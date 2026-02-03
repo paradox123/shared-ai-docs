@@ -1,0 +1,8 @@
+# n8n data directory
+data/
+
+# Environment variables with credentials
+.env
+
+# Logs
+*.log
