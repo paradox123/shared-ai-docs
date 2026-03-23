@@ -1,16 +1,16 @@
 ---
-name: RetroPlan
+name: retro-plan
 description: Review implementation results against the plan, evaluate plan quality, and feed actionable deltas into future plan definitions (including skill/prompt updates). USE WHEN the user asks to retro the plan, review what worked, capture bugs/refactorings, improve planning quality, or run a final retro.
 ---
 
-# RetroPlan
+# retro-plan
 
 Run interim or final retrospectives for an implementation plan and convert findings into actionable follow-up deltas.
 
 ## Workflow Routing
 | Workflow | Trigger | File |
 |----------|---------|------|
-| **RetroPlan** | "retro the plan" OR "retro plan" OR "retro the plan finally" OR "final retro the plan" | `workflows/RetroPlan.md` |
+| **retro-plan** | "retro the plan" OR "retro plan" OR "retro the plan finally" OR "final retro the plan" | `workflows/retro-plan.md` |
 
 ## Rules
 - Keep retro format: What worked well / What needs improvement / Next refine adjustments.
@@ -27,13 +27,13 @@ Run interim or final retrospectives for an implementation plan and convert findi
 **Example 1: Interim retro**
 ```
 User: "retro the plan"
-→ Invokes RetroPlan workflow
+→ Invokes retro-plan workflow
 → Produces retro and actionable follow-up deltas
 ```
 
 **Example 2: Final retro**
 ```
 User: "final retro the plan"
-→ Invokes RetroPlan workflow
+→ Invokes retro-plan workflow
 → Produces aggregate final retro across prior retros and implementation outcome
 ```

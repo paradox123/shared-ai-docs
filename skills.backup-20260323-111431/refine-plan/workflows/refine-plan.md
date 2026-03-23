@@ -1,4 +1,4 @@
-# RefinePlan
+# refine-plan
 
 ## Goal
 Refine an existing implementation plan by appending a new iteration and maintaining the history table at the bottom.
@@ -7,7 +7,7 @@ Refine an existing implementation plan by appending a new iteration and maintain
 1) Read the existing plan file and identify the highest iteration number.
 2) Parse user answers marked with `=>` and apply them as resolved decisions/missing info.
 3) Create exactly one new `# Iteration N` section (N = highest + 1).
-4) Include sections: Summary, Requirements Snapshot, Detailed Plan, Open Items.
+4) Include sections: Summary, Requirements Snapshot, Detailed Plan, Open Items in each iteration.
 5) Allow unresolved `[MISSING ...]` and `[DECISION ...]` items only when explicitly marked non-blocking.
 6) Determine whether the latest iteration is implementation-ready (no blocking unresolved items).
 7) If implementation-ready, automatically add `Verification Test Cases` to that same latest iteration.
@@ -39,4 +39,4 @@ Refine an existing implementation plan by appending a new iteration and maintain
   3) Given {failure/edge condition from actual state}, when {transition is attempted}, then {safe/expected desired-state handling occurs}.
 
 ## History Table Row
-| {YYYY-MM-DD} | {N} | Copilot | {Concise delta summary for this iteration} |
+| {YYYY-MM-DD} | {N} | Claude | {Concise delta summary for this iteration} |

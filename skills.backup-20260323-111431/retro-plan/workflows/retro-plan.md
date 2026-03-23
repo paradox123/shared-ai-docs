@@ -1,4 +1,4 @@
-# RetroPlan
+# retro-plan
 
 ## Goal
 Compare implementation results against the current plan, evaluate plan quality, and produce interim or final retro outputs with actionable follow-ups for both implementation and future plan-definition quality.
@@ -20,7 +20,7 @@ Compare implementation results against the current plan, evaluate plan quality, 
 7) Produce explicit `Prompt/Skill Update Deltas` so future plan generation improves.
 8) Ensure follow-ups are written back into the implementation plan process (new iteration/history update on next refine).
 9) In final mode, aggregate all retro findings into a closing evaluation.
-10) Put the Copilot SessionId, at file bottom if not already there
+10) Put the Claude SessionId at file bottom if not already there
 
 ## Output Format
 - Plan quality assessment:

@@ -1,16 +1,18 @@
 ---
-name: RefinePlan
+name: refine-plan
 description: Iteratively convert requirements into a detailed implementation plan with explicit [MISSING ...] and [DECISION ...] markers. USE WHEN the user asks to refine requirements OR create an implementation plan iteratively OR asks to iterate/refine an existing plan and maintain iteration history.
 ---
 
-# RefinePlan
+# refine-plan
 
 Iteratively refine requirements into a detailed, actionable implementation plan, append a new iteration, and maintain the history table at the bottom.
+
+**Input:** Can accept a finished spec document (from `doc-coauthoring`) as starting point, or raw requirements directly from the user.
 
 ## Workflow Routing
 | Workflow | Trigger | File |
 |----------|---------|------|
-| **RefinePlan** | "refine requirements" OR "iterative plan" OR "detailed implementation plan" OR "refine the plan" | `workflows/RefinePlan.md` |
+| **refine-plan** | "refine requirements" OR "iterative plan" OR "detailed implementation plan" OR "refine the plan" | `workflows/refine-plan.md` |
 
 ## Rules
 - Keep plan files append-only by iteration (`# Iteration N`).
@@ -22,20 +24,20 @@ Iteratively refine requirements into a detailed, actionable implementation plan,
 - Test cases must verify the transition from the current/actual state to the planned desired state defined in the plan.
 - Maintain bottom history table with fixed columns: `Date | Iteration | Author | Delta`.
 - If no history table exists yet, create it with the fixed columns before appending the current iteration row.
-- Do not generate retro sections here; retros are handled by `RetroPlan`.
+- Do not generate retro sections here; retros are handled by `retro-plan`.
 
 ## Examples
 
 **Example 1: Refine a new requirement set**
 ```
 User: "Refine these requirements into a detailed implementation plan"
-→ Invokes RefinePlan workflow
+→ Invokes refine-plan workflow
 → Adds Iteration N with detailed steps and open items
 ```
 
 **Example 2: Continue an existing plan**
 ```
 User: "I marked my answers with =>. refine the plan"
-→ Invokes RefinePlan workflow
+→ Invokes refine-plan workflow
 → Adds Iteration N+1 and updates history table
 ```
