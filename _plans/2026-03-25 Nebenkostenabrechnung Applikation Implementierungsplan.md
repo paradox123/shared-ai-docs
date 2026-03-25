@@ -1,7 +1,7 @@
 # Nebenkostenabrechnung Applikation Implementierungsplan
 
 Bezugsspezifikation:
-- `/Users/dh/Documents/DanielsVault/_shared/_specs/2026-03-24 Nebenkostenabrechnung Applikation.md`
+- `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-03-24 Nebenkostenabrechnung Applikation.md`
 
 # Iteration 1
 
