@@ -1,0 +1,530 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Nebenkostenabrechnung Input Schema",
+  "description": "Strukturiertes Eingabeformat für Nebenkostenabrechnung 2025 mit expliziten Relationen zwischen Domänenobjekten.",
+  "type": "object",
+  "required": [
+    "abrechnungsjahr",
+    "abrechnungszeitraum",
+    "objekt",
+    "mietparteien",
+    "zaehler",
+    "ablesungen",
+    "kostenbelege",
+    "vorauszahlungen"
+  ],
+  "properties": {
+    "abrechnungsjahr": {
+      "type": "integer",
+      "minimum": 2020,
+      "maximum": 2099
+    },
+    "abrechnungszeitraum": {
+      "type": "object",
+      "required": ["von", "bis"],
+      "properties": {
+        "von": {
+          "type": "string",
+          "format": "date"
+        },
+        "bis": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "objekt": {
+      "type": "object",
+      "description": "Root-Struktur für alle Berechnungseinheiten und Nutzeinheiten",
+      "required": [
+        "id",
+        "name",
+        "berechnungseinheiten"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Eindeutige Objekt-ID (z.B. 'hauptstr-2')"
+        },
+        "name": {
+          "type": "string",
+          "description": "Objektname (z.B. 'Hauptstr. 2')"
+        },
+        "berechnungseinheiten": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "nutzeinheiten"
+            ],
+            "properties": {
+              "id": {
+                "type": "integer",
+                "description": "BE-ID (1, 2, ...)"
+              },
+              "name": {
+                "type": "string"
+              },
+              "energietraeger": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "nutzeinheiten": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "name"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "NE-ID (NE1, NE2, ...)"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Bezeichnung der Nutzeinheit/Wohnung"
+                    },
+                    "wohnflaeche_m2": {
+                      "type": "number",
+                      "minimum": 0,
+                      "description": "Wohnfl\u00e4che in m\u00b2 (Schl\u00fcsselwert, NE-spezifisch)"
+                    },
+                    "nutzflaeche_m2": {
+                      "type": "number",
+                      "minimum": 0,
+                      "description": "Nutzfl\u00e4che in m\u00b2 (Schl\u00fcsselwert, NE-spezifisch)"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "mietparteien": {
+      "type": "array",
+      "description": "Alle Mietparteien mit Zuordnung zu Nutzeinheiten. Eine Mietpartei kann mehrere NE bewohnen.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "zugeordnete_nu",
+          "personen",
+          "einzug"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Eindeutige Mietpartei-ID"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name(n) der Mietpartei (Lebensgemeinschaft, Familie, Einzelperson)"
+          },
+          "zugeordnete_nu": {
+            "type": "array",
+            "description": "Liste der bewohnten Nutzeinheits-IDs",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^NE\\d+$"
+            }
+          },
+          "personen": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Anzahl Personen in der Mietpartei (Schlüsselwert für Müllabfuhr etc.)."
+          },
+          "einzug": {
+            "type": "string",
+            "format": "date",
+            "description": "Einzugsdatum der Mietpartei in die NE"
+          },
+          "auszug": {
+            "type": ["string", "null"],
+            "format": "date",
+            "description": "Auszugsdatum; null = Mietpartei noch aktiv. Bei Auszug innerhalb des Abrechnungszeitraums wird die Abrechnung zeitanteilig (monatsgenau) berechnet."
+          }
+        }
+      }
+    },
+    "schluesselwerte": {
+      "type": "object",
+      "description": "Schlüsselwerte, die denNutzeinheiten zugeordnet sind. In der Spec definiert.",
+      "required": [
+        "nutzeinheit_werte"
+      ],
+      "properties": {
+        "nutzeinheit_werte": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "ne_id",
+              "wohnflaeche_m2",
+              "nutzflaeche_m2"
+            ],
+            "properties": {
+              "ne_id": {
+                "type": "string",
+                "pattern": "^NE\\d+$"
+              },
+              "wohnflaeche_m2": {
+                "type": "number",
+                "minimum": 0
+              },
+              "nutzflaeche_m2": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "versicherungsvertraege": {
+      "type": "array",
+      "description": "Versicherungsverträge mit direkter Zuordnung zu NE und Kostenart.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "anbieter",
+          "versicherungsnummer",
+          "kostenart_id",
+          "zugeordnete_ne"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Eindeutige Vertrag-ID"
+          },
+          "anbieter": {
+            "type": "string",
+            "description": "Versicherungsunternehmen (z.B. 'AXA')"
+          },
+          "versicherungsnummer": {
+            "type": "string",
+            "description": "Vertragsnummer"
+          },
+          "kostenart_id": {
+            "type": "string",
+            "description": "Referenz auf Kostenart (z.B. 'GEV' für Gebäudeversicherung)"
+          },
+          "zugeordnete_ne": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^NE\\d+$"
+            },
+            "description": "NE-IDs, die dieser Versicherung zugeordnet sind"
+          }
+        }
+      }
+    },
+    "zaehler": {
+      "type": "array",
+      "description": "Messgeräte mit Zuordnung zu Nutzeinheiten.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "zaehlernummer",
+          "typ",
+          "einheit"
+        ],
+        "oneOf": [
+          { "required": ["zugeordnete_ne"] },
+          { "required": ["zugeordnete_be"] },
+          { "required": ["objektweit"] }
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Eindeutige Zähler-ID"
+          },
+          "zaehlernummer": {
+            "type": "string",
+            "description": "Physikalische Zählernummer"
+          },
+          "typ": {
+            "type": "string",
+            "enum": [
+              "kaltwasser",
+              "warmwasser",
+              "heizverbrauch",
+              "strom",
+              "heizkostenverteiler"
+            ],
+            "description": "Art des Zählers"
+          },
+          "einheit": {
+            "type": "string",
+            "enum": [
+              "m3",
+              "kWh",
+              "kW",
+              "Verbrauchseinheit"
+            ]
+          },
+          "zugeordnete_ne": {
+            "description": "NE-ID oder Array von NE-IDs, falls Zähler mehrere NE misst (z.B. Hauptanschluss)",
+            "oneOf": [
+              {
+                "type": "string",
+                "pattern": "^NE\\d+$"
+              },
+              {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^NE\\d+$"
+                }
+              }
+            ]
+          },
+          "zugeordnete_be": {
+            "type": "integer",
+            "description": "Optional: Berechnungseinheit, falls sich der Zähler auf eine gesamte BE bezieht"
+          },
+          "objektweit": {
+            "type": "boolean",
+            "const": true,
+            "description": "Optional: true, falls sich der Zähler auf das gesamte Objekt bezieht"
+          },
+          "umrechnungsfaktor": {
+            "type": "number",
+            "description": "Optional: Faktor für Heizkostenverteiler (von ista definiert)"
+          }
+        }
+      }
+    },
+    "ablesungen": {
+      "type": "array",
+      "description": "Messwerte je Zähler und NE. Zwei Modelle je nach quelle: ista → periode+messwert_alt+messwert_neu; manuell → stichtag+messwert.",
+      "items": {
+        "type": "object",
+        "required": [
+          "zaehler_id",
+          "quelle"
+        ],
+        "properties": {
+          "zaehler_id": {
+            "type": "string",
+            "description": "Referenz auf Zähler-ID"
+          },
+          "ne_id": {
+            "type": "string",
+            "pattern": "^NE\\d+$",
+            "description": "Optional bei NE-bezogenen Zählern: Nutzeinheit, für die dieser Messwert gilt"
+          },
+          "quelle": {
+            "type": "string",
+            "enum": [
+              "ista_ablese",
+              "ista_monatsmittel",
+              "manuell"
+            ],
+            "description": "Herkunft der Ablesung"
+          },
+          "periode": {
+            "type": "object",
+            "description": "Abrechnungszeitraum (nur für ista_ablese / ista_monatsmittel)",
+            "required": ["von", "bis"],
+            "properties": {
+              "von": { "type": "string", "format": "date" },
+              "bis": { "type": "string", "format": "date" }
+            }
+          },
+          "messwert_alt": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Zählerstand zu Periode-Anfang (ista)"
+          },
+          "messwert_neu": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Zählerstand zu Periode-Ende (ista)"
+          },
+          "stichtag": {
+            "type": "string",
+            "format": "date",
+            "description": "Ablesedatum (nur manuell)"
+          },
+          "messwert": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Zählerstand am Stichtag (manuell)"
+          }
+        },
+        "if": {
+          "properties": { "quelle": { "const": "manuell" } },
+          "required": ["quelle"]
+        },
+        "then": {
+          "required": ["stichtag", "messwert"]
+        },
+        "else": {
+          "required": ["periode", "messwert_alt", "messwert_neu"]
+        }
+      }
+    },
+    "kostenbelege": {
+      "type": "array",
+      "description": "Rechnungsbelege mit Zuordnung zu Kostenart und optionalen Scopes (BE/NE/Vertragsscope).",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kostenart_id",
+          "betrag",
+          "datum"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Eindeutige Beleg-ID"
+          },
+          "kostenart_id": {
+            "type": "string",
+            "description": "Referenz auf Kostenart (z.B. 'GRU' für Grundsteuer)"
+          },
+          "betrag": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Betrag in EUR"
+          },
+          "datum": {
+            "type": "string",
+            "format": "date",
+            "description": "Datum des Belegs"
+          },
+          "beschreibung": {
+            "type": "string"
+          },
+          "scope": {
+            "type": "object",
+            "description": "Optional: Einschränkung auf BE/NE/Vertragsscope. Fehlt scope, wird der anwendbare Scope aus der Kostenarten-Matrix abgeleitet.",
+            "minProperties": 1,
+            "properties": {
+              "berechnungseinheit": {
+                "type": "integer",
+                "description": "Optional: Beleg nur für diese BE"
+              },
+              "nutzeinheit": {
+                "type": "string",
+                "pattern": "^NE\\d+$",
+                "description": "Optional: Beleg nur für diese NE"
+              },
+              "versicherungsvertrag": {
+                "type": "string",
+                "description": "Optional: Beleg nur für diesen Versicherungsvertrag"
+              }
+            }
+          }
+        }
+      }
+    },
+    "vorauszahlungen": {
+      "type": "array",
+      "description": "Vorauszahlungen der Mietparteien mit Periode und Betrag.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "mietpartei_id",
+          "betrag_monatlich",
+          "anzahl_monate",
+          "gesamtbetrag",
+          "periode"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Eindeutige Zahlungs-ID"
+          },
+          "mietpartei_id": {
+            "type": "string",
+            "description": "Referenz auf Mietpartei-ID"
+          },
+          "betrag_monatlich": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Monatliche Vorauszahlung in EUR"
+          },
+          "anzahl_monate": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12,
+            "description": "Anzahl der Monate, f\u00fcr die Vorauszahlung geleistet wurde"
+          },
+          "gesamtbetrag": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Gesamtbetrag = betrag_monatlich * anzahl_monate. Wird validiert."
+          },
+          "periode": {
+            "type": "object",
+            "required": ["von", "bis"],
+            "properties": {
+              "von": { "type": "string", "format": "date" },
+              "bis": { "type": "string", "format": "date" }
+            }
+          }
+        }
+      }
+    },
+    "stromtarife": {
+      "type": "array",
+      "description": "Zeitlich begrenzte Stromtarife f\u00fcr BE1. Grundpreis wird anteilig (Tage/365) berechnet, Arbeitspreis pro verbrauchter kWh pro Tarifperiode.",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "lieferant",
+          "grundpreis_eur_jahr",
+          "arbeitspreis_ct_kwh",
+          "gueltig_von",
+          "gueltig_bis"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "lieferant": { "type": "string" },
+          "tarif": { "type": "string" },
+          "grundpreis_eur_jahr": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Grundpreis in EUR/Jahr (wird taggenau anteilig verrechnet)"
+          },
+          "arbeitspreis_ct_kwh": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Arbeitspreis in ct/kWh"
+          },
+          "gueltig_von": {
+            "type": "string",
+            "format": "date",
+            "description": "Erster Tag der G\u00fcltigkeit"
+          },
+          "gueltig_bis": {
+            "type": "string",
+            "format": "date",
+            "description": "Letzter Tag der G\u00fcltigkeit"
+          }
+        }
+      }
+    }
+  }
+}

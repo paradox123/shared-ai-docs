@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mock Einzelabrechnung Nebenkosten</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600;700&display=swap");
+
+      :root {
+        --bg: #f6f2ea;
+        --paper: #fffdfa;
+        --ink: #1f2022;
+        --muted: #5f6470;
+        --brand: #0f5a52;
+        --brand-soft: #d8ece8;
+        --line: #ddd5c9;
+        --accent: #b86f2e;
+        --ok: #245f3b;
+        --warn: #8a3c3c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 12% 8%, #e8f2ef 0, transparent 35%),
+          radial-gradient(circle at 84% 94%, #f0e3d2 0, transparent 40%),
+          var(--bg);
+        color: var(--ink);
+        font-family: "Source Sans 3", "Segoe UI", sans-serif;
+        line-height: 1.45;
+        padding: 24px;
+      }
+
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0 auto;
+        background: var(--paper);
+        border: 1px solid #cfc5b7;
+        box-shadow: 0 18px 36px rgba(35, 26, 14, 0.14);
+        padding: 24mm 18mm 20mm;
+        position: relative;
+      }
+
+      .header-band {
+        border: 1px solid var(--line);
+        border-left: 6px solid var(--brand);
+        background: linear-gradient(100deg, #f2faf8 0%, #fffdfa 72%);
+        padding: 12px 14px;
+        display: grid;
+        grid-template-columns: 74px 1fr auto;
+        gap: 14px;
+        align-items: center;
+      }
+
+      .house-thumb {
+        width: 74px;
+        height: 74px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #c8d7d4;
+      }
+
+      .house-thumb svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+
+      h1 {
+        font-family: "Fraunces", serif;
+        margin: 0 0 3px;
+        font-size: 28px;
+        letter-spacing: 0.15px;
+      }
+
+      .sub {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .badge {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--brand);
+        background: var(--brand-soft);
+        border: 1px solid #b8d9d2;
+        border-radius: 999px;
+        padding: 6px 10px;
+        white-space: nowrap;
+      }
+
+      .meta {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .meta-card {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+        background: #fff;
+      }
+
+      .meta-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: var(--muted);
+        letter-spacing: 0.08em;
+      }
+
+      .meta-value {
+        font-size: 15px;
+        font-weight: 700;
+        margin-top: 2px;
+      }
+
+      .results {
+        margin-top: 16px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+
+      .glossary {
+        margin-top: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #f8fbfa;
+        padding: 9px 11px;
+        font-size: 13px;
+      }
+
+      .glossary strong {
+        color: #22443f;
+      }
+
+      .result-box {
+        border: 1px solid var(--line);
+        border-top: 4px solid var(--brand);
+        border-radius: 8px;
+        padding: 10px 12px;
+        background: #fff;
+      }
+
+      .result-title {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      .result-value {
+        font-family: "Fraunces", serif;
+        font-size: 26px;
+        margin-top: 4px;
+      }
+
+      .result-value.ok {
+        color: var(--ok);
+      }
+
+      .result-value.warn {
+        color: var(--warn);
+      }
+
+      h2 {
+        margin: 22px 0 8px;
+        font-family: "Fraunces", serif;
+        font-size: 20px;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 6px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        background: #fff;
+      }
+
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 7px 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #f5f8f7;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #2a3f3a;
+      }
+
+      tr:nth-child(even) td {
+        background: #fcfbf8;
+      }
+
+      .formula {
+        margin-top: 8px;
+        border: 1px dashed #c5bba9;
+        border-radius: 8px;
+        background: #fff8ef;
+        padding: 10px;
+        font-family: "Source Sans 3", sans-serif;
+        font-size: 13px;
+      }
+
+      .formula code {
+        background: #f2e5d7;
+        padding: 1px 4px;
+        border-radius: 4px;
+      }
+
+      .note {
+        margin-top: 14px;
+        border-left: 4px solid var(--accent);
+        background: #fff5ea;
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+
+      .footer {
+        margin-top: 20px;
+        padding-top: 10px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 12px;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      @media print {
+        body {
+          padding: 0;
+          background: #fff;
+        }
+
+        .page {
+          width: auto;
+          min-height: 0;
+          border: 0;
+          box-shadow: none;
+          margin: 0;
+          padding: 16mm 14mm;
+        }
+
+        .result-box,
+        .meta-card,
+        table,
+        .note,
+        .formula {
+          break-inside: avoid;
+        }
+      }
+
+      @media (max-width: 980px) {
+        .page {
+          width: 100%;
+          min-height: auto;
+          padding: 18px;
+        }
+
+        .header-band {
+          grid-template-columns: 1fr;
+        }
+
+        .results {
+          grid-template-columns: 1fr;
+        }
+
+        .meta {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <article class="page">
+      <header class="header-band">
+        <div class="house-thumb" aria-label="Objektbild Platzhalter">
+          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration Gebäude Hauptstr. 2">
+            <rect width="120" height="120" fill="#dff0ec" />
+            <rect x="14" y="62" width="92" height="40" fill="#9fc7bf" />
+            <polygon points="10,62 60,26 110,62" fill="#4f7f77" />
+            <rect x="52" y="74" width="16" height="28" fill="#3f5955" />
+            <rect x="24" y="72" width="14" height="12" fill="#f4f1e8" />
+            <rect x="82" y="72" width="14" height="12" fill="#f4f1e8" />
+          </svg>
+        </div>
+        <div>
+          <h1>Nebenkostenabrechnung 2025</h1>
+          <p class="sub">Objekt: Hauptstr. 2, 36381 Schluechtern</p>
+          <p class="sub">Mietpartei: Kraft / Huehne - Wohnung 1 (NE1)</p>
+        </div>
+        <div class="badge">Gebaeude Ost (BE1)</div>
+      </header>
+
+      <section class="meta">
+        <div class="meta-card">
+          <div class="meta-label">Abrechnungszeitraum</div>
+          <div class="meta-value">01.01.2025 - 31.12.2025</div>
+        </div>
+        <div class="meta-card">
+          <div class="meta-label">Abrechnungsdatum</div>
+          <div class="meta-value">15.03.2026</div>
+        </div>
+      </section>
+
+      <section class="results">
+        <div class="result-box">
+          <div class="result-title">Ihre Gesamtkosten</div>
+          <div class="result-value">3.842,11 EUR</div>
+        </div>
+        <div class="result-box">
+          <div class="result-title">Ihre Vorauszahlungen</div>
+          <div class="result-value">3.600,00 EUR</div>
+        </div>
+        <div class="result-box">
+          <div class="result-title">Saldo</div>
+          <div class="result-value warn">242,11 EUR Nachzahlung</div>
+        </div>
+      </section>
+
+      <section class="glossary" aria-label="Begriffe kurz erklaert">
+        <strong>Begriffe kurz erklaert:</strong> Ihre Wohnung ist die <strong>Nutzeinheit NE1</strong>. Sie liegt im <strong>Gebaeude Ost</strong>. Fuer bestimmte Kosten wird Ihre Wohnung gemeinsam mit der zweiten Wohnung im Gebaeude Ost betrachtet. Dieser gemeinsame Bereich heisst in dieser Abrechnung <strong>Berechnungseinheit BE1</strong>. Das bedeutet hier konkret: Beide Wohnungen im Gebaeude Ost werden mit Oel beheizt, und das Warmwasser wird dort ueber eine Waermepumpe erzeugt.
+      </section>
+
+      <h2>1. Verbrauchs- und Ablesewerte</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Wert</th>
+            <th>Geraet / Zaehler</th>
+            <th>Einheit</th>
+            <th>Alt</th>
+            <th>Neu</th>
+            <th>Differenz</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Kaltwasser</td>
+            <td>KW-NE1-001</td>
+            <td>m3</td>
+            <td>106,2</td>
+            <td>131,0</td>
+            <td>24,8</td>
+          </tr>
+          <tr>
+            <td>Warmwasser</td>
+            <td>WW-NE1-004</td>
+            <td>m3</td>
+            <td>42,4</td>
+            <td>53,6</td>
+            <td>11,2</td>
+          </tr>
+          <tr>
+            <td>Strom (Wohnung)</td>
+            <td>STR-NE1-010</td>
+            <td>kWh</td>
+            <td>4.102</td>
+            <td>5.018</td>
+            <td>916</td>
+          </tr>
+          <tr>
+            <td>Warmwasseraufbereitung per Waermepumpe</td>
+            <td>Gebaeude Ost - abgeleiteter Wert</td>
+            <td>kWh</td>
+            <td>-</td>
+            <td>-</td>
+            <td>1.338</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="formula">
+        Einfache Erklaerung zum Warmwasser-Strom im Gebaeude Ost:<br />
+        Vom gesamten Stromzaehler des Gebaeudes Ost werden die beiden Wohnungszaehler abgezogen. Der verbleibende Rest ist der Strom fuer die Warmwasseraufbereitung.<br />
+        Beispiel: Gesamtzaehler 6.442 kWh minus Wohnung 1 mit 916 kWh minus Wohnung 2 mit 4.188 kWh ergibt 1.338 kWh fuer Warmwasser.
+      </div>
+
+      <h2>2. Kostenarten und Verteilerschluessel</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Kostenart</th>
+            <th>Bereich der Verteilung</th>
+            <th>Gesamtkosten</th>
+            <th>So wird verteilt</th>
+            <th>Ihre Rechnung</th>
+            <th>Ihr Betrag</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Grundsteuer</td>
+            <td>Objekt</td>
+            <td>2.140,00 EUR</td>
+            <td>nach Wohnflaeche: 654 m2 gesamt, davon 180 m2 Ihre Wohnung</td>
+            <td>2.140,00 x (180 / 654) = 588,93 EUR</td>
+            <td>588,93 EUR</td>
+          </tr>
+          <tr>
+            <td>Muellabfuhr</td>
+            <td>Objekt</td>
+            <td>540,00 EUR</td>
+            <td>nach Personenzahl: 10 Personen gesamt, davon 2 Personen Ihre Mietpartei</td>
+            <td>540,00 x (2 / 10) = 108,00 EUR</td>
+            <td>108,00 EUR</td>
+          </tr>
+          <tr>
+            <td>Strom (Gebaeude Ost)</td>
+            <td>Gebaeude Ost</td>
+            <td>1.680,40 EUR</td>
+            <td>nach Verbrauch: 6.442 kWh gesamt, davon 2.254 kWh Ihr Anteil</td>
+            <td>1.680,40 x (2.254 / 6.442) = 587,95 EUR</td>
+            <td>587,95 EUR</td>
+          </tr>
+          <tr>
+            <td>Gebaeudeversicherung</td>
+            <td>Vertrag AXA 56003644333</td>
+            <td>1.260,34 EUR</td>
+            <td>im Vertragsbereich nach Wohnflaeche: 260 m2 gesamt, davon 180 m2 Ihre Wohnung</td>
+            <td>1.260,34 x (180 / 260) = 872,54 EUR</td>
+            <td>872,54 EUR</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>3. Vorauszahlungen und Saldo</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Monatsabschlag</th>
+            <th>Anzahl Monate</th>
+            <th>Gesamt gezahlt</th>
+            <th>Gesamtkosten</th>
+            <th>Saldo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>300,00 EUR</td>
+            <td>12</td>
+            <td>3.600,00 EUR</td>
+            <td>3.842,11 EUR</td>
+            <td>242,11 EUR Nachzahlung</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <aside class="note">
+        Hinweis: Belege koennen nach Terminabsprache eingesehen werden. Zusaetzlich gibt es eine technische Detaildatei mit allen Rechenschritten im gleichen Mietpartei-Ordner wie dieses Dokument.
+      </aside>
+
+      <footer class="footer">
+        <span>Mock-Stand: 2026-03-24</span>
+        <span>Layoutvorlage fuer spaetere PDF-Erzeugung</span>
+      </footer>
+    </article>
+  </body>
+</html>

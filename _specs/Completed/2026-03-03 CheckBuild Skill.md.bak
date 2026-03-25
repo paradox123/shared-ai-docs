@@ -1,0 +1,4 @@
+# Iteration 0
+I want to be sure changes I made on the ncg backend are not breaking the D-System on the Hetzner infrastructure, and if the break it I want it to be documented, diagnosed, troubleshooted, fixed, rebuild, pushed, build, deployed and checked again. as the desired state the healthcheckmonitor service should be green for all services and logs of each service should be free of any exception 2 Minutes after startup.
+
+I want the agent to observe build, deployment and startup of NCG backend after I committed and pushed changes using git. 

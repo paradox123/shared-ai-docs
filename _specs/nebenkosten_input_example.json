@@ -1,0 +1,448 @@
+{
+  "abrechnungsjahr": 2025,
+  "abrechnungszeitraum": {
+    "von": "2025-01-01",
+    "bis": "2025-12-31"
+  },
+  "objekt": {
+    "id": "hauptstr-2",
+    "name": "Hauptstr. 2",
+    "berechnungseinheiten": [
+      {
+        "id": 1,
+        "name": "Gebäude Ost",
+        "energietraeger": [
+          "Öl",
+          "Wärmepumpe (Strom)"
+        ],
+        "nutzeinheiten": [
+          {
+            "id": "NE1",
+            "name": "Geb. Ost - Loftwohnung (Nutzeinheit 1)",
+            "wohnflaeche_m2": 180,
+            "nutzflaeche_m2": 180
+          },
+          {
+            "id": "NE2",
+            "name": "Geb. Ost - Wohnung 2 (Nutzeinheit 2)",
+            "wohnflaeche_m2": 80,
+            "nutzflaeche_m2": 80
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "name": "Gebäude Nord und Gebäude West",
+        "energietraeger": [
+          "Holz",
+          "Pellets"
+        ],
+        "nutzeinheiten": [
+          {
+            "id": "NE3",
+            "name": "Geb. Nord - Gesindehaus (Nutzeinheit 3)",
+            "wohnflaeche_m2": 60,
+            "nutzflaeche_m2": 60
+          },
+          {
+            "id": "NE4",
+            "name": "1-Zimmer-Apartment (Nutzeinheit 4)",
+            "wohnflaeche_m2": 34,
+            "nutzflaeche_m2": 34
+          },
+          {
+            "id": "NE5",
+            "name": "Geb. West - Wohnhaus (Nutzeinheit 5)",
+            "wohnflaeche_m2": 300,
+            "nutzflaeche_m2": 1000
+          }
+        ]
+      }
+    ]
+  },
+  "mietparteien": [
+    {
+      "id": "mp-kraft-huehne",
+      "name": "Kraft / Hühne",
+      "zugeordnete_nu": ["NE1"],
+      "personen": 2,
+      "einzug": "2020-01-01",
+      "auszug": null
+    },
+    {
+      "id": "mp-ne2",
+      "name": "TODO: Mietpartei NE2",
+      "zugeordnete_nu": ["NE2"],
+      "personen": 2,
+      "einzug": "2020-01-01",
+      "auszug": null
+    },
+    {
+      "id": "mp-huehne-ne3",
+      "name": "Hühne",
+      "zugeordnete_nu": ["NE3"],
+      "personen": 1,
+      "einzug": "2023-05-01",
+      "auszug": null
+    },
+    {
+      "id": "mp-ne4",
+      "name": "TODO: Mietpartei NE4",
+      "zugeordnete_nu": ["NE4"],
+      "personen": 1,
+      "einzug": "2024-03-01",
+      "auszug": null
+    },
+    {
+      "id": "mp-hecht",
+      "name": "Familie Hecht",
+      "zugeordnete_nu": ["NE5"],
+      "personen": 4,
+      "einzug": "2020-01-01",
+      "auszug": null
+    }
+  ],
+  "versicherungsvertraege": [
+    {
+      "id": "vers-axa-1",
+      "anbieter": "AXA",
+      "versicherungsnummer": "56003644342",
+      "kostenart_id": "GEV",
+      "zugeordnete_ne": [
+        "NE4",
+        "NE5"
+      ]
+    },
+    {
+      "id": "vers-axa-2",
+      "anbieter": "AXA",
+      "versicherungsnummer": "56003644335",
+      "kostenart_id": "GEV",
+      "zugeordnete_ne": [
+        "NE3"
+      ]
+    },
+    {
+      "id": "vers-axa-3",
+      "anbieter": "AXA",
+      "versicherungsnummer": "56003644333",
+      "kostenart_id": "GEV",
+      "zugeordnete_ne": [
+        "NE1",
+        "NE2"
+      ]
+    }
+  ],
+  "zaehler": [
+    {
+      "id": "z-kaltwasser-hauptanschluss",
+      "zaehlernummer": "P560620521",
+      "typ": "kaltwasser",
+      "einheit": "m3",
+      "objektweit": true,
+      "beschreibung": "Allgemein Hauptanschluss – Gesamtkaltwasserverbrauch Liegenschaft. NE5-Verbrauch = Hauptanschluss - NE1 - NE2 - NE3 - NE4 (berechnet, kein eigener Zähler)."
+    },
+    {
+      "id": "z-kaltwasser-ne1",
+      "zaehlernummer": "KW001",
+      "typ": "kaltwasser",
+      "einheit": "m3",
+      "zugeordnete_ne": "NE1"
+    },
+    {
+      "id": "z-kaltwasser-ne2",
+      "zaehlernummer": "KW002",
+      "typ": "kaltwasser",
+      "einheit": "m3",
+      "zugeordnete_ne": "NE2"
+    },
+    {
+      "id": "z-kaltwasser-ne3",
+      "zaehlernummer": "KW003",
+      "typ": "kaltwasser",
+      "einheit": "m3",
+      "zugeordnete_ne": "NE3"
+    },
+    {
+      "id": "z-kaltwasser-ne4",
+      "zaehlernummer": "KW004",
+      "typ": "kaltwasser",
+      "einheit": "m3",
+      "zugeordnete_ne": "NE4"
+    },
+    {
+      "id": "z-warmwasser-ne1",
+      "zaehlernummer": "WW001",
+      "typ": "warmwasser",
+      "einheit": "m3",
+      "zugeordnete_ne": "NE1"
+    },
+    {
+      "id": "z-warmwasser-ne2",
+      "zaehlernummer": "WW002",
+      "typ": "warmwasser",
+      "einheit": "m3",
+      "zugeordnete_ne": "NE2"
+    },
+    {
+      "id": "z-heizverbrauch-ne1",
+      "zaehlernummer": "HV001",
+      "typ": "heizkostenverteiler",
+      "einheit": "Verbrauchseinheit",
+      "zugeordnete_ne": "NE1",
+      "umrechnungsfaktor": 1.32
+    },
+    {
+      "id": "z-heizverbrauch-ne2",
+      "zaehlernummer": "HV002",
+      "typ": "heizkostenverteiler",
+      "einheit": "Verbrauchseinheit",
+      "zugeordnete_ne": "NE2",
+      "umrechnungsfaktor": 1.45
+    },
+    {
+      "id": "z-strom-be1-gesamt",
+      "zaehlernummer": "S001",
+      "typ": "strom",
+      "einheit": "kWh",
+      "zugeordnete_be": 1,
+      "beschreibung": "Zähler Gebäude Ost – Gesamtstrom BE1 inkl. Wärmepumpe. Wärmepumpen-Strom = S001 - S002 - S003, wird nach WW-Verbrauch auf NE1/NE2 umgelegt."
+    },
+    {
+      "id": "z-strom-ne1",
+      "zaehlernummer": "S002",
+      "typ": "strom",
+      "einheit": "kWh",
+      "zugeordnete_ne": "NE1"
+    },
+    {
+      "id": "z-strom-ne2",
+      "zaehlernummer": "S003",
+      "typ": "strom",
+      "einheit": "kWh",
+      "zugeordnete_ne": "NE2"
+    }
+  ],
+  "_ablesungen_hinweis": "Zwei Ablese-Modelle je nach Quelle: ista (ista_ablese, ista_monatsmittel) liefert Perioden-Daten mit messwert_alt + messwert_neu + periode. Manuell (manuell) liefert nur Zählerstand zum Stichtag; Verbrauch = Differenz zweier manueller Ablesungen für denselben Zähler/NE.",
+  "ablesungen": [
+    {
+      "_hinweis": "ista-Ablesung: ein Datensatz pro Periode mit alt+neu.",
+      "zaehler_id": "z-kaltwasser-hauptanschluss",
+      "periode": { "von": "2025-01-01", "bis": "2025-12-31" },
+      "messwert_alt": 4820.0,
+      "messwert_neu": 5075.5,
+      "quelle": "ista_ablese"
+    },
+    {
+      "zaehler_id": "z-kaltwasser-ne1",
+      "ne_id": "NE1",
+      "periode": { "von": "2025-01-01", "bis": "2025-12-31" },
+      "messwert_alt": 1000.0,
+      "messwert_neu": 1125.5,
+      "quelle": "ista_ablese"
+    },
+    {
+      "zaehler_id": "z-warmwasser-ne1",
+      "ne_id": "NE1",
+      "periode": { "von": "2025-01-01", "bis": "2025-12-31" },
+      "messwert_alt": 20.0,
+      "messwert_neu": 45.8,
+      "quelle": "ista_ablese"
+    },
+    {
+      "zaehler_id": "z-heizverbrauch-ne1",
+      "ne_id": "NE1",
+      "periode": { "von": "2025-01-01", "bis": "2025-12-31" },
+      "messwert_alt": 1500,
+      "messwert_neu": 3250,
+      "quelle": "ista_ablese"
+    },
+    {
+      "_hinweis": "Manuelle Ablesung: nur Stichtag + Zählerstand. Verbrauch = Differenz zweier solcher Einträge (gleicher Zähler/NE).",
+      "zaehler_id": "z-strom-ne1",
+      "ne_id": "NE1",
+      "stichtag": "2025-01-01",
+      "messwert": 5000.0,
+      "quelle": "manuell"
+    },
+    {
+      "zaehler_id": "z-strom-ne1",
+      "ne_id": "NE1",
+      "stichtag": "2025-12-31",
+      "messwert": 5480.3,
+      "quelle": "manuell"
+    }
+  ],
+  "kostenbelege": [
+    {
+      "id": "beleg-grundsteuer-2025",
+      "kostenart_id": "GRU",
+      "betrag": 480.00,
+      "datum": "2025-03-15",
+      "beschreibung": "Grundsteuer 2025"
+    },
+    {
+      "id": "beleg-oberflaeche-2025",
+      "kostenart_id": "OBF",
+      "betrag": 125.00,
+      "datum": "2025-04-10",
+      "beschreibung": "Oberflächenwasserabgabe 2025"
+    },
+    {
+      "id": "beleg-muell-2025",
+      "kostenart_id": "MUE",
+      "betrag": 650.00,
+      "datum": "2025-01-05",
+      "beschreibung": "Müllabfuhr 2025"
+    },
+    {
+      "id": "beleg-versicherung-axa-1",
+      "kostenart_id": "GEV",
+      "betrag": 1260.34,
+      "datum": "2025-02-01",
+      "beschreibung": "AXA Gebäudeversicherung Vertrag 56003644342",
+      "scope": {
+        "versicherungsvertrag": "vers-axa-1"
+      }
+    },
+    {
+      "id": "beleg-versicherung-axa-2",
+      "kostenart_id": "GEV",
+      "betrag": 538.69,
+      "datum": "2025-02-01",
+      "beschreibung": "AXA Gebäudeversicherung Vertrag 56003644335",
+      "scope": {
+        "versicherungsvertrag": "vers-axa-2"
+      }
+    },
+    {
+      "id": "beleg-versicherung-axa-3",
+      "kostenart_id": "GEV",
+      "betrag": 1967.90,
+      "datum": "2025-02-01",
+      "beschreibung": "AXA Gebäudeversicherung Vertrag 56003644333",
+      "scope": {
+        "versicherungsvertrag": "vers-axa-3"
+      }
+    },
+    {
+      "id": "beleg-brennstoff-be1",
+      "kostenart_id": "BRE",
+      "betrag": 2400.00,
+      "datum": "2025-11-30",
+      "beschreibung": "Brennstoffkosten (Öl) BE1",
+      "scope": {
+        "berechnungseinheit": 1
+      }
+    },
+    {
+      "id": "beleg-brennstoff-be2",
+      "kostenart_id": "BRE",
+      "betrag": 1800.00,
+      "datum": "2025-11-30",
+      "beschreibung": "Brennstoffkosten (Holz/Pellets) BE2",
+      "scope": {
+        "berechnungseinheit": 2
+      }
+    },
+    {
+      "id": "beleg-warmwasser-be1",
+      "kostenart_id": "WWV",
+      "betrag": 750.00,
+      "datum": "2025-12-01",
+      "beschreibung": "Warmwasseraufbereitung BE1 (Wärmepumpenkosten)",
+      "scope": {
+        "berechnungseinheit": 1
+      }
+    },
+    {
+      "id": "beleg-strom-be1",
+      "kostenart_id": "STR",
+      "betrag": 950.00,
+      "datum": "2025-12-15",
+      "beschreibung": "Stromkosten BE1",
+      "scope": {
+        "berechnungseinheit": 1
+      }
+    }
+  ],
+  "_vorauszahlungen_hinweis": "betrag_monatlich x anzahl_monate muss gesamtbetrag ergeben. Bei unterjährigem Ein-/Auszug entsprechend kürzere Periode und angepasste anzahl_monate.",
+  "vorauszahlungen": [
+    {
+      "id": "vz-kraft-huehne-2025",
+      "mietpartei_id": "mp-kraft-huehne",
+      "betrag_monatlich": 150.00,
+      "anzahl_monate": 12,
+      "gesamtbetrag": 1800.00,
+      "periode": {
+        "von": "2025-01-01",
+        "bis": "2025-12-31"
+      }
+    },
+    {
+      "id": "vz-ne2-2025",
+      "mietpartei_id": "mp-ne2",
+      "betrag_monatlich": 120.00,
+      "anzahl_monate": 12,
+      "gesamtbetrag": 1440.00,
+      "periode": {
+        "von": "2025-01-01",
+        "bis": "2025-12-31"
+      }
+    },
+    {
+      "id": "vz-huehne-ne3-2025",
+      "mietpartei_id": "mp-huehne-ne3",
+      "betrag_monatlich": 100.00,
+      "anzahl_monate": 12,
+      "gesamtbetrag": 1200.00,
+      "periode": {
+        "von": "2025-01-01",
+        "bis": "2025-12-31"
+      }
+    },
+    {
+      "id": "vz-ne4-2025",
+      "mietpartei_id": "mp-ne4",
+      "betrag_monatlich": 90.00,
+      "anzahl_monate": 12,
+      "gesamtbetrag": 1080.00,
+      "periode": {
+        "von": "2025-01-01",
+        "bis": "2025-12-31"
+      }
+    },
+    {
+      "id": "vz-hecht-2025",
+      "mietpartei_id": "mp-hecht",
+      "betrag_monatlich": 250.00,
+      "anzahl_monate": 12,
+      "gesamtbetrag": 3000.00,
+      "periode": {
+        "von": "2025-01-01",
+        "bis": "2025-12-31"
+      }
+    }
+  ],
+  "_stromtarife_hinweis": "Zeitlich begrenzte Tarife. Die Anwendung ermittelt Tagesverbrauch (kWh / Tage im Zeitraum), weist Verbrauchsanteile den Tarifperioden zu und berechnet: Grundpreis (anteilig Tage / 365) + Verbrauch * Arbeitspreis.",
+  "stromtarife": [
+    {
+      "id": "tarif-eprimo-2024",
+      "lieferant": "ePrimo",
+      "tarif": "eprimo Strom PrimaKlima",
+      "grundpreis_eur_jahr": 301.37,
+      "arbeitspreis_ct_kwh": 37.22,
+      "gueltig_von": "2023-09-01",
+      "gueltig_bis": "2024-02-13"
+    },
+    {
+      "id": "tarif-vattenfall-2024",
+      "lieferant": "Vattenfall",
+      "tarif": "easy12 Strom",
+      "grundpreis_eur_jahr": 130.80,
+      "arbeitspreis_ct_kwh": 34.57,
+      "gueltig_von": "2024-02-14",
+      "gueltig_bis": "2025-02-14"
+    }
+  ]
+}

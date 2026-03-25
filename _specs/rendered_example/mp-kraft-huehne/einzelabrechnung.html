@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Einzelabrechnung Kraft / Hühne</title>
+  <style>
+    @page { size: A4; margin: 14mm; }
+    :root { --ink:#1f2022; --line:#d8d2c8; --brand:#0f5a52; --bg:#f4efe6; --paper:#fffdfa; }
+    body { margin:0; font-family: 'Source Sans 3', 'Segoe UI', sans-serif; color:var(--ink); background:var(--bg); }
+    .page { width: 210mm; min-height: 297mm; margin: 8mm auto; background:var(--paper); padding:14mm; box-sizing:border-box; border:1px solid #d7d0c4; }
+    h1,h2 { margin:0; font-family:'Georgia', serif; }
+    .sub { margin:4px 0 0; color:#4c4f57; }
+    .header { border-left:6px solid var(--brand); padding:8px 10px; background:#f1f8f6; }
+    .summary { margin-top:10px; display:grid; grid-template-columns: repeat(3,1fr); gap:8px; }
+    .box { border:1px solid var(--line); background:white; padding:8px; }
+    .box .label { font-size:12px; color:#4c4f57; }
+    .box .value { font-size:23px; font-family:'Georgia', serif; }
+    h2 { margin-top:14px; font-size:20px; border-bottom:1px solid var(--line); padding-bottom:4px; }
+    .hint { margin-top:8px; border:1px solid var(--line); background:#f7faf8; padding:8px; font-size:13px; }
+    table { width:100%; border-collapse:collapse; margin-top:8px; font-size:12.5px; }
+    thead { display: table-header-group; }
+    tr { page-break-inside: avoid; break-inside: avoid; }
+    th,td { border:1px solid var(--line); padding:6px 7px; vertical-align:top; }
+    th { background:#eef5f3; text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; }
+    .footer { margin-top:10px; font-size:12px; color:#5d616b; border-top:1px solid var(--line); padding-top:8px; }
+    @media print { body { background:white; } .page { margin:0; border:0; } }
+  </style>
+</head>
+<body>
+  <article class="page">
+    <section class="header">
+      <h1>Nebenkostenabrechnung 2025</h1>
+      <p class="sub">Objekt: Hauptstr. 2 | Mietpartei: Kraft / Hühne | Wohnung: Geb. Ost - Loftwohnung (Nutzeinheit 1)</p>
+      <p class="sub">Abrechnungszeitraum: 2025-01-01 bis 2025-12-31</p>
+    </section>
+
+    <section class="summary">
+      <div class="box"><div class="label">Ihre Gesamtkosten</div><div class="value">4.497,37 EUR</div></div>
+      <div class="box"><div class="label">Ihre Vorauszahlungen</div><div class="value">1.800,00 EUR</div></div>
+      <div class="box"><div class="label">Saldo</div><div class="value">2.697,37 EUR</div></div>
+    </section>
+
+    <div class="hint"><strong>Begriffe:</strong> Ihre Wohnung ist NE1. Diese Wohnung gehoert zur Berechnungseinheit Gebäude Ost (BE1). In dieser Berechnungseinheit werden bestimmte Kosten gemeinsam verteilt.</div>
+
+    <h2>1. Verbrauchswerte Ihrer Wohnung</h2>
+    <table>
+      <thead><tr><th>Wert</th><th>Zaehler</th><th>Einheit</th><th>Verbrauch im Zeitraum</th></tr></thead>
+      <tbody>
+        <tr><td>Kaltwasser</td><td>z-kaltwasser-ne1</td><td>m3</td><td>125,50</td></tr>
+<tr><td>Warmwasser</td><td>z-warmwasser-ne1</td><td>m3</td><td>25,80</td></tr>
+<tr><td>Heizverbrauch</td><td>z-heizverbrauch-ne1</td><td>VE</td><td>1.750</td></tr>
+<tr><td>Heizverbrauch (umgerechnet)</td><td>z-heizverbrauch-ne1</td><td>VE</td><td>2.310,00</td></tr>
+<tr><td>Strom Wohnung</td><td>z-strom-ne1</td><td>kWh</td><td>480,30</td></tr>
+      </tbody>
+    </table>
+
+    <h2>2. Kostenarten, Verteilung und Ihr Anteil</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Kostenart</th><th>Bereich</th><th>Gesamtkosten</th><th>So wird verteilt</th><th>Ihre Rechnung</th><th>Ihr Betrag</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Grundsteuer</td><td>gesamtes Objekt</td><td>480,00 EUR</td><td>nach Wohnflaeche: 654 m2 gesamt, davon 180 m2 Ihre Wohnung</td><td>480,00 EUR x (180 / 654) = 132,11 EUR</td><td>132,11 EUR</td></tr>
+<tr><td>Oberflaechenwasser</td><td>gesamtes Objekt</td><td>125,00 EUR</td><td>nach Wohnflaeche: 654 m2 gesamt, davon 180 m2 Ihre Wohnung</td><td>125,00 EUR x (180 / 654) = 34,40 EUR</td><td>34,40 EUR</td></tr>
+<tr><td>Muellabfuhr</td><td>gesamtes Objekt</td><td>650,00 EUR</td><td>nach Personenzahl: 10 Personen gesamt, davon 2 Personen Ihre Mietpartei</td><td>650,00 EUR x (2 / 10) = 130,00 EUR</td><td>130,00 EUR</td></tr>
+<tr><td>Gebaeudeversicherung (AXA 56003644333)</td><td>Vertrag</td><td>1.967,90 EUR</td><td>im Vertrag nach Wohnflaeche: 260 m2 gesamt, davon 180 m2 Ihre Wohnung</td><td>1.967,90 EUR x (180 / 260) = 1.362,39 EUR</td><td>1.362,39 EUR</td></tr>
+<tr><td>Brennstoffkosten (Gebaeude Ost)</td><td>Gebaeude Ost (BE1)</td><td>2.400,00 EUR</td><td>Demo-Verteilung nach Wohnflaeche in BE1: 260 m2 gesamt, davon 180 m2 Ihre Wohnung</td><td>2.400,00 EUR x (180 / 260) = 1.661,54 EUR</td><td>1.661,54 EUR</td></tr>
+<tr><td>Warmwasseraufbereitung per Waermepumpe</td><td>Gebaeude Ost (BE1)</td><td>750,00 EUR</td><td>Demo-Verteilung nach Wohnflaeche in BE1: 260 m2 gesamt, davon 180 m2 Ihre Wohnung</td><td>750,00 EUR x (180 / 260) = 519,23 EUR</td><td>519,23 EUR</td></tr>
+<tr><td>Stromkosten (Gebaeude Ost)</td><td>Gebaeude Ost (BE1)</td><td>950,00 EUR</td><td>Demo-Verteilung nach Wohnflaeche in BE1: 260 m2 gesamt, davon 180 m2 Ihre Wohnung</td><td>950,00 EUR x (180 / 260) = 657,69 EUR</td><td>657,69 EUR</td></tr>
+      </tbody>
+    </table>
+
+    <h2>3. Vorauszahlungen und Ergebnis</h2>
+    <table>
+      <thead><tr><th>Monatsbetrag</th><th>Anzahl Monate</th><th>Gezahlt</th><th>Gesamtkosten</th><th>Saldo</th></tr></thead>
+      <tbody><tr><td>150,00 EUR</td><td>12</td><td>1.800,00 EUR</td><td>4.497,37 EUR</td><td>2.697,37 EUR</td></tr></tbody>
+    </table>
+
+    <p class="footer">Hinweis: Dies ist ein erstes Beispiel aus den JSON-Daten. Fuer Kostenarten ohne vollstaendige Vergleichswerte im Beispiel-JSON wird im Mock eine nachvollziehbare Demo-Verteilung verwendet.</p>
+  </article>
+</body>
+</html>
