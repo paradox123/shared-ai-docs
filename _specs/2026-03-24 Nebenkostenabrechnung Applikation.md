@@ -301,6 +301,46 @@ Ich möchte die zur Berechnung erforderlichen Daten aus der Excel in ein struktu
 - `vorauszahlungen` — `betrag_monatlich`, `anzahl_monate`, `gesamtbetrag` (wird validiert), `periode`
 - `stromtarife` — Zeitlich begrenzte Tarife: `grundpreis_eur_jahr`, `arbeitspreis_ct_kwh`, `gueltig_von`, `gueltig_bis`
 
+#### Excel2024-Abbildung fuer Stromkosten (Iteration 1 Ergaenzung)
+
+Die Laufzeitanwendung verarbeitet weiterhin ausschliesslich JSON. Fuer Datenmigration/Fixture-Erstellung und Oracle-Abgleich gilt fuer Excel2024 zusaetzlich diese normative Abbildung:
+
+1. Worksheet `Stromkosten`, Spalten B-H sind die Quellbasis fuer `stromtarife` im Input-JSON.
+2. Worksheet `Stromkosten`, Spalten L-Q sind die verteilten Ergebniswerte je Mietpartei und dienen als Oracle-/Plausibilitaetsbereich fuer Regression, nicht als operative Eingabequelle.
+
+**Verbindliche Abgrenzung (Quelle vs. Berechnung):**
+
+- Aus Excel werden fuer Strom ausschliesslich Tarifstammdaten nach `stromtarife` uebernommen (B-H).
+- Stromkosten je Mietpartei werden nicht aus Excel und nicht als vorab berechneter Wert aus JSON uebernommen.
+- Die Stromkostenberechnung (inkl. Zeitraeume je Tarif, Grundpreis-/Arbeitspreisanteile) erfolgt ausschliesslich im Rechenkern der Anwendung auf Basis von Verbrauchsdaten und `stromtarife`.
+
+**Mapping B-H -> JSON `stromtarife[]`**
+
+| Excel2024 Worksheet `Stromkosten` | JSON-Feld | Bedeutung |
+|---|---|---|
+| Spalte B | `id` | Tarif-ID |
+| Spalte C | `grundpreis_eur_jahr` | Grundpreis in EUR/Jahr |
+| Spalte D | `arbeitspreis_ct_kwh` | Arbeitspreis in ct/kWh |
+| Spalte E | `gueltig_von` | Tarifbeginn (ISO-Datum) |
+| Spalte F | `gueltig_bis` | Tarifende (ISO-Datum) |
+| Spalte G | `be_id` | Zuordnung zur Berechnungseinheit |
+| Spalte H | `lieferant` und/oder `tarif` | Transparenzfelder fuer Ausweis und Nachvollziehbarkeit |
+
+**Bedeutung L-Q (Verteilung je Mietpartei)**
+
+- L-Q bilden die strombezogene Kostenaufstellung je Mietpartei als Rechenergebnisbereich ab.
+- Dieser Bereich wird fuer Regression und Delta-Dokumentation verwendet, jedoch nicht als operative Quelle fuer den Rechenkern.
+- Abweichungen zwischen berechnetem Ergebnis und L-Q sind zu dokumentieren als:
+   - bekannte Excel-Formelabweichung,
+   - bewusstes Spec-Delta,
+   - oder Implementierungsfehler.
+
+**Validierungsregel fuer Migration/Fixture-Erstellung**
+
+- Wenn in `Stromkosten` B-H tarifrelevante Datensaetze vorhanden sind, darf `stromtarife` im erzeugten Input-JSON nicht leer sein.
+- Wenn `stromtarife` leer bleibt, ist dies ein Mapping-Fehler der Datenaufbereitung (nicht der fachlichen Berechnung) und muss fail-fast als Vorverarbeitungsfehler markiert werden.
+- Die Datenaufbereitung darf keine fertigen Stromkosten aus L-Q in JSON-Felder fuer Kostenanteile uebernehmen.
+
 **Validierungsregeln (Fail-Fast):**
 
 *Strukturelle Integrität:*
@@ -634,4 +674,18 @@ Das `einzelabrechnung.json` je Mietpartei soll mindestens enthalten:
 - `kostenpositionen`: je Kostenart — Gesamtbetrag, Scope, Schlüssel/Verbrauch, Anteil_NE, Betrag_NE
 - `vorauszahlungen`: geleisteter Gesamtbetrag, Aufschlüsselung
 - `saldo`: Gesamtkosten − Vorauszahlungen (positiv = Nachzahlung, negativ = Guthaben)
+
+### Ergaenzende Testfaelle (Iteration 1)
+
+| ID | Szenario | Art | Erwartetes Ergebnis |
+|---|---|---|---|
+| T11 | Excel2024 Worksheet `Stromkosten` B-H enthaelt Tarifdaten | Pflicht | Mapping erzeugt nicht-leeres `stromtarife[]` im Input-JSON; leeres `stromtarife[]` gilt als Vorverarbeitungsfehler |
+| T12 | Vergleich berechneter Stromkosten gegen Worksheet `Stromkosten` L-Q | Pflicht | Delta je Mietpartei wird als `gleich`, `bekanntes Excel-Delta` oder `Implementierungsfehler` klassifiziert und reportet |
+| T13 | Abgrenzung Eingabe/Berechnung fuer Strom | Pflicht | JSON enthaelt keine aus Excel uebernommenen, vorab berechneten Stromkosten; Stromkosten entstehen erst im Rechenkern aus Verbrauchsdaten + `stromtarife` |
+
+## History
+| Date | Iteration | Author | Delta |
+|---|---|---|---|
+| 2026-03-24 | 0 | User | Initiale fachliche Spezifikation erstellt |
+| 2026-03-25 | 1 | Copilot (GPT-5.3-Codex) | Excel2024-Stromkostenabbildung praezisiert: Mapping B-H -> `stromtarife`, L-Q als Oracle-Verteilungsbereich, zusaetzliche Testfaelle T11/T12 |
 
