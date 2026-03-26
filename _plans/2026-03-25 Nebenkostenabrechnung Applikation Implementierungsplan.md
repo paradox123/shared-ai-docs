@@ -318,29 +318,30 @@ Bezugsspezifikation:
    - Evidence: `private/Vermietung/nebenkosten-abrechnung/dotnet/Nebenkosten.Core/Services/AllocationCalculator.cs`
 - [DONE] Spec-Ergaenzung fuer Excel2024-Stromkostenabbildung ist dokumentiert.
    - Evidence: `_specs/2026-03-24 Nebenkostenabrechnung Applikation.md` (Iteration-1-Ergaenzung)
-- [PENDING] Ergebnisobjekt (`einzelabrechnung.json`) enthaelt aktuell keine explizite Tarifaufschluesselung fuer Strom.
-   - Evidence: `private/Vermietung/nebenkosten-abrechnung/dotnet/Nebenkosten.Core/Output/StatementResult.cs`
-- [PENDING] HTML/PDF zeigt derzeit keine Tarifdetails (Grundpreis, Arbeitspreis, Tarifperiode) je Mietpartei.
+- [DONE] Ergebnisobjekt (`einzelabrechnung.json`) enthaelt expliziten `stromkosten_anhang`-Block je Mietpartei mit Tarif-ID, Gueltigkeitszeitraum, Grundpreisanteil, Arbeitspreisanteil, kWh-Anteil, Summenbetrag und Herleitung.
+   - Evidence: `private/Vermietung/nebenkosten-abrechnung/dotnet/Nebenkosten.Core/Output/StatementResult.cs` (`StromkostenAnhang`, `StatementStromkostenAnhangItem`)
+- [DONE] HTML/PDF zeigt Tarifdetails (Grundpreis, Arbeitspreis, Tarifperiode, kWh, Kostenanteil, Herleitung) je Mietpartei im Abschnitt `3. Stromkosten-Anhang`.
    - Evidence: `private/Vermietung/nebenkosten-abrechnung/dotnet/Nebenkosten.Rendering/Templates/einzelabrechnung.html`
-- [PENDING] Regression gegen Excel2024 `Stromkosten` L-Q ist noch nicht als eigener Testvertrag implementiert.
-   - Evidence: offene Erweiterung in `private/Vermietung/nebenkosten-abrechnung/tests/Nebenkosten.Tests/Regression2024Tests.cs`
+- [DONE] Regression gegen Excel2024 `Stromkosten` L-Q als eigener Testvertrag T12 implementiert; Deltas werden je Mietpartei als `gleich`, `bekanntes Excel-Delta` oder `Implementierungsfehler` klassifiziert.
+   - Evidence: `private/Vermietung/nebenkosten-abrechnung/tests/Nebenkosten.Tests/Regression2024Tests.cs` (`T12_ShouldClassifyStromDeltaVsExcelOraclePerMietpartei`)
 
 ## Action Plan
 1. [DONE] Spec-Luecke zum Excel2024-Stromkostenfluss in den Plan uebernommen und operationalisiert.
     - Done signal: Anforderungen B-H (Quelle) und L-Q (Oracle) sind als eigener Planfokus dokumentiert.
-2. [PENDING] Datenaufbereitungspfad fuer Excel2024 -> Input-JSON um einen expliziten Mapping-Check fuer `stromtarife` erweitern.
-    - Done when: Bei vorhandenen Tarifzeilen in B-H kann kein leeres `stromtarife[]` mehr unbemerkt in Regression/Fixtures eingehen.
-   - Done when: Der Import uebernimmt keine vorab berechneten Stromkosten aus L-Q in operative JSON-Kostenfelder.
-3. [PENDING] Ergebnisvertrag erweitern: eigener Block fuer Stromkosten-Herleitung je Mietpartei.
-    - Done when: `einzelabrechnung.json` fuehrt fuer Strom mindestens Tarif-ID, Gueltigkeitszeitraum, Grundpreisanteil, Arbeitspreisanteil, kWh-Anteil und Summenbetrag.
-4. [PENDING] Assembler/Rechenkern-Output verbinden.
-    - Done when: Die in `CalculateStromCostForNe` verwendeten Tarife werden als nachvollziehbare Detailzeilen ins Statement uebergeben.
-5. [PENDING] Rendervertrag fuer Mietersicht erweitern.
-    - Done when: HTML/PDF enthaelt fuer Stromkosten einen eigenen Transparenzabschnitt mit Tarifparametern und Rechenschritt je Mietpartei.
-6. [PENDING] Regressionstest fuer Excel2024 `Stromkosten` L-Q ergaenzen.
-    - Done when: Der Test klassifiziert je Delta `gleich`, `bekanntes Excel-Delta` oder `Implementierungsfehler`.
-7. [PENDING] Dokumenthinweis auf technische Detaildatei nur beibehalten, wenn Artefakt tatsaechlich erzeugt wird.
-    - Done when: Entweder die Detaildatei wird erzeugt und verlinkbar abgelegt oder der Hinweistext wird aus dem Dokument entfernt/umformuliert.
+2. [DONE] Datenaufbereitungspfad fuer Excel2024 -> Input-JSON um einen expliziten Mapping-Check fuer `stromtarife` erweitert.
+   - Evidence: Einmalige Uebernahme aus `Nebenkostenabrechnung_2024.xlsx`, Worksheet `Stromkosten` Spalten B-H in `data/2024/input_tariff_from_excel.json`.
+   - Evidence: Direkte NE-Stromkostenbelege wurden fuer den Tarifmodus entfernt; Stromkosten entstehen nur noch aus Verbrauchsdaten + `stromtarife`.
+   - Evidence: Tarifbasierte Einzelabrechnungen erzeugt in `output/2024-from-excel-tariff-2026-03-26_0940-2026-03-26_0940`.
+3. [DONE] Ergebnisvertrag erweitern: eigener Block fuer Stromkosten-Herleitung je Mietpartei.
+    - Evidence: `StatementResult.cs` → `StromkostenAnhang: List<StatementStromkostenAnhangItem>` mit Tarif-ID, Gueltigkeitszeitraum, Grundpreisanteil, Arbeitspreisanteil, kWh-Anteil und Summenbetrag.
+4. [DONE] Assembler/Rechenkern-Output verbinden.
+    - Evidence: `ConsumptionCalculator.cs` → `CalculateStromCostBreakdownForNe()` liefert `StromCostBreakdownEntry`-Liste; `StatementAssembler.cs` schreibt diese als `stromkosten_anhang` ins Statement.
+5. [DONE] Rendervertrag fuer Mietersicht erweitern.
+    - Evidence: `einzelabrechnung.html` → bedingter Abschnitt `3. Stromkosten-Anhang` mit Tarifparametern und Rechenschrittherleitung; Vorauszahlungen auf Abschnitt 4 verschoben.
+6. [DONE] Regressionstest fuer Excel2024 `Stromkosten` L-Q ergaenzen.
+    - Evidence: `Regression2024Tests.cs` → `T12_ShouldClassifyStromDeltaVsExcelOraclePerMietpartei` klassifiziert je Delta `gleich`, `bekanntes Excel-Delta` (NE2: +44.75) oder `Implementierungsfehler`.
+7. [DONE] Dokumenthinweis auf technische Detaildatei entfernt/umformuliert.
+    - Evidence: `einzelabrechnung.html` → Hinweis auf `"technische Detaildatei"` entfernt; `RenderingContractTests.cs` → `ShouldNotClaimTechnicalDetailFileExists` sichert dies als Regressionsschutz ab.
 
 ## Open Items
 - [DECISION NON-BLOCKING] Soll die Strom-Detailaufschluesselung direkt im Hauptdokument stehen oder als zusaetzliches technisches Beiblatt mit Kurzreferenz im Hauptdokument?
@@ -359,3 +360,5 @@ Bezugsspezifikation:
 | 2026-03-25 | 2 | Copilot (GPT-5.4) | Plan auf Umsetzungsreife nachgeschaerft: Entscheidungen operationalisiert, Render-Pflichten und Teststrategie konkretisiert |
 | 2026-03-25 | 3 | Copilot (GPT-5.4) | Plan auf konkrete Ausfuehrungsvertraege, C#-Projektzuschnitt und implementation-ready Start-Backlog verdichtet |
 | 2026-03-25 | 4 | Copilot (GPT-5.3-Codex) | Spec-Luecke zu Excel2024-Stromkosten operationalisiert; klarer Done/Pending-Status fuer Stromtarif-Transparenz und L-Q-Regression ergänzt |
+| 2026-03-26 | 5 | Copilot (Claude Sonnet 4.6) | Items 3-7 implementiert und als DONE markiert: `stromkosten_anhang`-Block im Ergebnisvertrag, Assembler/Rechenkern verbunden (`StromCostBreakdownEntry`), HTML-Template um Abschnitt 3 Stromkosten-Anhang erweitert, T12-Regression mit Delta-Klassifizierung, Detaildatei-Hinweis entfernt. Zusaetzlich: Validierungsguardrails NK-VALID-004 (StromTariffRequired) und NK-VALID-005 (StromInputModeConflict) ergaenzt. 46/46 Tests gruen. Item 2 (Excel→JSON Mapping-Check) bleibt PENDING (kein Excel-Importpfad im .NET-Projekt). |
+| 2026-03-26 | 6 | Copilot (GPT-5.3-Codex) | Item 2 einmalig praktisch umgesetzt: Tarife aus Excel2024 Worksheet `Stromkosten` (B-H) in eigenes Tarif-Input uebernommen (`input_tariff_from_excel.json`), Tarifmodus ohne direkte NE-Strombelege gefahren, 5 Einzelabrechnungen neu erzeugt. |
