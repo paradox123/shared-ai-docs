@@ -680,7 +680,7 @@ Das `einzelabrechnung.json` je Mietpartei soll mindestens enthalten:
 | ID | Szenario | Art | Erwartetes Ergebnis |
 |---|---|---|---|
 | T11 | Excel2024 Worksheet `Stromkosten` B-H enthaelt Tarifdaten | Pflicht | Mapping erzeugt nicht-leeres `stromtarife[]` im Input-JSON; leeres `stromtarife[]` gilt als Vorverarbeitungsfehler |
-| T12 | Vergleich berechneter Stromkosten gegen Worksheet `Stromkosten` L-Q | Pflicht | Delta je Mietpartei wird als `gleich`, `bekanntes Excel-Delta` oder `Implementierungsfehler` klassifiziert und reportet |
+| T12 | Vergleich berechneter Stromkosten gegen Worksheet `Stromkosten` L-Q | Pflicht | Delta je Mietpartei wird als `gleich` oder `Implementierungsfehler` klassifiziert und reportet; alte Excel-Ausnahmen sind nicht zulaessig |
 | T13 | Abgrenzung Eingabe/Berechnung fuer Strom | Pflicht | JSON enthaelt keine aus Excel uebernommenen, vorab berechneten Stromkosten; Stromkosten entstehen erst im Rechenkern aus Verbrauchsdaten + `stromtarife` |
 
 ## History
