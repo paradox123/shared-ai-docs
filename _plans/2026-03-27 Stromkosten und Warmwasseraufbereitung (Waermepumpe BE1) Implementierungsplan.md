@@ -273,6 +273,25 @@ Codebasis (analysiert):
 - Implementierung fuer die in Iteration 4 geschnittenen Pakete ist abgeschlossen und verifiziert.
 - Die naechste fachliche Arbeit liegt bei optionaler Oracle-Feinabstimmung der Warmwasser-Fixturewerte gegen externe Fachherkunft, nicht bei fehlender technischer Umsetzung.
 
+# Iteration 6
+
+## Summary
+- Nachlauf abgeschlossen: T10 ist jetzt im Testartefakt explizit als historischer Gesamtkostenvertrag markiert.
+- Damit ist die zuvor offene Klarstellung aus Iteration 3/4 auch technisch im Codebestand umgesetzt.
+
+## Delivery Status
+1. [DONE] Historische Einordnung von T10 im Testartefakt nachgezogen.
+   - Evidence:
+     - `tests/Nebenkosten.Tests/Regression2024Tests.cs` (Testname `T10_HistoricalAggregate_...`)
+     - Kommentar trennt historischen Gesamtkostencheck vom normativen Strom-/Warmwasservertrag.
+
+## Verification
+1. `dotnet test --filter "FullyQualifiedName~Regression2024Tests"` -> gruen (`Passed: 4, Failed: 0`).
+
+## Readiness
+- Plan- und Code-Stand sind fuer den aktuell vereinbarten Scope voll synchron.
+- Offen bleibt nur optionale fachliche Feinabstimmung der Warmwasser-Oracle-Herkunftsdaten.
+
 ## History
 | Date | Iteration | Author | Delta |
 |---|---|---|---|
@@ -281,3 +300,4 @@ Codebasis (analysiert):
 | 2026-03-27 | 3 | Copilot (GPT-5.3-Codex) | Review-Befunde eingearbeitet: Fixture-Sequenz bereinigt, Readiness zwischen Plan und Implementierung getrennt, T10 als historischer Gesamtkostenvertrag eingeordnet. |
 | 2026-03-27 | 4 | Copilot (GPT-5.3-Codex) | Umsetzung in drei konkrete Commit-Pakete geschnitten inkl. Datei-Scope, Done-Kriterien, Reihenfolge und Verifikations-Gates. |
 | 2026-03-27 | 5 | Copilot (GPT-5.3-Codex) | TDD-Umsetzung abgeschlossen: Fixture-Split, strukturierter WP-Vertrag, neue Warmwasser/BE2/Rendering-Verifikation implementiert und mit 52/52 Tests validiert. |
+| 2026-03-27 | 6 | Copilot (GPT-5.3-Codex) | Historische T10-Klarstellung im Testartefakt umgesetzt und gezielt verifiziert (Regression2024Tests gruen). |
