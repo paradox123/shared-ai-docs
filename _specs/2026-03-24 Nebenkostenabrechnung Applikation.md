@@ -161,6 +161,18 @@ Regel für manuelle Ablesungen: Für die Berechnung und für die Ausgabe werden 
 
 Zur Kostenberechnung werden alle Belege einer Kostenart aufsummiert und gemäß der verbindlichen Kostenarten-Matrix (Scope + Umlageart + Schlüssel/Verbrauch) auf die NE umgelegt.
 
+**Brennstoffkosten mit Bestandsabgrenzung (Rest / Rest aus Vorjahr):**
+
+- Für Energieträger mit physischem Restbestand am Periodenende (insb. Öl, Holz, Pellets) gilt fachlich: Kosten des laufenden Jahres = Anfangsbestand + Zugänge im Jahr − Restbestand zum Jahresende.
+- Der Restbestand zum Jahresende wird wertmäßig in das Folgejahr verschoben und dort als `Rest aus Vorjahr` bzw. Anfangsbestand behandelt.
+- Die Bewertung erfolgt je Energieträger und je Berechnungseinheit auf Basis eines Durchschnittspreises über den verfügbaren Bestand des Jahres:
+  - `verfuegbarer_wert = anfangsbestand_wert + einkaufswerte_im_jahr`
+  - `verfuegbare_menge = anfangsbestand_menge + einkaufsmengen_im_jahr`
+  - `restwert_jahresende = restmenge_jahresende * (verfuegbarer_wert / verfuegbare_menge)`
+- Für Holz gilt normativ die Mengenumrechnung `1 Festmeter (Fm) = 1,5 Raummeter (Rm)`. Einkaufsbelege in `Fm` und Restmengen in `Rm` sind vor der Bewertung auf dieselbe Einheit zu normieren.
+- Negative operative `kostenbelege[].betrag` werden in der Anwendung nicht verwendet; die Vorverarbeitung muss die laufende Periode bereits auf den netto verbrauchten Brennstoffkostenwert abgrenzen und den Folgejahres-Anfangsbestand als positiven Beleg vorbereiten.
+- Fehlerfall: Restmenge > verfügbare Gesamtmenge, fehlende belastbare Bewertungsbasis oder positiver Restbestand bei `Anfangsbestand = 0` und `Zugängen = 0` → Abbruch mit Fehlermeldung.
+
 #### Berechnungslogik: Systematische Regeln zu Zeitanteiligkeit und Scope-Grenzen
 
 **Was bedeutet „Zeitanteilig"?**
@@ -357,6 +369,7 @@ Die Laufzeitanwendung verarbeitet weiterhin ausschliesslich JSON. Fuer Datenmigr
 - Für Verbrauchs-Umlage: alle NE des Scopes müssen Ablesungen für den erforderlichen Zählertyp haben.
 - Versicherungsverträge: Für alle zugeordneten NE muss Wohnfläche vorliegen.
 - Vorauszahlungen: dürfen nicht null/negativ sein; Summe per Periode muss prüfbar sein.
+- Für Brennstoffkosten mit Bestandsabgrenzung müssen Anfangsbestand, Zugänge und Restbestand je Energieträger/BE in konsistenter Mengeneinheit bewertbar sein; insbesondere müssen Umrechnungen wie `Fm -> Rm` eindeutig möglich sein.
 
 *Fail-Fast Abbruch bei:*
 - Fehlendes Pflichtfeld (z. B. `mietparteien` komplett leer)
@@ -364,6 +377,7 @@ Die Laufzeitanwendung verarbeitet weiterhin ausschliesslich JSON. Fuer Datenmigr
 - Mehrdeutige Zuordnung (z. B. Kostenart in mehreren Versicherungsverträgen, aber Kostenbeleg hat keinen eindeutigen Vers.-Scope)
 - Unplausibler Verbrauch (z. B. Differenz negativ, oder Restverbrauch NE5 negativ)
 - Fehlende kritische Ablesungen (z. B. Heizverbrauch-Umlage gefordert, aber kein Messwert für diese BE vorhanden)
+- Unplausible Brennstoff-Bestandsabgrenzung (z. B. Restbestand > verfügbarer Bestand, fehlende Bewertungsbasis, uneindeutige Mengenumrechnung)
 
 #### Einheitliches Fehlermeldungsformat (v1)
 
@@ -582,6 +596,8 @@ Als primärer Referenzwert dient die manuell erstellte Nebenkostenabrechnung 202
 | T8 | Rundungskonsistenz: Restcent-Zuweisung | Pflicht | Summe gerundeter Anteile = Gesamtbeleg nach Restcent-Zuweisung an größten Anteil |
 | T9 | Versicherungs-Vertragsgruppe: NE3 zahlt nur eigenen Vertrag | Pflicht | NE3 erhält keinen Anteil am NE4/NE5-Vertrag und umgekehrt |
 | T10 | Excel2024-Regressiontest: gleiche 2024-Eingaben → gleiche Ergebnisse für NE1–NE4 | Pflicht | Abweichungen nur mit Dokumentation akzeptiert (→ bekannte Abweichungen oben). NE5 wird von dieser Validierung ausgenommen, da Excel2024 keine Einzelabrechnung für NE5 enthält. NE5 wird inhaltlich berechnet (T1), aber nicht gegen Oracle validiert |
+| T11 | Brennstoff-Restbestand Jahresende | Pflicht | Brennstoffkosten des laufenden Jahres werden um den Restbestand zum Jahresende wertmäßig reduziert; Folgejahr erhält positiven Anfangsbestands-Beleg `Rest aus Vorjahr` |
+| T12 | Holz-Umrechnung Festmeter zu Raummeter | Pflicht | Einkaufsbelege in `Fm` und Restmengen in `Rm` werden über `1 Fm = 1,5 Rm` konsistent bewertet; uneindeutige Umrechnung → Abbruch |
 
 ### Test-Oracle: Erwartete Ergebnisse je NE (aus Excel2024)
 
@@ -679,13 +695,12 @@ Das `einzelabrechnung.json` je Mietpartei soll mindestens enthalten:
 
 | ID | Szenario | Art | Erwartetes Ergebnis |
 |---|---|---|---|
-| T11 | Excel2024 Worksheet `Stromkosten` B-H enthaelt Tarifdaten | Pflicht | Mapping erzeugt nicht-leeres `stromtarife[]` im Input-JSON; leeres `stromtarife[]` gilt als Vorverarbeitungsfehler |
-| T12 | Vergleich berechneter Stromkosten gegen Worksheet `Stromkosten` L-Q | Pflicht | Delta je Mietpartei wird als `gleich` oder `Implementierungsfehler` klassifiziert und reportet; alte Excel-Ausnahmen sind nicht zulaessig |
-| T13 | Abgrenzung Eingabe/Berechnung fuer Strom | Pflicht | JSON enthaelt keine aus Excel uebernommenen, vorab berechneten Stromkosten; Stromkosten entstehen erst im Rechenkern aus Verbrauchsdaten + `stromtarife` |
+| T13 | Excel2024 Worksheet `Stromkosten` B-H enthaelt Tarifdaten | Pflicht | Mapping erzeugt nicht-leeres `stromtarife[]` im Input-JSON; leeres `stromtarife[]` gilt als Vorverarbeitungsfehler |
+| T14 | Vergleich berechneter Stromkosten gegen Worksheet `Stromkosten` L-Q | Pflicht | Delta je Mietpartei wird als `gleich` oder `Implementierungsfehler` klassifiziert und reportet; alte Excel-Ausnahmen sind nicht zulaessig |
+| T15 | Abgrenzung Eingabe/Berechnung fuer Strom | Pflicht | JSON enthaelt keine aus Excel uebernommenen, vorab berechneten Stromkosten; Stromkosten entstehen erst im Rechenkern aus Verbrauchsdaten + `stromtarife` |
 
 ## History
 | Date | Iteration | Author | Delta |
 |---|---|---|---|
 | 2026-03-24 | 0 | User | Initiale fachliche Spezifikation erstellt |
 | 2026-03-25 | 1 | Copilot (GPT-5.3-Codex) | Excel2024-Stromkostenabbildung praezisiert: Mapping B-H -> `stromtarife`, L-Q als Oracle-Verteilungsbereich, zusaetzliche Testfaelle T11/T12 |
-
