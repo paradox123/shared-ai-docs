@@ -1,107 +1,198 @@
 # Documentation & Planning Workflow
 
-Documentation and implementation planning follow a structured pipeline of three skills, each handling a distinct phase.
+Dieser Workflow erweitert die bestehende Skill-Pipeline um klare Planungs- und Verifikations-Gates, um Nacharbeiten zu reduzieren.
 
-## Pipeline
+## Ziel
+
+1. Anforderungen sauber erfassen.
+2. Entscheidungen vor Umsetzung einfrieren.
+3. Umsetzung nur mit überprüfbaren Gates starten.
+4. Abweichungen und Learnings systematisch in Skills/Workflow zurückführen.
+
+## End-to-End Pipeline
 
 ```
 Prompt (Kernanforderungen)
-  |  Iteration 0
+  | Iteration 0
   v
-doc-coauthoring ──── Spec / RFC / Proposal / Decision Doc
-  |  "refine the plan"
+doc-coauthoring  ->  Spec/Proposal/Decision Doc
+  | "refine the plan"
   v
-refine-plan ──────── Implementation Plan mit Verification Test Cases
-  |  Implementierung
+refine-plan      ->  Implementierungsplan + Verification Cases
+  | Scope/Impact Check
+  |-- direkter Plan-Track
+  |-- optional: OpenSpec-Track (wenn vom User gewünscht)
   v
-retro-plan ───────── Retrospektive mit Follow-up Deltas
+Implementierung + Verifikation (tests + runtime + smoke)
+  v
+retro-plan + improve-skills (Feedback in Workflow/Skills)
 ```
 
-## Skills
+## Skills und Verantwortung
 
-### doc-coauthoring
+### `doc-coauthoring`
 
-**Purpose:** Co-author specs, proposals, RFCs, decision docs through structured collaboration.
+Purpose: Anforderungen, Scope, Constraints, Akzeptanzkriterien.
 
-**Stages:**
-1. Context Gathering — user dumps context, Claude asks clarifying questions
-2. Refinement & Structure — section-by-section brainstorming, curation, drafting
-3. Reader Testing — verify doc works for readers via fresh Claude instance
+Lieferobjekt:
+- belastbare Spec mit `[MISSING ...]`, `[DECISION ...]`, `[REVIEW ...]`
+- klare Non-Goals
 
-**Triggers:** "write a doc", "draft a proposal", "create a spec", "write up", "PRD", "design doc", "decision doc", "RFC", "refine requirements", "write requirements"
+### `refine-plan`
 
-### refine-plan
+Purpose: Aus Spec einen ausführbaren Plan machen.
 
-**Purpose:** Convert a spec or raw requirements into an actionable implementation plan.
+Lieferobjekt:
+- status-bearing actions (`[DONE]`, `[PENDING]`, `[BLOCKED]`)
+- konkrete Verification Cases pro Teilbereich
+- offene Spec-Lücken explizit als `[MISSING SPEC ...]`/`[DECISION SPEC ...]`
 
-**Input:** Finished spec from doc-coauthoring, or raw requirements directly.
+### `retro-plan`
 
-**Output:** Iterative implementation plan with verification test cases.
+Purpose: Ergebnis gegen Plan prüfen und Deltas erfassen.
 
-**Triggers:** "refine the plan", "refine requirements", "iterative plan", "detailed implementation plan"
+Lieferobjekt:
+- Root-Cause-Analyse
+- Follow-up-Deltas für Spec/Plan/Umsetzung
 
-### retro-plan
+### `improve-skills`
 
-**Purpose:** Review implementation results against the plan and improve future planning.
+Purpose: wiederkehrende Reibungsmuster identifizieren und dauerhaft reduzieren.
 
-**Modes:** Interim ("retro the plan") or Final ("final retro the plan")
+Im Kontext dieses Workflows:
+- wiederholte Nacharbeiten klassifizieren
+- fehlende/unklare Entscheidungspunkte dokumentieren
+- Workflow-/Skill-Anpassungen ableiten
 
-**Output:** Quality assessment, root causes, follow-up deltas, skill/prompt update deltas.
+## OpenSpec Nutzung (optional)
+
+OpenSpec ist **optional** und wird **vom User entschieden**.
+
+OpenSpec ist typischerweise hilfreich bei:
+
+1. größeren oder mehrstufigen Vorhaben,
+2. mehreren beteiligten Teams/Repos,
+3. Bedarf nach formalen Artefakten und Audit-Trace,
+4. länger laufenden Changes mit Blockern und Teilfortschritt.
+
+Für kleinere oder klar abgegrenzte Änderungen reicht oft der direkte Plan-Track ohne OpenSpec.
+
+## Definition of Ready (vor Implementierung)
+
+Implementierung startet erst, wenn alle Punkte erfüllt sind:
+
+1. Scope in 1-2 Sätzen fixiert.
+2. Non-Goals explizit dokumentiert.
+3. Decision Freeze Pack ausgefüllt (siehe unten).
+4. Referenz-Baseline benannt (**falls relevant**).
+5. Testfälle/Abnahmeszenarien vorab definiert, die den späteren DoD nachweisbar machen.
+6. Verifikationskommandos vorab definiert:
+   - Unit/Integration Tests
+   - Runtime/Compose Start
+   - Health/Smoke Checks
+7. Offene Risiken, Abhängigkeiten und Blocker sind dokumentiert.
+
+## Decision Freeze Pack (kontextabhängige Checkliste)
+
+Vor der Implementierung die **relevanten** Punkte fixieren:
+
+1. Zielbild und Scope in 1-2 Sätzen.
+2. betroffene Umgebungen/Branches (**falls relevant**).
+3. Secret-/Config-Contract (**falls relevant**).
+4. Datenmigration/Fallback (**falls relevant**).
+5. externe Integrationsverträge zu anderen Systemen/Repos (**falls relevant**).
+6. Sicherheits-/Exposure-Entscheidungen (**falls relevant**).
+7. Abnahmekriterien (Go/No-Go).
+8. Owner für offene Abhängigkeiten/Risiken.
+9. Nachweisformat (welche Evidenzdatei, welche Kommandos).
+
+## OpenSpec Artifact Contract (nur wenn OpenSpec aktiv)
+
+Mindestens diese Artefakte müssen konsistent sein:
+
+1. `proposal.md` - Why/What/Impact
+2. `design.md` - Entscheidungen und Trade-offs
+3. `tasks.md` - nur echte, überprüfbare Tasks; Blocker explizit offen lassen
+4. `specs/*/spec.md` - Requirements + Scenarios
+5. `acceptance-criteria-matrix.md` - `pass/fail/blocked`
+6. `implementation-evidence.md` - konkrete Kommandos + Resultate
+
+Regel:
+- **`[BLOCKED]` ist nicht `done`**
+- Teilweise Umsetzung nicht als abgeschlossen markieren
+
+## Definition of Done (Release Gate)
+
+Ein Change ist erst "done", wenn:
+
+1. relevante Findings und Risiken geklärt, mitigiert oder explizit akzeptiert sind.
+2. die in DoR definierten Testfälle ausgeführt und dokumentiert sind.
+3. definierte Tests erfolgreich sind.
+4. Runtime-Validierung erfolgreich ist (z. B. `docker compose up` + Health).
+5. offene Blocker klar dokumentiert sind (inkl. Impact/Nächster Schritt).
+6. Akzeptanzkriterien mit Evidenz belegt sind.
+7. Specs/Plan/OpenSpec-Artefakte synchron sind (kein Drift).
+
+## Anti-Rework Guardrails
+
+1. Keine Umsetzung starten, solange zentrale Entscheidungen noch "im Fluss" sind.
+2. Größere Vorhaben in mehrere Changes/Arbeitspakete splitten (z. B. nach Themenclustern oder Risiko).
+3. Referenz-Implementierung/Baseline früh festlegen und diffen (**falls relevant**).
+4. Jede Iteration endet mit:
+   - Was wurde entschieden?
+   - Was bleibt offen?
+   - Welche Evidenz fehlt noch?
+5. Keine "Hybrid-Steuerung": entweder OpenSpec bewusst als SSOT oder bewusst ohne OpenSpec.
 
 ## Marker System
 
-All three skills share a common marker system for tracking gaps:
+| Marker | Bedeutung | Verwendung |
+|--------|-----------|-----------|
+| `[MISSING ...]` | Fehlende Information | Spec/Plan |
+| `[DECISION ...]` | Offene Wahl | Spec/Plan |
+| `[REVIEW ...]` | Prüfen/Validieren | Spec |
+| `[MISSING SPEC ...]` | Spezifikationslücke | Plan |
+| `[DECISION SPEC ...]` | Spezifikationsentscheidung offen | Plan |
+| `[BLOCKED ...]` | Externer Blocker | Plan/OpenSpec Tasks |
 
-| Marker | Meaning | Used in |
-|--------|---------|---------|
-| `[MISSING ...]` | Information needed but not yet provided | doc-coauthoring, refine-plan |
-| `[DECISION ...]` | Choice between options needed | doc-coauthoring, refine-plan |
-| `[REVIEW ...]` | Content needs verification/review | doc-coauthoring |
+## Iteration, History, SessionId
 
-**Rules:**
-- Markers can be **blocking** (must resolve before ready) or **non-blocking** (explicitly marked)
-- User resolves markers with `=>` notation (e.g., `[DECISION REST vs GraphQL] => REST`)
-- A document/plan is **ready** when no blocking markers remain
+Weiterhin append-only:
 
-## Iteration System
-
-Both doc-coauthoring and refine-plan use append-only iterations:
-
-- **Iteration 0**: User's initial prompt / core requirements
-- **Iteration N**: Each refinement round
-- Never overwrite prior iterations
-
-## History Table
-
-Every document and plan maintains a history table at the bottom:
-
-```markdown
-| Date | Iteration | Author | Delta |
-|------|-----------|--------|-------|
-| 2026-03-20 | 0 | User | Initial requirements |
-| 2026-03-20 | 1 | Claude | Context gathered, structure proposed |
-| 2026-03-21 | 2 | Claude | Resolved [DECISION API layer], drafted core sections |
-```
-
-## SessionId
-
-Each document tracks the Claude session ID at the file bottom for conversation continuity.
+1. `Iteration 0` = Initialanforderung.
+2. `Iteration N` = jede Verfeinerung.
+3. Keine Überschreibung alter Iterationen.
+4. History Table am Dateiende pflegen.
+5. SessionId am Dateiende pflegen.
 
 ## File Conventions
 
-| Phase | File Pattern | Example |
-|-------|-------------|---------|
-| Spec | `<working-dir>/<name>.md` | `auth-spec.md` |
-| Plan | `<working-dir>/<name>-plan.md` | `auth-plan.md` |
-| Retro | Appended to plan file or separate | `auth-plan.md` (inline) |
+| Typ | Ort | Muster |
+|-----|-----|--------|
+| Spezifikation (ohne OpenSpec) | `_specs/` | `YYYY-MM-DD <Titel>.md` |
+| Plan | neben Spec oder Projektordner | `<name>-plan.md` |
+| OpenSpec Change (optional) | `openspec/changes/<change>/` | Standard-Artefakte |
+| Retro | inline im Plan oder eigene Datei | `<name>-retro.md` |
 
-## Transitions
+## Übergänge
 
 ### Spec -> Plan
-When a spec document is ready (no blocking `[MISSING]`/`[DECISION]` markers, Reader Testing passed), the user says **"refine the plan"** to start deriving an implementation plan with `refine-plan`.
+"refine the plan" erst, wenn blockierende `[MISSING]`/`[DECISION]` minimiert sind.
 
-### Plan -> Implementation
-When the implementation plan has no blocking markers, it includes verification test cases automatically. The user proceeds with implementation.
+### Plan -> Umsetzung
+Nur bei erfüllter Definition of Ready.
 
-### Implementation -> Retro
-After implementation (or during), the user says **"retro the plan"** (interim) or **"final retro the plan"** (final) to run a retrospective with `retro-plan`.
+### Umsetzung -> Retro
+"retro the plan" nach jedem signifikanten Meilenstein, "final retro the plan" vor Abschluss.
+
+### Retro -> Improve Skills
+Wiederkehrende Probleme als `improve-skills`-Kandidaten erfassen und in Workflow/Skills einarbeiten.
+
+## Lightweight Checkliste vor Umsetzung
+
+1. Ist der Scope klar abgegrenzt?
+2. Sind Entscheidungen eingefroren (Decision Freeze Pack)?
+3. Sind Test- und Runtime-Gates vorab definiert?
+4. Ist eine Referenz-Baseline nötig und benannt (falls relevant)?
+5. Sind externe Abhängigkeiten/Owner dokumentiert?
+6. Ist klar, was "done" konkret bedeutet?
