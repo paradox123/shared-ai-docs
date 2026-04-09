@@ -9,6 +9,21 @@ Dieser Workflow erweitert die bestehende Skill-Pipeline um klare Planungs- und V
 3. Umsetzung nur mit überprüfbaren Gates starten.
 4. Abweichungen und Learnings systematisch in Skills/Workflow zurückführen.
 
+## Shared Gate Source of Truth
+
+Dieses Dokument ist die **kanonische Quelle** für die gemeinsamen Delivery-Gates in:
+- `doc-coauthoring`
+- `refine-plan`
+- `spec-change-delivery`
+- `retro-plan`
+
+Hier werden die gemeinsamen Begriffe gepflegt:
+- **Definition of Ready (DoR)**
+- **Definition of Done (DoD)**
+- **Decision Freeze Pack**
+
+Die Skills dürfen diese Begriffe lokal kurz restaten, sollen aber **keine abweichenden Definitionen** einführen. Änderungen an der gemeinsamen Bedeutung werden zuerst hier gepflegt.
+
 ## End-to-End Pipeline
 
 ```
