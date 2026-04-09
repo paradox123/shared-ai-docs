@@ -1,5 +1,25 @@
 # Nebenkostenabrechnung 2025 - Belege und Messwerte
 
+## Statushinweis
+
+Diese Spec beschreibt weiterhin das fachliche Zielbild fuer die Vorverarbeitung von Belegen und Messwerten 2025.
+
+Stand `2026-04-09` ist sie jedoch **nicht als operativ vollstaendig umgesetzt** zu lesen. Die aktuelle Code- und Realdatenbewertung zeigt, dass wesentliche Teile der hier beschriebenen Ziel-Vorverarbeitung fuer die echten 2025er Unterlagen noch nicht durchgaengig implementiert sind, insbesondere:
+
+- OCR fuer bildbasierte Messwert- und Belegquellen
+- Segmentierung und operative Extraktion von Sammelbelegen
+- Parser fuer allgemeine Belege, Versicherungen und `ista_period_or_snapshot`
+- robuste Tibber-Verarbeitung fuer reale 2025er Rechnungen mit Verbrauchsanpassungen und Zaehlerwechsel
+
+Fuer die konkrete Erstellung der Nebenkostenabrechnung 2025 ist deshalb die operative Ausfuehrungsspec
+[`2026-04-09 Nebenkostenabrechnung 2025 Realdaten und Abrechnungspfad`](./2026-04-09%20Nebenkostenabrechnung%202025%20Realdaten%20und%20Abrechnungspfad.md)
+massgeblich.
+
+Diese Datei bleibt damit:
+
+- **normative Zielbeschreibung** fuer den angestrebten Import-/Vorverarbeitungspfad
+- **nicht** der Nachweis, dass dieser Pfad fuer die echten 2025er Unterlagen bereits vollstaendig verfuegbar ist
+
 ## Titel und Einordnung
 
 Diese Spec konkretisiert die Vorverarbeitung fuer gescannte **Belege** und **Messwerte** des Abrechnungsjahres 2025.
@@ -821,3 +841,10 @@ Bei Konflikten gilt:
 
 - **Hauptspec gewinnt** fuer JSON-Zielstruktur, Domänenmodell, Kostenlogik und Output
 - **diese Spec gewinnt** fuer Quellanalyse, OCR, Scope-Inferenz und Vorverarbeitungsregeln der 2025er Rohdokumente
+
+## History
+
+| Date | Iteration | Author | Delta |
+|------|-----------|--------|-------|
+| 2026-03-28 | 0 | Claude | Fachliche Import-Spec fuer Belege und Messwerte 2025 erstellt |
+| 2026-04-09 | 1 | Codex | Statushinweis ergaenzt: Zielbild bleibt gueltig, operative 2025-Ausfuehrung jedoch in der Spec vom 2026-04-09 verankert |

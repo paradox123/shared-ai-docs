@@ -223,11 +223,9 @@ Normative Abbildung im 2025er Input:
 - `einzug = 2025-04-01`
 - `auszug = null`
 
-Blockierend offen:
+Normative Festlegung:
 
-- `[MISSING Personenanzahl der Mietpartei Ingeborg Hainz]`
-
-Ohne diese Angabe ist insbesondere die korrekte Muellumlage nicht abschliessend bestimmbar.
+- die Mietpartei Ingeborg Hainz ist fuer 2025 mit `1 Person` anzulegen
 
 ### 2. Direkter Strom NE1
 
@@ -251,55 +249,83 @@ Diese Ablesung ist die fachlich massgebliche Anfangsablesung fuer die 2025er Tei
 
 Weitere zwingende Voraussetzung:
 
-- `[MISSING korrespondierende Endablesung 2025 fuer z-strom-ne1, falls sie nicht belastbar aus den Messwert-Unterlagen 2025 extrahiert wird]`
+- die korrespondierende Endablesung fuer `z-strom-ne1` ist aus dem manuellen Ableseprotokoll zum `2025-12-31` zu uebernehmen:
+  - `zaehler_id = "z-strom-ne1"`
+  - `quelle = "manuell"`
+  - `ne_id = "NE1"`
+  - `stichtag = 2025-12-31`
+  - `messwert = 35005.6`
 
-Ohne Endablesung kann der direkte Stromverbrauch NE1 fuer 2025 nicht berechnet werden.
+Damit ergibt sich fuer die Mietperiode von Ingeborg Hainz 2025 ein direkter Stromverbrauch NE1 von:
+
+- `35005.6 - 34684.0 = 321.6 kWh`
 
 ### 3. Stromtarife BE1 / Tibber
 
 ### 3.1 Grundregel
 
-Die Tibber-Rechnungen erzeugen operative `stromtarife[]` fuer `be1`, nicht `kostenbelege[]` mit `kostenart_id = "strom"`.
+Fuer 2025 werden operative `stromtarife[]` fuer `be1` aus belastbaren Tarifquellen erzeugt, nicht aus `kostenbelege[]` mit `kostenart_id = "strom"`.
 
-### 3.2 Monatsableitung statt Uebersichtssumme
+Mit dem nun vorliegenden Vertragsdatensatz gilt fuer BE1 zusaetzlich:
 
-Wenn eine Tibber-Rechnung Verbrauchsanpassungen aus frueheren Perioden enthaelt, gilt:
+- CHECK24 Vertragsnummer `28632852`
+- Vertragskontonummer `12004642899`
+- Lieferbeginn `2025-03-03`
+- Rueckmeldung des Lieferanten: `Grüüün`
+- jaehrlicher Grundpreis brutto `216.26 EUR`
+- Arbeitspreis brutto `22.66 ct/kWh`
+
+Dieser Vertragstarif ist fuer BE1 ab `2025-03-03` als kanonische Tarifquelle zu behandeln.
+
+### 3.2 Tibber nur als Plausibilisierung
+
+Die Tibber-Rechnungen 2025 enthalten weiterhin fachlich nuetzliche Monatsdetails, sind fuer die operative 2025er Tarifkette von `be1` aber **nicht** die primaere Tarifquelle, sobald der vertragliche Vattenfall-/Grüüün-Pfad feststeht.
+
+Wenn Tibber-Rechnungen fuer 2025 als Zusatz- oder Plausibilisierungsquelle herangezogen werden, gilt:
 
 - die tarifliche Ableitung fuer einen Monat erfolgt ausschliesslich aus der **dedizierten Monatssektion** (z. B. `Juni 2025`, `August 2025`, `September 2025`)
 - die Uebersichtssumme `Kosten Stromverbrauch ... enthaelt Verbrauchsanpassungen ...` darf **nicht** direkt als Monatskostenbasis verwendet werden
+- Tibber-PDFs duerfen fuer `be1` nicht zusaetzlich als operative `stromtarife[]` fuer Zeitraeume importiert werden, die bereits durch Vattenfall bzw. Grüüün normativ abgedeckt sind
+- die automatische Tibber-Tariferzeugung des aktuellen `build-year-input` ist fuer den 2025er Operativlauf daher nur fuer explizit freigegebene Restzeiträume zulaessig
 
-### 3.3 Zaehlerwechsel / Lieferstellenkontinuitaet
+### 3.3 Abweichende Tibber-Zaehlernummern
 
-Bis zum Nachweis des Gegenteils gilt fuer 2025 folgende Arbeitsannahme:
+Die Quellenlage ist derzeit widerspruechlich:
 
-- `1ISK0078261075` und `1ISK0094903173` repraesentieren dieselbe fachliche Stromlieferung fuer die BE1-Stromkostenkette, nur mit geaenderter Zaehlernummer
-- die operative Tarifzielstruktur bleibt deshalb `stromtarife[]` fuer `be1`
+- in vier Tibber-Rechnungen 2025 wird `1ISK0078261075` genannt
+- in `Rechnung_1167054756.pdf` wird dagegen `1ISK0094903173` genannt
+- fachliche Vorgabe des Nutzers ist, dass `1ISK0078261075` der korrekte Zaehler fuer die BE1-Stromkette ist und kein echter Zaehlerwechsel stattgefunden hat
 
-Diese Annahme ist vor Finalisierung gegenzupruefen:
+Normative Festlegung:
 
-- `[REVIEW Bestaetigen, dass der Zaehlerwechsel 1ISK0078261075 -> 1ISK0094903173 kein Scope-Wechsel, sondern nur ein technischer Zaehlerwechsel innerhalb derselben BE1-Lieferstelle ist]`
+- `1ISK0078261075` ist als kanonische Zaehlernummer zu behandeln
+- die in `Rechnung_1167054756.pdf` genannte Nummer `1ISK0094903173` ist als Dokumentfehler zu behandeln
+- fuer Import, Review und finale Tarifanlage ist durchgaengig `1ISK0078261075` zu verwenden
 
 ### 3.4 Fehlende Stromperioden
 
-Aus dem vorliegenden Ordner sind derzeit erkennbar:
+Aus dem vorliegenden Ordner und den Nutzerhinweisen ergibt sich:
 
-- Teilperiode `2025-03-02` bis `2025-03-31`
-- April 2025
-- Mai 2025 ist **nicht** als eigener sauberer Monatsbeleg vorhanden
-- Juni 2025
-- Juli 2025
-- August 2025
-- September 2025
+- fuer Stromperioden ist nicht zwingend eine Monatsrechnung erforderlich; als Quelle kommen auch Vertrags-/Tarifdaten in Betracht
+- fuer BE1 liegt in `data/2024/input_tariff_from_excel.json` ein bestehender Tarifdatensatz vor
+- dieser Datensatz deckt fuer BE1 jedoch nur den Zeitraum bis einschliesslich `2025-02-14` ab (`gueltig_bis = 2025-02-14`)
+- zusaetzlich liegt fuer BE1 ein CHECK24-/Grüüün-Vertragstarif mit Lieferbeginn `2025-03-03` vor
+- aus den 2025er Tibber-Unterlagen sind belastbare Monats- bzw. Teilperiodeninformationen fuer `2025-03-02` bis `2025-09-30` erkennbar
 
-Blockierend offen bleiben damit aktuell mindestens:
+Damit ist normativ festgelegt:
 
-- `[MISSING belastbare Stromkostenquelle fuer BE1 vom 2025-01-01 bis 2025-03-01]`
-- `[MISSING belastbare Stromkostenquelle fuer Mai 2025]`
-- `[MISSING belastbare Stromkostenquelle fuer Oktober 2025]`
-- `[MISSING belastbare Stromkostenquelle fuer November 2025]`
-- `[MISSING belastbare Stromkostenquelle fuer Dezember 2025]`
+- `data/2024/input_tariff_from_excel.json` darf als Tarifquelle fuer BE1 nur fuer den dort tatsaechlich abgedeckten Zeitraum verwendet werden
+- der CHECK24-/Grüüün-Tarif ist fuer BE1 ab `2025-03-03` als operative Tarifquelle zu verwenden
+- fehlende 2025er Tarifzeiträume duerfen nicht mit pauschalen Annahmen aus 2024 ueberschrieben werden
 
-Wenn diese Monate in anderen Belegen oder Konto-/Anbieterunterlagen vorhanden sind, muessen sie vor Finalisierung in die 2025er Tarifkette aufgenommen werden.
+- der Vattenfall-Vertrag ist die belastbare Tarifquelle fuer BE1 im Zeitraum `2025-02-15` bis `2025-03-01`
+- der Uebergangstag `2025-03-02` wird aus den 2025er Tibber-Unterlagen abgedeckt
+- die Nutzerangabe `2024-01-18` bis `2025-03-31` ist als Kontext zur Lieferantenkette zu dokumentieren, nicht als operative Datumslogik fuer die finale 2025er Tarifkette
+- die abweichende Datierung im Fixture `data/2024/input_tariff_from_excel.json` ist als Fixture-/Datumsfehler zu behandeln und fuer die 2025er operative Tarifkette entsprechend zu korrigieren
+- fuer die finale `input.reviewed.json` ist genau **eine** operative Tarifkette fuer `be1` zu hinterlegen; parallele, sich zeitlich ueberlappende Tibber-Monatstarife neben dem Vattenfall-/Grüüün-Vertragspfad sind unzulaessig
+- daraus folgt fuer den Operativlauf 2025: Tibber-Rechnungen bleiben Review-/Plausibilisierungsquellen und muessen entweder vor dem automatischen Tarifimport ausgeschlossen oder die daraus erzeugten Monats-Tarife vor Finalisierung wieder entfernt werden
+
+Die bisherigen Marker fuer `Oktober`, `November` und `Dezember 2025` entfallen durch den nun dokumentierten Vertragstarif ab `2025-03-03`.
 
 ### 4. Messwerte 2025 ausser Tibber
 
@@ -329,12 +355,9 @@ Das Dokument `026490450 - AQ -2025-NE0000(P621450654).pdf` ist fuer die aktuelle
 
 Normative Festlegung:
 
-- fuer die 2025er Bearbeitung ist dieses Dokument fachlich wie eine potentielle Ablese-/Messwertquelle zu behandeln, nicht wie ein normaler Kostenbeleg
-- seine inhaltliche Rolle ist vor Finalisierung zu klaeren
-
-Offen:
-
-- `[REVIEW fachliche Bedeutung des Dokuments 026490450 - AQ -2025-NE0000(P621450654).pdf bestaetigen]`
+- `026490450 - AQ -2025-NE0000(P621450654).pdf` ist die Hauptquelle der Ablesewerte fuer das komplette Jahr 2025
+- Ausnahme ist NE1: wegen des unterjaehrigen Einzugs von Ingeborg Hainz muessen die Verbrauchswerte fuer NE1 periodisch bzw. monatlich betrachtet werden
+- fuer NE1 ist dafuer die Datei `Monatswerte - 2025 -  - NE0001(P621593463).pdf` die spezialisierte Zusatzquelle
 
 ### 5. Belege 2025 ausser Strom
 
@@ -357,9 +380,36 @@ Normative Abbildung:
 
 Die 2025er Verarbeitung setzt weiterhin einen gueltigen Anfangsbestandspfad voraus.
 
-Blockierend offen:
+Normative Festlegung:
 
-- `[MISSING bestaetigtes carryover-output.json oder belastbare Restbasis 2024 -> 2025 fuer Heizoel/Holz/Pellets]`
+- die Restmengen 2024 -> 2025 sind aus dem manuellen Ableseprotokoll zu uebernehmen:
+  - Heizoel Rest `3500 l`
+  - Holz Rest `40 m3`
+  - Pellets Rest `1500 kg`
+
+Mit `Bewertungsbasis` bzw. `Restwert-Herleitung` ist hierbei der **Geldwert** dieser Restmengen gemeint, also entweder:
+
+- ein bereits belastbar vorliegender Restwert je Energietraeger
+- oder eine Herleitung ueber den Durchschnittspreis aus Anfangsbestand und Zugaengen des Vorjahres
+
+Normative Festlegung:
+
+- die Bewertungsbasis fuer die Carryover-Uebernahme 2024 -> 2025 ist aus den Vorjahreskosten und Vorjahresmengen zu berechnen
+- primaere operative Referenz dafuer ist die Arbeitsmappe `Nebenkostenabrechnung_2024.xlsx`, Tabellenblatt `Betriebskosten`
+- `data/2024/input_tariff_from_excel.json` ist dafuer **nicht** ausreichend als Alleinquelle, weil dort zwar aggregierte Brennstoffkostenbelege, aber keine belastbaren Restmengen-/Restwertzeilen je Energietraeger enthalten sind
+- die fachliche Behandlungsregel folgt der Import-Spec `2026-03-28 Nebenkostenabrechnung Blege und Messwerte.md`, insbesondere der dort beschriebenen Restwert-/Durchschnittspreislogik
+
+Die 2024er Arbeitsmappe enthaelt die fuer 2025 erforderlichen Opening-Carryover-Werte bereits explizit:
+
+- Tabellenblatt `Betriebskosten`, Zeile 32: `Öl Rest aus Vorjahr`, Menge `3500`, Betrag `3395.37 EUR`
+- Tabellenblatt `Betriebskosten`, Zeile 33: `Holz aus Vorjahr`, Menge `40`, Betrag `2242.40 EUR`
+- Tabellenblatt `Betriebskosten`, Zeile 34: `Pellets aus Vorjahr`, Menge `1.5` t entsprechend `1500 kg`, Betrag `425.86 EUR`
+
+Diese drei Zeilen sind fuer die 2025er Carryover-Uebernahme als kanonische Ausgangswerte zu behandeln. Die spiegelbildlichen Endbestandszeilen `25` bis `27` bestaetigen dieselben Werte zum `2024-12-31`.
+
+Beispielhaft gilt fuer das Verstaendnis:
+
+- wenn 2024 fuer einen Energietraeger `10.000 EUR` Kosten angefallen sind und davon wertmaessig `4.000 EUR` als Restbestand ins Folgejahr uebergehen, dann werden `6.000 EUR` in 2024 verbraucht und `4.000 EUR` als `Rest aus Vorjahr` nach 2025 uebernommen
 
 Ohne diesen Schritt kann zwar ein technischer Scaffold-Lauf erfolgen, aber keine vollstaendige operative 2025er Kostenbasis.
 
@@ -367,9 +417,14 @@ Ohne diesen Schritt kann zwar ein technischer Scaffold-Lauf erfolgen, aber keine
 
 Fuer rechtlich brauchbare Einzelabrechnungen muessen die 2025er Vorauszahlungen je Mietpartei vorliegen.
 
-Blockierend offen:
+Normative Festlegung:
 
-- `[MISSING Vorauszahlungen 2025 je Mietpartei, insbesondere fuer Ingeborg Hainz ab 2025-04-01]`
+- fuer Ingeborg Hainz gilt ab `2025-04-01` eine monatliche Vorauszahlung von `350 EUR`
+- fuer die bestehenden Mietparteien werden die monatlichen Vorauszahlungswerte aus `data/2024/input_tariff_from_excel.json` unveraendert fortgefuehrt:
+  - NE2 / `mp-ne2`: `230 EUR` monatlich
+  - NE3 / `mp-ne3`: `125 EUR` monatlich
+  - NE4 / `mp-ne4`: `107.50 EUR` monatlich
+  - NE5 / `mp-ne5`: `0 EUR` monatlich
 
 ## Operativer Zielprozess fuer 2025
 
@@ -402,8 +457,9 @@ Diese Spec ist fuer 2025 fachlich ausreichend, wenn sie als Arbeitsgrundlage zu 
 3. Die manuelle Anfangsablesung fuer NE1-Strom `34877025 = 34684 kWh` zum `2025-03-29` ist explizit als operative Pflichtquelle festgelegt.
 4. Die reale Importgrenze ist explizit dokumentiert: 16/16 Dokumente sind im aktuellen Reallauf review-pflichtig.
 5. Tibber-Rechnungen mit Verbrauchsanpassungen werden nicht ueber die Uebersichtssumme fehlinterpretiert, sondern monatsweise aus den Detailsektionen behandelt.
-6. Fehlende Daten fuer Stromperioden, Vorauszahlungen, Personenanzahl und Carryover sind als blockierende Punkte sichtbar gemacht.
-7. Die bestehende Codebasis wird nicht falscherweise als vollautomatischer 2025er Import dargestellt, sondern korrekt als Rechenkern plus Review-gestuetzte Vorverarbeitung beschrieben.
+6. Die operative Tarifkette fuer `be1` ist ohne Ueberlappung definiert, und Tibber-Rechnungen werden nicht versehentlich parallel als konkurrierende Monatstarife importiert.
+7. Die Carryover-Uebernahme 2024 -> 2025 ist nicht nur logisch beschrieben, sondern mit konkreten Restmengen und Restwerten aus der 2024er Arbeitsmappe belegt.
+8. Die bestehende Codebasis wird nicht falscherweise als vollautomatischer 2025er Import dargestellt, sondern korrekt als Rechenkern plus Review-gestuetzte Vorverarbeitung beschrieben.
 
 ## Abgrenzung
 
@@ -420,5 +476,9 @@ Diese Spec definiert nicht erneut:
 |------|-----------|--------|-------|
 | 2026-04-09 | 0 | User | Anfrage zur Erstellung der Nebenkostenabrechnung 2025, Hinweis auf Mieterwechsel NE1 und bestehende Vorarbeiten |
 | 2026-04-09 | 1 | Codex | Code-, Test- und Realdatenanalyse; operative 2025er Spec mit Datenstand, Importgrenzen und Blockern erstellt |
+| 2026-04-09 | 2 | Codex | Nutzerantworten aus `=>`-Kommentaren eingearbeitet; belastbare Aussagen normativ uebernommen und unvollstaendige Antworten in praezise Rest-Blocker umformuliert |
+| 2026-04-09 | 3 | Codex | CHECK24-/Grüüün-Tarif fuer BE1, Fortgeltung der Vorauszahlungen der Bestandsmieter und Erlaeuterung der Carryover-Bewertungsbasis eingearbeitet |
+| 2026-04-09 | 4 | Codex | Neue Nutzerantworten zu Tibber-Dokumentfehler, Vattenfall-Zwischenzeitraum und Herleitung der Carryover-Bewertung normativ eingearbeitet |
+| 2026-04-09 | 5 | Codex | Quellenabgleich gegen Code und 2024er Arbeitsmappe: Carryover-Quelle auf Excel-Betriebskostenblatt verengt und operative Tarifregel gegen ueberlappende Tibber-Monatstarife geschaerft |
 
 Session: Codex desktop thread, konkrete Session-ID in dieser Laufumgebung nicht exponiert.
