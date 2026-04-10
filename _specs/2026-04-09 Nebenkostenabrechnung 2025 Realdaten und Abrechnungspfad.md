@@ -20,6 +20,48 @@ Massgebliche Referenzen:
 - Codebasis: `/Users/dh/Documents/DanielsVault/private/Vermietung/nebenkosten-abrechnung`
 - Realdaten 2025: `/Users/dh/Library/CloudStorage/OneDrive-Personal/Documents/Me/Real Estate/Schlüchtern Hauptstr 2/Vermietung/Nebenkostenabrechnung/2025`
 
+## Aktueller Vorbehalt
+
+Der 2025er Endstand in `data/2025/input.json` ist nach Abschluss der Korrektur-Slices wieder als kanonischer operativer Stand zu lesen.
+
+Normative Einordnung:
+
+- Stromtarifkette, HKV-Gewichtung und Warmwasser-Beleg wurden in eigenen Slices nachgezogen und verifiziert
+- nachtraeglich identifizierter Restvorbehalt: fuer `NE1` fehlen noch die Leerstands-Messwerte `2025-01-01` bis `2025-03-31` fuer die verbrauchsabhaengigen Verteilungen
+- der dafuer benoetigte Rechenkern-Nachtrag fuer periodische, mietzeitbewusste Verbrauchsverteilung ist implementiert und verifiziert
+- bis zum Abschluss des verbleibenden `NE1`-Messwerte-Nachtrags ist `data/2025/input.json` daher weiterhin als fachlich vorlaeufig zu lesen
+
+## Child-Spec Statusuebersicht
+
+### Noch offen / noch zu erledigen
+
+- `2026-04-10 Nebenkostenabrechnung 2025 NE1 Leerstand Messwerte Nachtrag-Slice.md`
+  - nachtraeglich identifizierter Nachtrags-Slice fuer die fehlenden `NE1`-Leerstands-Messwerte
+  - korrigiert die bislang nur ab `2025-03-31` modellierten `NE1`-Verbrauchssegmente
+  - baut auf dem bereits implementierten Rechenkern-Slice fuer periodische Verbrauchsverteilung auf
+
+### Im Wesentlichen erledigt
+
+- `2026-04-09 Nebenkostenabrechnung 2025 Messwerte Review-Slice.md`
+- `2026-04-09 Nebenkostenabrechnung 2025 Gebaeudeversicherungen Review-Slice.md`
+- `2026-04-09 Nebenkostenabrechnung 2025 Restkosten Review-Slice.md`
+- `2026-04-09 Nebenkostenabrechnung 2025 Stromtarif Korrektur-Slice.md`
+- `2026-04-09 Nebenkostenabrechnung 2025 HKV Korrektur-Slice.md`
+- `2026-04-09 Nebenkostenabrechnung 2025 Warmwasserkosten Ableitung-Slice.md`
+- `2026-04-10 Nebenkostenabrechnung 2025 Periodische Verbrauchsverteilung Nachtrag-Slice.md`
+
+### Teilweise ueberholt
+
+- `2026-04-09 Nebenkostenabrechnung 2025 Tibber Review-Slice.md`
+  - bleibt als Nachweis des bisherigen Review-Slices erhalten
+  - wird fuer die weitere operative Arbeit jedoch durch den Stromtarif Korrektur-Slice uebersteuert
+
+### Parent-Spec
+
+- `2026-04-09 Nebenkostenabrechnung 2025 Realdaten und Abrechnungspfad.md`
+  - bleibt die uebergeordnete 2025-Ausfuehrungsspec
+  - ist erst nach Abschluss des `NE1`-Leerstands-Nachtrags wieder ohne operativen Vorbehalt lesbar
+
 ## Ergebnis der Statuspruefung der bestehenden Import-Spec vom 2026-03-28
 
 ### Befund
@@ -260,13 +302,13 @@ Damit ergibt sich fuer die Mietperiode von Ingeborg Hainz 2025 ein direkter Stro
 
 - `35005.6 - 34684.0 = 321.6 kWh`
 
-### 3. Stromtarife BE1 / Tibber
+### 3. Stromtarife 2025 / Tibber
 
 ### 3.1 Grundregel
 
-Fuer 2025 werden operative `stromtarife[]` fuer `be1` aus belastbaren Tarifquellen erzeugt, nicht aus `kostenbelege[]` mit `kostenart_id = "strom"`.
+Fuer 2025 werden operative `stromtarife[]` aus belastbaren Tarifquellen erzeugt, nicht aus `kostenbelege[]` mit `kostenart_id = "strom"`.
 
-Mit dem nun vorliegenden Vertragsdatensatz gilt fuer BE1 zusaetzlich:
+Mit dem nun vorliegenden Vertragsdatensatz gilt zusaetzlich:
 
 - CHECK24 Vertragsnummer `28632852`
 - Vertragskontonummer `12004642899`
@@ -275,24 +317,30 @@ Mit dem nun vorliegenden Vertragsdatensatz gilt fuer BE1 zusaetzlich:
 - jaehrlicher Grundpreis brutto `216.26 EUR`
 - Arbeitspreis brutto `22.66 ct/kWh`
 
-Dieser Vertragstarif ist fuer BE1 ab `2025-03-03` als kanonische Tarifquelle zu behandeln.
+Normative Praezisierung nach Nutzerkorrektur:
 
-### 3.2 Tibber nur als Plausibilisierung
+- der Vattenfall- vor dem Grüüün-Vertrag betrifft `be2`
+- die fruehere Annahme eines Vattenfall-/Grüüün-Pfads fuer `be1` ist damit nicht mehr kanonisch
+- die konkrete 2025er Stromtarifkette ist daher je Berechnungseinheit separat zu pflegen
 
-Die Tibber-Rechnungen 2025 enthalten weiterhin fachlich nuetzliche Monatsdetails, sind fuer die operative 2025er Tarifkette von `be1` aber **nicht** die primaere Tarifquelle, sobald der vertragliche Vattenfall-/Grüüün-Pfad feststeht.
+### 3.2 Tibber als operative Monats-/Teilperiodenquelle, aber ohne kuenstlichen Uebergangstag
 
-Wenn Tibber-Rechnungen fuer 2025 als Zusatz- oder Plausibilisierungsquelle herangezogen werden, gilt:
+Die Tibber-Rechnungen 2025 enthalten fachlich nutzbare Monats- bzw. Teilperiodendaten und koennen operativ als `stromtarife[]` verwendet werden, sofern sie der korrekten Berechnungseinheit zugeordnet werden.
+
+Wenn Tibber-Rechnungen fuer 2025 als operative Tarifquelle herangezogen werden, gilt:
 
 - die tarifliche Ableitung fuer einen Monat erfolgt ausschliesslich aus der **dedizierten Monatssektion** (z. B. `Juni 2025`, `August 2025`, `September 2025`)
 - die Uebersichtssumme `Kosten Stromverbrauch ... enthaelt Verbrauchsanpassungen ...` darf **nicht** direkt als Monatskostenbasis verwendet werden
-- Tibber-PDFs duerfen fuer `be1` nicht zusaetzlich als operative `stromtarife[]` fuer Zeitraeume importiert werden, die bereits durch Vattenfall bzw. Grüüün normativ abgedeckt sind
-- die automatische Tibber-Tariferzeugung des aktuellen `build-year-input` ist fuer den 2025er Operativlauf daher nur fuer explizit freigegebene Restzeiträume zulaessig
+- pro Tibber-Rechnung ist ein eigener operativer Monats- oder Teilperioden-Tarif anzulegen
+- fuer die vorliegenden 2025er Unterlagen sind damit `6` Tibber-`stromtarife[]` zu erwarten
+- eine kuenstliche Sonderbehandlung eines einzelnen `Uebergangstags` ist nicht zulaessig
+- falls zwischen zwei belastbaren Tarifsegmenten genau ein einzelner Kalendertag unbedeckt bliebe, wird das fruehere Segment um diesen einen Tag vorgezogen bzw. erweitert; es wird **kein** synthetischer 1-Tages-Tarif angelegt
 
 ### 3.3 Abweichende Tibber-Zaehlernummern
 
 Die Quellenlage ist derzeit widerspruechlich:
 
-- in vier Tibber-Rechnungen 2025 wird `1ISK0078261075` genannt
+- in fuenf Tibber-Rechnungen 2025 wird `1ISK0078261075` genannt
 - in `Rechnung_1167054756.pdf` wird dagegen `1ISK0094903173` genannt
 - fachliche Vorgabe des Nutzers ist, dass `1ISK0078261075` der korrekte Zaehler fuer die BE1-Stromkette ist und kein echter Zaehlerwechsel stattgefunden hat
 
@@ -302,30 +350,26 @@ Normative Festlegung:
 - die in `Rechnung_1167054756.pdf` genannte Nummer `1ISK0094903173` ist als Dokumentfehler zu behandeln
 - fuer Import, Review und finale Tarifanlage ist durchgaengig `1ISK0078261075` zu verwenden
 
-### 3.4 Fehlende Stromperioden
+### 3.4 Stromperioden 2025
 
 Aus dem vorliegenden Ordner und den Nutzerhinweisen ergibt sich:
 
 - fuer Stromperioden ist nicht zwingend eine Monatsrechnung erforderlich; als Quelle kommen auch Vertrags-/Tarifdaten in Betracht
-- fuer BE1 liegt in `data/2024/input_tariff_from_excel.json` ein bestehender Tarifdatensatz vor
-- dieser Datensatz deckt fuer BE1 jedoch nur den Zeitraum bis einschliesslich `2025-02-14` ab (`gueltig_bis = 2025-02-14`)
-- zusaetzlich liegt fuer BE1 ein CHECK24-/Grüüün-Vertragstarif mit Lieferbeginn `2025-03-03` vor
-- aus den 2025er Tibber-Unterlagen sind belastbare Monats- bzw. Teilperiodeninformationen fuer `2025-03-02` bis `2025-09-30` erkennbar
+- fuer `be2` liegt in `data/2024/input_tariff_from_excel.json` ein bestehender Tarifdatensatz vor
+- dieser Datensatz ist durch den Nutzer fuer Zeitraeume und Berechnungseinheit bereits manuell korrigiert worden
+- zusaetzlich liegt fuer `be2` ein CHECK24-/Grüüün-Vertragstarif mit Lieferbeginn `2025-03-03` vor
+- aus den 2025er Tibber-Unterlagen sind belastbare Monats- bzw. Teilperiodeninformationen fuer `6` operative Tarifsegmente erkennbar
 
 Damit ist normativ festgelegt:
 
-- `data/2024/input_tariff_from_excel.json` darf als Tarifquelle fuer BE1 nur fuer den dort tatsaechlich abgedeckten Zeitraum verwendet werden
-- der CHECK24-/Grüüün-Tarif ist fuer BE1 ab `2025-03-03` als operative Tarifquelle zu verwenden
+- `data/2024/input_tariff_from_excel.json` darf nur fuer die tatsaechlich belastbar gepflegte Berechnungseinheit und die dort korrigierten Zeitraeume verwendet werden
+- der CHECK24-/Grüüün-Tarif ist fuer die vom Nutzer korrigierte Berechnungseinheit operativ zu verwenden
 - fehlende 2025er Tarifzeiträume duerfen nicht mit pauschalen Annahmen aus 2024 ueberschrieben werden
-
-- der Vattenfall-Vertrag ist die belastbare Tarifquelle fuer BE1 im Zeitraum `2025-02-15` bis `2025-03-01`
-- der Uebergangstag `2025-03-02` wird aus den 2025er Tibber-Unterlagen abgedeckt
-- die Nutzerangabe `2024-01-18` bis `2025-03-31` ist als Kontext zur Lieferantenkette zu dokumentieren, nicht als operative Datumslogik fuer die finale 2025er Tarifkette
-- die abweichende Datierung im Fixture `data/2024/input_tariff_from_excel.json` ist als Fixture-/Datumsfehler zu behandeln und fuer die 2025er operative Tarifkette entsprechend zu korrigieren
-- fuer die finale `input.reviewed.json` ist genau **eine** operative Tarifkette fuer `be1` zu hinterlegen; parallele, sich zeitlich ueberlappende Tibber-Monatstarife neben dem Vattenfall-/Grüüün-Vertragspfad sind unzulaessig
-- daraus folgt fuer den Operativlauf 2025: Tibber-Rechnungen bleiben Review-/Plausibilisierungsquellen und muessen entweder vor dem automatischen Tarifimport ausgeschlossen oder die daraus erzeugten Monats-Tarife vor Finalisierung wieder entfernt werden
-
-Die bisherigen Marker fuer `Oktober`, `November` und `Dezember 2025` entfallen durch den nun dokumentierten Vertragstarif ab `2025-03-03`.
+- pro Tibber-Rechnung ist ein operatives Monats- oder Teilperiodensegment anzulegen
+- die finale 2025er Tarifkette darf keine kuenstlichen 1-Tages-Segmente enthalten
+- die fruehere `2025-03-02`-Sonderlogik ist verworfen
+- wenn Vertragsmetadaten und operative Tibber-Segmente sonst zu Ueberlappungen fuehren wuerden, darf der Grüün-Tarif fuer die operative 2025er Kette pragmatisch auf den ersten Tag nach der letzten belastbaren Tibber-Periode verschoben werden
+- fuer die finale `input.reviewed.json` ist genau eine lueckenlose operative Tarifkette pro betroffener Berechnungseinheit zu hinterlegen
 
 ### 4. Messwerte 2025 ausser Tibber
 
@@ -448,6 +492,240 @@ Normative Festlegung:
 3. `finalize-year-input` ausfuehren
 4. mit dem finalen `input.json` die Einzelabrechnungen erzeugen
 
+## Verification Commands
+
+Arbeitsverzeichnis fuer alle folgenden Kommandos:
+
+- Repository-Root ` /Users/dh/Documents/DanielsVault/private/Vermietung/nebenkosten-abrechnung `
+
+Empfohlene Shell-Variablen fuer den 2025er Lauf:
+
+```bash
+export NK_REPO="/Users/dh/Documents/DanielsVault/private/Vermietung/nebenkosten-abrechnung"
+export NK_2025_SRC="/Users/dh/Library/CloudStorage/OneDrive-Personal/Documents/Me/Real Estate/Schlüchtern Hauptstr 2/Vermietung/Nebenkostenabrechnung/2025"
+export NK_2025_WORK="$NK_REPO/data/2025/work"
+mkdir -p "$NK_2025_WORK"
+```
+
+Grundlegender Regression- und CLI-Check:
+
+```bash
+cd "$NK_REPO"
+dotnet test Nebenkosten.sln
+```
+
+Scaffold fuer 2025 aus dem validierten Vorjahres-Input erzeugen:
+
+```bash
+cd "$NK_REPO"
+dotnet run --project src/Nebenkosten.Import -- \
+  generate-scaffold-template \
+  --prior-input-json data/2024/input_tariff_from_excel.json \
+  --target-year 2025 \
+  --output-json "$NK_2025_WORK/scaffold.json" \
+  --state-output-json "$NK_2025_WORK/scaffold.state.json"
+```
+
+Opening-Carryover fuer 2025 schreiben, sobald eine bestaetigte Quelle vorliegt:
+
+```bash
+cd "$NK_REPO"
+dotnet run --project src/Nebenkosten.Carryover -- \
+  derive-opening-carryover \
+  --target-year 2025 \
+  --existing-carryover-json "$NK_2025_WORK/carryover-output.confirmed.json" \
+  --output-json "$NK_2025_WORK/carryover-output.json"
+```
+
+Rohimport fuer 2025 ausfuehren:
+
+```bash
+cd "$NK_REPO"
+dotnet run --project src/Nebenkosten.Import -- \
+  build-year-input \
+  --scaffold-json "$NK_2025_WORK/scaffold.json" \
+  --scaffold-state-json "$NK_2025_WORK/scaffold.state.json" \
+  --carryover-json "$NK_2025_WORK/carryover-output.json" \
+  --source-dir "$NK_2025_SRC" \
+  --output-dir "$NK_2025_WORK/build"
+```
+
+Finalisierung nach manueller Review:
+
+```bash
+cd "$NK_REPO"
+dotnet run --project src/Nebenkosten.Import -- \
+  finalize-year-input \
+  --reviewed-input-json "$NK_2025_WORK/build/input.reviewed.json" \
+  --review-output-json "$NK_2025_WORK/build/review-output.json" \
+  --output-json "$NK_2025_WORK/input.json"
+```
+
+Abrechnungslauf als Sachpruefung auf dem finalen Input:
+
+```bash
+cd "$NK_REPO"
+dotnet run --project src/Nebenkosten.Cli -- \
+  --input-json "$NK_2025_WORK/input.json" \
+  --output-dir "$NK_2025_WORK/statements" \
+  --skip-pdf
+```
+
+## Test Cases
+
+### TC1 Regressionbasis bleibt gruen
+
+Ziel:
+
+- sicherstellen, dass die bestehende Codebasis vor der 2025er Datenableitung unveraendert gruen ist
+
+Verification Command:
+
+```bash
+cd "$NK_REPO"
+dotnet test Nebenkosten.sln
+```
+
+Expected Result:
+
+- Exitcode `0`
+- die Solution laeuft ohne fehlschlagende Tests durch
+- insbesondere bleiben Import-, Carryover- und Rechenkern-Tests gruen
+
+### TC2 Scaffold-Generierung fuer 2025 funktioniert
+
+Ziel:
+
+- aus dem 2024er Input wird ein 2025er Scaffold samt State-Datei erzeugt
+
+Verification Command:
+
+```bash
+cd "$NK_REPO"
+dotnet run --project src/Nebenkosten.Import -- \
+  generate-scaffold-template \
+  --prior-input-json data/2024/input_tariff_from_excel.json \
+  --target-year 2025 \
+  --output-json "$NK_2025_WORK/scaffold.json" \
+  --state-output-json "$NK_2025_WORK/scaffold.state.json"
+```
+
+Expected Result:
+
+- Exitcode `0`
+- Datei `scaffold.json` existiert
+- Datei `scaffold.state.json` existiert
+- `scaffold.abrechnungsjahr = 2025`
+- `scaffold.state.generated_from_year = 2024`
+
+### TC3 Build-Year-Input blockiert ohne abgeschlossene Preflight-Flags
+
+Ziel:
+
+- sicherstellen, dass `build-year-input` nicht gegen ein unreviewtes Scaffold laeuft
+
+Verification Command:
+
+```bash
+cd "$NK_REPO"
+dotnet run --project src/Nebenkosten.Import -- \
+  build-year-input \
+  --scaffold-json "$NK_2025_WORK/scaffold.json" \
+  --scaffold-state-json "$NK_2025_WORK/scaffold.state.json" \
+  --carryover-json "$NK_2025_WORK/carryover-output.json" \
+  --source-dir "$NK_2025_SRC" \
+  --output-dir "$NK_2025_WORK/build"
+```
+
+Expected Result:
+
+- solange `zaehler_review_completed`, `mietparteien_review_completed` und `opening_carryover_attached` nicht gesetzt sind, endet der Lauf mit Validierungsfehler
+- die Fehlermeldung verweist auf den jeweils fehlenden Review-/Carryover-Schritt
+
+### TC4 Build-Year-Input erzeugt Review-Artefakte fuer 2025
+
+Voraussetzung:
+
+- `scaffold.state.json` ist fachlich auf `zaehler_review_completed = true`, `mietparteien_review_completed = true`, `opening_carryover_attached = true` gesetzt
+- `carryover-output.json` fuer Zieljahr `2025` liegt vor
+
+Verification Command:
+
+```bash
+cd "$NK_REPO"
+dotnet run --project src/Nebenkosten.Import -- \
+  build-year-input \
+  --scaffold-json "$NK_2025_WORK/scaffold.json" \
+  --scaffold-state-json "$NK_2025_WORK/scaffold.state.json" \
+  --carryover-json "$NK_2025_WORK/carryover-output.json" \
+  --source-dir "$NK_2025_SRC" \
+  --output-dir "$NK_2025_WORK/build"
+```
+
+Expected Result:
+
+- Exitcode `0`
+- Dateien `input.generated.json`, `import-manifest.json` und `review-output.json` existieren unter `$NK_2025_WORK/build`
+- das generierte Input enthaelt die Opening-Carryover-Belege fuer 2025
+- Tibber-Rechnungen erscheinen hoechstens als Review-/Plausibilisierungsgrundlage; fuer `be1` darf in der finalen Kette keine ueberlappende Doppelbelegung neben Vattenfall/Grüüün bestehen
+
+### TC5 Finalisierung blockiert bei offenen Review-Punkten
+
+Ziel:
+
+- sicherstellen, dass `finalize-year-input` keine unvollstaendige `input.reviewed.json` freigibt
+
+Verification Command:
+
+```bash
+cd "$NK_REPO"
+dotnet run --project src/Nebenkosten.Import -- \
+  finalize-year-input \
+  --reviewed-input-json "$NK_2025_WORK/build/input.reviewed.json" \
+  --review-output-json "$NK_2025_WORK/build/review-output.json" \
+  --output-json "$NK_2025_WORK/input.json"
+```
+
+Expected Result:
+
+- solange `review-output.json` noch Items enthaelt, endet der Lauf mit Validierungsfehler
+- die Fehlermeldung nennt die Anzahl der offenen Review-Punkte
+- `input.json` wird in diesem Zustand nicht geschrieben
+
+### TC6 Finalisierung und Abrechnungslauf funktionieren auf bereinigtem Input
+
+Voraussetzung:
+
+- `review-output.json` ist leer
+- `input.reviewed.json` entspricht der normativen Tarifkette, den Carryover-Werten und den 2025er Mietparteien-/Messwertfestlegungen dieser Spec
+
+Verification Commands:
+
+```bash
+cd "$NK_REPO"
+dotnet run --project src/Nebenkosten.Import -- \
+  finalize-year-input \
+  --reviewed-input-json "$NK_2025_WORK/build/input.reviewed.json" \
+  --review-output-json "$NK_2025_WORK/build/review-output.json" \
+  --output-json "$NK_2025_WORK/input.json"
+```
+
+```bash
+cd "$NK_REPO"
+dotnet run --project src/Nebenkosten.Cli -- \
+  --input-json "$NK_2025_WORK/input.json" \
+  --output-dir "$NK_2025_WORK/statements" \
+  --skip-pdf
+```
+
+Expected Result:
+
+- beide Kommandos enden mit Exitcode `0`
+- `input.json` existiert
+- unter `$NK_2025_WORK/statements` werden Einzelabrechnungs-Artefakte erzeugt
+- fuer `mp-ne1` ist der Strom-Sachverhalt mit Einzug `2025-04-01`, Anfangsstand `34684`, Endstand `35005.6` und Verbrauch `321.6 kWh` rechnerisch konsistent abbildbar
+- die Tarifaufschluesselung fuer BE1 enthaelt keine zeitlich ueberlappenden Doppel-Tarife
+
 ## Akzeptanzkriterien dieser Spec
 
 Diese Spec ist fuer 2025 fachlich ausreichend, wenn sie als Arbeitsgrundlage zu folgendem Ergebnis fuehrt:
@@ -480,5 +758,10 @@ Diese Spec definiert nicht erneut:
 | 2026-04-09 | 3 | Codex | CHECK24-/Grüüün-Tarif fuer BE1, Fortgeltung der Vorauszahlungen der Bestandsmieter und Erlaeuterung der Carryover-Bewertungsbasis eingearbeitet |
 | 2026-04-09 | 4 | Codex | Neue Nutzerantworten zu Tibber-Dokumentfehler, Vattenfall-Zwischenzeitraum und Herleitung der Carryover-Bewertung normativ eingearbeitet |
 | 2026-04-09 | 5 | Codex | Quellenabgleich gegen Code und 2024er Arbeitsmappe: Carryover-Quelle auf Excel-Betriebskostenblatt verengt und operative Tarifregel gegen ueberlappende Tibber-Monatstarife geschaerft |
+| 2026-04-10 | 6 | Codex | Parent-Spec um expliziten Vorbehalt fuer Stromtarif- und HKV-Korrekturslices ergaenzt |
+| 2026-04-10 | 7 | Codex | Child-Spec-Statusuebersicht fuer offene, erledigte und teilweise ueberholte 2025er Slices ergaenzt |
+| 2026-04-10 | 8 | Codex | Neue Tibber-Rechnung fuer Mai 2025 eingearbeitet; operative Erwartung fuer die betroffene Tarifkette von `5` auf `6` Segmente korrigiert |
+| 2026-04-10 | 9 | Codex | Nutzerpraezisierung zum Grüün-Cutover normativ ergaenzt: operative Verschiebung hinter die letzte Tibber-Periode ist zulaessig |
+| 2026-04-10 | 10 | Codex | Rechenkern-Nachtrag fuer periodische Verbrauchsverteilung implementiert und Statusuebersicht auf den verbleibenden `NE1`-Messwerte-Nachtrag verengt |
 
 Session: Codex desktop thread, konkrete Session-ID in dieser Laufumgebung nicht exponiert.
