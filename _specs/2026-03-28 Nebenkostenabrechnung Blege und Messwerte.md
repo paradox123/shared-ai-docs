@@ -12,7 +12,7 @@ Stand `2026-04-09` ist sie jedoch **nicht als operativ vollstaendig umgesetzt** 
 - robuste Tibber-Verarbeitung fuer reale 2025er Rechnungen mit Verbrauchsanpassungen und Zaehlerwechsel
 
 Fuer die konkrete Erstellung der Nebenkostenabrechnung 2025 ist deshalb die operative Ausfuehrungsspec
-[`2026-04-09 Nebenkostenabrechnung 2025 Realdaten und Abrechnungspfad`](./2026-04-09%20Nebenkostenabrechnung%202025%20Realdaten%20und%20Abrechnungspfad.md)
+[`2026-04-09 Nebenkostenabrechnung 2025 Realdaten und Abrechnungspfad`](./Completed/2026-04-09%20Nebenkostenabrechnung%202025%20Realdaten%20und%20Abrechnungspfad.md)
 massgeblich.
 
 Diese Datei bleibt damit:

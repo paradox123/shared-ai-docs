@@ -1,5 +1,15 @@
 # Nebenkostenabrechnung 2025 - Warmwasserkosten Revalidierung-Slice
 
+## Status
+
+Accepted and closed on 2026-04-10.
+
+Closeout summary:
+
+- Diese Spec ist der kanonische Nachfolger des frueheren Warmwasser-Derivation-Zwischenstands.
+- Verification Commands im Closeout erneut gruen replayt.
+- Zugehoeriger OpenSpec-Change archiviert unter `openspec/changes/archive/2026-04-10-2026-04-10-2025-warmwasser-revalidation`.
+
 ## Zweck
 
 Diese Child-Spec definiert genau einen bounded Delivery-Slice aus der Parent-Spec `2026-04-09 Nebenkostenabrechnung 2025 Realdaten und Abrechnungspfad.md`:
@@ -249,3 +259,4 @@ PY
 | 2026-04-09 | 0 | Claude | Child-Spec fuer den 2025er Warmwasser-Stromkostenbeleg angelegt |
 | 2026-04-09 | 1 | Codex | Tarifannahmen nach Nutzerkorrektur entschaerft: keine 1-Tages-Tibber-Sonderlogik mehr, Euro-Wert nur noch als vorlaeufiger Arbeitsstand markiert |
 | 2026-04-10 | 2 | Codex | Slice auf stromtarif- und hkv-korrigierten Zwischenstand umgestellt; neue Artefaktkette definiert und `kb-warmwasser-be1 = 718.75 EUR` normativ revalidiert |
+| 2026-04-10 | 3 | Codex | Closeout abgeschlossen; Verification Commands erneut gruen ausgefuehrt und der fruehere Warmwasser-Derivation-Vorlaeufer als historischer OpenSpec-Archiveintrag mitgefuehrt |

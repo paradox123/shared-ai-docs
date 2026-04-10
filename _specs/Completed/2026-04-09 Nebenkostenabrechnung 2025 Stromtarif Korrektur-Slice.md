@@ -1,5 +1,14 @@
 # Nebenkostenabrechnung 2025 - Stromtarif Korrektur-Slice
 
+## Status
+
+Accepted and closed on 2026-04-10.
+
+Closeout summary:
+
+- Verification Commands im Closeout erneut gruen replayt.
+- Zugehoeriger OpenSpec-Change archiviert unter `openspec/changes/archive/2026-04-10-2026-04-10-2025-stromtarif-correction`.
+
 ## Zweck
 
 Diese Child-Spec definiert genau einen bounded Fix-Slice fuer die 2025er Stromtarifkette.
@@ -121,9 +130,14 @@ Fuer die korrigierte betroffene Berechnungseinheit gilt:
 
 Normative Nutzerpraezisierung:
 
-- das Vertragsmetadatum fuer Gruueeuen bleibt `Lieferbeginn 2025-03-03`
-- fuer die operative 2025er Tarifkette darf das Gruueeuen-Segment zur Vermeidung von Ueberlappungen pragmatisch auf den ersten Tag nach der letzten belastbaren Tibber-Periode verschoben werden
-- fuer diesen Slice ist Gruueeuen daher operativ ab `2025-10-01` zu modellieren
+- das historische Vertragsmetadatum fuer Gruueeuen bleibt fuer fruehere Review-Staende dokumentiert, ist fuer den finalen `be2`-Pfad aber ueberholt
+- fuer `be2` wird das Segment ab `2025-10-01` normativ als `EnpalOne` modelliert
+- operative Tarifdaten fuer dieses Endsegment:
+  - `id = strom-be2-2025-enpal`
+  - `grundpreis_eur_jahr = 281.42`
+  - `arbeitspreis_ct_kwh = 18.1`
+  - `lieferant = Enpal`
+  - `tarif = EnpalOne`
 
 ### 5. Keine Kostenbeleg-Alternative in diesem Slice
 
@@ -141,7 +155,7 @@ Dieser Slice ist fachlich fertig, wenn alle folgenden Punkte erfuellt sind:
 1. `input.reviewed.tibber-fixed.json` enthaelt fuer die korrigierte Berechnungseinheit genau `6` Tibber-Tarife.
 2. Kein Tarif in `input.reviewed.tibber-fixed.json` ist ein synthetischer 1-Tages-Tarif.
 3. Die korrigierte Tarifkette fuer die betroffene Berechnungseinheit ist lueckenlos und nicht ueberlappend.
-4. Alle betroffenen Tarife haben die fachlich korrekte `be_id` gemaess Nutzerkorrektur.
+4. Alle betroffenen Tarife haben die fachlich korrekte `be_id` gemaess Nutzerkorrektur, und das letzte `be2`-Segment ist `EnpalOne` statt `Grueeuen`.
 5. `finalize-year-input` erzeugt aus `input.reviewed.tibber-fixed.json` erfolgreich `input.tibber-fixed.json`.
 6. Ein technischer CLI-Lauf auf `input.tibber-fixed.json` endet erfolgreich.
 7. Dieser Slice aendert weder HKV-Modellierung noch Warmwasser-Endwert.
@@ -189,7 +203,7 @@ Ziel:
 
 Expected Result:
 
-- alle betroffenen Vattenfall-/Tibber-/Grueeuen-Segmente tragen die vom Nutzer korrigierte `be_id`
+- alle betroffenen Vattenfall-/Tibber-/Enpal-Segmente tragen die vom Nutzer korrigierte `be_id`
 
 ### TC5 Finalisierung des Tibber-Fix-Zwischenstands erfolgreich
 
@@ -296,3 +310,4 @@ Wenn diese drei Punkte in den Artefakten bereits manuell korrigiert wurden, darf
 | 2026-04-09 | 0 | Codex | Child-Spec fuer den Stromtarif-Korrektur-Slice mit neuer Artefaktkette, Testcases und Verification Commands angelegt |
 | 2026-04-10 | 1 | Codex | Neue Tibber-Rechnung `1167054111` fuer Mai 2025 eingearbeitet; Erwartung von `5` auf `6` operative Tibber-Segmente angehoben |
 | 2026-04-10 | 2 | Codex | Nutzerpraezisierung zum Gruueeuen-Cutover eingearbeitet; operatives Gruueeuen-Segment fuer `be2` auf `2025-10-01` gesetzt, um Ueberlappungen zu vermeiden |
+| 2026-04-10 | 3 | Codex | Closeout abgeschlossen; Enpal-Nachtrag kanonisch ueber die Artefaktkette synchronisiert, Verification Commands erneut gruen ausgefuehrt und OpenSpec-Change archiviert |

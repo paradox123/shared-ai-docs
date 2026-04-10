@@ -1,5 +1,14 @@
 # Nebenkostenabrechnung 2025 - HKV Korrektur-Slice
 
+## Status
+
+Accepted and closed on 2026-04-10.
+
+Closeout summary:
+
+- Verification Commands im Closeout erneut gruen replayt.
+- Zugehoeriger OpenSpec-Change archiviert unter `openspec/changes/archive/2026-04-10-2026-04-10-2025-hkv-correction`.
+
 ## Zweck
 
 Diese Child-Spec definiert genau einen bounded Fix-Slice fuer die 2025er Heizkostenverteiler-Modellierung.
@@ -345,3 +354,4 @@ Solange diese drei Punkte noch nicht festgezogen sind, ist die Child-Spec bewuss
 |------|-----------|--------|-------|
 | 2026-04-10 | 0 | Codex | Child-Spec fuer den HKV-Korrektur-Slice mit Artefaktkette, Akzeptanzkriterien, Testcases und Verification Commands angelegt |
 | 2026-04-10 | 1 | Codex | Slice nach Nutzerreview auf `NE3` erweitert; Akzeptanzkriterien, Placeholder-Liste und Periodenlogik entsprechend nachgezogen |
+| 2026-04-10 | 2 | Codex | Closeout abgeschlossen; Verification Commands erneut gruen ausgefuehrt und OpenSpec-Change archiviert |

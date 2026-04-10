@@ -1,5 +1,14 @@
 # Nebenkostenabrechnung 2025 - Messwerte Review-Slice
 
+## Status
+
+Accepted and closed on 2026-04-10.
+
+Closeout summary:
+
+- Verification Commands im Closeout erneut gruen replayt.
+- Zugehoeriger OpenSpec-Change archiviert unter `openspec/changes/archive/2026-04-10-2026-04-09-2025-messwerte-review`.
+
 ## Zweck
 
 Diese Child-Spec definiert **genau einen** naechsten Delivery-Slice aus der Parent-Spec `2026-04-09 Nebenkostenabrechnung 2025 Realdaten und Abrechnungspfad.md`:
@@ -298,5 +307,6 @@ Voraussichtliche naechste Slices nach Abschluss dieser Child-Spec:
 | Date | Iteration | Author | Delta |
 |------|-----------|--------|-------|
 | 2026-04-09 | 0 | Codex | Child-Spec aus Parent-Spec herausgeschnitten, um den naechsten Delivery-Slice `Messwerte -> input.reviewed.json` mit Akzeptanzkriterien, Test Cases und Verification Commands explizit zu definieren |
+| 2026-04-10 | 1 | Codex | Closeout abgeschlossen; Verification Commands im Endstand erneut gruen ausgefuehrt und OpenSpec-Change archiviert |
 
 Session: Codex desktop thread, konkrete Session-ID in dieser Laufumgebung nicht exponiert.

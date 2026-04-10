@@ -1,5 +1,14 @@
 # Nebenkostenabrechnung 2025 - Periodische Verbrauchsverteilung Nachtrag-Slice
 
+## Status
+
+Accepted and closed on 2026-04-10.
+
+Closeout summary:
+
+- Verification Commands im Closeout erneut gruen replayt.
+- Zugehoeriger OpenSpec-Change archiviert unter `openspec/changes/archive/2026-04-10-2026-04-10-2025-periodic-consumption-allocation`.
+
 ## Zweck
 
 Diese Child-Spec definiert genau einen bounded Nachtrags-Slice fuer den 2025er Operativpfad:
@@ -178,3 +187,4 @@ Expected Result:
 | Date | Iteration | Author | Delta |
 |------|-----------|--------|-------|
 | 2026-04-10 | 0 | Codex | Child-Spec fuer periodenbewusste verbrauchsabhaengige Verteilung als separaten Rechenkern-Nachtrags-Slice angelegt |
+| 2026-04-10 | 1 | Codex | Closeout abgeschlossen; gezielte Rechenkern- und CLI-Verifikationen erneut gruen ausgefuehrt und OpenSpec-Change archiviert |

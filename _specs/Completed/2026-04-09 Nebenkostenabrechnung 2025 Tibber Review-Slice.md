@@ -1,5 +1,14 @@
 # Nebenkostenabrechnung 2025 - Tibber Review-Slice
 
+## Status
+
+Closed as superseded historical precursor on 2026-04-10.
+
+Closeout summary:
+
+- Fachlich durch `2026-04-09 Nebenkostenabrechnung 2025 Stromtarif Korrektur-Slice.md` abgeloest.
+- Zugehoeriger OpenSpec-Change archiviert unter `openspec/changes/archive/2026-04-10-2026-04-09-2025-tibber-review`.
+
 ## Zweck
 
 Diese Child-Spec definiert einen bounded Slice fuer die offenen Tibber-Rechnungen 2025.
@@ -144,5 +153,6 @@ Danach TC3 und TC4 wie oben.
 | 2026-04-09 | 0 | Codex | Child-Spec fuer den bounded Slice `Tibber 2025 -> operative Resttarifkette + Review-Aufloesung` erstellt |
 | 2026-04-09 | 1 | Codex | Nutzerkorrektur eingearbeitet: keine 1-Tages-Sonderlogik, stattdessen 5 operative Tibber-Tarife und Zuordnung zum Vattenfall/Grüüün-Strang von `be2` |
 | 2026-04-10 | 2 | Codex | Neue Tibber-Rechnung `1167054111` fuer Mai 2025 eingearbeitet; Erwartung von `5` auf `6` operative Tarife korrigiert |
+| 2026-04-10 | 3 | Codex | Historischen Vorlaeufer im Closeout als superseded markiert und OpenSpec-Change archiviert |
 
 Session: Codex desktop thread, konkrete Session-ID in dieser Laufumgebung nicht exponiert.

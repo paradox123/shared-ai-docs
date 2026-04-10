@@ -1,5 +1,14 @@
 # Nebenkostenabrechnung 2025 - Gebaeudeversicherungen Review-Slice
 
+## Status
+
+Accepted and closed on 2026-04-10.
+
+Closeout summary:
+
+- Verification Commands im Closeout erneut gruen replayt.
+- Zugehoeriger OpenSpec-Change archiviert unter `openspec/changes/archive/2026-04-10-2026-04-09-2025-versicherung-review`.
+
 ## Zweck
 
 Diese Child-Spec definiert genau einen bounded Delivery-Slice aus dem 2025er Review-Backlog:
@@ -166,5 +175,6 @@ Danach TC3 und TC4 wie oben.
 | Date | Iteration | Author | Delta |
 |------|-----------|--------|-------|
 | 2026-04-09 | 0 | Codex | Child-Spec fuer den bounded Slice `Gebaeudeversicherungen 2025 -> reviewed kostenbelege` erstellt |
+| 2026-04-10 | 1 | Codex | Closeout abgeschlossen; Verification Commands erneut gruen ausgefuehrt und OpenSpec-Change archiviert |
 
 Session: Codex desktop thread, konkrete Session-ID in dieser Laufumgebung nicht exponiert.

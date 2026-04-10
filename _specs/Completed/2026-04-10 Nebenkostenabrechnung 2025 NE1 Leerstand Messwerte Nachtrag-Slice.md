@@ -1,5 +1,14 @@
 # Nebenkostenabrechnung 2025 - NE1 Leerstand Messwerte Nachtrag-Slice
 
+## Status
+
+Accepted and closed on 2026-04-10.
+
+Closeout summary:
+
+- Verification Commands im Closeout erneut gruen replayt.
+- Zugehoeriger OpenSpec-Change archiviert unter `openspec/changes/archive/2026-04-10-2026-04-10-2025-ne1-vacancy-readings`.
+
 ## Zweck
 
 Diese Child-Spec definiert genau einen bounded Nachtrags-Slice fuer den 2025er Operativpfad:
@@ -276,3 +285,4 @@ TC3 bis TC5 siehe oben.
 |------|-----------|--------|-------|
 | 2026-04-10 | 0 | Codex | Child-Spec fuer fehlende `NE1`-Leerstands-Messwerte im 2025er Operativpfad angelegt; Personenanzahl-Aenderung des Nutzers explizit als Baseline, nicht als Slice-Inhalt markiert |
 | 2026-04-10 | 1 | Codex | Abhaengigkeit vom neuen Rechenkern-Slice fuer periodische Verbrauchsverteilung explizit gemacht; Reihenfolge und Umsetzbarkeit gegen Code-Realitaet geschaerft |
+| 2026-04-10 | 2 | Codex | Closeout abgeschlossen; Verification Commands erneut gruen ausgefuehrt, `data/2025/input.json` final synchronisiert und OpenSpec-Change archiviert |

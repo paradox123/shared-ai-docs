@@ -1,5 +1,14 @@
 # Nebenkostenabrechnung 2025 - Restkosten Review-Slice
 
+## Status
+
+Accepted and closed on 2026-04-10.
+
+Closeout summary:
+
+- Verification Commands im Closeout erneut gruen replayt.
+- Zugehoeriger OpenSpec-Change archiviert unter `openspec/changes/archive/2026-04-10-2026-04-09-2025-restkosten-review`.
+
 ## Zweck
 
 Diese Child-Spec definiert genau einen weiteren bounded Delivery-Slice aus der Parent-Spec `2026-04-09 Nebenkostenabrechnung 2025 Realdaten und Abrechnungspfad.md`:
@@ -297,3 +306,4 @@ TC3 und TC4 siehe oben.
 | Date | Iteration | Author | Delta |
 |------|-----------|--------|-------|
 | 2026-04-09 | 0 | Claude | Child-Spec fuer die verbleibenden Restkostenbelege 2025 angelegt |
+| 2026-04-10 | 1 | Codex | Closeout abgeschlossen; Verification Commands erneut gruen ausgefuehrt und OpenSpec-Change archiviert |
