@@ -8,7 +8,7 @@ Closeout summary:
 
 - Der kanonische 2025er Endstand liegt in `data/2025/input.json`.
 - Alle akzeptierten Child-Slices wurden im Closeout erneut verifiziert.
-- Zugehoerige OpenSpec-Changes sind archiviert; historische Vorlaeufer-Slices wurden als superseded geschlossen.
+- Der zuletzt akzeptierte `BE2`-Heiznebenkosten-Slice wurde inklusive OpenSpec-Archivierung geschlossen; historische Vorlaeufer-Slices wurden als superseded dokumentiert.
 
 ## Zweck
 
@@ -32,13 +32,12 @@ Massgebliche Referenzen:
 
 ## Aktueller Vorbehalt
 
-Der 2025er Endstand in `data/2025/input.json` ist nach Abschluss der Korrektur-Slices wieder als kanonischer operativer Stand zu lesen.
+Der 2025er Endstand in `data/2025/input.json` ist nach Abschluss aller bisherigen Korrektur-Slices wieder ohne operativen Restvorbehalt als kanonischer 2025er Stand zu lesen.
 
 Normative Einordnung:
 
-- Stromtarifkette, HKV-Gewichtung und Warmwasser-Beleg wurden in eigenen Slices nachgezogen und verifiziert
-- der nachtraeglich identifizierte `NE1`-Leerstands-Nachtrag fuer verbrauchsabhaengige Verteilungen ist ebenfalls implementiert und verifiziert
-- `data/2025/input.json` ist damit wieder ohne operativen Restvorbehalt als kanonischer 2025er Stand zu lesen
+- Stromtarifkette, HKV-Gewichtung, Warmwasser-Beleg, `NE1`-Leerstand, Carryover, `BE2`-Wasserpfad und `BE2`-Heiznebenkosten-Sonderverteilung wurden in eigenen Slices nachgezogen und verifiziert
+- `data/2025/input.json` ist damit wieder ohne offenen 2025er Restvorbehalt zu lesen
 
 ## Child-Spec Statusuebersicht
 
@@ -57,6 +56,8 @@ Normative Einordnung:
 - `2026-04-10 Nebenkostenabrechnung 2025 Periodische Verbrauchsverteilung Nachtrag-Slice.md`
 - `2026-04-10 Nebenkostenabrechnung 2025 NE1 Leerstand Messwerte Nachtrag-Slice.md`
 - `2026-04-10 Nebenkostenabrechnung 2025 Carryover Brennstoffkosten Korrektur-Slice.md`
+- `2026-04-10 Nebenkostenabrechnung 2025 BE2 Wasser und Sonderverteilung Korrektur-Slice.md`
+- `2026-04-10 Nebenkostenabrechnung 2025 BE2 Heiznebenkosten Sonderverteilung Korrektur-Slice.md`
 
 ### Teilweise ueberholt
 
@@ -772,8 +773,12 @@ Diese Spec definiert nicht erneut:
 | 2026-04-10 | 9 | Codex | Nutzerpraezisierung zum Grüün-Cutover normativ ergaenzt: operative Verschiebung hinter die letzte Tibber-Periode ist zulaessig |
 | 2026-04-10 | 10 | Codex | Rechenkern-Nachtrag fuer periodische Verbrauchsverteilung implementiert und Statusuebersicht auf den verbleibenden `NE1`-Messwerte-Nachtrag verengt |
 | 2026-04-10 | 11 | Codex | `NE1`-Leerstands-Messwerte fuer KW, WW und HKV als eigener Nachtrags-Slice umgesetzt; Parent-Spec wieder ohne operativen Restvorbehalt lesbar |
+| 2026-04-10 | 12 | Codex | `BE2`-Wasserpfad und 2025-only Brennstoff-Sonderverteilung abgeschlossen; keine offenen 2025er Child-Slices mehr |
+| 2026-04-10 | 13 | Codex | Letzten 2025-only Restvorbehalt fuer `BE2`-Heiznebenkosten nach fachlicher Schlusspruefung ergaenzt; neuer finaler Child-Slice angelegt |
+| 2026-04-10 | 14 | Codex | Letzten 2025-only `BE2`-Heiznebenkosten-Slice abgeschlossen; Parent-Spec wieder ohne Restvorbehalt und mit finalem kanonischen 2025er Stand synchronisiert |
 | 2026-04-10 | 12 | Codex | Finaler Closeout der akzeptierten 2025er Child-Slices: Verification-Replay gruen, OpenSpec-Changes archiviert und Repo-Doku auf Endstand synchronisiert |
 | 2026-04-10 | 13 | Codex | Post-Closeout-Review der finalen PDFs zeigt plausibles Carryover-/Brennstoffkostenproblem; neuer Follow-up-Slice fuer 2025eroeffnet |
 | 2026-04-10 | 14 | Codex | Carryover-Brennstoffkosten-Follow-up umgesetzt: 2025 auf Netto-Brennstoffkosten `Opening + Zukauf - Closing` umgestellt, finale PDFs neu erzeugt und Salden deutlich plausibilisiert |
+| 2026-04-10 | 15 | Codex | Verbleibende Auffaelligkeiten fuer `NE2..NE5` auf Wasser-/Sonderverteilungs-Slice eingegrenzt; neuer 2025-only Follow-up-Slice fuer `NE3`/`NE5`-Kaltwasser und `BE2`-Sonderverteilung angelegt |
 
 Session: Codex desktop thread, konkrete Session-ID in dieser Laufumgebung nicht exponiert.

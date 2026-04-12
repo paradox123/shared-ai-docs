@@ -1,5 +1,15 @@
 # Nebenkostenabrechnung 2025 - Carryover Brennstoffkosten Korrektur-Slice
 
+## Status
+
+Accepted and closed on 2026-04-10.
+
+Closeout summary:
+
+- TC1 bis TC5 wurden im Closeout erneut ausgefuehrt und waren gruen.
+- Die Carryover-`Rest-vorjahr`-Belege sind im kanonischen 2025er Endstand nicht mehr als umlagewirksame Kostenbelege enthalten.
+- Der zugehoerige OpenSpec-Change `2026-04-10-2025-carryover-brennstoff-correction` wurde per `openspec archive --skip-specs` archiviert.
+
 ## Zweck
 
 Diese Child-Spec definiert genau einen bounded Korrektur-Slice fuer den 2025er Endstand:
@@ -273,5 +283,6 @@ Solange diese drei Punkte noch nicht explizit beantwortet sind, ist die Child-Sp
 |------|-----------|--------|-------|
 | 2026-04-10 | 0 | Codex | Neuer Follow-up-Slice fuer den mutmasslich fehlerhaften 2025er Carryover-/Brennstoffkostenpfad angelegt; Vergleich 2024 vs. 2025 als Problemtrigger normativ verankert |
 | 2026-04-10 | 1 | Codex | Slice umgesetzt: Netto-Brennstoffkosten `Opening + Zukauf - Closing` fuer `be1`/`be2` in die 2025er Artefakte uebernommen, finale PDFs neu erzeugt und Saldenvergleich gegen den Fehlstand dokumentiert |
+| 2026-04-10 | 2 | Codex | Closeout replayt; TC1-TC5 erneut gruen und OpenSpec-Change archiviert |
 
 Session: Codex desktop thread, konkrete Session-ID in dieser Laufumgebung nicht exponiert.

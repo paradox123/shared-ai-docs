@@ -60,3 +60,7 @@ Implementiere diese Spec-Änderung im Direct-Modus (ohne OpenSpec):
 8. **Final Verdict**: Liefere `READY` oder `NOT READY` Verdict mit vollständiger Evidence (changed files, verification checklist, open risks).
 
 Unterbreche erst wenn komplett fertig implementiert ODER blocker/open items auftreten die vorher nicht sichtbar waren.
+
+## Close Change
+
+change ist akzeptiert, schließe spec/open-spec
