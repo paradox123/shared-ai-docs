@@ -1,0 +1,22 @@
+{
+  "name": "@kai-skills/documentation-tools",
+  "version": "1.0.0",
+  "description": "CLI tools for NCG Documentation Skill",
+  "type": "module",
+  "scripts": {
+    "search": "bun run SearchVault.ts",
+    "changelog": "bun run UpdateChangelog.ts",
+    "servermap": "bun run GenerateServerMap.ts"
+  },
+  "keywords": [
+    "kai",
+    "documentation",
+    "infrastructure"
+  ],
+  "author": "NCG DevOps",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}

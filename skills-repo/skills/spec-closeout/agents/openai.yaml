@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Closeout"
+  short_description: "Close accepted changes with hard verification and docs sync"
+  default_prompt: "Use $spec-closeout to finalize one accepted change: execute all spec verification commands, close OpenSpec when possible, and synchronize project documentation before declaring READY/NOT READY."

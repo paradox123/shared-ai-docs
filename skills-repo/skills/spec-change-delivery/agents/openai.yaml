@@ -1,0 +1,4 @@
+interface:
+  display_name: "Spec Change Delivery"
+  short_description: "Ship one bounded spec change with evidence"
+  default_prompt: "Use $spec-change-delivery to execute one bounded spec item or planned change with strict scope control, verification, and a READY/NOT READY result."
