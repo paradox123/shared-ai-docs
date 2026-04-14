@@ -34,7 +34,7 @@ In this workflow:
 
 ## Scope Pressure Guardrail
 
-This skill must proactively warn when the current spec scope is too large for a single coherent delivery slice.
+This skill must proactively warn when the current spec scope is too large for a single coherent delivery change.
 
 Treat scope as "too large" when one or more signals are present:
 - More than 3 major capability domains in one spec (for example product behavior + security hardening + CI/runtime + migration).

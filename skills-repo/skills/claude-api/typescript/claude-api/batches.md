@@ -79,7 +79,7 @@ for await (const result of await client.messages.batches.results(
   switch (result.result.type) {
     case "succeeded":
       console.log(
-        `[${result.custom_id}] ${result.result.message.content[0].text.slice(0, 100)}`,
+        `[${result.custom_id}] ${result.result.message.content[0].text.change(0, 100)}`,
       );
       break;
     case "errored":

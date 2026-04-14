@@ -1,6 +1,6 @@
 ---
 name: spec-change-delivery
-description: Execute one bounded change from a spec or requirements document with strict scope control, optional OpenSpec usage, deterministic verification, and handoff-ready evidence. Use whenever the user asks to implement one spec item, ship one change slice, apply a planned task, deliver a single requirement safely, or avoid scope creep and partial implementations. Works with or without OpenSpec.
+description: Execute one bounded change from a spec or requirements document with strict scope control, optional OpenSpec usage, deterministic verification, and handoff-ready evidence. Use whenever the user asks to implement one spec item, ship one change change, apply a planned task, deliver a single requirement safely, or avoid scope creep and partial implementations. Works with or without OpenSpec.
 ---
 
 # spec-change-delivery
@@ -11,7 +11,7 @@ Use this skill when the user wants **execution**, not more planning:
 - "implement this spec item"
 - "ship just this one change"
 - "apply the next planned task"
-- "do one safe slice only"
+- "do one safe change only"
 - "avoid scope creep"
 
 Do **not** use this skill to write or refine the whole spec from scratch. For that, prefer `doc-coauthoring` or `refine-plan`.
@@ -32,10 +32,10 @@ This skill keeps short local definitions for convenience, but execution and the 
 
 ## Key Terms
 
-- **Slice**: the smallest self-contained increment that can be implemented and verified with one concrete done signal.
+- **Change**: the smallest self-contained increment that can be implemented and verified with one concrete done signal.
 - **Scope contract**: a short agreement listing in scope, out of scope, acceptance targets, and planned verification before editing starts.
 - **DoR (Definition of Ready)**: what must be true before implementation begins. See the shared workflow doc for the full gate.
-- **DoD (Definition of Done)**: what evidence must exist before the slice can be marked complete. See the shared workflow doc for the full gate.
+- **DoD (Definition of Done)**: what evidence must exist before the change can be marked complete. See the shared workflow doc for the full gate.
 - **OpenSpec mode**: use the repo's OpenSpec workflow for proposal/tasks/spec deltas when the user asks for it or the repo already uses it.
 - **Direct mode**: implement directly from the stated scope contract without creating a new OpenSpec change.
 
@@ -61,14 +61,14 @@ If verification commands are missing, derive them explicitly and say what you ch
 
 ## Non-Negotiables
 
-1. One slice per run.
+1. One change per run.
 Do not blend multiple independent changes in one pass.
 2. Scope is explicit before editing.
 3. Baseline, migration, and cutover are optional patterns, not defaults.
 Only include them when the spec explicitly requires them.
 4. Do not silently descope acceptance criteria.
 5. Do not claim done without fresh verification evidence.
-6. Preserve behavior outside the slice unless the spec requires a change.
+6. Preserve behavior outside the change unless the spec requires a change.
 7. If the spec provides explicit verification commands, execute all of them before final close-out.
 8. Never silently skip verification commands from the spec.
 9. If any required verification command cannot be run or fails, final verdict MUST be `NOT READY`.
@@ -77,13 +77,13 @@ Only include them when the spec explicitly requires them.
 
 When the requested scope is too large for one verifiable increment:
 1. Flag the risk explicitly.
-2. Propose 2-5 smaller slices.
-3. For each slice provide:
+2. Propose 2-5 smaller changes.
+3. For each change provide:
    - goal,
    - dependency boundary,
    - concrete done signal.
 4. Recommend an execution order.
-5. Implement only one slice in the current run unless the user explicitly widens scope.
+5. Implement only one change in the current run unless the user explicitly widens scope.
 
 ## Kickoff Contract
 
@@ -117,7 +117,7 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
 
 3. **Choose execution mode**
    - **`openspec` mode**
-     - Create or update exactly one OpenSpec change for the slice.
+     - Create or update exactly one OpenSpec change for the change.
      - Keep proposal, tasks, and spec deltas aligned with the scope contract.
      - Implement only after tasks and acceptance mapping are clear.
    - **`direct` mode**
@@ -125,7 +125,7 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
      - Hold to the same verification and evidence standard.
 
 4. **Implement**
-   - Edit only the files needed for the current slice.
+   - Edit only the files needed for the current change.
    - Prefer the smallest root-cause change that satisfies the acceptance criteria.
    - Avoid opportunistic refactors unless they are required for correctness.
    - For bug fixes, reproduce first and prefer a targeted red -> green test when practical.
@@ -147,7 +147,7 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
 
 ## Post-Acceptance Handover
 
-If the user accepts the implemented slice and asks to finalize statuses/docs:
+If the user accepts the implemented change and asks to finalize statuses/docs:
 1. Switch to `spec-closeout`.
 2. Re-run or confirm all spec-listed verification commands as a full checklist.
 3. Close/archive OpenSpec when possible.
@@ -165,7 +165,7 @@ Otherwise, make the safest reasonable assumption and state it in the report.
 
 ## Blocked Path
 
-If you cannot finish the slice, still produce a useful close-out:
+If you cannot finish the change, still produce a useful close-out:
 1. What was attempted.
 2. What evidence was gathered.
 3. Exact blocker or missing dependency.
@@ -191,7 +191,7 @@ Use this close-out structure:
    - unresolved items, assumptions, or follow-up work
 
 5. **Final verdict**
-   - `READY` = the agreed slice is implemented and required checks pass
+   - `READY` = the agreed change is implemented and required checks pass
    - `NOT READY` = acceptance evidence is incomplete, checks fail, or blockers remain
 
 Never report success if acceptance evidence is incomplete.

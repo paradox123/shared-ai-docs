@@ -13,7 +13,7 @@ Implementiere diese Spec-Änderung im OpenSpec-Modus:
 
 2. **Scope Contract**: Erstelle expliziten Scope Contract basierend auf **Spec-Anforderungen UND Code-Realität** mit in/out scope, acceptance targets, und planned verification bevor du editierst.
 
-3. **Execution Mode**: Nutze `openspec` mode - erstelle/update einen OpenSpec Change für diesen Slice mit Proposal, Tasks, und Spec Deltas aligned zum Scope Contract.
+3. **Execution Mode**: Nutze `openspec` mode - erstelle/update einen OpenSpec Change für diesen Change mit Proposal, Tasks, und Spec Deltas aligned zum Scope Contract.
 
 4. **Implementation**: Implementiere gemäß Definition of Ready (DoR) aus doc-workflow.md. Nutze TDD wo sinnvoll für testbare Komponenten.
 
@@ -25,7 +25,7 @@ Implementiere diese Spec-Änderung im OpenSpec-Modus:
    - OpenSpec Tasks sind complete (keine `[BLOCKED]` als done markiert)
    - Acceptance criteria mit Evidence belegt
 
-7. **Scope Discipline**: Avoid scope creep - implementiere nur was im aktuellen Slice definiert ist. Keine opportunistischen Refactorings außerhalb des Scope.
+7. **Scope Discipline**: Avoid scope creep - implementiere nur was im aktuellen Change definiert ist. Keine opportunistischen Refactorings außerhalb des Scope.
 
 8. **Final Verdict**: Liefere `READY` oder `NOT READY` Verdict mit vollständiger Evidence (changed files, verification checklist, open risks).
 
@@ -55,7 +55,7 @@ Implementiere diese Spec-Änderung im Direct-Modus (ohne OpenSpec):
    - Runtime-Validierung erfolgreich (z.B. docker compose + health checks)
    - Acceptance criteria mit Evidence belegt
 
-7. **Scope Discipline**: Avoid scope creep - implementiere nur was im aktuellen Slice definiert ist. Keine opportunistischen Refactorings außerhalb des Scope.
+7. **Scope Discipline**: Avoid scope creep - implementiere nur was im aktuellen Change definiert ist. Keine opportunistischen Refactorings außerhalb des Scope.
 
 8. **Final Verdict**: Liefere `READY` oder `NOT READY` Verdict mit vollständiger Evidence (changed files, verification checklist, open risks).
 
@@ -71,11 +71,11 @@ change ist akzeptiert, schließe spec/open-spec
 Klar, hier ist ein Copy-Paste-Prompt für Copilot auf dem Windows-Laptop:
 
 ```text
-Implementiere den Windows-Slice der Skill-Sync-Spec im Direct-Modus (ohne OpenSpec).
+Implementiere den Windows-Change der Skill-Sync-Spec im Direct-Modus (ohne OpenSpec).
 
 Kontext:
 - Source of truth ist jetzt das Git-Repo unter `<REPO_ROOT>\skills-repo\skills`
-- Der Mac-Slice ist bereits umgesetzt
+- Der Mac-Change ist bereits umgesetzt
 - Der alte Kompatibilitätspfad `shared-ai-docs/skills` wurde auf dem Mac bewusst entfernt
 - Ziel auf Windows: `%USERPROFILE%\.copilot\skills` soll auf `<REPO_ROOT>\skills-repo\skills` zeigen
 - Optionaler Alias oder zweite Kopien sind nicht gewünscht
@@ -108,7 +108,7 @@ Erstelle vor Änderungen einen kurzen Scope Contract mit:
 - Richte `%USERPROFILE%\.copilot\skills` als Junction oder Directory Symlink auf:
   `<REPO_ROOT>\skills-repo\skills`
 - Keine zweite Kopie der Skills anlegen
-- Keine Änderungen außerhalb dieses Windows-Slices
+- Keine Änderungen außerhalb dieses Windows-Changes
 
 4. Verification
 Führe ALLE Windows-Verifikationsschritte aus der Spec aus und gib für jedes Kommando einen Status aus:

@@ -45,17 +45,17 @@ Treat scope as "too large" when one or more signals are present:
 - The plan contains many loosely coupled streams that could progress independently.
 - The plan depends on multiple external blockers before core execution can start.
 - The plan mixes foundational platform work, feature behavior, migration, and rollout in one undivided sequence.
-- Verification is only possible at the very end instead of per slice.
+- Verification is only possible at the very end instead of per change.
 - The latest iteration cannot provide a realistic next executable tranche.
 
 When scope pressure is detected:
 1. Explicitly flag that the plan is oversized.
-2. Propose 2-5 concrete split slices with:
+2. Propose 2-5 concrete split changes with:
    - goal,
    - dependency boundary,
    - done signal / verification.
 3. Recommend a default execution order.
-4. Mark cross-slice dependencies explicitly instead of hiding them in one long task list.
+4. Mark cross-change dependencies explicitly instead of hiding them in one long task list.
 
 If the user decides to keep a single plan, keep working but add a visible marker:
 - `[REVIEW Scope risk accepted: <reason>]`

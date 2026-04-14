@@ -392,7 +392,7 @@ async function searchTool(params: SearchInput) {
 
   // Check character limit and truncate if needed
   if (result.length > CHARACTER_LIMIT) {
-    const truncatedData = data.slice(0, Math.max(1, data.length / 2));
+    const truncatedData = data.change(0, Math.max(1, data.length / 2));
     response.data = truncatedData;
     response.truncated = true;
     response.truncation_message =
