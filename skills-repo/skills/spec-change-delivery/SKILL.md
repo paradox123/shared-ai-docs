@@ -21,6 +21,16 @@ Do **not** use this skill to write or refine the whole spec from scratch. For th
 Deliver exactly one bounded change from requirements to verified implementation.
 Prioritize predictability: explicit scope, clear gates, runnable checks, and a final `READY` / `NOT READY` verdict.
 
+## Workflow Compatibility
+
+This skill is the primary delivery path for **Workflow 2 (current)**:
+- `spec -> spec-change-delivery -> (optional retro) -> (optional spec-closeout)`
+
+**Workflow 1 (legacy-compatible)** can continue without this skill:
+- `spec -> refine-plan (iterative) -> direct-mode implementation -> (optional retro)`
+
+Do not force migration from Workflow 1 to Workflow 2 unless the user explicitly asks to switch.
+
 ## Shared Delivery Gates
 
 Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md` as the canonical source for:
@@ -73,6 +83,16 @@ Only include them when the spec explicitly requires them.
 8. Never silently skip verification commands from the spec.
 9. If any required verification command cannot be run or fails, final verdict MUST be `NOT READY`.
 
+## Spec Status, History, SessionId
+
+When this skill is used with a spec artifact, update the spec metadata as work progresses:
+
+1. Set status to `🟠 Plan` when the scope contract is locked (direct or OpenSpec mode).
+2. Set status to `🔵 Implemented` only after implementation artifacts exist and required execution evidence is captured.
+3. Preserve `Date` and `Scope` lines unless the user explicitly requests a scope/date correction.
+4. Append one history row per status transition using `| Date | Author | Change |` with a short sentence.
+5. Keep `SessionId` unchanged if present; add `SessionId: <session-id>` if missing.
+
 ## Scope Pressure Guardrail
 
 When the requested scope is too large for one verifiable increment:
@@ -114,6 +134,7 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
    - Map each `requirement -> implementation task`.
    - Map each `acceptance criterion -> executable check`.
    - Capture risks for unresolved or environment-dependent points.
+   - After this contract is fixed, update spec status to `🟠 Plan` and append a matching history row.
 
 3. **Choose execution mode**
    - **`openspec` mode**
@@ -143,6 +164,7 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
    - Commands run with pass/fail summary.
    - Files changed.
    - Residual risks, follow-ups, or blockers.
+   - If implementation was completed with evidence, update spec status to `🔵 Implemented` and append a matching history row.
    - Final verdict: `READY` or `NOT READY`.
 
 ## Post-Acceptance Handover

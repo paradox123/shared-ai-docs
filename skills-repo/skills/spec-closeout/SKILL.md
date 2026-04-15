@@ -12,7 +12,13 @@ Use this skill when implementation is already done and the user asks to close or
 - "update spec status and docs"
 - "final closeout" / "abschluss"
 
-Do not use this skill for feature implementation. Use `spec-change-delivery` for implementation.
+Do not use this skill for feature implementation. Use `spec-change-delivery` (Workflow 2) or the legacy direct implementation run (Workflow 1) for implementation.
+
+## Workflow Compatibility
+
+This closeout can finalize accepted changes from both workflows:
+- Workflow 1: `spec -> refine-plan -> direct-mode implementation -> (optional) spec-closeout`
+- Workflow 2: `spec -> spec-change-delivery -> (optional) spec-closeout`
 
 ## Core Outcome
 
@@ -79,10 +85,11 @@ If OpenSpec cannot be closed, report blocker and return `NOT READY`.
 ### 4) Update Spec Status
 
 Update target spec file with:
-1. status line set to accepted/completed with date,
+1. header status set to `🟢 Accepted`,
 2. execution result summary for required verification commands,
 3. OpenSpec close status (if applicable),
-4. new iteration-history row describing closure delta.
+4. one new history row (`Date | Author | Change`) with a short closure summary sentence,
+5. `SessionId` preserved (or added if missing).
 
 ### 5) Synchronize Project Documentation
 

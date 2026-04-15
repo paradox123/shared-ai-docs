@@ -56,7 +56,7 @@ If the user chooses not to split, keep working but add an explicit marker such a
 
 The optional `CORE` response wrapper (`📋 SUMMARY`, `🔍 ANALYSIS`, `⚡ ACTIONS`, `✅ RESULTS`, `➡️ NEXT`, `🎯 COMPLETED`) can be used for short conversational updates, handoffs, or completion summaries around this workflow.
 
-Do **not** force that wrapper into the actual spec artifact. The generated document should keep its native structure, sections, markers, iteration history, and reader-focused prose.
+Do **not** force that wrapper into the actual spec artifact. The generated document should keep its native structure, sections, markers, and reader-focused prose.
 
 ## Marker System
 
@@ -73,31 +73,59 @@ Use these markers throughout the document to track gaps and decisions:
 - User answers marked with `=>` resolve the corresponding marker
 - Use markers for requirement/spec gaps, not as a substitute for implementation task tracking
 
-## Iteration System
+## Spec Header Contract
 
-Documents are refined through numbered iterations:
+Every spec must include this header block at the top:
 
-- **Iteration 0**: The user's initial prompt with core requirements — captured as-is
-- **Iteration 1, 2, ...**: Each refinement round creates a new iteration
-- Iterations are **append-only** — never overwrite prior iteration content
-- Each iteration records: what changed, what markers were resolved, what new markers emerged
+```md
+**Date:** 2026-03-03  
+**Status:** 🟡 Spec
+**Scope:** Automated deployment validation and self-healing for NCG backend on Hetzner infrastructure
 
-## History Table
-
-Maintain a history table at the bottom of every document:
-
-```
-| Date | Iteration | Author | Delta |
-|------|-----------|--------|-------|
-| YYYY-MM-DD | 0 | User | Initial requirements |
-| YYYY-MM-DD | 1 | Claude | Context gathered, structure proposed |
+---
 ```
 
-If no history table exists yet, create it before appending the first row.
+Header rules:
+- `Date` uses `YYYY-MM-DD` and reflects the spec creation date.
+- `Scope` is a short one-line scope statement.
+- `Status` must be one of:
+  - `🟡 Spec` - spec is being authored/refined in `doc-coauthoring`
+  - `🟠 Plan` - an executable plan exists (from `refine-plan` or `spec-change-delivery`)
+  - `🔵 Implemented` - planned change was executed and implementation artifacts exist
+  - `🟢 Accepted` - change was formally accepted (typically via `spec-closeout`)
 
-## SessionId
+Status ownership by workflow:
+- `doc-coauthoring` initializes new specs with `🟡 Spec`.
+- **Workflow 1 (legacy)**:
+  - `refine-plan` (or the implementing run) can advance to `🟠 Plan`.
+  - the implementing run can advance to `🔵 Implemented`.
+  - `spec-closeout` is optional and sets `🟢 Accepted` when used successfully.
+- **Workflow 2 (current)**:
+  - `spec-change-delivery` is responsible for transitioning `🟡 Spec -> 🟠 Plan -> 🔵 Implemented`.
+  - `spec-closeout` sets `🟢 Accepted` after full closeout succeeds.
 
-Write the Claude session ID at the file bottom if not already present. Use the same session ID throughout a conversation.
+## Spec History and SessionId
+
+Keep a history table at the bottom of every spec and keep it append-only.
+
+Use this format (no iteration column):
+
+```md
+| Date | Author | Change |
+|------|--------|--------|
+| YYYY-MM-DD | User | Initial spec draft created with scope and core requirements. |
+| YYYY-MM-DD | Claude | Acceptance criteria clarified and rollback constraints added. |
+```
+
+Rules:
+- Record each meaningful spec adjustment in one short sentence.
+- Do not use iteration numbers.
+- Do not overwrite or delete prior history rows; append new rows only.
+- If an older spec still uses an iteration-style history, migrate it to this 3-column format when the file is touched.
+
+Keep `SessionId` at the bottom of the spec file:
+- If missing, add it as `SessionId: <session-id>`.
+- If present, preserve it and continue using the same value for ongoing updates.
 
 ## When to Offer This Workflow
 
@@ -245,7 +273,7 @@ Create a markdown file in the working directory. Name it appropriately (e.g., `d
 
 Inform them that the initial structure with placeholders for all sections will be created.
 
-Create file with all section headers and `[MISSING ...]` markers as placeholder text. Include the History Table at the bottom with Iteration 0 row.
+Create file with the required spec header block, all section headers, and `[MISSING ...]` markers as placeholder text. Include a history table in the 3-column format (`Date | Author | Change`) and a `SessionId` line at the bottom.
 
 Confirm the filename has been created and indicate it's time to fill in each section.
 
@@ -314,7 +342,7 @@ As user provides feedback:
 
 ### Quality Checking
 
-After 3 consecutive iterations with no substantial changes, ask if anything can be removed without losing important information.
+After several consecutive refinement rounds with no substantial changes, ask if anything can be removed without losing important information.
 
 When section is done, confirm [SECTION NAME] is complete. Ask if ready to move to the next section.
 
@@ -471,18 +499,25 @@ Announce document completion. Provide a few final tips:
 
 **Quality over Speed:**
 - Don't rush through stages
-- Each iteration should make meaningful improvements
+- Each refinement round should make meaningful improvements
 - The goal is a document that actually works for readers
 
 ## Pipeline Integration
 
-This skill is part of the **Spec → Plan → Retro** pipeline:
+This skill supports two valid downstream workflows:
 
-1. **doc-coauthoring** (this skill): Create specs, proposals, RFCs, decision docs
-2. **refine-plan**: Derive concrete implementation plans from finished specs
-3. **retro-plan**: Retrospective after implementation
+1. **Workflow 1 (legacy-compatible)**:
+   - `doc-coauthoring` -> `refine-plan` (iterative) -> direct-mode implementation -> `retro-plan` (optional)
+2. **Workflow 2 (current)**:
+   - `doc-coauthoring` -> `spec-change-delivery` (direct/OpenSpec) -> `retro-plan` (optional) -> `spec-closeout` (optional/formal)
 
-**Handoff to refine-plan:** When a document is ready enough to drive execution (blocking requirements questions resolved, or any remaining gaps explicitly marked non-blocking, and Reader Testing passed), inform the user they can use `refine-plan` to derive an implementation plan from this spec by saying "refine the plan".
+**Handoff to planning/delivery:** When a document is ready enough to drive execution (blocking requirements questions resolved, or any remaining gaps explicitly marked non-blocking, and Reader Testing passed), inform the user they can either:
+- continue with **Workflow 1** via `refine-plan` (iterative plan-first path), or
+- continue with **Workflow 2** via `spec-change-delivery` (delivery-first path).
+
+Default behavior:
+- Keep the currently active workflow for an existing thread/spec.
+- For new deliveries without a preference, recommend Workflow 2.
 
 During handoff, carry forward:
 - resolved requirements
@@ -492,4 +527,3 @@ During handoff, carry forward:
 If a later planning pass exposes a new missing requirement or unresolved product decision, send that gap back to the spec instead of burying it as an implementation subtask.
 
 **Do not generate retro sections here;** retros are handled by `retro-plan`.
-

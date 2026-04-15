@@ -37,6 +37,17 @@ This skill operationalizes those gates:
 - translate acceptance criteria into verification cases that later prove **DoD**,
 - keep blocking gaps visible instead of hiding them in vague tasks.
 
+## Workflow Compatibility
+
+This skill is the primary planning engine for **Workflow 1 (legacy-compatible)**:
+- `spec -> refine-plan (iterative) -> direct-mode implementation -> retro-plan`
+
+This skill also remains usable in **Workflow 2 (current)** when the user still wants a separate plan artifact before or alongside `spec-change-delivery`.
+
+Status coordination:
+- In Workflow 1, this skill may set the spec header status to `🟠 Plan` once an implementation-ready plan exists.
+- In Workflow 2, leave status progression to `spec-change-delivery` unless the user explicitly asks refine-plan to update the spec status.
+
 ## Scope Pressure Guardrail
 
 This skill must proactively warn when the plan scope is too large for one executable plan increment.
@@ -88,6 +99,8 @@ Do **not** replace the actual plan structure with the CORE wrapper. The generate
 - Do not mark a plan implementation-ready if the next executable tranche is not clearly bounded and verifiable.
 - Maintain bottom history table with fixed columns: `Date | Iteration | Author | Delta`.
 - If no history table exists yet, create it with the fixed columns before appending the current iteration row.
+- This iteration/history rule applies to the **plan file**, not the spec file.
+- If updating spec status from this skill (Workflow 1), append one spec history row in spec format: `Date | Author | Change` and preserve `SessionId`.
 - Do not generate retro sections here; retros are handled by `retro-plan`.
 
 ## Examples

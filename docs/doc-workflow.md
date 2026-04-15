@@ -15,6 +15,7 @@ Dieses Dokument ist die **kanonische Quelle** für die gemeinsamen Delivery-Gate
 - `doc-coauthoring`
 - `refine-plan`
 - `spec-change-delivery`
+- `spec-closeout`
 - `retro-plan`
 
 Hier werden die gemeinsamen Begriffe gepflegt:
@@ -24,24 +25,77 @@ Hier werden die gemeinsamen Begriffe gepflegt:
 
 Die Skills dürfen diese Begriffe lokal kurz restaten, sollen aber **keine abweichenden Definitionen** einführen. Änderungen an der gemeinsamen Bedeutung werden zuerst hier gepflegt.
 
-## End-to-End Pipeline
+## Unterstützte Workflows
+
+Beide Workflows sind offiziell unterstützt. Workflow 2 ist der aktuelle Default, Workflow 1 bleibt kompatibel nutzbar.
+
+### Workflow 1 (Legacy-kompatibel)
 
 ```
-Prompt (Kernanforderungen)
-  | Iteration 0
+Spec (`🟡 Spec`)
   v
-doc-coauthoring  ->  Spec/Proposal/Decision Doc
-  | "refine the plan"
+refine-plan (iterativ, plan history)
   v
-refine-plan      ->  Implementierungsplan + Verification Cases
-  | Scope/Impact Check
-  |-- direkter Plan-Track
-  |-- optional: OpenSpec-Track (wenn vom User gewünscht)
+direct-mode implementation
   v
-Implementierung + Verifikation (tests + runtime + smoke)
-  v
-retro-plan + improve-skills (Feedback in Workflow/Skills)
+retro-plan (optional)
 ```
+
+### Workflow 2 (Current)
+
+```
+Spec (`🟡 Spec`)
+  v
+spec-change-delivery (direct oder OpenSpec) -> Scope Contract (`🟠 Plan`)
+  v
+Implementierung + Verifikation (`🔵 Implemented`)
+  v
+retro-plan (optional)
+  v
+spec-closeout (optional, für formalen Abschluss) (`🟢 Accepted`)
+```
+
+## Workflow Selection (ohne Zwangsumstellung)
+
+1. Wenn der User explizit Workflow 1 oder Workflow 2 nennt, diesem Pfad folgen.
+2. Wenn ein bestehendes Artefakt bereits klar einen Pfad nutzt, auf demselben Pfad bleiben.
+3. Ohne klare Vorgabe:
+   - für neue Deliveries Workflow 2 bevorzugen,
+   - für laufende ältere Threads Workflow 1 beibehalten.
+4. Ein Wechsel ist nur bei expliziter User-Entscheidung sinnvoll.
+
+## Spec Header Contract (verpflichtend)
+
+Jede Spec muss mit diesem Header starten:
+
+```md
+**Date:** 2026-03-03  
+**Status:** 🟡 Spec
+**Scope:** Automated deployment validation and self-healing for NCG backend on Hetzner infrastructure
+
+---
+```
+
+Regeln:
+1. `Date` im Format `YYYY-MM-DD` (Erstellungsdatum der Spec).
+2. `Scope` als prägnanter Einzeiler.
+3. `Status` nur aus dieser Liste:
+   - `🟡 Spec` - Spec wird erstellt/verfeinert (`doc-coauthoring`)
+   - `🟠 Plan` - umsetzbarer Plan existiert (aus `refine-plan` oder `spec-change-delivery`)
+   - `🔵 Implemented` - Umsetzung plus Artefakte/Evidenz liegt vor
+   - `🟢 Accepted` - formaler Abschluss erfolgt (typisch via `spec-closeout`)
+
+## Status Ownership by Workflow
+
+1. In beiden Workflows:
+   - `doc-coauthoring` erstellt Header (falls fehlend) und setzt `🟡 Spec`.
+2. Workflow 1:
+   - `refine-plan` kann auf `🟠 Plan` setzen, sobald ein umsetzbarer Plan vorliegt.
+   - der ausführende Implementierungs-Run (direct mode) setzt auf `🔵 Implemented`, sobald Evidenz vorliegt.
+   - `spec-closeout` ist optional; bei erfolgreichem formalem Abschluss wird `🟢 Accepted` gesetzt.
+3. Workflow 2:
+   - `spec-change-delivery` setzt auf `🟠 Plan` (Scope Contract fixiert) und später auf `🔵 Implemented` (Umsetzung + Evidenz).
+   - `spec-closeout` setzt auf `🟢 Accepted`, wenn Verifikation/Closeout vollständig erfolgreich sind.
 
 ## Skills und Verantwortung
 
@@ -61,6 +115,25 @@ Lieferobjekt:
 - status-bearing actions (`[DONE]`, `[PENDING]`, `[BLOCKED]`)
 - konkrete Verification Cases pro Teilbereich
 - offene Spec-Lücken explizit als `[MISSING SPEC ...]`/`[DECISION SPEC ...]`
+- primärer Plan-Track für Workflow 1 (iterativ)
+
+### `spec-change-delivery`
+
+Purpose: Einen klar abgegrenzten Change aus der Spec implementieren und verifizieren.
+
+Lieferobjekt:
+- Scope Contract (direct oder OpenSpec)
+- umgesetzte Artefakte + Verifikationsnachweise
+- primärer Delivery-Track für Workflow 2 inkl. Spec-Statusupdate auf `🟠 Plan` und später `🔵 Implemented`
+
+### `spec-closeout`
+
+Purpose: Akzeptierten Change formal abschließen und dokumentarisch synchronisieren.
+
+Lieferobjekt:
+- vollständiger Verifikations-Checklist-Report
+- OpenSpec Close/Archivierung (falls genutzt)
+- Spec-Statusupdate auf `🟢 Accepted`
 
 ### `retro-plan`
 
@@ -153,7 +226,7 @@ Ein Change ist erst "done", wenn:
 1. Keine Umsetzung starten, solange zentrale Entscheidungen noch "im Fluss" sind.
 2. Größere Vorhaben in mehrere Changes/Arbeitspakete splitten (z. B. nach Themenclustern oder Risiko).
 3. Referenz-Implementierung/Baseline früh festlegen und diffen (**falls relevant**).
-4. Jede Iteration endet mit:
+4. Jede Arbeitsphase endet mit:
    - Was wurde entschieden?
    - Was bleibt offen?
    - Welche Evidenz fehlt noch?
@@ -170,15 +243,21 @@ Ein Change ist erst "done", wenn:
 | `[DECISION SPEC ...]` | Spezifikationsentscheidung offen | Plan |
 | `[BLOCKED ...]` | Externer Blocker | Plan/OpenSpec Tasks |
 
-## Iteration, History, SessionId
+## History und SessionId (verpflichtend)
 
-Weiterhin append-only:
+History und SessionId bleiben verpflichtend, aber ohne Iterationssystem.
 
-1. `Iteration 0` = Initialanforderung.
-2. `Iteration N` = jede Verfeinerung.
-3. Keine Überschreibung alter Iterationen.
-4. History Table am Dateiende pflegen.
-5. SessionId am Dateiende pflegen.
+1. Jede Spec hat am Dateiende eine append-only History-Tabelle im Format:
+   - `| Date | Author | Change |`
+2. Jede History-Zeile beschreibt die jeweilige Anpassung in genau einem kurzen Satz.
+3. Keine Iterationsspalte und keine Iterationsnummern verwenden.
+4. Vorhandene Iterations-History bei Berührung auf das 3-Spalten-Format migrieren.
+5. `SessionId` am Dateiende beibehalten; falls fehlend, ergänzen als `SessionId: <session-id>`.
+6. Statuswechsel (`🟡 Spec` / `🟠 Plan` / `🔵 Implemented` / `🟢 Accepted`) müssen jeweils mit einer passenden neuen History-Zeile dokumentiert werden.
+
+Hinweis:
+- Diese History-Regel gilt für **Spec-Dateien**.
+- Iterative History in **Plan-Dateien** (z. B. `refine-plan`) bleibt davon unberührt.
 
 ## File Conventions
 
@@ -192,10 +271,14 @@ Weiterhin append-only:
 ## Übergänge
 
 ### Spec -> Plan
-"refine the plan" erst, wenn blockierende `[MISSING]`/`[DECISION]` minimiert sind.
+Workflow 1: `refine-plan` iterativ; bei implementierungsreifem Plan Status `🟠 Plan`.
+Workflow 2: `spec-change-delivery` setzt Status `🟠 Plan`, sobald der Scope Contract fixiert ist.
 
 ### Plan -> Umsetzung
-Nur bei erfüllter Definition of Ready.
+Nur bei erfüllter Definition of Ready. Nach ausgeführter Umsetzung mit Artefakten: Status `🔵 Implemented`.
+
+### Umsetzung -> Accepted
+In beiden Workflows optional über `spec-closeout`: Status `🟢 Accepted`, wenn Verifikation vollständig grün ist und (falls aktiv) OpenSpec archiviert wurde.
 
 ### Umsetzung -> Retro
 "retro the plan" nach jedem signifikanten Meilenstein, "final retro the plan" vor Abschluss.
