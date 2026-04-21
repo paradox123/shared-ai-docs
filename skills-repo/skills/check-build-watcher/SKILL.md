@@ -7,6 +7,12 @@ description: Developer-armed watcher flow for NCG check-build automation. USE WH
 
 Maps natural-language watch prompts to the local `check-build.local.watch.cs` workflow in `backend/sources`.
 
+## Boundaries
+
+- This skill monitors pipeline/build state and local watcher state only.
+- A successful watcher/build job is **not** proof that a domain-specific functional verification passed (API behavior, security flow, data contract, integration path, or business scenario).
+- If the user asks whether a concrete request/path/scenario was tested, run or inspect that explicit functional test separately and report it independently.
+
 ## Workflow Routing
 
 | Workflow | Trigger | File |

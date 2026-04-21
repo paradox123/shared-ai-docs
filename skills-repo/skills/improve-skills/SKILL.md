@@ -19,12 +19,13 @@ Use this skill to inspect sessions since the previous run and answer four questi
 ## Inputs
 
 - Primary source: `.claude/projects/**/*.jsonl`
+- Co-primary source for Codex Desktop runs: `.codex/sessions/**/*.jsonl` (and `.codex/archived_sessions/*.jsonl` when needed)
 - Supporting sources when useful: `.claude/history/sessions/**`, `.claude/history/research/**`, `.claude/history/raw-outputs/**`, `.claude/debug/latest`
 - Skill files to inspect or update: prefer `.agents/skills/*/SKILL.md`; if unavailable use `.claude/skills/*/SKILL.md`
 - Persistent run cursor: prefer `.agents/skills/improve-skills/last-run.json`; if unavailable use `.claude/skills/improve-skills/last-run.json`
 - Persistent candidate memory: prefer `/memories/improve-skills.md`; if `/memories` is unavailable, reuse an existing improve-skills report/memory file in the active docs workspace and note the fallback path in the report
 
-Prefer the project session logs first because they preserve tool calls, retries, and agent behavior in sequence.
+Prefer project session logs first because they preserve tool calls, retries, and agent behavior in sequence. When `.claude/projects` does not include the active Codex thread, use `.codex/sessions` as the authoritative source for that run window.
 
 ## First Run And Cursor Handling
 

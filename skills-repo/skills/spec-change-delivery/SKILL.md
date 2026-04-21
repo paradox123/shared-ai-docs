@@ -82,6 +82,26 @@ Only include them when the spec explicitly requires them.
 7. If the spec provides explicit verification commands, execute all of them before final close-out.
 8. Never silently skip verification commands from the spec.
 9. If any required verification command cannot be run or fails, final verdict MUST be `NOT READY`.
+10. Never present a verification as completed before the command has actually run and returned.
+11. Never label a local rehearsal as an environment gate-run (`develop_hetzner`, production, etc.) unless executed in that actual target runtime.
+12. When a spec distinguishes legacy vs candidate endpoints, assert and report both concrete values before execution (`OLD != CANDIDATE`).
+
+## Verification Truth Contract
+
+Use exact status language for every verification item:
+
+- `planned`: not run yet.
+- `ran-target`: executed in the required target runtime/environment.
+- `ran-rehearsal`: executed only in local/simulated context.
+- `failed`: executed and assertion failed.
+- `blocked`: could not execute due to missing prerequisites.
+
+Rules:
+
+1. `READY` is only possible when all required spec checks are `ran-target`.
+2. Any required check that is `ran-rehearsal`, `failed`, `blocked`, or still `planned` forces `NOT READY`.
+3. If a rehearsal is still useful, keep it, but label it explicitly as rehearsal and non-gate evidence.
+4. If you discover environment mismatch after earlier claims, issue an explicit status correction immediately and downgrade verdict until re-verified.
 
 ## Spec Status, History, SessionId
 
@@ -155,9 +175,11 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
    - Run targeted tests for the modified behavior first.
    - Then run broader project checks required by the spec.
    - If runtime or infrastructure is in scope, run smoke checks for the affected path.
-   - Record the exact commands, exit status, and meaningful output.
+   - Record the exact commands, exit status, runtime environment label, and meaningful output.
    - Treat the spec's `Verification` section as a hard checklist: every listed command must be attempted and reported.
    - If a command is blocked (missing creds/services/tools), report it explicitly as blocked and keep verdict `NOT READY`.
+   - If checks involve endpoint identity (for example old vs candidate STS), log the concrete endpoint values used in each command.
+   - Do not infer functional-path success from CI health/watcher success; run the functional command path explicitly when required by the spec.
 
 6. **Report**
    - Requirements covered vs not covered.
@@ -204,7 +226,7 @@ Use this close-out structure:
 2. **Evidence**
    - requirement / testcase / acceptance coverage summary
    - verification commands and results
-   - include a full verification checklist: `ran`, `failed`, or `blocked` for each spec-listed command
+   - include a full verification checklist with one of: `planned`, `ran-target`, `ran-rehearsal`, `failed`, `blocked` for each spec-listed command
 
 3. **Changed artifacts**
    - files or resources touched

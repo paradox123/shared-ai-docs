@@ -16,10 +16,10 @@
 
 - name: runtime-proof-gate
   scope: general
-  counter: 1
-  signal: Implementation confidence remained low until runtime proof was provided.
-  latest_evidence: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/improve-skills-report-2026-04-03.md
-  suggested_skill_or_playbook: Require runtime and smoke evidence before marking done.
+  counter: 2
+  signal: Green status was reported before target-runtime verification was truly complete.
+  latest_evidence: /Users/dh/.codex/sessions/2026/04/16/rollout-2026-04-16T08-21-54-019d94f4-0b73-71f2-8640-05bac38b653a.jsonl
+  suggested_skill_or_playbook: Require strict verification status labels and target-runtime evidence before marking done.
 
 - name: codex-local-config-discovery-playbook
   scope: project:ncg-backend
@@ -34,3 +34,17 @@
   signal: Responses API incompatibility was discovered late after broad config mutation.
   latest_evidence: /Users/dh/.claude/projects/-Users-dh-Documents-Dev-NCG-ncg-backend-backend-sources/286a6556-ab40-4fa3-8370-decc76dc53d9.jsonl
   suggested_skill_or_playbook: Add a preflight compatibility check step before writing Codex LiteLLM config.
+
+- name: gate-environment-truth-labeling
+  scope: general
+  counter: 1
+  signal: A local compose rehearsal was temporarily communicated as if it were a gate-valid Hetzner runtime run.
+  latest_evidence: /Users/dh/.codex/sessions/2026/04/16/rollout-2026-04-16T08-21-54-019d94f4-0b73-71f2-8640-05bac38b653a.jsonl
+  suggested_skill_or_playbook: Add explicit ran-target vs ran-rehearsal labeling to spec-change-delivery and enforce verdict downgrade when mismatched.
+
+- name: watcher-vs-functional-proof-separation
+  scope: general
+  counter: 1
+  signal: Pipeline watcher success created ambiguity about whether the required Store token endpoint test had actually run.
+  latest_evidence: /Users/dh/.codex/sessions/2026/04/16/rollout-2026-04-16T08-21-54-019d94f4-0b73-71f2-8640-05bac38b653a.jsonl
+  suggested_skill_or_playbook: Add hard watcher boundaries that separate pipeline health evidence from explicit functional endpoint verification.

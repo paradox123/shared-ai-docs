@@ -42,3 +42,5 @@ Translate watcher intents into deterministic local commands for NCG check-build 
 - Use local watcher flow first; only inspect specific pipeline URLs when user explicitly requests manual inspection.
 - Keep code-fix/commit/push manual.
 - When automation reports incidents, explicitly point to generated diagnosis artifacts (`analysis/diagnosis.json` and `diagnosis/warmup-summary.json`) so warmup/healthcheck failures are visible without extra digging.
+- Never claim that domain/business flows were validated unless the relevant functional commands or scenarios were executed separately.
+- After reporting watcher/build status, explicitly state that this is pipeline health evidence, not functional endpoint evidence.

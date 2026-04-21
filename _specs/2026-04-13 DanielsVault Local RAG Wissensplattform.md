@@ -1,3 +1,9 @@
+**Date:** 2026-04-13  
+**Status:** 🟡 Spec  
+**Scope:** Lokale DanielsVault-RAG-Wissensplattform mit CLI-first Agentenzugriff, Default-Scope `ncg/ncg-docs` plus eingeschlossenem `private`
+
+---
+
 # Iteration 0
 
 Ein neues lokales RAG-Projekt fuer DanielsVault soll gestartet werden.
@@ -225,17 +231,25 @@ Empfehlung fuer den ersten Implementierungszuschnitt:
 - Python
 - FastAPI
 - Qdrant
-- lokales oder API-basiertes Embedding-Modell
+- lokales Embedding-Modell
 - CLI oder kleine HTTP-API fuer Retrieval-Tests
 - kleine Query-Schicht fuer strukturierte Projektionen
 
-### Nicht fest eingefrorene Entscheidungen
+### Offene Anforderungsentscheidungen fuer Phase 1
 
-- `[DECISION Embedding-Modell fuer Phase 1: lokal vs API-basiert]`
-- `[DECISION Retrieval-Zugang zunaechst CLI-only oder HTTP-API]`
-- `[DECISION Re-Ranking bereits in Phase 1 oder erst in Phase 2]`
-- `[DECISION Speicherform fuer strukturierte Projektionen: JSONL, SQLite oder Qdrant payload-first]`
-- `[DECISION Welche strukturierten Artefakte zuerst projiziert werden: Nebenkosten-Outputs, reviewed artifacts, NCG-Konfig-Artefakte oder andere]`
+Bereits festgelegt:
+
+- Agentenzugriff erfolgt in Phase 1 CLI-first (lokale Kommandozeile als verbindlicher Zugangsweg), weitere Interfaces sind optional.
+- Phase 1 stellt nur vorhandene lokale Informationen bereit; es werden keine externen Inhaltsquellen angebunden.
+- API-basierte Embeddings sind fuer Phase 1 nicht erforderlich.
+- Mindestqualitaetsziele fuer Phase 1 sind festgelegt:
+  - `domain_hit_rate >= 0.90`
+  - `file_hit_rate >= 0.70`
+  - `cross_domain_leakage <= 0.10`
+
+Weiterhin offen auf Anforderungsniveau:
+
+- keine blockierenden Open Items in diesem Abschnitt
 
 ## Use Cases
 
@@ -245,7 +259,7 @@ Ein Nutzer fragt nach einem technischen oder organisatorischen Thema und erhaelt
 
 ### Use Case 2 - Domain-spezifischen Kontext sammeln
 
-Ein Agent soll vor einer Aufgabe nur in `_shared`, `ncg` oder `private` suchen und keine unkontrollierte Vollsuche ueber den gesamten Vault ausfuehren.
+Ein Agent soll vor einer Aufgabe standardmaessig in `ncg/ncg-docs` suchen, zusaetzlich aber auch auf `private` zugreifen koennen. Eine Vollsuche ueber den gesamten Vault bleibt ein expliziter Opt-in und erfolgt nicht unkontrolliert als Default.
 
 ### Use Case 3 - Strukturierte Datensaetze gezielt finden
 
@@ -254,6 +268,14 @@ Ein Agent soll gezielt nach exakten Datensaetzen fragen koennen, zum Beispiel na
 ### Use Case 4 - Hybride Agent-Antworten
 
 Ein Agent soll bei gemischten Aufgaben erst strukturierte Treffer ermitteln und danach semantischen Dokumentkontext nachladen koennen.
+
+### Use Case 5 - Research for Review
+
+Ein `research-for-review`-Skill soll fuer Spec- und Implementierungsreviews gezielt Zusatzkontext aus `ncg/ncg-docs` holen koennen, ohne breite manuelle Dateisuche.
+
+### Use Case 6 - Spec Closeout Dokumentationsrouting
+
+`spec-closeout` soll die wahrscheinlich betroffenen Dokumentationsziele priorisiert vorgeschlagen bekommen, damit notwendige Doku-Updates schnell auffindbar sind.
 
 ## Akzeptanzkriterien fuer die erste umsetzbare Projektphase
 
@@ -276,14 +298,53 @@ Die spaeteren bounded Changes muessen konkrete Verifikationskommandos definieren
 4. Retrieval-Test gegen Beispielanfragen erfolgreich
 5. Eval-Run mit dokumentierten Metriken erfolgreich
 
-`[MISSING Konkrete Verifikationskommandos je Implementierungschange]`
+Vorschlag fuer eine verbindliche CLI-basierte Verifikationsstrecke:
+
+1. `rag ingest run --domain ncg/ncg-docs`
+2. `rag records project --record-type <phase1-record-type>`
+3. `rag retrieve semantic --domain ncg/ncg-docs --query "<frage>"`
+4. `rag retrieve structured --record-type <phase1-record-type> --filter "<fachfilter>"`
+5. `rag eval run --set /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/evaluation-set.v0.jsonl --top-k 5`
+6. `rag eval report --metrics domain_hit_rate,file_hit_rate,source_precision,cross_domain_leakage`
+
+Anforderung an den Eval-Lauf:
+
+- Die Fragen aus `evaluation-set.v0.jsonl` muessen gegen den Retriever laufen.
+- Das Ergebnis muss pro Frage mindestens Top-5 Treffer, Domain-Treffer, Datei-Treffer und Quellenpraezision enthalten.
+
+Kommando-/Parameterkonvention wird in Change A als CLI-Contract fixiert und bleibt fuer Phase 1 stabil.
 
 ## Risiken und offene Punkte
 
-- `[DECISION Welche Wissensraeume standardmaessig indexiert werden: alle vs priorisierte Teilmenge]`
-- `[DECISION Ob das Projekt in einem neuen Repo oder innerhalb eines bestehenden Repos startet]`
-- `[MISSING Zielpfad fuer das eigentliche Implementierungsrepo]`
-- `[MISSING Entscheidung zu lokalen Embeddings und Hardwarebudget]`
+Bereits festgelegt durch aktuelle Nutzerentscheidung:
+
+- Implementierungszielpfad fuer das neue RAG-Projekt: `/Users/dh/Documents/DanielsVault/_shared/danielsvault-rag`
+- Priorisierte Start-Domain fuer Agenten-Retrieval: `/Users/dh/Documents/DanielsVault/ncg/ncg-docs`
+- Zusaetzlich eingeschlossener Wissensraum in Phase 1: `/Users/dh/Documents/DanielsVault/private`
+- Agentenzugriff in Phase 1 erfolgt CLI-first.
+- Offline-Pflicht besteht nicht; Online/API-basierte Komponenten sind fuer Phase 1 zulaessig.
+- Datenschutzanforderung in Phase 1: `vertraulich` (keine unkontrollierte Weitergabe ausserhalb explizit freigegebener Dienste).
+- Zielhardware fuer lokale Ausfuehrung: vorhandener Apple-Laptop des Nutzers muss fuer Phase-1-Workloads ausreichen.
+- RAG dient als lokaler Wissenszugriff auf vorhandene Dateien; externe Datenquellen werden in Phase 1 nicht abgefragt.
+- API-Embeddings sind in Phase 1 nicht erforderlich, daher ist fuer RAG-internen Embedding-Betrieb kein externer API-Kostenrahmen noetig.
+- Primaerer Nutzen in Phase 1:
+  1. `research-for-review` kann gezielt Projektwissen aus `ncg/ncg-docs` fuer Specs und Implementierungsreviews nachladen.
+  2. `spec-closeout` kann die zu aktualisierende Dokumentation gezielter bestimmen, ohne ungerichtete Vollsuche.
+- Ein erweiterter Full-Vault-Modus (`/Users/dh/Documents/DanielsVault`) bleibt optional und erfolgt nur als expliziter Opt-in.
+- Structured Retrieval in Phase 1 ist kein SQL-Ersatz, sondern ein kleiner praeziser Zusatzkanal fuer exakte Fragen (z. B. CI-Variablen/Settings) mit Quellenbezug.
+- Mindest-Ausgabeformat fuer agentische Nutzung ist maschinell lesbar mit Quellenpflicht:
+  1. `research-for-review`: pro Treffer mindestens `path`, `section_or_chunk`, `excerpt`, `why_relevant`.
+  2. `spec-closeout`: pro vorgeschlagener Doku mindestens `path`, `update_reason`, `source_evidence`.
+  3. zusaetzliche Felder sind erlaubt und duerfen je Agent-Fall flexibel erweitert werden.
+- Vorschlag fuer ein einheitliches, aber schlankes CLI-Response-Envelope:
+  1. Kopf: `query`, `mode` (`semantic|structured`), `domain`, `generated_at`.
+  2. `hits[]` fuer Dokumenttreffer mit Quellenbezug (`path`, `section_or_chunk`, `excerpt`, `score`, `why_relevant`).
+  3. optional `facts[]` fuer exakte Antworten (z. B. `name`, `value`, `source_path`, `source_anchor`).
+  4. Freitextantworten bleiben erlaubt, solange die Pflichtfelder fuer Nachvollziehbarkeit enthalten sind.
+
+Weiterhin offen:
+
+- `[REVIEW Non-blocking: Full-Vault-Opt-in-Modus und Multi-Rechner-Betrieb werden nach Phase 1 erneut eingeplant]`
 - `[REVIEW Scope risk accepted: Parent-Spec bleibt bewusst uebergeordnet und verlangt Folge-Changes]`
 
 ## Empfohlene naechste bounded Changes
@@ -296,10 +357,16 @@ Die spaeteren bounded Changes muessen konkrete Verifikationskommandos definieren
 
 ## History
 
-| Date | Iteration | Author | Delta |
-|------|-----------|--------|-------|
-| 2026-04-13 | 0 | User | Neues lokales RAG-Projekt gewuenscht, Dokuordner und erste Spec angefordert |
-| 2026-04-13 | 1 | Codex | Parent-Spec, Zielbild, Scope-Grenzen und erste Folge-Changes formuliert |
-| 2026-04-14 | 2 | Codex | Strukturierter Retrieval-Layer und Einordnung als hybrides bzw. spaeter agentisches Retrieval ergaenzt |
+| Date | Author | Change |
+|------|--------|--------|
+| 2026-04-13 | User | Neues lokales RAG-Projekt gewuenscht, Dokuordner und erste Spec angefordert. |
+| 2026-04-13 | Codex | Parent-Spec, Zielbild, Scope-Grenzen und erste Folge-Changes formuliert. |
+| 2026-04-14 | Codex | Strukturierter Retrieval-Layer und Einordnung als hybrides bzw. spaeter agentisches Retrieval ergaenzt. |
+| 2026-04-21 | User + Codex | Open-Items auf priorisierte `ncg/ncg-docs`-Nutzung, Zielpfad unter `_shared`, Skill-Use-Cases und Multi-Projekt-Perspektive aktualisiert. |
+| 2026-04-21 | User + Codex | Open-Items auf Anforderungsniveau umgestellt, CLI-first fixiert und Verifikationsvorschlag inkl. Eval-Set-Lauf ergaenzt. |
+| 2026-04-21 | User + Codex | Anforderungen fuer Online-Zulaessigkeit, Vertraulichkeit, Zielhardware und nicht-priorisierte Multi-Rechner-Erweiterung konkretisiert. |
+| 2026-04-21 | User + Codex | Mindest-Ausgabeformat fuer research-for-review/spec-closeout mit Quellenpflicht festgelegt und verbleibende Open-Items weiter reduziert. |
+| 2026-04-21 | User + Codex | Phase-1-Fokus auf lokale vorhandene Inhalte ohne externe Datenquellen/API-Embeddings fixiert, Eval-Mindestziele festgelegt und CLI-Response-Vorschlag ergaenzt. |
+| 2026-04-21 | User + Codex | Domain-Scope praezisiert: `ncg/ncg-docs` als Default, `private` in Phase 1 eingeschlossen, Full-Vault nur als expliziter Opt-in. |
 
 SessionId: codex-desktop-current-thread

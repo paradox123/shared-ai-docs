@@ -1,10 +1,10 @@
 {
-  "last_run": "2026-04-07T12:14:36.000Z",
-  "newest_session_timestamp": "2026-04-01T09:14:15.006Z",
+  "last_run": "2026-04-17T06:13:55.930Z",
+  "newest_session_timestamp": "2026-04-17T06:13:55.930Z",
   "sessions_processed": [
-    "67b5a7b4-812f-4429-95a1-8ae9804b32ac (2026-04-01, DanielsVault, lightweight readiness thread)",
-    "82d9f987-ab82-448f-962d-253fe1c985c9 (2026-04-01, DanielsVault, startup/API-error only)",
-    "286a6556-ab40-4fa3-8370-decc76dc53d9 (2026-04-01, NCG backend sources, Codex LiteLLM configuration flow)"
+    "/Users/dh/.codex/sessions/2026/04/16/rollout-2026-04-16T08-21-54-019d94f4-0b73-71f2-8640-05bac38b653a.jsonl",
+    "/Users/dh/.claude/projects/-Users-dh-Documents-DanielsVault/9427cfd7-4ce4-47dc-ba12-443d2136cb0d.jsonl",
+    "/Users/dh/.claude/projects/-Users-dh-Documents-DanielsVault/b03a0ff1-12f5-42bb-bba9-cb18bb078c02.jsonl"
   ],
-  "summary": "Incremental run after baseline. Updated CORE and improve-skills instructions, recorded two new candidates, and persisted counters in fallback docs memory."
+  "summary": "Improved spec-change-delivery verification truth rules, clarified check-build-watcher boundaries, expanded improve-skills log sources to include Codex sessions, and updated candidate memory with gate-environment and watcher separation findings."
 }
