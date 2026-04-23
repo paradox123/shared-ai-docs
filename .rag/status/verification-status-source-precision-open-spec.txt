@@ -1,0 +1,9 @@
+01_marker_check|ran|0|.rag/status/commands-source-precision-open-spec/01_marker_check.log
+02_parent_gate_authority|ran|0|.rag/status/commands-source-precision-open-spec/02_parent_gate_authority.log
+03_parent_source_precision_optional|ran|0|.rag/status/commands-source-precision-open-spec/03_parent_source_precision_optional.log
+04_child04_blocking_triplet|ran|0|.rag/status/commands-source-precision-open-spec/04_child04_blocking_triplet.log
+05_child04_optional_monitoring|ran|0|.rag/status/commands-source-precision-open-spec/05_child04_optional_monitoring.log
+06_history_rows|ran|0|.rag/status/commands-source-precision-open-spec/06_history_rows.log
+07_openspec_validate|ran|0|.rag/status/commands-source-precision-open-spec/07_openspec_validate.log
+08_openspec_status_json|ran|0|.rag/status/commands-source-precision-open-spec/08_openspec_status_json.log
+09_check_build_watcher|ran|0|.rag/status/check-build-watcher-source-precision.log

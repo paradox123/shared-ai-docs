@@ -26,6 +26,7 @@ Use this skill to inspect sessions since the previous run and answer four questi
 - Persistent candidate memory: prefer `/memories/improve-skills.md`; if `/memories` is unavailable, reuse an existing improve-skills report/memory file in the active docs workspace and note the fallback path in the report
 
 Prefer project session logs first because they preserve tool calls, retries, and agent behavior in sequence. When `.claude/projects` does not include the active Codex thread, use `.codex/sessions` as the authoritative source for that run window.
+When multiple unrelated workspaces are present in the same time window, filter candidate sessions by `cwd`/workspace relevance first to avoid cross-project noise in findings.
 
 ## First Run And Cursor Handling
 
@@ -81,6 +82,11 @@ For each candidate session, capture:
 - project or workspace scope
 - relevant user request
 - evidence snippets showing tool retries, doc lookup, or out-of-skill discovery
+
+Session selection rule:
+
+- Prefer sessions whose `cwd` matches the active workspace/task path.
+- Only include cross-workspace sessions if the user explicitly asked for a cross-project review.
 
 ### Step 2: Identify improvement-worthy patterns
 
@@ -201,6 +207,8 @@ Use this structure exactly:
 ```
 
 If no skill changes are warranted, say so explicitly. Still report candidate counter changes and deferred items.
+
+If active-thread evidence exists but has not yet been persisted to session logs, mark it as provisional in the report and do not advance the cursor past the newest persisted session timestamp.
 
 ## Practical Heuristics
 

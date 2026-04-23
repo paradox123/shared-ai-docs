@@ -16,10 +16,10 @@
 
 - name: runtime-proof-gate
   scope: general
-  counter: 2
-  signal: Green status was reported before target-runtime verification was truly complete.
-  latest_evidence: /Users/dh/.codex/sessions/2026/04/16/rollout-2026-04-16T08-21-54-019d94f4-0b73-71f2-8640-05bac38b653a.jsonl
-  suggested_skill_or_playbook: Require strict verification status labels and target-runtime evidence before marking done.
+  counter: 3
+  signal: Delivery status remained formally correct (`NOT READY`) but foundational runtime blockers were not escalated early enough, causing user-perceived mismatch between requested implementation and delivered scope.
+  latest_evidence: /Users/dh/.codex/sessions/2026/04/21/rollout-2026-04-21T07-49-37-019dae96-456d-76e2-b1e5-562f1534a6cd.jsonl
+  suggested_skill_or_playbook: Enforce an early foundational-runtime reality gate and explicit blocker decision before continuing implementation workflows.
 
 - name: codex-local-config-discovery-playbook
   scope: project:ncg-backend
@@ -48,3 +48,10 @@
   signal: Pipeline watcher success created ambiguity about whether the required Store token endpoint test had actually run.
   latest_evidence: /Users/dh/.codex/sessions/2026/04/16/rollout-2026-04-16T08-21-54-019d94f4-0b73-71f2-8640-05bac38b653a.jsonl
   suggested_skill_or_playbook: Add hard watcher boundaries that separate pipeline health evidence from explicit functional endpoint verification.
+
+- name: blocker-first-runtime-prereq-gate
+  scope: general
+  counter: 1
+  signal: The run discovered missing core prerequisites (`rag` CLI/runtime) after execution had already advanced deeply into verification paperwork, leading to avoidable frustration.
+  latest_evidence: /Users/dh/.codex/sessions/2026/04/21/rollout-2026-04-21T07-49-37-019dae96-456d-76e2-b1e5-562f1534a6cd.jsonl
+  suggested_skill_or_playbook: Add a mandatory early stop-and-choose gate for missing foundational runtime prerequisites in spec-change-delivery.

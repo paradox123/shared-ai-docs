@@ -16,6 +16,7 @@ Dieses Dokument ist die **kanonische Quelle** für die gemeinsamen Delivery-Gate
 - `refine-plan`
 - `spec-change-delivery`
 - `spec-closeout`
+- `doc-review-autoresolve`
 - `retro-plan`
 
 Hier werden die gemeinsamen Begriffe gepflegt:
@@ -135,6 +136,16 @@ Lieferobjekt:
 - OpenSpec Close/Archivierung (falls genutzt)
 - Spec-Statusupdate auf `🟢 Accepted`
 
+### `doc-review-autoresolve`
+
+Purpose: Review-Findings in Specs/Dokus autonom auflösen und direkt gegenprüfen, um Rework-Schleifen zu verkürzen.
+
+Lieferobjekt:
+- Findings-first Review mit file/line Referenzen
+- automatische Behebung aller sicher entscheidbaren Inkonsistenzen im selben Run
+- unmittelbarer Re-Review nach Edits (Loop bis stabil)
+- Eskalation nur für echte Entscheidungs-/Informationslücken (`[MISSING ...]`, `[DECISION ...]`, blockierende `[REVIEW ...]`)
+
 ### `retro-plan`
 
 Purpose: Ergebnis gegen Plan prüfen und Deltas erfassen.
@@ -231,6 +242,7 @@ Ein Change ist erst "done", wenn:
    - Was bleibt offen?
    - Welche Evidenz fehlt noch?
 5. Keine "Hybrid-Steuerung": entweder OpenSpec bewusst als SSOT oder bewusst ohne OpenSpec.
+6. Review-Findings werden standardmäßig per `doc-review-autoresolve` erst **autonom behoben**, dann **erneut reviewed**; Rückfrage nur bei echten Entscheidungs-/Missing-Blockern.
 
 ## Marker System
 
@@ -242,6 +254,19 @@ Ein Change ist erst "done", wenn:
 | `[MISSING SPEC ...]` | Spezifikationslücke | Plan |
 | `[DECISION SPEC ...]` | Spezifikationsentscheidung offen | Plan |
 | `[BLOCKED ...]` | Externer Blocker | Plan/OpenSpec Tasks |
+
+## Review-Findings Auto-Resolution Policy
+
+Default bei Review-Arbeit:
+1. Findings erfassen.
+2. Alle sicher entscheidbaren Findings ohne Zusatzfreigabe direkt beheben.
+3. Im gleichen Run re-reviewen.
+4. Wiederholen, bis keine autonomen Findings mehr offen sind.
+
+Eskalation an den User nur wenn:
+- mehrere fachlich unterschiedliche Lösungen möglich sind,
+- Sicherheits-/Policy-Entscheidungen betroffen sind,
+- oder Marker-basierte Entscheidungslücken bestehen (`[MISSING ...]`, `[DECISION ...]`, blockierende `[REVIEW ...]`).
 
 ## History und SessionId (verpflichtend)
 
@@ -282,6 +307,9 @@ In beiden Workflows optional über `spec-closeout`: Status `🟢 Accepted`, wenn
 
 ### Umsetzung -> Retro
 "retro the plan" nach jedem signifikanten Meilenstein, "final retro the plan" vor Abschluss.
+
+### Review Findings -> Auto-Resolve
+Bei Findings aus Review-Runden zuerst `doc-review-autoresolve` ausführen (fix + re-review loop). Erst verbleibende Entscheidungs- oder Missing-Blocker an den User eskalieren.
 
 ### Retro -> Improve Skills
 Wiederkehrende Probleme als `improve-skills`-Kandidaten erfassen und in Workflow/Skills einarbeiten.

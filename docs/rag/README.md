@@ -8,6 +8,8 @@ Dies ist der Einstiegspunkt fuer die RAG-Dokumentation in diesem Ordner.
   Zielbild, Scope, Domain-Grenzen und empfohlener technischer Zuschnitt.
 - [Evaluation Set v0](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/evaluation-set.md)
   Eval-Set mit echten historischen Nutzerfragen, beobachteten Agent-Lookups, hilfreichen Gegenfragen und zukunftsorientierten Folgefragen.
+- [Runtime Closeout 2026-04-23](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/2026-04-23-rag-runtime-closeout.md)
+  Abschlussbericht mit voller Verifikations-Checklist, Runtime-Validierung und OpenSpec-Archivpfaden.
 - [Parent Spec](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-04-13%20DanielsVault%20Local%20RAG%20Wissensplattform.md)
   Uebergeordnete Anforderungen, Scope-Grenzen und offene Entscheidungen fuer das Projekt.
 
@@ -34,4 +36,4 @@ Damit laesst sich messen, ob das RAG:
 1. Zielbild lesen
 2. Parent-Spec lesen
 3. Evaluation Set lesen
-4. daraus Retrieval- und Evaluation-Slices ableiten
+4. Runtime-Closeout und Archivpfade pruefen

@@ -1,5 +1,5 @@
 **Date:** 2026-04-13  
-**Status:** 🟡 Spec  
+**Status:** 🟢 Accepted  
 **Scope:** Lokale DanielsVault-RAG-Wissensplattform mit CLI-first Agentenzugriff, Default-Scope `ncg/ncg-docs` plus eingeschlossenem `private`
 
 ---
@@ -69,14 +69,23 @@ Dieses Vorhaben ist fuer eine einzelne Delivery-Change zu gross.
 Empfohlene Aufteilung:
 
 1. Parent-Spec und Zielbild
-2. Change A: Datenquellen, Ignore-Regeln, Chunking-Strategie
-3. Change B: Embeddings, Vector Store, Retrieval API
-4. Change C: Evaluation Harness und Qualitaetsmetriken
-5. Change D: Agent-/MCP-Integration
+2. `01` Ingestion Scope und Metadaten
+3. `02` Strukturierte Projektionen
+4. `03` Embeddings, Index und hybrides Retrieval
+5. `04` Evaluation und Qualitaetsgates
+6. `05` Agent-Integration fuer `research-for-review` und `spec-closeout`
 
 Empfehlung:
 
-- zuerst Change A umsetzen, weil dadurch der spaetere Index sauber und domain-treu bleibt
+- zuerst Child-Spec `01` umsetzen, weil dadurch der spaetere Index sauber und domain-treu bleibt
+
+## Wiederverwendungsregel fuer Child-Specs und Runtime-Pakete
+
+Normative Regel:
+
+- Die Child-Specs `01..05` definieren den fachlichen und verifikatorischen Vertrag.
+- Das konkret eingesetzte Runtime-Paket ist ein Implementierungsdetail, solange CLI-Contract, Scope-Regeln, Metadatenpflichten und Qualitaetsgates unveraendert erfuellt werden.
+- Ein Paketwechsel (z. B. auf `qmd`) ist in Phase 1 zulaessig, wenn die gleiche Verifikationsmatrix ohne Abschwaechung besteht.
 
 ## Decision Freeze Pack
 
@@ -224,16 +233,28 @@ Normative Anforderungen:
 
 ## Architekturrahmen
 
-### Empfohlener Startstack
+### Implementierungsprofil (tool-agnostisch)
 
-Empfehlung fuer den ersten Implementierungszuschnitt:
+Verbindlich ist der Runtime-Contract, nicht ein einzelner Technologie-Stack.
 
-- Python
-- FastAPI
-- Qdrant
-- lokales Embedding-Modell
-- CLI oder kleine HTTP-API fuer Retrieval-Tests
-- kleine Query-Schicht fuer strukturierte Projektionen
+Normative Anforderungen:
+
+- Es existiert ein stabiler `rag` CLI-Contract fuer die in `01..05` definierten Commands.
+- Scope-Grenzen, Ignore-Regeln, Metadatenminimum, strukturierte Filtersemantik und Eval-Gates bleiben unveraendert.
+- Ergebnisse sind maschinell lesbar und reproduzierbar.
+- Ein Backend darf intern ersetzt werden, wenn keine Breaking-Aenderung am Contract entsteht.
+
+### Moegliche Runtime-Backends (nicht exklusiv)
+
+Beispielhafte Optionen fuer die Umsetzung:
+
+- Python-basierte Eigenimplementierung
+- `qmd`-basierter Runtime-Adapter
+- lokale Such-/Index-Komponenten in anderen Sprachen
+
+Normative Regel:
+
+- Kein Vendor-/Package-Lock-in auf Parent-Spec-Ebene; die Abnahme erfolgt ueber Command-Evidenz und Qualitaetsmetriken, nicht ueber Stack-Wahl.
 
 ### Offene Anforderungsentscheidungen fuer Phase 1
 
@@ -298,21 +319,42 @@ Die spaeteren bounded Changes muessen konkrete Verifikationskommandos definieren
 4. Retrieval-Test gegen Beispielanfragen erfolgreich
 5. Eval-Run mit dokumentierten Metriken erfolgreich
 
-Vorschlag fuer eine verbindliche CLI-basierte Verifikationsstrecke:
+Verbindliche CLI-basierte Verifikationsstrecke:
 
-1. `rag ingest run --domain ncg/ncg-docs`
-2. `rag records project --record-type <phase1-record-type>`
-3. `rag retrieve semantic --domain ncg/ncg-docs --query "<frage>"`
-4. `rag retrieve structured --record-type <phase1-record-type> --filter "<fachfilter>"`
-5. `rag eval run --set /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/evaluation-set.v0.jsonl --top-k 5`
-6. `rag eval report --metrics domain_hit_rate,file_hit_rate,source_precision,cross_domain_leakage`
+- Normative Gate-Quelle ist die vollstaendige Command- und Assertion-Checklist in Child-Specs `01..05`.
+- Alle dort definierten Commands inklusive Assertions sind fuer Abnahme vollstaendig auszufuehren; Teillisten im Parent sind nur orientierend.
+- Vor den Child-Commandstrecken ist ein harter CLI-Preflight verpflichtend (`command -v rag`, `rag --version`, non-empty Versionsnachweisdatei).
+- Jeder Verifikationsschritt gilt nur bei realer Ausfuehrung mit Exit-Code `0` als bestanden; Status `blocked` oder `failed` ist ein Gate-Fehler und nicht DoD-faehig.
+
+Orientierende Beispielkommandos (nicht vollstaendige Gate-Liste):
+
+1. `command -v rag >/dev/null`
+2. `rag --version > .rag/runs/00-rag-version.txt && test -s .rag/runs/00-rag-version.txt`
+3. `rag ingest run --scope ncg/ncg-docs`
+4. `rag records project --scope ncg/ncg-docs --record-type ci_setting_fact`
+5. `rag retrieve semantic --scope ncg/ncg-docs --query "Wo ist die Migration zu Hetzner-Dev dokumentiert?"`
+6. `rag retrieve structured --scope ncg/ncg-docs --record-type ci_setting_fact --filter "setting_name=DEPLOY_TARGET"`
+7. `rag retrieve hybrid --scope ncg/ncg-docs --record-type ci_setting_fact --query "Welche CI-Variable steuert das Deployment-Target?"`
+8. `rag workflow research-for-review --scope ncg/ncg-docs --query "Welche Dokumente sind fuer den Docker BaseUrl Fix relevant?" --top-k 5 --format json`
+9. `rag workflow spec-closeout --scope ncg/ncg-docs --change "Docker BaseUrl Fix" --top-k 5 --format json`
+10. `rag eval run --set /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/evaluation-set.v0.jsonl --top-k 5`
+11. `rag eval report --metrics domain_hit_rate,file_hit_rate,cross_domain_leakage`
+
+Contract-Regel:
+
+- Die Kommandos sind als stabile Capability-Schnittstelle zu verstehen.
+- Ob intern eine Eigenimplementierung, ein Adapter oder ein Paket wie `qmd` ausgefuehrt wird, ist fuer die Spec-Erfuellung nachrangig.
+- Nicht zulaessig ist ein Paketwechsel, der nur durch Abschwaechung von Acceptance/Verification gruen wird.
 
 Anforderung an den Eval-Lauf:
 
 - Die Fragen aus `evaluation-set.v0.jsonl` muessen gegen den Retriever laufen.
-- Das Ergebnis muss pro Frage mindestens Top-5 Treffer, Domain-Treffer, Datei-Treffer und Quellenpraezision enthalten.
+- Das Ergebnis muss pro Frage mindestens Top-5 Treffer, Domain-Treffer und Datei-Treffer enthalten.
+- Blocking-Gates in Phase 1 sind `domain_hit_rate`, `file_hit_rate`, `cross_domain_leakage` gemaess Child-Spec `04`.
+- `source_precision` darf optional als zusaetzliche Monitoring-Metrik reportet werden, ist aber kein Phase-1-Blocking-Gate.
+- Die orientierende Parent-Kommandoliste und Report-Metriken duerfen diese Child-Gate-Definition nicht ueberschreiben.
 
-Kommando-/Parameterkonvention wird in Change A als CLI-Contract fixiert und bleibt fuer Phase 1 stabil.
+Kommando-/Parameterkonvention ist in Child-Specs `01..05` als CLI-Contract fixiert und bleibt fuer Phase 1 stabil.
 
 ## Risiken und offene Punkte
 
@@ -345,15 +387,15 @@ Bereits festgelegt durch aktuelle Nutzerentscheidung:
 Weiterhin offen:
 
 - `[REVIEW Non-blocking: Full-Vault-Opt-in-Modus und Multi-Rechner-Betrieb werden nach Phase 1 erneut eingeplant]`
-- `[REVIEW Scope risk accepted: Parent-Spec bleibt bewusst uebergeordnet und verlangt Folge-Changes]`
+- `[REVIEW Scope-Split umgesetzt: Parent-Spec bleibt als Zielbild, Umsetzung erfolgt ueber nummerierte Child-Specs 01-05]`
 
-## Empfohlene naechste bounded Changes
+## Archivierte Phase-1 Changes
 
-1. Change A: Datenquellen, Ignore-Regeln, Chunking- und Metadatenkonzept
-2. Change B: strukturierte Projektionen fuer ausgewaehlte Datentypen
-3. Change C: lokaler Prototyp fuer Embeddings, Index und hybrides Retrieval
-4. Change D: Evaluation Harness fuer reale DanielsVault-Fragen
-5. Change E: Integration in Agent- oder MCP-Workflows
+1. [2026-04-21 01 DanielsVault RAG Ingestion Scope und Metadaten](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-04-21%2001%20DanielsVault%20RAG%20Ingestion%20Scope%20und%20Metadaten.md)
+2. [2026-04-21 02 DanielsVault RAG Strukturierte Projektionen](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-04-21%2002%20DanielsVault%20RAG%20Strukturierte%20Projektionen.md)
+3. [2026-04-21 03 DanielsVault RAG Embeddings Index und Hybrides Retrieval](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-04-21%2003%20DanielsVault%20RAG%20Embeddings%20Index%20und%20Hybrides%20Retrieval.md)
+4. [2026-04-21 04 DanielsVault RAG Evaluation und Qualitaetsgates](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-04-21%2004%20DanielsVault%20RAG%20Evaluation%20und%20Qualitaetsgates.md)
+5. [2026-04-21 05 DanielsVault RAG Agent Integration Research-for-Review und Spec-Closeout](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-04-21%2005%20DanielsVault%20RAG%20Agent%20Integration%20Research-for-Review%20und%20Spec-Closeout.md)
 
 ## History
 
@@ -368,5 +410,13 @@ Weiterhin offen:
 | 2026-04-21 | User + Codex | Mindest-Ausgabeformat fuer research-for-review/spec-closeout mit Quellenpflicht festgelegt und verbleibende Open-Items weiter reduziert. |
 | 2026-04-21 | User + Codex | Phase-1-Fokus auf lokale vorhandene Inhalte ohne externe Datenquellen/API-Embeddings fixiert, Eval-Mindestziele festgelegt und CLI-Response-Vorschlag ergaenzt. |
 | 2026-04-21 | User + Codex | Domain-Scope praezisiert: `ncg/ncg-docs` als Default, `private` in Phase 1 eingeschlossen, Full-Vault nur als expliziter Opt-in. |
+| 2026-04-21 | User + Codex | Scope-Risiko durch Split in nummerierte Child-Specs 01-05 reduziert und Implementierungsreihenfolge im Dateinamen verankert. |
+| 2026-04-21 | Codex | CLI-Parameterkonvention auf `--scope` vereinheitlicht und Scope-Split-Hinweise konsolidiert. |
+| 2026-04-22 | Codex | Verifikationsstrecke auf konkrete Commands ohne Platzhalter aktualisiert (`ci_setting_fact` fixiert). |
+| 2026-04-23 | User + Codex | Parent-Spec geschaerft: Runtime-Paket als Implementierungsdetail festgelegt, Child-Spec-Contract als verbindliche Abnahmebasis beibehalten (u. a. `qmd` als zulaessige Option). |
+| 2026-04-23 | User + Codex | Review-Findings eingearbeitet: Parent-Verifikation auf vollstaendige Child-Gates `01..05` harmonisiert, `source_precision` als optionales Monitoring praezisiert und veralteten `Change A`-Verweis entfernt. |
+| 2026-04-23 | User + Codex | Metrik-Governance weiter gehaertet: Parent-Beispielliste explizit als nicht vollstaendig markiert und Child-Gate-Prioritaet bei `source_precision` nochmals klargestellt. |
+| 2026-04-23 | User + Codex | Verifikationsgate gehaertet: harter `rag`-Install-Preflight und Regel ergaenzt, dass `blocked/failed` nicht als bestandene Abnahme gewertet werden duerfen. |
+| 2026-04-23 | User + Codex | Status auf `🟢 Accepted` gesetzt: Child-Specs 01-05 wurden runtime-seitig umgesetzt, erneut gruen verifiziert und OpenSpec-Changes archiviert. |
 
 SessionId: codex-desktop-current-thread

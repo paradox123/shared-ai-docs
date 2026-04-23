@@ -85,6 +85,7 @@ Only include them when the spec explicitly requires them.
 10. Never present a verification as completed before the command has actually run and returned.
 11. Never label a local rehearsal as an environment gate-run (`develop_hetzner`, production, etc.) unless executed in that actual target runtime.
 12. When a spec distinguishes legacy vs candidate endpoints, assert and report both concrete values before execution (`OLD != CANDIDATE`).
+13. If required spec checks depend on missing foundational runtime prerequisites (for example missing CLI, missing service repo, missing runtime manifests), stop early and ask for a scope decision before continuing.
 
 ## Verification Truth Contract
 
@@ -149,6 +150,14 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
 1. **Read and normalize scope**
    - Extract: in scope, out of scope, requirements, test cases, acceptance criteria, dependencies, decisions, open items.
    - Convert test cases into **DoR -> DoD** checkpoints.
+   - Run a foundational runtime reality gate before substantial edits:
+     - verify required CLI/tools exist,
+     - verify required implementation repo/services exist,
+     - verify required runtime artifacts exist when runtime validation is mandatory.
+   - If prerequisites are missing, pause and ask the user to choose one path:
+     1) extend the change to bootstrap prerequisites first, or
+     2) keep this as documentation/spec-only work with explicit `NOT READY`.
+   - Do not continue with implementation-like paperwork as a substitute for missing runtime unless the user explicitly chooses path (2).
 
 2. **Build the execution contract**
    - Map each `requirement -> implementation task`.
@@ -204,6 +213,7 @@ Pause and ask the user before proceeding when:
 2. Security, data, or production risk requires a policy choice.
 3. Essential credentials, services, or environment prerequisites are missing.
 4. Multiple non-equivalent fixes are possible with different tradeoffs.
+5. The request text includes multiple execution modes (for example OpenSpec and Direct) and no explicit selection is given.
 
 Otherwise, make the safest reasonable assumption and state it in the report.
 

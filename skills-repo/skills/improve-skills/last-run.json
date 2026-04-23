@@ -1,10 +1,9 @@
 {
-  "last_run": "2026-04-17T06:13:55.930Z",
-  "newest_session_timestamp": "2026-04-17T06:13:55.930Z",
+  "last_run": "2026-04-22T06:31:22.442Z",
+  "newest_session_timestamp": "2026-04-22T06:31:22.442Z",
   "sessions_processed": [
-    "/Users/dh/.codex/sessions/2026/04/16/rollout-2026-04-16T08-21-54-019d94f4-0b73-71f2-8640-05bac38b653a.jsonl",
-    "/Users/dh/.claude/projects/-Users-dh-Documents-DanielsVault/9427cfd7-4ce4-47dc-ba12-443d2136cb0d.jsonl",
-    "/Users/dh/.claude/projects/-Users-dh-Documents-DanielsVault/b03a0ff1-12f5-42bb-bba9-cb18bb078c02.jsonl"
+    "/Users/dh/.codex/sessions/2026/04/21/rollout-2026-04-21T07-49-37-019dae96-456d-76e2-b1e5-562f1534a6cd.jsonl",
+    "/Users/dh/.codex/sessions/2026/04/21/rollout-2026-04-21T09-22-45-019daeeb-8c2d-74d0-b046-52b4161ab01d.jsonl"
   ],
-  "summary": "Improved spec-change-delivery verification truth rules, clarified check-build-watcher boundaries, expanded improve-skills log sources to include Codex sessions, and updated candidate memory with gate-environment and watcher separation findings."
+  "summary": "Improved spec-change-delivery with an early foundational runtime reality gate and mode-ambiguity stop rule; improved improve-skills session selection with cwd/workspace filtering and cursor guardrails; updated memory counters and report for 2026-04-22 run."
 }
