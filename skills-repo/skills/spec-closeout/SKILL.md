@@ -96,6 +96,12 @@ Update target spec file with:
 Always check and update project docs root (NCG default below):
 - `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs`
 
+RAG-first source discovery is mandatory before deciding which docs to update:
+1. Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/rag-documentation-research/SKILL.md`.
+2. Start with `rag` retrieval/workflow commands to build a prioritized source shortlist.
+3. Use `qmd` only as optional discovery add-on when `rag` results are too narrow.
+4. Keep source-backed evidence for why each updated (or skipped) documentation file was selected.
+
 Minimum docs sync checks:
 1. Search for references to the spec title/path and OpenSpec change id.
 2. Check parent spec, index/overview pages, and deferred-topic trackers when present.

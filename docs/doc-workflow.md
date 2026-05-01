@@ -108,6 +108,26 @@ Lieferobjekt:
 - belastbare Spec mit `[MISSING ...]`, `[DECISION ...]`, `[REVIEW ...]`
 - klare Non-Goals
 
+### `rag-documentation-research`
+
+Purpose: Quellenorientierte Dokumentationssuche vor Plan/Umsetzung mit `rag` als Standard und optionalem `qmd`-Discovery-Zusatz.
+
+Lieferobjekt:
+- priorisierte Quellenpfade fuer die aktuelle Frage
+- nachvollziehbare Trefferbegruendung pro Quelle
+- explizite Kennzeichnung, ob Treffer aus `rag`, `qmd` oder kombiniert stammen
+
+Trigger (beispielhaft):
+- "durchsuche die dokumentation"
+- "durchsuche docs"
+- "research the documentation"
+- "search the documentation"
+- "find relevant docs"
+- "welche dokumente sind relevant"
+
+Routing-Regel:
+- Bei solchen Suchanfragen zuerst `rag-documentation-research`, danach mit den Quellen im jeweiligen Workflow (`doc-coauthoring`, `refine-plan`, `spec-change-delivery`, `spec-closeout`) fortfahren.
+
 ### `refine-plan`
 
 Purpose: Aus Spec einen ausführbaren Plan machen.
@@ -135,6 +155,7 @@ Lieferobjekt:
 - vollständiger Verifikations-Checklist-Report
 - OpenSpec Close/Archivierung (falls genutzt)
 - Spec-Statusupdate auf `🟢 Accepted`
+- RAG-basierte Quellensuche fuer relevante Doku-Updates (RAG-first, `qmd` optional)
 
 ### `doc-review-autoresolve`
 

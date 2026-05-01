@@ -10,7 +10,11 @@ Dies ist der Einstiegspunkt fuer die RAG-Dokumentation in diesem Ordner.
   Eval-Set mit echten historischen Nutzerfragen, beobachteten Agent-Lookups, hilfreichen Gegenfragen und zukunftsorientierten Folgefragen.
 - [Runtime Closeout 2026-04-23](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/2026-04-23-rag-runtime-closeout.md)
   Abschlussbericht mit voller Verifikations-Checklist, Runtime-Validierung und OpenSpec-Archivpfaden.
-- [Parent Spec](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-04-13%20DanielsVault%20Local%20RAG%20Wissensplattform.md)
+- [Operating Model: rag Default, qmd Optional](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/operating-model-rag-qmd.md)
+  Betriebsentscheidung fuer den Alltag: `rag` ist Standardruntime; `qmd` ist optionaler Discovery-Zusatz.
+- [Delivery Evidence 2026-04-26](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/2026-04-26-rag-qmd-operating-model-delivery-evidence.md)
+  Vollstaendige Verification-Checklist fuer den Direct-Mode-Change inkl. `qmd`-Gate und `check-build-watcher`.
+- [Parent Spec](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/Completed/2026-04-13%20DanielsVault%20Local%20RAG%20Wissensplattform.md)
   Uebergeordnete Anforderungen, Scope-Grenzen und offene Entscheidungen fuer das Projekt.
 
 ## Warum das Eval-Set hier zentral ist
@@ -36,4 +40,5 @@ Damit laesst sich messen, ob das RAG:
 1. Zielbild lesen
 2. Parent-Spec lesen
 3. Evaluation Set lesen
-4. Runtime-Closeout und Archivpfade pruefen
+4. Operating Model lesen und Standardpfad verinnerlichen
+5. Runtime-Closeout und Archivpfade pruefen

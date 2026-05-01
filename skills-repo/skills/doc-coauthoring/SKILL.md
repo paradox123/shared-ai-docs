@@ -32,6 +32,24 @@ In this workflow:
 - blocking `[MISSING ...]` and `[DECISION ...]` items must stay visible until resolved,
 - "ready for planning" or "ready for implementation" should be judged against the shared gate definitions.
 
+## Documentation Research Routing
+
+Before spec drafting continues, route documentation discovery to
+`/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/rag-documentation-research/SKILL.md`
+when users ask for source search, for example:
+
+1. "durchsuche die dokumentation"
+2. "durchsuche docs"
+3. "research the documentation"
+4. "search the documentation"
+5. "find relevant docs"
+6. "welche dokumente sind relevant"
+
+Routing rule:
+
+1. Use `rag-documentation-research` first (RAG-first, source-backed).
+2. Then continue `doc-coauthoring` with the retrieved sources as context.
+
 ## Scope Pressure Guardrail
 
 This skill must proactively warn when the current spec scope is too large for a single coherent delivery change.
