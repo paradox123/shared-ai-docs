@@ -24,7 +24,7 @@
 //
 // #hiring-entity-info(
 //   entity-info: (
-//     target: "Frau Schelle",          // Ansprechpartner oder "Damen und Herren"
+//     target: "Frau Schelle",          // Address block: "Frau X", "Herr X" or "Damen und Herren"
 //     name: "AS Recruitment GmbH",
 //     street-address: "",              // leave empty if unknown
 //     city: "",
@@ -33,7 +33,8 @@
 //
 // #letter-heading(
 //   job-position: "Senior C# Entwickler (m/w/d)",
-//   addressee: "Frau Schelle",         // or "Damen und Herren"
+//   addressee: "Frau Schelle",         // "Herr X", "Frau X" or "Damen und Herren"
+//   dear: "Sehr geehrte",              // "Sehr geehrter" for Herr X
 // )
 //
 // = Über mich
@@ -48,7 +49,7 @@
 //
 // = Verfügbarkeit und Konditionen
 // #coverletter-content[
-//   - Verfügbarkeit: ab sofort, 100 %
+//   - Verfügbarkeit: ab sofort, 80 % Auslastung
 //   - Remote: 100 % bevorzugt
 //   - Stundensatz: 90 € (Verhandlungsbasis)
 //   - Standort: Schlüchtern, Hessen

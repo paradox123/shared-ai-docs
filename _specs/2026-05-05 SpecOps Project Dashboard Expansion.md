@@ -1,5 +1,5 @@
 **Date:** 2026-05-05
-**Status:** 🟡 Spec
+**Status:** 🟢 Accepted
 **Scope:** SpecOps Portfolio Views Slice fuer konsistente Portfolio-, Global-Spec- und projektlokale Dashboard-Sichten auf Basis bestehender Entity Notes
 
 ---
@@ -189,7 +189,7 @@ Pflichtchecks:
 22. `rg -n '^## Specs' _shared/SpecOps/Dashboards/projects/ncg-checkbuild.md`
 23. `rg -n '^## Backlog' _shared/SpecOps/Dashboards/projects/ncg-checkbuild.md`
 24. `rg -n 'Metadata Quality|Missing Metadata' _shared/SpecOps/Dashboards/projects/ncg-checkbuild.md`
-25. `rg -n 'status: promoted' _shared/SpecOps/Entities/backlog/project-dashboard-expansion.md`
+25. `rg -n 'status: done' _shared/SpecOps/Entities/backlog/project-dashboard-expansion.md`
 26. `rg -n 'promoted_to: .+2026-05-05 SpecOps Project Dashboard Expansion.md' _shared/SpecOps/Entities/backlog/project-dashboard-expansion.md`
 27. `rg -n 'title: Visual Board UX Pilot|candidate_slice: Visual Board UX Pilot' _shared/SpecOps/Entities/backlog`
 
@@ -214,11 +214,81 @@ Diese Spec ist bereit fuer einen anschliessenden Scope-Contract-/Delivery-Run, w
 2. keine blockierenden `[MISSING ...]` oder `[DECISION ...]` Marker offen sind,
 3. die Verification Commands vor Umsetzung unveraendert als DoD-Basis akzeptiert werden.
 
-Aktueller Stand: bereit fuer Planung/Delivery, aber noch nicht implementiert.
+Aktueller Stand: umgesetzt und mit den Pflichtchecks verifiziert.
 
 ## Implementation Evidence
 
-Noch nicht umgesetzt.
+Target runtime: lokaler DanielsVault unter `/Users/dh/Documents/DanielsVault`.
+
+Execution mode: direct, ohne OpenSpec Change.
+
+Changed files:
+
+1. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboard.md`
+2. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboards/global-spec-board.md`
+3. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboards/projects/danielsvault-rag.md`
+4. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboards/projects/nebenkostenabrechnung.md`
+5. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboards/projects/ncg-checkbuild.md`
+6. `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-05-05 SpecOps Project Dashboard Expansion.md`
+
+Runtime / watcher applicability:
+
+1. Keine Runtime-Validierung mit `docker compose` erforderlich, weil dieser Slice ausschliesslich Markdown-/Dataview-Dashboard-Dateien aendert.
+2. `check-build-watcher` ist fuer NCG-Backend-Build-Monitoring nicht anwendbar, weil kein NCG-Backend-Code, keine Pipeline und kein Build-Artefakt in Scope sind.
+3. Obsidian-/Dataview-Renderpruefung bleibt gemaess Spec ein manuelles Review-Signal.
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| 1. Dashboard exists | ran-target | `test -f _shared/SpecOps/Dashboard.md` returned exit code `0`. |
+| 2. Global Spec Board exists | ran-target | `test -f _shared/SpecOps/Dashboards/global-spec-board.md` returned exit code `0`. |
+| 3. RAG project board exists | ran-target | `test -f _shared/SpecOps/Dashboards/projects/danielsvault-rag.md` returned exit code `0`. |
+| 4. Nebenkosten project board exists | ran-target | `test -f _shared/SpecOps/Dashboards/projects/nebenkostenabrechnung.md` returned exit code `0`. |
+| 5. NCG / CheckBuild project board exists | ran-target | `test -f _shared/SpecOps/Dashboards/projects/ncg-checkbuild.md` returned exit code `0`. |
+| 6. Root dashboard references required views | ran-target | `rg -n 'Dashboards/global-spec-board\|Global Spec Board\|Backlog\|Missing Metadata' _shared/SpecOps/Dashboard.md` found the expected markers. |
+| 7. Global board reads spec entities | ran-target | `rg -n 'FROM "_shared/SpecOps/Entities/specs"' _shared/SpecOps/Dashboards/global-spec-board.md` found the spec entity source. |
+| 8. Global board filters specs | ran-target | `rg -n 'WHERE type = "spec"' _shared/SpecOps/Dashboards/global-spec-board.md` found the spec filter. |
+| 9. Global board shows project | ran-target | `rg -n 'TABLE .*project' _shared/SpecOps/Dashboards/global-spec-board.md` found the field. |
+| 10. Global board shows status | ran-target | `rg -n 'TABLE .*status' _shared/SpecOps/Dashboards/global-spec-board.md` found the field. |
+| 11. Global board shows lifecycle | ran-target | `rg -n 'TABLE .*lifecycle' _shared/SpecOps/Dashboards/global-spec-board.md` found the field. |
+| 12. Global board shows metadata quality | ran-target | `rg -n 'TABLE .*metadata_quality' _shared/SpecOps/Dashboards/global-spec-board.md` found the field. |
+| 13. Global board shows source | ran-target | `rg -n 'TABLE .*source' _shared/SpecOps/Dashboards/global-spec-board.md` found the field. |
+| 14. Global board shows artifacts | ran-target | `rg -n 'TABLE .*artifacts' _shared/SpecOps/Dashboards/global-spec-board.md` found the field. |
+| 15. Global board shows evidence | ran-target | `rg -n 'TABLE .*evidence' _shared/SpecOps/Dashboards/global-spec-board.md` found the field. |
+| 16. RAG board has Specs | ran-target | `rg -n '^## Specs' _shared/SpecOps/Dashboards/projects/danielsvault-rag.md` found the section. |
+| 17. RAG board has Backlog | ran-target | `rg -n '^## Backlog' _shared/SpecOps/Dashboards/projects/danielsvault-rag.md` found the section. |
+| 18. RAG board has Metadata Quality | ran-target | `rg -n 'Metadata Quality\|Missing Metadata' _shared/SpecOps/Dashboards/projects/danielsvault-rag.md` found the section. |
+| 19. Nebenkosten board has Specs | ran-target | `rg -n '^## Specs' _shared/SpecOps/Dashboards/projects/nebenkostenabrechnung.md` found the section. |
+| 20. Nebenkosten board has Backlog | ran-target | `rg -n '^## Backlog' _shared/SpecOps/Dashboards/projects/nebenkostenabrechnung.md` found the section. |
+| 21. Nebenkosten board has Metadata Quality | ran-target | `rg -n 'Metadata Quality\|Missing Metadata' _shared/SpecOps/Dashboards/projects/nebenkostenabrechnung.md` found the section. |
+| 22. NCG board has Specs | ran-target | `rg -n '^## Specs' _shared/SpecOps/Dashboards/projects/ncg-checkbuild.md` found the section. |
+| 23. NCG board has Backlog | ran-target | `rg -n '^## Backlog' _shared/SpecOps/Dashboards/projects/ncg-checkbuild.md` found the section. |
+| 24. NCG board has Metadata Quality | ran-target | `rg -n 'Metadata Quality\|Missing Metadata' _shared/SpecOps/Dashboards/projects/ncg-checkbuild.md` found the section. |
+| 25. Backlog item closed as done | ran-target | `rg -n 'status: done' _shared/SpecOps/Entities/backlog/project-dashboard-expansion.md` found the expected status. |
+| 26. Backlog item links this spec | ran-target | `rg -n 'promoted_to: .+2026-05-05 SpecOps Project Dashboard Expansion.md' _shared/SpecOps/Entities/backlog/project-dashboard-expansion.md` found the link. |
+| 27. Forbidden slice name absent | ran-target | `rg -n 'title: Visual Board UX Pilot\|candidate_slice: Visual Board UX Pilot' _shared/SpecOps/Entities/backlog` returned expected exit code `1`. |
+
+Verdict: READY for Obsidian review.
+
+## Closeout Evidence
+
+Closeout date: 2026-05-05.
+
+OpenSpec closure: not applicable; this change used Direct Mode without an OpenSpec change.
+
+Documentation synchronization:
+
+1. RAG source discovery ran successfully with `rag workflow spec-closeout --scope all --change "SpecOps Project Dashboard Expansion" --top-k 7 --format json`.
+2. RAG recommendations were generic documentation workflow files, not SpecOps-specific normative docs requiring update.
+3. Local exact search found the stale `project-dashboard-expansion` status in the RAG Project Board Pilot backlog table; that table was synchronized.
+4. The subsequent SpecOps Dashboard UX Overview already references this dashboard expansion as completed context and did not require status changes.
+
+Closeout verification replay:
+
+1. All positive required checks returned exit code `0`.
+2. Negative scope-guard check 27 returned expected exit code `1`.
+3. The `project-dashboard-expansion` backlog entity is closed as `done`.
+
+Verdict: READY.
 
 ## History
 
@@ -227,5 +297,9 @@ Noch nicht umgesetzt.
 | 2026-05-05 | User | Erstellung der Child-Spec fuer den naechsten SpecOps-Slice freigegeben. |
 | 2026-05-05 | Codex | Child-Spec fuer `project-dashboard-expansion` / `SpecOps Portfolio Views` erstellt. |
 | 2026-05-05 | Codex | Review-Findings zu Verification-Strength und Shell-/Plattformvertrag autonom behoben. |
+| 2026-05-05 | Codex | Direct-Mode Scope Contract fixiert und Spec-Status auf Plan gesetzt. |
+| 2026-05-05 | Codex | SpecOps Portfolio Views direkt umgesetzt, verifiziert und Spec-Status auf Implemented gesetzt. |
+| 2026-05-05 | User | Implementierten Change akzeptiert. |
+| 2026-05-05 | Codex | Closeout-Verifikation replayed, Backlog/Doku synchronisiert und Spec-Status auf Accepted gesetzt. |
 
 SessionId: codex-desktop-current-thread

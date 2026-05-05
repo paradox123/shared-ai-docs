@@ -41,10 +41,16 @@ Folder:   applications/{yyyy-MM}/{yyyyMMddHHmm}_{TitleCamelCase}/
 DE files:
   {ts}_Daniel_Hecht_Lebenslauf_{ShortTitle}.typ   →  .pdf
   {ts}_Daniel_Hecht_Anschreiben_{ShortTitle}.typ  →  .pdf
+  {ts}_Daniel_Hecht_Projektprofil_{ShortTitle}.md
+  {ts}_Daniel_Hecht_Plattformtext_{ShortTitle}.txt
+  {ts}_Daniel_Hecht_Review_{ShortTitle}.md
 
 EN files:
   {ts}_Daniel_Hecht_CV_{ShortTitle}.typ           →  .pdf
   {ts}_Daniel_Hecht_CoverLetter_{ShortTitle}.typ  →  .pdf
+  {ts}_Daniel_Hecht_ProjectProfile_{ShortTitle}.md
+  {ts}_Daniel_Hecht_PlatformText_{ShortTitle}.txt
+  {ts}_Daniel_Hecht_Review_{ShortTitle}.md
 
 ShortTitle: CamelCase, max 30 chars, derived from job title
 ```

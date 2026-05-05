@@ -157,9 +157,9 @@ These items capture work that was intentionally out of scope for this first slic
 
 | Backlog Item | Status | Why It Exists | Next Action |
 |--------------|--------|---------------|-------------|
-| `mixed-backfill-pilot` | `ready_for_spec` | Tests the model beyond RAG with Nebenkosten umbrella, Nebenkosten slice and CheckBuild-style material. | Create next child spec. |
-| `project-dashboard-expansion` | `ready_for_spec` | Moves from one project board to portfolio and per-project boards. | Add boards after mixed backfill entities exist. |
-| `document-entity-support-for-adrs` | `triaged` | ADRs, runbooks, guides, architecture and evidence docs need first-class document treatment. | Promote when a real ADR is linked. |
+| `mixed-backfill-pilot` | `done` | Tests the model beyond RAG with Nebenkosten umbrella, Nebenkosten slice and CheckBuild-style material. | Closed via `2026-05-04 SpecOps Mixed Backfill Pilot.md`. |
+| `project-dashboard-expansion` | `done` | Moves from one project board to portfolio and per-project boards. | Closed via `2026-05-05 SpecOps Project Dashboard Expansion.md`. |
+| `document-entity-support-for-adrs` | `done` | ADRs, runbooks, guides, architecture and evidence docs need first-class document treatment. | Closed via `2026-05-05 SpecOps Document Entity Support for ADRs.md`. |
 | `full-historical-spec-backfill` | `triaged` | Full overview requires historical spec coverage. | Wait until mixed backfill validates reconstruction rules. |
 | `release-entity-records` | `triaged` | Releases should link specs, artifacts, environments and evidence. | Promote when field-level release labels are insufficient. |
 | `environment-tracking-model` | `triaged` | Spec status and artifact status need environment-level distinction. | Define after real examples appear in mixed backfill. |
@@ -190,5 +190,7 @@ Done signal:
 | 2026-05-04 | Codex | RAG Project Board Pilot unter `_shared/SpecOps/` umgesetzt und Verifikationsevidenz erfasst. |
 | 2026-05-04 | User | Fehlende Sichtbarkeit zurueckgestellter Punkte und zu leere Portfolio-Sicht moniert. |
 | 2026-05-04 | Codex | Deferred Scope als Backlog-Entities, Projektplatzhalter, Project Index und Coverage View nachgezogen. |
+| 2026-05-05 | Codex | Backlog-Tabelle nach Accepted-Closeout von Mixed Backfill und Project Dashboard Expansion synchronisiert. |
+| 2026-05-05 | Codex | Backlog-Tabelle nach Accepted-Closeout von Document Entity Support synchronisiert. |
 
 SessionId: codex-desktop-current-thread
