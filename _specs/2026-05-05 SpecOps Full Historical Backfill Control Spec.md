@@ -201,7 +201,7 @@ Aktueller Source-Recount vom 2026-05-05:
 | Phase | Source Path / Subset | Expected Source Count | source_type | Intended Entity Type | Current Imported Count | Remaining Candidate Count | Skipped / Linked-Only Count | metadata_quality Summary | Proposed Scale | Status |
 |---:|---|---:|---|---|---:|---:|---:|---|---|---|
 | 0 | `historical-001` batch | 5 | mixed narrative | `type: spec` | 5 | 0 | 0 | explicit/inferred/conflict | n/a | done |
-| 1 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/Completed/` | 32 | `completed_narrative_spec` plus support docs | `type: spec` or `type: document` by classification | 11 | 21 | 0 current | mixed | M next | in progress |
+| 1 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/Completed/` | 32 | `completed_narrative_spec` plus support docs | `type: spec` or `type: document` by classification | 32 | 0 | 0 current | explicit/inferred/conflict | completed final | done |
 | 2 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/` active root files | 13 | `narrative_spec` | `type: spec` | 13 | 0 | 0 current | explicit plus one conflict | completed M | done |
 | 3 | `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_specs/` | 19 | `narrative_spec` | `type: spec` | 19 | 0 | 0 current | explicit plus one inferred index | completed L | done |
 | 4 | `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs/Specs/` | 29 | `narrative_spec` / `completed_narrative_spec` | `type: spec` | 0 | 29 | 0 current | unknown | M then L | planned |
@@ -307,6 +307,8 @@ Verification vom 2026-05-05:
 | Old OpenSpec Evidence | removed | Kein bestehender OpenSpec-Change wird als replaybare Evidence vorausgesetzt. |
 | OpenSpec archive closeout | ran | Aktive Change-Liste ist leer; archiviert wurden `2026-05-05-specops-full-historical-backfill-delivery-plan`, `2026-05-05-specops-full-historical-backfill-phase-1a` und `2026-05-05-specops-kmu-specs-backfill`. |
 | Shared active root archive closeout | ran | `specops-shared-active-root-specs-backfill` wurde als `2026-05-05-specops-shared-active-root-specs-backfill` archiviert; aktive Change-Liste ist leer und `openspec validate --all --strict` meldet 5/5 valid. |
+| Completed Phase 1B archive closeout | ran | `specops-completed-nebenkosten-2025-backfill` wurde als `2026-05-05-specops-completed-nebenkosten-2025-backfill` archiviert; aktive Change-Liste ist leer und `openspec validate --all --strict` meldet 6/6 valid. |
+| Final Completed support/RAG run | ran | `specops-final-completed-support-rag-backfill` importierte 5 RAG-Completed-Specs und 3 Support-Dokumente; Completed-Coverage steht jetzt bei `32/32`. |
 
 Runtime-Validierung:
 
@@ -329,5 +331,8 @@ Nicht anwendbar fuer SpecOps Runtime. Diese Spec erzeugt Planungs- und Steuerart
 | 2026-05-05 | Codex | Accepted Closeout abgeschlossen: drei OpenSpec-Changes archiviert, kanonische OpenSpec-Specs erzeugt und `openspec validate --all --strict` mit 4/4 valid wiederholt. |
 | 2026-05-05 | Codex | Shared active root Backfill importierte die 12 fehlenden Root-Specs; active-root Coverage steht jetzt bei `13/13`. |
 | 2026-05-05 | Codex | Accepted Closeout fuer `specops-shared-active-root-specs-backfill` abgeschlossen: Change archiviert, kanonische OpenSpec-Spec erzeugt und `openspec validate --all --strict` mit 5/5 valid wiederholt. |
+| 2026-05-05 | Codex | Completed Phase 1B importierte 13 Nebenkostenabrechnung-2025-Completed-Specs; Completed-Coverage steht jetzt bei `24/32`. |
+| 2026-05-05 | Codex | Accepted Closeout fuer `specops-completed-nebenkosten-2025-backfill` abgeschlossen: Change archiviert, kanonische OpenSpec-Spec erzeugt und `openspec validate --all --strict` mit 6/6 valid wiederholt. |
+| 2026-05-05 | Codex | Finaler Completed-Support/RAG-Run importierte die letzten acht Completed-Quellen; Completed-Coverage steht jetzt bei `32/32`. |
 
 SessionId: codex-desktop-current-thread

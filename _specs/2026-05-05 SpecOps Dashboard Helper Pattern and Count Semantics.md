@@ -1,5 +1,5 @@
 **Date:** 2026-05-05
-**Status:** 🟡 Spec
+**Status:** 🟢 Accepted
 **Scope:** SpecOps Dashboard Follow-up fuer renderstabile Helper, klare Projektzaehlungen und wartbare DataviewJS-Konventionen
 
 ---
@@ -247,11 +247,58 @@ Autorenreview am 2026-05-05:
 4. Verification Commands enthalten Existenzchecks, Strukturchecks, DataviewJS-Syntaxcheck und einen Node-Check fuer lokale Helper-Isolation im `Needs Attention`-Block.
 5. Ergebnis: keine offenen Review-Findings.
 
+## Implementation Evidence
+
+Direct-Mode-Umsetzung am 2026-05-05:
+
+1. `Dashboard.md` `Needs Attention` enthaelt einen lokalen `linkEl`-Helper.
+2. `project-index.md` nutzt `countKey = project.project ?? project.title ?? project.file.name` fuer Specs, Active Specs, Backlog und Metadata Attention.
+3. Project Index zeigt `Project Entity` und `Project Key` sichtbar auf den Karten.
+4. `_shared/SpecOps/Reference/dashboard-helper-patterns.md` dokumentiert isolierte DataviewJS-Bloecke, `linkEl`, Card/Grid/Metric und `countKey`.
+5. Root-Dashboard verlinkt `[[Reference/dashboard-helper-patterns]]`.
+
+Verification Status:
+
+| Check | Status | Evidence |
+|---|---|---|
+| `test -f _shared/SpecOps/Dashboard.md` | ran-target | Exit-Code `0` |
+| `test -f _shared/SpecOps/Dashboards/project-index.md` | ran-target | Exit-Code `0` |
+| `test -f _shared/SpecOps/Reference/dashboard-helper-patterns.md` | ran-target | Exit-Code `0` |
+| `rg -n 'function linkEl' _shared/SpecOps/Dashboard.md` | ran-target | Vier lokale Helper gefunden, inklusive `Needs Attention` |
+| `rg -n 'const countKey\|Project Key\|Project Entity' _shared/SpecOps/Dashboards/project-index.md` | ran-target | `countKey`, `Project Entity`, `Project Key` gefunden |
+| `rg -n 'DataviewJS blocks are isolated\|linkEl\|Card\|Grid\|Metric\|countKey' _shared/SpecOps/Reference/dashboard-helper-patterns.md` | ran-target | Alle Pattern-Begriffe gefunden |
+| `rg -n 'dashboard-helper-patterns' _shared/SpecOps/Dashboard.md` | ran-target | Root-Reference-Link gefunden |
+| DataviewJS syntax check | ran-target | `Parsed 5 dataviewjs blocks` |
+| Needs Attention local-helper check | ran-target | `Needs Attention block has local linkEl helper` |
+
+Runtime Validation:
+
+1. Obsidian-Dataview-Rendering ist fuer diesen Markdown-only Slice das relevante Runtime-Signal.
+2. Shell-seitig wurden DataviewJS-Syntax und blocklokale Helper-Isolation gruen geprueft.
+3. Docker/Health Checks und `check-build-watcher` sind nicht anwendbar, weil kein NCG-Backend, kein Service und kein Build-Pipeline-Pfad im Scope beruehrt wurde.
+4. Visuelle Obsidian-Sichtpruefung bleibt das Review-Signal fuer Acceptance/Closeout.
+
+## Closeout Evidence
+
+Closeout am 2026-05-05:
+
+1. User hat den Change akzeptiert.
+2. Alle neun Verification Commands wurden im Closeout erneut mit Exit-Code `0` ausgefuehrt.
+3. `openspec list --json` zeigte keinen zugehoerigen aktiven OpenSpec-Change fuer diesen Direct-Mode-Slice; kein OpenSpec-Archiv war erforderlich.
+4. Der lokale SpecOps-Dokumentationsstand wurde synchronisiert:
+   - Backlog-Entity `specops-dashboard-helper-pattern-count-semantics` auf `done` gesetzt.
+   - Spec-Entity `specops-dashboard-helper-pattern-count-semantics-2026-05-05` angelegt.
+   - Source Inventory um die akzeptierte narrative Spec ergaenzt.
+5. RAG-Closeout-Recherche (`rag workflow spec-closeout --scope all`) lieferte nur unspezifische NCG-Treffer; exakte `rg`-Recherche fand relevante Referenzen nur in SpecOps/Shared-AI-Docs.
+
 ## History
 
 | Date | Author | Change |
 |------|--------|--------|
 | 2026-05-05 | User | Review-Findings fuer Needs-Attention-Helper, Project-Count-Semantik und Helper-Duplikation als neue Spec freigegeben. |
 | 2026-05-05 | Codex | Erste Spec fuer Dashboard Helper Pattern and Count Semantics erstellt und reviewt. |
+| 2026-05-05 | Codex | Scope Contract im Direct Mode fixiert und Status auf Plan gesetzt. |
+| 2026-05-05 | Codex | Direct-Mode-Implementierung abgeschlossen, alle Spec-Verification-Commands gruen ausgefuehrt und Status auf Implemented gesetzt. |
+| 2026-05-05 | User + Codex | Change akzeptiert, Closeout-Verifikation erneut gruen replayt und Status auf Accepted gesetzt. |
 
 SessionId: codex-desktop-current-thread
