@@ -309,6 +309,7 @@ Verification vom 2026-05-05:
 | Shared active root archive closeout | ran | `specops-shared-active-root-specs-backfill` wurde als `2026-05-05-specops-shared-active-root-specs-backfill` archiviert; aktive Change-Liste ist leer und `openspec validate --all --strict` meldet 5/5 valid. |
 | Completed Phase 1B archive closeout | ran | `specops-completed-nebenkosten-2025-backfill` wurde als `2026-05-05-specops-completed-nebenkosten-2025-backfill` archiviert; aktive Change-Liste ist leer und `openspec validate --all --strict` meldet 6/6 valid. |
 | Final Completed support/RAG run | ran | `specops-final-completed-support-rag-backfill` importierte 5 RAG-Completed-Specs und 3 Support-Dokumente; Completed-Coverage steht jetzt bei `32/32`. |
+| Final Completed support/RAG archive closeout | ran | `specops-final-completed-support-rag-backfill` wurde als `2026-05-05-specops-final-completed-support-rag-backfill` archiviert; aktive Change-Liste ist leer und `openspec validate --all --strict` meldet 7/7 valid. |
 
 Runtime-Validierung:
 
@@ -334,5 +335,6 @@ Nicht anwendbar fuer SpecOps Runtime. Diese Spec erzeugt Planungs- und Steuerart
 | 2026-05-05 | Codex | Completed Phase 1B importierte 13 Nebenkostenabrechnung-2025-Completed-Specs; Completed-Coverage steht jetzt bei `24/32`. |
 | 2026-05-05 | Codex | Accepted Closeout fuer `specops-completed-nebenkosten-2025-backfill` abgeschlossen: Change archiviert, kanonische OpenSpec-Spec erzeugt und `openspec validate --all --strict` mit 6/6 valid wiederholt. |
 | 2026-05-05 | Codex | Finaler Completed-Support/RAG-Run importierte die letzten acht Completed-Quellen; Completed-Coverage steht jetzt bei `32/32`. |
+| 2026-05-05 | Codex | Accepted Closeout fuer `specops-final-completed-support-rag-backfill` abgeschlossen: Change archiviert, kanonische OpenSpec-Spec erzeugt und `openspec validate --all --strict` mit 7/7 valid wiederholt. |
 
 SessionId: codex-desktop-current-thread
