@@ -210,6 +210,12 @@ Implementierung startet erst, wenn alle Punkte erfüllt sind:
    - Unit/Integration Tests
    - Runtime/Compose Start
    - Health/Smoke Checks
+   - Plattform-/Shell-Contract der Kommandos (z. B. macOS vs Linux) ist explizit.
+   - Readiness-Strategie für timing-sensitive Runtime-Checks ist explizit (Poll/Retry/Wait).
+   - Scope-Guard-Baseline ist explizit (Branch-History vs Working-Tree) inklusive Verhalten auf long-lived branches.
+   - Risk-based Verification Preflight ist definiert (nur High-Risk-Kommandos; getrennte Statuslogik).
+   - Anti-Loop-Regel ist definiert: kein rekursives "Verifikation der Verifikation".
+   - Vereinfachungen/Anpassungen von Verification Commands sind als Vorschlagspfad mit User-Freigabe geregelt.
 7. Offene Risiken, Abhängigkeiten und Blocker sind dokumentiert.
 
 ## Decision Freeze Pack (kontextabhängige Checkliste)

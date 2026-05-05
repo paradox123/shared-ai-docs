@@ -16,10 +16,17 @@
 
 - name: runtime-proof-gate
   scope: general
-  counter: 3
+  counter: 4
   signal: Delivery status remained formally correct (`NOT READY`) but foundational runtime blockers were not escalated early enough, causing user-perceived mismatch between requested implementation and delivered scope.
-  latest_evidence: /Users/dh/.codex/sessions/2026/04/21/rollout-2026-04-21T07-49-37-019dae96-456d-76e2-b1e5-562f1534a6cd.jsonl
+  latest_evidence: /Users/dh/.codex/sessions/2026/05/01/rollout-2026-05-01T10-42-01-019de2b3-b4c3-7883-b237-9b4a2078c13e.jsonl
   suggested_skill_or_playbook: Enforce an early foundational-runtime reality gate and explicit blocker decision before continuing implementation workflows.
+
+- name: verification-command-determinism
+  scope: general
+  counter: 1
+  signal: Verification command blocks can fail for non-functional reasons (platform-specific command semantics, branch-history scope guards on long-lived branches, startup timing races), creating avoidable rework.
+  latest_evidence: /Users/dh/.codex/sessions/2026/05/01/rollout-2026-05-01T10-42-01-019de2b3-b4c3-7883-b237-9b4a2078c13e.jsonl
+  suggested_skill_or_playbook: Add explicit verification-command authoring constraints (portability/readiness/baseline semantics) in doc-coauthoring and enforce them in spec-change-delivery.
 
 - name: codex-local-config-discovery-playbook
   scope: project:ncg-backend

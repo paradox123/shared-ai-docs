@@ -86,6 +86,24 @@ Only include them when the spec explicitly requires them.
 11. Never label a local rehearsal as an environment gate-run (`develop_hetzner`, production, etc.) unless executed in that actual target runtime.
 12. When a spec distinguishes legacy vs candidate endpoints, assert and report both concrete values before execution (`OLD != CANDIDATE`).
 13. If required spec checks depend on missing foundational runtime prerequisites (for example missing CLI, missing service repo, missing runtime manifests), stop early and ask for a scope decision before continuing.
+14. Verification commands must be shell/platform explicit enough to run on the declared target operator environment (for example macOS vs Linux) without hidden behavior differences.
+15. Verification commands must fail on assertion mismatches, not on benign pre-existing state (for example copying already-existing files).
+16. If a scope guard compares branch history (`origin/develop...HEAD`), the spec must either require a dedicated clean branch or define a working-tree-only fallback guard for long-lived branches.
+17. Runtime smoke checks after `docker compose up` must include a deterministic readiness strategy (poll/retry/restart policy) before first HTTP assertions.
+18. Before full verification execution, run a risk-based preflight only for high-failure-risk commands (runtime boot, TLS/bootstrap, branch-history guards, first endpoint smokes).
+19. Preflight is preparation only: it must never be treated as a substitute for the required verification checklist.
+20. Never recurse into "verification of verification". One preflight pass is allowed; then run the canonical spec verification block.
+21. If command simplifications are beneficial, propose them first with rationale and trade-offs; do not silently alter the spec command contract.
+
+## Risk-Based Verification Preflight
+
+Use a short preflight phase before the main verification run when command fragility risk is high.
+
+1. Select only high-risk commands for preflight.
+2. Mark preflight outcomes separately (`pass`, `warn`, `fail`) from verification statuses.
+3. If preflight exposes command-contract flaws, pause and propose explicit simplifications/fixes to the user before modifying commands.
+4. Keep preflight bounded to one pass; do not create recursive loops.
+5. After preflight, run the full spec verification block and report gate-relevant statuses (`planned`, `ran-target`, `ran-rehearsal`, `failed`, `blocked`).
 
 ## Verification Truth Contract
 
@@ -186,6 +204,8 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
    - If runtime or infrastructure is in scope, run smoke checks for the affected path.
    - Record the exact commands, exit status, runtime environment label, and meaningful output.
    - Treat the spec's `Verification` section as a hard checklist: every listed command must be attempted and reported.
+   - Run risk-based preflight first when command fragility risk is high, but keep preflight reporting separate from gate verdict statuses.
+   - If a check sequence is timing-sensitive (containers, proxies, startup migrations), apply the spec-defined readiness strategy before marking endpoint checks as failed.
    - If a command is blocked (missing creds/services/tools), report it explicitly as blocked and keep verdict `NOT READY`.
    - If checks involve endpoint identity (for example old vs candidate STS), log the concrete endpoint values used in each command.
    - Do not infer functional-path success from CI health/watcher success; run the functional command path explicitly when required by the spec.

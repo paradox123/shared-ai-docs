@@ -32,6 +32,26 @@ In this workflow:
 - blocking `[MISSING ...]` and `[DECISION ...]` items must stay visible until resolved,
 - "ready for planning" or "ready for implementation" should be judged against the shared gate definitions.
 
+## Verification Command Authoring Guardrail
+
+When a spec includes a `Verification Commands` block, enforce these authoring rules before marking the spec ready:
+
+1. Declare execution context explicitly (working directory, shell assumptions, platform target such as macOS/Linux).
+2. Avoid commands that fail on benign pre-existing state unless that failure is intentional and documented.
+3. For branch-based scope guards, specify baseline semantics and compatibility for long-lived branches (or require a clean branch).
+4. For runtime startup checks (`docker compose up`, service boot), include deterministic readiness handling before first HTTP assertions.
+5. For each command, define success criteria that can be observed from exit code and/or concrete output token.
+6. Define a risk-based preflight subset (only high-risk commands) plus clear separation from gate verification statuses.
+7. Explicitly forbid recursive verification loops (no "verification of verification" chains).
+8. If command simplifications are needed, list them as proposals with rationale/trade-offs first; adopt only after user confirmation.
+
+If these are not met, add explicit markers such as:
+- `[MISSING verification portability contract]`
+- `[MISSING runtime readiness strategy]`
+- `[DECISION scope guard baseline strategy]`
+- `[MISSING risk-based verification preflight subset]`
+- `[DECISION verification command simplification approval]`
+
 ## Documentation Research Routing
 
 Before spec drafting continues, route documentation discovery to

@@ -1,9 +1,9 @@
 {
-  "last_run": "2026-04-22T06:31:22.442Z",
-  "newest_session_timestamp": "2026-04-22T06:31:22.442Z",
+  "last_run": "2026-05-01T11:11:57.351Z",
+  "newest_session_timestamp": "2026-05-01T11:11:57.351Z",
   "sessions_processed": [
-    "/Users/dh/.codex/sessions/2026/04/21/rollout-2026-04-21T07-49-37-019dae96-456d-76e2-b1e5-562f1534a6cd.jsonl",
-    "/Users/dh/.codex/sessions/2026/04/21/rollout-2026-04-21T09-22-45-019daeeb-8c2d-74d0-b046-52b4161ab01d.jsonl"
+    "/Users/dh/.codex/sessions/2026/04/25/rollout-2026-04-25T16-41-57-019dc517-1587-7860-a754-7e2ee215f22e.jsonl",
+    "/Users/dh/.codex/sessions/2026/05/01/rollout-2026-05-01T10-42-01-019de2b3-b4c3-7883-b237-9b4a2078c13e.jsonl"
   ],
-  "summary": "Improved spec-change-delivery with an early foundational runtime reality gate and mode-ambiguity stop rule; improved improve-skills session selection with cwd/workspace filtering and cursor guardrails; updated memory counters and report for 2026-04-22 run."
+  "summary": "Updated spec-change-delivery and doc-coauthoring with verification command quality guardrails (portability, benign-state handling, scope baseline semantics, readiness strategy) and refreshed improve-skills memory/report." 
 }
