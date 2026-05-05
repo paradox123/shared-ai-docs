@@ -14,7 +14,7 @@ Die SpecOps Parent-Spec definiert Dokumente und ADRs als eigene Entity-Klasse:
 
 Das bestehende Backlog-Item `document-entity-support-for-adrs` ist dafuer bereits triaged. Der Trigger ist jetzt erfuellt, weil im Vault echte ADR-Quellen fuer `Mittelstand KI Startbahn` existieren:
 
-`/Users/dh/Documents/DanielsVault/private/mittelstand-ki-startbahn/v2/docs/adr/`
+`/Users/dh/Documents/DanielsVault/ki-fuer-kmu/v2/docs/adr/`
 
 Aktuelle Pilotquellen:
 
@@ -43,7 +43,7 @@ Nach diesem Slice soll beantwortbar sein:
 1. Nutzung des bestehenden Entity-Typs `type: document`.
 2. Mindestens eine reale Document Entity unter `_shared/SpecOps/Entities/documents/`.
 3. Pilotquelle:
-   - `/Users/dh/Documents/DanielsVault/private/mittelstand-ki-startbahn/v2/docs/adr/`
+   - `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/v2/docs/adr/`
 4. Drei reale ADR-Dateien aus der Pilotquelle werden als Document Entities erfasst.
 5. Falls `Mittelstand KI Startbahn` noch nicht in SpecOps-Projekt-Taxonomie und Project Entities existiert, darf dieser Slice genau diesen Projekt-Eintrag minimal ergaenzen.
 6. Ein Dokument-Dashboard unter `_shared/SpecOps/Dashboards/`, das `type: document` Entities zeigt.
@@ -80,7 +80,7 @@ Akzeptanzkriterien:
 
 ### R2 - Real ADR Document Pilot
 
-Der Slice muss die drei realen ADRs aus `private/mittelstand-ki-startbahn/v2/docs/adr/` als Document Entities erfassen.
+Der Slice muss die drei realen ADRs aus `ki-fuer-kmu/v2/docs/adr/` als Document Entities erfassen.
 
 Akzeptanzkriterien:
 
@@ -160,7 +160,7 @@ Alle Daten bleiben lokal im Vault. Es wird nichts publiziert oder synchronisiert
 Go:
 
 1. Drei ADR Document Entities existieren.
-2. Alle drei ADRs aus `private/mittelstand-ki-startbahn/v2/docs/adr/` sind als Document Entities erfasst.
+2. Alle drei ADRs aus `ki-fuer-kmu/v2/docs/adr/` sind als Document Entities erfasst.
 3. `Mittelstand KI Startbahn` ist als Projektwert verwendbar.
 4. Document Dashboard existiert und nutzt Dataview.
 5. Root-Dashboard referenziert die Document View.
@@ -224,7 +224,7 @@ Success Criteria:
 
 Diese Spec ist bereit fuer einen anschliessenden Scope-Contract-/Delivery-Run, wenn:
 
-1. der User die Pilotquelle `private/mittelstand-ki-startbahn/v2/docs/adr/` akzeptiert,
+1. der User die Pilotquelle `ki-fuer-kmu/v2/docs/adr/` akzeptiert,
 2. keine blockierenden `[MISSING ...]` oder `[DECISION ...]` Marker offen sind,
 3. die Verification Commands als DoD-Basis akzeptiert werden.
 

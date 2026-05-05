@@ -17,12 +17,12 @@
 | 0 | `historical-001` batch | 5 | mixed narrative | `type: spec` | 5 | 0 | explicit/inferred/conflict | done |
 | 1 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/Completed/` | included in 42 shared specs | `completed_narrative_spec` | `type: spec` | included in 7 shared imports | 0 | mixed | planned |
 | 2 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/` active specs | included in 42 shared specs | `narrative_spec` | `type: spec` | included in 7 shared imports | 0 | mixed | planned |
-| 3 | `/Users/dh/Documents/DanielsVault/private/_specs/` | 19 | `narrative_spec` | `type: spec` | 2 | 0 | explicit so far | planned |
+| 3 | `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_specs/` | 19 | `narrative_spec` | `type: spec` | 2 | 0 | explicit so far | planned |
 | 4 | `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs/Specs/` | 29 | `narrative_spec` / `completed_narrative_spec` | `type: spec` | 0 | 0 | unknown | planned |
 | 5 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/` | 10 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence, not primary spec by default | 1 primary OpenSpec-derived spec exists from earlier work | 0 | explicit | planned |
 | 5 | `/Users/dh/Documents/DanielsVault/_shared/danielsvault-rag/openspec/` | 17 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence, not primary spec by default | 0 | 0 | unknown | planned |
 | 6 | `/Users/dh/Documents/DanielsVault/private/Vermietung/nebenkosten-abrechnung/openspec/` | 87 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence after narrative dedupe | 0 | 0 | unknown | planned |
-| 7 | `/Users/dh/Documents/DanielsVault/private/mittelstand-ki-startbahn/_legacy/v1-node-prototype/openspec/` | 35 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | legacy relationship/evidence | 0 | 0 | unknown | planned |
+| 7 | `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_legacy/v1-node-prototype/openspec/` | 35 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | legacy relationship/evidence | 0 | 0 | unknown | planned |
 | 8 | Historical documents discovered during source review | variable | document-like | `type: document` | 3 current ADR documents | 0 | explicit so far | planned |
 
 ## Per-Run Acceptance Contract

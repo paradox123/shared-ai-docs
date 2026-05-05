@@ -26,10 +26,10 @@ Eine erste lokale Discovery zeigt, dass relevante Spec-/OpenSpec-Pfade ueber meh
 1. `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/`
 2. `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/`
 3. `/Users/dh/Documents/DanielsVault/_shared/danielsvault-rag/openspec/`
-4. `/Users/dh/Documents/DanielsVault/private/_specs/`
+4. `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_specs/`
 5. `/Users/dh/Documents/DanielsVault/private/Vermietung/nebenkosten-abrechnung/openspec/`
-6. `/Users/dh/Documents/DanielsVault/private/mittelstand-ki-startbahn/_legacy/v1-node-prototype/openspec/`
-7. `/Users/dh/Documents/DanielsVault/private/mittelstand-ki-startbahn/v2/docs/specs/`
+6. `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_legacy/v1-node-prototype/openspec/`
+7. `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/v2/docs/specs/`
 8. `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs/Specs/`
 
 Dieser Slice promoted ausschliesslich das bestehende Backlog-Item `full-historical-spec-backfill` mit `candidate_slice: SpecOps Backfill`.

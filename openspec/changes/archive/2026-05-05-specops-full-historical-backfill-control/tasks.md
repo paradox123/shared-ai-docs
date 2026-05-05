@@ -22,7 +22,7 @@ The following tracks are intentionally not marked as tasks for this control-chan
 
 1. Phase 1: shared-ai-docs completed narrative specs.
 2. Phase 2: shared-ai-docs active narrative specs.
-3. Phase 3: private `_specs`.
+3. Phase 3: `ki-fuer-kmu` `_specs`.
 4. Phase 4: NCG `docs/Specs`.
 5. Phase 5: shared/RAG OpenSpec relationship mapping.
 6. Phase 6: Nebenkostenabrechnung OpenSpec relationship mapping.

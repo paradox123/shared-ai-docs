@@ -61,11 +61,11 @@ The remaining work spans narrative specs, completed narrative specs, OpenSpec ca
 | 0 | `historical-001` accepted baseline | 5 imported batch entities | Done; never re-import. |
 | 1 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/Completed/` | included in 42 shared specs | Primary `type: spec` candidates, with completed-path inference allowed. |
 | 2 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/` active specs | included in 42 shared specs | Primary `type: spec` candidates, status from header/source context. |
-| 3 | `/Users/dh/Documents/DanielsVault/private/_specs/` | 19 | Primary `type: spec` candidates; private paths stay local. |
+| 3 | `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_specs/` | 19 | Primary `type: spec` candidates; dedicated repository paths stay local. |
 | 4 | `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs/Specs/` | 29 | Primary `type: spec` candidates, likely separate NCG delivery runs. |
 | 5 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/` and `/Users/dh/Documents/DanielsVault/_shared/danielsvault-rag/openspec/` | 27 | Link as canonical/evidence relationships unless no narrative source exists. |
 | 6 | `/Users/dh/Documents/DanielsVault/private/Vermietung/nebenkosten-abrechnung/openspec/` | 87 | Link/dedupe against narrative Nebenkosten specs before entity creation. |
-| 7 | `/Users/dh/Documents/DanielsVault/private/mittelstand-ki-startbahn/_legacy/v1-node-prototype/openspec/` | 35 | Legacy evidence/relationship mapping; low priority. |
+| 7 | `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_legacy/v1-node-prototype/openspec/` | 35 | Legacy evidence/relationship mapping; low priority. |
 | 8 | Historical documents discovered during phases | variable | `type: document`, not `type: spec`, unless the source is actually a spec. |
 
 ## Risks / Trade-offs

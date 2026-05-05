@@ -1,5 +1,5 @@
 **Date:** 2026-05-05
-**Status:** 🟡 Implementation-ready fuer neuen Delivery-Plan
+**Status:** 🟢 Accepted
 **Scope:** Control Spec fuer den vollstaendigen historischen SpecOps-Backfill aus Inventar, mit Scope-Contract-Planung statt einzelner Batch-Child-Specs
 
 ---
@@ -37,7 +37,7 @@ Nach dieser Spec soll klar sein:
 3. Phasierung nach Quellgruppen:
    - shared-ai-docs `_specs/Completed`
    - shared-ai-docs aktive `_specs`
-   - private `_specs`
+   - `ki-fuer-kmu` `_specs`
    - NCG `docs/Specs`
    - DanielsVault RAG OpenSpec-Beziehungen
    - Nebenkostenabrechnung OpenSpec-Beziehungen
@@ -201,14 +201,14 @@ Aktueller Source-Recount vom 2026-05-05:
 | Phase | Source Path / Subset | Expected Source Count | source_type | Intended Entity Type | Current Imported Count | Remaining Candidate Count | Skipped / Linked-Only Count | metadata_quality Summary | Proposed Scale | Status |
 |---:|---|---:|---|---|---:|---:|---:|---|---|---|
 | 0 | `historical-001` batch | 5 | mixed narrative | `type: spec` | 5 | 0 | 0 | explicit/inferred/conflict | n/a | done |
-| 1 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/Completed/` | 32 | `completed_narrative_spec` plus support docs | `type: spec` or `type: document` by classification | 6 | 26 | 0 current | mixed | S first, then M | ready |
-| 2 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/` active root files | 11 | `narrative_spec` | `type: spec` | 1 | 10 | 0 current | mixed | M | planned |
-| 3 | `/Users/dh/Documents/DanielsVault/private/_specs/` | 19 | `narrative_spec` | `type: spec` | 2 | 17 | 0 current | explicit so far | M/L | planned |
+| 1 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/Completed/` | 32 | `completed_narrative_spec` plus support docs | `type: spec` or `type: document` by classification | 11 | 21 | 0 current | mixed | M next | in progress |
+| 2 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/` active root files | 13 | `narrative_spec` | `type: spec` | 13 | 0 | 0 current | explicit plus one conflict | completed M | done |
+| 3 | `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_specs/` | 19 | `narrative_spec` | `type: spec` | 19 | 0 | 0 current | explicit plus one inferred index | completed L | done |
 | 4 | `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs/Specs/` | 29 | `narrative_spec` / `completed_narrative_spec` | `type: spec` | 0 | 29 | 0 current | unknown | M then L | planned |
 | 5 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/` | 19 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence, not primary spec by default | 1 legacy OpenSpec-derived entity exists | 18 relationship candidates | tbd by narrative dedupe | explicit/unknown | S relationship audit | planned |
 | 6 | `/Users/dh/Documents/DanielsVault/_shared/danielsvault-rag/openspec/` | 17 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence, not primary spec by default | 0 | 17 relationship candidates | tbd by narrative dedupe | unknown | S relationship audit | planned |
 | 7 | `/Users/dh/Documents/DanielsVault/private/Vermietung/nebenkosten-abrechnung/openspec/` | 87 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence after narrative dedupe | 0 | 87 relationship candidates | tbd by narrative dedupe | unknown | XL blocked for manual import | planned |
-| 8 | `/Users/dh/Documents/DanielsVault/private/mittelstand-ki-startbahn/_legacy/v1-node-prototype/openspec/` | 35 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | legacy relationship/evidence | 0 | 35 relationship candidates | tbd by narrative dedupe | unknown | XL blocked for manual import | planned |
+| 8 | `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_legacy/v1-node-prototype/openspec/` | 35 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | legacy relationship/evidence | 0 | 35 relationship candidates | tbd by narrative dedupe | unknown | XL blocked for manual import | planned |
 | 9 | Historical document-like sources discovered during narrative review | per-run exact list required | document-like | `type: document` | 3 current ADR documents | tbd per run | tbd per run | explicit so far | S | planned |
 
 Vorgeschlagener erster Run:
@@ -239,12 +239,13 @@ Pflichtchecks fuer diese Spec-Erstellung:
 4. `rg -n 'control_spec: .+2026-05-05 SpecOps Full Historical Backfill Control Spec.md|promoted_to: .+2026-05-05 SpecOps Full Historical Spec Backfill.md' _shared/SpecOps/Entities/backlog/full-historical-spec-backfill.md`
 5. `find "_shared/shared-ai-docs/_specs/Completed" -type f -name "*.md" | wc -l`
 6. `find "_shared/shared-ai-docs/_specs" -maxdepth 1 -type f -name "*.md" | wc -l`
-7. `find "private/_specs" -type f -name "*.md" | wc -l`
+7. `find "ki-fuer-kmu/_specs" -type f -name "*.md" | wc -l`
 8. `find "ncg/ncg-docs/docs/Specs" -type f -name "*.md" | wc -l`
+9. `find "_shared/shared-ai-docs/openspec" -path "_shared/shared-ai-docs/openspec/changes/specops-full-historical-backfill-delivery-plan" -prune -o -type f -name "*.md" -print | wc -l`
 
 Success Criteria:
 
-1. Checks 1-8 geben Exit-Code `0` zurueck.
+1. Checks 1-9 geben Exit-Code `0` zurueck.
 2. Count-Checks bestaetigen die in der Delivery Run Scale dokumentierten Quellgruppen-Zahlen oder die Spec wird vor dem Run aktualisiert.
 3. Manuelles Review bestaetigt, dass die Control Spec keine direkte Entity-Erstellung fordert und den neuen Delivery-Plan als naechsten Steuerungsschritt beschreibt.
 
@@ -256,9 +257,30 @@ Diese Spec ist bereit fuer den naechsten Schritt, wenn:
 2. die Delivery Run Scale konkrete Counts und einen ersten Source-Subset-Vorschlag enthaelt,
 3. vor Entity-Erstellung ein finaler Scope Contract fuer genau einen Run fixiert wird.
 
-Aktueller Stand: implementation-ready als Control Spec fuer einen neuen Delivery-Plan. Es wird kein bestehender OpenSpec-Change als gueltige Implementierungsbasis vorausgesetzt.
+Aktueller Stand: accepted und geschlossen. Der Delivery-Plan, Phase 1A und der KI-fuer-KMU-Backfill wurden umgesetzt, verifiziert und als OpenSpec-Changes archiviert. Es wird kein frueherer, zu enger archivierter OpenSpec-Change als gueltige Implementierungsbasis vorausgesetzt.
 
 ## Implementation Evidence
+
+OpenSpec Delivery-Plan umgesetzt und archiviert am 2026-05-05:
+
+Aktive Change-Quelle:
+
+`/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/archive/2026-05-05-specops-full-historical-backfill-delivery-plan/`
+
+Kanonische OpenSpec-Spec:
+
+`/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/specs/specops-historical-backfill-delivery-control/spec.md`
+
+Erstellte OpenSpec-Artefakte:
+
+1. `scope-contract.md`
+2. `proposal.md`
+3. `design.md`
+4. `tasks.md`
+5. `acceptance-criteria-matrix.md`
+6. `spec-deltas.md`
+7. `specs/specops-historical-backfill-delivery-control/spec.md`
+8. `implementation-evidence.md`
 
 Autonomous Review Resolution vom 2026-05-05:
 
@@ -275,13 +297,20 @@ Verification vom 2026-05-05:
 | Control Spec Check 2 | ran | `spec-source-inventory`, `historical-001`, `OpenSpec` und `full-historical-spec-backfill` sind auffindbar. |
 | Control Spec Check 3 | ran | `type: spec`, `type: document`, `openspec_change_artifact` und `metadata_quality` sind auffindbar. |
 | Control Spec Check 4 | ran | Backlog-Item verweist auf akzeptierten Slice und Control Spec. |
-| Source Recount | ran | Completed `32`, shared active root `11`, private `_specs` `19`, NCG `docs/Specs` `29`. |
+| Source Recount | ran | Completed `32`, shared active root `13`, `ki-fuer-kmu/_specs` `19`, NCG `docs/Specs` `29`; active root changed from `12` after a new dashboard-navigation spec appeared. |
+| OpenSpec validate | ran | `openspec validate specops-full-historical-backfill-delivery-plan --strict --json` meldete `valid: true`. |
+| OpenSpec validate all | ran | `openspec validate --all --strict --json` meldete nach Archivierung 4/4 valid. |
+| OpenSpec status | ran | `openspec status --change specops-full-historical-backfill-delivery-plan --json` meldete alle Kernartefakte als `done`. |
 | Marker sanity | ran | Kein formaler missing/decision/blocked Marker in Control Spec. |
+| Task sanity | ran | Keine offenen Checkbox-Tasks und kein blocked-as-done Pattern in `tasks.md`. |
+| check-build-watcher status | ran | `dotnet run tests/check-build.local.watch.cs -- --show-state` im NCG Backend meldete `isArmed: false`, Branch `develop`, Project `4`. |
 | Old OpenSpec Evidence | removed | Kein bestehender OpenSpec-Change wird als replaybare Evidence vorausgesetzt. |
+| OpenSpec archive closeout | ran | Aktive Change-Liste ist leer; archiviert wurden `2026-05-05-specops-full-historical-backfill-delivery-plan`, `2026-05-05-specops-full-historical-backfill-phase-1a` und `2026-05-05-specops-kmu-specs-backfill`. |
+| Shared active root archive closeout | ran | `specops-shared-active-root-specs-backfill` wurde als `2026-05-05-specops-shared-active-root-specs-backfill` archiviert; aktive Change-Liste ist leer und `openspec validate --all --strict` meldet 5/5 valid. |
 
 Runtime-Validierung:
 
-Nicht anwendbar. Diese Spec erzeugt Planungs- und Steuerartefakte fuer SpecOps und aendert keine lauffaehige Anwendung, kein Docker-Compose-Target und keinen NCG-Backend-Buildpfad. `check-build-watcher` wurde deshalb nicht armiert.
+Nicht anwendbar fuer SpecOps Runtime. Diese Spec erzeugt Planungs- und Steuerartefakte fuer SpecOps und aendert keine lauffaehige Anwendung, kein Docker-Compose-Target und keinen NCG-Backend-Buildpfad. `check-build-watcher` wurde separat als Pipeline-/Build-Watcher-Evidence geprueft, aber nicht als funktionale SpecOps-Runtime-Validierung gewertet.
 
 ## History
 
@@ -291,5 +320,14 @@ Nicht anwendbar. Diese Spec erzeugt Planungs- und Steuerartefakte fuer SpecOps u
 | 2026-05-05 | Codex | Control Spec fuer den restlichen Full Historical Backfill erstellt. |
 | 2026-05-05 | Codex | Einen frueheren, zu engen Planungs-Change erstellt; dieser ist archiviert und gilt nicht als Implementierungsbasis. |
 | 2026-05-05 | Codex | Review-Findings autonom aufgeloest: veraltete OpenSpec-Change-Evidence entfernt, Status auf neuen Delivery-Plan umgestellt und konkrete Run-Scale mit Source-Counts ergaenzt. |
+| 2026-05-05 | Codex | Mittelstand KI Startbahn Source-Pfade auf den neuen Repository-Ort `/Users/dh/Documents/DanielsVault/ki-fuer-kmu` aktualisiert. |
+| 2026-05-05 | Codex | Source-Baseline nach Dateioperationen neu gezaehlt: shared `_specs` `44` gesamt, davon `32` Completed und `12` active root; shared OpenSpec `19`. |
+| 2026-05-05 | Codex | OpenSpec Delivery-Plan `specops-full-historical-backfill-delivery-plan` erstellt, verifiziert und Control Spec auf Implemented gesetzt. |
+| 2026-05-05 | Codex | Phase 1A importierte fuenf Completed-Nebenkostenabrechnung-Specs als SpecOps-Entities; Completed-Coverage steht jetzt bei `11/32`. |
+| 2026-05-05 | Codex | `ki-fuer-kmu/_specs` Backfill importierte die 17 fehlenden Mittelstand-KI-Startbahn-Specs; KI-Coverage steht jetzt bei `19/19`. |
+| 2026-05-05 | Codex | Closeout-Recount aktualisierte shared `_specs` auf `45` gesamt, davon `32` Completed und `13` active root. |
+| 2026-05-05 | Codex | Accepted Closeout abgeschlossen: drei OpenSpec-Changes archiviert, kanonische OpenSpec-Specs erzeugt und `openspec validate --all --strict` mit 4/4 valid wiederholt. |
+| 2026-05-05 | Codex | Shared active root Backfill importierte die 12 fehlenden Root-Specs; active-root Coverage steht jetzt bei `13/13`. |
+| 2026-05-05 | Codex | Accepted Closeout fuer `specops-shared-active-root-specs-backfill` abgeschlossen: Change archiviert, kanonische OpenSpec-Spec erzeugt und `openspec validate --all --strict` mit 5/5 valid wiederholt. |
 
 SessionId: codex-desktop-current-thread
