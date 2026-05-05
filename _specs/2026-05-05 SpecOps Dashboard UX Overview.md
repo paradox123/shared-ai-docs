@@ -1,5 +1,5 @@
 **Date:** 2026-05-05
-**Status:** 🟡 Spec
+**Status:** 🔵 Implemented
 **Scope:** UX-Optimierung der SpecOps Boards und Dashboards fuer grafische, scanbare Uebersicht ohne horizontale Tabellenlast
 
 ---
@@ -306,7 +306,51 @@ Ready-Signale:
 4. Es gibt keine blockierenden `[MISSING ...]` oder `[DECISION ...]` Marker.
 5. Der Scope bleibt auf UX, Informationsarchitektur und Dashboard-Darstellung begrenzt.
 
-Aktueller Stand: implementation-ready als Spec. Naechster Schritt ist ein Scope-Contract-/Delivery-Run, der die Anforderungen in konkrete Dashboard-Aenderungen uebersetzt.
+Aktueller Stand: umgesetzt und mit den Pflichtchecks verifiziert. Obsidian-Lesbarkeit bleibt als User-Review-Signal offen.
+
+## Implementation Evidence
+
+Target runtime: lokaler DanielsVault unter `/Users/dh/Documents/DanielsVault`.
+
+Execution mode: direct, ohne OpenSpec Change.
+
+Scope Contract:
+
+1. In scope: bestehende SpecOps-Dashboard-Dateien, Dataview-/DataviewJS-Views, schmalere Detailbereiche, UX-Spec-Evidence.
+2. Out of scope: Entity-Schema, Backfill, Skill-/Agent-Verhalten, RAG-Runtime, neue Pflicht-Plugins.
+3. Acceptance targets: Root-Snapshot, Global-Spec-Lifecycle-Lanes, Backlog-Triage-Lanes, Project `Now / Next / Later`, Metadata-Attention-Lanes, keine alte breite Global-Spec-Haupttabelle.
+
+Changed files:
+
+1. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboard.md`
+2. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboards/global-spec-board.md`
+3. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboards/specops-backlog.md`
+4. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboards/missing-metadata.md`
+5. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboards/projects/danielsvault-rag.md`
+6. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboards/projects/nebenkostenabrechnung.md`
+7. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Dashboards/projects/ncg-checkbuild.md`
+8. `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-05-05 SpecOps Dashboard UX Overview.md`
+
+Runtime / watcher applicability:
+
+1. Keine Runtime-Validierung mit `docker compose` erforderlich, weil dieser Slice ausschliesslich Markdown-/Dataview-Dashboard-Dateien aendert.
+2. `check-build-watcher` ist nicht anwendbar, weil kein NCG-Backend-Code, keine Pipeline und kein Build-Artefakt in Scope sind.
+3. Obsidian-/Dataview-Renderpruefung bleibt ein manuelles Review-Signal.
+
+| Check | Status | Evidence |
+|-------|--------|----------|
+| 1. Dashboard exists | ran-target | `test -f _shared/SpecOps/Dashboard.md` returned exit code `0`. |
+| 2. Global Spec Board exists | ran-target | `test -f _shared/SpecOps/Dashboards/global-spec-board.md` returned exit code `0`. |
+| 3. Backlog board exists | ran-target | `test -f _shared/SpecOps/Dashboards/specops-backlog.md` returned exit code `0`. |
+| 4. Root dashboard has Snapshot | ran-target | `rg -n '^## Snapshot' _shared/SpecOps/Dashboard.md` found the section. |
+| 5. Global board has lifecycle/lane markers | ran-target | `rg -n 'Lifecycle\|Spec Lifecycle\|status-lane\|spec-lane' _shared/SpecOps/Dashboards/global-spec-board.md` found the expected markers. |
+| 6. Project boards have Now / Next / Later | ran-target | `rg -n 'Now / Next / Later\|^## Now' _shared/SpecOps/Dashboards/projects` found all three project boards. |
+| 7. Backlog board has triage statuses | ran-target | `rg -n 'ready_for_spec\|triaged\|proposed\|parked' _shared/SpecOps/Dashboards/specops-backlog.md` found the lane/status logic. |
+| 8. Global and Backlog boards have Details | ran-target | `rg -n '^## Details\|Detail' _shared/SpecOps/Dashboards/global-spec-board.md _shared/SpecOps/Dashboards/specops-backlog.md` found both detail sections. |
+| 9. Old broad Global Spec table absent | ran-target | `rg -n 'TABLE .*project, status, lifecycle, metadata_quality, source, artifacts, evidence' _shared/SpecOps/Dashboards/global-spec-board.md` returned expected exit code `1`. |
+| 10. DataviewJS syntax parses | ran-target | Node syntax check parsed 14 `dataviewjs` blocks from changed dashboard files. |
+
+Verdict: READY for Obsidian review. Shell-verifiable acceptance criteria passed; final visual acceptance depends on opening the dashboards in Obsidian.
 
 ## History
 
@@ -316,5 +360,7 @@ Aktueller Stand: implementation-ready als Spec. Naechster Schritt ist ein Scope-
 | 2026-05-05 | Codex | Erste UX-Spec fuer SpecOps Dashboard Overview erstellt. |
 | 2026-05-05 | User | DataviewJS und optionale Plugin-Empfehlungen fuer die UX-Umsetzung freigegeben. |
 | 2026-05-05 | Codex | DataviewJS-Entscheidung aufgeloest und Spec als implementation-ready markiert. |
+| 2026-05-05 | Codex | Direct-Mode Scope Contract fuer dashboard-only DataviewJS-Umsetzung fixiert und Spec-Status auf Plan gesetzt. |
+| 2026-05-05 | Codex | Dashboard UX mit Snapshot-, Lane-, Triage- und Projektarbeitsansichten umgesetzt, verifiziert und Spec-Status auf Implemented gesetzt. |
 
 SessionId: codex-desktop-current-thread

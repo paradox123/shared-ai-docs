@@ -1,5 +1,5 @@
 **Date:** 2026-05-05
-**Status:** 🔵 Implemented
+**Status:** 🟢 Accepted
 **Scope:** SpecOps Full Historical Spec Backfill Inventarisierung und kontrollierter Backfill historischer User-Specs, Spec-Ordner und OpenSpec-Artefakte
 
 ---
@@ -256,6 +256,10 @@ Aktueller Stand: implementation-ready als Spec.
 
 Umgesetzt am 2026-05-05 im Direct Mode ohne OpenSpec Change.
 
+Closeout-Scope:
+
+Diese Spec ist als `historical-001` Inventory- und erster Batch-Slice akzeptiert. Sie schliesst nicht den gesamten Full Historical Backfill ab. Die weitere Abarbeitung aller uebrigen Specs, Dokumente und OpenSpec-Beziehungen wird ueber eine separate Control Spec und daraus abgeleitete OpenSpec-Planung gesteuert.
+
 Geaenderte Artefakte:
 
 1. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Reference/spec-source-inventory.md`
@@ -295,6 +299,14 @@ Runtime-Validierung:
 
 Nicht anwendbar. Dieser Slice aendert nur lokale Obsidian-Markdown-Artefakte in SpecOps und keine lauffaehige Anwendung, kein Docker-Compose-Target und keinen NCG-Backend-Buildpfad. `check-build-watcher` wurde deshalb nicht armiert.
 
+Closeout vom 2026-05-05:
+
+1. Alle 12 Verifikationskommandos wurden erneut ausgefuehrt.
+2. Checks 1-11 lieferten Exit-Code `0`.
+3. Check 12 lieferte als negativer Guard erwartungsgemaess Exit-Code `1`.
+4. OpenSpec-Archivierung war nicht anwendbar, weil dieser Slice im Direct Mode ohne OpenSpec Change umgesetzt wurde.
+5. RAG-gestuetzte Dokumentationssuche fuer den Closeout fand keine zusaetzliche Projektdokumentation, die fuer diesen SpecOps-Markdown-Slice synchronisiert werden musste; relevante Treffer waren bestehende Workflow-Skills, NCG-Beispielspecs oder bereits betroffene SpecOps-Artefakte.
+
 ## History
 
 | Date | Author | Change |
@@ -305,5 +317,7 @@ Nicht anwendbar. Dieser Slice aendert nur lokale Obsidian-Markdown-Artefakte in 
 | 2026-05-05 | Codex | Ziel, R3, Go/No-Go und Verification auf verpflichtenden ersten Backfill-Batch von 5-10 Specs geschaerft. |
 | 2026-05-05 | Codex | Direct-Mode Scope Contract fixiert und Spec auf Plan gesetzt. |
 | 2026-05-05 | Codex | Direct-Mode Umsetzung abgeschlossen, Verification Evidence erfasst und Spec auf Implemented gesetzt. |
+| 2026-05-05 | User | Implementierten Inventory- und historical-001-Slice akzeptiert und Closeout angefordert. |
+| 2026-05-05 | Codex | Closeout-Verifikation erneut ausgefuehrt, Scope-Abgrenzung ergaenzt und Spec auf Accepted gesetzt. |
 
 SessionId: codex-desktop-current-thread
