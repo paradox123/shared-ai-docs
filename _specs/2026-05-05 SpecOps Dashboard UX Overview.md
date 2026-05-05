@@ -362,5 +362,7 @@ Verdict: READY for Obsidian review. Shell-verifiable acceptance criteria passed;
 | 2026-05-05 | Codex | DataviewJS-Entscheidung aufgeloest und Spec als implementation-ready markiert. |
 | 2026-05-05 | Codex | Direct-Mode Scope Contract fuer dashboard-only DataviewJS-Umsetzung fixiert und Spec-Status auf Plan gesetzt. |
 | 2026-05-05 | Codex | Dashboard UX mit Snapshot-, Lane-, Triage- und Projektarbeitsansichten umgesetzt, verifiziert und Spec-Status auf Implemented gesetzt. |
+| 2026-05-05 | User | Global Spec Board Review: Lifecycle-Lanes sollen innerhalb der Swimlanes nach Projekt gruppiert werden. |
+| 2026-05-05 | Codex | Global Spec Board Lifecycle-Lanes projektweise untergliedert und damit die globale Statussicht scanbarer gemacht. |
 
 SessionId: codex-desktop-current-thread

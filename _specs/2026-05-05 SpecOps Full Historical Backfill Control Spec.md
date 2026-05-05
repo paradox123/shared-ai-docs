@@ -1,6 +1,6 @@
 **Date:** 2026-05-05
-**Status:** 🔵 Implemented
-**Scope:** Control Spec fuer den vollstaendigen historischen SpecOps-Backfill aus Inventar, mit OpenSpec-Planung statt einzelner Batch-Child-Specs
+**Status:** 🟡 Implementation-ready fuer neuen Delivery-Plan
+**Scope:** Control Spec fuer den vollstaendigen historischen SpecOps-Backfill aus Inventar, mit Scope-Contract-Planung statt einzelner Batch-Child-Specs
 
 ---
 
@@ -15,11 +15,11 @@ Der Slice `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-0
 
 Der Name des Backlog-Items `full-historical-spec-backfill` beschreibt aber weiterhin das groessere Ziel: perspektivisch sollen alle relevanten historischen Specs, Dokumente und OpenSpec-Beziehungen im SpecOps-Control-Plane-Modell auffindbar, klassifiziert und kontrolliert abgearbeitet werden.
 
-Diese Control Spec ersetzt nicht das akzeptierte `historical-001`-Artefakt. Sie baut darauf auf und definiert den naechsten Ordnungsrahmen: aus dem Inventar soll ein OpenSpec Change beziehungsweise Implementierungsplan entstehen, der die verbleibenden Quellen in Phasen abarbeitbar macht, ohne fuer jede 5er- oder 20er-Gruppe eine neue Child-Spec zu schreiben.
+Diese Control Spec ersetzt nicht das akzeptierte `historical-001`-Artefakt. Sie baut darauf auf und definiert den naechsten Ordnungsrahmen: aus dem Inventar soll ein neuer Scope-Contract-basierter Implementierungsplan entstehen, der die verbleibenden Quellen in Phasen abarbeitbar macht, ohne fuer jede 5er- oder 20er-Gruppe eine neue Child-Spec zu schreiben.
 
 ## Ziel
 
-SpecOps soll einen steuerbaren Full-Backfill-Prozess bekommen, der aus dem vorhandenen Inventar einen OpenSpec-basierten Abarbeitungsplan erzeugt.
+SpecOps soll einen steuerbaren Full-Backfill-Prozess bekommen, der aus dem vorhandenen Inventar einen konkreten Abarbeitungsplan mit wiederholbaren Scope Contracts erzeugt.
 
 Nach dieser Spec soll klar sein:
 
@@ -32,8 +32,8 @@ Nach dieser Spec soll klar sein:
 
 ## In Scope
 
-1. Definition eines OpenSpec-Change-Artefakts fuer den restlichen Full Historical Backfill.
-2. Ableitung der OpenSpec-Tasks aus `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Reference/spec-source-inventory.md`.
+1. Definition eines neuen Delivery-Control-Plans fuer den restlichen Full Historical Backfill.
+2. Ableitung der Delivery-Tasks aus `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Reference/spec-source-inventory.md`.
 3. Phasierung nach Quellgruppen:
    - shared-ai-docs `_specs/Completed`
    - shared-ai-docs aktive `_specs`
@@ -71,7 +71,7 @@ Die Control Spec muss das bestehende Inventar als Baseline verwenden.
 
 Akzeptanzkriterien:
 
-1. Das OpenSpec-Planartefakt referenziert `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Reference/spec-source-inventory.md`.
+1. Der neue Delivery-Plan referenziert `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Reference/spec-source-inventory.md`.
 2. Jede Quellgruppe aus dem Inventar wird entweder einer Backfill-Phase zugeordnet oder bewusst als nicht vorhanden / nicht in Scope markiert.
 3. Der akzeptierte Batch `historical-001` wird als bereits erledigte Baseline behandelt und nicht erneut importiert.
 
@@ -87,17 +87,17 @@ Akzeptanzkriterien:
 4. OpenSpec change artifacts duerfen nicht pauschal als primaere Spec-Entities entstehen.
 5. Bei unklarer Abgrenzung muss `metadata_quality: inferred`, `missing` oder `conflict` sichtbar bleiben.
 
-### R3 - OpenSpec Control Change
+### R3 - Delivery Control Plan
 
-Aus dieser Control Spec soll ein OpenSpec Change fuer die Abarbeitung entstehen.
+Aus dieser Control Spec soll ein neuer Delivery-Control-Plan fuer die Abarbeitung entstehen. Ein frueherer, inzwischen archivierter OpenSpec-Change gilt fuer diese Spec nicht als gueltige Implementierungsbasis.
 
 Akzeptanzkriterien:
 
-1. Der OpenSpec Change enthaelt mindestens `proposal.md`, `design.md`, `tasks.md`, `acceptance-criteria-matrix.md` und `implementation-evidence.md`.
-2. `tasks.md` ist nach Quellgruppen und Phasen strukturiert.
+1. Der neue Delivery-Plan enthaelt mindestens Scope Contract, Run-Tasks, Acceptance-Matrix und Implementation-Evidence.
+2. Run-Tasks sind nach Quellgruppen, Phasen und konkreten Source-Subsets strukturiert.
 3. Tasks sind abarbeitbar, ohne fuer jede Gruppe eine neue Child-Spec zu erstellen.
-4. Jeder Delivery-Run darf ueber einen Scope Contract einen Teil der Tasks abarbeiten.
-5. `implementation-evidence.md` sammelt pro Run die erzeugten Entities, Guards und Verification-Ergebnisse.
+4. Jeder Delivery-Run muss ueber einen Scope Contract einen klar begrenzten Teil der Tasks abarbeiten.
+5. Implementation-Evidence sammelt pro Run die erzeugten Entities, Guards und Verification-Ergebnisse.
 
 ### R4 - Coverage And Verification Model
 
@@ -111,12 +111,15 @@ Akzeptanzkriterien:
    - source_type
    - intended entity type
    - current imported count
+   - remaining candidate count
    - skipped/linked-only count
    - metadata_quality summary
+   - vorgeschlagene Run-Scale
    - status
 2. Die SpecOps-Coverage-Dashboard-Struktur bleibt der sichtbare Vault-Ort fuer Fortschritt.
 3. Negative Guards verhindern, dass `source_type: openspec_change_artifact` als primaere Spec-Entity entsteht.
 4. Der Plan definiert, wie bereits importierte Entities erkannt und nicht doppelt erzeugt werden.
+5. Jeder konkrete Delivery-Run muss mit exakten Source-Dateien oder einer exakten Source-Query starten; globale Platzhalter wie `included in 42 shared specs` oder `variable` reichen fuer Run-Akzeptanz nicht aus.
 
 ### R5 - Backlog Discipline
 
@@ -126,14 +129,14 @@ Akzeptanzkriterien:
 
 1. `full-historical-spec-backfill` bleibt sichtbar und verweist auf den akzeptierten `historical-001`-Slice und diese Control Spec.
 2. `automated-metadata-reconstruction` bleibt separat.
-3. Neue Scope-Erweiterungen werden entweder als Task im OpenSpec Change oder als eigenes Backlog-Item sichtbar gemacht.
+3. Neue Scope-Erweiterungen werden entweder als Task im Delivery-Plan oder als eigenes Backlog-Item sichtbar gemacht.
 4. Ein Delivery-Run ohne Scope Contract ist nicht erlaubt.
 
 ## Decision Freeze Pack
 
 ### Zielbild und Scope
 
-Diese Control Spec definiert den Ordnungsrahmen fuer den restlichen Full Historical Backfill. Die Umsetzung soll danach ueber einen OpenSpec Change mit Phasen/Tasks laufen, nicht ueber viele kleine neue Child-Specs.
+Diese Control Spec definiert den Ordnungsrahmen fuer den restlichen Full Historical Backfill. Die Umsetzung soll danach ueber einen neuen Delivery-Plan mit Phasen, Scope Contracts und Evidence laufen, nicht ueber viele kleine neue Child-Specs.
 
 ### Betroffene Bereiche
 
@@ -142,7 +145,7 @@ Diese Control Spec definiert den Ordnungsrahmen fuer den restlichen Full Histori
 3. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Entities/specs/`
 4. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Entities/documents/`
 5. `/Users/dh/Documents/DanielsVault/_shared/SpecOps/Entities/backlog/full-historical-spec-backfill.md`
-6. OpenSpec Change unter `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/`
+6. Neuer Delivery-Plan / Scope Contract, der in dieser Session aus dieser Control Spec erstellt wird
 
 ### Secret-/Config-Contract
 
@@ -150,7 +153,7 @@ Keine Secrets. Alle Quellen bleiben lokal im DanielsVault.
 
 ### Datenmigration/Fallback
 
-Kein Big-Bang. Der OpenSpec Change steuert Phasen und Teilruns. Jeder Teilrun muss bereits vorhandene Entities erkennen und Duplikate vermeiden. Historische Source-Dateien bleiben unveraendert.
+Kein Big-Bang. Scope Contracts steuern Phasen und Teilruns. Jeder Teilrun muss bereits vorhandene Entities erkennen und Duplikate vermeiden. Historische Source-Dateien bleiben unveraendert.
 
 ### Externe Integrationen
 
@@ -165,7 +168,7 @@ Keine externe Synchronisierung. Private Spec-Pfade duerfen lokal in SpecOps refe
 Go:
 
 1. Control Spec ist erstellt und mit `full-historical-spec-backfill` verknuepft.
-2. OpenSpec Change kann aus dem Inventar erstellt werden.
+2. Neuer Delivery-Plan kann aus dem Inventar erstellt werden.
 3. Quellgruppen, Entity-Regeln und negative OpenSpec-Dedupe-Guards sind definiert.
 4. Abarbeitung kann ueber Scope Contracts erfolgen, ohne pro Batch neue Child-Specs zu schreiben.
 
@@ -180,7 +183,39 @@ No-Go:
 ### Owner fuer offene Risiken
 
 1. User: akzeptiert, ob diese Control Spec der richtige Ordnungsrahmen fuer den restlichen Full Backfill ist.
-2. Codex: erstellt daraus den OpenSpec Change, sobald die Control Spec akzeptiert oder zur Umsetzung freigegeben wird.
+2. Codex: erstellt daraus den neuen Delivery-Plan beziehungsweise den ersten Scope Contract, sobald die Control Spec akzeptiert oder zur Umsetzung freigegeben wird.
+
+## Delivery Run Scale Vorschlag
+
+Die folgenden Skalen gelten fuer kuenftige Backfill-Runs. Sie ersetzen unklare Batch-Groessen und machen sichtbar, wann ein Run noch autonom kontrollierbar ist.
+
+| Scale | Source Count | Geeignet fuer | Akzeptanz-Grenze |
+|---|---:|---|---|
+| S | 1-5 konkrete Source-Dateien | erster Run, unsichere Klassifikation, neue Entity-Regeln | alle Quellen einzeln gelistet; keine offenen Klassifikationsentscheidungen am Ende |
+| M | 6-15 konkrete Source-Dateien | wiederholte narrative Specs mit bekanntem Muster | Duplicate-Guard und metadata_quality-Verteilung muessen dokumentiert sein |
+| L | 16-30 konkrete Source-Dateien | ein vollstaendiger Ordnerabschnitt mit homogenem Typ | nur nach erfolgreichem S- oder M-Run; Review-Stichprobe verpflichtend |
+| XL | mehr als 30 Source-Dateien | Inventar-/Coverage-Arbeit oder Automation | nicht als manueller Import-Run erlaubt; braucht eigenes Backlog-Item oder Automation-Spec |
+
+Aktueller Source-Recount vom 2026-05-05:
+
+| Phase | Source Path / Subset | Expected Source Count | source_type | Intended Entity Type | Current Imported Count | Remaining Candidate Count | Skipped / Linked-Only Count | metadata_quality Summary | Proposed Scale | Status |
+|---:|---|---:|---|---|---:|---:|---:|---|---|---|
+| 0 | `historical-001` batch | 5 | mixed narrative | `type: spec` | 5 | 0 | 0 | explicit/inferred/conflict | n/a | done |
+| 1 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/Completed/` | 32 | `completed_narrative_spec` plus support docs | `type: spec` or `type: document` by classification | 6 | 26 | 0 current | mixed | S first, then M | ready |
+| 2 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/` active root files | 11 | `narrative_spec` | `type: spec` | 1 | 10 | 0 current | mixed | M | planned |
+| 3 | `/Users/dh/Documents/DanielsVault/private/_specs/` | 19 | `narrative_spec` | `type: spec` | 2 | 17 | 0 current | explicit so far | M/L | planned |
+| 4 | `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs/Specs/` | 29 | `narrative_spec` / `completed_narrative_spec` | `type: spec` | 0 | 29 | 0 current | unknown | M then L | planned |
+| 5 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/` | 19 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence, not primary spec by default | 1 legacy OpenSpec-derived entity exists | 18 relationship candidates | tbd by narrative dedupe | explicit/unknown | S relationship audit | planned |
+| 6 | `/Users/dh/Documents/DanielsVault/_shared/danielsvault-rag/openspec/` | 17 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence, not primary spec by default | 0 | 17 relationship candidates | tbd by narrative dedupe | unknown | S relationship audit | planned |
+| 7 | `/Users/dh/Documents/DanielsVault/private/Vermietung/nebenkosten-abrechnung/openspec/` | 87 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence after narrative dedupe | 0 | 87 relationship candidates | tbd by narrative dedupe | unknown | XL blocked for manual import | planned |
+| 8 | `/Users/dh/Documents/DanielsVault/private/mittelstand-ki-startbahn/_legacy/v1-node-prototype/openspec/` | 35 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | legacy relationship/evidence | 0 | 35 relationship candidates | tbd by narrative dedupe | unknown | XL blocked for manual import | planned |
+| 9 | Historical document-like sources discovered during narrative review | per-run exact list required | document-like | `type: document` | 3 current ADR documents | tbd per run | tbd per run | explicit so far | S | planned |
+
+Vorgeschlagener erster Run:
+
+| Run | Scale | Source Subset | Expected Source Count | Intended Entity Type | Acceptance Gate |
+|---|---|---|---:|---|---|
+| Phase 1A | S | `2026-03-23 Nebenkostenabrechnung Einzelabrechnung.md`, `2026-03-24 Nebenkostenabrechnung Applikation.md`, `2026-03-26 Stromkosten-Datenkorrektur und Test-Oracle Alignment.md`, `2026-03-27 Stromkosten und Warmwasseraufbereitung (Waermepumpe BE1).md`, `2026-03-28 Nebenkostenabrechnung Blege und Messwerte.md` | 5 | primary `type: spec` unless duplicate guard finds an existing primary entity | five sources classified, imported or explicitly skipped with duplicate/evidence reason; dashboard count updated |
 
 ## Verifikationskommandos
 
@@ -202,47 +237,35 @@ Pflichtchecks fuer diese Spec-Erstellung:
 2. `rg -n 'spec-source-inventory|historical-001|OpenSpec|full-historical-spec-backfill' "_shared/shared-ai-docs/_specs/2026-05-05 SpecOps Full Historical Backfill Control Spec.md"`
 3. `rg -n 'type: spec|type: document|openspec_change_artifact|metadata_quality' "_shared/shared-ai-docs/_specs/2026-05-05 SpecOps Full Historical Backfill Control Spec.md"`
 4. `rg -n 'control_spec: .+2026-05-05 SpecOps Full Historical Backfill Control Spec.md|promoted_to: .+2026-05-05 SpecOps Full Historical Spec Backfill.md' _shared/SpecOps/Entities/backlog/full-historical-spec-backfill.md`
+5. `find "_shared/shared-ai-docs/_specs/Completed" -type f -name "*.md" | wc -l`
+6. `find "_shared/shared-ai-docs/_specs" -maxdepth 1 -type f -name "*.md" | wc -l`
+7. `find "private/_specs" -type f -name "*.md" | wc -l`
+8. `find "ncg/ncg-docs/docs/Specs" -type f -name "*.md" | wc -l`
 
 Success Criteria:
 
-1. Checks 1-4 geben Exit-Code `0` zurueck.
-2. Manuelles Review bestaetigt, dass die Control Spec keine direkte Entity-Erstellung fordert und den OpenSpec Change als naechsten Steuerungsschritt beschreibt.
+1. Checks 1-8 geben Exit-Code `0` zurueck.
+2. Count-Checks bestaetigen die in der Delivery Run Scale dokumentierten Quellgruppen-Zahlen oder die Spec wird vor dem Run aktualisiert.
+3. Manuelles Review bestaetigt, dass die Control Spec keine direkte Entity-Erstellung fordert und den neuen Delivery-Plan als naechsten Steuerungsschritt beschreibt.
 
 ## Implementation Readiness
 
 Diese Spec ist bereit fuer den naechsten Schritt, wenn:
 
-1. der User bestaetigt, dass der restliche Full Backfill ueber einen OpenSpec Change statt ueber viele Batch-Child-Specs laufen soll,
-2. keine blockierenden MISSING- oder DECISION-Marker offen sind,
-3. die OpenSpec-Planung als naechster Artefakttyp akzeptiert ist.
+1. keine blockierenden MISSING- oder DECISION-Marker offen sind,
+2. die Delivery Run Scale konkrete Counts und einen ersten Source-Subset-Vorschlag enthaelt,
+3. vor Entity-Erstellung ein finaler Scope Contract fuer genau einen Run fixiert wird.
 
-Aktueller Stand: implementation-ready als Control Spec, vorbehaltlich User-Akzeptanz des Steuerungswegs.
+Aktueller Stand: implementation-ready als Control Spec fuer einen neuen Delivery-Plan. Es wird kein bestehender OpenSpec-Change als gueltige Implementierungsbasis vorausgesetzt.
 
 ## Implementation Evidence
 
-Umgesetzt am 2026-05-05 im OpenSpec Mode.
+Autonomous Review Resolution vom 2026-05-05:
 
-OpenSpec Change:
-
-`/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/specops-full-historical-backfill-control/`
-
-Erstellte OpenSpec-Artefakte:
-
-1. `scope-contract.md`
-2. `proposal.md`
-3. `design.md`
-4. `specs/specops-historical-backfill-control/spec.md`
-5. `tasks.md`
-6. `acceptance-criteria-matrix.md`
-7. `spec-deltas.md`
-8. `implementation-evidence.md`
-
-Scope-Ergebnis:
-
-1. Der OpenSpec Change steuert den restlichen Full Historical Backfill.
-2. `historical-001` bleibt akzeptierte Baseline und wird nicht erneut importiert.
-3. Die eigentlichen Backfill-Phasen sind als Folgeausfuehrung definiert, nicht in diesem Change importiert.
-4. Future Runs muessen jeweils einen Scope Contract gegen den OpenSpec-Plan nutzen.
+1. Der archivierte, zu enge OpenSpec-Change wird nicht mehr als gueltige Implementierungsbasis behandelt.
+2. Nicht replaybare OpenSpec-Validation-Evidence wurde entfernt.
+3. Coverage-Akzeptanz wurde von groben Platzhaltern auf aktuelle Source-Counts, Remaining Counts und Run-Scale-Vorschlaege umgestellt.
+4. Der erste vorgeschlagene Delivery-Run ist als Scale-S-Run mit fuenf konkreten Source-Dateien definiert.
 
 Verification vom 2026-05-05:
 
@@ -252,22 +275,21 @@ Verification vom 2026-05-05:
 | Control Spec Check 2 | ran | `spec-source-inventory`, `historical-001`, `OpenSpec` und `full-historical-spec-backfill` sind auffindbar. |
 | Control Spec Check 3 | ran | `type: spec`, `type: document`, `openspec_change_artifact` und `metadata_quality` sind auffindbar. |
 | Control Spec Check 4 | ran | Backlog-Item verweist auf akzeptierten Slice und Control Spec. |
-| OpenSpec validate | ran | `openspec validate specops-full-historical-backfill-control --strict --json` meldete `valid: true`. |
-| OpenSpec status | ran | `openspec status --change specops-full-historical-backfill-control --json` meldete alle Kernartefakte als `done`. |
-| Marker sanity | ran | Kein formaler missing/decision/blocked Marker in Control Spec oder OpenSpec Change. |
-| Task sanity | ran | Keine offenen Checkbox-Tasks und kein blocked-as-done Pattern in `tasks.md`. |
+| Source Recount | ran | Completed `32`, shared active root `11`, private `_specs` `19`, NCG `docs/Specs` `29`. |
+| Marker sanity | ran | Kein formaler missing/decision/blocked Marker in Control Spec. |
+| Old OpenSpec Evidence | removed | Kein bestehender OpenSpec-Change wird als replaybare Evidence vorausgesetzt. |
 
 Runtime-Validierung:
 
-Nicht anwendbar. Dieser Change erzeugt OpenSpec-Planungs- und Steuerartefakte fuer SpecOps und aendert keine lauffaehige Anwendung, kein Docker-Compose-Target und keinen NCG-Backend-Buildpfad. `check-build-watcher` wurde deshalb nicht armiert.
+Nicht anwendbar. Diese Spec erzeugt Planungs- und Steuerartefakte fuer SpecOps und aendert keine lauffaehige Anwendung, kein Docker-Compose-Target und keinen NCG-Backend-Buildpfad. `check-build-watcher` wurde deshalb nicht armiert.
 
 ## History
 
 | Date | Author | Change |
 |------|--------|--------|
-| 2026-05-05 | User | Nach Akzeptanz von `historical-001` vorgeschlagen, den restlichen Full Backfill ueber ein OpenSpec-Steuerartefakt aus dem Inventar abzuarbeiten. |
+| 2026-05-05 | User | Nach Akzeptanz von `historical-001` vorgeschlagen, den restlichen Full Backfill ueber ein Steuerartefakt aus dem Inventar abzuarbeiten. |
 | 2026-05-05 | Codex | Control Spec fuer den restlichen Full Historical Backfill erstellt. |
-| 2026-05-05 | Codex | OpenSpec Scope Contract fixiert und Change `specops-full-historical-backfill-control` erstellt. |
-| 2026-05-05 | Codex | OpenSpec-Artefakte, Acceptance Matrix und Evidence erstellt, verifiziert und Control Spec auf Implemented gesetzt. |
+| 2026-05-05 | Codex | Einen frueheren, zu engen Planungs-Change erstellt; dieser ist archiviert und gilt nicht als Implementierungsbasis. |
+| 2026-05-05 | Codex | Review-Findings autonom aufgeloest: veraltete OpenSpec-Change-Evidence entfernt, Status auf neuen Delivery-Plan umgestellt und konkrete Run-Scale mit Source-Counts ergaenzt. |
 
 SessionId: codex-desktop-current-thread
