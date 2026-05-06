@@ -144,6 +144,25 @@ When the requested scope is too large for one verifiable increment:
 4. Recommend an execution order.
 5. Implement only one change in the current run unless the user explicitly widens scope.
 
+## Parallel Child-Spec Execution Guardrail
+
+If the user explicitly asks to run child specs in parallel, act as an orchestrator first:
+
+1. Create a lane matrix before delegating or editing:
+   - child spec,
+   - owner/agent,
+   - allowed files/modules,
+   - shared files that are read-only for the lane,
+   - dependencies,
+   - required verification commands,
+   - integration order.
+2. Allow parallel implementation only when write-sets are disjoint or each lane has an isolated branch/worktree/OpenSpec change.
+3. Assign one integration owner for shared control files such as parent spec, slice plan, child-spec index, backlog, shared helpers, or common verification scripts.
+4. Do not let parallel lanes change common contracts independently. If a contract must change, promote that as its own serial prerequisite slice.
+5. After lane completion, perform integration review, rerun cross-slice verification, update parent coverage/backlog, and report a single final `READY` / `NOT READY` verdict.
+
+If these conditions are not met, recommend serial execution even when multiple child specs exist.
+
 ## Kickoff Contract
 
 At the start of execution, normalize the request into this short contract:

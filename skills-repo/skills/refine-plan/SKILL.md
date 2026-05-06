@@ -67,6 +67,10 @@ When scope pressure is detected:
    - done signal / verification.
 3. Recommend a default execution order.
 4. Mark cross-change dependencies explicitly instead of hiding them in one long task list.
+5. Build a lane matrix when independent slices can run in parallel: slice, write-set, shared files, dependency, verification command, integration owner.
+6. Keep deferred work as `[PENDING]` backlog or child-spec actions with trigger and done signal; do not rely on accepted specs being reopened later.
+
+Treat a split plan as implementation-ready only when the next executable child slice is fully bounded and verifiable. Other slices may remain `[PENDING]`, but their parent coverage and re-entry path must be visible.
 
 If the user decides to keep a single plan, keep working but add a visible marker:
 - `[REVIEW Scope risk accepted: <reason>]`

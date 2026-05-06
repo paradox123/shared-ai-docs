@@ -204,7 +204,7 @@ Aktueller Source-Recount vom 2026-05-05:
 | 1 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/Completed/` | 32 | `completed_narrative_spec` plus support docs | `type: spec` or `type: document` by classification | 32 | 0 | 0 current | explicit/inferred/conflict | completed final | done |
 | 2 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/` active root files | 13 | `narrative_spec` | `type: spec` | 13 | 0 | 0 current | explicit plus one conflict | completed M | done |
 | 3 | `/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_specs/` | 19 | `narrative_spec` | `type: spec` | 19 | 0 | 0 current | explicit plus one inferred index | completed L | done |
-| 4 | `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs/Specs/` | 29 | `narrative_spec` / `completed_narrative_spec` | `type: spec` | 0 | 29 | 0 current | unknown | M then L | planned |
+| 4 | `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs/Specs/` | 29 | `narrative_spec` / `completed_narrative_spec` | `type: spec` | 14 | 15 | 0 current | explicit so far | M then L | in progress |
 | 5 | `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/` | 19 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence, not primary spec by default | 1 legacy OpenSpec-derived entity exists | 18 relationship candidates | tbd by narrative dedupe | explicit/unknown | S relationship audit | planned |
 | 6 | `/Users/dh/Documents/DanielsVault/_shared/danielsvault-rag/openspec/` | 17 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence, not primary spec by default | 0 | 17 relationship candidates | tbd by narrative dedupe | unknown | S relationship audit | planned |
 | 7 | `/Users/dh/Documents/DanielsVault/private/Vermietung/nebenkosten-abrechnung/openspec/` | 87 | `openspec_canonical_spec` / `openspec_change_artifact` / `plan_or_evidence_artifact` | relationship/evidence after narrative dedupe | 0 | 87 relationship candidates | tbd by narrative dedupe | unknown | XL blocked for manual import | planned |
@@ -310,6 +310,10 @@ Verification vom 2026-05-05:
 | Completed Phase 1B archive closeout | ran | `specops-completed-nebenkosten-2025-backfill` wurde als `2026-05-05-specops-completed-nebenkosten-2025-backfill` archiviert; aktive Change-Liste ist leer und `openspec validate --all --strict` meldet 6/6 valid. |
 | Final Completed support/RAG run | ran | `specops-final-completed-support-rag-backfill` importierte 5 RAG-Completed-Specs und 3 Support-Dokumente; Completed-Coverage steht jetzt bei `32/32`. |
 | Final Completed support/RAG archive closeout | ran | `specops-final-completed-support-rag-backfill` wurde als `2026-05-05-specops-final-completed-support-rag-backfill` archiviert; aktive Change-Liste ist leer und `openspec validate --all --strict` meldet 7/7 valid. |
+| NCG STS Completed batch 1 | ran | `specops-ncg-sts-completed-backfill-1` importierte 7 akzeptierte NCG STS Completed-Specs; NCG docs Specs Coverage steht jetzt bei `7/29`. |
+| NCG STS Completed batch 1 archive closeout | ran | `specops-ncg-sts-completed-backfill-1` wurde als `2026-05-06-specops-ncg-sts-completed-backfill-1` archiviert; aktive Change-Liste ist leer und `openspec validate --all --strict` meldet 8/8 valid. |
+| NCG STS Completed batch 2 | ran | `specops-ncg-sts-completed-backfill-2` importierte 7 weitere akzeptierte NCG STS Completed-Specs; NCG docs Specs Coverage steht jetzt bei `14/29`. |
+| NCG STS Completed batch 2 archive closeout | ran | `specops-ncg-sts-completed-backfill-2` wurde als `2026-05-06-specops-ncg-sts-completed-backfill-2` archiviert; aktive Change-Liste ist leer und `openspec validate --all --strict` meldet 9/9 valid. |
 
 Runtime-Validierung:
 
@@ -336,5 +340,9 @@ Nicht anwendbar fuer SpecOps Runtime. Diese Spec erzeugt Planungs- und Steuerart
 | 2026-05-05 | Codex | Accepted Closeout fuer `specops-completed-nebenkosten-2025-backfill` abgeschlossen: Change archiviert, kanonische OpenSpec-Spec erzeugt und `openspec validate --all --strict` mit 6/6 valid wiederholt. |
 | 2026-05-05 | Codex | Finaler Completed-Support/RAG-Run importierte die letzten acht Completed-Quellen; Completed-Coverage steht jetzt bei `32/32`. |
 | 2026-05-05 | Codex | Accepted Closeout fuer `specops-final-completed-support-rag-backfill` abgeschlossen: Change archiviert, kanonische OpenSpec-Spec erzeugt und `openspec validate --all --strict` mit 7/7 valid wiederholt. |
+| 2026-05-05 | Codex | Erster NCG STS Completed-Backfill importierte sieben akzeptierte STS-Specs; NCG docs Specs Coverage steht jetzt bei `7/29`. |
+| 2026-05-06 | Codex | Accepted Closeout fuer `specops-ncg-sts-completed-backfill-1` abgeschlossen: Change archiviert, kanonische OpenSpec-Spec erzeugt und `openspec validate --all --strict` mit 8/8 valid wiederholt. |
+| 2026-05-06 | Codex | Zweiter NCG STS Completed-Backfill importierte sieben spaete STS-Specs; NCG docs Specs Coverage steht jetzt bei `14/29`. |
+| 2026-05-06 | Codex | Accepted Closeout fuer `specops-ncg-sts-completed-backfill-2` abgeschlossen: Change archiviert, kanonische OpenSpec-Spec erzeugt und `openspec validate --all --strict` mit 9/9 valid wiederholt. |
 
 SessionId: codex-desktop-current-thread

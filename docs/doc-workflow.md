@@ -197,6 +197,28 @@ OpenSpec ist typischerweise hilfreich bei:
 
 Für kleinere oder klar abgegrenzte Änderungen reicht oft der direkte Plan-Track ohne OpenSpec.
 
+## Parent-/Child-Spec Orchestrierung
+
+Wenn eine Spec wegen Scope-Druck in Child Specs aufgeteilt wird, muss die Parent Spec als Kontrollschicht erhalten bleiben. Child Specs duerfen den Scope nur schneiden, nicht verschwinden lassen.
+
+Pflichtbestandteile:
+
+1. Parent Spec oder Slice-Plan mit Coverage-Matrix: jede Parent-Anforderung ist `done`, `partial`, `pending`, `blocked` oder bewusst `out_of_scope`.
+2. Child-Spec-Index mit Status, Abhaengigkeiten, naechstem empfohlenem Slice und Link auf Evidence/Closeout.
+3. Jede Child Spec enthaelt vor Umsetzung mindestens Scope, Non-Goals, Master-/Parent-Abdeckung, Decision Freeze Pack, konkrete Acceptance Criteria und Verification Commands.
+4. Restscope wird nicht nur als "Next Step" in einer abgeschlossenen Spec abgelegt, sondern als Backlog-/Child-Spec-Eintrag mit Trigger, Done-Signal und Abhaengigkeit.
+5. Closeout einer Child Spec synchronisiert Parent Spec, Slice-Plan/Index, Backlog und OpenSpec-Artefakte, bevor der naechste Slice als fuehrend gilt.
+
+Parallelisierung ist nur sinnvoll, wenn Child Specs unabhaengige Write-Sets und verifizierbare Done-Signale haben.
+
+Parallel-Lane-Regeln:
+
+1. Vor Start eine Lane-Matrix erstellen: Child Spec, Owner/Agent, erlaubte Dateien/Module, verbotene Shared Files, Abhaengigkeiten, Verification Commands.
+2. Shared Control Files wie Parent Spec, Slice-Plan, Index, Backlog oder gemeinsame Helpers haben genau einen Integrations-Owner.
+3. Parallel arbeitende Child Specs laufen in getrennten Branches/Worktrees oder klar getrennten OpenSpec Changes.
+4. Kein paralleler Change darf denselben zentralen Contract still veraendern; Contract-Aenderungen laufen zuerst als eigener kleiner Slice.
+5. Nach Rueckkehr aller Lanes fuehrt der Integrations-Owner Merge, Cross-Slice-Review, Parent-Coverage-Update und die gemeinsame Verification-Replay aus.
+
 ## Definition of Ready (vor Implementierung)
 
 Implementierung startet erst, wenn alle Punkte erfüllt sind:

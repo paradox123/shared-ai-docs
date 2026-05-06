@@ -86,6 +86,16 @@ When scope pressure is detected, do this before continuing:
 2. Propose 2-5 concrete split options (for example by capability, system boundary, lifecycle phase, risk class, or environment lane).
 3. Recommend one split as the default and explain why.
 4. Preserve one short parent overview and move execution details into child specs.
+5. Add a parent/child control section that records coverage, dependencies, status, and the next recommended slice.
+6. Ensure deferred scope becomes a backlog or child-spec entry with a trigger and done signal, not only prose in "Next steps".
+
+Before calling any child spec implementation-ready, verify that it contains:
+- parent/master coverage,
+- explicit in/out scope,
+- a Decision Freeze Pack,
+- concrete acceptance criteria,
+- Verification Commands including runtime/container gates when relevant,
+- dependency and write-set boundaries if parallel execution is plausible.
 
 If the user chooses not to split, keep working but add an explicit marker such as:
 - `[REVIEW Scope risk accepted: <reason>]`

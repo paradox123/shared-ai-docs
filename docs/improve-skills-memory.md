@@ -62,3 +62,10 @@
   signal: The run discovered missing core prerequisites (`rag` CLI/runtime) after execution had already advanced deeply into verification paperwork, leading to avoidable frustration.
   latest_evidence: /Users/dh/.codex/sessions/2026/04/21/rollout-2026-04-21T07-49-37-019dae96-456d-76e2-b1e5-562f1534a6cd.jsonl
   suggested_skill_or_playbook: Add a mandatory early stop-and-choose gate for missing foundational runtime prerequisites in spec-change-delivery.
+
+- name: parent-child-spec-orchestration
+  scope: general
+  counter: 1
+  signal: Scope splitting helped delivery, but child specs, parent coverage, backlog re-entry, and parallel execution ownership were not consistently enforced by the workflow skills.
+  latest_evidence: /Users/dh/.codex/sessions/2026/05/05/rollout-2026-05-05T17-48-36-019df8d3-b142-7c22-9c48-0d755090556b.jsonl
+  suggested_skill_or_playbook: Add parent/child orchestration rules to doc-workflow and delivery skills: coverage matrix, child readiness envelope, backlog trigger/done signal, disjoint write-set lane matrix, and shared-file integration owner.

@@ -1,9 +1,14 @@
 {
-  "last_run": "2026-05-01T11:11:57.351Z",
-  "newest_session_timestamp": "2026-05-01T11:11:57.351Z",
+  "last_run": "2026-05-06T05:52:00.797Z",
+  "newest_session_timestamp": "2026-05-06T05:52:00.797Z",
   "sessions_processed": [
-    "/Users/dh/.codex/sessions/2026/04/25/rollout-2026-04-25T16-41-57-019dc517-1587-7860-a754-7e2ee215f22e.jsonl",
-    "/Users/dh/.codex/sessions/2026/05/01/rollout-2026-05-01T10-42-01-019de2b3-b4c3-7883-b237-9b4a2078c13e.jsonl"
+    "/Users/dh/.codex/sessions/2026/05/04/rollout-2026-05-04T09-32-48-019df1e7-698b-73f3-b891-ecbe5c6a7f28.jsonl",
+    "/Users/dh/.codex/sessions/2026/05/04/rollout-2026-05-04T11-31-07-019df253-bcc3-76a1-aaea-478af40394b4.jsonl",
+    "/Users/dh/.codex/sessions/2026/05/05/rollout-2026-05-05T07-53-12-019df6b2-958e-7891-af7a-0d3b69dd1cea.jsonl",
+    "/Users/dh/.codex/sessions/2026/05/05/rollout-2026-05-05T14-33-59-019df821-83ed-77f1-a0a0-864be881d118.jsonl",
+    "/Users/dh/.codex/sessions/2026/05/05/rollout-2026-05-05T16-57-49-019df8a5-34bc-7642-93eb-91dad8f57dfa.jsonl",
+    "/Users/dh/.codex/sessions/2026/05/05/rollout-2026-05-05T17-48-36-019df8d3-b142-7c22-9c48-0d755090556b.jsonl",
+    "/Users/dh/.codex/sessions/2026/05/06/rollout-2026-05-06T07-51-15-019dfbd7-2bd6-7fa1-8f25-82d26fbebc66.jsonl"
   ],
-  "summary": "Updated spec-change-delivery and doc-coauthoring with verification command quality guardrails (portability, benign-state handling, scope baseline semantics, readiness strategy) and refreshed improve-skills memory/report." 
+  "summary": "Added parent/child spec orchestration and parallel lane guardrails to doc-workflow, doc-coauthoring, refine-plan and spec-change-delivery; recorded parent-child-spec-orchestration candidate and report."
 }
