@@ -31,7 +31,7 @@ Close one accepted change with a strict evidence gate:
 ## Canonical References
 
 Use these as source of truth:
-- Shared workflow gates (DoR/DoD, Mini-Retro): `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md`
+- Shared workflow gates (DoR/DoD, Parallel Work Control Surface, Mini-Retro): `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md`
 - Delivery behavior and verification rigor: `/Users/dh/.agents/skills/spec-change-delivery/SKILL.md`
 
 ## Required Inputs
@@ -105,8 +105,9 @@ RAG-first source discovery is mandatory before deciding which docs to update:
 Minimum docs sync checks:
 1. Search for references to the spec title/path and OpenSpec change id.
 2. Check parent spec, index/overview pages, and deferred-topic trackers when present.
-3. Update dependent docs if status/progress references are now stale.
-4. If no additional update is needed, explicitly state this with the search evidence used.
+3. For child/parallel-lane closeout, check parent coverage, child index, slice plan/backlog, and integration-owner notes for stale write-set, shared-file, verification, or merge-order references.
+4. Update dependent docs if status/progress references are now stale.
+5. If no additional update is needed, explicitly state this with the search evidence used.
 
 ### 6) Capture Mini-Retro
 

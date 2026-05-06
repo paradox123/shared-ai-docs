@@ -27,6 +27,7 @@ Hier werden die gemeinsamen Begriffe gepflegt:
 - **Decision Freeze Pack**
 - **Session Briefing**
 - **Review Control Surface**
+- **Parallel Work Control Surface**
 - **Mini-Retro**
 
 Die Skills dürfen diese Begriffe lokal kurz restaten, sollen aber **keine abweichenden Definitionen** einführen. Änderungen an der gemeinsamen Bedeutung werden zuerst hier gepflegt.
@@ -179,6 +180,33 @@ Regeln:
 5. `Readiness Status` verwendet das passende Skill-Verdict, z. B. `NOT READY`, `READY FOR ORCHESTRATION`, `READY FOR PLANNING`, `IMPLEMENTATION READY`, `READY WITH NON-BLOCKING NOTES`, `NEEDS USER DECISION`, `NEEDS PARENT/ORCHESTRATOR SYNC` oder `NEEDS HARDENING`.
 6. Wenn Detailsektionen geaendert werden, muss die Kontrollflaeche mitgezogen werden. Widerspruch zwischen Kontrollflaeche und Detailvertrag ist ein blockierendes Review-Finding.
 
+## Parallel Work Control Surface (bei paralleler Arbeit verpflichtend)
+
+Parallel Work hat zwei unterschiedliche Modi:
+
+1. **Parallel Spec/Doc Hardening**: mehrere Child Specs oder Plan-/Doc-Arbeitsbloecke werden parallel bis zur Umsetzungsreife geschaerft.
+2. **Parallel Implementation**: mehrere umsetzungsreife Specs werden parallel in Runtime-/Produktcode umgesetzt.
+
+Parallel Spec/Doc Hardening ist normalerweise unproblematisch parallelisierbar, sobald Dependencies und Schreibdateien klar sind. Parallel Implementation ist strenger und darf nur starten, wenn zusaetzlich die Runtime-/Code-Write-Sets disjunkt sind, Contracts stabil sind und die Integration seriell gesteuert wird.
+
+In beiden Modi darf Parallel Work erst starten, wenn ein Parent-/Child-Schnitt oder Arbeitsblock-Schnitt existiert und die betroffenen Lanes explizit getrennte Write-Sets, Shared-File-Regeln, Verification Commands und eine Merge-/Sync-Reihenfolge haben.
+
+Minimale Kontrollflaeche:
+
+| Child/Arbeitsblock | Modus | Owner/Agent | Erlaubte Write-Sets | Shared Files / Read-only Files | Abhaengigkeiten | Verification Commands | Integrations-Owner | Merge-/Sync-Reihenfolge |
+|---|---|---|---|---|---|---|---|---|
+
+Regeln:
+1. Parallel Spec/Doc Hardening ist erlaubt, wenn jede Lane ihr eigenes Child-/Doc-/Plan-Artefakt schreibt, Dependencies sichtbar sind und Parent Spec, Child-Spec-Index, Slice-Plan, Backlog und gemeinsame Contracts fuer die Lane read-only bleiben.
+2. Parallel Implementation ist nur erlaubt, wenn die betroffenen Specs implementation-ready sind, die erlaubten Runtime-/Code-Write-Sets disjunkt sind und jede editierende Lane in einem isolierten Branch/Worktree/OpenSpec Change oder in eindeutig getrennten Dateien arbeitet.
+3. Shared Files sind fuer einzelne Lanes read-only, ausser die Lane ist ausdruecklich als Integrations-Owner fuer genau diese Datei benannt.
+4. Parent Spec, Child-Spec-Index, Slice-Plan, Backlog, gemeinsame Contracts, gemeinsame Helpers und gemeinsame Verification-Skripte brauchen genau einen Integrations-Owner.
+5. Contract-, Schema-, Harness- oder Shared-Helper-Aenderungen, die mehrere Lanes betreffen, duerfen in einzelnen Child Specs vorbereitet werden; ihre Uebernahme in Shared Files oder Runtime-Code ist ein serialer Integrations-/Prerequisite-Schritt.
+6. Jede Lane braucht eigene Verification Commands. Bei Hardening koennen das Review-/Section-/Consistency-Checks sein; bei Implementation muessen es die gate-relevanten Runtime-/Test-Commands der Spec sein.
+7. Der Integrations-Owner verantwortet Cross-Lane-Review, Parent-/Index-Sync, Merge-/Sync-Reihenfolge und gemeinsame Verification-Replay.
+8. Parallel Work ist nicht erlaubt, wenn Write-Sets ueberlappen, Shared Files unklar sind, Abhaengigkeiten zyklisch/ungeklaert sind oder kein Integrations-Owner benannt ist. Fuer Parallel Implementation blockieren zusaetzlich instabile Contracts oder Verification, die erst nach Gesamtmerge sinnvoll pruefbar ist.
+9. Mini-Retro/Handoff muss offene Lane-Konflikte, fehlende Verification und den Session-/Kontextzustand sichtbar halten, bevor weitere Lanes oder Integration starten.
+
 ## Status Ownership by Workflow
 
 1. In beiden Workflows:
@@ -240,7 +268,7 @@ Lieferobjekt:
 - Parent-/Child-Inventar und Coverage-Matrix
 - Review Control Surface fuer Parent/Child-Set oder fehlende Control-Surface-Patches
 - Child-Readiness-Matrix mit fehlenden Delivery-Pack-/Hardening-Bestandteilen
-- Parallelisierungs-/Lane-Matrix mit Write-Sets und Integrations-Owner
+- Parallel Work Control Surface mit Write-Sets, Shared-File-Regeln, Integrations-Owner und Merge-/Sync-Reihenfolge
 - empfohlene nächste Slices plus Closeout-Sync-Checkliste
 - Hardening Queue fuer Child Specs, die noch nicht implementation-ready sind
 
@@ -357,15 +385,16 @@ Parent-Scope-Conformance ist ein blockierendes Gate nach jeder Child-Spec-Nachar
 3. `missing_from_child` blockiert Implementierung, wenn kein benannter Child-/Backlog-Reentry existiert.
 4. Bewusste Scope-Verengung ist erlaubt, aber nur mit Rationale und Ziel fuer den Restscope.
 
-Parallelisierung ist nur sinnvoll, wenn Child Specs unabhaengige Write-Sets und verifizierbare Done-Signale haben.
+Parallelisierung ist je nach Modus unterschiedlich zu bewerten: Child-Spec-/Doc-Hardening kann parallel laufen, sobald die jeweiligen Spec-/Doc-Write-Sets getrennt sind und Dependencies eingehalten werden; Runtime-Implementierung braucht zusaetzlich implementation-ready Specs, stabile Contracts und disjunkte Code-/Artefakt-Write-Sets.
 
 Parallel-Lane-Regeln:
 
-1. Vor Start eine Lane-Matrix erstellen: Child Spec, Owner/Agent, erlaubte Dateien/Module, verbotene Shared Files, Abhaengigkeiten, Verification Commands.
-2. Shared Control Files wie Parent Spec, Slice-Plan, Index, Backlog oder gemeinsame Helpers haben genau einen Integrations-Owner.
-3. Parallel arbeitende Child Specs laufen in getrennten Branches/Worktrees oder klar getrennten OpenSpec Changes.
-4. Kein paralleler Change darf denselben zentralen Contract still veraendern; Contract-Aenderungen laufen zuerst als eigener kleiner Slice.
-5. Nach Rueckkehr aller Lanes fuehrt der Integrations-Owner Merge, Cross-Slice-Review, Parent-Coverage-Update und die gemeinsame Verification-Replay aus.
+1. Vor Start eine Parallel Work Control Surface erstellen: Child/Arbeitsblock, Modus (`spec/doc hardening` oder `implementation`), Owner/Agent, erlaubte Write-Sets, Shared Files / Read-only Files, Abhaengigkeiten, Verification Commands, Integrations-Owner, Merge-/Sync-Reihenfolge.
+2. Shared Control Files wie Parent Spec, Slice-Plan, Index, Backlog, gemeinsame Contracts, gemeinsame Helpers oder gemeinsame Verification-Skripte haben genau einen Integrations-Owner.
+3. Parallel arbeitende Implementation-Lanes laufen in getrennten Branches/Worktrees oder klar getrennten OpenSpec Changes, wenn sie mehr als reine Read-only-Analyse leisten.
+4. Kein paralleler Implementation-Change darf denselben zentralen Contract still veraendern; Contract-, Schema-, Harness- oder Shared-Helper-Aenderungen laufen zuerst als serialer Integrations-/Prerequisite-Schritt.
+5. Nach Rueckkehr aller Lanes fuehrt der Integrations-Owner Merge, Cross-Slice-Review, Parent-Coverage-/Index-Update und die gemeinsame Verification-Replay in der festgelegten Reihenfolge aus.
+6. Wenn Write-Sets, Shared Files, Dependencies, Verification Commands, Integrations-Owner oder Merge-/Sync-Reihenfolge nicht klar sind, wird serialisiert.
 
 ## Child-Spec-Hardening Pipeline
 
@@ -420,6 +449,7 @@ Implementierung startet erst, wenn alle Punkte erfüllt sind:
    - Vereinfachungen/Anpassungen von Verification Commands sind als Vorschlagspfad mit User-Freigabe geregelt.
 8. Offene Risiken, Abhängigkeiten und Blocker sind dokumentiert.
 9. Bei Child Specs liegt ein `child-spec-hardening`-Readiness-Verdict vor oder die vorhandene Child Spec erfuellt nachweisbar dieselben Hardening-Pflichtgates.
+10. Wenn parallele Implementation geplant ist, liegt die Parallel Work Control Surface mit expliziten Runtime-/Code-Write-Sets, Shared-File-Regeln, Integrations-Owner und Merge-/Sync-Reihenfolge vor.
 
 ## Decision Freeze Pack (kontextabhängige Checkliste)
 
@@ -477,6 +507,7 @@ Ein Change ist erst "done", wenn:
 5. Keine "Hybrid-Steuerung": entweder OpenSpec bewusst als SSOT oder bewusst ohne OpenSpec.
 6. Review-Findings werden standardmäßig per `doc-review-autoresolve` erst **autonom behoben**, dann **erneut reviewed**; Rückfrage nur bei echten Entscheidungs-/Missing-Blockern.
 7. Orchestrierung und Hardening nicht vermischen: `spec-orchestrator` schneidet und priorisiert; `child-spec-hardening` erzeugt die Vertragstiefe.
+8. Keine parallele Umsetzung starten, solange Write-Sets, Shared Files, Integrations-Owner und Merge-/Verification-Reihenfolge nur implizit sind.
 
 ## Marker System
 
@@ -596,4 +627,5 @@ Wiederkehrende Probleme als `improve-skills`-Kandidaten erfassen und in Workflow
 6. Sind Test- und Runtime-Gates vorab definiert?
 7. Ist eine Referenz-Baseline nötig und benannt (falls relevant)?
 8. Sind externe Abhängigkeiten/Owner dokumentiert?
-9. Ist klar, was "done" konkret bedeutet?
+9. Falls parallel gearbeitet wird: sind Write-Sets, Shared Files, Integrations-Owner und Merge-/Sync-Reihenfolge explizit?
+10. Ist klar, was "done" konkret bedeutet?

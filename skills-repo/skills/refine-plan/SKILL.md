@@ -31,6 +31,7 @@ Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.m
 - **Definition of Ready (DoR)**
 - **Definition of Done (DoD)**
 - **Decision Freeze Pack**
+- **Parallel Work Control Surface**
 
 This skill operationalizes those gates:
 - turn the spec into an execution plan that can satisfy **DoR** before implementation starts,
@@ -67,7 +68,7 @@ When scope pressure is detected:
    - done signal / verification.
 3. Recommend a default execution order.
 4. Mark cross-change dependencies explicitly instead of hiding them in one long task list.
-5. Build a lane matrix when independent slices can run in parallel: slice, write-set, shared files, dependency, verification command, integration owner.
+5. Build a Parallel Work Control Surface when independent slices can run in parallel, and classify lanes as spec/doc hardening or implementation: slice/work block, owner/agent, allowed write-sets, shared/read-only files, dependencies, verification commands, integration owner, and merge/sync order.
 6. Keep deferred work as `[PENDING]` backlog or child-spec actions with trigger and done signal; do not rely on accepted specs being reopened later.
 
 Treat a split plan as implementation-ready only when the next executable child slice is fully bounded and verifiable. Other slices may remain `[PENDING]`, but their parent coverage and re-entry path must be visible.

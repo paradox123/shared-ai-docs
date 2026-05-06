@@ -20,7 +20,7 @@ The default output is a **Delivery Orchestration Pack**:
 3. Parent scope conformance matrix.
 4. Child readiness matrix.
 5. Hardening queue or missing delivery-pack patches/instructions.
-6. Parallelization lane matrix.
+6. Parallel Work Control Surface.
 7. Recommended execution order.
 8. Closeout sync checklist.
 
@@ -28,7 +28,7 @@ If the user explicitly asks to also update files, update only spec/planning/work
 
 ## Shared Workflow Contract
 
-Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md` as the canonical reference for the Session Briefing, Review Control Surface, DoR/DoD, Decision Freeze Pack, and Mini-Retro.
+Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md` as the canonical reference for the Session Briefing, Review Control Surface, Parallel Work Control Surface, DoR/DoD, Decision Freeze Pack, and Mini-Retro.
 
 At the start of larger orchestration work, clarify or infer:
 - active mode/skill,
@@ -82,7 +82,7 @@ Output:
 
 - readiness gaps per child,
 - generated patch plan for missing sections,
-- lane matrix,
+- Parallel Work Control Surface when parallel work is plausible,
 - recommended next slice.
 
 ### Mode B: Generate Child Delivery Packs
@@ -114,12 +114,11 @@ Use when the user wants parallel agents/sessions.
 
 Output:
 
-- lane matrix with disjoint write-sets,
-- integration owner responsibilities,
+- Parallel Work Control Surface with child/work block, lane mode, owner/agent, allowed write-sets, shared/read-only files, dependencies, verification commands, integration owner, and merge/sync order,
 - serial prerequisites,
 - cross-slice verification replay.
 
-Only recommend parallel implementation when write-sets and contracts are clearly separated.
+Recommend parallel spec/doc hardening whenever child/doc write-sets are separated and dependencies allow it. Recommend parallel implementation only when implementation-ready specs, runtime/code write-sets, and contracts are clearly separated and one integration owner owns shared control-file updates.
 
 ## Workflow
 
@@ -249,19 +248,34 @@ For contract-heavy children, include `Canonical Examples/Fixtures decision` in R
 
 ### 7. Decide Parallelization
 
-Create a lane matrix:
+Create a Parallel Work Control Surface:
 
-| Lane | Child Spec | Goal | Allowed Write-Set | Shared Files Read-Only | Dependencies | Verification | Integration Owner |
-|---|---|---|---|---|---|---|---|
+| Lane | Child/Work Block | Mode | Owner/Agent | Allowed Write-Sets | Shared Files / Read-only Files | Dependencies | Verification Commands | Integration Owner | Merge/Sync Order |
+|---|---|---|---|---|---|---|---|---|---|
 
-Parallel is allowed only when:
+Classify every lane as either `spec/doc hardening` or `implementation`.
 
-- write-sets are disjoint,
-- shared contracts are stable,
-- each lane has its own verification,
-- one owner updates shared control files after integration.
+Parallel spec/doc hardening is allowed when:
 
-If two slices need the same contract/helper/harness, make that shared contract a serial prerequisite slice.
+- each lane owns a distinct child spec, plan, or doc artifact,
+- parent spec, child index, slice plan, backlog, and shared contracts are read-only for lane workers,
+- dependencies are visible and acyclic,
+- each lane has review/consistency verification,
+- one integration owner updates shared control files after lane completion.
+
+Parallel implementation is allowed only when:
+
+- allowed write-sets are disjoint,
+- every editing lane uses an isolated branch/worktree/OpenSpec change or clearly separated files,
+- target specs are implementation-ready,
+- shared contracts, schemas, helpers, and harnesses are stable before implementation lanes begin,
+- shared control files are read-only for every lane except the named integration owner,
+- each lane has its own verification commands and done signal,
+- dependencies are acyclic and visible,
+- merge/sync order is explicit,
+- one owner updates parent spec, child index, slice plan, backlog, and shared verification evidence after integration.
+
+Parallel spec/doc hardening should be serialized only when dependencies are unclear, child/doc write-sets overlap, or shared-file ownership is missing. Parallel implementation is not allowed when runtime/code write-sets overlap, shared files are ambiguous, contracts are still changing, verification only works after a combined merge, dependencies are unclear, or no integration owner is named. Isolated branches/worktrees do not make overlapping implementation write-sets safe; they only contain edits until the serial integration step. If two implementation slices need the same contract/helper/harness, make that shared contract a serial prerequisite slice.
 
 ### 8. Recommend Execution Order
 
@@ -318,8 +332,8 @@ Mode:
 |---|---|---|---|---|
 
 **Parallelization**
-| Lane | Child | Safe? | Reason | Write-Set | Integration Owner |
-|---|---|---|---|---|---|
+| Lane | Child/Work Block | Mode | Safe? | Owner/Agent | Allowed Write-Sets | Shared Files / Read-only Files | Dependencies | Verification Commands | Integration Owner | Merge/Sync Order |
+|---|---|---|---|---|---|---|---|---|---|---|
 
 **Recommended Next Moves**
 1. ...
@@ -349,7 +363,8 @@ If files were edited, include changed files and verification performed. Include 
 - Do not mark a child ready when its content-quality review has blockers, even if formal sections are present. This includes ambiguous, inconsistent, infeasible, incomplete, untestable, non-traceable, or semantically broken requirements, plus data/artifact/status contract flaws.
 - Do not mark a child implementation-ready just because the split is plausible. If normative contract depth, concrete cases, hardened verification commands, DoR/DoD, or status evidence are missing, route to `child-spec-hardening`.
 - Do not mark `done`, `accepted`, or `reference_done` unless evidence/closeout can be cited; otherwise use `parent_claims_done`.
-- Do not let parallel lanes edit shared control files independently.
+- Do not let parallel lanes edit shared control files independently or start without explicit shared/read-only file rules.
+- Do not recommend parallel work when merge/sync order, lane verification, or integration ownership is missing; serialize instead.
 - Do not implement feature/runtime code from this skill unless the user explicitly switches to `spec-change-delivery`.
 - Prefer a small generated delivery pack over a long narrative essay.
 

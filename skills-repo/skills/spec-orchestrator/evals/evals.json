@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "Die Free-Entry-v2-Master-Spec ist groß und S3-S7 existieren als Child Specs. Orchestriere die nächsten Schritte, sag mir welche Child Specs implementation-ready sind und was parallel laufen kann.",
-      "expected_output": "Produces a parent/child inventory, coverage/readiness matrix, parent scope conformance matrix, S3-S7 gaps, hardening queue for child-spec-hardening, parallel lane matrix, recommended next slice, and closeout sync checklist. Does not mark thin children implementation-ready without evidence.",
+      "expected_output": "Produces a parent/child inventory, coverage/readiness matrix, parent scope conformance matrix, S3-S7 gaps, hardening queue for child-spec-hardening, Parallel Work Control Surface when parallel work is safe, recommended next slice, and closeout sync checklist. Does not mark thin children implementation-ready without evidence.",
       "files": [
         "/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_specs/2026-05-04-free-entry-v2-master-spec.md",
         "/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_specs/2026-05-05-free-entry-v2-child-specs-index.md",
@@ -20,7 +20,7 @@
     {
       "id": 3,
       "prompt": "Welche dieser Child Specs kann ich parallel mit mehreren Codex-Sessions bearbeiten, ohne dass sie sich gegenseitig kaputt machen?",
-      "expected_output": "Produces a lane matrix with allowed write-sets, shared read-only files, dependencies, integration owner, parent conformance expectations, and serial prerequisites where shared contracts would collide.",
+      "expected_output": "Produces a Parallel Work Control Surface with lane mode, allowed write-sets, shared read-only files, dependencies, verification commands, integration owner, merge/sync order, parent conformance expectations, and serial prerequisites where shared contracts would collide.",
       "files": []
     }
   ]

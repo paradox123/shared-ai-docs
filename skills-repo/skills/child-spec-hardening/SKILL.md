@@ -22,7 +22,7 @@ Use `doc-coauthoring` principles for writing missing spec content, and `doc-revi
 
 ## Shared Workflow Contract
 
-Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md` as the canonical reference for the Session Briefing, Review Control Surface, DoR/DoD, Decision Freeze Pack, and Mini-Retro.
+Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md` as the canonical reference for the Session Briefing, Review Control Surface, Parallel Work Control Surface, DoR/DoD, Decision Freeze Pack, and Mini-Retro.
 
 At the start of larger or resumed hardening work, clarify or infer:
 - active mode/skill,
@@ -88,7 +88,7 @@ Ensure the child has:
 - in scope and out of scope,
 - parent/master coverage,
 - parent scope conformance table,
-- dependencies and write-set,
+- dependencies, hardening write-set, and shared/read-only files when parallel hardening is plausible,
 - closeout sync targets,
 - history and `SessionId`.
 
@@ -239,6 +239,16 @@ Use or adapt these sections in the child spec:
 
 For very small governance children, a compact variant is acceptable if the omitted sections are explicitly irrelevant.
 
+When parallel hardening is plausible, the `Dependencies and Write-Set` section must define:
+- the child spec/doc write-set owned by this hardening lane,
+- shared files that are read-only for this hardening lane,
+- dependencies and serial prerequisites,
+- lane-level review/consistency verification commands,
+- integration owner for shared control files,
+- merge/sync order relative to sibling children.
+
+If the child also claims it can later be implemented in parallel, this section must additionally define the future runtime/code write-set and any shared runtime files/helpers/harnesses. If those fields cannot be made explicit, mark only the implementation as not safe for parallel execution and route implementation parallelization back to `spec-orchestrator`.
+
 ## Output Contract
 
 After hardening, report:
@@ -274,3 +284,5 @@ When editing files, append one concise history row and preserve `SessionId`.
 - Do not use skipped cases as passed evidence.
 - Do not let generic commands replace accepted-slice verification patterns.
 - Do not mark `done` or `accepted` unless evidence exists; use `parent_claims_done` or `reference_done` only with cited evidence.
+- Do not block parallel hardening just because later implementation write-sets are unknown; keep those as implementation-readiness gaps.
+- Do not mark a child safe for parallel implementation when allowed runtime/code write-sets, shared/read-only runtime files, integration owner, or merge/sync order are missing.

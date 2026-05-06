@@ -37,6 +37,7 @@ Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.m
 - **Definition of Ready (DoR)**
 - **Definition of Done (DoD)**
 - **Decision Freeze Pack**
+- **Parallel Work Control Surface**
 - **Mini-Retro**
 
 This skill keeps short local definitions for convenience, but execution and the final `READY` / `NOT READY` verdict must stay aligned with the shared workflow document.
@@ -98,6 +99,7 @@ Only include them when the spec explicitly requires them.
 22. For child-spec implementation, check parent/master conformance before editing when the parent path is known. If the child contradicts the parent or omits expected scope without re-entry, stop and route to `child-spec-hardening`.
 23. If pre-implementation analysis finds a blocking content-quality flaw, stop before coding and route to `child-spec-hardening`. This includes requirements that are ambiguous, internally inconsistent, infeasible, untestable, incomplete for critical failure/edge cases, not traceable to the stated goal, or semantically broken in data/artifact/status contracts.
 24. If a child spec lacks implementation-ready depth (normative contract, concrete harness/verification cases, hardened verification commands, DoR/DoD, parent conformance, and status/evidence provenance), stop before coding and route to `child-spec-hardening`.
+25. If this run is one lane of parallel child-spec execution, edit only the lane's allowed write-set. Treat shared/read-only files as read-only unless this run is explicitly the integration-owner run.
 
 ## Risk-Based Verification Preflight
 
@@ -152,18 +154,21 @@ When the requested scope is too large for one verifiable increment:
 
 If the user explicitly asks to run child specs in parallel, act as an orchestrator first:
 
-1. Create a lane matrix before delegating or editing:
-   - child spec,
+1. Create a Parallel Work Control Surface before delegating or editing:
+   - child spec or work block,
+   - lane mode, which is normally `implementation` for this skill,
    - owner/agent,
-   - allowed files/modules,
-   - shared files that are read-only for the lane,
+   - allowed write-sets,
+   - shared files/read-only files for the lane,
    - dependencies,
    - required verification commands,
+   - integration owner,
    - integration order.
-2. Allow parallel implementation only when write-sets are disjoint or each lane has an isolated branch/worktree/OpenSpec change.
-3. Assign one integration owner for shared control files such as parent spec, slice plan, child-spec index, backlog, shared helpers, or common verification scripts.
-4. Do not let parallel lanes change common contracts independently. If a contract must change, promote that as its own serial prerequisite slice.
-5. After lane completion, perform integration review, rerun cross-slice verification, update parent coverage/backlog, and report a single final `READY` / `NOT READY` verdict.
+2. Allow parallel implementation only when write-sets are disjoint and each editing lane has an isolated branch/worktree/OpenSpec change or clearly separated files.
+3. Assign one integration owner for shared control files such as parent spec, slice plan, child-spec index, backlog, shared helpers, shared contracts, or common verification scripts.
+4. Do not let parallel lanes change common contracts independently. If a contract, schema, helper, harness, or shared verification command must change, promote that as its own serial prerequisite slice.
+5. If write-sets overlap, or if shared files, dependencies, verification commands, integration owner, or merge/sync order are unclear, recommend serial execution even when multiple child specs exist.
+6. After lane completion, the integration owner performs integration review, reruns cross-slice verification, updates parent coverage/index/backlog, and reports a single final `READY` / `NOT READY` verdict.
 
 If these conditions are not met, recommend serial execution even when multiple child specs exist.
 
@@ -217,6 +222,7 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
 
 4. **Implement**
    - Edit only the files needed for the current change.
+   - If executing a parallel lane, edit only the lane's allowed write-set and do not touch shared/read-only files.
    - Prefer the smallest root-cause change that satisfies the acceptance criteria.
    - Avoid opportunistic refactors unless they are required for correctness.
    - For bug fixes, reproduce first and prefer a targeted red -> green test when practical.

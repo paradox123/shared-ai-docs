@@ -26,6 +26,7 @@ Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.m
 - **Decision Freeze Pack**
 - **Session Briefing**
 - **Review Control Surface**
+- **Parallel Work Control Surface**
 - **Mini-Retro**
 
 This skill may briefly restate those gates for local context, but it should not redefine them differently.
@@ -164,7 +165,8 @@ Before calling any child spec implementation-ready, verify that it contains:
 - a Decision Freeze Pack,
 - concrete acceptance criteria,
 - Verification Commands including runtime/container gates when relevant,
-- dependency and write-set boundaries if parallel execution is plausible.
+- dependency, spec-hardening write-set, shared/read-only file, integration-owner, and merge/sync boundaries if parallel hardening is plausible.
+- future runtime/code write-set boundaries if the child claims it can later be implemented in parallel.
 
 Do not call a child spec implementation-ready when it contradicts the parent spec or drops expected parent scope without a named backlog/child-spec re-entry path.
 
