@@ -70,6 +70,33 @@ Discover before asking:
 
 Ask only if the target child or parent cannot be inferred safely. If no Child Index exists for a Parent/Child effort, create or propose the minimal Child Index row instead of treating the child as independently ready.
 
+## Tool Gate
+
+This skill includes a local validator:
+
+`/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/child-spec-hardening/Tools/ValidateChildReadiness.cs`
+
+Before reporting `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES` for a Parent/Child target, run the validator from a neutral directory such as `/tmp` with absolute target-repository paths. This avoids inheriting a target repo `global.json` or SDK pin that can make the .NET 10 file-based app unavailable even when .NET 10 is installed:
+
+```sh
+cd /tmp
+dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/child-spec-hardening/Tools/ValidateChildReadiness.cs -- \
+  --index /absolute/path/to/project/_specs/2026-05-05-free-entry-v2-child-specs-index.md \
+  --child S3 \
+  --handoff /absolute/path/to/project/_specs/child-session-handoffs/s3-session-handoff.md
+```
+
+Use the actual project paths and child id. The validator enforces:
+
+- exact operational Child Index columns,
+- target child row exists,
+- required cells are non-empty,
+- persisted handoff exists and agrees with the Child Index verdict,
+- `Allowed Write-Set` is concrete and not approximate,
+- obvious placeholder values do not pass as ready.
+
+If the validator fails, do not report `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES`. Use `NEEDS PARENT/ORCHESTRATOR SYNC` for Child Index/handoff schema or pointer failures, and `NEEDS HARDENING` for approximate write-set or child-spec content failures. If .NET 10 file-based app execution is unavailable in the environment, report the validator as blocked and do not claim an implementation-allowing verdict unless the user explicitly authorizes an equivalent local validator execution.
+
 ## Workflow
 
 ### 1. Load Scope Sources
@@ -233,9 +260,9 @@ Do not mark a child implementation-ready just because it has the expected sectio
 9. Child Index or Hardening Queue row is updated, uses the exact operational minimum column names, has no required gate hidden inside compressed/aliased substitute columns, and agrees with the child verdict.
 10. A persisted Child Session Handoff is produced and the Child Index `Session Handoff` pointer links to it.
 11. `Allowed Write-Set` in the Child Index, child spec, and handoff is enforceable: it names concrete paths, directories, or glob patterns and excludes shared/read-only files. It must not use uncertain language such as `voraussichtlich`, `likely`, `probably`, `expected`, `TBD`, `as needed`, `related files`, or `etc.`.
-12. Hardening verification has run and passed: at minimum `git diff --check`, plus parse/lint checks for embedded canonical machine-readable examples when such examples exist and local tooling is available.
+12. Hardening verification has run and passed: the `ValidateChildReadiness.cs` tool, `git diff --check`, plus parse/lint checks for embedded canonical machine-readable examples when such examples exist and local tooling is available.
 
-If any item is missing, use `NEEDS HARDENING`, `NEEDS USER DECISION`, or `NEEDS PARENT/ORCHESTRATOR SYNC`; do not downgrade the gate into a non-blocking note. If an otherwise ready child only lacks shared Child Index or handoff-pointer sync because the current lane cannot edit shared files, report the exact integration-owner patch and use `NEEDS PARENT/ORCHESTRATOR SYNC`. If the Child Index uses compressed/aliased columns instead of the exact operational schema, use `NEEDS PARENT/ORCHESTRATOR SYNC`. If the implementation write-set is approximate, use `NEEDS HARDENING`. If `git diff --check` fails or a canonical embedded example does not parse, use `NEEDS HARDENING` until corrected and rechecked.
+If any item is missing, use `NEEDS HARDENING`, `NEEDS USER DECISION`, or `NEEDS PARENT/ORCHESTRATOR SYNC`; do not downgrade the gate into a non-blocking note. If an otherwise ready child only lacks shared Child Index or handoff-pointer sync because the current lane cannot edit shared files, report the exact integration-owner patch and use `NEEDS PARENT/ORCHESTRATOR SYNC`. If the Child Index uses compressed/aliased columns instead of the exact operational schema, use `NEEDS PARENT/ORCHESTRATOR SYNC`. If the implementation write-set is approximate, use `NEEDS HARDENING`. If `ValidateChildReadiness.cs`, `git diff --check`, or a canonical embedded example parse check fails, use `NEEDS HARDENING` or `NEEDS PARENT/ORCHESTRATOR SYNC` according to the failing gate until corrected and rechecked.
 
 After assigning the final status, update or report the child spec's Review Control Surface so its `Offene Entscheidungen` and `Readiness Status` match the verdict.
 
@@ -291,7 +318,7 @@ After hardening, report:
 8. Exact decision blockers, if any.
 9. Child Index / Hardening Queue update, including `Session Handoff`, or exact integration-owner patch if sync is still blocking.
 10. Persisted Child Session Handoff path for an implementation-ready child.
-11. Hardening verification results, including `git diff --check` and any parse/lint checks for embedded canonical examples.
+11. Hardening verification results, including `ValidateChildReadiness.cs`, `git diff --check`, and any parse/lint checks for embedded canonical examples.
 12. Any out-of-scope predecessor/parent/slice-plan sync findings reported as follow-up patches, not silently bundled into the target-child verdict.
 13. Mini-Retro after substantial hardening blocks or before handoff/context loss: decisions, changes, open items, missing evidence, skill/workflow friction, and whether to continue in this session or start a new one.
 
@@ -319,6 +346,7 @@ When editing files, append one concise history row and preserve `SessionId`.
 - Do not mark `IMPLEMENTATION READY` without a documented hardening verdict, synchronized Child Index/Hardening Queue row, persisted Child Session Handoff, and matching Child Index pointer.
 - Do not mark `IMPLEMENTATION READY` from a partial, compressed, or aliased Child Index row. Missing exact operational Child Index columns, renamed substitute columns, merged gate columns, or empty gate-relevant cells require `NEEDS PARENT/ORCHESTRATOR SYNC`.
 - Do not mark `IMPLEMENTATION READY` while the implementation `Allowed Write-Set` is approximate, advisory, or phrased with `voraussichtlich`, `likely`, `probably`, `expected`, `TBD`, `as needed`, `related files`, or `etc.`. Use `NEEDS HARDENING` until the write-set is enforceable.
+- Do not mark `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES` unless `ValidateChildReadiness.cs` passes for the target Child Index row and persisted handoff.
 - Do not mark `IMPLEMENTATION READY` when `git diff --check` fails or when an embedded canonical YAML/JSON/TOML/schema/manifest example fails to parse.
 - Do not mutate accepted predecessor specs, parent closeout status, slice-plan coverage, or OpenSpec archives during child hardening unless that integration/closeout sync is explicitly in scope.
 - Do not leave the Child Index/Hardening Queue stale; update it or return `NEEDS PARENT/ORCHESTRATOR SYNC` with the exact integration-owner patch.
