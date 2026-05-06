@@ -36,6 +36,10 @@ At the start of larger or resumed hardening work, clarify or infer:
 
 Every hardened child spec must include a short Review Control Surface near the top with spec variant, Goldstandard status, goal, in scope, out of scope, key test/harness cases, key verification commands, open decisions, and readiness status. It is the user's fast review path and must stay synchronized with the detailed child contract.
 
+For Parent/Child work, the Child Index is the operational control surface. A hardening run must read it when present and update it when editing shared control artifacts is in scope. The Child Index row must include or receive a `Session Handoff` pointer for the child before implementation can be allowed. If the lane may not edit shared files, report the exact integration-owner patch and use `NEEDS PARENT/ORCHESTRATOR SYNC` until the child spec, Child Index/queue state, and handoff pointer agree.
+
+Child hardening is not predecessor closeout. Treat parent specs, slice plans, accepted predecessor children, and existing OpenSpec archives as read-only unless the user explicitly asks for an integration-owner or closeout-sync run. If stale predecessor or parent/slice-plan status is discovered, report the exact sync patch or follow-up instead of silently changing those artifacts inside the target-child hardening run.
+
 ## When To Use
 
 Use this skill when the request includes:
@@ -58,13 +62,13 @@ Discover before asking:
 
 1. Child spec path or hardening queue item.
 2. Parent/master spec path.
-3. Child index or slice plan, if present.
+3. Child index or slice plan.
 4. Accepted prior slices and their verification commands.
 5. Target repo/runtime conventions.
 6. Existing OpenSpec artifacts, if the project uses them.
 7. Parent/Child delivery ledger decision; for Spec Sizing Gate work, expect OpenSpec as the default unless explicitly overridden.
 
-Ask only if the target child or parent cannot be inferred safely.
+Ask only if the target child or parent cannot be inferred safely. If no Child Index exists for a Parent/Child effort, create or propose the minimal Child Index row instead of treating the child as independently ready.
 
 ## Workflow
 
@@ -92,6 +96,8 @@ Ensure the child has:
 - dependencies, hardening write-set, and shared/read-only files when parallel hardening is plausible,
 - closeout sync targets,
 - history and `SessionId`.
+- a hardening verdict section or Review Control Surface verdict that can be mirrored in the Child Index.
+- a persisted Child Session Handoff target, normally `child-session-handoffs/<child-id>-session-handoff.md` beside the Child Index, or an exact integration-owner patch if the current lane cannot write it.
 
 Parent conformance statuses are:
 
@@ -144,6 +150,8 @@ If examples are referenced instead of embedded, the spec must state:
 - how harness verification proves the fixtures were actually exercised.
 
 If a contract-heavy child has neither embedded examples nor required fixture references, mark it `NEEDS HARDENING`.
+
+Embedded machine-readable examples must be parseable when they are described as canonical, copyable, or normative. YAML, JSON, TOML, schema, manifest, or API examples that are only illustrative must be labelled as pseudo/example sketches and must not be used as canonical implementation inputs. If a normative embedded example does not parse, mark the child `NEEDS HARDENING`.
 
 ### 5. Derive Acceptance and Harness Cases
 
@@ -211,11 +219,25 @@ Use exactly one final status:
 - `NEEDS PARENT/ORCHESTRATOR SYNC`: child scope conflicts with parent/index or missing coverage destination.
 - `NEEDS HARDENING`: required contract, case, verification, or DoR depth is still missing.
 
-Do not mark a child implementation-ready just because it has the expected section headings.
+Do not mark a child implementation-ready just because it has the expected section headings. `IMPLEMENTATION READY` requires all of these to be true:
+
+1. Review Control Surface and detail sections agree.
+2. Parent/Master coverage and Parent Scope Conformance have no blocking gaps.
+3. Decision Freeze Pack has no blocking `[MISSING ...]`, `[DECISION ...]`, or blocking `[REVIEW ...]` markers.
+4. Normative Contract and Canonical Examples/Fixtures decision are deep enough for the child variant.
+5. Harness/Verification Cases include the relevant positive, negative, blocked, fallback, and security/redaction cases.
+6. Verification Commands include execution context, preflight when needed, gate verification, success criteria, runtime-readiness when relevant, and anti-loop rule.
+7. Dependencies, allowed write-set, shared/read-only files, DoR, DoD, and Closeout Sync Targets are explicit.
+8. Content-quality review has no blocking findings.
+9. Child Index or Hardening Queue row is updated, has the full operational minimum columns for this child, and agrees with the child verdict.
+10. A persisted Child Session Handoff is produced and the Child Index `Session Handoff` pointer links to it.
+11. Hardening verification has run and passed: at minimum `git diff --check`, plus parse/lint checks for embedded canonical machine-readable examples when such examples exist and local tooling is available.
+
+If any item is missing, use `NEEDS HARDENING`, `NEEDS USER DECISION`, or `NEEDS PARENT/ORCHESTRATOR SYNC`; do not downgrade the gate into a non-blocking note. If an otherwise ready child only lacks shared Child Index or handoff-pointer sync because the current lane cannot edit shared files, report the exact integration-owner patch and use `NEEDS PARENT/ORCHESTRATOR SYNC`. If `git diff --check` fails or a canonical embedded example does not parse, use `NEEDS HARDENING` until corrected and rechecked.
 
 After assigning the final status, update or report the child spec's Review Control Surface so its `Offene Entscheidungen` and `Readiness Status` match the verdict.
 
-When the verdict is `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES`, produce a short session-start handoff for the implementation run: parent path, child path, scope summary, non-goals, allowed write-set, shared/read-only files, verification commands, open non-blocking notes, OpenSpec/direct mode, and whether a fresh session is recommended. For large Parent/Child work, prefer a fresh implementation session per child.
+When the verdict is `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES`, always produce a persisted Child Session Handoff for the implementation run using the shared workflow template: parent path, child path, child index/queue path, handoff file path, next mode/skill, current verdict, scope summary, non-goals, allowed write-set, shared/read-only files, verification commands, evidence/OpenSpec, open non-blocking notes, and whether a fresh session is recommended. Link the same handoff from the Child Index. For large Parent/Child work, prefer a fresh implementation session per child.
 
 ## Required Delivery Sections
 
@@ -238,9 +260,10 @@ Use or adapt these sections in the child spec:
 ## Definition of Done / Closeout Evidence
 ## Dependencies and Write-Set
 ## Closeout Sync Targets
+## Child Session Handoff
 ```
 
-For very small governance children, a compact variant is acceptable if the omitted sections are explicitly irrelevant.
+For very small governance children, a compact variant is acceptable if the omitted sections are explicitly irrelevant. For Parent/Child implementation handoff, prefer a persisted handoff file and keep only a short pointer or summary in the child spec when duplication would create drift.
 
 When parallel hardening is plausible, the `Dependencies and Write-Set` section must define:
 - the child spec/doc write-set owned by this hardening lane,
@@ -264,8 +287,11 @@ After hardening, report:
 6. Verification depth result.
 7. Final readiness verdict.
 8. Exact decision blockers, if any.
-9. Session-start handoff for an implementation-ready child.
-10. Mini-Retro after substantial hardening blocks or before handoff/context loss: decisions, changes, open items, missing evidence, skill/workflow friction, and whether to continue in this session or start a new one.
+9. Child Index / Hardening Queue update, including `Session Handoff`, or exact integration-owner patch if sync is still blocking.
+10. Persisted Child Session Handoff path for an implementation-ready child.
+11. Hardening verification results, including `git diff --check` and any parse/lint checks for embedded canonical examples.
+12. Any out-of-scope predecessor/parent/slice-plan sync findings reported as follow-up patches, not silently bundled into the target-child verdict.
+13. Mini-Retro after substantial hardening blocks or before handoff/context loss: decisions, changes, open items, missing evidence, skill/workflow friction, and whether to continue in this session or start a new one.
 
 Use reader-calibrated findings for all blockers or noteworthy non-blocking notes. Assume the user may have reviewed only goal, in scope, out of scope, verification commands, and test cases. For each finding, explain:
 
@@ -288,5 +314,10 @@ When editing files, append one concise history row and preserve `SessionId`.
 - Do not use skipped cases as passed evidence.
 - Do not let generic commands replace accepted-slice verification patterns.
 - Do not mark `done` or `accepted` unless evidence exists; use `parent_claims_done` or `reference_done` only with cited evidence.
+- Do not mark `IMPLEMENTATION READY` without a documented hardening verdict, synchronized Child Index/Hardening Queue row, persisted Child Session Handoff, and matching Child Index pointer.
+- Do not mark `IMPLEMENTATION READY` from a partial Child Index row. Missing operational Child Index columns or empty gate-relevant cells require `NEEDS PARENT/ORCHESTRATOR SYNC`.
+- Do not mark `IMPLEMENTATION READY` when `git diff --check` fails or when an embedded canonical YAML/JSON/TOML/schema/manifest example fails to parse.
+- Do not mutate accepted predecessor specs, parent closeout status, slice-plan coverage, or OpenSpec archives during child hardening unless that integration/closeout sync is explicitly in scope.
+- Do not leave the Child Index/Hardening Queue stale; update it or return `NEEDS PARENT/ORCHESTRATOR SYNC` with the exact integration-owner patch.
 - Do not block parallel hardening just because later implementation write-sets are unknown; keep those as implementation-readiness gaps.
 - Do not mark a child safe for parallel implementation when allowed runtime/code write-sets, shared/read-only runtime files, integration owner, or merge/sync order are missing.

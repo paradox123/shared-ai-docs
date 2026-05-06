@@ -16,15 +16,16 @@ Do not implement feature code. Produce the orchestration layer that makes later 
 The default output is a **Delivery Orchestration Pack**:
 
 1. Parent/child inventory.
-2. Coverage matrix.
-3. Parent scope conformance matrix.
-4. Child readiness matrix.
-5. Hardening queue or missing delivery-pack patches/instructions.
-6. Parallel Work Control Surface.
-7. Recommended execution order.
-8. Closeout sync checklist.
-9. Session-start handoff for the next child when a new session should implement it.
-10. OpenSpec ledger recommendation or setup notes for Parent/Child work.
+2. Child Index as the operational control surface.
+3. Coverage matrix.
+4. Parent scope conformance matrix.
+5. Child readiness matrix.
+6. Hardening queue or missing delivery-pack patches/instructions.
+7. Parallel Work Control Surface.
+8. Recommended execution order.
+9. Closeout sync checklist.
+10. Persisted Child Session Handoff for the next child/hardening/delivery session.
+11. OpenSpec ledger recommendation or setup notes for Parent/Child work.
 
 If the user explicitly asks to also update files, update only spec/planning/workflow artifacts unless they explicitly ask for runtime implementation.
 
@@ -42,6 +43,8 @@ At the start of larger orchestration work, clarify or infer:
 - open decisions.
 
 When reading or generating specs, require the Review Control Surface to expose spec variant, Goldstandard status, goal, in scope, out of scope, key test/harness cases, key verification commands, open decisions, and readiness status. Missing or stale control surfaces become readiness gaps.
+
+For Parent/Child work, treat the Child Index as the operational control surface. It tracks slice status, parent coverage, hardening verdict, session handoff pointer, dependencies, next action, evidence/closeout links, backlog/re-entry, and OpenSpec/direct ledger pointers. It must not duplicate fine-grained OpenSpec tasks or implementation plan tasks.
 
 ## When To Use
 
@@ -140,7 +143,28 @@ Search for:
 
 Prefer `rg`/`rg --files`. Use exact file reads once candidate files are found.
 
-### 2. Normalize Parent Requirements
+### 2. Establish Or Update Child Index
+
+Create or update a Child Index whenever Parent/Child orchestration is active. If no separate index file exists, place the control surface in the parent spec, slice plan, or Delivery Orchestration Pack and list where it should live.
+
+Minimum Child Index columns:
+
+| Child | Child Spec | Parent Coverage | Readiness / Hardening Verdict | Session Handoff | OpenSpec / Ledger | Dependencies | Allowed Write-Set | Verification | Evidence / Closeout | Backlog / Re-entry | Next Action |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+
+Rules:
+
+- Every known child, planned child, deferred parent requirement, and blocked/re-entry item needs a row or named destination.
+- Do not treat a legacy or partial index table as operational. A table that only contains `Slice`, `Spec`, `Status`, `Hardening Verdict`, or `Session Handoff` is a migration intermediate and cannot support `IMPLEMENTATION READY`.
+- Before marking any child ready, make sure that child's row has the full minimum columns and non-empty values for Parent Coverage, Readiness / Hardening Verdict, Session Handoff, OpenSpec / Ledger, Dependencies, Allowed Write-Set, Verification, Evidence / Closeout, Backlog / Re-entry, and Next Action.
+- `ready_candidate` is not implementation permission. Only a documented hardening verdict of `IMPLEMENTATION READY` or explicitly accepted `READY WITH NON-BLOCKING NOTES` can feed `spec-change-delivery`.
+- Keep the Hardening Queue as the subset of Child Index rows that still need contract, case, verification, conformance, or DoR/DoD depth.
+- Keep OpenSpec as the formal delivery ledger when active. The Child Index points to OpenSpec changes and evidence; it does not mirror their task detail.
+- After recommending a next child, update `Next Action`, create or update the persisted Child Session Handoff, and write its path into `Session Handoff`.
+- Default handoff location is `child-session-handoffs/<child-id>-session-handoff.md` beside the Child Index. If the Child Index is only a section in another artifact, name the exact file/section or patch target that owns the handoff.
+- Mark a handoff as stale/blocking instead of reusing it when its child path, verdict, next action, evidence/OpenSpec pointer, or index row disagrees with the current orchestration state.
+
+### 3. Normalize Parent Requirements
 
 Extract parent requirements into stable rows:
 
@@ -154,7 +178,7 @@ Extract parent requirements into stable rows:
 
 If the parent lacks requirement IDs, infer temporary IDs and recommend adding stable IDs before broad automation.
 
-### 3. Build Coverage Matrix
+### 4. Build Coverage Matrix
 
 For each parent requirement, classify:
 
@@ -167,7 +191,7 @@ For each parent requirement, classify:
 
 Missing rows are the most important finding. They are where work falls through.
 
-### 4. Run Parent Scope Conformance Gate
+### 5. Run Parent Scope Conformance Gate
 
 After reading or editing any child spec, compare the child claim against every parent requirement it touches.
 
@@ -191,7 +215,7 @@ Every child hardening pass should leave a compact conformance table:
 | Parent Requirement | Child Claim | Conformance | Action |
 |---|---|---|---|
 
-### 5. Assess Child Readiness
+### 6. Assess Child Readiness
 
 Every implementation-ready child spec needs:
 
@@ -220,9 +244,9 @@ Mark each child:
 - `too_broad`,
 - `candidate_parallel_lane`.
 
-Use `ready` only when the child already contains implementation-ready depth: status provenance/evidence, normative contract, concrete harness cases, hardened verification commands, DoR/DoD, and no blocking parent conformance or content-quality findings. Otherwise use `ready_candidate` or `needs_hardening` and route to `child-spec-hardening`.
+Use `ready` only when the child already contains a documented hardening verdict plus implementation-ready depth: status provenance/evidence, normative contract, concrete harness cases, hardened verification commands, DoR/DoD, and no blocking parent conformance or content-quality findings. Otherwise use `ready_candidate` or `needs_hardening` and route to `child-spec-hardening`.
 
-### 6. Generate Delivery Packs
+### 7. Generate Delivery Packs
 
 For each child that is not ready, propose a delivery skeleton or hardening queue entry with these sections:
 
@@ -246,12 +270,12 @@ Do not try to fully elaborate every normative contract, canonical example, fixtu
 
 Hardening queue format:
 
-| Child | Current Status | Required Hardening | Sources To Read | Blockers |
-|---|---|---|---|---|
+| Child | Current Status | Required Hardening | Sources To Read | Blockers | Next Handoff Target |
+|---|---|---|---|---|---|
 
 For contract-heavy children, include `Canonical Examples/Fixtures decision` in Required Hardening.
 
-### 7. Decide Parallelization
+### 8. Decide Parallelization
 
 Create a Parallel Work Control Surface:
 
@@ -282,7 +306,7 @@ Parallel implementation is allowed only when:
 
 Parallel spec/doc hardening should be serialized only when dependencies are unclear, child/doc write-sets overlap, or shared-file ownership is missing. Parallel implementation is not allowed when runtime/code write-sets overlap, shared files are ambiguous, contracts are still changing, verification only works after a combined merge, dependencies are unclear, or no integration owner is named. Isolated branches/worktrees do not make overlapping implementation write-sets safe; they only contain edits until the serial integration step. If two implementation slices need the same contract/helper/harness, make that shared contract a serial prerequisite slice.
 
-### 8. Recommend Execution Order
+### 9. Recommend Execution Order
 
 Prefer this order:
 
@@ -294,9 +318,9 @@ Prefer this order:
 
 Recommend the next single slice and, separately, any batch/parallel work that can happen safely.
 
-For each next child, include a session-start handoff: parent path, child path, current readiness, required hardening or implementation command, allowed write-set, verification commands, open blockers, and whether the next step should start in a fresh session.
+For each next child, include and persist a Child Session Handoff using the shared workflow template: parent path, child path, child index/queue path, handoff file path, next mode/skill, current verdict, scope summary, non-goals, allowed write-set, shared/read-only files, verification commands, evidence/OpenSpec, open blockers or non-blocking notes, and whether the next step should start in a fresh session. Link the same file from the Child Index.
 
-### 9. Closeout Sync Checklist
+### 10. Closeout Sync Checklist
 
 Every accepted child should update:
 
@@ -326,6 +350,10 @@ Mode:
 - missing:
 - blocked:
 
+**Child Index**
+| Child | Child Spec | Parent Coverage | Readiness / Hardening Verdict | Session Handoff | OpenSpec / Ledger | Dependencies | Allowed Write-Set | Verification | Evidence / Closeout | Backlog / Re-entry | Next Action |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+
 **Parent Scope Conformance**
 | Child | Parent Requirement | Conformance | Action |
 |---|---|---|---|
@@ -335,8 +363,8 @@ Mode:
 |---|---|---|---|
 
 **Hardening Queue**
-| Child | Current Status | Required Hardening | Sources To Read | Blockers |
-|---|---|---|---|---|
+| Child | Current Status | Required Hardening | Sources To Read | Blockers | Next Handoff Target |
+|---|---|---|---|---|---|
 
 **Parallelization**
 | Lane | Child/Work Block | Mode | Safe? | Owner/Agent | Allowed Write-Sets | Shared Files / Read-only Files | Dependencies | Verification Commands | Integration Owner | Merge/Sync Order |
@@ -346,6 +374,22 @@ Mode:
 1. ...
 2. ...
 3. ...
+
+**Child Session Handoff**
+- Parent:
+- Child:
+- Child Index / Queue:
+- Handoff file:
+- Next mode/skill:
+- Current verdict:
+- Scope summary:
+- Non-goals:
+- Allowed write-set:
+- Shared / read-only files:
+- Verification commands:
+- Evidence / OpenSpec:
+- Open blockers or non-blocking notes:
+- Fresh session recommended:
 
 **Files To Update**
 - ...
@@ -369,6 +413,10 @@ If files were edited, include changed files and verification performed. Include 
 - Do not mark a child ready when it contradicts the parent spec or omits expected parent scope without a named re-entry path.
 - Do not mark a child ready when its content-quality review has blockers, even if formal sections are present. This includes ambiguous, inconsistent, infeasible, incomplete, untestable, non-traceable, or semantically broken requirements, plus data/artifact/status contract flaws.
 - Do not mark a child implementation-ready just because the split is plausible. If normative contract depth, concrete cases, hardened verification commands, DoR/DoD, or status evidence are missing, route to `child-spec-hardening`.
+- Do not finish Parent/Child orchestration without a Child Index update or a clearly named Child Index patch target.
+- Do not report an `IMPLEMENTATION READY` child from a partial Child Index. Use `NEEDS PARENT/ORCHESTRATOR SYNC` until the full operational row exists and agrees with the child spec and handoff.
+- Do not recommend `spec-change-delivery` for a child that has no documented hardening verdict.
+- Do not leave the next child without a persisted Child Session Handoff and matching Child Index pointer.
 - Do not mark `done`, `accepted`, or `reference_done` unless evidence/closeout can be cited; otherwise use `parent_claims_done`.
 - Do not let parallel lanes edit shared control files independently or start without explicit shared/read-only file rules.
 - Do not recommend parallel work when merge/sync order, lane verification, or integration ownership is missing; serialize instead.

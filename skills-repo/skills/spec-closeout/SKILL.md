@@ -34,6 +34,8 @@ Use these as source of truth:
 - Shared workflow gates (DoR/DoD, Parallel Work Control Surface, Mini-Retro): `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md`
 - Delivery behavior and verification rigor: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/spec-change-delivery/SKILL.md`
 
+For Parent/Child closeout, the Child Index is the operational closeout control surface. It must reflect accepted evidence, OpenSpec/archive state, parent coverage, deferred scope, the next child action, and the next child `Session Handoff` pointer before any next child becomes leading.
+
 ## Required Inputs
 
 1. Repository path containing the implementation.
@@ -53,6 +55,8 @@ If input 4 is omitted and context is NCG, assume the default above.
 4. OpenSpec is closed only after required verification is green.
 5. Documentation sync is mandatory at the appropriate level: normal specs sync project docs directly; child specs sync parent/index/backlog/OpenSpec evidence first; parent closeout runs the broad project docs sync.
 6. Do not mark spec as accepted if evidence is incomplete.
+7. Do not mark a child spec as accepted while Parent Coverage, Child Index/Slice Plan, Backlog/Re-entry, Evidence Links, OpenSpec Status, or Child Session Handoff state are stale or contradictory.
+8. Do not advance the next leading child until the previous child closeout sync is complete and the next child handoff is current, or explicitly blocked/stale in the Child Index.
 
 ## Closeout Workflow
 
@@ -111,9 +115,26 @@ Minimum docs sync checks:
 5. If no additional update is needed, explicitly state this with the search evidence used.
 
 Parent/Child-specific rule:
-1. Child closeout must sync Parent Coverage, Child Index/Slice Plan, Backlog/Re-entry items, OpenSpec/Evidence links, and integration-owner notes before the next child becomes leading.
+1. Child closeout must sync Parent Coverage, Child Index/Slice Plan, Backlog/Re-entry items, OpenSpec/Evidence links, integration-owner notes, and next Child Session Handoff before the next child becomes leading.
 2. Child closeout runs broad project docs sync only when the child changed user-facing/project docs or would make public contract documentation stale.
 3. Parent closeout runs the broad project docs sync and confirms the child set, coverage, accepted evidence, deferred scope, and public docs are aligned.
+
+Child closeout sync details:
+
+1. Parent Coverage: mark covered requirements as `done`, `partial`, `blocked`, `pending`, or `out_of_scope` with evidence links; never let an uncovered parent requirement disappear.
+2. Child Index/Slice Plan: update child status, hardening/delivery/closeout verdict, `Session Handoff` pointer, dependencies unblocked or still blocked, next action, next leading child, and allowed write-set/shared-file notes.
+3. Backlog/Re-entry: move deferred or narrowed scope into a named child/backlog row with trigger, dependency, and done signal.
+4. Evidence Links: link implementation evidence, verification replay, changed artifacts, docs updates, and any blocked commands.
+5. OpenSpec Status: record active, archived, canonical spec path, or blocked status; if OpenSpec archive fails, keep closeout `NOT READY`.
+6. Handoff: update or create the next persisted Child Session Handoff so it points to current parent/index/evidence/OpenSpec state. If the next child is not allowed to proceed, keep or create the handoff but mark its verdict/notes as blocked or stale in both the file and the Child Index.
+
+Parent closeout sync details:
+
+1. Confirm every child row has accepted evidence, explicit deferral, or a blocker/re-entry destination.
+2. Confirm Parent Coverage and Child Index agree.
+3. Confirm OpenSpec canonical specs/archive paths are aligned with accepted children.
+4. Run broad RAG-first project docs sync and update stale public/project docs when needed.
+5. Record deferred scope and next re-entry path rather than hiding it in a final summary.
 
 ### 6) Capture Mini-Retro
 
@@ -135,8 +156,8 @@ Respond with:
 3. OpenSpec closure status and paths
 4. Synchronization result:
    - normal spec: project docs updated, or explicit "none needed" with basis,
-   - child spec: Parent Coverage, Child Index/Slice Plan, Backlog/Re-entry, OpenSpec/Evidence links, and integration-owner notes synced; broad project docs sync only if triggered,
-   - parent spec: broad project docs sync plus child set, coverage, accepted evidence, and deferred scope alignment.
+   - child spec: Parent Coverage, Child Index/Slice Plan, Backlog/Re-entry, Evidence links, OpenSpec Status, integration-owner notes, and next persisted Child Session Handoff synced; broad project docs sync only if triggered,
+   - parent spec: broad project docs sync plus child set, coverage, accepted evidence, OpenSpec archive/canonical status, and deferred scope alignment.
 5. Changed artifacts
 6. Mini-Retro
 7. Final verdict: `READY` or `NOT READY`

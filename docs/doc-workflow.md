@@ -26,6 +26,8 @@ Hier werden die gemeinsamen Begriffe gepflegt:
 - **Definition of Done (DoD)**
 - **Decision Freeze Pack**
 - **Session Briefing**
+- **Child Index**
+- **Child Session Handoff**
 - **Review Control Surface**
 - **Parallel Work Control Surface**
 - **Mini-Retro**
@@ -59,6 +61,43 @@ Regeln:
 3. `Ziel`, `Nicht-Ziele`, `In Scope` und `Erwarteter Output` muessen vor groesseren Edits oder Implementierung klar sein.
 4. Ausgeschlossene Themen werden als Nicht-Ziele sichtbar gehalten, damit sie nicht nebenbei in den Scope rutschen.
 5. Bei Review-/Spec-Arbeit wird zusaetzlich die `Review Control Surface` der betroffenen Spec geprueft oder angelegt.
+
+## Child Session Handoff Template (kurz)
+
+Ein Child Session Handoff ist der kompakte Startpunkt fuer die naechste Child-Hardening-, Delivery- oder Closeout-Session. Es ersetzt nicht Parent Spec, Child Spec, OpenSpec oder Evidence; es verweist nur auf die fuehrenden Artefakte und die naechste erlaubte Aktion.
+
+Persistenzregel:
+1. Bei Parent/Child-Vorhaben muss jedes fuehrende Child Session Handoff als auffindbares Artefakt persistiert werden, nicht nur im Chat oder in einem Orchestration-Pack.
+2. Standardort ist ein `child-session-handoffs/`-Ordner neben dem Child Index, z. B. `_specs/child-session-handoffs/s3-session-handoff.md`.
+3. Wenn kein eigener Child-Index-Dateipfad existiert, liegt das Handoff neben dem Parent-, Slice-Plan- oder Delivery-Orchestration-Pack-Artefakt, das den Child Index enthaelt.
+4. Der Child Index muss pro Child auf das persistierte Handoff zeigen. Ein reines Inline-Handoff ist nur als Fallback erlaubt, wenn der Index einen stabilen Abschnittsanker oder Patch-Zielpfad benennt.
+5. Ein Handoff ist stale, wenn Child Spec, Hardening Verdict, Child Index, Evidence/OpenSpec-Status oder Next Action voneinander abweichen. Stale Handoffs duerfen nicht als Implementierungsfreigabe gelten.
+
+```md
+## Child Session Handoff
+
+- Parent:
+- Child:
+- Child Index / Queue:
+- Handoff File:
+- Naechster Modus/Skill:
+- Aktueller Verdict:
+- Scope Summary:
+- Non-Goals:
+- Allowed Write-Set:
+- Shared / Read-only Files:
+- Verification Commands:
+- Evidence / OpenSpec:
+- Offene Blocker oder non-blocking Notes:
+- Fresh Session empfohlen:
+```
+
+Regeln:
+1. `spec-orchestrator` erzeugt oder aktualisiert ein persistiertes Handoff fuer den naechsten empfohlenen Child und verlinkt es im Child Index.
+2. `child-spec-hardening` liefert bei `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` immer ein persistiertes Handoff fuer die Implementierung und synchronisiert den Child-Index-Pointer.
+3. `spec-change-delivery` darf ein Child-Handoff als Kickoff-Quelle nutzen, muss aber trotzdem Child Spec, Parent Conformance, Child Index und Hardening Verdict pruefen.
+4. `spec-closeout` aktualisiert das naechste Handoff oder markiert es im Child Index als stale/blockiert, damit der naechste fuehrende Child nicht aus veralteten Status-/Evidence-Links startet.
+5. Bei grossen Parent/Child-Vorhaben wird pro Child-Implementation normalerweise eine frische Session empfohlen.
 
 ## Mini-Retro Template (kurz)
 
@@ -416,10 +455,29 @@ Kein Change soll denselben Fortschritt parallel in `refine-plan`, OpenSpec `task
 
 Wenn eine Spec wegen Scope-Druck in Child Specs aufgeteilt wird, muss die Parent Spec als Kontrollschicht erhalten bleiben. Child Specs duerfen den Scope nur schneiden, nicht verschwinden lassen.
 
+### Child Index als operative Steuerzentrale
+
+Der Child Index ist die operative Steuerzentrale eines Parent/Child-Vorhabens. Er ist nicht der Delivery-Ledger und nicht die fein granulare Taskliste. Er beantwortet: welche Child Specs existieren, welche Parent-Anforderungen sie abdecken, welcher Child als naechstes fuehrt, welche Hardening-/Delivery-/Closeout-Gates blockieren und wo Evidence oder Re-entry liegen.
+
+Minimale Child-Index-Flaeche:
+
+| Child | Child Spec | Parent Coverage | Readiness / Hardening Verdict | Session Handoff | OpenSpec / Ledger | Dependencies | Allowed Write-Set | Verification | Evidence / Closeout | Backlog / Re-entry | Next Action |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+
+Regeln:
+1. `spec-orchestrator` erzeugt oder aktualisiert den Child Index, sobald Parent/Child genutzt wird. Wenn kein eigener Index existiert, wird die Kontrollflaeche im Parent, Slice-Plan oder Delivery Orchestration Pack angelegt.
+2. Der Child Index haelt Slice-Status, Coverage, Abhaengigkeiten, Hardening Queue, Handoff-Pointer, Next Action, Evidence-/Closeout-Links und Backlog-/Re-entry-Verweise. Er dupliziert keine OpenSpec-Tasks und keine detaillierten Implementierungspläne.
+3. Die Hardening Queue ist ein Ausschnitt des Child Index fuer nicht implementation-ready Children. Sie nennt Required Hardening, Sources To Read und Blockers, aber keine fein granularen Delivery-Tasks.
+4. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn die Child-Index-Zeile die volle Mindestflaeche oben enthaelt und fuer diesen Child vollstaendig ausgefuellt ist. Eine alte Kurzform wie `Slice | Spec | Status | Hardening Verdict | Session Handoff` ist nur ein Migrationszwischenstand und blockiert Implementierung.
+5. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn ein dokumentiertes Hardening Verdict mit Parent Conformance, Content-Quality-Ergebnis, Verification Depth und DoR/DoD vorliegt und der Child Index auf ein aktuelles persistiertes Handoff zeigt.
+6. `ready_candidate` bedeutet nur: der Schnitt wirkt plausibel. Es ist kein Implementierungsfreigabe-Status.
+7. Nach Hardening, Delivery und Closeout muessen Child Spec, Parent Coverage, Child Index, Child Session Handoff, Backlog/Re-entry, Evidence Links und OpenSpec Status synchron sein.
+8. Der Child Index benennt den naechsten fuehrenden Child erst, nachdem die vorherige Child-Synchronisation abgeschlossen oder explizit als blockiert dokumentiert ist.
+
 Pflichtbestandteile:
 
 1. Parent Spec oder Slice-Plan mit Coverage-Matrix: jede Parent-Anforderung ist `done`, `partial`, `pending`, `blocked` oder bewusst `out_of_scope`.
-2. Child-Spec-Index mit Status, Abhaengigkeiten, naechstem empfohlenem Slice und Link auf Evidence/Closeout.
+2. Child-Spec-Index mit Status, Parent Coverage, Hardening Verdict, Handoff-Pointer, Abhaengigkeiten, naechstem empfohlenem Slice und Links auf Evidence/Closeout/Re-entry.
 3. Jede Child Spec enthaelt vor Umsetzung mindestens eine Review Control Surface, Scope, Non-Goals, Master-/Parent-Abdeckung, Parent-Scope-Conformance, Decision Freeze Pack, konkrete Acceptance Criteria und Verification Commands.
 4. Restscope wird nicht nur als "Next Step" in einer abgeschlossenen Spec abgelegt, sondern als Backlog-/Child-Spec-Eintrag mit Trigger, Done-Signal und Abhaengigkeit.
 5. Closeout einer Child Spec synchronisiert Parent Spec, Slice-Plan/Index, Backlog und OpenSpec-Artefakte, bevor der naechste Slice als fuehrend gilt.
@@ -451,7 +509,7 @@ Die Zerlegung und die Tiefe sind getrennte Verantwortungen:
 2. `spec-orchestrator` erzeugt Child-Schnitt, Coverage, Conformance, Dependencies, Parallel-Lanes und Hardening Queue.
 3. `child-spec-hardening` arbeitet einzelne Child Specs oder Batches aus der Hardening Queue bis zur Implementierungsreife aus.
 4. `doc-review-autoresolve` laeuft direkt im Anschluss oder innerhalb des Hardening-Schritts, um autonome Inkonsistenzen zu beheben und ein Readiness Verdict zu liefern.
-5. `spec-change-delivery` implementiert genau einen Child, nachdem `child-spec-hardening` `IMPLEMENTATION READY` oder bewusst akzeptierte non-blocking Notes meldet.
+5. `spec-change-delivery` implementiert genau einen Child, nachdem ein dokumentiertes Hardening Verdict `IMPLEMENTATION READY` oder bewusst akzeptierte `READY WITH NON-BLOCKING NOTES` meldet.
 
 Hardening Queue Beispiel:
 
@@ -461,7 +519,7 @@ Hardening Queue Beispiel:
 | S4 | ready_candidate | Content-Freshness-Vertrag, Guide-Cases, Rendering ohne LLM | Parent Provider-Guide-Anforderungen |
 | S6 | blocked | Dependency-Blocker erhalten, keine Fake-Inputs akzeptieren | S2/S3/S5 Evidence |
 
-`spec-orchestrator` darf einen Child als `ready_candidate` markieren, wenn der Schnitt plausibel ist. `implementation-ready` ist erst erlaubt, wenn `child-spec-hardening` oder eine gleichwertige bestehende Spec die Tiefe belegt.
+`spec-orchestrator` darf einen Child als `ready_candidate` markieren, wenn der Schnitt plausibel ist. `IMPLEMENTATION READY` ist erst erlaubt, wenn `child-spec-hardening` ein dokumentiertes Hardening Verdict erzeugt oder eine bestehende Child Spec dieses Verdict mit derselben Gate-Tiefe bereits sichtbar enthaelt.
 
 Child-Spec-Hardening-Pflichtgates:
 
@@ -473,6 +531,20 @@ Child-Spec-Hardening-Pflichtgates:
 6. Verification Commands: konkreter Execution Context, risk-based Preflight, Gate Verification, Runtime-Readiness, Success Criteria und Anti-Loop-Regel.
 7. Content Quality Review: Korrektheit, Scope, Vollstaendigkeit, Konsistenz, Eindeutigkeit, Machbarkeit, Testbarkeit, Traceability, Abstraktionsniveau und Lifecycle-Fit.
 8. DoR/DoD: Definition of Ready fuer Umsetzung und Definition of Done/Closeout Evidence sind vorhanden oder bewusst irrelevant.
+9. Handoff: Bei `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` existiert ein persistiertes Child Session Handoff mit naechstem Modus, Write-Set, Verification Commands, Evidence/OpenSpec und offenen Notes; der Child Index verlinkt genau dieses Handoff.
+10. Hardening Verification: Vor `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` muss `git diff --check` gruen sein. Wenn die Child Spec eingebettete maschinenlesbare Beispiele enthaelt, muessen die relevanten Beispiele geparst oder bewusst als nicht-parsebare Pseudobeispiele gekennzeichnet werden; parsefehlerhafte normative Beispiele blockieren Readiness.
+
+Contract-heavy Beispielregel:
+1. Eingebettete YAML-/JSON-/TOML-/Schema-/Manifest-Beispiele, die als kanonisch oder kopierbar beschrieben werden, muessen syntaktisch parsebar sein.
+2. Wenn ein Beispiel bewusst gekuerzt oder nicht parsebar ist, muss es als `pseudo-*`, `sketch` oder `excerpt` markiert werden und darf nicht als kanonische Implementierungsquelle gelten.
+3. Parse- oder Lint-Kommandos fuer die eingebetteten Beispiele gehoeren zur Hardening Verification, wenn Standardtools im Repo oder in der lokalen Umgebung verfuegbar sind.
+4. Ein parsefehlerhaftes kanonisches Beispiel ist kein non-blocking Note; es ist mindestens `NEEDS HARDENING`.
+
+Child-Hardening-Scope-Regel:
+1. `child-spec-hardening` darf den Ziel-Child, den Child Index und das zugehoerige Child Session Handoff synchronisieren.
+2. Parent Spec, Slice-Plan, akzeptierte Vorgaenger-Childs und OpenSpec-Archive sind im Child-Hardening read-only, ausser der User beauftragt explizit einen Integrations-/Closeout-Sync.
+3. Wenn Hardening entdeckt, dass Vorgaengerstatus, Parent Coverage oder Slice-Plan stale sind, wird ein klarer Sync-Patch oder Folgeauftrag dokumentiert. Der Ziel-Child darf trotzdem nur dann `IMPLEMENTATION READY` werden, wenn der Child Index fuer diesen Child vollstaendig und widerspruchsfrei ist.
+4. Akzeptierte Vorgaenger wie S1/S2 duerfen als Evidence-/Verification-Rezept genutzt werden; sie werden nicht pauschal migriert, archiviert oder in ihrem Status geaendert.
 
 ## Definition of Ready (vor Implementierung)
 
@@ -495,7 +567,7 @@ Implementierung startet erst, wenn alle Punkte erfüllt sind:
    - Anti-Loop-Regel ist definiert: kein rekursives "Verifikation der Verifikation".
    - Vereinfachungen/Anpassungen von Verification Commands sind als Vorschlagspfad mit User-Freigabe geregelt.
 8. Offene Risiken, Abhängigkeiten und Blocker sind dokumentiert.
-9. Bei Child Specs liegt ein `child-spec-hardening`-Readiness-Verdict vor oder die vorhandene Child Spec erfuellt nachweisbar dieselben Hardening-Pflichtgates.
+9. Bei Child Specs liegt ein dokumentiertes Hardening Verdict vor (`IMPLEMENTATION READY` oder bewusst akzeptierte `READY WITH NON-BLOCKING NOTES`). Implizite Reife ohne Verdict blockiert Implementierung.
 10. Wenn parallele Implementation geplant ist, liegt die Parallel Work Control Surface mit expliziten Runtime-/Code-Write-Sets, Shared-File-Regeln, Integrations-Owner und Merge-/Sync-Reihenfolge vor.
 
 ## Decision Freeze Pack (kontextabhängige Checkliste)
@@ -641,6 +713,7 @@ Hinweis:
 | Spezifikation (ohne OpenSpec) | `_specs/` | `YYYY-MM-DD <Titel>.md` |
 | Plan | neben Spec oder Projektordner | `<name>-plan.md` |
 | OpenSpec Change (optional) | `openspec/changes/<change>/` | Standard-Artefakte |
+| Child Session Handoff | `child-session-handoffs/` neben Child Index | `<child-id>-session-handoff.md` |
 | Retro/Mini-Retro | inline im Plan/Spec/Handoff oder eigene Datei | `<name>-retro.md` |
 
 ## Übergänge

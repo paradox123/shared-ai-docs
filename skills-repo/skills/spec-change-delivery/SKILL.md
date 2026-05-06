@@ -100,8 +100,11 @@ Only include them when the spec explicitly requires them.
 22. For child-spec implementation, check parent/master conformance before editing when the parent path is known. If the child contradicts the parent or omits expected scope without re-entry, stop and route to `child-spec-hardening`.
 23. If pre-implementation analysis finds a blocking content-quality flaw, stop before coding and route to `child-spec-hardening`. This includes requirements that are ambiguous, internally inconsistent, infeasible, untestable, incomplete for critical failure/edge cases, not traceable to the stated goal, or semantically broken in data/artifact/status contracts.
 24. If a child spec lacks implementation-ready depth (normative contract, concrete harness/verification cases, hardened verification commands, DoR/DoD, parent conformance, and status/evidence provenance), stop before coding and route to `child-spec-hardening`.
-25. If this run is one lane of parallel child-spec execution, edit only the lane's allowed write-set. Treat shared/read-only files as read-only unless this run is explicitly the integration-owner run.
-26. In Parent/Child workflows, implement exactly one implementation-ready child per run. Do not implement against the parent spec as a whole; the parent is the scope/control layer.
+25. For Parent/Child work, never implement a child spec without a documented Hardening Verdict of `IMPLEMENTATION READY` or explicitly accepted `READY WITH NON-BLOCKING NOTES`. A plausible split, `ready_candidate`, section headings, or implicit reviewer confidence is not enough.
+26. Before editing a child implementation, check the Child Index or Hardening Queue row when it exists. If it is missing, stale, contradicts the child verdict, lacks the full operational Child Index columns, lacks a `Session Handoff` pointer, lacks evidence/OpenSpec pointers, lacks dependencies/write-set/verification/next-action detail, or names a different next action, stop and route to `spec-orchestrator` or `child-spec-hardening` for sync.
+27. If this run starts from a Child Session Handoff, verify it against the child spec, parent conformance, Child Index `Session Handoff` pointer, evidence/OpenSpec pointers, and Hardening Verdict before treating it as the kickoff contract. Do not trust the handoff blindly; stale or unlinked handoffs block implementation.
+28. If this run is one lane of parallel child-spec execution, edit only the lane's allowed write-set. Treat shared/read-only files as read-only unless this run is explicitly the integration-owner run.
+29. In Parent/Child workflows, implement exactly one implementation-ready child per run. Do not implement against the parent spec as a whole; the parent is the scope/control layer.
 
 ## Risk-Based Verification Preflight
 
@@ -200,6 +203,9 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
 1. **Read and normalize scope**
    - Extract: in scope, out of scope, requirements, test cases, acceptance criteria, dependencies, decisions, open items.
    - Convert test cases into **DoR -> DoD** checkpoints.
+   - For child specs, locate and verify the Hardening Verdict, Parent Scope Conformance, full operational Child Index/Hardening Queue row, Child Index `Session Handoff` pointer, and persisted Child Session Handoff before any implementation edit.
+   - Verify that the Child Index row includes Parent Coverage, Readiness / Hardening Verdict, Session Handoff, OpenSpec / Ledger, Dependencies, Allowed Write-Set, Verification, Evidence / Closeout, Backlog / Re-entry, and Next Action for the target child.
+   - If the Hardening Verdict is absent, stale, weaker than `IMPLEMENTATION READY`/accepted `READY WITH NON-BLOCKING NOTES`, inconsistent with the Child Index, backed only by a partial index, missing a linked handoff, or contradicted by the handoff, stop with `NOT READY` and hand back to `child-spec-hardening` or `spec-orchestrator`.
    - Run a foundational runtime reality gate before substantial edits:
      - verify required CLI/tools exist,
      - verify required implementation repo/services exist,
