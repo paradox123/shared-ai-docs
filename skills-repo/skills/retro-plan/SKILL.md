@@ -1,6 +1,6 @@
 ---
 name: retro-plan
-description: Review implementation results against the plan, evaluate plan quality, and feed actionable deltas into future plan definitions (including skill/prompt updates). USE WHEN the user asks to retro the plan, review what worked, capture bugs/refactorings, improve planning quality, or run a final retro.
+description: Review implementation results against the plan, run lightweight Mini-Retros before context is lost, evaluate plan quality, and feed actionable deltas into future plan definitions (including skill/prompt updates). USE WHEN the user asks to retro the plan, review what worked, capture bugs/refactorings, improve planning quality, run a mini-retro/checkpoint, or run a final retro.
 ---
 
 # retro-plan
@@ -13,6 +13,7 @@ Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.m
 - **Definition of Ready (DoR)**
 - **Definition of Done (DoD)**
 - **Decision Freeze Pack**
+- **Mini-Retro**
 
 This retro should evaluate whether failures, rework, or surprises came from:
 - weak or unmet **DoR** before implementation started,
@@ -21,13 +22,28 @@ This retro should evaluate whether failures, rework, or surprises came from:
 
 When relevant, feed the findings back into spec, plan, and skill wording so the same class of mistake is less likely next time.
 
+## Mini-Retro Mode
+
+Use Mini-Retro mode when the user asks for a short checkpoint, when a larger spec/review/delivery/closeout block just finished, or before session end, context compression, handoff, or the next major workflow step.
+
+Keep the Mini-Retro short and include exactly the shared workflow checkpoint:
+- What was decided?
+- What changed?
+- What remains open?
+- Which evidence/verification is missing?
+- Which skill/workflow friction showed up?
+- Session/context state: continue here or start a new session?
+
+Do not expand Mini-Retro mode into a full root-cause retro unless the user asks or the checkpoint reveals real planning failures, repeated rework, or skill/workflow gaps.
+
 ## Workflow Routing
 | Workflow | Trigger | File |
 |----------|---------|------|
-| **retro-plan** | "retro the plan" OR "retro plan" OR "retro the plan finally" OR "final retro the plan" | `workflows/retro-plan.md` |
+| **retro-plan** | "mini-retro" OR "checkpoint" OR "retro the plan" OR "retro plan" OR "retro the plan finally" OR "final retro the plan" | `workflows/retro-plan.md` |
 
 ## Rules
 - Keep retro format: What worked well / What needs improvement / Next refine adjustments.
+- For Mini-Retros, use the shared six-question checkpoint instead of the full retro format.
 - Interim retro may run multiple times during feature development.
 - Final retro aggregates insights from all prior retros and overall plan quality.
 - Capture bugs/refactorings as concrete follow-up deltas and ensure they are reflected in plan history.

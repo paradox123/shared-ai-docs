@@ -14,6 +14,9 @@ Diese Seite sammelt die Dokumentation fuer gemeinsame Agent-Skills, lokale Runti
 - `spec-orchestrator`
   Orchestriert große Parent-/Master-Specs in Child-Delivery-Packs, Coverage-Matrizen, Readiness-Checks und Parallel-Lanes.
 
+- `child-spec-hardening`
+  Haertet Child-Spec-Drafts oder Orchestrator-Hardening-Queue-Eintraege zu implementation-ready Delivery Specs mit Parent-Conformance, Normative Contract, Harness-Cases, Verification Commands und Auto-Resolve-Loop.
+
 ## Empfohlene Lesereihenfolge
 
 1. Hybrid-Sync-Konzept lesen

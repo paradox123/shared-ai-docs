@@ -24,11 +24,17 @@ Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.m
 - **Definition of Ready (DoR)**
 - **Definition of Done (DoD)**
 - **Decision Freeze Pack**
+- **Session Briefing**
+- **Review Control Surface**
+- **Mini-Retro**
 
 This skill may briefly restate those gates for local context, but it should not redefine them differently.
 
 In this workflow:
 - the spec should become clear enough to satisfy the shared **DoR** later,
+- larger spec sessions should start by clarifying mode/skill, source of truth, goal, non-goals, in-scope work, expected output, verification/review path, and open decisions,
+- every spec should contain a **Review Control Surface** with goal, in scope, out of scope, key test/harness cases, key verification commands, open decisions, and readiness status,
+- larger spec blocks and handoffs should end with a short **Mini-Retro** so decisions, edits, open items, missing evidence, workflow friction, and session/context health are not lost,
 - blocking `[MISSING ...]` and `[DECISION ...]` items must stay visible until resolved,
 - "ready for planning" or "ready for implementation" should be judged against the shared gate definitions.
 
@@ -75,7 +81,44 @@ Check especially:
 
 If the content-quality pass finds a blocker, mark the spec as not implementation-ready even when all formal sections exist.
 
+## Reader-Calibrated Authoring and Findings
+
+Write and review specs for the user's actual review path. The user often checks goal, in scope, out of scope, verification commands, and test/harness cases first, while skimming the deeper contract sections. Therefore these control surfaces must carry enough meaning for a fast human review:
+
+1. Goal and scope must state the actual behavior change, not only a project label.
+2. In scope and out of scope must make the delivery boundary obvious without reading the whole document.
+3. Verification commands and test/harness cases must show what important behavior is proven, including negative and failure cases when relevant.
+4. Deep contract sections may contain detail, but any important consequence of that detail must be reflected in the review surfaces above.
+
+For specs, create or maintain this section near the top:
+
+```md
+## Review Control Surface
+
+- Ziel:
+- In Scope:
+- Out of Scope:
+- Wichtigste Test-/Harness-Cases:
+- Wichtigste Verification Commands:
+- Offene Entscheidungen:
+- Readiness Status:
+```
+
+Keep it short and synchronized with the detailed sections. If the control surface and the body disagree, treat that as a blocking review finding.
+
+When reporting non-trivial review findings, do not use terse technical labels that assume the user has read every detail section. Use this format:
+
+1. **Finding**: one short sentence in plain language.
+2. **Why it matters**: what could go wrong in implementation or review if this remains unresolved.
+3. **Where to check**: point to the human review surfaces first (goal, scope, verification commands, test/harness cases) and only then to deeper sections.
+4. **Concrete example**: name the missing artifact, status, command, fixture, case, or behavior.
+5. **Needed action**: state whether Claude can fix it autonomously or whether a user decision is required.
+
+If a technical term is unavoidable, translate it once in the finding. For example, explain "canonical serialization" as the exact byte representation that is hashed or signed.
+
 When the user wants a cleanup/review loop after authoring, hand off to `doc-review-autoresolve`: it should reconcile and fix inferable inconsistencies, then report readiness, while stopping for real decisions.
+
+When the user is working on a child spec that already has a parent/master source and needs implementation-ready depth, hand off to `child-spec-hardening` instead of continuing open-ended co-authoring. That skill applies these authoring principles in a bounded child delivery-pack workflow and then runs the auto-resolve loop.
 
 ## Documentation Research Routing
 
@@ -230,6 +273,8 @@ If user declines, work freeform. If user accepts, proceed to Stage 1.
 
 **Goal:** Close the gap between what the user knows and what Claude knows, enabling smart guidance later.
 
+For larger work, new sessions, or resumed/compressed context, first establish the shared session briefing from `doc-workflow.md`: mode/skill, source of truth, goal, non-goals, in-scope work, expected output, verification/review path, and open decisions. Infer what is safe from the prompt and repo context; ask only for blockers.
+
 ### Initial Questions
 
 Start by asking the user for meta-context about the document:
@@ -349,7 +394,7 @@ Create a markdown file in the working directory. Name it appropriately (e.g., `d
 
 Inform them that the initial structure with placeholders for all sections will be created.
 
-Create file with the required spec header block, all section headers, and `[MISSING ...]` markers as placeholder text. Include a history table in the 3-column format (`Date | Author | Change`) and a `SessionId` line at the bottom.
+Create file with the required spec header block, a `Review Control Surface`, all section headers, and `[MISSING ...]` markers as placeholder text. Include a history table in the 3-column format (`Date | Author | Change`) and a `SessionId` line at the bottom.
 
 Confirm the filename has been created and indicate it's time to fill in each section.
 
@@ -431,13 +476,15 @@ As approaching completion (80%+ of sections done), announce intention to re-read
 - Redundancy or contradictions
 - Anything that feels like "slop" or generic filler
 - Whether every sentence carries weight
+- Whether the Review Control Surface is present, short, and synchronized with the detailed sections
+- Whether goal, scope, verification commands, and test/harness cases are understandable as the user's primary review path
 
 Read entire document and provide feedback.
 
 **When all sections are drafted and refined:**
 Announce all sections are drafted. Indicate intention to review the complete document one more time.
 
-Review for overall coherence, flow, completeness.
+Review for overall coherence, flow, completeness, content quality, and reader-calibrated findings.
 
 Provide any final suggestions.
 
@@ -483,7 +530,7 @@ Summarize any issues found.
 If issues found:
 Report that Reader Claude struggled with specific issues.
 
-List the specific issues.
+List the specific issues using the Reader-Calibrated Authoring and Findings format.
 
 Indicate intention to fix these gaps.
 
@@ -533,6 +580,8 @@ Loop back to refinement for any problematic sections.
 ### Exit Condition (Both Approaches)
 
 When Reader Claude consistently answers questions correctly and doesn't surface new gaps or ambiguities, the doc is ready.
+
+Before declaring readiness, confirm that a reviewer can understand the important risks and proof points from goal, in scope, out of scope, verification commands, and test/harness cases without needing to reconstruct the whole middle of the spec.
 
 ## Final Review
 
@@ -599,7 +648,8 @@ During handoff, carry forward:
 - resolved requirements
 - explicit non-blocking assumptions
 - any remaining blockers that must go back to the spec before the plan can be implementation-ready
+- a short Mini-Retro when the spec block was substantial or context may be lost
 
 If a later planning pass exposes a new missing requirement or unresolved product decision, send that gap back to the spec instead of burying it as an implementation subtask.
 
-**Do not generate retro sections here;** retros are handled by `retro-plan`.
+**Do not generate full retro sections here;** full retros are handled by `retro-plan`. A short Mini-Retro is allowed for larger spec blocks, session endings, context compression risk, or skill handoff.

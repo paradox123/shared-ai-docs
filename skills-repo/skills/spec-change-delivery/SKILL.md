@@ -37,6 +37,7 @@ Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.m
 - **Definition of Ready (DoR)**
 - **Definition of Done (DoD)**
 - **Decision Freeze Pack**
+- **Mini-Retro**
 
 This skill keeps short local definitions for convenience, but execution and the final `READY` / `NOT READY` verdict must stay aligned with the shared workflow document.
 
@@ -94,8 +95,9 @@ Only include them when the spec explicitly requires them.
 19. Preflight is preparation only: it must never be treated as a substitute for the required verification checklist.
 20. Never recurse into "verification of verification". One preflight pass is allowed; then run the canonical spec verification block.
 21. If command simplifications are beneficial, propose them first with rationale and trade-offs; do not silently alter the spec command contract.
-22. For child-spec implementation, check parent/master conformance before editing when the parent path is known. If the child contradicts the parent or omits expected scope without re-entry, stop and harden the child spec first.
-23. If pre-implementation analysis finds a blocking content-quality flaw, stop before coding and route back to spec hardening. This includes requirements that are ambiguous, internally inconsistent, infeasible, untestable, incomplete for critical failure/edge cases, not traceable to the stated goal, or semantically broken in data/artifact/status contracts.
+22. For child-spec implementation, check parent/master conformance before editing when the parent path is known. If the child contradicts the parent or omits expected scope without re-entry, stop and route to `child-spec-hardening`.
+23. If pre-implementation analysis finds a blocking content-quality flaw, stop before coding and route to `child-spec-hardening`. This includes requirements that are ambiguous, internally inconsistent, infeasible, untestable, incomplete for critical failure/edge cases, not traceable to the stated goal, or semantically broken in data/artifact/status contracts.
+24. If a child spec lacks implementation-ready depth (normative contract, concrete harness/verification cases, hardened verification commands, DoR/DoD, parent conformance, and status/evidence provenance), stop before coding and route to `child-spec-hardening`.
 
 ## Risk-Based Verification Preflight
 
@@ -236,6 +238,7 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
    - Commands run with pass/fail summary.
    - Files changed.
    - Residual risks, follow-ups, or blockers.
+   - Mini-Retro for larger delivery blocks or before handoff/context loss: decisions, changes, open items, missing evidence, skill/workflow friction, and whether to continue in this session or start a new one.
    - If implementation was completed with evidence, update spec status to `🔵 Implemented` and append a matching history row.
    - Final verdict: `READY` or `NOT READY`.
 
@@ -285,7 +288,11 @@ Use this close-out structure:
 4. **Open risks or blockers**
    - unresolved items, assumptions, or follow-up work
 
-5. **Final verdict**
+5. **Mini-Retro**
+   - include this when the delivery block was substantial, when context may be lost, or when handing off to `retro-plan`/`spec-closeout`
+   - cover: what was decided, what changed, what remains open, which evidence/verification is missing, which skill/workflow friction appeared, and whether to continue in this session or start a new one
+
+6. **Final verdict**
    - `READY` = the agreed change is implemented and required checks pass
    - `NOT READY` = acceptance evidence is incomplete, checks fail, or blockers remain
 

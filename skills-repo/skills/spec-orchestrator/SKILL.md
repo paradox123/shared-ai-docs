@@ -1,13 +1,13 @@
 ---
 name: spec-orchestrator
-description: Orchestrate an existing parent/master spec, parent draft, or child-spec set into implementation-ready child delivery packs. Use this skill whenever the user wants to speed up work after an initial spec exists, split a master/parent spec into child specs, make several child specs implementation-ready, compare child specs against a master spec, create a readiness/coverage matrix, decide what can run in parallel, or asks "what is the next spec/slice?" Do not use this as the first step for a blank/new spec prompt; use doc-coauthoring first to create the initial parent spec, then use this skill before refine-plan/spec-change-delivery when scope spans multiple slices.
+description: Orchestrate an existing parent/master spec, parent draft, or child-spec set into child delivery packs, coverage matrices, hardening queues, and parallelization plans. Use this skill whenever the user wants to speed up work after an initial spec exists, split a master/parent spec into child specs, compare child specs against a master spec, create a readiness/coverage matrix, decide what can run in parallel, or asks "what is the next spec/slice?" Do not use this as the first step for a blank/new spec prompt; use doc-coauthoring first. Use child-spec-hardening after this skill when child specs need implementation-ready depth.
 ---
 
 # Spec Orchestrator
 
-Turn a large spec into a delivery control pack: parent coverage, child-spec readiness, backlog re-entry, parallel lane options, and next-slice recommendation.
+Turn a large spec into a delivery control pack: parent coverage, child-spec readiness, hardening queue, backlog re-entry, parallel lane options, and next-slice recommendation.
 
-Use this skill to reduce the repeated hand work of making each child spec implementation-ready one by one.
+Use this skill to reduce the repeated hand work of discovering child boundaries and readiness gaps. Use `child-spec-hardening` to create the deeper implementation-ready child contract.
 
 ## Core Promise
 
@@ -19,19 +19,35 @@ The default output is a **Delivery Orchestration Pack**:
 2. Coverage matrix.
 3. Parent scope conformance matrix.
 4. Child readiness matrix.
-5. Missing delivery-pack patches or instructions.
+5. Hardening queue or missing delivery-pack patches/instructions.
 6. Parallelization lane matrix.
 7. Recommended execution order.
 8. Closeout sync checklist.
 
 If the user explicitly asks to also update files, update only spec/planning/workflow artifacts unless they explicitly ask for runtime implementation.
 
+## Shared Workflow Contract
+
+Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md` as the canonical reference for the Session Briefing, Review Control Surface, DoR/DoD, Decision Freeze Pack, and Mini-Retro.
+
+At the start of larger orchestration work, clarify or infer:
+- active mode/skill,
+- source of truth parent/index/spec files,
+- goal and non-goals,
+- in-scope orchestration output,
+- expected deliverable,
+- verification/review path,
+- open decisions.
+
+When reading or generating specs, require the Review Control Surface to expose goal, in scope, out of scope, key test/harness cases, key verification commands, open decisions, and readiness status. Missing or stale control surfaces become readiness gaps.
+
 ## When To Use
 
 Use this skill when the request includes any of these patterns:
 
 - "large spec", "master spec", "parent spec", "child specs", "slices"
-- "make these child specs implementation-ready"
+- "which child specs are implementation-ready?"
+- "what needs hardening before implementation?"
 - "speed this up", "this takes too long", "orchestrate"
 - "which specs can run in parallel?"
 - "what is the next slice/spec?"
@@ -81,15 +97,16 @@ Output or create:
 - backlog entries,
 - child index updates.
 
-### Mode C: Batch Hardening
+### Mode C: Batch Readiness Assessment
 
-Use when several child specs should be made implementation-ready before implementation starts.
+Use when several child specs should be assessed before hardening or implementation starts.
 
 Output or create:
 
-- batched child-spec updates,
+- batched child-spec readiness updates,
 - a readiness report,
-- explicit non-ready reasons for remaining slices.
+- explicit non-ready reasons,
+- a hardening queue for `child-spec-hardening`.
 
 ### Mode D: Parallelization Plan
 
@@ -175,6 +192,7 @@ Every child hardening pass should leave a compact conformance table:
 Every implementation-ready child spec needs:
 
 - header/status/scope,
+- Review Control Surface,
 - parent/master coverage,
 - parent scope conformance table,
 - content-quality review result for the child scope,
@@ -192,16 +210,21 @@ Every implementation-ready child spec needs:
 Mark each child:
 
 - `ready`,
+- `ready_candidate`,
 - `needs_hardening`,
 - `blocked`,
 - `too_broad`,
 - `candidate_parallel_lane`.
 
+Use `ready` only when the child already contains implementation-ready depth: status provenance/evidence, normative contract, concrete harness cases, hardened verification commands, DoR/DoD, and no blocking parent conformance or content-quality findings. Otherwise use `ready_candidate` or `needs_hardening` and route to `child-spec-hardening`.
+
 ### 6. Generate Delivery Packs
 
-For each child that is not ready, propose or apply a delivery pack with these sections:
+For each child that is not ready, propose a delivery skeleton or hardening queue entry with these sections:
 
 ```md
+## Goal
+## Review Control Surface
 ## Parent Coverage
 ## Parent Scope Conformance
 ## In Scope
@@ -214,6 +237,15 @@ For each child that is not ready, propose or apply a delivery pack with these se
 ```
 
 Use prior accepted slices as verification recipes. For example, if S1/S2 used local harness plus Docker harness, later runtime slices should inherit that pattern unless explicitly out of scope.
+
+Do not try to fully elaborate every normative contract, canonical example, fixture, and harness case inside this skill when multiple children are involved. Capture the required depth as a `child-spec-hardening` work order.
+
+Hardening queue format:
+
+| Child | Current Status | Required Hardening | Sources To Read | Blockers |
+|---|---|---|---|---|
+
+For contract-heavy children, include `Canonical Examples/Fixtures decision` in Required Hardening.
 
 ### 7. Decide Parallelization
 
@@ -281,6 +313,10 @@ Mode:
 | Child | Status | Main Gap | Required Hardening |
 |---|---|---|---|
 
+**Hardening Queue**
+| Child | Current Status | Required Hardening | Sources To Read | Blockers |
+|---|---|---|---|---|
+
 **Parallelization**
 | Lane | Child | Safe? | Reason | Write-Set | Integration Owner |
 |---|---|---|---|---|---|
@@ -292,16 +328,27 @@ Mode:
 
 **Files To Update**
 - ...
+
+**Mini-Retro**
+- What was decided?
+- What changed?
+- What remains open?
+- Which evidence/verification is missing?
+- Which skill/workflow friction showed up?
+- Session/context state: continue here or start a new session?
 ```
 
-If files were edited, include changed files and verification performed.
+If files were edited, include changed files and verification performed. Include the Mini-Retro after substantial orchestration blocks or before handoff/context loss.
 
 ## Guardrails
 
 - Do not let "accepted" specs hide future work. Future work must become parent coverage, backlog, or child spec rows.
+- Do not let a missing or stale Review Control Surface pass as ready; it must match the detailed scope, cases, commands, open decisions, and readiness verdict.
 - Do not mark a child ready when it lacks verification commands.
 - Do not mark a child ready when it contradicts the parent spec or omits expected parent scope without a named re-entry path.
 - Do not mark a child ready when its content-quality review has blockers, even if formal sections are present. This includes ambiguous, inconsistent, infeasible, incomplete, untestable, non-traceable, or semantically broken requirements, plus data/artifact/status contract flaws.
+- Do not mark a child implementation-ready just because the split is plausible. If normative contract depth, concrete cases, hardened verification commands, DoR/DoD, or status evidence are missing, route to `child-spec-hardening`.
+- Do not mark `done`, `accepted`, or `reference_done` unless evidence/closeout can be cited; otherwise use `parent_claims_done`.
 - Do not let parallel lanes edit shared control files independently.
 - Do not implement feature/runtime code from this skill unless the user explicitly switches to `spec-change-delivery`.
 - Prefer a small generated delivery pack over a long narrative essay.
@@ -309,6 +356,7 @@ If files were edited, include changed files and verification performed.
 ## Hand-Off To Other Skills
 
 - Use `doc-coauthoring` first when no parent spec/draft exists yet, or when parent/child requirement text itself needs authoring.
+- Use `child-spec-hardening` after this skill when a child draft or hardening queue item must become implementation-ready.
 - Use `doc-review-autoresolve` when findings are clear and safe to fix in spec/docs.
 - Use `refine-plan` when the user wants an iterative implementation plan artifact.
 - Use `spec-change-delivery` when one child is ready and the user asks to implement it.

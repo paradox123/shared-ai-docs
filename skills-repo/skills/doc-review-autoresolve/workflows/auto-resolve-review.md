@@ -12,6 +12,16 @@ Convert review findings into immediate, bounded edits and re-review loops until 
 6. Repeat until no autonomous findings remain.
 7. Escalate only true decision/missing-information blockers.
 
+## Finding style
+Write findings for a reader who may have checked only goal, in scope, out of scope, verification commands, and test cases.
+
+For non-trivial findings include:
+- short plain-language finding,
+- why it matters,
+- where to check in goal/scope/verification/test cases,
+- concrete example,
+- needed action or decision.
+
 ## Content-quality checks
 - Is the described behavior correct for the stated problem and user/context?
 - Are the requirements necessary, in scope, and free of hidden scope creep?

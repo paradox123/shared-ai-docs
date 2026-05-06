@@ -1,0 +1,22 @@
+[
+  {
+    "name": "harden_generated_child_from_orchestrator_queue",
+    "prompt": "Make S3 from this spec-orchestrator hardening queue implementation-ready using the parent spec and accepted S1/S2 verification pattern.",
+    "expected_output": "Reads parent and predecessor specs, adds parent conformance, normative contract, canonical examples/fixtures decision, concrete harness cases, inherited verification commands, DoR/DoD, content-quality review, auto-resolve result, and a final readiness verdict."
+  },
+  {
+    "name": "stop_for_missing_contract_decision",
+    "prompt": "Harden this child spec, but the parent does not decide which entitlement statuses are allowed for managed updates.",
+    "expected_output": "Marks a DECISION blocker instead of inventing entitlement behavior, keeps parent conformance visible, and returns NEEDS USER DECISION rather than IMPLEMENTATION READY."
+  },
+  {
+    "name": "do_not_accept_thin_child_spec",
+    "prompt": "This child spec has scope, acceptance criteria, and one generic test command. Is it ready to implement?",
+    "expected_output": "Reports NEEDS HARDENING because normative contract depth, concrete harness cases, hardened verification commands, DoR/DoD, and evidence/status provenance are missing."
+  },
+  {
+    "name": "contract_heavy_fixture_decision",
+    "prompt": "Harden a child spec that defines a bundle manifest with hashes, signatures, entitlement fields, and update metadata.",
+    "expected_output": "Classifies the child as contract-heavy, chooses embedded examples, referenced fixtures, or hybrid, states required fixture paths/cases/normative fields, and does not mark implementation-ready if no canonical example or fixture strategy exists."
+  }
+]

@@ -18,6 +18,9 @@ Resolve documentation/spec review findings with minimal back-and-forth:
 
 Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md` as the canonical reference for:
 - marker meaning (`[MISSING ...]`, `[DECISION ...]`, `[REVIEW ...]`, `[BLOCKED ...]`),
+- Session Briefing,
+- Review Control Surface,
+- Mini-Retro,
 - DoR/DoD expectations,
 - history/session requirements.
 
@@ -38,6 +41,8 @@ Typical prompts:
 - "fix die findings"
 - "mach das automatisch"
 
+For larger, resumed, or context-compressed review work, begin by clarifying or inferring the Session Briefing: active mode/skill, source-of-truth files, review goal, non-goals, in-scope fixes, expected output, verification/review path, and open decisions. Ask only when a blocker cannot be inferred safely.
+
 ## Default Mode (Auto-Resolve)
 
 Default behavior is **autonomous resolution**:
@@ -45,6 +50,7 @@ Default behavior is **autonomous resolution**:
 - Apply fixes directly.
 - Re-run review immediately.
 - Continue until no autonomous findings remain.
+- Ensure the spec's Review Control Surface exists and matches the detailed goal/scope/cases/commands/open decisions/readiness.
 - Do not invent product behavior, data fields, acceptance criteria, or architecture decisions that are not already implied by the spec and its normative sources.
 
 ## Stop-and-Ask Boundary
@@ -64,6 +70,8 @@ If none apply, resolve findings without waiting for confirmation.
    - Review target docs/specs with file+line references.
    - Prioritize by severity/risk.
    - Include formal checklist findings, content-quality findings, and domain/semantic findings.
+   - Write findings for a reader who may only have checked goal, in-scope, out-of-scope, verification commands, and test cases.
+   - Treat a missing or stale Review Control Surface as a finding for specs.
 
 2. **Classify each finding**
    - `autonomous`: can be fixed safely now.
@@ -92,6 +100,31 @@ If none apply, resolve findings without waiting for confirmation.
    - What remains and why user input is required.
    - Final implementation-readiness verdict.
    - Final state: clean vs pending decisions.
+   - Mini-Retro after larger review loops or before context/handoff loss: decisions, changes, open items, missing evidence, skill/workflow friction, and whether to continue in this session or start a new one.
+
+## Reader-Calibrated Finding Format
+
+Findings must be understandable without assuming the user has read the full middle of the spec. The user often reviews goal, in scope, out of scope, verification commands, and test cases first; write findings so they make sense from that reading path.
+
+For every non-trivial finding, include:
+
+1. **Short finding**: one sentence in plain language.
+2. **Why it matters**: what could go wrong in implementation or review if this stays as-is.
+3. **Where to check**: point to the relevant goal/scope/verification/test-case section, not only the deep contract section.
+4. **Concrete example**: a small example of the missing/ambiguous artifact, command, status, case, or behavior.
+5. **Needed action**: what can be fixed autonomously, or what decision the user must make.
+
+Avoid findings that only say things like "contract depth missing", "fixture strategy unclear", or "status provenance incomplete". Expand them:
+
+```md
+Finding: The S3 bundle contract says a manifest must be signed, but the verification cases do not say what a valid or invalid signed manifest looks like.
+Why it matters: An implementation could pass by checking only that a `signature` field exists, while never proving that wrong signatures block installation.
+Where to check: S3 goal/scope says "signed Free-Entry bundle"; Verification Commands and Harness Cases should prove valid and invalid signature behavior.
+Example: Add one small embedded manifest example or require fixtures such as `valid-free-entry-bundle.yaml` and `invalid-signature-bundle.yaml`.
+Needed action: Autonomous if fixture names and fields follow existing S1/S2 harness conventions; ask the user only if the signing model itself is undecided.
+```
+
+If a finding is technical, translate the technical term once. For example, define "canonical serialization" as "the exact byte representation that is hashed or signed, so two systems calculate the same hash for the same logical data."
 
 ## Content Quality Review Gate
 
@@ -149,10 +182,13 @@ Use domain examples only as examples. For instance, in a survey contract, answer
 
 This skill may run directly after `doc-coauthoring`. Its goal is to make the authored spec coherent and implementation-ready where possible, not to hallucinate missing product decisions.
 
+When invoked after `child-spec-hardening`, treat the hardened child spec, parent conformance table, normative contract, harness cases, verification commands, DoR/DoD, and closeout sync targets as the review surface. Fix autonomous drift and inconsistencies, but do not invent missing contract decisions or mark a child ready when hardening gates are absent.
+
 ## Spec Hygiene Rules
 
 When touching spec files:
 - keep header contract intact,
+- keep the Review Control Surface synchronized with detailed sections and final readiness verdict,
 - preserve `SessionId`,
 - append one concise history row for meaningful changes,
 - do not silently weaken acceptance/verification gates,
@@ -165,8 +201,10 @@ After each run, report:
 1. **Applied fixes** (file + line references).
 2. **Residual findings requiring user decision** (if any).
 3. **Content quality review result** (`no content blockers` or list of content blockers, including domain/data-contract blockers when present).
-4. **Readiness verdict** (`IMPLEMENTATION READY`, `READY WITH NON-BLOCKING NOTES`, or `NOT IMPLEMENTATION READY`).
-5. **Re-review result** (`no findings` or list of remaining blockers).
-6. **Smallest next step** only when user input is needed.
+4. **Review Control Surface result** (`present and consistent`, `updated`, or remaining blocker).
+5. **Readiness verdict** (`IMPLEMENTATION READY`, `READY WITH NON-BLOCKING NOTES`, or `NOT IMPLEMENTATION READY`).
+6. **Re-review result** (`no findings` or list of remaining blockers).
+7. **Mini-Retro** when the review loop was substantial, ended a session, or hands off to another skill.
+8. **Smallest next step** only when user input is needed.
 
 Never claim "done" while unresolved blocking decision findings remain.

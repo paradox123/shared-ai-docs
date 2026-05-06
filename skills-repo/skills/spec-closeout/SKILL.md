@@ -31,7 +31,7 @@ Close one accepted change with a strict evidence gate:
 ## Canonical References
 
 Use these as source of truth:
-- Shared workflow gates (DoR/DoD): `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md`
+- Shared workflow gates (DoR/DoD, Mini-Retro): `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md`
 - Delivery behavior and verification rigor: `/Users/dh/.agents/skills/spec-change-delivery/SKILL.md`
 
 ## Required Inputs
@@ -108,6 +108,18 @@ Minimum docs sync checks:
 3. Update dependent docs if status/progress references are now stale.
 4. If no additional update is needed, explicitly state this with the search evidence used.
 
+### 6) Capture Mini-Retro
+
+Before final closeout messaging or handoff, capture the shared Mini-Retro checkpoint:
+1. What was decided?
+2. What changed?
+3. What remains open?
+4. Which evidence/verification is missing?
+5. Which skill/workflow friction showed up?
+6. Session/context state: continue here or start a new session?
+
+Keep it short. Escalate to `retro-plan` only when the checkpoint reveals planning failures, repeated rework, or workflow/skill deltas worth preserving.
+
 ## Output Contract
 
 Respond with:
@@ -116,7 +128,8 @@ Respond with:
 3. OpenSpec closure status and paths
 4. Documentation updates performed (or explicit "none needed" with basis)
 5. Changed artifacts
-6. Final verdict: `READY` or `NOT READY`
+6. Mini-Retro
+7. Final verdict: `READY` or `NOT READY`
 
 Never claim completion without the verification checklist and docs-sync result.
 
