@@ -28,7 +28,7 @@ If the user explicitly asks to also update files, update only spec/planning/work
 
 ## Shared Workflow Contract
 
-Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md` as the canonical reference for the Session Briefing, Review Control Surface, Parallel Work Control Surface, DoR/DoD, Decision Freeze Pack, and Mini-Retro.
+Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md` as the canonical reference for the Session Briefing, Review Control Surface, Parallel Work Control Surface, DoR/DoD, Decision Freeze Pack, Spec Goldstandard, and Mini-Retro.
 
 At the start of larger orchestration work, clarify or infer:
 - active mode/skill,
@@ -39,7 +39,7 @@ At the start of larger orchestration work, clarify or infer:
 - verification/review path,
 - open decisions.
 
-When reading or generating specs, require the Review Control Surface to expose goal, in scope, out of scope, key test/harness cases, key verification commands, open decisions, and readiness status. Missing or stale control surfaces become readiness gaps.
+When reading or generating specs, require the Review Control Surface to expose spec variant, Goldstandard status, goal, in scope, out of scope, key test/harness cases, key verification commands, open decisions, and readiness status. Missing or stale control surfaces become readiness gaps.
 
 ## When To Use
 
@@ -357,7 +357,7 @@ If files were edited, include changed files and verification performed. Include 
 ## Guardrails
 
 - Do not let "accepted" specs hide future work. Future work must become parent coverage, backlog, or child spec rows.
-- Do not let a missing or stale Review Control Surface pass as ready; it must match the detailed scope, cases, commands, open decisions, and readiness verdict.
+- Do not let a missing or stale Review Control Surface pass as ready; it must match the detailed spec variant, Goldstandard status, scope, cases, commands, open decisions, and readiness verdict.
 - Do not mark a child ready when it lacks verification commands.
 - Do not mark a child ready when it contradicts the parent spec or omits expected parent scope without a named re-entry path.
 - Do not mark a child ready when its content-quality review has blockers, even if formal sections are present. This includes ambiguous, inconsistent, infeasible, incomplete, untestable, non-traceable, or semantically broken requirements, plus data/artifact/status contract flaws.

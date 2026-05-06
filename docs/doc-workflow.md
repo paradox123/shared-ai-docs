@@ -29,8 +29,12 @@ Hier werden die gemeinsamen Begriffe gepflegt:
 - **Review Control Surface**
 - **Parallel Work Control Surface**
 - **Mini-Retro**
+- **Spec Goldstandard**
 
 Die Skills dürfen diese Begriffe lokal kurz restaten, sollen aber **keine abweichenden Definitionen** einführen. Änderungen an der gemeinsamen Bedeutung werden zuerst hier gepflegt.
+
+Die ausfuehrliche Goldstandard-Definition fuer Specs lebt in
+[`docs/spec-goldstandard.md`](spec-goldstandard.md). Dieses Workflow-Dokument bleibt die kanonische Gate-Quelle; die Goldstandard-Datei definiert Varianten, Mindestbestandteile, Anti-Patterns, Kandidatenbewertung und den Prozess, mit dem eine Spec zur Goldstandard-Referenz erhoben wird.
 
 ## Session Briefing Template (kurz)
 
@@ -163,6 +167,8 @@ Jede Spec, Parent Spec und Child Spec muss direkt nach Header/Einleitung eine ku
 ```md
 ## Review Control Surface
 
+- Spec-Variante:
+- Goldstandard Status:
 - Ziel:
 - In Scope:
 - Out of Scope:
@@ -173,12 +179,17 @@ Jede Spec, Parent Spec und Child Spec muss direkt nach Header/Einleitung eine ku
 ```
 
 Regeln:
-1. `Ziel` beschreibt die konkrete Verhaltens- oder Dokumentationsaenderung, nicht nur den Projektnamen.
-2. `In Scope` und `Out of Scope` muessen die Delivery-Grenze ohne Detaillekture verstaendlich machen.
-3. Test-/Harness-Cases und Verification Commands listen die wichtigsten Proof Points, inklusive Negativ-, Fehler- oder Secret-/Redaction-Cases, wenn relevant.
-4. `Offene Entscheidungen` nennt blockierende `[MISSING ...]`, `[DECISION ...]` oder blockierende `[REVIEW ...]` Marker; wenn keine offen sind, explizit `Keine blockierenden Entscheidungen`.
-5. `Readiness Status` verwendet das passende Skill-Verdict, z. B. `NOT READY`, `READY FOR ORCHESTRATION`, `READY FOR PLANNING`, `IMPLEMENTATION READY`, `READY WITH NON-BLOCKING NOTES`, `NEEDS USER DECISION`, `NEEDS PARENT/ORCHESTRATOR SYNC` oder `NEEDS HARDENING`.
-6. Wenn Detailsektionen geaendert werden, muss die Kontrollflaeche mitgezogen werden. Widerspruch zwischen Kontrollflaeche und Detailvertrag ist ein blockierendes Review-Finding.
+1. `Spec-Variante` verwendet eine der Varianten aus `docs/spec-goldstandard.md`, z. B. `Parent/Master Spec`, `implementation-ready Child Spec`, `contract-heavy Spec`, `vertical spike Spec` oder `output/report/data-artifact Spec`.
+2. `Goldstandard Status` beschreibt die Referenzklassifizierung der Spec und ist getrennt vom Workflow-`Status` im Header. Erlaubte Werte sind `none`, `candidate` und `reference`. Fuer normale Specs ist `none` ausreichend; Referenz-Specs muessen `candidate` oder `reference` sichtbar tragen.
+3. `Ziel` beschreibt die konkrete Verhaltens- oder Dokumentationsaenderung, nicht nur den Projektnamen.
+4. `In Scope` und `Out of Scope` muessen die Delivery-Grenze ohne Detaillekture verstaendlich machen.
+5. Test-/Harness-Cases und Verification Commands listen die wichtigsten Proof Points, inklusive Negativ-, Fehler- oder Secret-/Redaction-Cases, wenn relevant.
+6. `Offene Entscheidungen` nennt blockierende `[MISSING ...]`, `[DECISION ...]` oder blockierende `[REVIEW ...]` Marker; wenn keine offen sind, explizit `Keine blockierenden Entscheidungen`.
+7. `Readiness Status` verwendet das passende Skill-Verdict, z. B. `NOT READY`, `READY FOR ORCHESTRATION`, `READY FOR PLANNING`, `IMPLEMENTATION READY`, `READY WITH NON-BLOCKING NOTES`, `NEEDS USER DECISION`, `NEEDS PARENT/ORCHESTRATOR SYNC` oder `NEEDS HARDENING`.
+8. Wenn Detailsektionen geaendert werden, muss die Kontrollflaeche mitgezogen werden. Widerspruch zwischen Kontrollflaeche und Detailvertrag ist ein blockierendes Review-Finding.
+
+Legacy-Regel:
+- Bereits akzeptierte Legacy-Specs werden nicht nachtraeglich an der Review Control Surface oder am Goldstandard gemessen. Sie bleiben als umgesetzte Historie unveraendert. Goldstandard-Regeln gelten fuer neue Specs, aktive Kandidaten und Specs, die explizit fuer eine Referenz-Erhebung geoeffnet werden.
 
 ## Parallel Work Control Surface (bei paralleler Arbeit verpflichtend)
 

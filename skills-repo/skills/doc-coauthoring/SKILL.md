@@ -28,13 +28,14 @@ Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.m
 - **Review Control Surface**
 - **Parallel Work Control Surface**
 - **Mini-Retro**
+- **Spec Goldstandard**
 
 This skill may briefly restate those gates for local context, but it should not redefine them differently.
 
 In this workflow:
 - the spec should become clear enough to satisfy the shared **DoR** later,
 - larger spec sessions should start by clarifying mode/skill, source of truth, goal, non-goals, in-scope work, expected output, verification/review path, and open decisions,
-- every spec should contain a **Review Control Surface** with goal, in scope, out of scope, key test/harness cases, key verification commands, open decisions, and readiness status,
+- every spec should contain a **Review Control Surface** with spec variant, Goldstandard status, goal, in scope, out of scope, key test/harness cases, key verification commands, open decisions, and readiness status,
 - larger spec blocks and handoffs should end with a short **Mini-Retro** so decisions, edits, open items, missing evidence, workflow friction, and session/context health are not lost,
 - blocking `[MISSING ...]` and `[DECISION ...]` items must stay visible until resolved,
 - "ready for planning" or "ready for implementation" should be judged against the shared gate definitions.
@@ -96,6 +97,8 @@ For specs, create or maintain this section near the top:
 ```md
 ## Review Control Surface
 
+- Spec-Variante:
+- Goldstandard Status:
 - Ziel:
 - In Scope:
 - Out of Scope:

@@ -21,6 +21,7 @@ Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.m
 - Session Briefing,
 - Review Control Surface,
 - Parallel Work Control Surface,
+- Spec Goldstandard,
 - Mini-Retro,
 - DoR/DoD expectations,
 - history/session requirements.
@@ -51,7 +52,7 @@ Default behavior is **autonomous resolution**:
 - Apply fixes directly.
 - Re-run review immediately.
 - Continue until no autonomous findings remain.
-- Ensure the spec's Review Control Surface exists and matches the detailed goal/scope/cases/commands/open decisions/readiness.
+- Ensure the spec's Review Control Surface exists and matches the detailed spec variant/Goldstandard status/goal/scope/cases/commands/open decisions/readiness.
 - When a spec proposes parallel work, ensure the Parallel Work Control Surface names child/work block, lane mode (`spec/doc hardening` or `implementation`), owner/agent, allowed write-sets, shared/read-only files, dependencies, verification commands, integration owner, and merge/sync order.
 - Do not invent product behavior, data fields, acceptance criteria, or architecture decisions that are not already implied by the spec and its normative sources.
 
@@ -191,7 +192,7 @@ When invoked after `child-spec-hardening`, treat the hardened child spec, parent
 
 When touching spec files:
 - keep header contract intact,
-- keep the Review Control Surface synchronized with detailed sections and final readiness verdict,
+- keep the Review Control Surface synchronized with detailed sections, spec variant, Goldstandard status, and final readiness verdict,
 - keep any Parallel Work Control Surface synchronized with detailed dependencies, write-set sections, shared-file rules, verification commands, and integration order,
 - preserve `SessionId`,
 - append one concise history row for meaningful changes,

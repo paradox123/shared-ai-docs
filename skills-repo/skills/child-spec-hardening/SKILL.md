@@ -22,7 +22,7 @@ Use `doc-coauthoring` principles for writing missing spec content, and `doc-revi
 
 ## Shared Workflow Contract
 
-Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md` as the canonical reference for the Session Briefing, Review Control Surface, Parallel Work Control Surface, DoR/DoD, Decision Freeze Pack, and Mini-Retro.
+Use `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md` as the canonical reference for the Session Briefing, Review Control Surface, Parallel Work Control Surface, DoR/DoD, Decision Freeze Pack, Spec Goldstandard, and Mini-Retro.
 
 At the start of larger or resumed hardening work, clarify or infer:
 - active mode/skill,
@@ -34,7 +34,7 @@ At the start of larger or resumed hardening work, clarify or infer:
 - verification/review path,
 - open decisions.
 
-Every hardened child spec must include a short Review Control Surface near the top with goal, in scope, out of scope, key test/harness cases, key verification commands, open decisions, and readiness status. It is the user's fast review path and must stay synchronized with the detailed child contract.
+Every hardened child spec must include a short Review Control Surface near the top with spec variant, Goldstandard status, goal, in scope, out of scope, key test/harness cases, key verification commands, open decisions, and readiness status. It is the user's fast review path and must stay synchronized with the detailed child contract.
 
 ## When To Use
 
