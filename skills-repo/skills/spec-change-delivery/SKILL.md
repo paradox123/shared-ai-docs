@@ -94,6 +94,8 @@ Only include them when the spec explicitly requires them.
 19. Preflight is preparation only: it must never be treated as a substitute for the required verification checklist.
 20. Never recurse into "verification of verification". One preflight pass is allowed; then run the canonical spec verification block.
 21. If command simplifications are beneficial, propose them first with rationale and trade-offs; do not silently alter the spec command contract.
+22. For child-spec implementation, check parent/master conformance before editing when the parent path is known. If the child contradicts the parent or omits expected scope without re-entry, stop and harden the child spec first.
+23. If pre-implementation analysis finds a blocking content-quality flaw, stop before coding and route back to spec hardening. This includes requirements that are ambiguous, internally inconsistent, infeasible, untestable, incomplete for critical failure/edge cases, not traceable to the stated goal, or semantically broken in data/artifact/status contracts.
 
 ## Risk-Based Verification Preflight
 

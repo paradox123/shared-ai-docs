@@ -138,6 +138,21 @@ Lieferobjekt:
 - offene Spec-Lücken explizit als `[MISSING SPEC ...]`/`[DECISION SPEC ...]`
 - primärer Plan-Track für Workflow 1 (iterativ)
 
+### `spec-orchestrator`
+
+Purpose: Große Parent-/Master-Specs schneller in umsetzbare Child-Delivery-Packs übersetzen.
+
+Lieferobjekt:
+- Parent-/Child-Inventar und Coverage-Matrix
+- Child-Readiness-Matrix mit fehlenden Delivery-Pack-Bestandteilen
+- Parallelisierungs-/Lane-Matrix mit Write-Sets und Integrations-Owner
+- empfohlene nächste Slices plus Closeout-Sync-Checkliste
+
+Routing-Regel:
+- Nach `doc-coauthoring` nutzen, sobald ein Parent-Draft, eine Master-Spec, ein Slice-Plan oder Child Specs existieren und mehrere Slices orchestriert werden muessen.
+- Vor `refine-plan`/`spec-change-delivery` nutzen, wenn mehrere Child Specs, ein großer Parent-Scope oder die Frage nach Parallelisierung/Nächstem Slice im Raum steht.
+- Nicht als ersten Schritt fuer einen leeren Initialprompt nutzen; dafuer bleibt `doc-coauthoring` der Startpunkt.
+
 ### `spec-change-delivery`
 
 Purpose: Einen klar abgegrenzten Change aus der Spec implementieren und verifizieren.
@@ -165,7 +180,14 @@ Lieferobjekt:
 - Findings-first Review mit file/line Referenzen
 - automatische Behebung aller sicher entscheidbaren Inkonsistenzen im selben Run
 - unmittelbarer Re-Review nach Edits (Loop bis stabil)
+- strenger inhaltlicher Review des gesamten Vorhabens: Korrektheit, Scope, Vollstaendigkeit, Konsistenz, Eindeutigkeit, Machbarkeit, Testbarkeit, Traceability, Abstraktionsniveau, operative/lifecycle-relevante Punkte sowie Daten-/Artefaktvertraege
+- automatischer Readiness-Status nach Spec-Änderungen (`IMPLEMENTATION READY`, `READY WITH NON-BLOCKING NOTES`, `NOT IMPLEMENTATION READY`)
 - Eskalation nur für echte Entscheidungs-/Informationslücken (`[MISSING ...]`, `[DECISION ...]`, blockierende `[REVIEW ...]`)
+
+Zusammenspiel mit `doc-coauthoring`:
+- `doc-coauthoring` erstellt und ergänzt Inhalte, Anforderungen, Testfälle und Verification Commands.
+- `doc-review-autoresolve` darf direkt danach laufen, um Inkonsistenzen, Drift, Dopplungen, fehlende Querverweise und sicher inferierbare Vertragslücken zu bereinigen.
+- `doc-review-autoresolve` trifft keine neuen Produkt-/Scope-/Architektur-/Security-/Legal-/Data-Contract-Entscheidungen. Bei solchen Lücken stoppt der Loop mit Entscheidungsmarker.
 
 ### `retro-plan`
 
@@ -205,9 +227,16 @@ Pflichtbestandteile:
 
 1. Parent Spec oder Slice-Plan mit Coverage-Matrix: jede Parent-Anforderung ist `done`, `partial`, `pending`, `blocked` oder bewusst `out_of_scope`.
 2. Child-Spec-Index mit Status, Abhaengigkeiten, naechstem empfohlenem Slice und Link auf Evidence/Closeout.
-3. Jede Child Spec enthaelt vor Umsetzung mindestens Scope, Non-Goals, Master-/Parent-Abdeckung, Decision Freeze Pack, konkrete Acceptance Criteria und Verification Commands.
+3. Jede Child Spec enthaelt vor Umsetzung mindestens Scope, Non-Goals, Master-/Parent-Abdeckung, Parent-Scope-Conformance, Decision Freeze Pack, konkrete Acceptance Criteria und Verification Commands.
 4. Restscope wird nicht nur als "Next Step" in einer abgeschlossenen Spec abgelegt, sondern als Backlog-/Child-Spec-Eintrag mit Trigger, Done-Signal und Abhaengigkeit.
 5. Closeout einer Child Spec synchronisiert Parent Spec, Slice-Plan/Index, Backlog und OpenSpec-Artefakte, bevor der naechste Slice als fuehrend gilt.
+
+Parent-Scope-Conformance ist ein blockierendes Gate nach jeder Child-Spec-Nacharbeit:
+
+1. Jede Parent-Anforderung, die der Child beruehrt, wird als `preserves`, `extends`, `narrows_with_rationale`, `defers_to_child`, `missing_from_child` oder `contradicts_parent` markiert.
+2. `contradicts_parent` blockiert Implementierung.
+3. `missing_from_child` blockiert Implementierung, wenn kein benannter Child-/Backlog-Reentry existiert.
+4. Bewusste Scope-Verengung ist erlaubt, aber nur mit Rationale und Ziel fuer den Restscope.
 
 Parallelisierung ist nur sinnvoll, wenn Child Specs unabhaengige Write-Sets und verifizierbare Done-Signale haben.
 
@@ -310,7 +339,33 @@ Default bei Review-Arbeit:
 1. Findings erfassen.
 2. Alle sicher entscheidbaren Findings ohne Zusatzfreigabe direkt beheben.
 3. Im gleichen Run re-reviewen.
-4. Wiederholen, bis keine autonomen Findings mehr offen sind.
+4. Inhaltlichen Review ausführen: nicht nur Abschnitts-/DoR-Check, sondern strenge fachliche Prüfung des gesamten Vorhabens.
+5. Nach jeder Spec-Änderung automatisch Readiness-Status melden; der User soll nicht separat fragen müssen, ob die Spec implementation-ready ist.
+6. Wiederholen, bis keine autonomen Findings mehr offen sind.
+
+Inhaltliche Review-Fragen orientieren sich an etablierten Requirements-Qualitaetskriterien:
+
+- Ist das beschriebene Verhalten fachlich korrekt fuer Problem, Nutzer und Kontext?
+- Ist jede Anforderung notwendig und im Scope, oder versteckt sie Scope Creep bzw. ein Non-Goal?
+- Sind Normalpfad, Edge Cases, Fehlerpfade, Abhaengigkeiten, Constraints und Annahmen ausreichend vollstaendig?
+- Sind Anforderungen, Beispiele, Begriffe, Statuswerte, Parent-/Child-Scope, Akzeptanzkriterien und Verification Commands konsistent?
+- Ist die Aussage eindeutig genug, dass keine materiell unterschiedlichen Implementierungen plausibel sind?
+- Ist die Anforderung in der Zielumgebung machbar?
+- Ist sie testbar/verifizierbar durch Test, Inspection, Analyse, Demonstration oder konkrete Abnahme-Evidenz?
+- Ist sie traceable zu Intent, Parent Scope, Akzeptanzkriterien, Verification Commands und nachgelagerten Artefakten?
+- Ist sie atomar und auf dem richtigen Abstraktionsniveau?
+- Sind operative/lifecycle-relevante Themen wie Migration, Fallback, Rollback, Observability, Kompatibilitaet, Ownership und Closeout-Evidenz abgedeckt, falls relevant?
+
+Inhaltliche P1-Beispiele:
+
+- Datenartefakte ohne die fuer den eigenen nachgelagerten Flow notwendige Identitaet, Provenance oder Kontextbindung.
+- Hash-/Signaturvertrag ohne kanonische Serialisierung.
+- Manifest oder Run-Status ohne erlaubte Werte, Fehlerstatus oder Provenance.
+- Akzeptanzkriterium kann formal grün werden, obwohl der intendierte Kontrollfluss übersprungen wurde.
+- Anforderung ist mehrdeutig, fachlich widerspruechlich, technisch unmachbar oder nicht testbar.
+- Wichtiger Fehler-/Edge-Case fehlt, obwohl die Implementierung ohne ihn nicht sicher oder sinnvoll abgeschlossen werden kann.
+
+Use-Case-spezifische Beispiele sind keine globalen Pflichtfelder. Ein Survey braucht z. B. nur dann Frage-IDs im Antwortvertrag, wenn die Spec spaetere Interpretation nach Frage vorsieht.
 
 Eskalation an den User nur wenn:
 - mehrere fachlich unterschiedliche Lösungen möglich sind,

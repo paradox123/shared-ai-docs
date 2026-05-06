@@ -52,6 +52,31 @@ If these are not met, add explicit markers such as:
 - `[MISSING risk-based verification preflight subset]`
 - `[DECISION verification command simplification approval]`
 
+## Content Quality Guardrail
+
+Before calling a spec ready for planning or implementation, perform a strict content-quality review, not just a section checklist. Data contracts are one review category, not the whole semantic review.
+
+Check especially:
+
+1. Correctness/domain fit: the described behavior solves the stated problem and matches the intended user/system context.
+2. Necessity/scope: requirements are needed for the goal; hidden scope creep, accidental non-goals, and deferred work are explicit.
+3. Completeness: normal paths, edge cases, failure paths, dependencies, constraints, and assumptions are covered or marked.
+4. Consistency: requirements, examples, terminology, statuses, parent/child scope, acceptance criteria, and verification commands do not conflict.
+5. Unambiguity: a competent implementer should not have to choose between multiple materially different meanings.
+6. Feasibility: the behavior is implementable in the declared technical/runtime environment.
+7. Testability/verifiability: important requirements can be proven with concrete tests, inspection, analysis, demonstration, or acceptance evidence.
+8. Traceability: requirements connect to source intent, parent scope, acceptance criteria, verification commands, and downstream artifacts.
+9. Atomicity/abstraction: requirements are not bundled so broadly that partial delivery can look complete, and they do not over-prescribe implementation unless that is intentional.
+10. Operational/lifecycle fit: migration, fallback, rollback, observability, compatibility, ownership, and closeout evidence are covered when relevant.
+11. Data/artifact contracts preserve meaning downstream. Require identity/context/provenance fields only when the spec's downstream flow needs them; use-case-specific examples should not become universal fields.
+12. Status fields define allowed values, failure states, and blocked states when statuses matter.
+13. Fallback paths produce compatible artifacts or explicitly document differences.
+14. Acceptance criteria cannot be satisfied by skipping the intended control flow.
+
+If the content-quality pass finds a blocker, mark the spec as not implementation-ready even when all formal sections exist.
+
+When the user wants a cleanup/review loop after authoring, hand off to `doc-review-autoresolve`: it should reconcile and fix inferable inconsistencies, then report readiness, while stopping for real decisions.
+
 ## Documentation Research Routing
 
 Before spec drafting continues, route documentation discovery to
@@ -91,11 +116,14 @@ When scope pressure is detected, do this before continuing:
 
 Before calling any child spec implementation-ready, verify that it contains:
 - parent/master coverage,
+- parent scope conformance for every touched parent requirement (`preserves`, `extends`, `narrows_with_rationale`, `defers_to_child`, `missing_from_child`, `contradicts_parent`),
 - explicit in/out scope,
 - a Decision Freeze Pack,
 - concrete acceptance criteria,
 - Verification Commands including runtime/container gates when relevant,
 - dependency and write-set boundaries if parallel execution is plausible.
+
+Do not call a child spec implementation-ready when it contradicts the parent spec or drops expected parent scope without a named backlog/child-spec re-entry path.
 
 If the user chooses not to split, keep working but add an explicit marker such as:
 - `[REVIEW Scope risk accepted: <reason>]`
