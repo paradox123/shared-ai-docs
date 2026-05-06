@@ -155,8 +155,9 @@ Minimum Child Index columns:
 Rules:
 
 - Every known child, planned child, deferred parent requirement, and blocked/re-entry item needs a row or named destination.
-- Do not treat a legacy or partial index table as operational. A table that only contains `Slice`, `Spec`, `Status`, `Hardening Verdict`, or `Session Handoff` is a migration intermediate and cannot support `IMPLEMENTATION READY`.
-- Before marking any child ready, make sure that child's row has the full minimum columns and non-empty values for Parent Coverage, Readiness / Hardening Verdict, Session Handoff, OpenSpec / Ledger, Dependencies, Allowed Write-Set, Verification, Evidence / Closeout, Backlog / Re-entry, and Next Action.
+- Do not treat a legacy, partial, aliased, or compressed index table as operational. A table that only contains `Slice`, `Spec`, `Status`, `Hardening Verdict`, `Session Handoff`, `Dependencies / Evidence`, `Allowed Next Mode`, `Implementation Gate`, `Closeout Sync`, or similar substitute columns is a migration intermediate and cannot support `IMPLEMENTATION READY`.
+- Before marking any child ready, make sure the table contains the exact minimum column names shown above and that the target child's row has non-empty values for each required column. Do not accept renamed, merged, or semantically equivalent substitute columns as satisfying the gate.
+- For `IMPLEMENTATION READY`, the `Allowed Write-Set` cell must be a firm enforceable list or pattern list. Avoid uncertain language such as `likely`, `probably`, `expected`, `TBD`, `as needed`, `related files`, or `etc.`; if write-set uncertainty remains, mark the child `needs_hardening` or `needs_parent/orchestrator_sync`.
 - `ready_candidate` is not implementation permission. Only a documented hardening verdict of `IMPLEMENTATION READY` or explicitly accepted `READY WITH NON-BLOCKING NOTES` can feed `spec-change-delivery`.
 - Keep the Hardening Queue as the subset of Child Index rows that still need contract, case, verification, conformance, or DoR/DoD depth.
 - Keep OpenSpec as the formal delivery ledger when active. The Child Index points to OpenSpec changes and evidence; it does not mirror their task detail.
@@ -414,7 +415,8 @@ If files were edited, include changed files and verification performed. Include 
 - Do not mark a child ready when its content-quality review has blockers, even if formal sections are present. This includes ambiguous, inconsistent, infeasible, incomplete, untestable, non-traceable, or semantically broken requirements, plus data/artifact/status contract flaws.
 - Do not mark a child implementation-ready just because the split is plausible. If normative contract depth, concrete cases, hardened verification commands, DoR/DoD, or status evidence are missing, route to `child-spec-hardening`.
 - Do not finish Parent/Child orchestration without a Child Index update or a clearly named Child Index patch target.
-- Do not report an `IMPLEMENTATION READY` child from a partial Child Index. Use `NEEDS PARENT/ORCHESTRATOR SYNC` until the full operational row exists and agrees with the child spec and handoff.
+- Do not report an `IMPLEMENTATION READY` child from a partial, compressed, or aliased Child Index. Use `NEEDS PARENT/ORCHESTRATOR SYNC` until the exact operational row exists and agrees with the child spec and handoff.
+- Do not report an `IMPLEMENTATION READY` child while the `Allowed Write-Set` is approximate or advisory instead of enforceable.
 - Do not recommend `spec-change-delivery` for a child that has no documented hardening verdict.
 - Do not leave the next child without a persisted Child Session Handoff and matching Child Index pointer.
 - Do not mark `done`, `accepted`, or `reference_done` unless evidence/closeout can be cited; otherwise use `parent_claims_done`.

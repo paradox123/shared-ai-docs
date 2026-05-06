@@ -55,12 +55,40 @@ Process change:
 - `child-spec-hardening` now treats parent specs, slice plans, accepted predecessor children, and OpenSpec archives as read-only unless the user explicitly requests integration/closeout sync.
 - Stale predecessor or parent/slice-plan status should be reported as a follow-up patch, not silently changed inside the target-child verdict.
 
+### 5. Child Index Columns Must Be Exact, Not Compressed
+
+Observed failure in the retry:
+
+- The retry improved the S3 index, but compressed required fields into substitute columns such as `Dependencies / Evidence`, `Allowed Next Mode`, `Implementation Gate`, and `Closeout Sync`.
+- That made the table look operational while still depriving `spec-change-delivery` of the exact control surface it is expected to verify.
+
+Process change:
+
+- The Child Index must use the exact required column names.
+- Aliased, renamed, or merged substitute columns do not satisfy the gate.
+- A child with a compressed index must use `NEEDS PARENT/ORCHESTRATOR SYNC`, not `IMPLEMENTATION READY`.
+
+### 6. Implementation Write-Set Must Be Enforceable
+
+Observed failure in the retry:
+
+- The persisted handoff described the future S3 implementation write-set as approximate (`voraussichtlich`).
+- A fresh implementation session cannot enforce an approximate write-set without renegotiating scope.
+
+Process change:
+
+- For `IMPLEMENTATION READY`, `Allowed Write-Set` must be a firm list or pattern list.
+- Uncertain language such as `voraussichtlich`, `likely`, `probably`, `expected`, `TBD`, `as needed`, `related files`, or `etc.` blocks implementation readiness.
+- If the implementation write-set is still approximate, the correct verdict is `NEEDS HARDENING`.
+
 ## Expected Future Behavior
 
 A future S3-like child hardening run should:
 
 1. Upgrade or patch the Child Index to the full operational schema before claiming readiness.
-2. Parse or explicitly de-scope embedded canonical machine-readable examples.
-3. Run and report `git diff --check`.
-4. Keep predecessor closeout and parent/slice-plan sync out of scope unless explicitly requested.
-5. Return `NEEDS PARENT/ORCHESTRATOR SYNC` or `NEEDS HARDENING` instead of optimistic `IMPLEMENTATION READY` when any of these gates fail.
+2. Use exact Child Index column names, not compressed substitute columns.
+3. Provide an enforceable implementation write-set in both Child Index and Handoff.
+4. Parse or explicitly de-scope embedded canonical machine-readable examples.
+5. Run and report `git diff --check`.
+6. Keep predecessor closeout and parent/slice-plan sync out of scope unless explicitly requested.
+7. Return `NEEDS PARENT/ORCHESTRATOR SYNC` or `NEEDS HARDENING` instead of optimistic `IMPLEMENTATION READY` when any of these gates fail.

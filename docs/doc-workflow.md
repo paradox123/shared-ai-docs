@@ -468,11 +468,14 @@ Regeln:
 1. `spec-orchestrator` erzeugt oder aktualisiert den Child Index, sobald Parent/Child genutzt wird. Wenn kein eigener Index existiert, wird die Kontrollflaeche im Parent, Slice-Plan oder Delivery Orchestration Pack angelegt.
 2. Der Child Index haelt Slice-Status, Coverage, Abhaengigkeiten, Hardening Queue, Handoff-Pointer, Next Action, Evidence-/Closeout-Links und Backlog-/Re-entry-Verweise. Er dupliziert keine OpenSpec-Tasks und keine detaillierten Implementierungspläne.
 3. Die Hardening Queue ist ein Ausschnitt des Child Index fuer nicht implementation-ready Children. Sie nennt Required Hardening, Sources To Read und Blockers, aber keine fein granularen Delivery-Tasks.
-4. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn die Child-Index-Zeile die volle Mindestflaeche oben enthaelt und fuer diesen Child vollstaendig ausgefuellt ist. Eine alte Kurzform wie `Slice | Spec | Status | Hardening Verdict | Session Handoff` ist nur ein Migrationszwischenstand und blockiert Implementierung.
-5. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn ein dokumentiertes Hardening Verdict mit Parent Conformance, Content-Quality-Ergebnis, Verification Depth und DoR/DoD vorliegt und der Child Index auf ein aktuelles persistiertes Handoff zeigt.
-6. `ready_candidate` bedeutet nur: der Schnitt wirkt plausibel. Es ist kein Implementierungsfreigabe-Status.
-7. Nach Hardening, Delivery und Closeout muessen Child Spec, Parent Coverage, Child Index, Child Session Handoff, Backlog/Re-entry, Evidence Links und OpenSpec Status synchron sein.
-8. Der Child Index benennt den naechsten fuehrenden Child erst, nachdem die vorherige Child-Synchronisation abgeschlossen oder explizit als blockiert dokumentiert ist.
+4. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn die Child-Index-Tabelle die exakten Spaltennamen aus der Mindestflaeche oben enthaelt und die Ziel-Child-Zeile fuer jede Spalte vollstaendig ausgefuellt ist.
+5. Zusammengelegte oder umbenannte Ersatzspalten wie `Dependencies / Evidence`, `Allowed Next Mode`, `Implementation Gate`, `Closeout Sync`, `Status`, `Verdict`, `Ledger`, `Gate` oder aehnliche Kurzformen gelten nicht als operational. Sie koennen zusaetzlich existieren, ersetzen aber keine Pflichtspalte.
+6. Eine alte Kurzform wie `Slice | Spec | Status | Hardening Verdict | Session Handoff` ist nur ein Migrationszwischenstand und blockiert Implementierung.
+7. `Allowed Write-Set` muss fuer `IMPLEMENTATION READY` als verbindliche, durch `spec-change-delivery` durchsetzbare Liste oder Musterliste formuliert sein. Unverbindliche Formulierungen wie `voraussichtlich`, `likely`, `probably`, `expected`, `TBD`, `to be decided`, `etc.`, `and related files` oder `as needed` blockieren Implementierungsfreigabe.
+8. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn ein dokumentiertes Hardening Verdict mit Parent Conformance, Content-Quality-Ergebnis, Verification Depth und DoR/DoD vorliegt und der Child Index auf ein aktuelles persistiertes Handoff zeigt.
+9. `ready_candidate` bedeutet nur: der Schnitt wirkt plausibel. Es ist kein Implementierungsfreigabe-Status.
+10. Nach Hardening, Delivery und Closeout muessen Child Spec, Parent Coverage, Child Index, Child Session Handoff, Backlog/Re-entry, Evidence Links und OpenSpec Status synchron sein.
+11. Der Child Index benennt den naechsten fuehrenden Child erst, nachdem die vorherige Child-Synchronisation abgeschlossen oder explizit als blockiert dokumentiert ist.
 
 Pflichtbestandteile:
 
