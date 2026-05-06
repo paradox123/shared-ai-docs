@@ -74,13 +74,13 @@ Ask only if the target child or parent cannot be inferred safely. If no Child In
 
 This skill includes a local validator:
 
-`/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/child-spec-hardening/Tools/ValidateChildReadiness.cs`
+`/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateChildReadiness.cs`
 
 Before reporting `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES` for a Parent/Child target, run the validator from a neutral directory such as `/tmp` with absolute target-repository paths. This avoids inheriting a target repo `global.json` or SDK pin that can make the .NET 10 file-based app unavailable even when .NET 10 is installed:
 
 ```sh
 cd /tmp
-dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/child-spec-hardening/Tools/ValidateChildReadiness.cs -- \
+dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateChildReadiness.cs -- \
   --index /absolute/path/to/project/_specs/2026-05-05-free-entry-v2-child-specs-index.md \
   --child S3 \
   --handoff /absolute/path/to/project/_specs/child-session-handoffs/s3-session-handoff.md
