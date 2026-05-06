@@ -23,6 +23,8 @@ The default output is a **Delivery Orchestration Pack**:
 6. Parallel Work Control Surface.
 7. Recommended execution order.
 8. Closeout sync checklist.
+9. Session-start handoff for the next child when a new session should implement it.
+10. OpenSpec ledger recommendation or setup notes for Parent/Child work.
 
 If the user explicitly asks to also update files, update only spec/planning/workflow artifacts unless they explicitly ask for runtime implementation.
 
@@ -45,6 +47,7 @@ When reading or generating specs, require the Review Control Surface to expose s
 
 Use this skill when the request includes any of these patterns:
 
+- the Spec Sizing Gate fired in `doc-coauthoring` or `spec-change-delivery`
 - "large spec", "master spec", "parent spec", "child specs", "slices"
 - "which child specs are implementation-ready?"
 - "what needs hardening before implementation?"
@@ -96,6 +99,8 @@ Output or create:
 - shared verification recipe,
 - backlog entries,
 - child index updates.
+
+For Parent/Child work, default to OpenSpec as the preferred delivery ledger unless the user explicitly chooses direct mode or the target repo has no useful OpenSpec context. Keep OpenSpec as the formal change/audit ledger; do not duplicate its task detail in the child index or hardening queue.
 
 ### Mode C: Batch Readiness Assessment
 
@@ -288,6 +293,8 @@ Prefer this order:
 5. Closeout sync.
 
 Recommend the next single slice and, separately, any batch/parallel work that can happen safely.
+
+For each next child, include a session-start handoff: parent path, child path, current readiness, required hardening or implementation command, allowed write-set, verification commands, open blockers, and whether the next step should start in a fresh session.
 
 ### 9. Closeout Sync Checklist
 

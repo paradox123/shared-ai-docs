@@ -56,6 +56,17 @@ Default behavior is **autonomous resolution**:
 - When a spec proposes parallel work, ensure the Parallel Work Control Surface names child/work block, lane mode (`spec/doc hardening` or `implementation`), owner/agent, allowed write-sets, shared/read-only files, dependencies, verification commands, integration owner, and merge/sync order.
 - Do not invent product behavior, data fields, acceptance criteria, or architecture decisions that are not already implied by the spec and its normative sources.
 
+## Review-Only Override
+
+If the user explicitly asks to review first, avoid edits, make proposals only, or says "keine Edits", run in review-only mode for that turn:
+
+1. Report prioritized findings and concrete proposed fixes.
+2. Do not patch files.
+3. Still assign a readiness verdict when enough information is available.
+4. Offer the smallest safe follow-up edit set, but wait for user approval before applying it.
+
+Auto-resolve resumes only after the user asks to apply, fix, or continue autonomously.
+
 ## Stop-and-Ask Boundary
 
 Ask the user only if one of these applies:

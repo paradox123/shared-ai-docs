@@ -62,6 +62,7 @@ Discover before asking:
 4. Accepted prior slices and their verification commands.
 5. Target repo/runtime conventions.
 6. Existing OpenSpec artifacts, if the project uses them.
+7. Parent/Child delivery ledger decision; for Spec Sizing Gate work, expect OpenSpec as the default unless explicitly overridden.
 
 Ask only if the target child or parent cannot be inferred safely.
 
@@ -214,6 +215,8 @@ Do not mark a child implementation-ready just because it has the expected sectio
 
 After assigning the final status, update or report the child spec's Review Control Surface so its `Offene Entscheidungen` and `Readiness Status` match the verdict.
 
+When the verdict is `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES`, produce a short session-start handoff for the implementation run: parent path, child path, scope summary, non-goals, allowed write-set, shared/read-only files, verification commands, open non-blocking notes, OpenSpec/direct mode, and whether a fresh session is recommended. For large Parent/Child work, prefer a fresh implementation session per child.
+
 ## Required Delivery Sections
 
 Use or adapt these sections in the child spec:
@@ -261,7 +264,8 @@ After hardening, report:
 6. Verification depth result.
 7. Final readiness verdict.
 8. Exact decision blockers, if any.
-9. Mini-Retro after substantial hardening blocks or before handoff/context loss: decisions, changes, open items, missing evidence, skill/workflow friction, and whether to continue in this session or start a new one.
+9. Session-start handoff for an implementation-ready child.
+10. Mini-Retro after substantial hardening blocks or before handoff/context loss: decisions, changes, open items, missing evidence, skill/workflow friction, and whether to continue in this session or start a new one.
 
 Use reader-calibrated findings for all blockers or noteworthy non-blocking notes. Assume the user may have reviewed only goal, in scope, out of scope, verification commands, and test cases. For each finding, explain:
 

@@ -144,7 +144,7 @@ Routing rule:
 
 ## Scope Pressure Guardrail
 
-This skill must proactively warn when the current spec scope is too large for a single coherent delivery change.
+This skill must proactively apply the shared Spec Sizing Gate from `docs/doc-workflow.md` before treating a spec as a single coherent delivery change.
 
 Treat scope as "too large" when one or more signals are present:
 - More than 3 major capability domains in one spec (for example product behavior + security hardening + CI/runtime + migration).
@@ -152,14 +152,17 @@ Treat scope as "too large" when one or more signals are present:
 - The spec mixes strategic target-state design with immediate implementation details in one pass.
 - Several external dependencies (teams, infra windows, credentials, approvals) are required before any meaningful validation is possible.
 - Acceptance criteria cannot be verified within one realistic delivery cycle.
+- The expected work is likely to require context compression, long-running continuation, or multiple implementation sessions before reliable completion.
+- The scope naturally separates into multiple child slices with independent done signals or verification cycles.
 
 When scope pressure is detected, do this before continuing:
 1. Explicitly call out the scope risk.
-2. Propose 2-5 concrete split options (for example by capability, system boundary, lifecycle phase, risk class, or environment lane).
-3. Recommend one split as the default and explain why.
-4. Preserve one short parent overview and move execution details into child specs.
+2. Automatically create or update the Parent Spec control layer instead of continuing as a single normal spec.
+3. Produce 2-5 concrete child split options (for example by capability, system boundary, lifecycle phase, risk class, or environment lane) and choose the default split unless the user explicitly redirects.
+4. Preserve one short parent overview and move delivery detail into child specs or child skeletons.
 5. Add a parent/child control section that records coverage, dependencies, status, and the next recommended slice.
 6. Ensure deferred scope becomes a backlog or child-spec entry with a trigger and done signal, not only prose in "Next steps".
+7. Hand off to `spec-orchestrator` to build the child inventory, coverage matrix, hardening queue, optional OpenSpec ledger, and session-ready next-slice recommendation.
 
 Before calling any child spec implementation-ready, verify that it contains:
 - parent/master coverage,
@@ -173,7 +176,7 @@ Before calling any child spec implementation-ready, verify that it contains:
 
 Do not call a child spec implementation-ready when it contradicts the parent spec or drops expected parent scope without a named backlog/child-spec re-entry path.
 
-If the user chooses not to split, keep working but add an explicit marker such as:
+If the user explicitly forbids splitting after the gate fires, keep working but add an explicit marker such as:
 - `[REVIEW Scope risk accepted: <reason>]`
 
 ## CORE Response Format Compatibility
@@ -263,14 +266,16 @@ If a request says "refine requirements", first determine the intended output:
 - If they want a better requirements/spec document, stay in this skill
 - If they want those requirements translated into implementation actions, route to `refine-plan`
 
-**Initial offer:**
-Offer the user a structured workflow for co-authoring the document. Explain the three stages:
+**Initial offer for open-ended documentation work:**
+Offer the user a structured workflow for co-authoring the document. For shared-ai-docs specs, keep the offer short and bias toward the DocWorkflow gates in `docs/doc-workflow.md`; do not force the full generic three-stage writing process when the user already provided a concrete spec/change request.
+
+The full optional co-authoring flow has three stages:
 
 1. **Context Gathering**: User provides all relevant context while Claude asks clarifying questions
 2. **Refinement & Structure**: Iteratively build each section through brainstorming and editing
 3. **Reader Testing**: Test the doc with a fresh Claude (no context) to catch blind spots before others read it
 
-Explain that this approach helps ensure the doc works well when others read it (including when they paste it into Claude). Ask if they want to try this workflow or prefer to work freeform.
+Explain that this approach helps ensure the doc works well when others read it. Ask if they want to try this workflow or prefer to work freeform.
 
 If user declines, work freeform. If user accepts, proceed to Stage 1.
 
@@ -496,6 +501,8 @@ Provide any final suggestions.
 Ask if ready to move to Reader Testing, or if they want to refine anything else.
 
 ## Stage 3: Reader Testing
+
+Reader Testing is optional for shared-ai-docs specs. Prefer the DocWorkflow review path (`doc-review-autoresolve`, `child-spec-hardening`, or `spec-orchestrator`) when the document is a delivery spec with Review Control Surface, DoR/DoD, parent/child coverage, or implementation gates. Use Reader Testing mainly for open-ended docs, proposals, audience-facing documentation, or when the user explicitly asks whether a fresh reader would understand the document.
 
 **Goal:** Test the document with a fresh Claude (no context bleed) to verify it works for readers.
 

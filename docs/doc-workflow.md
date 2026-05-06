@@ -86,6 +86,26 @@ Regeln:
 
 Beide Workflows sind offiziell unterstützt. Workflow 2 ist der aktuelle Default, Workflow 1 bleibt kompatibel nutzbar.
 
+## Spec Sizing Gate (vor Workflow-Auswahl)
+
+Vor groesseren Spec-, Plan- oder Delivery-Schritten wird geprueft, ob die Arbeit in einer robusten Session als normaler Scope bearbeitbar ist oder wegen Kontextdruck in Parent/Child Specs geschnitten werden muss.
+
+Eine Spec gilt als "zu gross", wenn mehrere dieser Signale zusammenkommen:
+
+1. Mehrere Capability-Domains muessen in einem Change verstanden und umgesetzt werden.
+2. Mehrere Repos, Systeme, Runtime-Umgebungen oder externe Abhaengigkeiten sind beteiligt.
+3. Mehrere getrennte Verification-Zyklen waeren noetig, bevor ein belastbares Done-Signal entsteht.
+4. Der Scope zerfaellt natuerlich in mehrere Delivery Slices mit eigenen Done-Signalen.
+5. Es sind mehrere offene Produkt-, Architektur-, Security-, Daten- oder Betriebsentscheidungen zu erwarten.
+6. Die Arbeit ist so langlaufend, dass Kontextkomprimierung oder Session-Wechsel die Ergebnisqualitaet sichtbar gefaehrden wuerden.
+
+Routing-Regel:
+
+1. Wenn das Sizing Gate nicht feuert, bleibt die Spec eine normale Spec. Es wird keine Parent-/Child-Struktur erzeugt.
+2. Wenn das Sizing Gate feuert, wird Parent/Child automatisch angelegt: Parent Spec als Kontrollschicht, Child Specs oder Child-Skeletons als Delivery-Slices, Child-Index/Coverage/Hardening Queue als Steuerflaeche.
+3. Nach automatischem Parent/Child-Schnitt startet der Workflow mit `spec-orchestrator` und anschliessendem `child-spec-hardening` fuer die naechsten umsetzbaren Child Specs.
+4. Zielbild fuer grosse Vorhaben: Jeder implementation-ready Child ist so vollstaendig, dass eine neue Session nur mit Parent-Verweis, Child Spec, Handoff/Mini-Retro und relevanter Evidence starten kann.
+
 ### Workflow 1 (Legacy-kompatibel)
 
 ```
@@ -114,12 +134,12 @@ spec-closeout (optional, für formalen Abschluss) (`🟢 Accepted`)
 
 ### Large Spec / Child Spec Pipeline
 
-For Parent-/Master-Specs with multiple delivery slices:
+For Parent-/Master-Specs that trigger the Spec Sizing Gate:
 
 ```md
 doc-coauthoring -> Parent Spec (`🟡 Spec`)
   v
-spec-orchestrator -> Child Schnitt, Coverage, Hardening Queue
+spec-orchestrator -> Child Schnitt, Coverage, Hardening Queue, optional OpenSpec-Ledger
   v
 child-spec-hardening -> implementation-ready Child Spec
   v
@@ -135,6 +155,8 @@ spec-change-delivery -> one child implementation (`🟠 Plan` -> `🔵 Implement
 1. Wenn der User explizit Workflow 1 oder Workflow 2 nennt, diesem Pfad folgen.
 2. Wenn ein bestehendes Artefakt bereits klar einen Pfad nutzt, auf demselben Pfad bleiben.
 3. Ohne klare Vorgabe:
+   - zuerst das Spec Sizing Gate anwenden,
+   - bei zu grossem Scope automatisch Parent/Child nutzen,
    - für neue Deliveries Workflow 2 bevorzugen,
    - für laufende ältere Threads Workflow 1 beibehalten.
 4. Ein Wechsel ist nur bei expliziter User-Entscheidung sinnvoll.
@@ -364,18 +386,31 @@ Im Kontext dieses Workflows:
 - fehlende/unklare Entscheidungspunkte dokumentieren
 - Workflow-/Skill-Anpassungen ableiten
 
-## OpenSpec Nutzung (optional)
+## OpenSpec Nutzung
 
-OpenSpec ist **optional** und wird **vom User entschieden**.
+OpenSpec ist nach Scope-Modus geregelt:
 
-OpenSpec ist typischerweise hilfreich bei:
+1. **Normale Specs / kleine Changes**: OpenSpec ist optional und wird vom User entschieden. Ohne explizite OpenSpec-Vorgabe reicht direct Workflow 2.
+2. **Parent-/Child-Vorhaben nach Spec Sizing Gate**: OpenSpec ist der Default-Ledger. Es wird nicht erneut beim User nachgefragt, ausser der User fordert direct mode explizit oder das Zielrepo hat keinen sinnvollen OpenSpec-Kontext.
+
+OpenSpec ist besonders hilfreich bei:
 
 1. größeren oder mehrstufigen Vorhaben,
 2. mehreren beteiligten Teams/Repos,
 3. Bedarf nach formalen Artefakten und Audit-Trace,
 4. länger laufenden Changes mit Blockern und Teilfortschritt.
 
-Für kleinere oder klar abgegrenzte Änderungen reicht oft der direkte Plan-Track ohne OpenSpec.
+Für kleinere oder klar abgegrenzte Änderungen reicht oft der direkte Plan-Track ohne OpenSpec. Bei Parent-/Child-Vorhaben ersetzt OpenSpec nicht Parent/Child: OpenSpec haelt formale Change-/Audit-Artefakte, Parent/Child haelt Scope-Schnitt, Coverage, Hardening Queue und Session-Handoffs.
+
+## One Delivery Ledger
+
+Ein Delivery-Vorhaben braucht genau eine fuehrende Fortschritts- und Evidenzflaeche:
+
+1. **Direct Workflow 2**: Spec + `spec-change-delivery` Scope Contract + Evidence sind fuehrend.
+2. **OpenSpec Workflow 2**: OpenSpec Change-Artefakte sind der formale Delivery-Ledger; Spec/Parent/Child bleiben Scope- und Readiness-Quelle.
+3. **Workflow 1**: `refine-plan`-Plan ist der fuehrende Plan-Ledger.
+
+Kein Change soll denselben Fortschritt parallel in `refine-plan`, OpenSpec `tasks.md`, Child Index und Hardening Queue pflegen. Child Index und Hardening Queue duerfen Slices steuern, aber nicht die fein granularen OpenSpec-/Plan-Tasks duplizieren.
 
 ## Parent-/Child-Spec Orchestrierung
 
@@ -388,6 +423,7 @@ Pflichtbestandteile:
 3. Jede Child Spec enthaelt vor Umsetzung mindestens eine Review Control Surface, Scope, Non-Goals, Master-/Parent-Abdeckung, Parent-Scope-Conformance, Decision Freeze Pack, konkrete Acceptance Criteria und Verification Commands.
 4. Restscope wird nicht nur als "Next Step" in einer abgeschlossenen Spec abgelegt, sondern als Backlog-/Child-Spec-Eintrag mit Trigger, Done-Signal und Abhaengigkeit.
 5. Closeout einer Child Spec synchronisiert Parent Spec, Slice-Plan/Index, Backlog und OpenSpec-Artefakte, bevor der naechste Slice als fuehrend gilt.
+6. Breiter Projekt-Dokumentations-Sync laeuft normalerweise beim Parent-Closeout. Child-Closeout triggert breiten Docs-Sync nur, wenn der Child selbst user-facing/project docs veraendert oder oeffentliche Contract-Dokumentation stale machen wuerde.
 
 Parent-Scope-Conformance ist ein blockierendes Gate nach jeder Child-Spec-Nacharbeit:
 
@@ -515,7 +551,7 @@ Ein Change ist erst "done", wenn:
    - Welche Evidenz fehlt noch?
    - Welche Skill-/Workflow-Reibung ist aufgefallen?
    - Session-/Kontextzustand: weiterarbeiten oder neue Session starten?
-5. Keine "Hybrid-Steuerung": entweder OpenSpec bewusst als SSOT oder bewusst ohne OpenSpec.
+5. Keine "Hybrid-Steuerung": entweder OpenSpec ist als Ledger aktiv (Default bei Parent/Child) oder der Change laeuft bewusst ohne OpenSpec.
 6. Review-Findings werden standardmäßig per `doc-review-autoresolve` erst **autonom behoben**, dann **erneut reviewed**; Rückfrage nur bei echten Entscheidungs-/Missing-Blockern.
 7. Orchestrierung und Hardening nicht vermischen: `spec-orchestrator` schneidet und priorisiert; `child-spec-hardening` erzeugt die Vertragstiefe.
 8. Keine parallele Umsetzung starten, solange Write-Sets, Shared Files, Integrations-Owner und Merge-/Verification-Reihenfolge nur implizit sind.
@@ -617,7 +653,7 @@ Workflow 2: `spec-change-delivery` setzt Status `🟠 Plan`, sobald der Scope Co
 Nur bei erfüllter Definition of Ready. Nach ausgeführter Umsetzung mit Artefakten: Status `🔵 Implemented`.
 
 ### Umsetzung -> Accepted
-In beiden Workflows optional über `spec-closeout`: Status `🟢 Accepted`, wenn Verifikation vollständig grün ist und (falls aktiv) OpenSpec archiviert wurde.
+In beiden Workflows optional über `spec-closeout`: Status `🟢 Accepted`, wenn Verifikation vollständig grün ist und (falls aktiv) OpenSpec archiviert wurde. Bei Parent/Child-Vorhaben unterscheidet Closeout zwischen Child-Sync (Parent Coverage, Index, Backlog, OpenSpec/Evidence) und Parent-Closeout (breiter Projekt-Dokumentations-Sync).
 
 ### Arbeitsblock -> Mini-Retro / Retro
 Mini-Retro nach signifikanten Spec-, Review-, Delivery- oder Closeout-Bloecken sowie vor Session-Ende, Kontextwechsel oder Skill-Handoff. "retro the plan" nach signifikanten Meilensteinen, wenn Ursachenanalyse oder Planverbesserung noetig ist; "final retro the plan" vor Abschluss.

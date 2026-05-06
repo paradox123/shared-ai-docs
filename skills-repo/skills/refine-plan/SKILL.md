@@ -43,7 +43,9 @@ This skill operationalizes those gates:
 This skill is the primary planning engine for **Workflow 1 (legacy-compatible)**:
 - `spec -> refine-plan (iterative) -> direct-mode implementation -> retro-plan`
 
-This skill also remains usable in **Workflow 2 (current)** when the user still wants a separate plan artifact before or alongside `spec-change-delivery`.
+This skill also remains usable in **Workflow 2 (current)** when the user explicitly wants a separate plan artifact before or alongside `spec-change-delivery`.
+
+Follow the shared One Delivery Ledger rule from `docs/doc-workflow.md`: do not duplicate the same progress detail across `refine-plan`, OpenSpec `tasks.md`, Child Index, and Hardening Queue. If OpenSpec is the ledger for a Parent/Child change, keep `refine-plan` out of the critical path unless the user explicitly chooses an iterative plan artifact.
 
 Status coordination:
 - In Workflow 1, this skill may set the spec header status to `🟠 Plan` once an implementation-ready plan exists.
@@ -51,7 +53,7 @@ Status coordination:
 
 ## Scope Pressure Guardrail
 
-This skill must proactively warn when the plan scope is too large for one executable plan increment.
+This skill must proactively warn when the plan scope is too large for one executable plan increment, but it does not create an independent split system. Oversized scope routes back to the shared Spec Sizing Gate and Parent/Child orchestration unless the user explicitly keeps Workflow 1.
 
 Treat scope as "too large" when one or more signals are present:
 - The plan contains many loosely coupled streams that could progress independently.
@@ -62,19 +64,14 @@ Treat scope as "too large" when one or more signals are present:
 
 When scope pressure is detected:
 1. Explicitly flag that the plan is oversized.
-2. Propose 2-5 concrete split changes with:
-   - goal,
-   - dependency boundary,
-   - done signal / verification.
-3. Recommend a default execution order.
-4. Mark cross-change dependencies explicitly instead of hiding them in one long task list.
-5. Build a Parallel Work Control Surface when independent slices can run in parallel, and classify lanes as spec/doc hardening or implementation: slice/work block, owner/agent, allowed write-sets, shared/read-only files, dependencies, verification commands, integration owner, and merge/sync order.
-6. Keep deferred work as `[PENDING]` backlog or child-spec actions with trigger and done signal; do not rely on accepted specs being reopened later.
+2. Do not generate a separate split-plan as the default.
+3. Route to `spec-orchestrator` for Parent/Child inventory, coverage, hardening queue, optional OpenSpec ledger, and session-ready next-child handoffs.
+4. Keep the current plan as `NOT IMPLEMENTATION READY` until a bounded child or explicitly accepted Workflow 1 tranche exists.
 
-Treat a split plan as implementation-ready only when the next executable child slice is fully bounded and verifiable. Other slices may remain `[PENDING]`, but their parent coverage and re-entry path must be visible.
-
-If the user decides to keep a single plan, keep working but add a visible marker:
+If the user explicitly keeps Workflow 1 despite scope pressure, keep working but add a visible marker:
 - `[REVIEW Scope risk accepted: <reason>]`
+
+In that explicit Workflow 1 fallback only, propose a single next executable tranche with goal, dependency boundary, done signal, and verification. Do not maintain a long parallel child-index substitute inside the plan.
 
 ## CORE Response Format Compatibility
 

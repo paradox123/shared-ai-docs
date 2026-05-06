@@ -32,7 +32,7 @@ Close one accepted change with a strict evidence gate:
 
 Use these as source of truth:
 - Shared workflow gates (DoR/DoD, Parallel Work Control Surface, Mini-Retro): `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md`
-- Delivery behavior and verification rigor: `/Users/dh/.agents/skills/spec-change-delivery/SKILL.md`
+- Delivery behavior and verification rigor: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/spec-change-delivery/SKILL.md`
 
 ## Required Inputs
 
@@ -41,6 +41,7 @@ Use these as source of truth:
 3. OpenSpec change id or path (if OpenSpec is used).
 4. Project docs root.
    - Default for NCG: `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs`
+5. Parent/Child role of the target spec when applicable (`parent`, `child`, or `normal`).
 
 If input 4 is omitted and context is NCG, assume the default above.
 
@@ -50,7 +51,7 @@ If input 4 is omitted and context is NCG, assume the default above.
 2. Never silently skip verification commands.
 3. If a required verification command fails or is blocked, final verdict must be `NOT READY`.
 4. OpenSpec is closed only after required verification is green.
-5. Project documentation sync is mandatory, not optional.
+5. Documentation sync is mandatory at the appropriate level: normal specs sync project docs directly; child specs sync parent/index/backlog/OpenSpec evidence first; parent closeout runs the broad project docs sync.
 6. Do not mark spec as accepted if evidence is incomplete.
 
 ## Closeout Workflow
@@ -91,9 +92,9 @@ Update target spec file with:
 4. one new history row (`Date | Author | Change`) with a short closure summary sentence,
 5. `SessionId` preserved (or added if missing).
 
-### 5) Synchronize Project Documentation
+### 5) Synchronize Parent/Project Documentation
 
-Always check and update project docs root (NCG default below):
+For normal specs and Parent Spec closeout, check and update project docs root (NCG default below):
 - `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs`
 
 RAG-first source discovery is mandatory before deciding which docs to update:
@@ -108,6 +109,11 @@ Minimum docs sync checks:
 3. For child/parallel-lane closeout, check parent coverage, child index, slice plan/backlog, and integration-owner notes for stale write-set, shared-file, verification, or merge-order references.
 4. Update dependent docs if status/progress references are now stale.
 5. If no additional update is needed, explicitly state this with the search evidence used.
+
+Parent/Child-specific rule:
+1. Child closeout must sync Parent Coverage, Child Index/Slice Plan, Backlog/Re-entry items, OpenSpec/Evidence links, and integration-owner notes before the next child becomes leading.
+2. Child closeout runs broad project docs sync only when the child changed user-facing/project docs or would make public contract documentation stale.
+3. Parent closeout runs the broad project docs sync and confirms the child set, coverage, accepted evidence, deferred scope, and public docs are aligned.
 
 ### 6) Capture Mini-Retro
 
@@ -127,12 +133,15 @@ Respond with:
 1. Scope closed
 2. Verification checklist (every required command with `ran`/`failed`/`blocked`)
 3. OpenSpec closure status and paths
-4. Documentation updates performed (or explicit "none needed" with basis)
+4. Synchronization result:
+   - normal spec: project docs updated, or explicit "none needed" with basis,
+   - child spec: Parent Coverage, Child Index/Slice Plan, Backlog/Re-entry, OpenSpec/Evidence links, and integration-owner notes synced; broad project docs sync only if triggered,
+   - parent spec: broad project docs sync plus child set, coverage, accepted evidence, and deferred scope alignment.
 5. Changed artifacts
 6. Mini-Retro
 7. Final verdict: `READY` or `NOT READY`
 
-Never claim completion without the verification checklist and docs-sync result.
+Never claim completion without the verification checklist and appropriate sync result.
 
 ## Blocked Path
 

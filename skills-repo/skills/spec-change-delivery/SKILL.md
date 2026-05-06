@@ -56,7 +56,8 @@ This skill keeps short local definitions for convenience, but execution and the 
 1. Target repository path.
 2. One target spec/requirements artifact, or one clearly defined change request.
 3. Execution mode: `openspec` or `direct`.
-   - Default to `direct` unless the user explicitly wants OpenSpec or the repo already depends on it.
+   - Default to `direct` for normal bounded specs unless the user explicitly wants OpenSpec or the repo already depends on it.
+   - Default to `openspec` for Parent/Child work created by the Spec Sizing Gate, unless the user explicitly chooses direct mode or the target repo has no useful OpenSpec context.
 4. Verification commands or checks.
    - Use commands from the spec when present; otherwise derive the smallest safe set that proves the acceptance criteria.
 
@@ -100,6 +101,7 @@ Only include them when the spec explicitly requires them.
 23. If pre-implementation analysis finds a blocking content-quality flaw, stop before coding and route to `child-spec-hardening`. This includes requirements that are ambiguous, internally inconsistent, infeasible, untestable, incomplete for critical failure/edge cases, not traceable to the stated goal, or semantically broken in data/artifact/status contracts.
 24. If a child spec lacks implementation-ready depth (normative contract, concrete harness/verification cases, hardened verification commands, DoR/DoD, parent conformance, and status/evidence provenance), stop before coding and route to `child-spec-hardening`.
 25. If this run is one lane of parallel child-spec execution, edit only the lane's allowed write-set. Treat shared/read-only files as read-only unless this run is explicitly the integration-owner run.
+26. In Parent/Child workflows, implement exactly one implementation-ready child per run. Do not implement against the parent spec as a whole; the parent is the scope/control layer.
 
 ## Risk-Based Verification Preflight
 
@@ -142,13 +144,15 @@ When this skill is used with a spec artifact, update the spec metadata as work p
 
 When the requested scope is too large for one verifiable increment:
 1. Flag the risk explicitly.
-2. Propose 2-5 smaller changes.
-3. For each change provide:
+2. Apply the shared Spec Sizing Gate and route to Parent/Child orchestration instead of continuing as one delivery run.
+3. Propose or create 2-5 smaller child changes.
+4. For each change provide:
    - goal,
    - dependency boundary,
    - concrete done signal.
-4. Recommend an execution order.
-5. Implement only one change in the current run unless the user explicitly widens scope.
+5. Recommend an execution order.
+6. Hand off to `spec-orchestrator` for child inventory, coverage, hardening queue, optional OpenSpec ledger, and session-ready child handoffs.
+7. Implement only one child change in the current run after it is implementation-ready.
 
 ## Parallel Child-Spec Execution Guardrail
 
@@ -216,6 +220,7 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
      - Create or update exactly one OpenSpec change for the change.
      - Keep proposal, tasks, and spec deltas aligned with the scope contract.
      - Implement only after tasks and acceptance mapping are clear.
+     - For Parent/Child work, use the child as the implementation unit and keep parent coverage/index updates as closeout or integration-owner work.
    - **`direct` mode**
      - Implement directly from the scope contract.
      - Hold to the same verification and evidence standard.
