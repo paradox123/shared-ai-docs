@@ -57,6 +57,7 @@ If input 4 is omitted and context is NCG, assume the default above.
 6. Do not mark spec as accepted if evidence is incomplete.
 7. Do not mark a child spec as accepted while Parent Coverage, Child Index/Slice Plan, Backlog/Re-entry, Evidence Links, OpenSpec Status, or Child Session Handoff state are stale or contradictory.
 8. Do not advance the next leading child until the previous child closeout sync is complete and the next child handoff is current, or explicitly blocked/stale in the Child Index.
+9. If a required command is discovered to be stale or environment-fragile during closeout, do not silently replace it and still mark closeout ready. First record the original failure as a command-contract finding, synchronize the target spec/child spec, Child Index/Handoff and OpenSpec/Evidence command list to the corrected command, rerun that corrected command, and only then continue closeout. If the sync is not allowed or needs a decision, return `NOT READY`.
 
 ## Closeout Workflow
 
@@ -76,6 +77,12 @@ Capture briefly before edits:
 4. Keep key evidence (exit status + short meaningful output).
 
 If any required command is `failed` or `blocked`, stop closeout updates that would imply completion and return `NOT READY`.
+
+Command-contract repair exception:
+
+- If the failure proves the command text is stale or unsuitable for the declared target environment rather than the implementation being wrong, closeout may repair the command contract only when the target spec/child spec, Child Index/Handoff, and OpenSpec/Evidence are synchronized in the same run before acceptance.
+- The original failed command remains in Evidence as a finding, not as a passed verification.
+- The corrected command must be executed after the sync and must pass before closeout may continue.
 
 ### 3) Close OpenSpec Change (when applicable)
 

@@ -50,15 +50,21 @@ When a spec includes a `Verification Commands` block, enforce these authoring ru
 4. For runtime startup checks (`docker compose up`, service boot), include deterministic readiness handling before first HTTP assertions.
 5. For each command, define success criteria that can be observed from exit code and/or concrete output token.
 6. Define a risk-based preflight subset (only high-risk commands) plus clear separation from gate verification statuses.
-7. Explicitly forbid recursive verification loops (no "verification of verification" chains).
-8. If command simplifications are needed, list them as proposals with rationale/trade-offs first; adopt only after user confirmation.
+7. Rehearse high-risk command contracts before marking the spec ready when this is safe without implementation or external side effects. This is not functional verification; it proves the command can select the expected runtime/tooling, resolve paths, parse flags, and start from the declared cwd/shell/platform.
+8. Treat these as high-risk by default: SDK/runtime selection, absolute paths, commands affected by parent `global.json` or cwd, container/Compose commands, health/readiness checks, branch/diff guards, credential/secret checks, network/infra checks, and build/test commands with fragile flags such as `--no-build` or `--no-restore`.
+9. Explicitly forbid recursive verification loops (no "verification of verification" chains).
+10. If command simplifications are needed, list them as proposals with rationale/trade-offs first; adopt only after user confirmation.
 
 If these are not met, add explicit markers such as:
 - `[MISSING verification portability contract]`
 - `[MISSING runtime readiness strategy]`
 - `[DECISION scope guard baseline strategy]`
 - `[MISSING risk-based verification preflight subset]`
+- `[MISSING command contract rehearsal]`
+- `[REVIEW command contract not rehearsed: <reason>]`
 - `[DECISION verification command simplification approval]`
+
+When a command cannot be safely rehearsed during authoring, document why and name the later workflow owner (`child-spec-hardening`, `spec-change-delivery`, integration owner, or human operator) who must validate it before implementation permission. Do not call a spec ready for implementation if a high-risk command has neither a successful rehearsal nor an explicit blocking marker.
 
 ## Content Quality Guardrail
 

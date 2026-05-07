@@ -202,11 +202,16 @@ Verification commands must include, when relevant:
 - execution context: cwd, shell, target runtime, platform assumptions,
 - SDK/runtime selection details,
 - risk-based preflight,
+- command-contract rehearsal for high-risk commands when safe before implementation,
 - deterministic readiness handling before endpoint assertions,
 - gate verification commands,
 - local and container/harness gates when the parent or predecessors require them,
 - concrete success criteria for exit codes and output/artifacts,
 - anti-loop rule: do not add commands that only verify the verification.
+
+Treat these as high-risk by default: SDK/runtime selection, absolute paths, commands affected by parent `global.json` or cwd, Docker/Compose, service readiness probes, branch/diff guards, credential/secret checks, network/infra checks, and build/test commands with fragile flags such as `--no-build` or `--no-restore`.
+
+Before reporting `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES`, run safe command-contract rehearsals for high-risk verification commands. Rehearsal means proving the command contract is valid (tool/runtime selection, paths, flags, cwd/shell, daemon availability), not proving the future implementation behavior. If a high-risk command cannot be safely rehearsed, record the reason and keep a blocking marker unless a later owner and validation point are explicit. A high-risk command with no rehearsal evidence is `NEEDS HARDENING`, not a non-blocking note.
 
 Do not silently simplify commands. If a simplification changes the gate, mark `[DECISION verification command simplification approval]`.
 
@@ -258,10 +263,11 @@ Do not mark a child implementation-ready just because it has the expected sectio
 6. Verification Commands include execution context, preflight when needed, gate verification, success criteria, runtime-readiness when relevant, and anti-loop rule.
 7. Dependencies, allowed write-set, shared/read-only files, DoR, DoD, and Closeout Sync Targets are explicit.
 8. Content-quality review has no blocking findings.
-9. Child Index or Hardening Queue row is updated, uses the exact operational minimum column names, has no required gate hidden inside compressed/aliased substitute columns, and agrees with the child verdict.
-10. A persisted Child Session Handoff is produced and the Child Index `Session Handoff` pointer links to it.
-11. `Allowed Write-Set` in the Child Index, child spec, and handoff is enforceable: it names concrete paths, directories, or glob patterns and excludes shared/read-only files. It must not use uncertain language such as `voraussichtlich`, `likely`, `probably`, `expected`, `TBD`, `as needed`, `related files`, or `etc.`.
-12. Hardening verification has run and passed: the `ValidateChildReadiness.cs` tool, `git diff --check`, plus parse/lint checks for embedded canonical machine-readable examples when such examples exist and local tooling is available.
+9. High-risk Verification Commands have successful command-contract rehearsal evidence, or the child remains `NEEDS HARDENING` with an explicit `[MISSING command contract rehearsal]` / `[REVIEW command contract not rehearsed: <reason>]` marker.
+10. Child Index or Hardening Queue row is updated, uses the exact operational minimum column names, has no required gate hidden inside compressed/aliased substitute columns, and agrees with the child verdict.
+11. A persisted Child Session Handoff is produced and the Child Index `Session Handoff` pointer links to it.
+12. `Allowed Write-Set` in the Child Index, child spec, and handoff is enforceable: it names concrete paths, directories, or glob patterns and excludes shared/read-only files. It must not use uncertain language such as `voraussichtlich`, `likely`, `probably`, `expected`, `TBD`, `as needed`, `related files`, or `etc.`.
+13. Hardening verification has run and passed: the `ValidateChildReadiness.cs` tool, `git diff --check`, plus parse/lint checks for embedded canonical machine-readable examples when such examples exist and local tooling is available.
 
 If any item is missing, use `NEEDS HARDENING`, `NEEDS USER DECISION`, or `NEEDS PARENT/ORCHESTRATOR SYNC`; do not downgrade the gate into a non-blocking note. If an otherwise ready child only lacks shared Child Index or handoff-pointer sync because the current lane cannot edit shared files, report the exact integration-owner patch and use `NEEDS PARENT/ORCHESTRATOR SYNC`. If the Child Index uses compressed/aliased columns instead of the exact operational schema, use `NEEDS PARENT/ORCHESTRATOR SYNC`. If the implementation write-set is approximate, use `NEEDS HARDENING`. If `ValidateChildReadiness.cs`, `git diff --check`, or a canonical embedded example parse check fails, use `NEEDS HARDENING` or `NEEDS PARENT/ORCHESTRATOR SYNC` according to the failing gate until corrected and rechecked.
 

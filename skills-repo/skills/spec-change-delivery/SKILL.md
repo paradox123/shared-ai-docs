@@ -97,6 +97,7 @@ Only include them when the spec explicitly requires them.
 19. Preflight is preparation only: it must never be treated as a substitute for the required verification checklist.
 20. Never recurse into "verification of verification". One preflight pass is allowed; then run the canonical spec verification block.
 21. If command simplifications are beneficial, propose them first with rationale and trade-offs; do not silently alter the spec command contract.
+21a. If a required verification command fails because the command contract itself is stale or environment-fragile, do not silently replace it. Document the failed original command, synchronize the spec/child spec, Child Index/Handoff and OpenSpec/Evidence command list before treating any replacement as gate-relevant, then rerun the corrected command. If that sync is not in scope or requires a decision, stop with `NOT READY`.
 22. For child-spec implementation, check parent/master conformance before editing when the parent path is known. If the child contradicts the parent or omits expected scope without re-entry, stop and route to `child-spec-hardening`.
 23. If pre-implementation analysis finds a blocking content-quality flaw, stop before coding and route to `child-spec-hardening`. This includes requirements that are ambiguous, internally inconsistent, infeasible, untestable, incomplete for critical failure/edge cases, not traceable to the stated goal, or semantically broken in data/artifact/status contracts.
 24. If a child spec lacks implementation-ready depth (normative contract, concrete harness/verification cases, hardened verification commands, DoR/DoD, parent conformance, and status/evidence provenance), stop before coding and route to `child-spec-hardening`.
@@ -116,6 +117,8 @@ Use a short preflight phase before the main verification run when command fragil
 3. If preflight exposes command-contract flaws, pause and propose explicit simplifications/fixes to the user before modifying commands.
 4. Keep preflight bounded to one pass; do not create recursive loops.
 5. After preflight, run the full spec verification block and report gate-relevant statuses (`planned`, `ran-target`, `ran-rehearsal`, `failed`, `blocked`).
+
+If the user authorizes or the current integration-owner scope already permits a command-contract repair, update the relevant spec/Child Index/Handoff/OpenSpec command references before the replacement command counts as gate evidence. Keep the original failed command in evidence as a finding, not as a pass.
 
 ## Verification Truth Contract
 

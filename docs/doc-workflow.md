@@ -571,6 +571,7 @@ Implementierung startet erst, wenn alle Punkte erfüllt sind:
    - Readiness-Strategie für timing-sensitive Runtime-Checks ist explizit (Poll/Retry/Wait).
    - Scope-Guard-Baseline ist explizit (Branch-History vs Working-Tree) inklusive Verhalten auf long-lived branches.
    - Risk-based Verification Preflight ist definiert (nur High-Risk-Kommandos; getrennte Statuslogik).
+   - High-Risk-Kommandos wurden als Command-Vertrag rehearsed, soweit das ohne Implementierung oder externe Seiteneffekte moeglich ist. Dazu gehoeren besonders SDK-/Runtime-Auswahl, absolute Pfade, Container-/Compose-Kommandos, Testhost-Flags wie `--no-build`/`--no-restore`, Branch-/Diff-Guards, Health-Polls, Credentials-/Secret-Guards und Befehle, die durch Parent-`global.json`, CWD oder Shell-Unterschiede beeinflusst werden koennen.
    - Anti-Loop-Regel ist definiert: kein rekursives "Verifikation der Verifikation".
    - Vereinfachungen/Anpassungen von Verification Commands sind als Vorschlagspfad mit User-Freigabe geregelt.
 8. Offene Risiken, Abhängigkeiten und Blocker sind dokumentiert.
@@ -617,6 +618,28 @@ Ein Change ist erst "done", wenn:
 5. offene Blocker klar dokumentiert sind (inkl. Impact/Nächster Schritt).
 6. Akzeptanzkriterien mit Evidenz belegt sind.
 7. Specs/Plan/OpenSpec-Artefakte synchron sind (kein Drift).
+
+### Verification Command Contract Repair
+
+Wenn ein definierter Verification Command waehrend Delivery oder Closeout nicht wegen Produkt-/Implementierungsfehlern scheitert, sondern weil der Command-Vertrag selbst in der Zielumgebung fragil, stale oder falsch formuliert ist, darf der Fehler nicht still als bestanden ersetzt werden.
+
+Regeln:
+1. Der fehlgeschlagene Originalcommand wird als Command-Contract-Finding dokumentiert, inklusive Exit/Fehlerbild und Ursache, soweit erkennbar.
+2. Ein Ersatzcommand darf nur als gate-relevant gelten, wenn Spec, Child Spec, Child Index/Handoff und OpenSpec/Evidence vorher auf den neuen Command synchronisiert wurden oder ein explizit dokumentierter Sync-Patch Teil desselben Integrations-/Closeout-Runs ist.
+3. Nach der Sync-Aenderung muss der korrigierte Command frisch ausgefuehrt werden. Ein frueherer Rehearsal-Lauf ersetzt das nicht.
+4. Wenn die Sync-Aenderung nicht im aktuellen Scope erlaubt ist oder eine echte Entscheidung braucht, bleibt das Ergebnis `NOT READY` und wird an `child-spec-hardening`, `spec-change-delivery` oder den Integrations-Owner zurueckgegeben.
+5. Evidence muss Originalfehler und korrigierten Lauf unterscheiden. Der Originalfehler darf nicht als `ran/pass` umetikettiert werden.
+
+### Risk-Based Command Contract Rehearsal
+
+Vor `READY FOR PLANNING`, `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` muessen riskante Verification Commands nicht nur beschrieben, sondern als Command-Vertrag geprueft werden, soweit das in der aktuellen Umgebung ohne Umsetzung oder externe Seiteneffekte sicher moeglich ist.
+
+Regeln:
+1. High-Risk-Kommandos sind alle Commands, deren Erfolg stark von SDK-/Runtime-Auswahl, absolutem Pfad, CWD, Shell, Container-Daemon, Compose/Service-Readiness, Testhost-Flags, Vorbuild-Artefakten, Branch-Historie, Credentials oder Netzwerk-/Infrastrukturverfuegbarkeit abhaengt.
+2. Die Rehearsal prueft nur den Command-Vertrag: richtige Runtime/SDK-Auswahl, erreichbare Tools, gueltige Pfade, plausible Flags, erwartete Vorbedingungen und fehlende Seiteneffekte. Sie ist keine Ersatz-Verifikation fuer die spaetere Implementierung.
+3. Wenn eine Rehearsal sicher nicht moeglich ist, muss die Spec das explizit markieren, inklusive Grund und wer/was den Command-Vertrag spaeter validiert.
+4. Ein High-Risk-Command mit fehlender, fehlgeschlagener oder nicht erklaerter Rehearsal blockiert Implementation-Ready. Verwende `NEEDS HARDENING`, `[MISSING command contract rehearsal]` oder `[REVIEW command contract not rehearsed: <reason>]`.
+5. Bei Parent/Child-Arbeit muss das Rehearsal-Ergebnis in Child Spec, Child Index/Handoff oder Evidence sichtbar sein, damit eine frische Session den Command nicht erneut blind vertraut.
 
 ## Anti-Rework Guardrails
 
