@@ -71,15 +71,17 @@ Persistenzregel:
 2. Standardort ist ein `child-session-handoffs/`-Ordner neben dem Child Index, z. B. `_specs/child-session-handoffs/s3-session-handoff.md`.
 3. Wenn kein eigener Child-Index-Dateipfad existiert, liegt das Handoff neben dem Parent-, Slice-Plan- oder Delivery-Orchestration-Pack-Artefakt, das den Child Index enthaelt.
 4. Der Child Index muss pro Child auf das persistierte Handoff zeigen. Ein reines Inline-Handoff ist nur als Fallback erlaubt, wenn der Index einen stabilen Abschnittsanker oder Patch-Zielpfad benennt.
-5. Ein Handoff ist stale, wenn Child Spec, Hardening Verdict, Child Index, Evidence/OpenSpec-Status oder Next Action voneinander abweichen. Stale Handoffs duerfen nicht als Implementierungsfreigabe gelten.
+5. Ein Handoff ist stale, wenn Target Repository / Working Directory, Child Spec, Hardening Verdict, Child Index, Evidence/OpenSpec-Status oder Next Action voneinander abweichen. Stale Handoffs duerfen nicht als Implementierungsfreigabe gelten.
 
 ```md
 ## Child Session Handoff
 
 - Parent:
 - Child:
+- Child Spec:
 - Child Index / Queue:
 - Handoff File:
+- Target Repository / Working Directory:
 - Naechster Modus/Skill:
 - Aktueller Verdict:
 - Scope Summary:
@@ -95,7 +97,7 @@ Persistenzregel:
 Regeln:
 1. `spec-orchestrator` erzeugt oder aktualisiert ein persistiertes Handoff fuer den naechsten empfohlenen Child und verlinkt es im Child Index.
 2. `child-spec-hardening` liefert bei `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` immer ein persistiertes Handoff fuer die Implementierung und synchronisiert den Child-Index-Pointer.
-3. `spec-change-delivery` darf ein Child-Handoff als Kickoff-Quelle nutzen, muss aber trotzdem Child Spec, Parent Conformance, Child Index und Hardening Verdict pruefen.
+3. `spec-change-delivery` darf ein Child-Handoff als Kickoff-Quelle nutzen, muss aber trotzdem Target Repository / Working Directory, Child Spec, Parent Conformance, Child Index und Hardening Verdict pruefen.
 4. `spec-closeout` aktualisiert das naechste Handoff oder markiert es im Child Index als stale/blockiert, damit der naechste fuehrende Child nicht aus veralteten Status-/Evidence-Links startet.
 5. Bei grossen Parent/Child-Vorhaben wird pro Child-Implementation normalerweise eine frische Session empfohlen.
 
@@ -466,16 +468,18 @@ Minimale Child-Index-Flaeche:
 
 Regeln:
 1. `spec-orchestrator` erzeugt oder aktualisiert den Child Index, sobald Parent/Child genutzt wird. Wenn kein eigener Index existiert, wird die Kontrollflaeche im Parent, Slice-Plan oder Delivery Orchestration Pack angelegt.
-2. Der Child Index haelt Slice-Status, Coverage, Abhaengigkeiten, Hardening Queue, Handoff-Pointer, Next Action, Evidence-/Closeout-Links und Backlog-/Re-entry-Verweise. Er dupliziert keine OpenSpec-Tasks und keine detaillierten Implementierungspläne.
-3. Die Hardening Queue ist ein Ausschnitt des Child Index fuer nicht implementation-ready Children. Sie nennt Required Hardening, Sources To Read und Blockers, aber keine fein granularen Delivery-Tasks.
-4. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn die Child-Index-Tabelle die exakten Spaltennamen aus der Mindestflaeche oben enthaelt und die Ziel-Child-Zeile fuer jede Spalte vollstaendig ausgefuellt ist.
-5. Zusammengelegte oder umbenannte Ersatzspalten wie `Dependencies / Evidence`, `Allowed Next Mode`, `Implementation Gate`, `Closeout Sync`, `Status`, `Verdict`, `Ledger`, `Gate` oder aehnliche Kurzformen gelten nicht als operational. Sie koennen zusaetzlich existieren, ersetzen aber keine Pflichtspalte.
-6. Eine alte Kurzform wie `Slice | Spec | Status | Hardening Verdict | Session Handoff` ist nur ein Migrationszwischenstand und blockiert Implementierung.
-7. `Allowed Write-Set` muss fuer `IMPLEMENTATION READY` als verbindliche, durch `spec-change-delivery` durchsetzbare Liste oder Musterliste formuliert sein. Unverbindliche Formulierungen wie `voraussichtlich`, `likely`, `probably`, `expected`, `TBD`, `to be decided`, `etc.`, `and related files` oder `as needed` blockieren Implementierungsfreigabe.
-8. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn ein dokumentiertes Hardening Verdict mit Parent Conformance, Content-Quality-Ergebnis, Verification Depth und DoR/DoD vorliegt und der Child Index auf ein aktuelles persistiertes Handoff zeigt.
-9. `ready_candidate` bedeutet nur: der Schnitt wirkt plausibel. Es ist kein Implementierungsfreigabe-Status.
-10. Nach Hardening, Delivery und Closeout muessen Child Spec, Parent Coverage, Child Index, Child Session Handoff, Backlog/Re-entry, Evidence Links und OpenSpec Status synchron sein.
-11. Der Child Index benennt den naechsten fuehrenden Child erst, nachdem die vorherige Child-Synchronisation abgeschlossen oder explizit als blockiert dokumentiert ist.
+2. Die Spalte `Child` enthaelt einen stabilen maschinenlesbaren Child-ID wie `S3`, nicht einen gemischten Anzeigenamen wie `S3 Content Bundle`. Menschliche Titel stehen in `Child Spec`, `Parent Coverage` oder einer separaten Zusatzspalte.
+3. Child-ID, Handoff-Dateiname, Handoff-Feld `Child`, Validator-/Delivery-Aufruf und OpenSpec-/Ledger-Verweise muessen dieselbe Child-ID verwenden; der konkrete Pfad steht im Handoff-Feld `Child Spec`. Abweichungen blockieren Implementierungsfreigabe, weil eine frische Session sonst den Ziel-Child nicht eindeutig findet.
+4. Der Child Index haelt Slice-Status, Coverage, Abhaengigkeiten, Hardening Queue, Handoff-Pointer, Next Action, Evidence-/Closeout-Links und Backlog-/Re-entry-Verweise. Er dupliziert keine OpenSpec-Tasks und keine detaillierten Implementierungspläne.
+5. Die Hardening Queue ist ein Ausschnitt des Child Index fuer nicht implementation-ready Children. Sie nennt Required Hardening, Sources To Read und Blockers, aber keine fein granularen Delivery-Tasks.
+6. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn die Child-Index-Tabelle die exakten Spaltennamen aus der Mindestflaeche oben enthaelt und die Ziel-Child-Zeile fuer jede Spalte vollstaendig ausgefuellt ist.
+7. Zusammengelegte oder umbenannte Ersatzspalten wie `Dependencies / Evidence`, `Allowed Next Mode`, `Implementation Gate`, `Closeout Sync`, `Status`, `Verdict`, `Ledger`, `Gate` oder aehnliche Kurzformen gelten nicht als operational. Sie koennen zusaetzlich existieren, ersetzen aber keine Pflichtspalte.
+8. Eine alte Kurzform wie `Slice | Spec | Status | Hardening Verdict | Session Handoff` ist nur ein Migrationszwischenstand und blockiert Implementierung.
+9. `Allowed Write-Set` muss fuer `IMPLEMENTATION READY` als verbindliche, durch `spec-change-delivery` durchsetzbare Liste oder Musterliste formuliert sein. Unverbindliche Formulierungen wie `voraussichtlich`, `likely`, `probably`, `expected`, `TBD`, `to be decided`, `etc.`, `and related files` oder `as needed` blockieren Implementierungsfreigabe.
+10. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn ein dokumentiertes Hardening Verdict mit Parent Conformance, Content-Quality-Ergebnis, Verification Depth und DoR/DoD vorliegt und der Child Index auf ein aktuelles persistiertes Handoff zeigt.
+11. `ready_candidate` bedeutet nur: der Schnitt wirkt plausibel. Es ist kein Implementierungsfreigabe-Status.
+12. Nach Hardening, Delivery und Closeout muessen Child Spec, Parent Coverage, Child Index, Child Session Handoff, Backlog/Re-entry, Evidence Links und OpenSpec Status synchron sein.
+13. Der Child Index benennt den naechsten fuehrenden Child erst, nachdem die vorherige Child-Synchronisation abgeschlossen oder explizit als blockiert dokumentiert ist.
 
 Pflichtbestandteile:
 
@@ -534,7 +538,7 @@ Child-Spec-Hardening-Pflichtgates:
 6. Verification Commands: konkreter Execution Context, risk-based Preflight, Gate Verification, Runtime-Readiness, Success Criteria und Anti-Loop-Regel.
 7. Content Quality Review: Korrektheit, Scope, Vollstaendigkeit, Konsistenz, Eindeutigkeit, Machbarkeit, Testbarkeit, Traceability, Abstraktionsniveau und Lifecycle-Fit.
 8. DoR/DoD: Definition of Ready fuer Umsetzung und Definition of Done/Closeout Evidence sind vorhanden oder bewusst irrelevant.
-9. Handoff: Bei `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` existiert ein persistiertes Child Session Handoff mit naechstem Modus, Write-Set, Verification Commands, Evidence/OpenSpec und offenen Notes; der Child Index verlinkt genau dieses Handoff.
+9. Handoff: Bei `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` existiert ein persistiertes Child Session Handoff mit Target Repository / Working Directory, naechstem Modus, Write-Set, Verification Commands, Evidence/OpenSpec und offenen Notes; der Child Index verlinkt genau dieses Handoff.
 10. Hardening Verification: Vor `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` muss `git diff --check` gruen sein. Wenn die Child Spec eingebettete maschinenlesbare Beispiele enthaelt, muessen die relevanten Beispiele geparst oder bewusst als nicht-parsebare Pseudobeispiele gekennzeichnet werden; parsefehlerhafte normative Beispiele blockieren Readiness.
 
 Contract-heavy Beispielregel:

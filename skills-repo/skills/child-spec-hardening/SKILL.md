@@ -90,6 +90,7 @@ Use the actual project paths and child id. The validator enforces:
 
 - exact operational Child Index columns,
 - target child row exists,
+- target child row uses the same stable child id supplied to the validator and handoff,
 - required cells are non-empty,
 - persisted handoff exists and agrees with the Child Index verdict,
 - `Allowed Write-Set` is concrete and not approximate,
@@ -266,7 +267,7 @@ If any item is missing, use `NEEDS HARDENING`, `NEEDS USER DECISION`, or `NEEDS 
 
 After assigning the final status, update or report the child spec's Review Control Surface so its `Offene Entscheidungen` and `Readiness Status` match the verdict.
 
-When the verdict is `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES`, always produce a persisted Child Session Handoff for the implementation run using the shared workflow template: parent path, child path, child index/queue path, handoff file path, next mode/skill, current verdict, scope summary, non-goals, enforceable allowed write-set, shared/read-only files, verification commands, evidence/OpenSpec, open non-blocking notes, and whether a fresh session is recommended. Link the same handoff from the Child Index. For large Parent/Child work, prefer a fresh implementation session per child.
+When the verdict is `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES`, always produce a persisted Child Session Handoff for the implementation run using the shared workflow template: parent path, stable child id, child spec path, child index/queue path, handoff file path, target repository / working directory, next mode/skill, current verdict, scope summary, non-goals, enforceable allowed write-set, shared/read-only files, verification commands, evidence/OpenSpec, open non-blocking notes, and whether a fresh session is recommended. Link the same handoff from the Child Index. For large Parent/Child work, prefer a fresh implementation session per child.
 
 ## Required Delivery Sections
 

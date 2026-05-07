@@ -174,6 +174,38 @@ static void ValidateHandoff(IReadOnlyDictionary<string, string> row, string inde
     {
         ValidateWriteSet("Handoff Allowed Write-Set", handoffWriteSet, errors);
     }
+
+    var targetRepository = ExtractBulletValue(handoffText, "Target Repository / Working Directory")
+        ?? ExtractBulletValue(handoffText, "Target repository / working directory");
+    if (targetRepository is null)
+    {
+        errors.Add("Handoff is missing `Target Repository / Working Directory`.");
+    }
+    else
+    {
+        ValidateTargetRepository(targetRepository, errors, warnings);
+    }
+}
+
+static void ValidateTargetRepository(string value, List<string> errors, List<string> warnings)
+{
+    if (LooksLikePlaceholder(value))
+    {
+        errors.Add($"Handoff Target Repository / Working Directory still looks like a placeholder: {value}");
+        return;
+    }
+
+    var path = value.Trim().Trim('`');
+    if (!Path.IsPathRooted(path))
+    {
+        errors.Add($"Handoff Target Repository / Working Directory must be an absolute path: {value}");
+        return;
+    }
+
+    if (!Directory.Exists(path))
+    {
+        warnings.Add($"Handoff Target Repository / Working Directory does not exist in this environment: {path}");
+    }
 }
 
 static void ValidateWriteSet(string label, string value, List<string> errors)
