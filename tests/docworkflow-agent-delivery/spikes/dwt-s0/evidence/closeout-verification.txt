@@ -1,0 +1,233 @@
+
+## node-version
+command: node --version
+v24.14.0
+exit_status=0
+
+## promptfoo-debug
+command: npx --yes --package promptfoo@0.121.9 promptfoo debug
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+npm warn deprecated boolean@3.2.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
+npm error code ETIMEDOUT
+npm error syscall read
+npm error errno -60
+npm error network read ETIMEDOUT
+npm error network This is a problem related to network connectivity.
+npm error network In most cases you are behind a proxy or have bad network settings.
+npm error network
+npm error network If you are behind a proxy, please make sure that the
+npm error network 'proxy' config is set properly.  See: 'npm help config'
+npm notice
+npm notice New major version of npm available! 10.9.0 -> 11.14.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.14.0
+npm notice To update run: npm install -g npm@11.14.0
+npm notice
+npm error A complete log of this run can be found in: /tmp/docworkflow-agent-delivery-dwt-s0-closeout-npm-cache.CwWiwi/_logs/2026-05-07T10_59_53_266Z-debug-0.log
+exit_status=196
+FAILED_STEP=promptfoo-debug
+
+## closeout-retry-note
+first closeout attempt failed at promptfoo-debug with npm ETIMEDOUT; retrying same pinned command contract with same npm_config_cache after partial cache warmup.
+
+## node-version-retry
+command: node --version
+v24.14.0
+exit_status=0
+
+## promptfoo-debug-retry
+command: npx --yes --package promptfoo@0.121.9 promptfoo debug
+npm warn deprecated prebuild-install@7.1.3: No longer maintained. Please contact the author of the relevant native addon; alternatives are available.
+npm warn deprecated boolean@3.2.0: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+========================================================================================================================
+Promptfoo Debug Information
+========================================================================================================================
+{
+  "version": "0.121.9",
+  "platform": {
+    "os": "darwin",
+    "release": "25.3.0",
+    "arch": "arm64",
+    "nodeVersion": "v24.14.0"
+  },
+  "env": {
+    "telemetryDisabled": true,
+    "telemetryDebug": false
+  },
+  "configInfo": {
+    "configExists": false,
+    "configContent": null
+  }
+}
+========================================================================================================================
+Please include this output when reporting issues on GitHub: https://github.com/promptfoo/promptfoo/issues
+exit_status=0
+
+## promptfoo-validate-config-retry
+command: npx --yes --package promptfoo@0.121.9 promptfoo validate config -c tests/docworkflow-agent-delivery/spikes/dwt-s0/promptfooconfig.yaml
+Configuration is valid.
+exit_status=0
+
+## promptfoo-eval-no-cache-retry
+command: npx --yes --package promptfoo@0.121.9 promptfoo eval -c tests/docworkflow-agent-delivery/spikes/dwt-s0/promptfooconfig.yaml --no-cache --no-progress-bar
+Cache is disabled.
+Starting evaluation eval-tD7-2026-05-07T12:00:12
+Running 1 test cases (up to 4 at a time)...
+
+┌────────────────────────────────────────────────────────────┬────────────────────────────────────────────────────────────┐
+│ sessionId                                                  │ [openai:codex-sdk:gpt-5.5] You are running the DWT-S0      │
+│                                                            │ DocWorkflow framework spike.                               │
+│                                                            │ Read the file minimal-parent-spec.md in the working        │
+│                                                            │ directory.                                                 │
+│                                                            │ Return only a JSON object with these exact keys:           │
+│                                                            │ {                                                          │
+│                                                            │   "child": "DWT-S0",                                       │
+│                                                            │   "fixture_seen": true,                                    │
+│                                                            │   "sc...                                                   │
+├────────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────┤
+│ 019e024f-58c2-7500-94c3-0e96bdf4e0fa                       │ [PASS]                                                     │
+│                                                            │ {"child":"DWT-S0","fixture_seen":true,"scope":"framework-… │
+└────────────────────────────────────────────────────────────┴────────────────────────────────────────────────────────────┘
+✓ Eval complete (ID: eval-tD7-2026-05-07T12:00:12)
+
+» View results: promptfoo view
+» Share with your team: https://promptfoo.app
+» Feedback: https://promptfoo.dev/feedback
+
+Total Tokens: 23,125
+  Eval: 23,125 (22,972 prompt, 153 completion, 11,264 cached, 14 reasoning)
+
+Results:
+  ✓ 1 passed (100%)
+  0 failed (0%)
+  0 errors (0%)
+Duration: 11s (concurrency: 4)
+
+exit_status=0
+
+## deterministic-summary-assertion-retry
+command: node tests/docworkflow-agent-delivery/spikes/dwt-s0/scripts/assert-spike-summary.mjs tests/docworkflow-agent-delivery/spikes/dwt-s0/evidence/spike-summary.json
+DWT-S0 spike summary assertion passed: ADOPT_WITH_LIMITATIONS
+exit_status=0
+
+## openspec-validate-retry
+command: openspec validate docworkflow-agent-testsuite-dwt-s0-framework-spike --strict
+Note: OpenSpec collects anonymous usage stats. Opt out: OPENSPEC_TELEMETRY=0
+Change 'docworkflow-agent-testsuite-dwt-s0-framework-spike' is valid
+exit_status=0
+
+## child-readiness-retry
+command: dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateChildReadiness.cs -- --index /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md --handoff /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/child-session-handoffs/dwt-s0-session-handoff.md --child DWT-S0
+
+Welcome to .NET 8.0!
+---------------------
+SDK Version: 8.0.404
+
+Telemetry
+---------
+The .NET tools collect usage data in order to help us improve your experience. It is collected by Microsoft and shared with the community. You can opt-out of telemetry by setting the DOTNET_CLI_TELEMETRY_OPTOUT environment variable to '1' or 'true' using your favorite shell.
+
+Read more about .NET CLI Tools telemetry: https://aka.ms/dotnet-cli-telemetry
+
+----------------
+Installed an ASP.NET Core HTTPS development certificate.
+To trust the certificate, run 'dotnet dev-certs https --trust'
+Learn about HTTPS: https://aka.ms/dotnet-https
+
+----------------
+Write your first app: https://aka.ms/dotnet-hello-world
+Find out what's new: https://aka.ms/dotnet-whats-new
+Explore documentation: https://aka.ms/dotnet-docs
+Report issues and find source on GitHub: https://github.com/dotnet/core
+Use 'dotnet --help' to see available commands or visit: https://aka.ms/dotnet-cli
+--------------------------------------------------------------------------------------
+An issue was encountered verifying workloads. For more information, run "dotnet workload update".
+Couldn't find a project to run. Ensure a project exists in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs, or pass the path to the project using --project.
+exit_status=1
+FAILED_STEP=child-readiness-retry
+
+## closeout-connectivity-clarification
+The earlier npm ETIMEDOUT is recorded as network/registry connectivity instability, consistent with the user-reported intermittent internet connection; it is not treated as a cache correctness failure.
+
+## child-readiness-cwd-correction
+The previous child-readiness retry invoked dotnet from repo CWD and failed before running the file-based validator. Re-running from /tmp with the same validator and absolute paths.
+
+## child-readiness-final
+command: (cd /tmp && dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateChildReadiness.cs -- --index /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-05-07\ DocWorkflow\ Agent\ Delivery\ Testsuite.md --handoff /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/child-session-handoffs/dwt-s0-session-handoff.md --child DWT-S0)
+Child readiness validation passed for DWT-S0.
+exit_status=0
+
+## contract-checks-all-final
+command: tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all
+TC1 evidence
+Fixture: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery.LbO5So
+PASS: file exists: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery.LbO5So/_specs/2026-05-04-free-entry-v2-master-spec.md
+PASS: file exists: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery.LbO5So/_specs/2026-05-05-free-entry-v2-child-specs-index.md
+PASS: file exists: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery.LbO5So/_specs/2026-05-05-free-entry-v2-s3-content-bundle-managed-ai-channel-spec.md
+PASS: file exists: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery.LbO5So/_specs/child-session-handoffs/s3-session-handoff.md
+PASS: Spec Sizing Gate is documented
+PASS: Large Spec / Child Spec Pipeline is documented
+PASS: spec-orchestrator requires minimum Child Index columns
+PASS: child-spec-hardening requires command-contract rehearsals
+PASS: Child Index has exact operational header
+PASS: Child row exists: S0
+PASS: Child row exists: S1
+PASS: Child row exists: S2
+PASS: Child row exists: S3
+PASS: Child row exists: S4
+PASS: Child row exists: S5
+PASS: Child row exists: S6
+PASS: Child row exists: S7
+PASS: S3 passes fallback readiness gate
+PASS: S3 passes .NET readiness validator
+PASS: S4 remains in hardening queue
+PASS: S4 is not auto-released to spec-change-delivery
+PASS: S5 remains in hardening queue
+PASS: S5 is not auto-released to spec-change-delivery
+PASS: S6 remains in hardening queue
+PASS: S6 is not auto-released to spec-change-delivery
+PASS: S7 remains in hardening queue
+PASS: S7 is not auto-released to spec-change-delivery
+PASS: S3 spec documents verification preflight
+PASS: S3 spec documents Docker gate
+PASS: S3 spec documents anti-loop verification rule
+PASS: S3 handoff persists verification commands
+TC2 evidence
+Fixture: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery.LbO5So
+PASS: file exists: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery.LbO5So/_specs/2026-05-05-free-entry-v2-child-specs-index.md
+PASS: file exists: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery.LbO5So/_specs/2026-05-05-free-entry-v2-s3-content-bundle-managed-ai-channel-spec.md
+PASS: file exists: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery.LbO5So/_specs/child-session-handoffs/s3-session-handoff.md
+PASS: directory exists: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery.LbO5So/target-repo
+PASS: S3 delivery kickoff gate passes in temp fixture
+PASS: S3 delivery kickoff passes .NET readiness validator
+PASS: Handoff Target Repository is inside fixture
+PASS: S3 handoff does not point verification commands at original repo
+PASS: Allowed Write-Set is concrete
+PASS: Handoff keeps dotnet restore gate
+PASS: Handoff keeps dotnet build gate
+PASS: Handoff keeps dotnet test gate
+PASS: Handoff keeps local S3 harness gate
+PASS: Handoff keeps Docker build gate
+PASS: Handoff keeps Docker run gate
+PASS: S3 spec requires secret-leak assertions
+PASS: file exists: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery.LbO5So/negative/stale-handoffs/s3-missing-target-repo.md
+PASS: Stale S3 handoff without Target Repository blocks
+PASS: S4 remains not implementation-ready
+PASS: S4 is not auto-implemented
+PASS: spec-change-delivery requires Child Index gate
+PASS: spec-change-delivery requires target repository handoff validation
+PASS: spec-closeout requires Parent/Index/Evidence/Handoff sync
+DRY-RUN: Runtime verification commands are contract-checked only; no implementation is executed in this harness.
+RESULT: PASS
+exit_status=0
+
+## bash-n-suite-scripts-final
+command: bash -n tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh tests/docworkflow-agent-delivery/scripts/setup-fixture.sh
+exit_status=0
+
+## git-diff-check-final
+command: git diff --check
+exit_status=0
+
+CLOSEOUT_VERIFICATION_FINAL=PASS

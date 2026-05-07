@@ -1,0 +1,20 @@
+{
+  "fixture_id": "parent-only",
+  "source_files": [
+    {
+      "path": "start-state/parent-spec.md",
+      "stable_source_id": "synthetic-parent-only-v1"
+    }
+  ],
+  "copied_files": [],
+  "generated_files": [],
+  "removed_from_start_state": [
+    "child-index.md",
+    "child-specs/",
+    "child-session-handoffs/"
+  ],
+  "normalizations": [],
+  "forbidden_source_write_paths": [
+    "/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_specs"
+  ]
+}

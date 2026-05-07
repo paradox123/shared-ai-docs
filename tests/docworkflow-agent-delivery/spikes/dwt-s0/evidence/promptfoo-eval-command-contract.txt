@@ -1,0 +1,35 @@
+command: npx --yes --package promptfoo@0.121.9 promptfoo eval -c tests/docworkflow-agent-delivery/spikes/dwt-s0/promptfooconfig.yaml --no-cache
+Cache is disabled.
+Starting evaluation eval-kf5-2026-05-07T10:55:18
+Running 1 test cases (up to 4 at a time)...
+
+┌────────────────────────────────────────────────────────────┬────────────────────────────────────────────────────────────┐
+│ sessionId                                                  │ [openai:codex-sdk:gpt-5.5] You are running the DWT-S0      │
+│                                                            │ DocWorkflow framework spike.                               │
+│                                                            │ Read the file minimal-parent-spec.md in the working        │
+│                                                            │ directory.                                                 │
+│                                                            │ Return only a JSON object with these exact keys:           │
+│                                                            │ {                                                          │
+│                                                            │   "child": "DWT-S0",                                       │
+│                                                            │   "fixture_seen": true,                                    │
+│                                                            │   "sc...                                                   │
+├────────────────────────────────────────────────────────────┼────────────────────────────────────────────────────────────┤
+│ 019e0213-e354-7523-a53e-ff8c5e8e1930                       │ [PASS]                                                     │
+│                                                            │ {"child":"DWT-S0","fixture_seen":true,"scope":"framework-… │
+└────────────────────────────────────────────────────────────┴────────────────────────────────────────────────────────────┘
+✓ Eval complete (ID: eval-kf5-2026-05-07T10:55:18)
+
+» View results: promptfoo view
+» Share with your team: https://promptfoo.app
+» Feedback: https://promptfoo.dev/feedback
+
+Total Tokens: 25,700
+  Eval: 25,700 (25,558 prompt, 142 completion, 12,288 cached, 12 reasoning)
+
+Results:
+  ✓ 1 passed (100%)
+  0 failed (0%)
+  0 errors (0%)
+Duration: 10s (concurrency: 4)
+
+exit_status=0

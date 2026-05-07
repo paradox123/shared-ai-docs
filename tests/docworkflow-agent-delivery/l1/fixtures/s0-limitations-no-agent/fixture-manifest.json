@@ -1,0 +1,16 @@
+{
+  "fixture_id": "s0-limitations-no-agent",
+  "source_files": [
+    {
+      "path": "s0-context.md",
+      "stable_source_id": "dwt-s0-adopt-with-limitations"
+    }
+  ],
+  "copied_files": [],
+  "generated_files": [],
+  "removed_from_start_state": [],
+  "normalizations": [],
+  "forbidden_source_write_paths": [
+    "/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_specs"
+  ]
+}

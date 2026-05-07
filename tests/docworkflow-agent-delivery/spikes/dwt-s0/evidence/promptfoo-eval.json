@@ -1,0 +1,265 @@
+{
+  "evalId": "eval-Uua-2026-05-07T10:51:37",
+  "results": {
+    "version": 3,
+    "timestamp": "2026-05-07T10:51:37.383Z",
+    "prompts": [
+      {
+        "id": "238d4c14d95129e53270807a8c17ba03b99e8c83f2cc58a100bcec3c99e6e304",
+        "raw": "You are running the DWT-S0 DocWorkflow framework spike.\nRead the file minimal-parent-spec.md in the working directory.\nReturn only a JSON object with these exact keys:\n{\n  \"child\": \"DWT-S0\",\n  \"fixture_seen\": true,\n  \"scope\": \"framework-spike\",\n  \"forbidden_runtime_delivery\": false\n}",
+        "label": "You are running the DWT-S0 DocWorkflow framework spike.\nRead the file minimal-parent-spec.md in the working directory.\nReturn only a JSON object with these exact keys:\n{\n  \"child\": \"DWT-S0\",\n  \"fixture_seen\": true,\n  \"scope\": \"framework-spike\",\n  \"forbidden_runtime_delivery\": false\n}",
+        "provider": "openai:codex-sdk:gpt-5.5",
+        "metrics": {
+          "score": 1,
+          "testPassCount": 1,
+          "testFailCount": 0,
+          "testErrorCount": 0,
+          "assertPassCount": 2,
+          "assertFailCount": 0,
+          "totalLatencyMs": 12374,
+          "tokenUsage": {
+            "prompt": 22900,
+            "completion": 135,
+            "cached": 10752,
+            "total": 23035,
+            "numRequests": 1,
+            "completionDetails": {
+              "reasoning": 17,
+              "acceptedPrediction": 0,
+              "rejectedPrediction": 0,
+              "cacheReadInputTokens": 0,
+              "cacheCreationInputTokens": 0
+            },
+            "assertions": {
+              "total": 0,
+              "prompt": 0,
+              "completion": 0,
+              "cached": 0,
+              "numRequests": 0,
+              "completionDetails": {
+                "reasoning": 0,
+                "acceptedPrediction": 0,
+                "rejectedPrediction": 0,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 0
+              }
+            }
+          },
+          "namedScores": {},
+          "namedScoresCount": {},
+          "namedScoreWeights": {},
+          "cost": 0.070166
+        }
+      }
+    ],
+    "results": [
+      {
+        "cost": 0.070166,
+        "gradingResult": {
+          "pass": true,
+          "score": 1,
+          "reason": "All assertions passed",
+          "namedScores": {},
+          "tokensUsed": {
+            "total": 0,
+            "prompt": 0,
+            "completion": 0,
+            "cached": 0,
+            "numRequests": 0
+          },
+          "componentResults": [
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "is-json"
+              }
+            },
+            {
+              "pass": true,
+              "score": 1,
+              "reason": "Assertion passed",
+              "assertion": {
+                "type": "javascript",
+                "value": "const parsed = JSON.parse(output);\nreturn parsed.child === 'DWT-S0'\n  && parsed.fixture_seen === true\n  && parsed.scope === 'framework-spike'\n  && parsed.forbidden_runtime_delivery === false;"
+              }
+            }
+          ]
+        },
+        "id": "dcbefe54-976a-486a-80b4-15d908fb96a5",
+        "latencyMs": 12374,
+        "namedScores": {},
+        "prompt": {
+          "raw": "You are running the DWT-S0 DocWorkflow framework spike.\nRead the file minimal-parent-spec.md in the working directory.\nReturn only a JSON object with these exact keys:\n{\n  \"child\": \"DWT-S0\",\n  \"fixture_seen\": true,\n  \"scope\": \"framework-spike\",\n  \"forbidden_runtime_delivery\": false\n}",
+          "label": "You are running the DWT-S0 DocWorkflow framework spike.\nRead the file minimal-parent-spec.md in the working directory.\nReturn only a JSON object with these exact keys:\n{\n  \"child\": \"DWT-S0\",\n  \"fixture_seen\": true,\n  \"scope\": \"framework-spike\",\n  \"forbidden_runtime_delivery\": false\n}",
+          "config": {}
+        },
+        "promptId": "238d4c14d95129e53270807a8c17ba03b99e8c83f2cc58a100bcec3c99e6e304",
+        "promptIdx": 0,
+        "provider": {
+          "id": "openai:codex-sdk:gpt-5.5",
+          "label": ""
+        },
+        "response": {
+          "output": "{\"child\":\"DWT-S0\",\"fixture_seen\":true,\"scope\":\"framework-spike\",\"forbidden_runtime_delivery\":false}",
+          "tokenUsage": {
+            "prompt": 22900,
+            "completion": 135,
+            "total": 23035,
+            "cached": 10752,
+            "completionDetails": {
+              "reasoning": 17
+            }
+          },
+          "cost": 0.070166,
+          "raw": "{\"finalResponse\":\"{\\\"child\\\":\\\"DWT-S0\\\",\\\"fixture_seen\\\":true,\\\"scope\\\":\\\"framework-spike\\\",\\\"forbidden_runtime_delivery\\\":false}\",\"items\":[{\"id\":\"item_0\",\"type\":\"command_execution\",\"command\":\"/bin/zsh -lc \\\"pwd && ls && sed -n '1,120p' minimal-parent-spec.md\\\"\",\"aggregated_output\":\"/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/spikes/dwt-s0/fixtures/workspace\\nREADME.md\\nminimal-parent-spec.md\\n# Minimal Parent-Like Fixture\\n\\nChild: DWT-S0\\n\\nThis workspace copy is the read-only target for the Promptfoo Codex SDK probe.\\nThe probe should read this file and return a structured JSON response.\\n\\nForbidden actions:\\n\\n- Do not create a recurring L1/L2/L3 testsuite.\\n- Do not modify runtime repositories.\\n- Do not write outside the DWT-S0 spike workspace.\\n\\n\",\"exit_code\":0,\"status\":\"completed\"},{\"id\":\"item_1\",\"type\":\"agent_message\",\"text\":\"{\\\"child\\\":\\\"DWT-S0\\\",\\\"fixture_seen\\\":true,\\\"scope\\\":\\\"framework-spike\\\",\\\"forbidden_runtime_delivery\\\":false}\"}],\"usage\":{\"input_tokens\":22900,\"cached_input_tokens\":10752,\"output_tokens\":135,\"reasoning_output_tokens\":17},\"reasoningTexts\":[],\"conversationMessages\":[{\"role\":\"user\",\"content\":\"You are running the DWT-S0 DocWorkflow framework spike.\\nRead the file minimal-parent-spec.md in the working directory.\\nReturn only a JSON object with these exact keys:\\n{\\n  \\\"child\\\": \\\"DWT-S0\\\",\\n  \\\"fixture_seen\\\": true,\\n  \\\"scope\\\": \\\"framework-spike\\\",\\n  \\\"forbidden_runtime_delivery\\\": false\\n}\"},{\"role\":\"assistant\",\"content\":\"{\\\"child\\\":\\\"DWT-S0\\\",\\\"fixture_seen\\\":true,\\\"scope\\\":\\\"framework-spike\\\",\\\"forbidden_runtime_delivery\\\":false}\"}]}",
+          "sessionId": "019e0210-85ec-7790-8c21-5e01fc7ba66f"
+        },
+        "score": 1,
+        "success": true,
+        "testCase": {
+          "description": "DWT-S0 isolated fixture probe",
+          "assert": [
+            {
+              "type": "is-json"
+            },
+            {
+              "type": "javascript",
+              "value": "const parsed = JSON.parse(output);\nreturn parsed.child === 'DWT-S0'\n  && parsed.fixture_seen === true\n  && parsed.scope === 'framework-spike'\n  && parsed.forbidden_runtime_delivery === false;"
+            }
+          ],
+          "vars": {
+            "sessionId": "019e0210-85ec-7790-8c21-5e01fc7ba66f"
+          },
+          "options": {},
+          "metadata": {}
+        },
+        "testIdx": 0,
+        "vars": {
+          "sessionId": "019e0210-85ec-7790-8c21-5e01fc7ba66f"
+        },
+        "metadata": {
+          "_promptfooFileMetadata": {},
+          "sessionId": "019e0210-85ec-7790-8c21-5e01fc7ba66f"
+        },
+        "failureReason": 0
+      }
+    ],
+    "stats": {
+      "successes": 1,
+      "failures": 0,
+      "errors": 0,
+      "tokenUsage": {
+        "prompt": 22900,
+        "completion": 135,
+        "cached": 10752,
+        "total": 23035,
+        "numRequests": 1,
+        "completionDetails": {
+          "reasoning": 17,
+          "acceptedPrediction": 0,
+          "rejectedPrediction": 0,
+          "cacheReadInputTokens": 0,
+          "cacheCreationInputTokens": 0
+        },
+        "assertions": {
+          "total": 0,
+          "prompt": 0,
+          "completion": 0,
+          "cached": 0,
+          "numRequests": 0,
+          "completionDetails": {
+            "reasoning": 0,
+            "acceptedPrediction": 0,
+            "rejectedPrediction": 0,
+            "cacheReadInputTokens": 0,
+            "cacheCreationInputTokens": 0
+          }
+        }
+      },
+      "durationMs": 12387,
+      "evaluationDurationMs": 12387
+    }
+  },
+  "config": {
+    "tags": {},
+    "description": "DWT-S0 Promptfoo-first Codex SDK probe",
+    "prompts": [
+      "You are running the DWT-S0 DocWorkflow framework spike.\nRead the file minimal-parent-spec.md in the working directory.\nReturn only a JSON object with these exact keys:\n{\n  \"child\": \"DWT-S0\",\n  \"fixture_seen\": true,\n  \"scope\": \"framework-spike\",\n  \"forbidden_runtime_delivery\": false\n}"
+    ],
+    "providers": [
+      {
+        "id": "openai:codex-sdk:gpt-5.5",
+        "config": {
+          "working_dir": "[REDACTED]",
+          "skip_git_repo_check": true,
+          "sandbox_mode": "read-only",
+          "approval_policy": "never",
+          "model_reasoning_effort": "low",
+          "enable_streaming": true,
+          "web_search_mode": "disabled",
+          "network_access_enabled": false,
+          "cli_env": {
+            "CODEX_HOME": "/tmp/docworkflow-agent-delivery-dwt-s0-codex-home.dHmKx2"
+          },
+          "output_schema": {
+            "type": "object",
+            "properties": {
+              "child": {
+                "type": "string"
+              },
+              "fixture_seen": {
+                "type": "boolean"
+              },
+              "scope": {
+                "type": "string"
+              },
+              "forbidden_runtime_delivery": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "child",
+              "fixture_seen",
+              "scope",
+              "forbidden_runtime_delivery"
+            ],
+            "additionalProperties": false
+          }
+        }
+      }
+    ],
+    "tests": [
+      {
+        "description": "DWT-S0 isolated fixture probe",
+        "assert": [
+          {
+            "type": "is-json"
+          },
+          {
+            "type": "javascript",
+            "value": "const parsed = JSON.parse(output);\nreturn parsed.child === 'DWT-S0'\n  && parsed.fixture_seen === true\n  && parsed.scope === 'framework-spike'\n  && parsed.forbidden_runtime_delivery === false;"
+          }
+        ]
+      }
+    ],
+    "scenarios": [],
+    "env": {},
+    "outputPath": [
+      "tests/docworkflow-agent-delivery/spikes/dwt-s0/evidence/promptfoo-eval.json"
+    ],
+    "extensions": [],
+    "metadata": {},
+    "evaluateOptions": {}
+  },
+  "shareableUrl": null,
+  "metadata": {
+    "promptfooVersion": "0.121.9",
+    "nodeVersion": "v24.14.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "exportedAt": "2026-05-07T10:51:49.803Z",
+    "evaluationCreatedAt": "2026-05-07T10:51:37.383Z"
+  }
+}

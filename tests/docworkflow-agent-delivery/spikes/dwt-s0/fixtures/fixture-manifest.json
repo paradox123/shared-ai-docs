@@ -1,0 +1,15 @@
+{
+  "child": "DWT-S0",
+  "fixture_root": "tests/docworkflow-agent-delivery/spikes/dwt-s0/fixtures/workspace",
+  "source_files": [
+    "tests/docworkflow-agent-delivery/spikes/dwt-s0/fixtures/minimal-parent-spec.md"
+  ],
+  "workspace_files": [
+    "tests/docworkflow-agent-delivery/spikes/dwt-s0/fixtures/workspace/minimal-parent-spec.md",
+    "tests/docworkflow-agent-delivery/spikes/dwt-s0/fixtures/workspace/README.md"
+  ],
+  "original_specs_modified": false,
+  "hidden_normalizations_used": false,
+  "notes": "Spike-local fixture only; no KI-fuer-KMU source files are copied or normalized."
+}
+
