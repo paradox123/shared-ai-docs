@@ -113,6 +113,6 @@ Die DWT-S4 Summary verwendet `schema_id: docworkflow-agent-delivery-summary.v1`.
 
 ## DWT-S2 L2 Boundary
 
-`run-l2-parent-orchestration-checks.sh` prueft Output-Bundles fuer Parent-first Orchestration. Der Runner validiert Child Specs, exakten Child Index, Coverage Matrix, Dependencies, Hardening Queue, Next-State-Gating, DWT-S4-kompatible Summary-Felder und Telemetry. Negative Fixtures gelten als erfolgreich geprueft, wenn der erwartete Blocker sichtbar wird.
+`run-l2-parent-orchestration-checks.sh` prueft Output-Bundles fuer Parent-first Orchestration. Fuer `all` und `agent` startet der Runner zusaetzlich den Promptfoo/Codex SDK Provider gegen den parent-only Fixture-Workspace und schreibt `promptfoo-eval.json`, `promptfoo-eval.txt` und `dwt-s2-agent-proof.json` in den Evidence-Ordner. Wenn `CODEX_HOME_OVERRIDE` nicht gesetzt ist und `~/.codex/auth.json` existiert, wird dieses lokale Codex-Home als Auth-Quelle verwendet; alternativ koennen `OPENAI_API_KEY` oder `CODEX_API_KEY` durch die Umgebung bereitgestellt werden. Negative Fixtures gelten als erfolgreich geprueft, wenn der erwartete Blocker sichtbar wird.
 
-Der Selector `agent` schreibt aktuell eine reproduzierbare Blocker-Evidence, wenn Promptfoo/Codex nicht provisioniert ist. `fallback` und `all` koennen deterministische Contract Evidence erzeugen, aber eine akzeptierte L2-Agent-Proof braucht weiterhin `agent_execution_status: ran-target`.
+Eine akzeptierte L2-Agent-Proof braucht weiterhin `runner_mode: promptfoo-codex`, `agent_execution_status: ran-target` und `overall_agent_proof_status: pass`. Der Selector `fallback` bleibt deterministic-only und kann keine akzeptierte Agent-Proof erzeugen.

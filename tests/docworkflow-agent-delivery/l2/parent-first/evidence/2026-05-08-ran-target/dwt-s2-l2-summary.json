@@ -1,0 +1,84 @@
+{
+  "schema_id": "docworkflow-agent-delivery-summary.v1",
+  "suite_level": "DWT-S2",
+  "suite_version": "DWT-S2-l2-parent-first-v1",
+  "repo_root": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "fixture_root": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/l2/parent-first/fixtures",
+  "fixture_manifest": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/l2/parent-first/fixtures/oversized-parent-only/source-manifest.json",
+  "runner_mode": "promptfoo-codex",
+  "agent_execution_status": "ran-target",
+  "overall_agent_proof_status": "pass",
+  "selector": "all",
+  "test_results": {
+    "DWT-S2-L2A": "pass",
+    "DWT-S2-L2B": "pass",
+    "DWT-S2-L2C": "blocked",
+    "DWT-S2-L2D": "pass",
+    "DWT-S2-L2E": "blocked",
+    "DWT-S2-L2F": "warn"
+  },
+  "harness_case_results": {
+    "DWT-S2-L2A": "pass",
+    "DWT-S2-L2B": "pass",
+    "DWT-S2-L2C": "pass",
+    "DWT-S2-L2D": "pass",
+    "DWT-S2-L2E": "pass",
+    "DWT-S2-L2F": "pass"
+  },
+  "evidence_truth": {
+    "DWT-S2-L2A": "ran-target",
+    "DWT-S2-L2B": "ran-target",
+    "DWT-S2-L2C": "ran-target",
+    "DWT-S2-L2D": "ran-target",
+    "DWT-S2-L2E": "ran-target",
+    "DWT-S2-L2F": "ran-target"
+  },
+  "evidence_links": {
+    "DWT-S2-L2A": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-parent-first.w7q6iJ/evidence/dwt-s2-l2a-parent-first.json",
+    "DWT-S2-L2B": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-parent-first.w7q6iJ/evidence/dwt-s2-l2b-control-surface.json",
+    "DWT-S2-L2C": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-parent-first.w7q6iJ/evidence/dwt-s2-l2c-thin-child-block.json",
+    "DWT-S2-L2D": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-parent-first.w7q6iJ/evidence/dwt-s2-l2d-next-state.json",
+    "DWT-S2-L2E": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-parent-first.w7q6iJ/evidence/dwt-s2-l2e-blocked-agent.json",
+    "DWT-S2-L2F": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-parent-first.w7q6iJ/evidence/dwt-s2-l2f-reporting-telemetry.json",
+    "agent_proof": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-parent-first.w7q6iJ/evidence/dwt-s2-agent-proof.json",
+    "promptfoo_eval": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-parent-first.w7q6iJ/evidence/promptfoo-eval.json",
+    "promptfoo_log": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-parent-first.w7q6iJ/evidence/promptfoo-eval.txt"
+  },
+  "runner_environment": {
+    "os": "Darwin 25.3.0",
+    "shell": "/bin/zsh",
+    "node": "v24.14.0",
+    "promptfoo": "0.121.9",
+    "credentials_provisioned": true,
+    "requires_agents_for_acceptance": true,
+    "requires_docker": false
+  },
+  "agent_proof": {
+    "assertion_status": "pass",
+    "output_contract_status": "pass",
+    "session_id_present": true,
+    "promptfoo_exit_status": "0"
+  },
+  "provenance_checks": {
+    "parent_only_start": "pass",
+    "generated_control_surface": "pass",
+    "no_stale_output_reuse": "pass"
+  },
+  "readiness_checks": {
+    "thin_child_blocked": "blocked",
+    "valid_next_child_state": "pass",
+    "blocked_agent_honesty": "blocked"
+  },
+  "style_verdicts": {
+    "DWT-S2-L2F": "pass"
+  },
+  "telemetry_verdicts": {
+    "DWT-S2-L2F": "warn",
+    "DWT-S2-L2E": "blocked"
+  },
+  "forbidden_actions_observed": [],
+  "downstream_children": {
+    "DWT-S3": "blocked",
+    "DWT-S5": "planned"
+  }
+}

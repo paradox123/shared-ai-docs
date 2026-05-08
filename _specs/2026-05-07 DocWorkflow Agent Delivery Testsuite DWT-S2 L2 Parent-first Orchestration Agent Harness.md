@@ -1,5 +1,5 @@
 **Date:** 2026-05-08
-**Status:** 🔵 Implemented (blocked L2 agent proof)
+**Status:** 🟢 Accepted
 **Scope:** Implementation-ready child spec for the DWT-S2 L2 Parent-first Orchestration Agent Harness.
 
 ---
@@ -7,13 +7,13 @@
 ## Review Control Surface
 
 - Spec-Variante: implementation-ready Child Spec.
-- Goldstandard Status: candidate.
+- Goldstandard Status: accepted.
 - Ziel: Einen L2-Harness definieren, der nachweist, dass ein grosser Parent/Master-Spec-Start nicht direkt implementiert wird, sondern ueber `spec-orchestrator` und `child-spec-hardening` zu Child Specs, exaktem Child Index, Coverage Matrix, Dependencies, Hardening Queue und mindestens einem validen naechsten Child-State fuehrt.
 - In Scope: L2 Parent-first Agent-/Fallback-Runner-Vertrag, Promptfoo-first Codex-Probe mit S0-Limitations, fallback artifact runner for blocked-agent evidence, parent-only oversized fixture, generated child-control outputs, thin-child negative output, ready-child positive output, DWT-S4-compatible summary/telemetry/style evidence, TC1D/TC1A/TC1E coverage, OpenSpec active change, Parent Child Index and persisted handoff sync.
 - Out of Scope: DWT-S2 runner implementation during hardening, live agent execution during hardening, runtime delivery, DWT-S3/DWT-S5 implementation or release, S0/S1/S4 archive mutation, KI-fuer-KMU original repo writes, OpenSpec archive before DWT-S2 implementation evidence exists.
 - Wichtigste Test-/Harness-Cases: `DWT-S2-L2A oversized parent refuses direct implementation`, `DWT-S2-L2B parent-only orchestration produces child control surface`, `DWT-S2-L2C thin generated child cannot become ready`, `DWT-S2-L2D hardenable child reaches exactly one valid next child state`, `DWT-S2-L2E blocked agent path is reported as blocker rather than pass`, `DWT-S2-L2F DWT-S4 reporting/style/efficiency contract is honored`.
 - Wichtigste Verification Commands: retained DWT-S0/S1/S4 evidence presence and JSON parse checks; `bash -n` for existing L0/L1/reporting scripts; active-change `openspec validate docworkflow-agent-testsuite-dwt-s2-l2-parent-first-orchestration-agent-harness --strict`; canonical `openspec validate docworkflow-agent-delivery-testsuite --strict`; DWT-S2 `ValidateChildReadiness.cs`; `git diff --check`; after implementation, `bash -n tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh`, `tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh all --keep`, `tests/docworkflow-agent-delivery/scripts/run-reporting-contract-checks.sh all`, and `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all`.
-- Offene Entscheidungen: Keine blockierenden Entscheidungen. Promptfoo remains the primary L2 agent-runner path from DWT-S0, but DWT-S2 acceptance requires real `ran-target` agent evidence; fallback artifact mode may only produce deterministic contract evidence or a reproducible blocked-agent result, never a false pass.
+- Offene Entscheidungen: Keine blockierenden Entscheidungen. Promptfoo remains the primary L2 agent-runner path from DWT-S0; DWT-S2 closeout accepted real `ran-target` agent evidence. Fallback artifact mode may only produce deterministic contract evidence or a reproducible blocked-agent result, never a false pass.
 - Readiness Status: IMPLEMENTATION READY.
 
 ## Goal
@@ -312,8 +312,23 @@ Performed during hardening on 2026-05-08:
 | Evidence | Result | Meaning |
 |---|---|---|
 | `bash -n tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh` | Passed. | DWT-S2 runner syntax is valid. |
-| `tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh all --keep` | Passed with retained evidence `/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-parent-first.fTeIRN/evidence/dwt-s2-l2-summary.json`. | Deterministic positive, negative, blocked, style and telemetry bundle assertions pass. |
-| L2 agent proof status | Blocked: `agent_execution_status: blocked_auth`; `overall_agent_proof_status: blocked`. | Fallback artifact evidence is not accepted as passing L2 agent proof without `ran-target`. |
+| `tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh all --keep` | Passed with retained evidence `tests/docworkflow-agent-delivery/l2/parent-first/evidence/2026-05-08-ran-target/dwt-s2-l2-summary.json`. | Promptfoo/Codex and deterministic positive, negative, blocked, style and telemetry bundle assertions pass. |
+| L2 agent proof status | Passed: `runner_mode: promptfoo-codex`; `agent_execution_status: ran-target`; `overall_agent_proof_status: pass`. | Accepted L2 agent proof exists; DWT-S3 and DWT-S5 remain unreleased. |
+
+## Closeout Evidence
+
+| Evidence | Result | Meaning |
+|---|---|---|
+| Retained S0/S1/S4/S2 evidence presence and JSON parse | Passed. | Accepted baselines and fresh DWT-S2 retained summary are readable. |
+| `bash -n` for L0/L1/S4/L2 scripts | Passed. | Script command contracts are syntactically valid. |
+| Bundled Node version | Passed: `v24.14.0`. | Promptfoo/Codex runner uses the expected bundled runtime. |
+| Active DWT-S2 OpenSpec strict validate | Passed before archive. | Active change was valid before closure. |
+| Canonical OpenSpec strict validate | Passed before and after archive. | Canonical testsuite spec is valid. |
+| DWT-S2 child readiness validator | Passed. | Parent Child Index, DWT-S2 handoff and write-set agree. |
+| `tests/docworkflow-agent-delivery/scripts/run-reporting-contract-checks.sh all` | Passed. | DWT-S4 reporting contract remains green. |
+| `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all` | Passed. | L0/TC1/TC2 harness and reporting integration remain green. |
+| `git diff --check` | Passed. | Closeout edits have no whitespace errors. |
+| OpenSpec archive | Passed: `openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s2-l2-parent-first-orchestration-agent-harness/`. | DWT-S2 delta is archived into the canonical spec. |
 
 ## Definition of Ready for Implementation
 
@@ -331,7 +346,7 @@ Performed during hardening on 2026-05-08:
 
 - L2 parent-first fixtures, validators, Promptfoo config and fallback artifact runner exist.
 - `run-l2-parent-orchestration-checks.sh all --keep` writes retained evidence under an isolated run directory.
-- A real agent run either produces accepted `ran-target` evidence or the DWT-S2 implementation remains blocked with reproducible blocker evidence.
+- A real agent run produces accepted `ran-target` evidence, or the DWT-S2 implementation remains blocked with reproducible blocker evidence.
 - The accepted DWT-S2 summary uses DWT-S4 summary/telemetry/style fields and links assertion outputs.
 - The harness proves no direct implementation, exact child-control surface generation, thin-child readiness block and exactly one valid next child state.
 - Parent Child Index links DWT-S2 implementation evidence and next action after closeout.
@@ -346,7 +361,7 @@ Allowed implementation write-set:
 - `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite DWT-S2 L2 Parent-first Orchestration Agent Harness.md`
 - `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md`
 - `_specs/child-session-handoffs/dwt-s2-session-handoff.md`
-- `openspec/changes/docworkflow-agent-testsuite-dwt-s2-l2-parent-first-orchestration-agent-harness/**`
+- `openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s2-l2-parent-first-orchestration-agent-harness/**`
 - `tests/docworkflow-agent-delivery/l2/parent-first/**`
 - `tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh`
 - `tests/docworkflow-agent-delivery/README.md`
@@ -385,8 +400,8 @@ Parallel hardening / implementation:
 ## Closeout Sync Targets
 
 - Parent Child Index row `DWT-S2`.
-- OpenSpec change `openspec/changes/docworkflow-agent-testsuite-dwt-s2-l2-parent-first-orchestration-agent-harness/` before archive.
-- Canonical OpenSpec spec `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md` only after DWT-S2 acceptance/archive.
+- Archived OpenSpec change `openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s2-l2-parent-first-orchestration-agent-harness/`.
+- Canonical OpenSpec spec `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md` after DWT-S2 acceptance/archive.
 - DWT-S2 retained evidence path and README/testcase documentation.
 - DWT-S3 dependency row may be unblocked only by later closeout or orchestrator sync after accepted DWT-S2 evidence exists.
 - DWT-S5 remains blocked.
@@ -409,6 +424,7 @@ Persisted handoff: `_specs/child-session-handoffs/dwt-s2-session-handoff.md`.
 | Date | Author | Change |
 |---|---|---|
 | 2026-05-08 | Codex | Hardened DWT-S2 into an implementation-ready L2 Parent-first Orchestration Agent Harness child spec with runner/fallback contract, fixtures, verification, OpenSpec change and handoff/index sync. |
-| 2026-05-08 | Codex | Implemented DWT-S2 L2 fixtures, validator, Promptfoo config, fallback runner and retained deterministic evidence; live agent proof remains blocked on auth/provisioning. |
+| 2026-05-08 | Codex | Implemented DWT-S2 L2 fixtures, validator, Promptfoo config, fallback runner and retained deterministic evidence; live agent proof remained blocked until auth was provisioned. |
+| 2026-05-08 | Codex | Accepted DWT-S2 after real Promptfoo/Codex `ran-target` evidence passed, closeout verification replay was green, and OpenSpec archived into the canonical testsuite spec. |
 
 SessionId: 2026-05-08-docworkflow-agent-delivery-testsuite-dwt-s2

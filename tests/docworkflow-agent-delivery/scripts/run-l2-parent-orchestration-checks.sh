@@ -20,6 +20,9 @@ REPO_ROOT="$(cd "$SUITE_DIR/../.." && pwd)"
 L2_DIR="$SUITE_DIR/l2/parent-first"
 FIXTURE_SRC="$L2_DIR/fixtures"
 VALIDATOR="$L2_DIR/validators/parent-first-validator.js"
+PROMPTFOO_CONFIG="$L2_DIR/promptfooconfig.yaml"
+PROMPTFOO_VERSION="${DWT_S2_PROMPTFOO_VERSION:-0.121.9}"
+BUNDLED_NODE_DIR="/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin"
 
 selector="all"
 run_dir=""
@@ -101,6 +104,53 @@ validator_args=(
 
 if [ -n "$output_bundle" ]; then
   validator_args+=(--output-bundle "$output_bundle")
+fi
+
+run_promptfoo_agent=0
+case "$selector" in
+  all|agent)
+    run_promptfoo_agent=1
+    ;;
+esac
+
+if [ "$run_promptfoo_agent" -eq 1 ]; then
+  promptfoo_eval_json="$evidence_dir/promptfoo-eval.json"
+  promptfoo_eval_log="$evidence_dir/promptfoo-eval.txt"
+  promptfoo_auth_status="missing"
+
+  if [ -z "${CODEX_HOME_OVERRIDE:-}" ] && [ -z "${CODEX_HOME:-}" ] && [ -f "$HOME/.codex/auth.json" ]; then
+    export CODEX_HOME_OVERRIDE="$HOME/.codex"
+  elif [ -z "${CODEX_HOME_OVERRIDE:-}" ] && [ -n "${CODEX_HOME:-}" ]; then
+    export CODEX_HOME_OVERRIDE="$CODEX_HOME"
+  fi
+
+  if [ -n "${CODEX_HOME_OVERRIDE:-}" ] && [ -f "$CODEX_HOME_OVERRIDE/auth.json" ]; then
+    promptfoo_auth_status="codex-home"
+  elif [ -n "${OPENAI_API_KEY:-}" ] || [ -n "${CODEX_API_KEY:-}" ]; then
+    promptfoo_auth_status="api-key-env"
+  fi
+
+  export DWT_S2_FIXTURE_WORKSPACE="$FIXTURE_SRC/oversized-parent-only/start-state"
+  export DWT_S2_PROMPTFOO_EVAL_JSON="$promptfoo_eval_json"
+  export DWT_S2_PROMPTFOO_EVAL_LOG="$promptfoo_eval_log"
+  export DWT_S2_PROMPTFOO_VERSION="$PROMPTFOO_VERSION"
+  export DWT_S2_PROMPTFOO_AUTH_STATUS="$promptfoo_auth_status"
+
+  if [ -d "$BUNDLED_NODE_DIR" ]; then
+    export PATH="$BUNDLED_NODE_DIR:$PATH"
+  fi
+
+  {
+    printf 'command: npx --yes --package promptfoo@%s promptfoo eval -c %s --no-cache -o %s --no-progress-bar\n' "$PROMPTFOO_VERSION" "$PROMPTFOO_CONFIG" "$promptfoo_eval_json"
+    printf 'auth_source: %s\n' "$promptfoo_auth_status"
+  } > "$promptfoo_eval_log"
+
+  set +e
+  npx --yes --package "promptfoo@$PROMPTFOO_VERSION" promptfoo eval -c "$PROMPTFOO_CONFIG" --no-cache -o "$promptfoo_eval_json" --no-progress-bar >> "$promptfoo_eval_log" 2>&1
+  promptfoo_status=$?
+  set -e
+
+  export DWT_S2_PROMPTFOO_EXIT_STATUS="$promptfoo_status"
 fi
 
 node "${validator_args[@]}"

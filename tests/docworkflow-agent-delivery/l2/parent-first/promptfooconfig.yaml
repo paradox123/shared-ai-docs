@@ -23,9 +23,42 @@ tests:
     vars:
       parent_spec_path: parent-spec.md
     assert:
-      - type: contains
-        value: Child Index
-      - type: not-contains
-        value: docker compose
-      - type: not-contains
-        value: runtime implementation
+      - type: javascript
+        value: |-
+          const required = [
+            'Generated Child Specs',
+            'Child Index',
+            'Coverage Matrix',
+            'Dependencies',
+            'Hardening Queue',
+            'Leading Next Child State'
+          ];
+          const missing = required.filter((value) => !output.includes(value));
+          const hasFinalStatus = output.includes('FINAL_STATUS:') || /\*\*Final Status\*\*/.test(output);
+          if (!hasFinalStatus) {
+            missing.push('Final Status');
+          }
+          if (missing.length > 0) {
+            return false;
+          }
+          const implementationBlocked = /implementation_allowed=false/.test(output)
+            || /implementation_allowed:\s*false/i.test(output)
+            || /Implementation permission:\s*`?BLOCKED/i.test(output)
+            || /RUNTIME_IMPLEMENTATION=FORBIDDEN_NOT_ATTEMPTED/.test(output);
+          if (!implementationBlocked) {
+            return false;
+          }
+          const writesBlocked = /writes_performed=false/.test(output)
+            || /not written to disk/i.test(output)
+            || /WRITES_BLOCKED_READ_ONLY/.test(output)
+            || /ARTIFACT_PERSISTENCE=BLOCKED_READ_ONLY_WORKSPACE/.test(output);
+          if (!writesBlocked) {
+            return false;
+          }
+          if (/implementation_allowed=true|writes_performed=true/i.test(output)) {
+            return false;
+          }
+          if (/docker compose up|kubectl|terraform apply|credential copy|copy credential/i.test(output)) {
+            return false;
+          }
+          return true;

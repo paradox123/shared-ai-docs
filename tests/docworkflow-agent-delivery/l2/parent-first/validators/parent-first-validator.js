@@ -74,6 +74,14 @@ function readJson(file) {
   return JSON.parse(readText(file));
 }
 
+function tryReadJson(file) {
+  try {
+    return readJson(file);
+  } catch (error) {
+    return null;
+  }
+}
+
 function exists(file) {
   return fs.existsSync(file);
 }
@@ -112,6 +120,116 @@ function writeEvidence(evidenceDir, fileName, payload) {
   const file = path.join(evidenceDir, fileName);
   fs.writeFileSync(file, `${JSON.stringify(payload, null, 2)}\n`);
   return file;
+}
+
+function promptfooResultFromEval(evalJson) {
+  const results = evalJson && evalJson.results && Array.isArray(evalJson.results.results)
+    ? evalJson.results.results
+    : [];
+  return results[0] || null;
+}
+
+function classifyPromptfooBlocker(text) {
+  if (/401 Unauthorized|Missing bearer|basic authentication|auth/i.test(text)) {
+    return "blocked_auth";
+  }
+  if (/network|ETIMEDOUT|ECONNRESET|ENOTFOUND|fetch failed/i.test(text)) {
+    return "blocked_network";
+  }
+  if (/provider|model|openai:codex-sdk/i.test(text)) {
+    return "blocked_provider";
+  }
+  if (/ENOENT|Cannot find module|command not found|spawn/i.test(text)) {
+    return "blocked_runtime";
+  }
+  return "failed";
+}
+
+function persistPromptfooEvidence(ctx, evidence) {
+  writeEvidence(ctx.evidence, "dwt-s2-agent-proof.json", evidence);
+  return evidence;
+}
+
+function getPromptfooEvidence(ctx) {
+  const evalPath = process.env.DWT_S2_PROMPTFOO_EVAL_JSON || "";
+  const logPath = process.env.DWT_S2_PROMPTFOO_EVAL_LOG || "";
+  const exitStatus = process.env.DWT_S2_PROMPTFOO_EXIT_STATUS || "not-run";
+  const authStatus = process.env.DWT_S2_PROMPTFOO_AUTH_STATUS || "missing";
+  const evidence = {
+    runner_mode: evalPath ? "promptfoo-codex" : "fallback-artifact",
+    agent_execution_status: "not-run",
+    overall_agent_proof_status: "blocked",
+    promptfoo_eval_json: evalPath || null,
+    promptfoo_eval_log: logPath || null,
+    promptfoo_exit_status: exitStatus,
+    promptfoo_version: process.env.DWT_S2_PROMPTFOO_VERSION || "not-run",
+    auth_status: authStatus,
+    session_id_present: false,
+    assertion_status: "not-run",
+    output_contract_status: "not-run",
+    failure_reason: null
+  };
+
+  if (!evalPath) {
+    evidence.agent_execution_status = authStatus === "missing" ? "blocked_auth" : "not-run";
+    return persistPromptfooEvidence(ctx, evidence);
+  }
+
+  const evalJson = exists(evalPath) ? tryReadJson(evalPath) : null;
+  const logText = logPath && exists(logPath) ? readText(logPath) : "";
+  if (!evalJson) {
+    evidence.agent_execution_status = classifyPromptfooBlocker(logText);
+    evidence.failure_reason = "Promptfoo eval JSON is missing or invalid.";
+    return persistPromptfooEvidence(ctx, evidence);
+  }
+
+  const result = promptfooResultFromEval(evalJson);
+  const output = result && result.response ? String(result.response.output || "") : "";
+  const hasFinalStatus = output.includes("FINAL_STATUS:") || /\*\*Final Status\*\*/.test(output);
+  const implementationBlocked = /implementation_allowed=false/.test(output)
+    || /implementation_allowed:\s*false/i.test(output)
+    || /Implementation permission:\s*`?BLOCKED/i.test(output)
+    || /RUNTIME_IMPLEMENTATION=FORBIDDEN_NOT_ATTEMPTED/.test(output);
+  const writesBlocked = /writes_performed=false/.test(output)
+    || /not written to disk/i.test(output)
+    || /WRITES_BLOCKED_READ_ONLY/.test(output)
+    || /ARTIFACT_PERSISTENCE=BLOCKED_READ_ONLY_WORKSPACE/.test(output);
+  evidence.session_id_present = Boolean(result && result.response && result.response.sessionId);
+  evidence.assertion_status = result && result.success === true ? "pass" : "fail";
+  evidence.output_contract_status = output.includes("Child Index")
+    && output.includes("Coverage Matrix")
+    && output.includes("Dependencies")
+    && output.includes("Hardening Queue")
+    && hasFinalStatus
+    && implementationBlocked
+    && writesBlocked
+    ? "pass"
+    : "fail";
+  evidence.promptfoo_eval_id = evalJson.evalId || null;
+  evidence.promptfoo_shareable_url = evalJson.shareableUrl || null;
+  evidence.promptfoo_cost = result && typeof result.cost === "number" ? result.cost : null;
+  evidence.promptfoo_token_usage = result && result.response ? result.response.tokenUsage || null : null;
+  evidence.agent_execution_status = evidence.session_id_present || output.length > 0
+    ? "ran-target"
+    : classifyPromptfooBlocker(`${result && result.failureReason || ""}\n${logText}`);
+  evidence.failure_reason = result && result.gradingResult && result.gradingResult.reason
+    ? result.gradingResult.reason
+    : result && result.failureReason
+      ? String(result.failureReason)
+      : null;
+
+  if (
+    evidence.agent_execution_status === "ran-target"
+    && evidence.assertion_status === "pass"
+    && evidence.output_contract_status === "pass"
+    && String(exitStatus) === "0"
+  ) {
+    evidence.overall_agent_proof_status = "pass";
+  } else if (evidence.agent_execution_status === "ran-target") {
+    evidence.overall_agent_proof_status = "failed";
+  }
+
+  return persistPromptfooEvidence(ctx, evidence);
 }
 
 function validateSummaryShape(summary, failures) {
@@ -365,7 +483,15 @@ function runL2F(ctx) {
 
 function writeSummary(ctx, results, selector) {
   const byCase = Object.fromEntries(results.map((result) => [result.case_id, result]));
-  const agentResult = byCase["DWT-S2-L2E"];
+  const agentProof = ctx.agentEvidence || getPromptfooEvidence(ctx);
+  const evidenceLinks = Object.fromEntries(Object.entries(CASES).map(([caseId, file]) => [caseId, path.join(ctx.evidence, file)]));
+  evidenceLinks.agent_proof = path.join(ctx.evidence, "dwt-s2-agent-proof.json");
+  if (agentProof.promptfoo_eval_json) {
+    evidenceLinks.promptfoo_eval = agentProof.promptfoo_eval_json;
+  }
+  if (agentProof.promptfoo_eval_log) {
+    evidenceLinks.promptfoo_log = agentProof.promptfoo_eval_log;
+  }
   const summary = {
     schema_id: "docworkflow-agent-delivery-summary.v1",
     suite_level: "DWT-S2",
@@ -373,22 +499,28 @@ function writeSummary(ctx, results, selector) {
     repo_root: ctx.repoRoot,
     fixture_root: ctx.fixtures,
     fixture_manifest: path.join(ctx.fixtures, "oversized-parent-only", "source-manifest.json"),
-    runner_mode: "fallback-artifact",
-    agent_execution_status: agentResult ? agentResult.agent_execution_status : "not-run",
-    overall_agent_proof_status: agentResult && agentResult.agent_execution_status === "ran-target" ? "pass" : "blocked",
+    runner_mode: agentProof.runner_mode,
+    agent_execution_status: agentProof.agent_execution_status,
+    overall_agent_proof_status: agentProof.overall_agent_proof_status,
     selector,
     test_results: Object.fromEntries(Object.keys(CASES).map((caseId) => [caseId, byCase[caseId] ? byCase[caseId].expected_fixture_status : "planned"])),
     harness_case_results: Object.fromEntries(Object.entries(byCase).map(([caseId, result]) => [caseId, result.harness_status])),
     evidence_truth: Object.fromEntries(Object.keys(CASES).map((caseId) => [caseId, byCase[caseId] ? "ran-target" : "planned"])),
-    evidence_links: Object.fromEntries(Object.entries(CASES).map(([caseId, file]) => [caseId, path.join(ctx.evidence, file)])),
+    evidence_links: evidenceLinks,
     runner_environment: {
       os: `${os.type()} ${os.release()}`,
       shell: process.env.SHELL || "unknown",
       node: process.version,
-      promptfoo: process.env.DWT_S2_PROMPTFOO_VERSION || "not-run",
-      credentials_provisioned: process.env.DWT_S2_CODEX_AGENT_ENABLED === "1",
+      promptfoo: agentProof.promptfoo_version,
+      credentials_provisioned: agentProof.auth_status !== "missing",
       requires_agents_for_acceptance: true,
       requires_docker: false
+    },
+    agent_proof: {
+      assertion_status: agentProof.assertion_status,
+      output_contract_status: agentProof.output_contract_status,
+      session_id_present: agentProof.session_id_present,
+      promptfoo_exit_status: agentProof.promptfoo_exit_status
     },
     provenance_checks: {
       parent_only_start: byCase["DWT-S2-L2A"] && byCase["DWT-S2-L2A"].harness_status === "pass" ? "pass" : "planned",
@@ -430,23 +562,26 @@ function runValidateOutput(ctx) {
 }
 
 function runAgent(ctx) {
-  const blocker = {
-    case_id: "DWT-S2-L2E",
-    expected_fixture_status: "blocked",
-    harness_status: "pass",
-    evidence_truth: "blocked",
-    runner_mode: "promptfoo-codex",
-    agent_execution_status: process.env.DWT_S2_CODEX_AGENT_ENABLED === "1" ? "blocked_runtime" : "blocked_auth",
-    blocker_reason: "Promptfoo/Codex live agent execution is not provisioned for this local run; fallback artifact validation remains available and cannot be accepted as L2 proof."
+  const proof = ctx.agentEvidence || getPromptfooEvidence(ctx);
+  const payload = {
+    case_id: "DWT-S2-AGENT",
+    expected_fixture_status: proof.overall_agent_proof_status === "pass" ? "pass" : proof.overall_agent_proof_status,
+    harness_status: proof.overall_agent_proof_status === "pass" ? "pass" : "fail",
+    evidence_truth: proof.agent_execution_status === "ran-target" ? "ran-target" : "blocked",
+    runner_mode: proof.runner_mode,
+    agent_execution_status: proof.agent_execution_status,
+    overall_agent_proof_status: proof.overall_agent_proof_status,
+    failure_reason: proof.failure_reason
   };
-  writeEvidence(ctx.evidence, "dwt-s2-agent-blocker.json", blocker);
-  return [blocker];
+  writeEvidence(ctx.evidence, "dwt-s2-agent-result.json", payload);
+  return [payload];
 }
 
 function main() {
   const args = parseArgs(process.argv);
   fs.mkdirSync(args.evidence, { recursive: true });
   const ctx = args;
+  ctx.agentEvidence = getPromptfooEvidence(ctx);
   const runners = {
     "DWT-S2-L2A": runL2A,
     "DWT-S2-L2B": runL2B,
@@ -480,6 +615,13 @@ function main() {
   console.log(`SUMMARY: ${summaryPath}`);
 
   const failures = results.filter((result) => result.harness_status !== "pass");
+  if ((args.selector === "all" || args.selector === "agent") && ctx.agentEvidence.overall_agent_proof_status !== "pass") {
+    failures.push({
+      case_id: "DWT-S2-AGENT",
+      harness_status: "fail",
+      failure_reason: ctx.agentEvidence.failure_reason || ctx.agentEvidence.agent_execution_status
+    });
+  }
   if (failures.length > 0) {
     process.exitCode = 1;
   }

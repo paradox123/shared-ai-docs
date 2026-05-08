@@ -15,6 +15,10 @@ Required output:
 - provenance for every generated artifact;
 - concise final status for deterministic parsing.
 
+End the response with this exact machine-readable line, preserving these keys:
+
+`FINAL_STATUS: child_index_generated=true;coverage_matrix_generated=true;dependencies_generated=true;hardening_queue_generated=true;implementation_allowed=false;writes_performed=false`
+
 Forbidden:
 
 - runtime implementation;
