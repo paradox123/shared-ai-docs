@@ -1,5 +1,5 @@
 **Date:** 2026-05-08
-**Status:** 🔵 Implemented
+**Status:** 🟢 Accepted
 **Scope:** Enforceable Agent Delivery launch evidence and real session-log references for fresh-session handoffs.
 
 ---
@@ -7,14 +7,14 @@
 ## Review Control Surface
 
 - Spec-Variante: contract-heavy workflow/tooling Spec.
-- Goldstandard Status: implemented.
+- Goldstandard Status: accepted.
 - Ziel: Future Agent Delivery handoffs must not claim a fresh Codex session transition unless matching launch/queue evidence exists, and handoffs must no longer rely on semantic `SessionId` labels as their only session reference.
 - In Scope: launcher-evidence enforcement, stale/missing launcher-evidence detection, real Codex session/log reference contract, historical/pre-launcher transition labeling, deterministic validator or harness fixture, small workflow-skill doc patches, and closeout/reporting expectations for this enforcement change.
 - Out of Scope: backfilling fake launch artifacts for completed DWT sessions, changing completed DWT acceptance status, broad redesign of `AgentDeliverySessionLauncher.cs`, implementing non-Codex agent adapters, direct mutation of Codex app databases, runtime/product repository changes, and a new Parent/Child split for this small follow-up.
 - Wichtigste Test-/Harness-Cases: missing launcher evidence blocks an automatic fresh-session claim; stale launcher evidence with mismatched target id or handoff path blocks; `manual_start_required` is visible but not automatic success; `blocked` and `failed` stop delivery; matching `queued` or `launched` evidence passes; handoff with only semantic `SessionId` is flagged unless marked `legacy_reconstructed` or paired with real log path/session id.
 - Wichtigste Verification Commands: `dotnet run skills-repo/tools/AgentDeliverySessionLauncher.cs -- --help`; targeted launcher-evidence validator or Node fixture command for valid/missing/stale/manual/blocked cases; `rg -n "Agent Delivery Session Launch/Queue Evidence|agent-delivery-session-launches|manual_start_required|legacy_reconstructed|real session" docs/doc-workflow.md skills-repo/skills`; `git diff --check`.
 - Offene Entscheidungen: Keine blockierenden Entscheidungen. Historical DWT transitions are documented as pre-launcher/manual reconstruction unless a later explicit backfill spec chooses otherwise.
-- Readiness Status: IMPLEMENTED / READY.
+- Readiness Status: ACCEPTED / CLOSED.
 
 ## Session Briefing
 
@@ -225,13 +225,40 @@ Acceptance evidence:
 7. Workflow and skill docs now state the shared gate.
 8. No completed DWT child spec or archive was rewritten.
 
+## 8.2 Closeout Evidence
+
+Closeout date: 2026-05-08.
+
+Closeout status: Accepted.
+
+OpenSpec status: not applicable. This change was explicitly implemented in direct mode without an OpenSpec change. `openspec/changes/` contains no active change directory for this spec, so no archive action was required.
+
+Closeout verification replay:
+
+| Command | Status | Evidence |
+|---|---|---|
+| `dotnet run skills-repo/tools/AgentDeliverySessionLauncher.cs -- --help` | ran/pass | Help output lists launcher inputs and modes. |
+| `dotnet run skills-repo/tools/ValidateAgentDeliveryLaunchEvidence.cs -- --fixture tests/agent-delivery-session-launcher/fixtures/launch-evidence` | ran/pass | `RESULT: PASS (10 cases)`. |
+| `rg -n "Agent Delivery Session Launch/Queue Evidence\|agent-delivery-session-launches\|manual_start_required\|legacy_reconstructed\|real Codex session\|semantic.*SessionId" docs/doc-workflow.md skills-repo/skills` | ran/pass | Workflow docs and all relevant Agent Delivery skills contain the synchronized gate language. |
+| `git diff --check` | ran/pass | No whitespace errors. |
+| `openspec list --json` | ran/pass | Only archived changes exist for this area; no active OpenSpec change was created for this direct-mode implementation. |
+
+Documentation sync:
+
+- `docs/doc-workflow.md` updated with the final launch-evidence and semantic-session proof rules.
+- Agent Delivery skills updated to consume the same gate.
+- `tests/agent-delivery-session-launcher/README.md` updated with the new validator command.
+- Repository search found no additional public/project documentation that needed a status update for this direct-mode tooling spec.
+
+Final closeout verdict: READY.
+
 ## 9. Mini-Retro
 
 - Was wurde entschieden? The follow-up should be a small enforcement spec, not a new Parent/Child scope.
 - Was wurde geaendert? This spec turns the retro findings into normative requirements, harness cases and acceptance criteria.
 - Was bleibt offen? No blocking decisions.
 - Welche Evidenz/Verification fehlt? None for this direct tooling change.
-- Session-/Kontextzustand: Implementation complete; future Agent Delivery handoffs can use the new validator/gate.
+- Session-/Kontextzustand: Change accepted and closed; future Agent Delivery handoffs can use the new validator/gate.
 
 ## History
 
@@ -239,5 +266,6 @@ Acceptance evidence:
 |---|---|---|
 | 2026-05-08 | Codex | Created, reviewed and hardened the Agent Delivery Launch Evidence Enforcement spec from the DWT retro findings. |
 | 2026-05-08 | Codex | Implemented the direct-mode launch evidence enforcement validator, fixtures, workflow docs and skill synchronization; verification passed. |
+| 2026-05-08 | Codex | Accepted and closed the direct-mode change; OpenSpec closure marked not applicable because no active OpenSpec change existed. |
 
 SessionId: 2026-05-08-agent-delivery-launch-evidence-enforcement
