@@ -1,5 +1,5 @@
 **Date:** 2026-05-08
-**Status:** Implemented; target Promptfoo/Codex proof blocked
+**Status:** Implemented; ready for closeout
 **Scope:** Implementation-ready child spec for the DWT-S5 L3 Runtime Temp-Repo Delivery Pilot.
 
 ---
@@ -433,9 +433,9 @@ Persisted handoff: `_specs/child-session-handoffs/dwt-s5-session-handoff.md`.
 ## Implementation Evidence
 
 - Implemented source-controlled synthetic runtime fixture, L3 validator, Promptfoo/Codex config, prompt and `run-l3-runtime-temp-repo-checks.sh`.
-- Retained blocked-runtime evidence path: `tests/docworkflow-agent-delivery/l3/runtime-temp-repo/evidence/2026-05-08-blocked-runtime/dwt-s5-l3-summary.json`.
-- Latest deterministic run: `run-l3-runtime-temp-repo-checks.sh all --keep` passed DWT-S5-L3A through DWT-S5-L3F with local runtime and container/harness fixture evidence from the generated temp repo.
-- Acceptance caveat: the summary reports `runner_mode: fallback-artifact`, `agent_execution_status: blocked_runtime` and `overall_runtime_proof_status: blocked` because Promptfoo/Codex target execution was not enabled in this implementation run.
+- Retained target evidence path: `tests/docworkflow-agent-delivery/l3/runtime-temp-repo/evidence/2026-05-08-ran-target/dwt-s5-l3-summary.json`.
+- Latest target run: `DWT_S5_ENABLE_AGENT=1 run-l3-runtime-temp-repo-checks.sh all --keep` passed DWT-S5-L3A through DWT-S5-L3F with `runner_mode: promptfoo-codex`, `agent_execution_status: ran-target`, `overall_runtime_proof_status: pass`, local runtime evidence and container/harness fixture evidence from the generated temp repo.
+- Blocked-runtime rehearsal remains available at `tests/docworkflow-agent-delivery/l3/runtime-temp-repo/evidence/2026-05-08-blocked-runtime/dwt-s5-l3-summary.json` as fallback-path evidence only.
 
 ## History
 
@@ -443,5 +443,6 @@ Persisted handoff: `_specs/child-session-handoffs/dwt-s5-session-handoff.md`.
 |---|---|---|
 | 2026-05-08 | Codex | Hardened DWT-S5 into an implementation-ready L3 Runtime Temp-Repo Delivery Pilot child spec with synthetic fixture contract, runtime/container evidence contract, OpenSpec change and handoff/index sync. |
 | 2026-05-08 | Codex | Implemented the DWT-S5 L3 synthetic temp-repo runner, fixtures, validators, Promptfoo/Codex config and retained blocked-runtime evidence; target Promptfoo/Codex proof remains blocked pending an enabled agent run. |
+| 2026-05-08 | Codex | Repaired the Promptfoo/Codex command contract, ran DWT-S5 target proof with `DWT_S5_ENABLE_AGENT=1`, and retained `ran-target` pass evidence for closeout. |
 
 SessionId: 2026-05-08-docworkflow-agent-delivery-testsuite-dwt-s5

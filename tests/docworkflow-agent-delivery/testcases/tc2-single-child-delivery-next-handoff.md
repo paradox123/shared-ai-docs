@@ -52,7 +52,7 @@ tests/docworkflow-agent-delivery/scripts/run-l3-runtime-temp-repo-checks.sh all
 
 ## Evidence
 
-Der L0 Harness schreibt `evidence/tc2-contract-checks.txt` in die Temp-Fixture. Der DWT-S3 L2 Harness schreibt `evidence/dwt-s3-l2-summary.json` plus per-case Assertion JSON in den isolierten Run-Ordner. Der DWT-S5 L3 Harness schreibt `evidence/dwt-s5-l3-summary.json`, `agent-run-manifest.json`, runtime gate logs und per-case Assertion JSON in den isolierten Run-Ordner; retained blocked-runtime evidence liegt unter `tests/docworkflow-agent-delivery/l3/runtime-temp-repo/evidence/2026-05-08-blocked-runtime/`.
+Der L0 Harness schreibt `evidence/tc2-contract-checks.txt` in die Temp-Fixture. Der DWT-S3 L2 Harness schreibt `evidence/dwt-s3-l2-summary.json` plus per-case Assertion JSON in den isolierten Run-Ordner. Der DWT-S5 L3 Harness schreibt `evidence/dwt-s5-l3-summary.json`, `agent-run-manifest.json`, runtime gate logs und per-case Assertion JSON in den isolierten Run-Ordner; retained target evidence liegt unter `tests/docworkflow-agent-delivery/l3/runtime-temp-repo/evidence/2026-05-08-ran-target/`, blocked-runtime rehearsal evidence unter `tests/docworkflow-agent-delivery/l3/runtime-temp-repo/evidence/2026-05-08-blocked-runtime/`.
 
 ## Cleanup
 

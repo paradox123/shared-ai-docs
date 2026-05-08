@@ -1,9 +1,19 @@
 # DWT-S5 Runtime Temp-Repo Delivery Prompt
 
-Use the parent/master spec, DWT-S5 child spec, Parent Child Index row, DWT-S5
-handoff, retained DWT-S3 evidence paths and synthetic fixture manifest as
-leading inputs. Apply `spec-change-delivery` only to DWT-S5 and only against the
-generated synthetic temp repo.
+Use these leading inputs:
+
+- repo root: `{{ repo_root }}`
+- parent/master spec: `{{ parent_spec_path }}`
+- DWT-S5 child spec: `{{ child_spec_path }}`
+- Parent Child Index row: `{{ parent_spec_path }}` section `Delivery Orchestration Pack`, row `DWT-S5`
+- DWT-S5 handoff: `{{ handoff_path }}`
+- retained DWT-S3 summary: `{{ retained_dwt_s3_summary }}`
+- retained DWT-S3 manifest: `{{ retained_dwt_s3_manifest }}`
+- synthetic fixture source: `{{ synthetic_fixture }}`
+- generated synthetic temp repo target: `{{ target_temp_repo }}`
+
+Apply `spec-change-delivery` only to DWT-S5 and only against the generated
+synthetic temp repo target above.
 
 Required output sections:
 
@@ -16,7 +26,9 @@ Required output sections:
 
 The delivery kickoff must validate the current DWT-S5 handoff, implementation
 ready verdict, concrete write-set, retained DWT-S3 predecessor proof and the
-synthetic fixture manifest before any edit-like or runtime action.
+synthetic fixture manifest before any edit-like or runtime action. The supplied
+target temp repo already exists for this run; do not require it to be inside the
+agent working directory.
 
 Runtime gate output must name the generated temp repo as target, record local
 runtime and container/harness truth labels, and distinguish blocked auth,

@@ -7,7 +7,7 @@ prompts:
 providers:
   - id: openai:codex-sdk:gpt-5.5
     config:
-      working_dir: '{{ env.DWT_S5_FIXTURE_WORKSPACE | default("/tmp/docworkflow-agent-delivery-dwt-s5-agent-workspace") }}'
+      working_dir: '{{ env.DWT_S5_AGENT_REPO_ROOT | default("/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs") }}'
       skip_git_repo_check: true
       sandbox_mode: read-only
       approval_policy: never
@@ -26,6 +26,9 @@ tests:
       handoff_path: _specs/child-session-handoffs/dwt-s5-session-handoff.md
       retained_dwt_s3_summary: tests/docworkflow-agent-delivery/l2/single-child-closeout/evidence/2026-05-08-ran-target/dwt-s3-l2-summary.json
       retained_dwt_s3_manifest: tests/docworkflow-agent-delivery/l2/single-child-closeout/evidence/2026-05-08-ran-target/manifest.json
+      repo_root: '{{ env.DWT_S5_AGENT_REPO_ROOT | default("/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs") }}'
+      target_temp_repo: '{{ env.DWT_S5_TARGET_REPO | default("/tmp/docworkflow-agent-delivery-dwt-s5-target-repo") }}'
+      synthetic_fixture: '{{ env.DWT_S5_SYNTHETIC_FIXTURE | default("/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/l3/runtime-temp-repo/fixtures/synthetic-runtime-repo") }}'
     assert:
       - type: javascript
         value: |-

@@ -152,11 +152,16 @@ if [ "$run_promptfoo_agent" -eq 1 ]; then
   fi
 
   export DWT_S5_FIXTURE_WORKSPACE="$run_dir/agent-workspace"
+  export DWT_S5_AGENT_REPO_ROOT="$REPO_ROOT"
+  export DWT_S5_TARGET_REPO="$run_dir/target-repos/dwt-s5-synthetic-runtime-repo"
+  export DWT_S5_SYNTHETIC_FIXTURE="$FIXTURE_SRC/synthetic-runtime-repo"
   export DWT_S5_PROMPTFOO_EVAL_JSON="$promptfoo_eval_json"
   export DWT_S5_PROMPTFOO_EVAL_LOG="$promptfoo_eval_log"
   export DWT_S5_PROMPTFOO_VERSION="$PROMPTFOO_VERSION"
   export DWT_S5_PROMPTFOO_AUTH_STATUS="$promptfoo_auth_status"
-  mkdir -p "$DWT_S5_FIXTURE_WORKSPACE"
+  mkdir -p "$DWT_S5_FIXTURE_WORKSPACE" "$(dirname "$DWT_S5_TARGET_REPO")"
+  rm -rf "$DWT_S5_TARGET_REPO"
+  cp -R "$DWT_S5_SYNTHETIC_FIXTURE" "$DWT_S5_TARGET_REPO"
 
   if [ -d "$BUNDLED_NODE_DIR" ]; then
     export PATH="$BUNDLED_NODE_DIR:$PATH"
