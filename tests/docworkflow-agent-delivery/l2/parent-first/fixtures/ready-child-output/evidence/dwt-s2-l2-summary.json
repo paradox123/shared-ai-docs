@@ -1,0 +1,41 @@
+{
+  "schema_id": "docworkflow-agent-delivery-summary.v1",
+  "suite_level": "DWT-S2",
+  "suite_version": "DWT-S2-l2-parent-first-fixture-v1",
+  "repo_root": "planned",
+  "fixture_root": "planned",
+  "fixture_manifest": "source-manifest.json",
+  "runner_mode": "promptfoo-codex",
+  "agent_execution_status": "ran-target",
+  "test_results": {
+    "DWT-S2-L2D": "pass"
+  },
+  "evidence_truth": {
+    "DWT-S2-L2D": "ran-target"
+  },
+  "evidence_links": {
+    "output_bundle": ".",
+    "readiness_validator": "evidence/dwt-c3-readiness-validator.json"
+  },
+  "runner_environment": {
+    "os": "fixture",
+    "shell": "bash",
+    "node": "v24.14.0",
+    "credentials_provisioned": true
+  },
+  "provenance_checks": {
+    "source_hash": "pass"
+  },
+  "readiness_checks": {
+    "child_index": "pass",
+    "handoff": "pass",
+    "next_state": "pass"
+  },
+  "style_verdicts": {
+    "DWT-S2-L2D": "pass"
+  },
+  "telemetry_verdicts": {
+    "DWT-S2-L2D": "pass"
+  },
+  "forbidden_actions_observed": []
+}

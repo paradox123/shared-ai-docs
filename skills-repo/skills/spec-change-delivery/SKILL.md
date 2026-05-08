@@ -107,6 +107,7 @@ Only include them when the spec explicitly requires them.
 28. If this run starts from a Child Session Handoff, verify its Target Repository / Working Directory, child spec, parent conformance, Child Index `Session Handoff` pointer, evidence/OpenSpec pointers, and Hardening Verdict before treating it as the kickoff contract. Do not trust the handoff blindly; stale or unlinked handoffs block implementation.
 29. If this run is one lane of parallel child-spec execution, edit only the lane's allowed write-set. Treat shared/read-only files as read-only unless this run is explicitly the integration-owner run.
 30. In Parent/Child workflows, implement exactly one implementation-ready child per run. Do not implement against the parent spec as a whole; the parent is the scope/control layer.
+31. If the handoff lists temp Evidence as an accepted baseline or dependency for later children, either persist it to a stable workspace path during this run or record an explicit retained-evidence limitation for closeout. Do not make a later child depend silently on `/tmp` or OS temp paths.
 
 ## Risk-Based Verification Preflight
 
@@ -264,6 +265,7 @@ If the user says, "Implement the retry-timeout requirement from the plan, nothin
    - Files changed.
    - Residual risks, follow-ups, or blockers.
    - Mini-Retro for larger delivery blocks or before handoff/context loss: decisions, changes, open items, missing evidence, skill/workflow friction, and whether to continue in this session or start a new one.
+   - If the run exposed stale handoffs, command-contract repair, context-window drift, repeated verification retries, or other workflow friction, recommend `agent-delivery-retro-review` after closeout or before the next major child.
    - If implementation was completed with evidence, update spec status to `🔵 Implemented` and append a matching history row.
    - Final verdict: `READY` or `NOT READY`.
 

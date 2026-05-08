@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: DWT-S2 parent-first orchestration Promptfoo/Codex harness
+
+prompts:
+  - file://prompts/parent-first-orchestration-prompt.md
+
+providers:
+  - id: openai:codex-sdk:gpt-5.5
+    config:
+      working_dir: '{{ env.DWT_S2_FIXTURE_WORKSPACE | default("/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/l2/parent-first/fixtures/oversized-parent-only/start-state") }}'
+      skip_git_repo_check: true
+      sandbox_mode: read-only
+      approval_policy: never
+      model_reasoning_effort: low
+      enable_streaming: true
+      web_search_mode: disabled
+      network_access_enabled: false
+      cli_env:
+        CODEX_HOME: '{{ env.CODEX_HOME_OVERRIDE | default("/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/l2/parent-first/fixtures/sample-codex-home") }}'
+
+tests:
+  - description: DWT-S2 parent-first route contract
+    vars:
+      parent_spec_path: parent-spec.md
+    assert:
+      - type: contains
+        value: Child Index
+      - type: not-contains
+        value: docker compose
+      - type: not-contains
+        value: runtime implementation

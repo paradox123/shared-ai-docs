@@ -20,7 +20,7 @@ This retro should evaluate whether failures, rework, or surprises came from:
 - incomplete proof of **DoD** before something was treated as done,
 - unclear or missing decisions in the **Decision Freeze Pack**.
 
-When relevant, feed the findings back into spec, plan, and skill wording so the same class of mistake is less likely next time.
+When relevant, feed the findings back into spec, plan, and skill wording so the same class of mistake is less likely next time. For Parent/Child Agent Delivery process findings, especially stale handoffs, command-contract repair, missing retained evidence, next-child release ambiguity, or session reconstruction gaps, route to `agent-delivery-retro-review` for the artifact/session-oriented workflow review.
 
 ## Mini-Retro Mode
 

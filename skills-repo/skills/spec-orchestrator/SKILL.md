@@ -161,6 +161,7 @@ Rules:
 - Before marking any child ready, make sure the table contains the exact minimum column names shown above and that the target child's row has non-empty values for each required column. Do not accept renamed, merged, or semantically equivalent substitute columns as satisfying the gate.
 - For `IMPLEMENTATION READY`, the `Allowed Write-Set` cell must be a firm enforceable list or pattern list. Avoid uncertain language such as `likely`, `probably`, `expected`, `TBD`, `as needed`, `related files`, or `etc.`; if write-set uncertainty remains, mark the child `needs_hardening` or `needs_parent/orchestrator_sync`.
 - `ready_candidate` is not implementation permission. Only a documented hardening verdict of `IMPLEMENTATION READY` or explicitly accepted `READY WITH NON-BLOCKING NOTES` can feed `spec-change-delivery`.
+- Be precise in final wording: `spec-orchestrator` is complete when the parent control surface, Child Index, coverage/dependency shape, hardening queue, ledger pointers, and next handoff exist. Do not say "the children are ready" or imply implementation permission unless `child-spec-hardening` has produced a documented implementation-allowing verdict and the readiness validator has passed for that child.
 - Keep the Hardening Queue as the subset of Child Index rows that still need contract, case, verification, conformance, or DoR/DoD depth.
 - Keep OpenSpec as the formal delivery ledger when active. The Child Index points to OpenSpec changes and evidence; it does not mirror their task detail.
 - After recommending a next child, update `Next Action`, create or update the persisted Child Session Handoff, and write its path into `Session Handoff`.
@@ -321,7 +322,7 @@ Prefer this order:
 
 Recommend the next single slice and, separately, any batch/parallel work that can happen safely.
 
-For each next child, include and persist a Child Session Handoff using the shared workflow template: parent path, stable child id, child spec path, child index/queue path, handoff file path, target repository / working directory, next mode/skill, current verdict, scope summary, non-goals, allowed write-set, shared/read-only files, verification commands, evidence/OpenSpec, open blockers or non-blocking notes, and whether the next step should start in a fresh session. Link the same file from the Child Index.
+For each next child, include and persist a Child Session Handoff using the shared workflow template: parent path, stable child id, child spec path, child index/queue path, handoff file path, target repository / working directory, Codex session/log metadata when available, next mode/skill, current verdict, scope summary, non-goals, allowed write-set, shared/read-only files, verification lifecycle, evidence/OpenSpec, retained evidence, open blockers or non-blocking notes, and whether the next step should start in a fresh session. Link the same file from the Child Index.
 
 ### 10. Closeout Sync Checklist
 

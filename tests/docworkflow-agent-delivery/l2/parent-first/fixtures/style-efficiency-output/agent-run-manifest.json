@@ -1,0 +1,58 @@
+{
+  "manifest_version": "docworkflow-agent-delivery-telemetry.v1",
+  "run_id": "dwt-s2-style-efficiency-output",
+  "child_id": "DWT-S2",
+  "skill_under_test": "spec-orchestrator/style-efficiency",
+  "commands": [
+    {
+      "id": "cmd-001",
+      "command_class": "read",
+      "cwd_category": "shared-ai-docs",
+      "target_path_category": "parent-spec",
+      "exit_status": 0,
+      "evidence_truth": "ran-target"
+    },
+    {
+      "id": "cmd-002",
+      "command_class": "read",
+      "cwd_category": "shared-ai-docs",
+      "target_path_category": "child-index",
+      "exit_status": 0,
+      "evidence_truth": "ran-target"
+    }
+  ],
+  "file_reads": {
+    "broad_scan_count": 3,
+    "repeated_read_count": 1,
+    "sampled_paths": [
+      "_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md",
+      "_specs/child-session-handoffs/dwt-s2-session-handoff.md",
+      "openspec/changes/docworkflow-agent-testsuite-dwt-s2-l2-parent-first-orchestration-agent-harness/tasks.md"
+    ]
+  },
+  "tool_calls": {
+    "shell": 2
+  },
+  "forbidden_command_classes": [
+    "docker",
+    "runtime-build",
+    "runtime-test",
+    "credential-copy",
+    "ki-fuer-kmu-write",
+    "deployment"
+  ],
+  "budget": {
+    "max_commands": 20,
+    "max_broad_reads": 2,
+    "max_repeated_reads": 3
+  },
+  "efficiency_verdict": "warn",
+  "justifications": [
+    {
+      "reason": "Initial parent/child/handoff discovery required one extra broad read to prove control-surface sync.",
+      "applies_to": [
+        "broad_scan_count"
+      ]
+    }
+  ]
+}

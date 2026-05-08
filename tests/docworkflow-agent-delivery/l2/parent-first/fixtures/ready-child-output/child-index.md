@@ -1,0 +1,4 @@
+| Child | Child Spec | Parent Coverage | Readiness / Hardening Verdict | Session Handoff | OpenSpec / Ledger | Dependencies | Allowed Write-Set | Verification | Evidence / Closeout | Backlog / Re-entry | Next Action |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| DWT-C3 | `child-specs/DWT-C3.md` | `DWT-PR1`, `DWT-PR2`, `DWT-PR5` | `IMPLEMENTATION READY` | `child-session-handoffs/dwt-c3-session-handoff.md` | `openspec/changes/dwt-c3/` | DWT-C1 hardening accepted | `_specs/dwt-c3.md`; `tests/dwt-c3/**`; `openspec/changes/dwt-c3/**` | `cd /tmp && dotnet run ValidateChildReadiness.cs -- --child DWT-C3` | `evidence/dwt-c3-readiness-validator.json` | None | `spec-change-delivery` |
+| DWT-C4 | `child-specs/DWT-C4.md` | `DWT-PR7` | `NEEDS HARDENING` |  | `openspec/changes/dwt-c4/` | DWT-C3 | `_specs/dwt-c4.md`; `tests/dwt-c4/**` | planned | planned | Wait for DWT-C3 | `child-spec-hardening` |

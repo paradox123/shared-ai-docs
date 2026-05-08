@@ -17,6 +17,9 @@ Diese Seite sammelt die Dokumentation fuer gemeinsame Agent-Skills, lokale Runti
 - `child-spec-hardening`
   Haertet Child-Spec-Drafts oder Orchestrator-Hardening-Queue-Eintraege zu implementation-ready Delivery Specs mit Parent-Conformance, Normative Contract, Harness-Cases, Verification Commands und Auto-Resolve-Loop.
 
+- `agent-delivery-retro-review`
+  Reviewed abgeschlossene oder laufende Parent-/Child-Delivery-Abläufe als Meta-Test, rekonstruiert Sessions/Handoffs/Evidence und leitet daraus konkrete Workflow-, Skill-, Template- oder Validator-Haertungen ab.
+
 ## Empfohlene Lesereihenfolge
 
 1. Hybrid-Sync-Konzept lesen

@@ -72,7 +72,7 @@ Capture briefly before edits:
 ### 2) Run Required Verification
 
 1. Parse the spec `Verification` section.
-2. Execute each listed command from the correct working directory.
+2. Execute each listed command from the correct working directory. For shared `.NET` file-based validators such as `ValidateChildReadiness.cs`, use the neutral-CWD pattern from the workflow docs, e.g. `(cd /tmp && dotnet run /absolute/path/to/ValidateChildReadiness.cs -- --index /absolute/index.md --child <id> --handoff /absolute/handoff.md)`.
 3. Record one result per command with `ran`, `failed`, or `blocked`.
 4. Keep key evidence (exit status + short meaningful output).
 
@@ -134,6 +134,8 @@ Child closeout sync details:
 4. Evidence Links: link implementation evidence, verification replay, changed artifacts, docs updates, and any blocked commands.
 5. OpenSpec Status: record active, archived, canonical spec path, or blocked status; if OpenSpec archive fails, keep closeout `NOT READY`.
 6. Handoff: update or create the next persisted Child Session Handoff so it points to current parent/index/evidence/OpenSpec state. If the next child is not allowed to proceed, keep or create the handoff but mark its verdict/notes as blocked or stale in both the file and the Child Index.
+7. Verification Lifecycle: replace active-change verification commands with post-archive/current replay commands after archive, for example archive-presence checks plus canonical spec validation. Preserve pre-archive commands as evidence, not as future replay gates.
+8. Retained Evidence: if accepted evidence currently lives in an OS temp path, either copy or regenerate it under a stable workspace evidence path with a manifest/hash, or record a blocking/non-blocking retention limitation before later children consume it.
 
 Parent closeout sync details:
 
@@ -154,6 +156,8 @@ Before final closeout messaging or handoff, capture the shared Mini-Retro checkp
 6. Session/context state: continue here or start a new session?
 
 Keep it short. Escalate to `retro-plan` only when the checkpoint reveals planning failures, repeated rework, or workflow/skill deltas worth preserving.
+
+If the Mini-Retro reveals workflow friction such as stale handoffs, command-contract repair, missing retained evidence, unclear next-child gating, or context-loss recovery, recommend or run `agent-delivery-retro-review` when the user wants the workflow to learn from the completed Parent/Child block.
 
 ## Output Contract
 

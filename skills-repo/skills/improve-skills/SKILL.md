@@ -5,7 +5,7 @@ description: Review Claude session history since the last run to find where exis
 
 # improve-skills
 
-Review recent session history, improve weak skills when the evidence is strong enough, track repeated discovery patterns as future skill candidates, and produce a concise report.
+Review recent session history, improve weak skills when the evidence is strong enough, track repeated discovery patterns as future skill candidates, and produce a concise report. For Parent/Child Agent Delivery process reviews where the target is a specific parent spec, child index, handoffs, OpenSpec evidence, and workflow self-optimization, prefer `agent-delivery-retro-review` first and use this skill only for broader cross-session skill-gap aggregation.
 
 ## Goal
 

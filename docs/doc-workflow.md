@@ -82,14 +82,21 @@ Persistenzregel:
 - Child Index / Queue:
 - Handoff File:
 - Target Repository / Working Directory:
+- Codex Session / Log:
+- Handoff Timestamp:
 - Naechster Modus/Skill:
 - Aktueller Verdict:
 - Scope Summary:
 - Non-Goals:
 - Allowed Write-Set:
 - Shared / Read-only Files:
-- Verification Commands:
+- Verification Lifecycle:
+  - Rehearsal / Preflight:
+  - Delivery Gate:
+  - Pre-Archive Closeout:
+  - Post-Archive / Current Replay:
 - Evidence / OpenSpec:
+- Retained Evidence:
 - Offene Blocker oder non-blocking Notes:
 - Fresh Session empfohlen:
 ```
@@ -100,6 +107,9 @@ Regeln:
 3. `spec-change-delivery` darf ein Child-Handoff als Kickoff-Quelle nutzen, muss aber trotzdem Target Repository / Working Directory, Child Spec, Parent Conformance, Child Index und Hardening Verdict pruefen.
 4. `spec-closeout` aktualisiert das naechste Handoff oder markiert es im Child Index als stale/blockiert, damit der naechste fuehrende Child nicht aus veralteten Status-/Evidence-Links startet.
 5. Bei grossen Parent/Child-Vorhaben wird pro Child-Implementation normalerweise eine frische Session empfohlen.
+6. Wenn ein Hardening-Run einen Child auf `IMPLEMENTATION READY` setzt, ist das ein Handoff-Punkt. Der Run liefert ein frisches Handoff und stoppt dort, ausser der User hat ausdruecklich denselben Run auch fuer Delivery freigegeben.
+7. `Verification Lifecycle` trennt Command-Rehearsal, Delivery-Gate, Pre-Archive-Closeout und aktuellen Post-Archive-Replay. Ein nach OpenSpec-Archive ungueltiger Active-Change-Command darf nicht als aktueller Replay-Command im Handoff stehen bleiben.
+8. Temp-Evidence darf als Laufnachweis dienen, aber accepted Baseline-Evidence muss entweder an einem stabilen Workspace-Pfad persistiert oder mit Retention-/Hash-/Wiederherstellungsanweisung im Handoff referenziert werden.
 
 ## Mini-Retro Template (kurz)
 
@@ -122,6 +132,26 @@ Regeln:
 3. Sie bleibt kurz: Stichpunkte reichen, keine Ursachenanalyse erzwingen, keine neue Methodik starten.
 4. Offene Entscheidungen, fehlende Evidenz, Workflow-Reibung und Kontextqualitaet muessen sichtbar bleiben, damit sie im naechsten Schritt nicht neu entdeckt werden.
 5. Wenn die Mini-Retro echte Planungsfehler, wiederkehrende Rework-Muster oder Skill-Luecken zeigt, kann daraus eine vollstaendige `retro-plan`-Retro oder ein `improve-skills`-Kandidat werden.
+
+## Agent Delivery Meta-Review
+
+Ein Agent Delivery Meta-Review ist das lernende Kontrollritual fuer Parent/Child-Arbeit. Es rekonstruiert nicht die Produktimplementierung, sondern bewertet, ob der Workflow selbst waehrend Orchestration, Hardening, Delivery, Closeout und Handoff funktioniert hat.
+
+Trigger:
+1. Nach Abschluss oder Abbruch eines Parent/Child-Arbeitsblocks, wenn mehrere Child-Sessions beteiligt waren.
+2. Nach einem Child-Closeout, wenn Rework, stale Handoffs, command-contract repairs, Kontextverlust oder unklare Next Actions sichtbar wurden.
+3. Vor dem Start eines groesseren Folge-Childs, wenn der bisherige Parent/Child-Ablauf als Lernsignal genutzt werden soll.
+4. Wenn der User nach Workflow-Selbstoptimierung, Prozessreview, "was lernen wir daraus" oder aehnlichen Meta-Fragen fragt.
+
+Vorgehen:
+1. Fuehrende Parent Spec, Child Index, Child Specs, Handoffs, OpenSpec-Artefakte, Evidence und Session-Logs identifizieren.
+2. Den tatsaechlichen Ablauf rekonstruieren: Parent/Scope -> Orchestrator -> Hardening -> Delivery -> Closeout -> naechstes Handoff.
+3. Findings-first bewerten, mit Prioritaet `P0` bis `P3` und konkreten Artefakt-/Dateireferenzen.
+4. Verbesserungsvorschlaege trennen in `sofort patchbar`, `braucht Entscheidung`, `spaeterer Testsuite-Ausbau` und `Automatisierung/Validator`.
+5. Kleine, evidence-backed Workflow-/Skill-/Template-Haertungen duerfen direkt umgesetzt werden, wenn der User das Review als Optimierungsauftrag formuliert hat. Breite Refactors, Runtime-Implementierung und Original-Produkt-Spec-Aenderungen bleiben ausserhalb des Meta-Reviews.
+
+Persistierter Skill:
+- Nutze `agent-delivery-retro-review`, wenn ein Parent/Child-Prozess selbst reviewed und in Workflow-Verbesserungen rueckgekoppelt werden soll.
 
 ## Unterstützte Workflows
 
@@ -629,6 +659,8 @@ Regeln:
 3. Nach der Sync-Aenderung muss der korrigierte Command frisch ausgefuehrt werden. Ein frueherer Rehearsal-Lauf ersetzt das nicht.
 4. Wenn die Sync-Aenderung nicht im aktuellen Scope erlaubt ist oder eine echte Entscheidung braucht, bleibt das Ergebnis `NOT READY` und wird an `child-spec-hardening`, `spec-change-delivery` oder den Integrations-Owner zurueckgegeben.
 5. Evidence muss Originalfehler und korrigierten Lauf unterscheiden. Der Originalfehler darf nicht als `ran/pass` umetikettiert werden.
+6. Commands, die nur vor einem OpenSpec-Archive sinnvoll sind, werden als `Pre-Archive Closeout` markiert. Nach Archive ersetzt ein `Post-Archive / Current Replay` die aktive Change-Validierung durch Archive-Presence plus canonical spec validation.
+7. Gemeinsame `.NET` file-based Validatoren werden aus einem neutralen CWD gestartet, damit kein Zielrepo-`global.json` oder Projekt-CWD den Lauf verfälscht, z. B. `(cd /tmp && dotnet run /absolute/path/to/ValidateChildReadiness.cs -- --index /absolute/index.md --child <id> --handoff /absolute/handoff.md)`.
 
 ### Risk-Based Command Contract Rehearsal
 
@@ -731,6 +763,14 @@ History und SessionId bleiben verpflichtend, aber ohne Iterationssystem.
 4. Vorhandene Iterations-History bei Berührung auf das 3-Spalten-Format migrieren.
 5. `SessionId` am Dateiende beibehalten; falls fehlend, ergänzen als `SessionId: <session-id>`.
 6. Statuswechsel (`🟡 Spec` / `🟠 Plan` / `🔵 Implemented` / `🟢 Accepted`) müssen jeweils mit einer passenden neuen History-Zeile dokumentiert werden.
+
+Bei Parent/Child-Handoffs zusaetzlich erfassen, wenn verfuegbar:
+- echte Codex-Session-ID oder semantische Session-ID,
+- Session-Log-Pfad (`.codex/sessions/**` oder `.codex/archived_sessions/**`),
+- fuehrender Skill des Runs,
+- Input-Handoff und Output-/Evidence-Pfade.
+
+Wenn die echte Session-ID noch nicht bekannt oder nicht persistiert ist, wird die Luecke explizit als `Session log not yet persisted` markiert statt durch eine scheinbar echte ID ersetzt.
 
 Hinweis:
 - Diese History-Regel gilt für **Spec-Dateien**.

@@ -1,0 +1,16 @@
+{
+  "leading_next_child": "DWT-C1",
+  "children": [
+    {
+      "child_id": "DWT-C1",
+      "next_state": "implementation_ready",
+      "leading_next": true,
+      "next_action": "spec-change-delivery",
+      "allowed_write_set": [
+        "TBD"
+      ],
+      "handoff_path": "",
+      "validator_evidence_path": ""
+    }
+  ]
+}

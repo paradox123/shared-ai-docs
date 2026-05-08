@@ -1,0 +1,4 @@
+| Child | Child Spec | Parent Coverage | Readiness / Hardening Verdict | Session Handoff | OpenSpec / Ledger | Dependencies | Allowed Write-Set | Verification | Evidence / Closeout | Backlog / Re-entry | Next Action |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| DWT-C1 | `child-specs/DWT-C1.md` | `DWT-PR1`, `DWT-PR5` | `NEEDS HARDENING` |  | `openspec/changes/dwt-c1/` | Parent only | `_specs/dwt-c1.md`; `tests/dwt-c1/**` | `child-spec-hardening readiness rehearsal` | planned | Needs hardening depth | `child-spec-hardening` |
+| DWT-C2 | `child-specs/DWT-C2.md` | `DWT-PR2`, `DWT-PR7` | `NEEDS HARDENING` |  | `openspec/changes/dwt-c2/` | DWT-C1 output contract | `_specs/dwt-c2.md`; `tests/dwt-c2/**` | `child-spec-hardening readiness rehearsal` | planned | Needs hardening depth | `child-spec-hardening` |

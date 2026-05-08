@@ -273,7 +273,9 @@ If any item is missing, use `NEEDS HARDENING`, `NEEDS USER DECISION`, or `NEEDS 
 
 After assigning the final status, update or report the child spec's Review Control Surface so its `Offene Entscheidungen` and `Readiness Status` match the verdict.
 
-When the verdict is `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES`, always produce a persisted Child Session Handoff for the implementation run using the shared workflow template: parent path, stable child id, child spec path, child index/queue path, handoff file path, target repository / working directory, next mode/skill, current verdict, scope summary, non-goals, enforceable allowed write-set, shared/read-only files, verification commands, evidence/OpenSpec, open non-blocking notes, and whether a fresh session is recommended. Link the same handoff from the Child Index. For large Parent/Child work, prefer a fresh implementation session per child.
+When the verdict is `IMPLEMENTATION READY` or `READY WITH NON-BLOCKING NOTES`, always produce a persisted Child Session Handoff for the implementation run using the shared workflow template: parent path, stable child id, child spec path, child index/queue path, handoff file path, target repository / working directory, Codex session/log metadata when available, next mode/skill, current verdict, scope summary, non-goals, enforceable allowed write-set, shared/read-only files, verification lifecycle, evidence/OpenSpec, retained evidence, open non-blocking notes, and whether a fresh session is recommended. Link the same handoff from the Child Index. For large Parent/Child work, prefer a fresh implementation session per child.
+
+Treat an implementation-allowing hardening verdict as a handoff boundary. After producing the child spec, synchronized Child Index row, passing readiness validation and persisted handoff, stop and hand off to `spec-change-delivery` unless the user explicitly authorized delivery in the same run. Do not opportunistically begin the next child after creating an implementation-ready handoff.
 
 ## Required Delivery Sections
 
