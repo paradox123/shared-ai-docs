@@ -4,7 +4,7 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  run-contract-checks.sh [all|tc1|tc2] [--fixture DIR] [--keep] [--source-specs DIR]
+  run-contract-checks.sh [all|tc1|tc2|reporting] [--fixture DIR] [--keep] [--source-specs DIR]
 
 Runs contract checks for the DocWorkflow Agent Delivery test suite.
 If no fixture is supplied, a temp fixture is created and removed unless --keep is set.
@@ -52,7 +52,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 case "$testcase" in
-  all|tc1|tc2) ;;
+  all|tc1|tc2|reporting) ;;
   *)
     echo "Unknown testcase: $testcase" >&2
     usage >&2
@@ -367,6 +367,10 @@ fi
 
 if [ "$testcase" = "all" ] || [ "$testcase" = "tc2" ]; then
   run_tc2
+fi
+
+if [ "$testcase" = "all" ] || [ "$testcase" = "reporting" ]; then
+  "$SCRIPT_DIR/run-reporting-contract-checks.sh" all
 fi
 
 if [ "$failures" -gt 0 ]; then

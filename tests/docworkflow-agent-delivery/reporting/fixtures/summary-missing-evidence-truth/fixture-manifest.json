@@ -1,0 +1,8 @@
+{
+  "fixture_id": "summary-missing-evidence-truth",
+  "fixture_kind": "negative-summary-v1",
+  "summary_path": "summary.json",
+  "expected_case": "DWT-S4-R2",
+  "expected_status": "fail",
+  "expected_failure": "invalid_evidence_truth"
+}

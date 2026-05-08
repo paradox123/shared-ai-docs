@@ -1,0 +1,7 @@
+{
+  "fixture_id": "summary-v1-positive",
+  "fixture_kind": "summary-v1",
+  "summary_path": "summary.json",
+  "expected_case": "DWT-S4-R1",
+  "expected_status": "pass"
+}

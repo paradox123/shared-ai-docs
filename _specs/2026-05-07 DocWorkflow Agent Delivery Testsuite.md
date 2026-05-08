@@ -14,7 +14,7 @@
 - Wichtigste Test-/Harness-Cases: Child-Slices `DWT-S0` bis `DWT-S5`; Skill-Unit-Tests fuer `spec-orchestrator`, `child-spec-hardening`, `spec-change-delivery`, `spec-closeout`; `TC1D oversized parent does not enter direct implementation`, `TC1A Parent-only orchestration produces child control surface`, `TC1B plausible child skeleton cannot become ready`, `TC1C ready child requires validator and high-risk command rehearsal`, `TC1E orchestration plus hardening produces readiness matrix`, `TC2A ready child delivery kickoff is temp-repo only`, `TC2B after S3 closeout S4 not-ready blocks delivery`, `TC2C stale next handoff blocks`, `TC2D parent coverage cannot disappear during closeout`, Style-/Usability-Gates und Effizienz-/Telemetry-Gates.
 - Wichtigste Verification Commands: bestehend `bash -n tests/docworkflow-agent-delivery/scripts/*.sh` und `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all`; zukuenftige automatisierte Runner-/Framework-Commands werden im Plan festgelegt.
 - Offene Entscheidungen: Keine blockierenden Entscheidungen fuer die Spec. Framework-ADR wurde durch `DWT-S0` mit `ADOPT_WITH_LIMITATIONS` re-evaluiert; Promptfoo bleibt primaerer Agent-/Coding-Agent-Eval-Rahmen, braucht aber explizite Codex-Auth-Provisionierung und stabile npm-/Registry-Connectivity. Inspect AI bleibt strategischer Fallback, wird aber nicht als naechster Pfad aktiviert. .NET 10 file-based Apps bleiben eine bevorzugte Option fuer kleine deterministische Harness-Hilfen.
-- Readiness Status: Ready for planning as Parent/Master Spec; not implementation-ready as a single change. `DWT-S0` is accepted and archived; next recommended planning slice: `DWT-S1` L1 deterministic contract harness.
+- Readiness Status: Ready for planning as Parent/Master Spec; not implementation-ready as a single change. `DWT-S0`, `DWT-S1` and `DWT-S4` are accepted and archived; `DWT-S2`, `DWT-S3` and `DWT-S5` remain unreleased.
 
 ## Session Briefing
 
@@ -86,10 +86,10 @@ Das Spec Sizing Gate feuert fuer die Umsetzung dieser Testsuite: Die Spec umfass
 | Child | Child Spec | Parent Coverage | Readiness / Hardening Verdict | Session Handoff | OpenSpec / Ledger | Dependencies | Allowed Write-Set | Verification | Evidence / Closeout | Backlog / Re-entry | Next Action |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | DWT-S0 | `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite DWT-S0 Framework Spike.md` | `DWT-PR6`, supports `DWT-PR5` | `ACCEPTED`; was `IMPLEMENTATION READY`; result `ADOPT_WITH_LIMITATIONS` | `child-session-handoffs/dwt-s0-session-handoff.md` | `openspec/changes/archive/2026-05-07-docworkflow-agent-testsuite-dwt-s0-framework-spike/`; canonical `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md` | ADR plus this Parent Spec | `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite DWT-S0 Framework Spike.md`; `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md`; `_specs/2026-05-07 DocWorkflow Agent Test Framework Evaluation ADR.md`; `_specs/child-session-handoffs/dwt-s0-session-handoff.md`; `openspec/changes/archive/2026-05-07-docworkflow-agent-testsuite-dwt-s0-framework-spike/**`; `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`; `tests/docworkflow-agent-delivery/spikes/dwt-s0/**`; `/tmp/docworkflow-agent-delivery-dwt-s0.*` | Closeout replay in `tests/docworkflow-agent-delivery/spikes/dwt-s0/evidence/closeout-verification.txt`; Promptfoo `0.121.9` debug/config/eval; deterministic summary assertion; OpenSpec validate/archive; readiness validator | `tests/docworkflow-agent-delivery/spikes/dwt-s0/evidence/spike-summary.json`; ADR re-evaluation `ADOPT_WITH_LIMITATIONS`; OpenSpec archived | Later slices must explicitly provision Codex auth or equivalent credentials and account for intermittent npm registry/network connectivity; no Inspect fallback needed now | `spec-change-delivery` complete; DWT-S0 closed; harden `DWT-S1` next with Promptfoo primary and limitations |
-| DWT-S1 | `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite DWT-S1 L1 Deterministic Harness.md` | `DWT-PR1`, `DWT-PR2`, `DWT-PR5`; records `DWT-S0` `ADOPT_WITH_LIMITATIONS` as context only | `IMPLEMENTATION READY` | `child-session-handoffs/dwt-s1-session-handoff.md` | `openspec/changes/docworkflow-agent-testsuite-dwt-s1-l1-deterministic-harness/`; canonical spec remains `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md` until archive | `DWT-S0` accepted with limitations; current L0 harness | `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite DWT-S1 L1 Deterministic Harness.md`; `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md`; `_specs/child-session-handoffs/dwt-s1-session-handoff.md`; `openspec/changes/docworkflow-agent-testsuite-dwt-s1-l1-deterministic-harness/**`; `tests/docworkflow-agent-delivery/l1/**`; `tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh`; `tests/docworkflow-agent-delivery/README.md`; `tests/docworkflow-agent-delivery/testcases/tc1-parent-first-orchestration-child-hardening.md` | L0 rehearsal passed; OpenSpec active/canonical validate passed; readiness validator required and passed for handoff/index sync; no agent runner required | DWT-S1 L1 runner implemented; retained evidence `/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l1.sPlnN6/evidence/l1-summary.json`; active OpenSpec change and handoff | Defers L2 agent execution to dependency-blocked `DWT-S2`; S3/S5 remain dependency-blocked | `spec-change-delivery` evidence captured; ready for review and later archive |
+| DWT-S1 | `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite DWT-S1 L1 Deterministic Harness.md` | `DWT-PR1`, `DWT-PR2`, `DWT-PR5`; records `DWT-S0` `ADOPT_WITH_LIMITATIONS` as context only | `ACCEPTED`; was `IMPLEMENTATION READY` | `child-session-handoffs/dwt-s1-session-handoff.md` | `openspec/changes/archive/2026-05-07-docworkflow-agent-testsuite-dwt-s1-l1-deterministic-harness/`; canonical `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md` | `DWT-S0` accepted with limitations; current L0 harness | `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite DWT-S1 L1 Deterministic Harness.md`; `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md`; `_specs/child-session-handoffs/dwt-s1-session-handoff.md`; `openspec/changes/archive/2026-05-07-docworkflow-agent-testsuite-dwt-s1-l1-deterministic-harness/**`; `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`; `tests/docworkflow-agent-delivery/l1/**`; `tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh`; `tests/docworkflow-agent-delivery/README.md`; `tests/docworkflow-agent-delivery/testcases/tc1-parent-first-orchestration-child-hardening.md` | Closeout replay passed: L1 syntax; L1 all; L0 all; OpenSpec canonical validate; readiness validator; no agent runner required | Retained L1 summary `/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l1.bMyVlu/evidence/l1-summary.json`; OpenSpec archived; canonical spec updated | Defers L2 agent execution to `DWT-S2`; S3/S5 remain dependency-blocked; DWT-S4 uses L1 summary schema baseline | `spec-change-delivery` complete; closed by `spec-closeout`; DWT-S4 is now hardened for reporting contract delivery; DWT-S2/S3/S5 remain unreleased |
 | DWT-S2 | L2 Parent-first Orchestration Agent Harness | `DWT-PR1`, `DWT-PR2`, `DWT-PR5`, `DWT-PR7` | `BLOCKED BY DEPENDENCY` | To be created after S1 | OpenSpec child/change | `DWT-S0`, `DWT-S1` | L2 runner config, agent-output fixtures, assertions; temp workspaces only | Promptfoo or fallback runner plus deterministic output validators | `TC1D`, `TC1A`, `TC1E` evidence | If runner cannot drive skills reproducibly, return to `DWT-S0` fallback path | Blocked until S0/S1 |
 | DWT-S3 | L2 Single-Child Delivery and Closeout Gate Harness | `DWT-PR3`, `DWT-PR4`, `DWT-PR5`, `DWT-PR7` | `BLOCKED BY DEPENDENCY` | To be created after S2 | OpenSpec child/change | `DWT-S0`, `DWT-S1`, relevant S2 output contract | L2 runner config, synthetic closeout fixtures, assertions; temp workspaces only | Runner plus deterministic checks for S4 delivery block and parent coverage preservation | `TC2A`, `TC2B`, `TC2C`, `TC2D` evidence | Runtime proof deferred to `DWT-S5` | Blocked until S2 output contract is stable |
-| DWT-S4 | Summary, Telemetry, Style and Reporting Contract | `DWT-PR5`, `DWT-PR7` | `NEEDS HARDENING` | To be created after S1 or in parallel with S2 if write-sets stay disjoint | OpenSpec child/change | `DWT-S1` summary schema baseline | Reporting/schema/testcase docs and validators under tests/docworkflow-agent-delivery only | Summary schema validation and style/efficiency assertions | `TCQ1`, `TCE1`, summary artifact examples | Feed required fields back to S2/S3 output contracts | Candidate parallel hardening after S1 |
+| DWT-S4 | `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite DWT-S4 Summary Telemetry Style Reporting Contract.md` | `DWT-PR5`, `DWT-PR7` | `ACCEPTED`; was `IMPLEMENTATION READY` | `child-session-handoffs/dwt-s4-session-handoff.md` | `openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s4-reporting-telemetry-contract/`; canonical `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md` | `DWT-S1` accepted L1 summary schema baseline `/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l1.bMyVlu/evidence/l1-summary.json`; no S2/S3/S5 release | `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite DWT-S4 Summary Telemetry Style Reporting Contract.md`; `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md`; `_specs/child-session-handoffs/dwt-s4-session-handoff.md`; `openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s4-reporting-telemetry-contract/**`; `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`; `tests/docworkflow-agent-delivery/reporting/**`; `tests/docworkflow-agent-delivery/scripts/run-reporting-contract-checks.sh`; `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh`; `tests/docworkflow-agent-delivery/README.md`; `tests/docworkflow-agent-delivery/testcases/tcq1-style-usability-gate.md`; `tests/docworkflow-agent-delivery/testcases/tce1-efficiency-telemetry-gate.md` | Closeout replay passed: retained baseline presence/JSON; reporting syntax; reporting all; L0 all with reporting; pre-archive OpenSpec change validate; post-archive canonical OpenSpec validate; pre-closeout readiness validator | Retained DWT-S1 summary baseline; DWT-S4 reporting fixtures/validator/runner implemented; retained reporting evidence `/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-reporting.CA7ryD/evidence/dwt-s4-reporting-summary.json`; OpenSpec archived and canonical spec updated | Feed required report fields to S2/S3 only through later orchestrator or implementation sync; DWT-S2/DWT-S3/DWT-S5 remain unreleased by DWT-S4 | `spec-change-delivery` complete; closed by `spec-closeout`; next child still requires its own hardening/handoff |
 | DWT-S5 | L3 Runtime Temp-Repo Delivery Pilot | `DWT-PR3`, `DWT-PR4`, `DWT-PR5` | `BLOCKED BY DEPENDENCY` | To be created after S3 | OpenSpec child/change | `DWT-S2`, `DWT-S3`, stable runtime fixture | Temp-repo/worktree runtime files only; original repos read-only | Runtime local/container/harness gates with preflight and rehearsal evidence | L3 selected-slice implementation evidence | Backlog if runtime fixture remains too expensive | Later pilot only |
 
 ### Hardening Queue and Execution Order
@@ -97,10 +97,10 @@ Das Spec Sizing Gate feuert fuer die Umsetzung dieser Testsuite: Die Spec umfass
 1. `DWT-S0` is accepted and archived with `ADOPT_WITH_LIMITATIONS`; Promptfoo remains the primary framework path with explicit auth and network/connectivity limitations.
 2. `DWT-S1` follows to make deterministic artifact checks real before agent outputs can claim workflow proof.
 3. `DWT-S2` and `DWT-S3` must stay separate: parent-first orchestration proof and post-closeout next-child proof answer different questions and have different fixture states.
-4. `DWT-S4` can be hardened in parallel with `DWT-S2` only if one integration owner owns shared summary/output contracts.
+4. `DWT-S4` can be implemented in parallel with `DWT-S2` only inside its reporting/schema/style/telemetry write-set, and only if one integration owner owns shared summary/output contracts before S2 consumes those fields.
 5. `DWT-S5` remains blocked until L2 proves the control flow without runtime implementation.
 
-`DWT-S0` is accepted and closed. All other Childs still need their own child spec or scope contract, allowed write-set, verification commands, evidence contract and handoff before `spec-change-delivery`.
+`DWT-S0`, `DWT-S1` and `DWT-S4` are accepted and closed. `DWT-S2`, `DWT-S3` and `DWT-S5` still need their own child spec or scope contract, allowed write-set, verification commands, evidence contract and handoff before `spec-change-delivery`.
 
 ## 5. Testarten und Ausbau-Stufen
 
@@ -138,7 +138,7 @@ Erste Skill-Unit-Tests:
 | `child-spec-hardening` | duenner Child-Skeleton | `NEEDS HARDENING` oder sync/blocking Verdict, kein stilles `IMPLEMENTATION READY`. |
 | `child-spec-hardening` | hardenbarer Child plus Parent/Index | Readiness Matrix, konkreter Verdict, Handoff/Index-Sync oder klarer Blocker. |
 | `spec-change-delivery` | not-ready Child mit Handoff-Versuch | `NOT READY`, keine Runtime-Edits. |
-| `spec-closeout` | synthetische S3-Evidence plus S4 not-ready | S3-Sync wird erzeugt, S4 bleibt blockiert. |
+| `spec-closeout` | synthetische S3-Evidence plus not-ready next-child fixture | S3-Sync wird erzeugt, der not-ready Folge-Child bleibt blockiert. |
 
 ### Skill Chain / Teil-E2E Contract
 
@@ -284,7 +284,7 @@ Jeder automatisierte Lauf soll ein Summary-Artefakt erzeugen. Das konkrete Forma
 | Strenges Child Hardening | Plausible Skeletons bleiben nicht ready; `IMPLEMENTATION READY` verlangt Parent Conformance, Write-Set, Handoff, Validator und Verification Contract. | `TC1B`, `TC1C`, `TC1E` |
 | Frische Child Delivery Sessions | Delivery startet nur aus aktuellem persistiertem Handoff und nur gegen erlaubtes Temp-Repo/Write-Set. | `TC2A`, `TC2C` |
 | Closeout Sync | S3-Delivery/Closeout aktualisiert Parent Coverage, Child Index, Backlog/Re-entry, Evidence Links und OpenSpec Status ohne Scope verschwinden zu lassen. | `TC2B`, `TC2D` |
-| Kontrollierte Freigabe des naechsten Child | S4 wird nach S3 nur freigegeben, wenn S4 selbst implementation-ready ist; sonst blockiert Delivery. | `TC2B`, `TC2C` |
+| Kontrollierte Freigabe des naechsten Child | Ein Folge-Child wird nach S3 nur freigegeben, wenn er selbst implementation-ready ist; sonst blockiert Delivery. Historische S4-Beispiele muessen nach DWT-S4-Acceptance durch synthetische stale/not-ready Fixtures ersetzt werden. | `TC2B`, `TC2C` |
 
 ## 8. Nicht-Ziele und Guardrails
 
@@ -341,7 +341,7 @@ Erwartung:
 
 - Child Index hat exakte Mindestspalten.
 - S3 kann in der Temp-Kopie den Readiness-Gate bestehen.
-- S4-S7 sind nicht delivery-freigegeben.
+- Folge-Child-Fixtures ohne eigenes implementation-allowing Verdict sind nicht delivery-freigegeben.
 - stale Handoff ohne Target Repository blockiert.
 
 Einschraenkung:
@@ -490,26 +490,26 @@ Assertions:
 - Runtime-Write-Set liegt innerhalb des Temp-Repos oder ist als read-only Spec-/Evidence-Quelle markiert.
 - Fehlendes oder stale Target Repository blockiert.
 
-### TC2B: after S3 closeout S4 not-ready blocks delivery
+### TC2B: after S3 closeout not-ready next child blocks delivery
 
-Zweck: Die zweite Kernfrage beantworten: Nach abgeschlossener S3-Delivery darf S4 nicht automatisch implementiert werden, solange S4 nicht implementation-ready ist.
+Zweck: Die zweite Kernfrage beantworten: Nach abgeschlossener S3-Delivery darf ein Folge-Child nicht automatisch implementiert werden, solange dieser Folge-Child im Fixture nicht implementation-ready ist. Historisch nutzt der Test S4 als not-ready Beispiel; nach DWT-S4-Hardening muss ein synthetischer stale/not-ready S4-Zustand oder ein anderer not-ready Folge-Child im Fixture verwendet werden.
 
 Fixture Setup:
 
 - Temp-Fixture mit S3 als implemented/closeout-ready simuliert.
 - S3 Evidence-Artefakt existiert als kontrolliertes Fake-Evidence-Dokument.
 - Child Index wird in einer Temp-Kopie so vorbereitet, als ob S3 closeout-synchronisiert werden soll.
-- S4 bleibt `NEEDS HARDENING` und hat kein implementation-allowing Handoff.
+- Der Folge-Child bleibt im Fixture `NEEDS HARDENING` oder `NEEDS PARENT/ORCHESTRATOR SYNC` und hat kein implementation-allowing Handoff.
 
 Workflow Action:
 
 - L2: `spec-closeout` Dry-Run oder Closeout-output-Fixture erzeugt Parent/Index/Evidence/Handoff-Sync.
-- Danach wird ein S4 `spec-change-delivery` Kickoff gegen den synchronisierten Zustand versucht.
-- Der S4-Kickoff muss den von `spec-closeout` erzeugten synchronisierten Zustand als Input verwenden; ein Kickoff gegen den urspruenglichen Fixture-Zustand ist kein gueltiger TC2B-Beweis.
+- Danach wird ein Folge-Child-`spec-change-delivery` Kickoff gegen den synchronisierten Zustand versucht.
+- Der Folge-Child-Kickoff muss den von `spec-closeout` erzeugten synchronisierten Zustand als Input verwenden; ein Kickoff gegen den urspruenglichen Fixture-Zustand ist kein gueltiger TC2B-Beweis.
 
 Beweiskraft-Regel:
 
-- Fuer die Kernfrage "bricht die Uebergabe nach Implementierung ab, wenn der naechste Child nicht implementation-ready ist?" muss mindestens der post-closeout S4-Kickoff gegen den synchronisierten Zustand tatsaechlich ausgefuehrt oder als Agent-Dry-Run erzeugt werden.
+- Fuer die Kernfrage "bricht die Uebergabe nach Implementierung ab, wenn der naechste Child nicht implementation-ready ist?" muss mindestens ein post-closeout Folge-Child-Kickoff gegen einen synchronisierten stale/not-ready Zustand tatsaechlich ausgefuehrt oder als Agent-Dry-Run erzeugt werden.
 - Eine rein statische S4-Index-Zeile mit `NEEDS HARDENING` reicht nicht.
 - Ein L2-Test mit synthetischer S3-Closeout-Evidence beweist das Next-Child-Gate, aber keine Runtime-Implementation.
 - Ein L3-Test mit echter S3-Temp-Repo-Delivery ist erforderlich, wenn die Aussage explizit "nach realer Implementierung" lauten soll.
@@ -518,10 +518,10 @@ Assertions:
 
 - S3 darf als closed/accepted oder closeout-synced erscheinen, aber nur mit Evidence-Link.
 - Parent Coverage verliert keine deferred oder offenen Requirements.
-- S4 wird hoechstens als naechster Hardening-Kandidat markiert.
-- S4 Delivery-Kickoff endet mit `NOT READY` oder `NEEDS HARDENING`.
-- Kein S4 Runtime-Write-Set wird als freigegeben behandelt.
-- Kein S4 Temp-Repo-Implementation-Step wird ausgefuehrt.
+- Der not-ready Folge-Child wird hoechstens als naechster Hardening-Kandidat markiert.
+- Der Folge-Child Delivery-Kickoff endet mit `NOT READY`, `NEEDS HARDENING` oder `NEEDS PARENT/ORCHESTRATOR SYNC`.
+- Kein Folge-Child Runtime-Write-Set wird als freigegeben behandelt.
+- Kein Folge-Child Temp-Repo-Implementation-Step wird ausgefuehrt.
 - Evidence belegt die Reihenfolge `S3 closeout sync -> S4 kickoff attempt -> S4 block` mit Pfaden oder Hashes der Zwischenartefakte.
 
 Evidence:
@@ -643,7 +643,7 @@ Erlaubte `result_status` Werte:
 - `failed`
 - `dry-run`
 
-L2-Erfolg verlangt, dass der Harness nicht nur Textstrings sucht, sondern die fuer den Testcase relevanten Felder prueft. Beispiel: `TC2B` muss `next_allowed_mode=child-spec-hardening` oder `delivery_blocked` fuer S4 belegen und darf `spec-change-delivery` fuer S4 nicht als erlaubten naechsten Modus enthalten.
+L2-Erfolg verlangt, dass der Harness nicht nur Textstrings sucht, sondern die fuer den Testcase relevanten Felder prueft. Beispiel: `TC2B` muss `next_allowed_mode=child-spec-hardening` oder `delivery_blocked` fuer den not-ready Folge-Child belegen und darf `spec-change-delivery` fuer diesen Fixture-Child nicht als erlaubten naechsten Modus enthalten.
 
 Zusaetzlich muss ein L2-Ergebnis erklaeren, ob es `ran-target`, `ran-rehearsal`, `dry-run`, `blocked` oder `failed` ist. Ein `dry-run` darf keine Runtime- oder Closeout-Ausfuehrung behaupten, und ein `blocked`-Ergebnis darf nicht als positiver Workflow-Beweis zusammengefasst werden.
 
@@ -703,6 +703,15 @@ Die Testsuite gilt fuer die naechste Ausbaustufe als akzeptabel, wenn:
 18. Die Vision Traceability Matrix fuer das automatische Sizing Gate plus alle sieben Workflow-Schritte mindestens L1- oder L2-Testabdeckung nennt.
 19. Die Child-Index-Slices `DWT-S0` bis `DWT-S5` bleiben in Parent Coverage, Dependencies, Evidence und Next Action synchron; kein Slice darf als implementation-ready geplant werden, bevor sein eigenes Handoff und sein eigener Verification Contract existieren.
 
+## DWT-S1 Closeout Evidence
+
+- Accepted child: `DWT-S1` deterministic L1 contract harness.
+- OpenSpec archive: `openspec/changes/archive/2026-05-07-docworkflow-agent-testsuite-dwt-s1-l1-deterministic-harness/`.
+- Canonical spec: `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`.
+- Retained L1 summary: `/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l1.bMyVlu/evidence/l1-summary.json`.
+- Verification replay: `bash -n tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh`; `tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh all --keep`; `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all`; `openspec validate docworkflow-agent-testsuite-dwt-s1-l1-deterministic-harness --strict` before archive; `openspec validate docworkflow-agent-delivery-testsuite --strict`; `ValidateChildReadiness.cs` for `DWT-S1`.
+- Next-child state after DWT-S1 closeout: `DWT-S4` is now independently hardened for reporting contract delivery; `DWT-S2`, `DWT-S3` and `DWT-S5` are not delivery-released by DWT-S1 closeout.
+
 ## 14. Content Quality Review
 
 Review-Ergebnis:
@@ -740,7 +749,10 @@ Review-Ergebnis:
 | 2026-05-07 | Codex | Promptfoo-first Spike als einmalige Pre-Implementation-Vorbedingung statt regulaerem Testcase klargestellt. |
 | 2026-05-07 | Codex | Kritisches Auto-Resolve-Review: Spec Sizing Gate angewendet, `DWT-S0` bis `DWT-S5` Child-Index ergaenzt und Evidence-/Provenance-Gates fuer TC1A, TC1E und TC2B geschaerft. |
 | 2026-05-07 | Codex | Spec-Orchestrator: DWT-S0 als naechsten fuehrenden Slice bestaetigt, persistiertes Handoff und OpenSpec-Ledger angelegt, Parent Child Index synchronisiert. |
+| 2026-05-07 | Codex | DWT-S4 Child Spec, Parent Child Index, Handoff und aktiven OpenSpec-Change fuer Summary-/Telemetry-/Style-/Reporting-Contract auf implementation-ready synchronisiert. |
 | 2026-05-07 | Codex | Child-Spec-Hardening: DWT-S0 Child Spec ergaenzt, Promptfoo-Command-Vertrag rehearsed und DWT-S0 auf `IMPLEMENTATION READY` gesetzt. |
 | 2026-05-07 | Codex | DWT-S0 accepted, Promptfoo mit Limitierungen bestaetigt und OpenSpec-Change archiviert. |
+| 2026-05-08 | Codex | DWT-S4 reporting fixtures, validator, runner, README/testcases and verification evidence implemented; DWT-S2/DWT-S3/DWT-S5 remain unreleased. |
+| 2026-05-08 | Codex | DWT-S4 accepted and archived; Parent Child Index and handoff synchronized to closeout evidence while DWT-S2/DWT-S3/DWT-S5 remain unreleased. |
 
 SessionId: 2026-05-07-docworkflow-agent-delivery-testsuite

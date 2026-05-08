@@ -1,0 +1,8 @@
+{
+  "fixture_id": "dwt-s1-retained-baseline",
+  "fixture_kind": "legacy-summary-compatibility",
+  "external_summary_path": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l1.bMyVlu/evidence/l1-summary.json",
+  "expected_case": "DWT-S4-R1",
+  "expected_status": "pass",
+  "must_not_mutate_external_summary": true
+}

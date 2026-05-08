@@ -1,5 +1,5 @@
 **Date:** 2026-05-07  
-**Status:** 🔵 Implemented  
+**Status:** 🟢 Accepted  
 **Scope:** Implementation-ready child spec for the DWT-S1 deterministic L1 contract harness.
 
 ---
@@ -12,7 +12,7 @@
 - In Scope: L1 Fixture-Builder, Manifest-/Provenance-Validator, Child-Index-/Handoff-/Readiness-Validator, negative Skeleton-Fixtures, TC1A/TC1B/TC1C statische Gate-Regressionen, Integration in den bestehenden L0-Harness.
 - Out of Scope: Agentische L2-Ausfuehrung, Promptfoo-/Inspect-/Codex-Runner, Runtime-Delivery, KI-fuer-KMU-Originalaenderungen, S3/S4 echte Closeout-Ausfuehrung, Framework-Re-Evaluation.
 - Wichtigste Test-/Harness-Cases: `DWT-S1-L1A parent-only fixture has no child artifacts at start`, `DWT-S1-L1B generated child index must be new/provenanced`, `DWT-S1-L1C thin skeleton cannot pass readiness`, `DWT-S1-L1D high-risk command without rehearsal blocks`, `DWT-S1-L1E hidden normalization fails`, `DWT-S1-L1F S0 limitations do not become L1 assumptions`.
-- Wichtigste Verification Commands: `bash -n tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh`; `tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh all`; `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all`; `openspec validate docworkflow-agent-testsuite-dwt-s1-l1-deterministic-harness --strict`; `openspec validate docworkflow-agent-delivery-testsuite --strict`; `ValidateChildReadiness.cs`.
+- Wichtigste Verification Commands: `bash -n tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh`; `tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh all`; `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all`; active-change OpenSpec validation before archive; post-archive archive-presence check; `openspec validate docworkflow-agent-delivery-testsuite --strict`; `ValidateChildReadiness.cs`.
 - Offene Entscheidungen: Keine blockierenden Entscheidungen. L1 ist absichtlich deterministic-only; S0 `ADOPT_WITH_LIMITATIONS` bleibt fuer spaetere Promptfoo-/Codex-Agent-Slices relevant, erzeugt aber keine L1-Agent- oder Auth-Abhaengigkeit.
 - Readiness Status: IMPLEMENTATION READY.
 
@@ -184,7 +184,7 @@ cd /tmp && dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/sk
   --handoff "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/child-session-handoffs/dwt-s1-session-handoff.md"
 ```
 
-Gate verification after implementation creates the L1 script and fixtures:
+Gate verification after implementation creates the L1 script and fixtures, before OpenSpec archive:
 
 ```sh
 bash -n tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh
@@ -198,10 +198,24 @@ cd /tmp && dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/sk
   --handoff "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/child-session-handoffs/dwt-s1-session-handoff.md"
 ```
 
+Post-archive closeout replay replaces active-change validation with an archive-presence check plus canonical spec validation:
+
+```sh
+bash -n tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh
+tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh all --keep
+tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all
+test -f openspec/changes/archive/2026-05-07-docworkflow-agent-testsuite-dwt-s1-l1-deterministic-harness/tasks.md
+openspec validate docworkflow-agent-delivery-testsuite --strict
+cd /tmp && dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateChildReadiness.cs -- \
+  --index "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md" \
+  --child DWT-S1 \
+  --handoff "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/child-session-handoffs/dwt-s1-session-handoff.md"
+```
+
 Success criteria:
 
 - Existing L0 harness exits `0` and remains green.
-- OpenSpec active change and canonical spec validate in strict mode.
+- OpenSpec active change validates before archive; after archive, the archive exists and the canonical spec validates in strict mode.
 - `ValidateChildReadiness.cs` passes for `DWT-S1`.
 - After implementation, shell syntax exits `0`.
 - After implementation, L1 runner exits `0` only when all required positive/negative cases match expected status.
@@ -243,7 +257,10 @@ Performed during hardening on 2026-05-07:
 - OpenSpec change tasks and canonical spec are synchronized after acceptance/archive.
 - S2/S3/S5 remain blocked unless their own dependency gates are later satisfied.
 - No original source specs were modified.
-- Retained L1 summary evidence: `/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l1.sPlnN6/evidence/l1-summary.json`.
+- Retained L1 summary evidence: `/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l1.bMyVlu/evidence/l1-summary.json`.
+- Fresh post-archive replay evidence: `/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l1.mBtjxX/evidence/l1-summary.json`.
+- OpenSpec archived at `openspec/changes/archive/2026-05-07-docworkflow-agent-testsuite-dwt-s1-l1-deterministic-harness/`.
+- Canonical OpenSpec spec updated at `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`.
 
 ## Dependencies and Write-Set
 
@@ -304,5 +321,7 @@ Persisted handoff: `_specs/child-session-handoffs/dwt-s1-session-handoff.md`.
 | 2026-05-07 | Codex | Hardened DWT-S1 contract, S0 limitation handling, verification evidence, handoff/index sync requirements and dependency-blocked descendants. |
 | 2026-05-07 | Codex | Locked DWT-S1 delivery scope for deterministic L1 harness implementation. |
 | 2026-05-07 | Codex | Implemented L1 fixtures, runner, summary evidence and documentation sync for DWT-S1. |
+| 2026-05-07 | Codex | Accepted DWT-S1, archived OpenSpec change and synchronized closeout evidence. |
+| 2026-05-07 | Codex | Clarified post-archive verification command contract for DWT-S1 closeout replay. |
 
 SessionId: 2026-05-07-docworkflow-agent-delivery-testsuite-dwt-s1

@@ -1,0 +1,26 @@
+{
+  "schema_id": "docworkflow-agent-delivery-summary.v1",
+  "suite_level": "DWT-S4",
+  "suite_version": "DWT-S4-reporting-contract-v1",
+  "repo_root": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "fixture_root": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/reporting/fixtures/summary-missing-evidence-truth",
+  "fixture_manifest": "fixture-manifest.json",
+  "test_results": {
+    "DWT-S4-R2": "pass"
+  },
+  "evidence_links": {
+    "DWT-S4-R2": "evidence/dwt-s4-r2-summary-schema.json"
+  },
+  "runner_environment": {
+    "os": "macos-or-linux",
+    "shell": "bash",
+    "node": ">=18"
+  },
+  "provenance_checks": {
+    "summary_schema_v1": "pass"
+  },
+  "readiness_checks": {
+    "evidence_truth_present": "fail"
+  },
+  "forbidden_actions_observed": []
+}
