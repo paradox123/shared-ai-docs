@@ -1,5 +1,5 @@
 **Date:** 2026-05-08
-**Status:** 🟡 Spec
+**Status:** 🔵 Implemented
 **Scope:** Agent Delivery Workflow automation for turning session handoffs into launched or queued fresh agent sessions.
 
 ---
@@ -511,5 +511,6 @@ Readiness verdict: `IMPLEMENTATION READY` for one bounded `spec-change-delivery`
 | 2026-05-08 | Codex | Renamed the tool contract to `AgentDeliverySessionLauncher.cs` and generalized Child-only IDs to Agent Delivery session targets. |
 | 2026-05-08 | Codex | Added mandatory Agent Delivery Workflow skill integration scope and static verification for launcher evidence usage. |
 | 2026-05-08 | Codex | Added Codex app project visibility and deterministic session title requirements with local metadata verification. |
+| 2026-05-08 | Codex | Implemented AgentDeliverySessionLauncher tool, fixtures, queue/dry-run/manual/blocked evidence paths and workflow skill integration. |
 
 SessionId: 2026-05-08-agent-delivery-session-launcher-automation-spec

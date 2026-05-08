@@ -1,0 +1,50 @@
+command: npx --yes --package promptfoo@0.121.9 promptfoo eval -c /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/l2/single-child-closeout/promptfooconfig.yaml --no-cache -o /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/promptfoo-eval.json --no-progress-bar
+auth_source: codex-home
+
+========================================================================================================================
+⚠️ The current version of promptfoo 0.121.9 is lower than the latest available version 0.121.11.
+
+Please run npx promptfoo@latest or npm install -g promptfoo@latest to update.
+========================================================================================================================
+
+Cache is disabled.
+Starting evaluation eval-Cyu-2026-05-08T09:49:47
+Running 1 test cases (up to 4 at a time)...
+
+[90m┌────────────────────────[39m[90m┬────────────────────────[39m[90m┬────────────────────────[39m[90m┬────────────────────────[39m[90m┬────────────────────────┐[39m
+[90m│[39m[1m[34m child_spec_path        [39m[22m[90m│[39m[1m[34m handoff_path           [39m[22m[90m│[39m[1m[34m parent_spec_path       [39m[22m[90m│[39m[1m[34m sessionId              [39m[22m[90m│[39m[1m[34m [openai:codex-sdk:gpt… [39m[22m[90m│[39m
+[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m /Users/dh/Documents/D… [39m[22m[90m│[39m
+[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m # DWT-S3 Single-Child  [39m[22m[90m│[39m
+[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m Delivery Closeout      [39m[22m[90m│[39m
+[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m Prompt                 [39m[22m[90m│[39m
+[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m                        [39m[22m[90m│[39m[1m[34m Us...                  [39m[22m[90m│[39m
+[90m├────────────────────────[39m[90m┼────────────────────────[39m[90m┼────────────────────────[39m[90m┼────────────────────────[39m[90m┼────────────────────────┤[39m
+[90m│[39m _specs/2026-05-08      [90m│[39m _specs/child-session-… [90m│[39m _specs/2026-05-07      [90m│[39m 019e06fe-4721-7983-9f… [90m│[39m [PASS] **DWT-S3        [90m│[39m
+[90m│[39m DocWorkflow Agent      [90m│[39m                        [90m│[39m DocWorkflow Agent      [90m│[39m                        [90m│[39m Delivery Kickoff**     [90m│[39m
+[90m│[39m Delivery Testsuite     [90m│[39m                        [90m│[39m Delivery Testsuite.md  [90m│[39m                        [90m│[39m DWT-S3 kickoff is      [90m│[39m
+[90m│[39m DWT-S3 L2 Single-Child [90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m valid for              [90m│[39m
+[90m│[39m Delivery Closeout Gate [90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m `spec-change-delivery` [90m│[39m
+[90m│[39m Harness.md             [90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m only.                  [90m│[39m
+[90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m - Handoff:             [90m│[39m
+[90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m `_specs/child-session… [90m│[39m
+[90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m - Handoff current:     [90m│[39m
+[90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m `true`                 [90m│[39m
+[90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m - Readiness verdict:   [90m│[39m
+[90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m `IMPLEMENTATION READY` [90m│[39m
+[90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m - Target workspace:    [90m│[39m
+[90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m                        [90m│[39m i...                   [90m│[39m
+[90m└────────────────────────[39m[90m┴────────────────────────[39m[90m┴────────────────────────[39m[90m┴────────────────────────[39m[90m┴────────────────────────┘[39m
+✓ Eval complete
+
+Total Tokens: 181,737
+  Eval: 181,737 (178,723 prompt, 3,014 completion, 143,872 cached, 196 reasoning)
+
+Results:
+  ✓ 1 passed (100%)
+  0 failed (0%)
+  0 errors (0%)
+Duration: 1m 9s (concurrency: 4)
+
+Progress: 1/1 results shared (100%)
+» ✓ https://www.promptfoo.app/eval/eval-Cyu-2026-05-08T09:49:47
+Writing output to /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/promptfoo-eval.json

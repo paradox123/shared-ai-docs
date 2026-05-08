@@ -1,0 +1,6 @@
+{
+  "fixture_id": "style-efficiency-output",
+  "fixture_version": "1.0.0",
+  "schema_id": "docworkflow-agent-delivery-summary.v1",
+  "telemetry_version": "docworkflow-agent-delivery-telemetry.v1"
+}

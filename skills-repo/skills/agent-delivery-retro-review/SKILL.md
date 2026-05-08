@@ -31,6 +31,7 @@ Required where available:
 - Child Specs and Child Session Handoffs.
 - OpenSpec active/archive changes and canonical specs.
 - Evidence, closeout reports, retained summaries, command logs.
+- Agent Delivery Session Launch/Queue Evidence under `_specs/agent-delivery-session-launches/`, especially `launch-request.json`, `start-prompt.md`, `evidence.json`, `manual_start_required`, `blocked`, and `failed` statuses.
 - History rows and SessionId lines.
 - Codex session logs under `.codex/sessions/**/*.jsonl` and `.codex/archived_sessions/*.jsonl` when they are relevant and available.
 
@@ -50,6 +51,7 @@ Compare the actual flow against the desired Agent Delivery Workflow:
 8. Did post-archive/current replay commands replace active-change commands?
 9. Was accepted evidence stable enough for future fresh sessions, or only stored in temp paths?
 10. Were decisions, blockers and next actions visible early enough for the next session?
+11. Did each claimed fresh-session transition have Agent Delivery Session Launch/Queue Evidence with matching Target-ID and Handoff path, or was the workflow only producing handoff text/prompts? Missing Launcher evidence is a workflow finding; `manual_start_required` is a manual residue, while `blocked` and `failed` should have stopped follow-up delivery.
 
 ## Output Format
 
@@ -116,3 +118,4 @@ When a pattern is likely to recur:
 - A static fixture is used as proof of agentic orchestration.
 - Optional validators leave a green result with weaker evidence.
 - Session IDs in specs are semantic labels, but real Codex session logs are not linked.
+- Agent Delivery Session Launch/Queue Evidence is missing, stale, points at a different handoff, or records `manual_start_required`, `blocked`, or `failed` while the workflow narrative claims a successful automated transition.

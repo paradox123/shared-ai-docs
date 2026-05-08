@@ -1,0 +1,55 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: DWT-S5 runtime temp-repo Promptfoo/Codex harness
+
+prompts:
+  - file://prompts/runtime-temp-repo-prompt.md
+
+providers:
+  - id: openai:codex-sdk:gpt-5.5
+    config:
+      working_dir: '{{ env.DWT_S5_FIXTURE_WORKSPACE | default("/tmp/docworkflow-agent-delivery-dwt-s5-agent-workspace") }}'
+      skip_git_repo_check: true
+      sandbox_mode: read-only
+      approval_policy: never
+      model_reasoning_effort: low
+      enable_streaming: true
+      web_search_mode: disabled
+      network_access_enabled: false
+      cli_env:
+        CODEX_HOME: '{{ env.CODEX_HOME_OVERRIDE | default("/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/l3/runtime-temp-repo/fixtures/sample-codex-home") }}'
+
+tests:
+  - description: DWT-S5 runtime temp-repo delivery route contract
+    vars:
+      parent_spec_path: _specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md
+      child_spec_path: _specs/2026-05-08 DocWorkflow Agent Delivery Testsuite DWT-S5 L3 Runtime Temp-Repo Delivery Pilot.md
+      handoff_path: _specs/child-session-handoffs/dwt-s5-session-handoff.md
+      retained_dwt_s3_summary: tests/docworkflow-agent-delivery/l2/single-child-closeout/evidence/2026-05-08-ran-target/dwt-s3-l2-summary.json
+      retained_dwt_s3_manifest: tests/docworkflow-agent-delivery/l2/single-child-closeout/evidence/2026-05-08-ran-target/manifest.json
+    assert:
+      - type: javascript
+        value: |-
+          const required = [
+            'DWT-S5 Delivery Kickoff',
+            'Runtime Gates',
+            'Container Harness',
+            'DWT-S5 Closeout Sync',
+            'Parent Coverage',
+            'FINAL_STATUS:'
+          ];
+          if (required.some((value) => !output.includes(value))) {
+            return false;
+          }
+          const finalStatusOk = /child_id=DWT-S5/.test(output)
+            && /handoff_current=true/.test(output)
+            && /temp_repo_isolated=true/.test(output)
+            && /allowed_write_set_concrete=true/.test(output)
+            && /descendant_release=false/.test(output)
+            && /forbidden_actions=false/.test(output);
+          if (!finalStatusOk) {
+            return false;
+          }
+          if (/credential copy|copy credential|secret=|api[_-]?key|terraform apply|kubectl|descendant_release=true/i.test(output)) {
+            return false;
+          }
+          return true;

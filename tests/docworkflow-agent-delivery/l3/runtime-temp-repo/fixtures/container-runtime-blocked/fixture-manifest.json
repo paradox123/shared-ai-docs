@@ -1,0 +1,7 @@
+{
+  "fixture_id": "container-runtime-blocked",
+  "fixture_version": "1.0.0",
+  "container_runtime_available": false,
+  "expected_status": "blocked_runtime",
+  "blocked_runtime_as_pass_allowed": false
+}

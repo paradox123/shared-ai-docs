@@ -1,0 +1,22 @@
+{
+  "case_id": "DWT-S3-L2D",
+  "expected_fixture_status": "blocked",
+  "harness_status": "pass",
+  "evidence_truth": "ran-target",
+  "output_bundle": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/output-bundles/dwt-s5-auto-release-attempt",
+  "expected_blocker_detected": true,
+  "failures": [
+    {
+      "code": "dwt_s5_released_without_own_gate",
+      "message": "DWT-S5 must remain blocked_by_dependency"
+    },
+    {
+      "code": "dwt_s5_released_without_own_gate",
+      "message": "DWT-S5 must not name spec-change-delivery"
+    },
+    {
+      "code": "dwt_s5_released_without_own_gate",
+      "message": "child index after must show DWT-S5 blocked"
+    }
+  ]
+}

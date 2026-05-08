@@ -1,0 +1,28 @@
+{
+  "fixture_id": "dwt-s3-ready-kickoff",
+  "source_parent_path": "_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md",
+  "source_child_spec_path": "_specs/2026-05-08 DocWorkflow Agent Delivery Testsuite DWT-S3 L2 Single-Child Delivery Closeout Gate Harness.md",
+  "source_handoff_path": "_specs/child-session-handoffs/dwt-s3-session-handoff.md",
+  "retained_dwt_s2_summary_path": "tests/docworkflow-agent-delivery/l2/parent-first/evidence/2026-05-08-ran-target/dwt-s2-l2-summary.json",
+  "retained_dwt_s2_manifest_path": "tests/docworkflow-agent-delivery/l2/parent-first/evidence/2026-05-08-ran-target/manifest.json",
+  "stable_source_id": "dwt-s3-ready-kickoff-v1",
+  "copied_fixture_paths": [
+    "child-index-before.md",
+    "handoffs/dwt-s3-session-handoff.md"
+  ],
+  "generated_artifacts": [
+    "agent-output.md",
+    "delivery-kickoff.md",
+    "closeout-sync.md",
+    "child-index-after.md",
+    "agent-run-manifest.json",
+    "evidence/dwt-s3-l2-summary.json"
+  ],
+  "declared_normalizations": [
+    "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP resolves to the isolated DWT-S3 runner directory",
+    "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs resolves to the source repository only in negative fixtures"
+  ],
+  "normalizations": [
+    "target workspace placeholder materialized during validation"
+  ]
+}

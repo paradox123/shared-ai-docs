@@ -1,0 +1,9 @@
+{
+  "name": "dwt-s5-synthetic-runtime-repo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "local:gate": "node scripts/local-gate.js",
+    "container:harness": "node scripts/container-harness.js"
+  }
+}

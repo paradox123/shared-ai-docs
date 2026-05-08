@@ -1,0 +1,19 @@
+{
+  "fixture_id": "dwt-s5-synthetic-runtime-repo",
+  "fixture_version": "1.0.0",
+  "description": "Synthetic source-controlled runtime repo template for DWT-S5 L3 isolation checks.",
+  "local_gate_command": ["node", "scripts/local-gate.js"],
+  "container_harness_command": ["node", "scripts/container-harness.js"],
+  "forbidden_path_classes": [
+    "original-repo-target",
+    "out-of-run-dir",
+    "credential-copy",
+    "deployment-target"
+  ],
+  "required_files": [
+    "README.md",
+    "package.json",
+    "scripts/local-gate.js",
+    "scripts/container-harness.js"
+  ]
+}

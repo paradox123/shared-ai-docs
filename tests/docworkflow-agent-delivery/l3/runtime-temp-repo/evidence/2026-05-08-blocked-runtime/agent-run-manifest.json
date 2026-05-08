@@ -1,0 +1,40 @@
+{
+  "manifest_version": "docworkflow-agent-delivery-telemetry.v1",
+  "run_id": "docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS",
+  "child_id": "DWT-S5",
+  "skill_under_test": "spec-change-delivery",
+  "selector": "all",
+  "commands": [
+    {
+      "command_class": "local-runtime",
+      "command": "/opt/homebrew/Cellar/node@22/22.12.0/bin/node scripts/local-gate.js",
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/target-repos/dwt-s5-synthetic-runtime-repo",
+      "exit_status": 0,
+      "evidence_truth": "ran-target"
+    },
+    {
+      "command_class": "container-harness",
+      "command": "/opt/homebrew/Cellar/node@22/22.12.0/bin/node scripts/container-harness.js",
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/target-repos/dwt-s5-synthetic-runtime-repo",
+      "exit_status": 0,
+      "evidence_truth": "ran-target"
+    }
+  ],
+  "file_reads": {
+    "broad_scan_count": 0,
+    "repeated_read_count": 0,
+    "retained_evidence_reads": 2
+  },
+  "tool_calls": {
+    "promptfoo": 0,
+    "local_runtime": 1,
+    "container_harness": 1
+  },
+  "forbidden_command_classes": [],
+  "budget": {
+    "max_broad_reads": 4,
+    "max_repeated_reads": 4
+  },
+  "efficiency_verdict": "pass",
+  "justifications": []
+}

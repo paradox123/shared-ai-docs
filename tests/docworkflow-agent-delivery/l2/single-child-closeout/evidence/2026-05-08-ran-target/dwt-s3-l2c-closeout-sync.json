@@ -1,0 +1,8 @@
+{
+  "case_id": "DWT-S3-L2C",
+  "expected_fixture_status": "pass",
+  "harness_status": "pass",
+  "evidence_truth": "ran-target",
+  "output_bundle": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/output-bundles/closeout-sync-positive",
+  "failures": []
+}

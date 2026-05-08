@@ -1,0 +1,141 @@
+{
+  "schema_id": "docworkflow-agent-delivery-summary.v1",
+  "suite_level": "DWT-S5",
+  "suite_version": "DWT-S5-l3-runtime-temp-repo-v1",
+  "repo_root": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "fixture_root": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS",
+  "fixture_manifest": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/evidence/output-bundles/dwt-s5-runtime-temp-repo/source-manifest.json",
+  "runner_mode": "fallback-artifact",
+  "agent_execution_status": "blocked_runtime",
+  "overall_runtime_proof_status": "blocked",
+  "selector": "all",
+  "predecessor_evidence": {
+    "summary_path": "tests/docworkflow-agent-delivery/l2/single-child-closeout/evidence/2026-05-08-ran-target/dwt-s3-l2-summary.json",
+    "manifest_path": "tests/docworkflow-agent-delivery/l2/single-child-closeout/evidence/2026-05-08-ran-target/manifest.json",
+    "runner_mode": "promptfoo-codex",
+    "agent_execution_status": "ran-target",
+    "overall_agent_proof_status": "pass",
+    "manifest_sha_present": true,
+    "summary_sha256": "5bff022a4c5122adf97631b3dfc1faa8679edc0127d0de13dc5f637da544a64f"
+  },
+  "temp_repo": {
+    "generated_path": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/target-repos/dwt-s5-synthetic-runtime-repo",
+    "fixture_id": "dwt-s5-synthetic-runtime-repo",
+    "fixture_version": "1.0.0",
+    "source_hash": "1f5062d5b482938adeeab0f6cc8c1ca6e2ebf600f191f75ef13598dd53bfe932",
+    "target_hash": "1f5062d5b482938adeeab0f6cc8c1ca6e2ebf600f191f75ef13598dd53bfe932",
+    "isolation_checks": {
+      "under_run_dir": true,
+      "under_target_repos": true,
+      "source_target_hash_match": true
+    }
+  },
+  "test_results": {
+    "DWT-S5-L3A": "pass",
+    "DWT-S5-L3B": "pass",
+    "DWT-S5-L3C": "pass",
+    "DWT-S5-L3D": "pass",
+    "DWT-S5-L3E": "blocked",
+    "DWT-S5-L3F": "pass"
+  },
+  "harness_case_results": {
+    "DWT-S5-L3A": "pass",
+    "DWT-S5-L3B": "pass",
+    "DWT-S5-L3C": "pass",
+    "DWT-S5-L3D": "pass",
+    "DWT-S5-L3E": "pass",
+    "DWT-S5-L3F": "pass"
+  },
+  "evidence_truth": {
+    "DWT-S5-L3A": "ran-target",
+    "DWT-S5-L3B": "ran-target",
+    "DWT-S5-L3C": "ran-target",
+    "DWT-S5-L3D": "ran-target",
+    "DWT-S5-L3E": "blocked",
+    "DWT-S5-L3F": "ran-target"
+  },
+  "evidence_links": {
+    "output_bundle": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/evidence/output-bundles/dwt-s5-runtime-temp-repo",
+    "kickoff_assertions": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/evidence/dwt-s5-l3b-delivery-kickoff.json",
+    "runtime_gate_assertions": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/evidence/dwt-s5-l3c-local-runtime.json",
+    "container_harness_assertions": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/evidence/dwt-s5-l3d-container-harness.json",
+    "closeout_assertions": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/evidence/dwt-s5-l3f-closeout-sync.json",
+    "telemetry": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/evidence/output-bundles/dwt-s5-runtime-temp-repo/agent-run-manifest.json",
+    "agent_proof": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/evidence/dwt-s5-agent-proof.json"
+  },
+  "runner_environment": {
+    "os": "Darwin 25.3.0",
+    "shell": "/bin/zsh",
+    "node": "v22.12.0",
+    "promptfoo": "not-run",
+    "codex_credentials_provisioned": false,
+    "docker_available": true,
+    "container_harness": "node-fixture"
+  },
+  "agent_proof": {
+    "assertion_status": "not-run",
+    "output_contract_status": "not-run",
+    "session_id_present": false,
+    "promptfoo_exit_status": "not-run",
+    "failure_reason": "Promptfoo/Codex agent run was not requested or not provisioned; fallback artifact validation only."
+  },
+  "provenance_checks": {
+    "retained_dwt_s3_identity": "pass",
+    "source_manifest_present": "pass",
+    "temp_repo_hash_match": "pass",
+    "no_stale_output_reuse": "pass"
+  },
+  "readiness_checks": {
+    "child_index_row": "pass",
+    "handoff_current": "pass",
+    "write_set_concrete": "pass",
+    "target_workspace_isolated": "pass",
+    "stale_handoff_blocked": "blocked"
+  },
+  "runtime_checks": {
+    "local_runtime_gate": {
+      "status": "pass",
+      "evidence_truth": "ran-target",
+      "command": "/opt/homebrew/Cellar/node@22/22.12.0/bin/node scripts/local-gate.js",
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/target-repos/dwt-s5-synthetic-runtime-repo",
+      "exit_status": 0,
+      "log": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/evidence/local-runtime.log",
+      "failures": []
+    },
+    "container_harness_gate": {
+      "status": "pass",
+      "evidence_truth": "ran-target",
+      "command": "/opt/homebrew/Cellar/node@22/22.12.0/bin/node scripts/container-harness.js",
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/target-repos/dwt-s5-synthetic-runtime-repo",
+      "exit_status": 0,
+      "harness": "node-fixture",
+      "log": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/evidence/container-harness.log",
+      "failures": []
+    },
+    "blocked_runtime_reason": null
+  },
+  "closeout_checks": {
+    "parent_coverage_preserved": "pass",
+    "evidence_link_sync": "pass",
+    "openspec_ledger_sync": "pass",
+    "descendant_non_release": "pass"
+  },
+  "style_verdicts": {
+    "DWT-S5-L3A": "pass",
+    "DWT-S5-L3B": "pass",
+    "DWT-S5-L3C": "pass",
+    "DWT-S5-L3D": "pass",
+    "DWT-S5-L3E": "pass",
+    "DWT-S5-L3F": "pass"
+  },
+  "telemetry_verdicts": {
+    "DWT-S5-L3A": "pass",
+    "DWT-S5-L3B": "pass",
+    "DWT-S5-L3C": "pass",
+    "DWT-S5-L3D": "pass",
+    "DWT-S5-L3E": "pass",
+    "DWT-S5-L3F": "pass"
+  },
+  "forbidden_actions_observed": [],
+  "downstream_children": {}
+}

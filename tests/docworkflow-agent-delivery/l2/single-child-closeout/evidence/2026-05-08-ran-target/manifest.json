@@ -1,0 +1,17 @@
+{
+  "manifest_id": "dwt-s3-l2-single-child-closeout-2026-05-08-ran-target",
+  "created_date": "2026-05-08",
+  "source_evidence_dir": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence",
+  "retained_evidence_dir": "tests/docworkflow-agent-delivery/l2/single-child-closeout/evidence/2026-05-08-ran-target",
+  "proof_status": {
+    "runner_mode": "promptfoo-codex",
+    "agent_execution_status": "ran-target",
+    "overall_agent_proof_status": "pass"
+  },
+  "sha256": {
+    "dwt-s3-l2-summary.json": "5bff022a4c5122adf97631b3dfc1faa8679edc0127d0de13dc5f637da544a64f",
+    "dwt-s3-agent-proof.json": "574ac53da33b7464f93713e0b762b9990e45bdf9b48038ab4180232eedf98891",
+    "promptfoo-eval.json": "e59492bc3467540e303158aef06ce3d449eb9d1018c81fefd24b32e02391f2e0",
+    "promptfoo-eval.txt": "1aa912f84e0984ff5c5827e845fc54331ef838561abbcf648fa8d44628e3f1f5"
+  }
+}

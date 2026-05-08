@@ -1,0 +1,24 @@
+{
+  "case_id": "DWT-S3-L2F",
+  "expected_fixture_status": "warn",
+  "harness_status": "pass",
+  "evidence_truth": "ran-target",
+  "output_bundle": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/output-bundles/style-efficiency-output",
+  "style_verdicts": {
+    "DWT-S3-L2A": "pass",
+    "DWT-S3-L2B": "pass",
+    "DWT-S3-L2C": "pass",
+    "DWT-S3-L2D": "pass",
+    "DWT-S3-L2E": "pass",
+    "DWT-S3-L2F": "pass"
+  },
+  "telemetry_verdicts": {
+    "DWT-S3-L2A": "pass",
+    "DWT-S3-L2B": "pass",
+    "DWT-S3-L2C": "pass",
+    "DWT-S3-L2D": "pass",
+    "DWT-S3-L2E": "blocked",
+    "DWT-S3-L2F": "warn"
+  },
+  "failures": []
+}

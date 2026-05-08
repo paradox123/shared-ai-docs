@@ -1,0 +1,110 @@
+{
+  "schema_id": "docworkflow-agent-delivery-summary.v1",
+  "suite_level": "DWT-S3",
+  "suite_version": "DWT-S3-l2-single-child-closeout-v1",
+  "repo_root": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "fixture_root": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP",
+  "fixture_manifest": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/output-bundles/dwt-s3-ready-kickoff/source-manifest.json",
+  "runner_mode": "promptfoo-codex",
+  "agent_execution_status": "ran-target",
+  "overall_agent_proof_status": "pass",
+  "selector": "all",
+  "predecessor_evidence": {
+    "summary_path": "tests/docworkflow-agent-delivery/l2/parent-first/evidence/2026-05-08-ran-target/dwt-s2-l2-summary.json",
+    "manifest_path": "tests/docworkflow-agent-delivery/l2/parent-first/evidence/2026-05-08-ran-target/manifest.json",
+    "runner_mode": "promptfoo-codex",
+    "agent_execution_status": "ran-target",
+    "overall_agent_proof_status": "pass",
+    "manifest_sha_present": true,
+    "summary_sha256": "6e9d8f0ef8924673edc1b75f597905c0687f2bedbcda2c53a5f6f904c60c0a41"
+  },
+  "test_results": {
+    "DWT-S3-L2A": "pass",
+    "DWT-S3-L2B": "blocked",
+    "DWT-S3-L2C": "pass",
+    "DWT-S3-L2D": "blocked",
+    "DWT-S3-L2E": "blocked",
+    "DWT-S3-L2F": "warn"
+  },
+  "harness_case_results": {
+    "DWT-S3-L2A": "pass",
+    "DWT-S3-L2B": "pass",
+    "DWT-S3-L2C": "pass",
+    "DWT-S3-L2D": "pass",
+    "DWT-S3-L2E": "pass",
+    "DWT-S3-L2F": "pass"
+  },
+  "evidence_truth": {
+    "DWT-S3-L2A": "ran-target",
+    "DWT-S3-L2B": "ran-target",
+    "DWT-S3-L2C": "ran-target",
+    "DWT-S3-L2D": "ran-target",
+    "DWT-S3-L2E": "blocked",
+    "DWT-S3-L2F": "ran-target"
+  },
+  "evidence_links": {
+    "DWT-S3-L2A": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/dwt-s3-l2a-ready-kickoff.json",
+    "DWT-S3-L2B": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/dwt-s3-l2b-stale-handoff.json",
+    "DWT-S3-L2C": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/dwt-s3-l2c-closeout-sync.json",
+    "DWT-S3-L2D": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/dwt-s3-l2d-dwt-s5-blocked.json",
+    "DWT-S3-L2E": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/dwt-s3-l2e-blocked-agent.json",
+    "DWT-S3-L2F": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/dwt-s3-l2f-style-telemetry.json",
+    "agent_proof": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/dwt-s3-agent-proof.json",
+    "promptfoo_eval": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/promptfoo-eval.json",
+    "promptfoo_log": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/promptfoo-eval.txt"
+  },
+  "runner_environment": {
+    "os": "Darwin 25.3.0",
+    "shell": "/bin/zsh",
+    "node": "v24.14.0",
+    "promptfoo": "0.121.9",
+    "credentials_provisioned": true,
+    "requires_agents_for_acceptance": true,
+    "requires_docker": false
+  },
+  "agent_proof": {
+    "assertion_status": "pass",
+    "output_contract_status": "pass",
+    "session_id_present": true,
+    "promptfoo_exit_status": "0",
+    "failure_reason": null
+  },
+  "provenance_checks": {
+    "retained_dwt_s2_identity": "pass",
+    "source_manifest_present": "pass",
+    "no_stale_output_reuse": "pass"
+  },
+  "readiness_checks": {
+    "child_index_row": "pass",
+    "handoff_current": "pass",
+    "stale_handoff_blocked": "blocked",
+    "write_set_concrete": "pass",
+    "target_workspace_isolated": "pass"
+  },
+  "closeout_checks": {
+    "parent_coverage_preserved": "pass",
+    "evidence_link_sync": "pass",
+    "openspec_ledger_sync": "pass",
+    "dwt_s5_blocked_state": "blocked"
+  },
+  "style_verdicts": {
+    "DWT-S3-L2A": "pass",
+    "DWT-S3-L2B": "pass",
+    "DWT-S3-L2C": "pass",
+    "DWT-S3-L2D": "pass",
+    "DWT-S3-L2E": "warn",
+    "DWT-S3-L2F": "pass"
+  },
+  "telemetry_verdicts": {
+    "DWT-S3-L2A": "pass",
+    "DWT-S3-L2B": "pass",
+    "DWT-S3-L2C": "pass",
+    "DWT-S3-L2D": "pass",
+    "DWT-S3-L2E": "blocked",
+    "DWT-S3-L2F": "warn"
+  },
+  "forbidden_actions_observed": [],
+  "downstream_children": {
+    "DWT-S5": "blocked_by_dependency"
+  }
+}

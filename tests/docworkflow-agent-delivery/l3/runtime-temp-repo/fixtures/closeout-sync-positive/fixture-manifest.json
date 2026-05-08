@@ -1,0 +1,7 @@
+{
+  "fixture_id": "closeout-sync-positive",
+  "fixture_version": "1.0.0",
+  "parent_coverage": ["DWT-PR3", "DWT-PR4", "DWT-PR5"],
+  "dwt_s5_state": "implemented_pending_closeout",
+  "descendant_release_state": "none"
+}

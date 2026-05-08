@@ -167,6 +167,7 @@ Rules:
 - After recommending a next child, update `Next Action`, create or update the persisted Child Session Handoff, and write its path into `Session Handoff`.
 - Default handoff location is `child-session-handoffs/<child-id>-session-handoff.md` beside the Child Index. If the Child Index is only a section in another artifact, name the exact file/section or patch target that owns the handoff.
 - Mark a handoff as stale/blocking instead of reusing it when its child path, verdict, next action, evidence/OpenSpec pointer, or index row disagrees with the current orchestration state.
+- After creating or updating the leading handoff, create Agent Delivery Session Launch/Queue Evidence with `skills-repo/tools/AgentDeliverySessionLauncher.cs --mode queue` or document the explicit `manual_start_required`, `blocked`, or `failed` reason. Do not describe a handoff as an automated fresh-session transition unless matching `_specs/agent-delivery-session-launches/**/launch-request.json` and `evidence.json` exist for the same target id and handoff path.
 
 ### 3. Normalize Parent Requirements
 
@@ -322,7 +323,7 @@ Prefer this order:
 
 Recommend the next single slice and, separately, any batch/parallel work that can happen safely.
 
-For each next child, include and persist a Child Session Handoff using the shared workflow template: parent path, stable child id, child spec path, child index/queue path, handoff file path, target repository / working directory, Codex session/log metadata when available, next mode/skill, current verdict, scope summary, non-goals, allowed write-set, shared/read-only files, verification lifecycle, evidence/OpenSpec, retained evidence, open blockers or non-blocking notes, and whether the next step should start in a fresh session. Link the same file from the Child Index.
+For each next child, include and persist a Child Session Handoff using the shared workflow template: parent path, stable child id, child spec path, child index/queue path, handoff file path, target repository / working directory, Codex session/log metadata when available, next mode/skill, current verdict, scope summary, non-goals, allowed write-set, shared/read-only files, verification lifecycle, evidence/OpenSpec, retained evidence, open blockers or non-blocking notes, and whether the next step should start in a fresh session. Link the same file from the Child Index. Then run or recommend `AgentDeliverySessionLauncher.cs --mode queue --handoff <handoff> --target-id <child> --agent codex --out _specs/agent-delivery-session-launches`; if that cannot produce `queued` or `launched`, keep the blocked/manual state visible.
 
 ### 10. Closeout Sync Checklist
 

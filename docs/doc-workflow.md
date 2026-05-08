@@ -32,6 +32,7 @@ Hier werden die gemeinsamen Begriffe gepflegt:
 - **Parallel Work Control Surface**
 - **Mini-Retro**
 - **Spec Goldstandard**
+- **Agent Delivery Session Launch/Queue Evidence**
 
 Die Skills dürfen diese Begriffe lokal kurz restaten, sollen aber **keine abweichenden Definitionen** einführen. Änderungen an der gemeinsamen Bedeutung werden zuerst hier gepflegt.
 
@@ -110,6 +111,23 @@ Regeln:
 6. Wenn ein Hardening-Run einen Child auf `IMPLEMENTATION READY` setzt, ist das ein Handoff-Punkt. Der Run liefert ein frisches Handoff und stoppt dort, ausser der User hat ausdruecklich denselben Run auch fuer Delivery freigegeben.
 7. `Verification Lifecycle` trennt Command-Rehearsal, Delivery-Gate, Pre-Archive-Closeout und aktuellen Post-Archive-Replay. Ein nach OpenSpec-Archive ungueltiger Active-Change-Command darf nicht als aktueller Replay-Command im Handoff stehen bleiben.
 8. Temp-Evidence darf als Laufnachweis dienen, aber accepted Baseline-Evidence muss entweder an einem stabilen Workspace-Pfad persistiert oder mit Retention-/Hash-/Wiederherstellungsanweisung im Handoff referenziert werden.
+
+## Agent Delivery Session Launch/Queue Evidence
+
+Ein Agent-Delivery-Handoff ist die fachliche Startquelle; die technische Uebergabe in eine frische Agent-Session wird durch Agent Delivery Session Launch/Queue Evidence belegt. Standardort ist `_specs/agent-delivery-session-launches/`. Das lokale Tool `skills-repo/tools/AgentDeliverySessionLauncher.cs` erzeugt pro Run mindestens `launch-request.json`, `start-prompt.md` und `evidence.json`; bei Launch koennen `agent-events.jsonl` und `last-message.md` dazukommen.
+
+Statuswerte:
+1. `launched`: ein implementierter Adapter hat eine frische Session wirklich gestartet.
+2. `queued`: ein vollstaendiger maschinenlesbarer Startauftrag und Prompt liegen fuer einen implementierten Queue-/Launch-Adapter vor.
+3. `manual_start_required`: der Prompt ist vollstaendig, aber der angeforderte Agent-Provider hat keinen implementierten automatischen v1-Adapter.
+4. `blocked`: Konsistenz-, Verdict-, Workspace- oder Secret-Gate verhindert eine gueltige Startfreigabe.
+5. `failed`: ein Launch wurde versucht, schlug aber fehl oder Evidence konnte nicht vollstaendig geschrieben werden.
+
+Regeln:
+1. Skills duerfen "frische Session gestartet/gequeued" nur behaupten, wenn `launch-request.json` und `evidence.json` fuer dieselbe Target-ID und denselben Handoff-Pfad existieren und `status` `launched` oder `queued` ist.
+2. `manual_start_required` ist ein sichtbarer manueller Rest, aber kein automatisierter Uebergangserfolg.
+3. `blocked` und `failed` blockieren Folge-Delivery und muessen in Control-Artefakten sichtbar bleiben.
+4. Fuer `codex`-Launches muss Evidence `project_cwd` und `codex_app.visibility_status` enthalten; `verified_same_project` ist nur erlaubt, wenn der beobachtete Thread-`cwd` dem Target Workspace entspricht.
 
 ## Mini-Retro Template (kurz)
 

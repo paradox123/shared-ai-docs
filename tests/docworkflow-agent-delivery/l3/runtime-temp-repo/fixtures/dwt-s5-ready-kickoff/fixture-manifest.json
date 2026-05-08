@@ -1,0 +1,8 @@
+{
+  "fixture_id": "dwt-s5-ready-kickoff",
+  "fixture_version": "1.0.0",
+  "child_id": "DWT-S5",
+  "handoff_path": "_specs/child-session-handoffs/dwt-s5-session-handoff.md",
+  "readiness_verdict": "IMPLEMENTATION READY",
+  "expected_result": "pass"
+}

@@ -1,0 +1,10 @@
+{
+  "case_id": "DWT-S3-L2E",
+  "expected_fixture_status": "blocked",
+  "harness_status": "pass",
+  "evidence_truth": "blocked",
+  "output_bundle": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/output-bundles/blocked-agent-output",
+  "runner_mode": "fallback-artifact",
+  "agent_execution_status": "blocked_auth",
+  "failures": []
+}

@@ -1,0 +1,38 @@
+{
+  "case_id": "DWT-S3-L2B",
+  "expected_fixture_status": "blocked",
+  "harness_status": "pass",
+  "evidence_truth": "ran-target",
+  "output_bundle": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-single-child-closeout.QcEYiP/evidence/output-bundles/stale-dwt-s3-handoff",
+  "expected_blocker_detected": true,
+  "failures": [
+    {
+      "code": "stale_or_mismatched_dwt_s3_handoff",
+      "message": "kickoff must use current DWT-S3 handoff"
+    },
+    {
+      "code": "stale_or_mismatched_dwt_s3_handoff",
+      "message": "handoff_current must be true"
+    },
+    {
+      "code": "stale_or_mismatched_dwt_s3_handoff",
+      "message": "readiness verdict must be implementation-ready"
+    },
+    {
+      "code": "missing_target_workspace",
+      "message": "target workspace must be absolute"
+    },
+    {
+      "code": "target_workspace_not_isolated",
+      "message": "target workspace must be under the isolated run directory"
+    },
+    {
+      "code": "target_workspace_not_isolated",
+      "message": "target_workspace_isolated must be true"
+    },
+    {
+      "code": "approximate_or_mismatched_write_set",
+      "message": "allowed write-set must be concrete"
+    }
+  ]
+}

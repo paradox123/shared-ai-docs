@@ -1,0 +1,26 @@
+{
+  "fixture_id": "dwt-s5-runtime-temp-repo-output",
+  "source_parent_path": "_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md",
+  "source_child_spec_path": "_specs/2026-05-08 DocWorkflow Agent Delivery Testsuite DWT-S5 L3 Runtime Temp-Repo Delivery Pilot.md",
+  "source_handoff_path": "_specs/child-session-handoffs/dwt-s5-session-handoff.md",
+  "retained_dwt_s3_summary_path": "tests/docworkflow-agent-delivery/l2/single-child-closeout/evidence/2026-05-08-ran-target/dwt-s3-l2-summary.json",
+  "retained_dwt_s3_manifest_path": "tests/docworkflow-agent-delivery/l2/single-child-closeout/evidence/2026-05-08-ran-target/manifest.json",
+  "synthetic_fixture_path": "tests/docworkflow-agent-delivery/l3/runtime-temp-repo/fixtures/synthetic-runtime-repo",
+  "generated_temp_repo_path": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.KUb3JS/target-repos/dwt-s5-synthetic-runtime-repo",
+  "fixture_source_hash": "1f5062d5b482938adeeab0f6cc8c1ca6e2ebf600f191f75ef13598dd53bfe932",
+  "normalizations": [
+    "absolute run-dir paths are per-run evidence"
+  ],
+  "generated_artifacts": [
+    "source-manifest.json",
+    "agent-output.md",
+    "delivery-kickoff.md",
+    "runtime-gates.md",
+    "closeout-sync.md",
+    "child-index-before.md",
+    "child-index-after.md",
+    "handoffs/dwt-s5-session-handoff.md",
+    "agent-run-manifest.json",
+    "evidence/dwt-s5-l3-summary.json"
+  ]
+}
