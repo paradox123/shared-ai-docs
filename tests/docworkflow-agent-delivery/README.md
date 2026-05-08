@@ -9,9 +9,12 @@ Diese Testsuite prueft den shared-ai-docs Agent Delivery Workflow fuer Parent-/C
 | `testcases/tc1-parent-first-orchestration-child-hardening.md` | Testcase 1 als lesbarer Harness-Vertrag. |
 | `testcases/tc2-single-child-delivery-next-handoff.md` | Testcase 2 als lesbarer Harness-Vertrag. |
 | `l1/fixtures/` | Kleine synthetische DWT-S1-Fixtures fuer deterministische L1-Vertragschecks. |
+| `l2/parent-first/fixtures/` | DWT-S2 Parent-first Output Bundles fuer positive, negative, blocked, style and telemetry checks. |
+| `l2/parent-first/validators/` | Deterministic Node validator for DWT-S2 parent-first orchestration bundles. |
 | `scripts/setup-fixture.sh` | Kopiert reale KI-fuer-KMU-Spec-Fixtures in einen Temp-Ordner und normalisiert nur diese Kopie. |
 | `scripts/run-contract-checks.sh` | Fuehrt automatisierbare Contract-Checks fuer TC1/TC2 aus und schreibt Evidence in die Temp-Fixture. |
 | `scripts/run-l1-contract-checks.sh` | Fuehrt DWT-S1 L1A-L1F gegen synthetische Fixtures aus und schreibt `evidence/l1-summary.json`. |
+| `scripts/run-l2-parent-orchestration-checks.sh` | Fuehrt DWT-S2 L2A-L2F gegen Parent-first Output Bundles aus und schreibt `evidence/dwt-s2-l2-summary.json`. |
 | `scripts/run-reporting-contract-checks.sh` | Fuehrt DWT-S4 Summary-, Telemetry-, Style- und Efficiency-Contract-Checks aus und schreibt `evidence/dwt-s4-reporting-summary.json`. |
 | `reporting/fixtures/` | DWT-S4 positive, negative, warning, blocked and retained-baseline reporting fixtures. |
 | `reporting/validators/` | Deterministic Node validator for DWT-S4 reporting fixtures. |
@@ -34,10 +37,22 @@ DWT-S4 reporting contract checks:
 tests/docworkflow-agent-delivery/scripts/run-reporting-contract-checks.sh all
 ```
 
+DWT-S2 L2 parent-first orchestration checks:
+
+```sh
+tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh all
+```
+
 Optional mit behaltenem L1-Evidence-Ordner:
 
 ```sh
 tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh all --keep
+```
+
+Optional mit behaltenem DWT-S2 L2-Evidence-Ordner:
+
+```sh
+tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh all --keep
 ```
 
 Optional mit behaltenem DWT-S4 Reporting-Evidence-Ordner:
@@ -72,6 +87,7 @@ Automatisierbar:
 - Temp-Repo-Gate fuer Delivery-Starts,
 - Vorhandensein lokaler und Docker-/Harness-Gates im Vertrag,
 - L1-Fixture-Provenance, Child-Readiness-Regressionen, Hidden-Normalization-Fehler und S0-Limitation-Isolation.
+- DWT-S2 Parent-only Startzustand, generated Child Control Surface, Direct-Implementation-Blocker, Thin-Child-Readiness-Blocker, exactly-one leading Next Child State und blocked-agent Ehrlichkeit.
 - DWT-S4 Summary-v1-Felder, Legacy-Kompatibilitaet fuer die retained DWT-S1 Summary, Telemetry-Verbote, Style-/Handoff-Sync, Efficiency-Warnungen und Downstream-Release-Blockaden.
 
 Agentischer Dry-Run:
@@ -94,3 +110,9 @@ Negative Fixtures gelten nur dann als erfolgreich geprueft, wenn der erwartete B
 `run-reporting-contract-checks.sh` ist reporting-only. Der Runner liest die retained DWT-S1 Summary als externe Legacy-Baseline und prueft neue source-controlled Fixtures unter `reporting/fixtures/`. Er ruft keine Agenten, Promptfoo, Codex, Docker, npm Registry oder Runtime-Repos auf.
 
 Die DWT-S4 Summary verwendet `schema_id: docworkflow-agent-delivery-summary.v1`. Negative Fixtures gelten als erfolgreich geprueft, wenn die erwartete Failure-Klasse sichtbar wird, z. B. `invalid_evidence_truth`, `forbidden_runtime_command` oder `stale_handoff_or_index_pointer`. Warning- und Blocked-Fixtures bleiben maschinenlesbare Ergebnisstatus, waehrend `harness_case_results` zeigt, ob die erwartete Contract-Assertion bestanden hat.
+
+## DWT-S2 L2 Boundary
+
+`run-l2-parent-orchestration-checks.sh` prueft Output-Bundles fuer Parent-first Orchestration. Der Runner validiert Child Specs, exakten Child Index, Coverage Matrix, Dependencies, Hardening Queue, Next-State-Gating, DWT-S4-kompatible Summary-Felder und Telemetry. Negative Fixtures gelten als erfolgreich geprueft, wenn der erwartete Blocker sichtbar wird.
+
+Der Selector `agent` schreibt aktuell eine reproduzierbare Blocker-Evidence, wenn Promptfoo/Codex nicht provisioniert ist. `fallback` und `all` koennen deterministische Contract Evidence erzeugen, aber eine akzeptierte L2-Agent-Proof braucht weiterhin `agent_execution_status: ran-target`.

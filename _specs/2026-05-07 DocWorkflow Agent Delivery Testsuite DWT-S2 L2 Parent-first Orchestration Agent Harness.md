@@ -1,5 +1,5 @@
 **Date:** 2026-05-08
-**Status:** 🟡 Implementation-ready
+**Status:** 🔵 Implemented (blocked L2 agent proof)
 **Scope:** Implementation-ready child spec for the DWT-S2 L2 Parent-first Orchestration Agent Harness.
 
 ---
@@ -307,6 +307,14 @@ Performed during hardening on 2026-05-08:
 
 `run-l2-parent-orchestration-checks.sh` does not exist before DWT-S2 implementation. Its first successful syntax and `all --keep` executions are DWT-S2 delivery evidence, distinct from hardening rehearsal evidence.
 
+## Implementation Evidence
+
+| Evidence | Result | Meaning |
+|---|---|---|
+| `bash -n tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh` | Passed. | DWT-S2 runner syntax is valid. |
+| `tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh all --keep` | Passed with retained evidence `/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l2-parent-first.fTeIRN/evidence/dwt-s2-l2-summary.json`. | Deterministic positive, negative, blocked, style and telemetry bundle assertions pass. |
+| L2 agent proof status | Blocked: `agent_execution_status: blocked_auth`; `overall_agent_proof_status: blocked`. | Fallback artifact evidence is not accepted as passing L2 agent proof without `ran-target`. |
+
 ## Definition of Ready for Implementation
 
 - Parent coverage and conformance are explicit for `DWT-PR1`, `DWT-PR2`, `DWT-PR5` and `DWT-PR7`.
@@ -401,5 +409,6 @@ Persisted handoff: `_specs/child-session-handoffs/dwt-s2-session-handoff.md`.
 | Date | Author | Change |
 |---|---|---|
 | 2026-05-08 | Codex | Hardened DWT-S2 into an implementation-ready L2 Parent-first Orchestration Agent Harness child spec with runner/fallback contract, fixtures, verification, OpenSpec change and handoff/index sync. |
+| 2026-05-08 | Codex | Implemented DWT-S2 L2 fixtures, validator, Promptfoo config, fallback runner and retained deterministic evidence; live agent proof remains blocked on auth/provisioning. |
 
 SessionId: 2026-05-08-docworkflow-agent-delivery-testsuite-dwt-s2
