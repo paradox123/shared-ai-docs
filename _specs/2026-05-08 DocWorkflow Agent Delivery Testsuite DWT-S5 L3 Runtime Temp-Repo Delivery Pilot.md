@@ -1,20 +1,20 @@
 **Date:** 2026-05-08
-**Status:** Implemented; ready for closeout
-**Scope:** Implementation-ready child spec for the DWT-S5 L3 Runtime Temp-Repo Delivery Pilot.
+**Status:** 🟢 Accepted
+**Scope:** Accepted child spec for the DWT-S5 L3 Runtime Temp-Repo Delivery Pilot.
 
 ---
 
 ## Review Control Surface
 
-- Spec-Variante: implementation-ready Child Spec.
-- Goldstandard Status: candidate.
+- Spec-Variante: accepted Child Spec.
+- Goldstandard Status: accepted.
 - Ziel: Einen L3-Piloten definieren, der eine einzelne synthetische Child-Delivery in einem isolierten Temp-Repo ausfuehrt, lokale Runtime-Gates und Container-/Harness-Gates als Evidence trennt und beweist, dass keine Original-Repositories oder Folge-Children beschrieben, veraendert oder freigegeben werden.
 - In Scope: DWT-S5 L3 Temp-Repo runner contract, synthetic runtime fixture, temp-repo materialization, local runtime gate, container/harness gate contract, Promptfoo/Codex delivery kickoff through the current DWT-S5 handoff, retained DWT-S3 evidence dependency checks, DWT-S4-compatible summary/telemetry/style evidence, OpenSpec active change, Parent Child Index and persisted handoff sync.
 - Out of Scope: DWT-S5 implementation during hardening, runtime or Docker execution as hardening acceptance proof, any KI-fuer-KMU original repo description or write, broad runtime migration, deployment, credential copying, mutation of accepted DWT-S0 through DWT-S4 archives, auto-release of any child after DWT-S5.
 - Wichtigste Test-/Harness-Cases: `DWT-S5-L3A temp repo is materialized from synthetic fixture only`, `DWT-S5-L3B delivery kickoff validates current DWT-S5 handoff and write-set`, `DWT-S5-L3C local runtime gate runs inside temp repo only`, `DWT-S5-L3D container/harness gate is isolated and honestly blocked when unavailable`, `DWT-S5-L3E forbidden original-repo or credential writes fail`, `DWT-S5-L3F closeout preserves DWT-PR3/DWT-PR4/DWT-PR5 and DWT-S3 retained evidence`.
 - Wichtigste Verification Commands: retained DWT-S3 summary/manifest presence and status assertions; `bash -n` for existing L0/L1/S2/S3/S4 scripts; active-change `openspec validate docworkflow-agent-testsuite-dwt-s5-l3-runtime-temp-repo-delivery-pilot --strict`; canonical `openspec validate docworkflow-agent-delivery-testsuite --strict`; DWT-S5 `ValidateChildReadiness.cs`; `git diff --check`; after implementation, `bash -n tests/docworkflow-agent-delivery/scripts/run-l3-runtime-temp-repo-checks.sh`, `tests/docworkflow-agent-delivery/scripts/run-l3-runtime-temp-repo-checks.sh preflight --keep`, `tests/docworkflow-agent-delivery/scripts/run-l3-runtime-temp-repo-checks.sh all --keep`, `tests/docworkflow-agent-delivery/scripts/run-reporting-contract-checks.sh all`, and `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all`.
 - Offene Entscheidungen: Keine blockierenden Entscheidungen. The L3 pilot uses a synthetic fixture repository, not a KI-fuer-KMU original repository. Container execution is an implementation-time gate; if Docker or the container runtime is unavailable, the result must be `blocked_runtime`, not `pass`.
-- Readiness Status: IMPLEMENTATION READY.
+- Readiness Status: ACCEPTED; was IMPLEMENTATION READY.
 
 ## Goal
 
@@ -333,7 +333,7 @@ No runtime command or Docker/container command was executed as hardening accepta
 - Harness cases include positive, negative, blocked, fallback, local runtime, container/harness, closeout, style, telemetry and secret/redaction assertions.
 - Allowed Write-Set and Shared/read-only Files are enforceable.
 - Verification commands, success criteria and anti-loop rule are defined.
-- Active OpenSpec change exists and validates.
+- OpenSpec change existed, validated before archive and is now archived.
 - Persisted handoff exists and matches this spec and the Parent Child Index.
 - `ValidateChildReadiness.cs` passes for DWT-S5 before delivery starts.
 
@@ -357,7 +357,7 @@ Allowed implementation write-set:
 - `_specs/2026-05-08 DocWorkflow Agent Delivery Testsuite DWT-S5 L3 Runtime Temp-Repo Delivery Pilot.md`
 - `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md`
 - `_specs/child-session-handoffs/dwt-s5-session-handoff.md`
-- `openspec/changes/docworkflow-agent-testsuite-dwt-s5-l3-runtime-temp-repo-delivery-pilot/**`
+- `openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s5-l3-runtime-temp-repo-delivery-pilot/**`
 - `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`
 - `tests/docworkflow-agent-delivery/l3/runtime-temp-repo/**`
 - `tests/docworkflow-agent-delivery/scripts/run-l3-runtime-temp-repo-checks.sh`
@@ -410,7 +410,7 @@ Parallel hardening / implementation:
 ## Closeout Sync Targets
 
 - Parent Child Index row `DWT-S5`.
-- Active OpenSpec change `openspec/changes/docworkflow-agent-testsuite-dwt-s5-l3-runtime-temp-repo-delivery-pilot/`.
+- Archived OpenSpec change `openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s5-l3-runtime-temp-repo-delivery-pilot/`.
 - Canonical OpenSpec spec `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md` after DWT-S5 acceptance/archive.
 - DWT-S5 retained evidence path and README/testcase documentation.
 - DWT-S5 child spec implementation and closeout evidence sections.
@@ -426,7 +426,7 @@ Persisted handoff: `_specs/child-session-handoffs/dwt-s5-session-handoff.md`.
 - Correctness/domain fit: Pass. DWT-S5 owns L3 runtime temp-repo proof and does not re-prove L2 orchestration or closeout gates.
 - Scope discipline: Pass. Runtime and Docker/container execution are implementation-time gates only; hardening did not execute them as acceptance proof.
 - Completeness: Pass. Runner modes, outputs, fixture paths, cases, verification, write-set, OpenSpec and handoff are concrete.
-- Consistency: Pass after Parent Child Index, handoff and active OpenSpec sync.
+- Consistency: Pass after Parent Child Index, handoff and archived OpenSpec sync.
 - Testability: Pass. Implementation has deterministic fixture/validator paths plus explicit handling for real runtime pass versus blocked runtime.
 - Blocking Marker: None after hardening verification passes.
 
@@ -437,12 +437,20 @@ Persisted handoff: `_specs/child-session-handoffs/dwt-s5-session-handoff.md`.
 - Latest target run: `DWT_S5_ENABLE_AGENT=1 run-l3-runtime-temp-repo-checks.sh all --keep` passed DWT-S5-L3A through DWT-S5-L3F with `runner_mode: promptfoo-codex`, `agent_execution_status: ran-target`, `overall_runtime_proof_status: pass`, local runtime evidence and container/harness fixture evidence from the generated temp repo.
 - Blocked-runtime rehearsal remains available at `tests/docworkflow-agent-delivery/l3/runtime-temp-repo/evidence/2026-05-08-blocked-runtime/dwt-s5-l3-summary.json` as fallback-path evidence only.
 
+## Closeout Evidence
+
+- OpenSpec archived at `openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s5-l3-runtime-temp-repo-delivery-pilot/`.
+- Canonical OpenSpec spec updated at `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`.
+- Parent Child Index, DWT-S5 handoff, README/testcase docs and retained DWT-S5 evidence links are synchronized.
+- No descendant child is implementation-authorized by this closeout.
+
 ## History
 
 | Date | Author | Change |
 |---|---|---|
 | 2026-05-08 | Codex | Hardened DWT-S5 into an implementation-ready L3 Runtime Temp-Repo Delivery Pilot child spec with synthetic fixture contract, runtime/container evidence contract, OpenSpec change and handoff/index sync. |
-| 2026-05-08 | Codex | Implemented the DWT-S5 L3 synthetic temp-repo runner, fixtures, validators, Promptfoo/Codex config and retained blocked-runtime evidence; target Promptfoo/Codex proof remains blocked pending an enabled agent run. |
+| 2026-05-08 | Codex | Implemented the DWT-S5 L3 synthetic temp-repo runner, fixtures, validators, Promptfoo/Codex config and retained blocked-runtime rehearsal evidence before target agent proof was enabled. |
 | 2026-05-08 | Codex | Repaired the Promptfoo/Codex command contract, ran DWT-S5 target proof with `DWT_S5_ENABLE_AGENT=1`, and retained `ran-target` pass evidence for closeout. |
+| 2026-05-08 | Codex | Accepted DWT-S5 and archived the OpenSpec change after verification replay and parent/handoff/evidence sync. |
 
 SessionId: 2026-05-08-docworkflow-agent-delivery-testsuite-dwt-s5
