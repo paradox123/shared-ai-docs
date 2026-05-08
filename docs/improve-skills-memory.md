@@ -69,3 +69,24 @@
   signal: Scope splitting helped delivery, but child specs, parent coverage, backlog re-entry, and parallel execution ownership were not consistently enforced by the workflow skills.
   latest_evidence: /Users/dh/.codex/sessions/2026/05/05/rollout-2026-05-05T17-48-36-019df8d3-b142-7c22-9c48-0d755090556b.jsonl
   suggested_skill_or_playbook: Add parent/child orchestration rules to doc-workflow and delivery skills: coverage matrix, child readiness envelope, backlog trigger/done signal, disjoint write-set lane matrix, and shared-file integration owner.
+
+- name: agent-delivery-launch-evidence
+  scope: general
+  counter: 1
+  signal: The DocWorkflow Agent Delivery Testsuite used strong persisted handoffs and real Codex sessions, but historical DWT fresh-session transitions had no `_specs/agent-delivery-session-launches/**/launch-request.json` or `evidence.json` artifacts.
+  latest_evidence: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/agent-delivery-retro-review-2026-05-08.md
+  suggested_skill_or_playbook: Treat Agent Delivery Session Launch/Queue Evidence as the default proof for future fresh-session transitions; missing historical evidence should be labeled as reconstructed/manual instead of automated.
+
+- name: session-id-crosswalk
+  scope: general
+  counter: 1
+  signal: Semantic handoff `SessionId` labels were useful for humans but not enough to directly locate real Codex `.jsonl` session logs during the DWT retro.
+  latest_evidence: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/agent-delivery-retro-review-2026-05-08.md
+  suggested_skill_or_playbook: Handoffs and launcher evidence should store real session/log paths when available, or explicitly state that the transition is pre-launcher/manual.
+
+- name: post-archive-replay-contract
+  scope: general
+  counter: 1
+  signal: The DWT-S5 active-child runtime command became stale after OpenSpec archive, and parent closeout had to replace it with archive-presence plus canonical spec validation.
+  latest_evidence: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/agent-delivery-retro-review-2026-05-08.md
+  suggested_skill_or_playbook: Closeout must preserve pre-archive commands as historical evidence and publish a separate post-archive/current replay command set.

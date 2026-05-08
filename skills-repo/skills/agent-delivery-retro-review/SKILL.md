@@ -35,7 +35,7 @@ Required where available:
 - History rows and SessionId lines.
 - Codex session logs under `.codex/sessions/**/*.jsonl` and `.codex/archived_sessions/*.jsonl` when they are relevant and available.
 
-If session ids are semantic labels rather than real Codex ids, document the gap and reconstruct through handoffs/history/evidence as far as possible.
+If session ids are semantic labels rather than real Codex ids, document the gap and reconstruct through handoffs/history/evidence as far as possible. For future work, semantic-only `SessionId` is a finding unless the handoff also has matching launch evidence, a real Codex session id plus `.codex/...jsonl` log path, `manual_start_required` evidence, or explicit `legacy_reconstructed` source/date for historical pre-launcher transitions.
 
 ## Review Questions
 

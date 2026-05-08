@@ -84,6 +84,7 @@ Persistenzregel:
 - Handoff File:
 - Target Repository / Working Directory:
 - Codex Session / Log:
+- Session Evidence:
 - Handoff Timestamp:
 - Naechster Modus/Skill:
 - Aktueller Verdict:
@@ -128,6 +129,8 @@ Regeln:
 2. `manual_start_required` ist ein sichtbarer manueller Rest, aber kein automatisierter Uebergangserfolg.
 3. `blocked` und `failed` blockieren Folge-Delivery und muessen in Control-Artefakten sichtbar bleiben.
 4. Fuer `codex`-Launches muss Evidence `project_cwd` und `codex_app.visibility_status` enthalten; `verified_same_project` ist nur erlaubt, wenn der beobachtete Thread-`cwd` dem Target Workspace entspricht.
+5. Ein semantischer `SessionId` wie `2026-05-08-...` ist nur ein menschlicher Alias. Fuer zukuenftige forensische Session-Evidence braucht ein Handoff entweder passende Launch/Queue-Evidence, eine echte Codex Session-ID plus `.codex/...jsonl` Logpfad, `manual_start_required` mit Startauftrag-Evidence oder den expliziten historischen Marker `legacy_reconstructed` mit Rekonstruktionsquelle und Datum.
+6. `legacy_reconstructed` darf historische/pre-launcher Uebergaenge erklaeren, zaehlt aber nicht als automatischer Launch-/Queue-Erfolg.
 
 ## Mini-Retro Template (kurz)
 
