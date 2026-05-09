@@ -7,7 +7,8 @@ Usage:
   run-contract-checks.sh [all|tc1|tc2|reporting] [--fixture DIR] [--keep] [--source-specs DIR]
 
 Runs contract checks for the DocWorkflow Agent Delivery test suite.
-If no fixture is supplied, a temp fixture is created and removed unless --keep is set.
+The standard "all" selector delegates to the mock-only E2E runner.
+Legacy tc1/tc2 checks require --fixture or an explicit non-forbidden --source-specs.
 USAGE
 }
 
@@ -17,7 +18,7 @@ REPO_ROOT="$(cd "$SUITE_DIR/../.." && pwd)"
 
 testcase="all"
 fixture_dir=""
-source_specs="/Users/dh/Documents/DanielsVault/ki-fuer-kmu/_specs"
+source_specs=""
 keep=0
 
 if [ "$#" -gt 0 ] && [[ "$1" != --* ]]; then
@@ -60,8 +61,31 @@ case "$testcase" in
     ;;
 esac
 
+if [ "$testcase" = "all" ]; then
+  if [ -n "$fixture_dir" ] || [ -n "$source_specs" ]; then
+    echo "The standard all selector is mock-only and does not accept fixture sources." >&2
+    echo "Use run-mock-e2e-checks.sh all --keep, or tc1/tc2 with an explicit legacy fixture." >&2
+    exit 2
+  fi
+
+  mock_args=(all)
+  if [ "$keep" -eq 1 ]; then
+    mock_args+=(--keep)
+  fi
+  exec "$SCRIPT_DIR/run-mock-e2e-checks.sh" "${mock_args[@]}"
+fi
+
+if [ "$testcase" = "reporting" ]; then
+  exec "$SCRIPT_DIR/run-reporting-contract-checks.sh" all
+fi
+
 created_fixture=0
 if [ -z "$fixture_dir" ]; then
+  if [ -z "$source_specs" ]; then
+    echo "Legacy $testcase checks require --fixture or explicit --source-specs." >&2
+    echo "The standard gate is run-mock-e2e-checks.sh all --keep." >&2
+    exit 2
+  fi
   setup_output="$("$SCRIPT_DIR/setup-fixture.sh" --source-specs "$source_specs")"
   fixture_dir="$(printf '%s\n' "$setup_output" | sed -n 's/^FIXTURE_DIR=//p' | tail -n 1)"
   created_fixture=1
@@ -325,8 +349,12 @@ run_tc2() {
     *) fail "Handoff Target Repository is inside fixture" ;;
   esac
 
-  source_root="${source_specs%/_specs}"
-  assert_not_contains "$s3_handoff" "$source_root" "S3 handoff does not point verification commands at original repo"
+  if [ -n "$source_specs" ]; then
+    source_root="${source_specs%/_specs}"
+    assert_not_contains "$s3_handoff" "$source_root" "S3 handoff does not point verification commands at original repo"
+  else
+    pass "S3 handoff does not point at an implicit source repo"
+  fi
 
   write_set="$(extract_handoff_write_set "$s3_handoff")"
   if write_set_is_concrete "$write_set"; then
@@ -361,16 +389,12 @@ run_tc2() {
   log "DRY-RUN: Runtime verification commands are contract-checked only; no implementation is executed in this harness."
 }
 
-if [ "$testcase" = "all" ] || [ "$testcase" = "tc1" ]; then
+if [ "$testcase" = "tc1" ]; then
   run_tc1
 fi
 
-if [ "$testcase" = "all" ] || [ "$testcase" = "tc2" ]; then
+if [ "$testcase" = "tc2" ]; then
   run_tc2
-fi
-
-if [ "$testcase" = "all" ] || [ "$testcase" = "reporting" ]; then
-  "$SCRIPT_DIR/run-reporting-contract-checks.sh" all
 fi
 
 if [ "$failures" -gt 0 ]; then

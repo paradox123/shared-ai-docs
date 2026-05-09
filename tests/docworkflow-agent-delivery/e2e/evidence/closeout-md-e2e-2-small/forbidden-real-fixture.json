@@ -1,0 +1,27 @@
+{
+  "schema_id": "docworkflow-agent-delivery-mock-forbidden-scan.v1",
+  "target": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-small",
+  "validator": "tests/docworkflow-agent-delivery/e2e/validators/forbidden-real-fixture.js",
+  "status": "pass",
+  "stdout_json": {
+    "status": "pass",
+    "checked_paths": [
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-small/command-telemetry.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-small/forbidden-path-policy.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-small/mock-e2e-summary.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-small/negative-guard-evidence.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-small/small/direct-delivery.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-small/small/mock-e2e-summary.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-small/small/mock-target/output/small-direct-result.json"
+    ],
+    "forbidden_patterns": [
+      "absolute_ki_fuer_kmu",
+      "relative_ki_fuer_kmu",
+      "compatibility_fixture",
+      "real_product_fixture",
+      "kmu_fixture_fallback"
+    ],
+    "findings": []
+  },
+  "stderr": ""
+}

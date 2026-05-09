@@ -1,0 +1,28 @@
+{
+  "schema_id": "docworkflow-agent-delivery-mock-direct.v1",
+  "fixture_id": "mock-small-direct-v1",
+  "sizing_decision": "direct",
+  "state_transitions": [
+    {
+      "state": "started",
+      "at": "2026-05-09T09:00:01.000Z"
+    },
+    {
+      "state": "ran-target",
+      "at": "2026-05-09T09:00:02.000Z"
+    },
+    {
+      "state": "closed",
+      "at": "2026-05-09T09:00:03.000Z"
+    }
+  ],
+  "final_status": "ran-target",
+  "closeout_status": "closed",
+  "child_artifact_status": "absent",
+  "output_evidence": {
+    "path": "small/mock-target/output/small-direct-result.json",
+    "sha256_path": "small/output-evidence/small-direct-result.json.sha256",
+    "sha256": "5376f8220a960817102a572b8febd4174e4dff22253f394d4a6b0fc4329294aa"
+  },
+  "external_dependency_status": "not_used"
+}

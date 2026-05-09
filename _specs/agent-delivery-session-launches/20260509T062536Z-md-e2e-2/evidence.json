@@ -1,0 +1,86 @@
+{
+  "schema_version": "agent-delivery.session-launch.v1",
+  "status": "queued",
+  "created_at": "2026-05-09T06:25:36.4082850\u002B00:00",
+  "started_at": null,
+  "completed_at": null,
+  "parent": "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md",
+  "target_id": "MD-E2E-2",
+  "target_role": "child",
+  "target_spec": "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-2 Local Mock Session Runner.md",
+  "control_index": "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md",
+  "handoff_path": "_specs/child-session-handoffs/md-e2e-2-session-handoff.md",
+  "target_workspace": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "session_title": "MD-E2E-2 child-spec-hardening - harden the local mock",
+  "next_skill": "child-spec-hardening for MD-E2E-2 after MD-E2E-1 acceptance.",
+  "next_mode": "child-spec-hardening for MD-E2E-2 after MD-E2E-1 acceptance.",
+  "current_verdict": "NEEDS HARDENING; runner contracts, command selectors and evidence schema need implementation-ready detail",
+  "scope_summary": "Harden the local mock session runner and run-mock-e2e-checks.sh large/small/all contract, consuming the accepted MD-E2E-1 fixture/manifests/validator contracts and defining large/small E2E evidence, session state machine and output assertions.",
+  "non_goals": [
+    "No base fixture creation beyond compatibility fixes, no legacy standard gate migration, no docs closeout sync, no live-agent/Codex execution."
+  ],
+  "allowed_write_set": [
+    "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-2 Local Mock Session Runner.md",
+    "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md",
+    "_specs/child-session-handoffs/md-e2e-2-session-handoff.md",
+    "tests/docworkflow-agent-delivery/e2e/**",
+    "tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh",
+    "tests/docworkflow-agent-delivery/mock-data/** read/write only for accepted MD-E2E-1 compatibility fixes"
+  ],
+  "read_only_files": [
+    "tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh",
+    "tests/docworkflow-agent-delivery/scripts/setup-fixture.sh",
+    "tests/docworkflow-agent-delivery/README.md",
+    "accepted DWT harnesses and evidence",
+    "KI-fuer-KMU and real product repositories."
+  ],
+  "verification": [
+    "After implementation: bash -n tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh",
+    "tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh large --keep",
+    "small --keep",
+    "all --keep",
+    "summary JSON assertions",
+    "git diff --check"
+  ],
+  "evidence_openspec": [
+    "Proposed: openspec/changes/docworkflow-agent-mock-e2e-md-e2e-2-local-runner/",
+    "Closeout must link retained large and small mock-e2e summaries, session evidence, target output evidence and failure evidence for forbidden states"
+  ],
+  "open_notes": [
+    "MD-E2E-1 fixture contract is accepted. Network, Docker, Codex auth or manual-start dependency is out of scope for the local baseline."
+  ],
+  "fresh_session_required": true,
+  "agent": {
+    "requested_provider": "codex",
+    "adapter_id": "codex-cli",
+    "adapter_status": "supported",
+    "launch_capability": "launch",
+    "command_contract": "codex exec --json -C \u003Ctarget_workspace\u003E --output-last-message \u003Clast-message.md\u003E -"
+  },
+  "mechanism": {
+    "type": "queue",
+    "recommended_command": "codex exec --json -C \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0027 --output-last-message \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/agent-delivery-session-launches/20260509T062536Z-md-e2e-2/last-message.md\u0027 - \u003C \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/agent-delivery-session-launches/20260509T062536Z-md-e2e-2/start-prompt.md\u0027",
+    "actual_command": null,
+    "adapter_available": true
+  },
+  "evidence_paths": {
+    "prompt": "_specs/agent-delivery-session-launches/20260509T062536Z-md-e2e-2/start-prompt.md",
+    "events": null,
+    "last_message": null
+  },
+  "codex_app": {
+    "visibility_status": "not_applicable",
+    "thread_id": null,
+    "rollout_path": null,
+    "thread_source": null,
+    "thread_cwd_observed": null,
+    "thread_title_observed": null,
+    "title_status": "not_applicable"
+  },
+  "blockers": [],
+  "warnings": [
+    "ValidateChildReadiness.cs passed: Child readiness validation passed for MD-E2E-2.\nwarning: Verdict is not implementation-allowing: \u0060NEEDS HARDENING\u0060; runner contracts, command selectors and evidence schema need implementation-ready detail"
+  ],
+  "prompt_sha256": "062d057ee7807a2f1b650b25818077413aff5e803be47666eaa9ed5a4f630582"
+}

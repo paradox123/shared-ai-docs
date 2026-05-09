@@ -15,8 +15,8 @@ Diese Testsuite prueft den shared-ai-docs Agent Delivery Workflow fuer Parent-/C
 | `l2/single-child-closeout/validators/` | Deterministic Node validator for DWT-S3 delivery kickoff, closeout sync and next-child gate bundles. |
 | `l3/runtime-temp-repo/fixtures/` | DWT-S5 synthetic runtime repo plus positive, negative, blocked, closeout and reporting fixtures. |
 | `l3/runtime-temp-repo/validators/` | Deterministic Node validator for DWT-S5 temp-repo materialization, runtime gates, blocked-runtime honesty and closeout sync. |
-| `scripts/setup-fixture.sh` | Kopiert reale KI-fuer-KMU-Spec-Fixtures in einen Temp-Ordner und normalisiert nur diese Kopie. |
-| `scripts/run-contract-checks.sh` | Fuehrt automatisierbare Contract-Checks fuer TC1/TC2 aus und schreibt Evidence in die Temp-Fixture. |
+| `scripts/run-mock-e2e-checks.sh` | Fuehrt den mock-only Standard-E2E-Gate fuer grosse und kleine Agent-Delivery-Flows aus. |
+| `scripts/run-contract-checks.sh` | Kompatibilitaetskommando; `all` delegiert mock-only auf den Standard-E2E-Gate, TC1/TC2 sind legacy und explicit-fixture-only. |
 | `scripts/run-l1-contract-checks.sh` | Fuehrt DWT-S1 L1A-L1F gegen synthetische Fixtures aus und schreibt `evidence/l1-summary.json`. |
 | `scripts/run-l2-parent-orchestration-checks.sh` | Fuehrt DWT-S2 L2A-L2F gegen Parent-first Output Bundles aus und schreibt `evidence/dwt-s2-l2-summary.json`. |
 | `scripts/run-l2-single-child-closeout-checks.sh` | Fuehrt DWT-S3 L2A-L2F gegen Single-child Delivery/Closeout Bundles aus und schreibt `evidence/dwt-s3-l2-summary.json`. |
@@ -28,7 +28,13 @@ Diese Testsuite prueft den shared-ai-docs Agent Delivery Workflow fuer Parent-/C
 ## Schnellstart
 
 ```sh
-tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all
+tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep
+```
+
+Kompatibilitaetsname fuer den mock-only Standard-Gate:
+
+```sh
+tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all --keep
 ```
 
 DWT-S1 L1 deterministic-only checks:
@@ -91,17 +97,10 @@ Optional mit behaltenem DWT-S5 L3-Evidence-Ordner:
 tests/docworkflow-agent-delivery/scripts/run-l3-runtime-temp-repo-checks.sh all --keep
 ```
 
-Optional mit behaltenem Temp-Ordner:
+Optional mit behaltenem Mock-E2E-Evidence-Ordner:
 
 ```sh
-tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all --keep
-```
-
-Optional mit expliziter Fixture:
-
-```sh
-fixture_dir="$(tests/docworkflow-agent-delivery/scripts/setup-fixture.sh | sed -n 's/^FIXTURE_DIR=//p')"
-tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all --fixture "$fixture_dir"
+tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep
 ```
 
 ## Automatisierungsgrenzen

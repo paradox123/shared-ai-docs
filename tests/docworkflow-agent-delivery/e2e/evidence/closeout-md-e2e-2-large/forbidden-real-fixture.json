@@ -1,0 +1,43 @@
+{
+  "schema_id": "docworkflow-agent-delivery-mock-forbidden-scan.v1",
+  "target": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large",
+  "validator": "tests/docworkflow-agent-delivery/e2e/validators/forbidden-real-fixture.js",
+  "status": "pass",
+  "stdout_json": {
+    "status": "pass",
+    "checked_paths": [
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/command-telemetry.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/forbidden-path-policy.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/mock-e2e-summary.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/mock-target/output/count.txt",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/child-index.md",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/child-specs/ML-C1.md",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/child-specs/ML-C2.md",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/child-specs/ML-C3.md",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/child-specs/ML-C4.md",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/child-specs/ML-C5.md",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/handoffs/ML-C1-handoff.md",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/handoffs/ML-C2-handoff.md",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/handoffs/ML-C3-handoff.md",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/handoffs/ML-C4-handoff.md",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/handoffs/ML-C5-handoff.md",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/parent-control/parent-control-summary.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/sessions/ML-C1-delivery.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/sessions/ML-C2-delivery.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/sessions/ML-C3-delivery.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/sessions/ML-C4-delivery.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/large/sessions/ML-C5-delivery.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/mock-e2e-summary.json",
+      "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/negative-guard-evidence.json"
+    ],
+    "forbidden_patterns": [
+      "absolute_ki_fuer_kmu",
+      "relative_ki_fuer_kmu",
+      "compatibility_fixture",
+      "real_product_fixture",
+      "kmu_fixture_fallback"
+    ],
+    "findings": []
+  },
+  "stderr": ""
+}

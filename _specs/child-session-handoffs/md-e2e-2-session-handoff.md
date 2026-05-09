@@ -6,22 +6,19 @@
 - Child Index / Queue: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md` section `Child Index`
 - Handoff File: `_specs/child-session-handoffs/md-e2e-2-session-handoff.md`
 - Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`
-- Codex Session / Log: not created; delivery launch is blocked until hardening verdict exists.
-- Session Evidence: no launch evidence; orchestration-only handoff.
+- Codex Session / Log: queued hardening evidence retained at `_specs/agent-delivery-session-launches/20260509T062536Z-md-e2e-2/evidence.json`; implementation and closeout evidence are retained in the OpenSpec archive.
+- Session Evidence: `_specs/agent-delivery-session-launches/20260509T062536Z-md-e2e-2/evidence.json`
 - Handoff Timestamp: 2026-05-09
-- Naechster Modus/Skill: `child-spec-hardening` for `MD-E2E-2` after MD-E2E-1 contract is frozen.
-- Aktueller Verdict: NEEDS HARDENING; not implementation-ready.
-- Scope Summary: Harden the local mock session runner and `run-mock-e2e-checks.sh large/small/all` contract, including large and small E2E evidence, session state machine and output assertions.
-- Non-Goals: No base fixture creation beyond compatibility fixes, no legacy standard gate migration, no docs closeout sync, no live-agent/Codex execution.
-- Allowed Write-Set: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-2 Local Mock Session Runner.md`; `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md`; `_specs/child-session-handoffs/md-e2e-2-session-handoff.md`; `tests/docworkflow-agent-delivery/e2e/**`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`; `tests/docworkflow-agent-delivery/mock-data/**` only for accepted MD-E2E-1 compatibility fixes.
-- Shared / Read-only Files: `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh`; `tests/docworkflow-agent-delivery/scripts/setup-fixture.sh`; `tests/docworkflow-agent-delivery/README.md`; accepted DWT harnesses and evidence; KI-fuer-KMU and real product repositories.
-- Verification Lifecycle:
-  - Rehearsal / Preflight: confirm MD-E2E-1 accepted or freeze dependency; `git diff --check`.
-  - Delivery Gate: `bash -n tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh large --keep`; `small --keep`; `all --keep`.
-  - Pre-Archive Closeout: retain summaries and session/output evidence.
-  - Post-Archive / Current Replay: not available yet.
-- Evidence / OpenSpec: proposed ledger `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-2-local-runner/`; not created in orchestration pass.
-- Retained Evidence: none yet.
-- Offene Blocker oder non-blocking Notes: Cannot become ready before MD-E2E-1 fixture contract is stable. Network, Docker, Codex auth or manual-start dependency is out of scope for the local baseline.
-- Fresh Session empfohlen: Yes.
-
+- Naechster Modus/Skill: none for `MD-E2E-2`; child is accepted. Next workflow action is `child-spec-hardening` for `MD-E2E-3`.
+- Aktueller Verdict: ACCEPTED.
+- Scope Summary: Implement the local mock session runner and `run-mock-e2e-checks.sh large/small/all` contract. The runner consumes accepted `MD-E2E-1` fixture/manifests/validator contracts and must produce large/small/all retained evidence, session state evidence, summary JSON and output assertions without live agents.
+- Non-Goals: No base fixture contract changes except an explicitly documented MD-E2E-1 compatibility fix; no legacy standard gate migration; no README/final docs sync; no live-agent/Codex execution; no network, Docker, Codex auth or manual-start dependency.
+- OpenSpec / Ledger: archived at `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-2-local-runner/`; canonical spec updated at `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`.
+- Allowed Write-Set: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-2 Local Mock Session Runner.md`; `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md`; `_specs/child-session-handoffs/md-e2e-2-session-handoff.md`; `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-2-local-runner/**`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`; `tests/docworkflow-agent-delivery/e2e/mock-runner/**`; `tests/docworkflow-agent-delivery/e2e/validators/mock-e2e-summary.js`; `tests/docworkflow-agent-delivery/e2e/fixtures/mock-runner-negative/**`; `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-*`.
+- Shared / Read-only Files: `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh`; `tests/docworkflow-agent-delivery/scripts/setup-fixture.sh`; `tests/docworkflow-agent-delivery/README.md`; `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md` until MD-E2E-3/MD-E2E-4 sync; accepted MD-E2E-1 archive; accepted DWT harnesses/evidence; KI-fuer-KMU and real product repositories.
+- Verification Commands: Closeout replay ran `node --version`; manifest schema validator; forbidden-real-fixture validator over mock data and generated evidence roots; `bash -n tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`; `run-mock-e2e-checks.sh large/small/all --keep --run-id closeout-md-e2e-2-*`; summary validator over retained summaries; `openspec validate docworkflow-agent-delivery-testsuite --strict`; `git diff --check`.
+- Required Closeout Evidence: retained `large`, `small` and `all` evidence roots at `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/`, `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-small/` and `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-all/`; `mock-e2e-summary.json` for large and small; `aggregate-summary.json` for all; five `ML-C*` session files; `count.txt` and hash evidence; `small-direct-result.json` and hash evidence; forbidden-real-fixture validator evidence over generated run roots; negative evidence proving `manual_start_required`, permanent `queued`, `blocked`, `failed`, output mismatch and forbidden fixture states cannot pass.
+- Key State Machine Contract: Large path requires `parent-control` plus `ML-C1` through `ML-C5` in order; each child must end `ran-target` and `closed` before the next starts. Small path is `direct-delivery` only and must create no child-control artifacts.
+- Summary Contract: `schema_id: docworkflow-agent-delivery-mock-e2e-summary.v1`; positive large/small/all pass requires `evidence_truth: ran-target`, correct sizing decision, expected output validation, forbidden fixture pass, no external dependency use and no positive bad state.
+- Offene Blocker oder non-blocking Notes: None for `MD-E2E-2`. `MD-E2E-3` remains the next hardening target for standard gate migration; README/final docs sync remains `MD-E2E-4`.
+- Fresh Session empfohlen: Yes for the next child, not for this accepted handoff.

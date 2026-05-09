@@ -739,8 +739,9 @@ Child Specs:
 Operational rule:
 
 - Jeder Child startet mit `child-spec-hardening`.
-- Kein Child ist nach dieser Orchestrierung `IMPLEMENTATION READY`.
-- `spec-change-delivery` darf erst nach dokumentiertem Hardening-Verdict `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` fuer genau einen Child starten.
+- `MD-E2E-1` und `MD-E2E-2` sind akzeptiert; ihre OpenSpec-Archive und Evidence-Pfade sind im Orchestration Pack verlinkt.
+- `MD-E2E-3` ist der naechste fuehrende Child fuer `child-spec-hardening`.
+- `spec-change-delivery` darf erst nach dokumentiertem Hardening-Verdict `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` fuer genau einen weiteren Child starten.
 - KI-fuer-KMU faellt vollstaendig aus den Standard-Testdaten heraus und darf nicht als Compatibility Fixture erhalten bleiben.
 
 ## History
@@ -752,5 +753,6 @@ Operational rule:
 | 2026-05-09 | Codex | Expanded scope to include migration of existing tests, new assertions, new mock-based test cases, and a full E2E path from parent spec to final count artifact. |
 | 2026-05-09 | Codex | Hardened the spec with parent conformance, local mock session runner execution model, write-set boundaries, delivery slices, decision freeze pack, and stricter E2E acceptance gates. |
 | 2026-05-09 | Codex | Added spec-orchestrator control layer, child spec pointers and explicit block against implementing this Parent Spec as one bounded delivery slice. |
+| 2026-05-09 | Codex | Synchronized parent orchestration status after accepting and archiving MD-E2E-2 local mock runner evidence. |
 
 SessionId: 2026-05-09-docworkflow-agent-delivery-mock-data-e2e-harness

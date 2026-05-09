@@ -1,5 +1,5 @@
 **Date:** 2026-05-09
-**Status:** 🔵 Implemented
+**Status:** 🟢 Accepted
 **Scope:** Child spec for mock data, manifests, mock target fixtures and forbidden-real-fixture validators.
 
 ---
@@ -10,11 +10,11 @@
 - Goldstandard Status: candidate.
 - Ziel: Create the source-controlled mock fixture family that later Mock E2E runner slices consume, and add deterministic validators that prevent KI-fuer-KMU or other real product paths from returning as standard test fixtures.
 - In Scope: `mock-large-parent-spec.md`, `mock-small-direct-spec.md`, `manifest.json` for both fixture families, minimal mock target fixture roots, manifest schema validator, forbidden-real-fixture validator, positive and negative validator fixtures.
-- Out of Scope: Local Mock Session Runner implementation, `run-mock-e2e-checks.sh`, standard gate migration, README/parent closeout documentation, live-agent/Codex path, OpenSpec archive.
+- Out of Scope: Local Mock Session Runner implementation, `run-mock-e2e-checks.sh`, standard gate migration, README/parent closeout documentation and live-agent/Codex path.
 - Wichtigste Test-/Harness-Cases: `MD-E2E-1A manifest schema positive`, `MD-E2E-1B large fixture contract`, `MD-E2E-1C small fixture contract`, `MD-E2E-1D forbidden source path`, `MD-E2E-1E forbidden target/write/evidence path`, `MD-E2E-1F no compatibility fixture`.
 - Wichtigste Verification Commands: `node tests/docworkflow-agent-delivery/e2e/validators/mock-manifest-schema.js tests/docworkflow-agent-delivery/mock-data`; `node tests/docworkflow-agent-delivery/e2e/validators/forbidden-real-fixture.js tests/docworkflow-agent-delivery/mock-data tests/docworkflow-agent-delivery/e2e/fixtures/forbidden-real-fixture`; `git diff --check`; `ValidateChildReadiness.cs` for `MD-E2E-1`.
 - Offene Entscheidungen: Keine blockierenden Entscheidungen. Node is the validator runtime for this child.
-- Readiness Status: IMPLEMENTATION READY after Child Index, handoff and readiness validation pass.
+- Readiness Status: ACCEPTED after implementation verification replay and OpenSpec archive.
 
 ## Goal
 
@@ -46,7 +46,7 @@ Make the mock fixture family real enough for later runner work without touching 
 - No implementation of the local mock session runner.
 - No creation or modification of `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`.
 - No migration of `run-contract-checks.sh` or `setup-fixture.sh`; that is `MD-E2E-3`.
-- No README, parent spec or OpenSpec canonical closeout sync except this child spec, handoff and Child Index.
+- No README or parent spec documentation sync except this child spec, handoff and Child Index.
 - No live-agent/Codex session path.
 - No copied KI-fuer-KMU spec, no real product fixture and no compatibility fixture.
 
@@ -353,6 +353,17 @@ Implementation closeout must provide:
 - Updated Child Index row marking `MD-E2E-1` accepted or implemented only after delivery evidence exists.
 - Handoff update that releases `MD-E2E-2` hardening only after fixture contracts are accepted.
 
+## Accepted Closeout Evidence
+
+Closeout status: `ACCEPTED`.
+
+- Verification replay: `node --version`; `ValidateChildReadiness.cs` for `MD-E2E-1`; manifest schema validator; forbidden-real-fixture positive scan; forbidden-real-fixture negative scan; `openspec validate docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures --strict`; `openspec validate docworkflow-agent-delivery-testsuite --strict`; `git diff --check`.
+- OpenSpec archive: `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/`.
+- Canonical OpenSpec spec: `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`.
+- Archived implementation evidence: `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/implementation-evidence.md`.
+- Next child handoff released for hardening: `_specs/child-session-handoffs/md-e2e-2-session-handoff.md`.
+- Next child queue evidence: `_specs/agent-delivery-session-launches/20260509T062536Z-md-e2e-2/evidence.json`.
+
 ## Dependencies and Write-Set
 
 Dependencies:
@@ -360,14 +371,14 @@ Dependencies:
 - Parent: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md`
 - Child Index: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md`
 - Handoff: `_specs/child-session-handoffs/md-e2e-1-session-handoff.md`
-- Active OpenSpec ledger: `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/`
+- Archived OpenSpec ledger: `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/`
 
 Implementation Allowed Write-Set:
 
 - `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-1 Mock Fixtures.md`
 - `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md`
 - `_specs/child-session-handoffs/md-e2e-1-session-handoff.md`
-- `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/**`
+- `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/**`
 - `tests/docworkflow-agent-delivery/mock-data/large-parent/**`
 - `tests/docworkflow-agent-delivery/mock-data/small-direct/**`
 - `tests/docworkflow-agent-delivery/e2e/validators/mock-manifest-schema.js`
@@ -397,7 +408,7 @@ Parallelization:
 - Update the `MD-E2E-1` Child Index row in the orchestration pack.
 - Update `_specs/child-session-handoffs/md-e2e-1-session-handoff.md` with retained evidence.
 - Do not change README or standard runner docs in this child except if closeout must fix a stale handoff pointer.
-- Do not archive OpenSpec until implementation evidence exists.
+- OpenSpec archive is allowed only after implementation evidence exists and verification replay is green.
 
 ## Child Session Handoff
 
@@ -418,7 +429,7 @@ The handoff must remain synchronized with this spec and the Child Index before `
 
 ## Hardening Verdict
 
-`IMPLEMENTATION READY`
+`ACCEPTED`
 
 Rationale:
 
@@ -434,10 +445,10 @@ Rationale:
 
 - Was wurde entschieden? Node validators and `manifest.json` per fixture root are frozen for `MD-E2E-1`.
 - Was wurde geaendert? The child skeleton was hardened into an implementation-ready fixture/validator contract.
-- Was bleibt offen? Actual fixture and validator files still need `spec-change-delivery`.
-- Welche Evidenz/Verification fehlt? Functional validator output comes during implementation closeout.
-- Welche Skill-/Workflow-Reibung ist aufgefallen? New commands that create files cannot be fully rehearsed before implementation; the readiness gate therefore rehearses runtime/path contracts and requires delivery evidence after implementation.
-- Session-/Kontextzustand: Stop at implementation handoff unless the user explicitly starts `spec-change-delivery`.
+- Was bleibt offen? `MD-E2E-2` must harden and consume these accepted fixture contracts.
+- Welche Evidenz/Verification fehlt? None for `MD-E2E-1`; runner/runtime evidence belongs to `MD-E2E-2`.
+- Welche Skill-/Workflow-Reibung ist aufgefallen? OpenSpec archive moved retained evidence from the active change path to the archive path, so closeout must update all Child Index and handoff pointers.
+- Session-/Kontextzustand: `MD-E2E-1` is closed; next session should use `child-spec-hardening` for `MD-E2E-2`.
 
 ## History
 
@@ -447,5 +458,6 @@ Rationale:
 | 2026-05-09 | Codex | Hardened MD-E2E-1 with fixture layout, manifest contract, canonical examples, validator contracts, verification lifecycle and implementation-ready handoff. |
 | 2026-05-09 | Codex | Locked spec-change-delivery scope contract for OpenSpec implementation. |
 | 2026-05-09 | Codex | Implemented source-controlled mock fixtures, manifests, validators, negative fixtures and OpenSpec evidence. |
+| 2026-05-09 | Codex | Accepted MD-E2E-1 after verification replay and archived OpenSpec change into the canonical testsuite spec. |
 
 SessionId: 2026-05-09-md-e2e-1-child-spec-hardening

@@ -1,0 +1,100 @@
+{
+  "schema_version": "agent-delivery.session-launch.v1",
+  "status": "queued",
+  "created_at": "2026-05-09T08:09:16.6915000\u002B00:00",
+  "started_at": null,
+  "completed_at": null,
+  "parent": "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md",
+  "target_id": "MD-E2E-3",
+  "target_role": "child",
+  "target_spec": "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-3 Standard Gate Migration.md",
+  "control_index": "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md",
+  "handoff_path": "_specs/child-session-handoffs/md-e2e-3-session-handoff.md",
+  "target_workspace": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "session_title": "MD-E2E-3 spec-change-delivery - migrate deactivate old standard",
+  "next_skill": "spec-change-delivery for MD-E2E-3",
+  "next_mode": "spec-change-delivery for MD-E2E-3",
+  "current_verdict": "IMPLEMENTATION READY; migration strategy frozen: mock all --keep is leading standard, run-contract-checks.sh all can only survive as mock-only shim or non-leading legacy command, no KI-fuer-KMU default/fallback/compatibility fixture remains",
+  "scope_summary": "Migrate/deactivate old standard Agent Delivery gates so the leading standard command is mock-only and no KI-fuer-KMU default, fallback or compatibility fixture remains.",
+  "non_goals": [
+    "No new fixture authoring",
+    "no accepted MD-E2E-1 mock-data contract edits",
+    "no MD-E2E-2 runner internals beyond standard routing integration",
+    "no broad DWT historical rewrite",
+    "no final parent/canonical docs closeout beyond README command references directly coupled to standard gate behavior",
+    "no live-agent/Codex execution."
+  ],
+  "allowed_write_set": [
+    "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-3 Standard Gate Migration.md",
+    "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md",
+    "_specs/child-session-handoffs/md-e2e-3-session-handoff.md",
+    "openspec/changes/docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/**",
+    "tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh",
+    "tests/docworkflow-agent-delivery/scripts/setup-fixture.sh",
+    "tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh",
+    "tests/docworkflow-agent-delivery/README.md"
+  ],
+  "read_only_files": [
+    "tests/docworkflow-agent-delivery/mock-data/**",
+    "tests/docworkflow-agent-delivery/e2e/mock-runner/**",
+    "tests/docworkflow-agent-delivery/e2e/validators/**",
+    "accepted MD-E2E-1 and MD-E2E-2 archived OpenSpec evidence",
+    "KI-fuer-KMU and all other real product repositories",
+    "retained DWT historical evidence."
+  ],
+  "verification": [
+    "Hardening rehearsed: bash -n tests/docworkflow-agent-delivery/scripts/*.sh",
+    "run-mock-e2e-checks.sh all --keep --run-id hardening-md-e2e-3-rehearsal",
+    "CLI help for legacy scripts",
+    "node --version",
+    ".NET 10 present. Delivery: bash -n tests/docworkflow-agent-delivery/scripts/*.sh",
+    "run-mock-e2e-checks.sh all --keep --run-id closeout-md-e2e-3-mock-all",
+    "run-contract-checks.sh all --keep",
+    "no-default-KI-fuer-KMU guards",
+    "openspec validate docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration --strict",
+    "ValidateChildReadiness.cs",
+    "git diff --check"
+  ],
+  "evidence_openspec": [
+    "Proposed: openspec/changes/docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/",
+    "Closeout must retain mock all evidence, migrated standard-all evidence or documented removal from standard path, no-default-real-fixture guard output, OpenSpec validation, and proof no compatibility fixture remains"
+  ],
+  "open_notes": [
+    "None. Current scripts still contain forbidden defaults",
+    "removing them is the implementation work authorized by this handoff."
+  ],
+  "fresh_session_required": true,
+  "agent": {
+    "requested_provider": "codex",
+    "adapter_id": "codex-cli",
+    "adapter_status": "supported",
+    "launch_capability": "launch",
+    "command_contract": "codex exec --json -C \u003Ctarget_workspace\u003E --output-last-message \u003Clast-message.md\u003E -"
+  },
+  "mechanism": {
+    "type": "queue",
+    "recommended_command": "codex exec --json -C \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0027 --output-last-message \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/agent-delivery-session-launches/20260509T080916Z-md-e2e-3/last-message.md\u0027 - \u003C \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/agent-delivery-session-launches/20260509T080916Z-md-e2e-3/start-prompt.md\u0027",
+    "actual_command": null,
+    "adapter_available": true
+  },
+  "evidence_paths": {
+    "prompt": "_specs/agent-delivery-session-launches/20260509T080916Z-md-e2e-3/start-prompt.md",
+    "events": null,
+    "last_message": null
+  },
+  "codex_app": {
+    "visibility_status": "not_applicable",
+    "thread_id": null,
+    "rollout_path": null,
+    "thread_source": null,
+    "thread_cwd_observed": null,
+    "thread_title_observed": null,
+    "title_status": "not_applicable"
+  },
+  "blockers": [],
+  "warnings": [
+    "ValidateChildReadiness.cs passed: Child readiness validation passed for MD-E2E-3."
+  ],
+  "prompt_sha256": "bf44fe1b75a33124e659d3ba3328151e58b86e6fdb28cef34aa3ef41f25e4d10"
+}

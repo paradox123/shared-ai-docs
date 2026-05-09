@@ -178,6 +178,8 @@ Persistierter Skill:
 
 Beide Workflows sind offiziell unterstützt. Workflow 2 ist der aktuelle Default, Workflow 1 bleibt kompatibel nutzbar.
 
+Status in den Diagrammen meint den Spec-Header-Status (`🟡 Spec`, `🟠 Plan`, `🔵 Implemented`, `🟢 Accepted`). Readiness-Verdicts wie `needs_hardening`, `ready_candidate`, `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` sind Gate-/Kontrollflaechenwerte und ersetzen den Header-Status nicht.
+
 ## Spec Sizing Gate (vor Workflow-Auswahl)
 
 Vor groesseren Spec-, Plan- oder Delivery-Schritten wird geprueft, ob die Arbeit in einer robusten Session als normaler Scope bearbeitbar ist oder wegen Kontextdruck in Parent/Child Specs geschnitten werden muss.
@@ -198,46 +200,125 @@ Routing-Regel:
 3. Nach automatischem Parent/Child-Schnitt startet der Workflow mit `spec-orchestrator` und anschliessendem `child-spec-hardening` fuer die naechsten umsetzbaren Child Specs.
 4. Zielbild fuer grosse Vorhaben: Jeder implementation-ready Child ist so vollstaendig, dass eine neue Session nur mit Parent-Verweis, Child Spec, Handoff/Mini-Retro und relevanter Evidence starten kann.
 
+```mermaid
+stateDiagram-v2
+    [*] --> SizingGate: neuer oder groesserer Scope
+
+    state "Spec Sizing Gate" as SizingGate
+    state "Normale Spec" as NormalSpec
+    state "Parent/Child-Schnitt" as ParentChild
+    state "Workflow 2 Default" as Workflow2Default
+    state "Workflow 1 Legacy" as Workflow1Legacy
+    state "spec-orchestrator" as Orchestrator
+    state "Parallel Work Gate" as ParallelGate
+    state "child-spec-hardening" as Hardening
+
+    SizingGate --> NormalSpec: Gate feuert nicht
+    SizingGate --> ParentChild: Gate feuert
+    NormalSpec --> Workflow2Default: neue Delivery
+    NormalSpec --> Workflow1Legacy: laufender Legacy-Thread
+    ParentChild --> Orchestrator: Child-Schnitt und Queue
+    Orchestrator --> ParallelGate: Dependencies und Write-Sets pruefen
+    ParallelGate --> Hardening: parallel oder serialisiert haerten
+```
+
 ### Workflow 1 (Legacy-kompatibel)
 
-```
-Spec (`🟡 Spec`)
-  v
-refine-plan (iterativ, plan history)
-  v
-direct-mode implementation
-  v
-retro-plan (optional)
+```mermaid
+stateDiagram-v2
+    [*] --> Spec
+
+    state "Spec (🟡 Spec)" as Spec
+    state "refine-plan" as RefinePlan
+    state "Plan (🟠 Plan)" as Plan
+    state "Direct-mode Implementation" as DirectImplementation
+    state "Implemented (🔵 Implemented)" as Implemented
+    state "retro-plan optional" as Retro
+    state "spec-closeout optional" as Closeout
+    state "Accepted (🟢 Accepted)" as Accepted
+
+    Spec --> RefinePlan: Plan iterativ schaerfen
+    RefinePlan --> Plan: umsetzbarer Plan liegt vor
+    Plan --> DirectImplementation: DoR erfuellt
+    DirectImplementation --> Implemented: Umsetzung + Evidenz
+    Implemented --> Retro: optionales Lernen
+    Implemented --> Closeout: formaler Abschluss
+    Retro --> Closeout: falls Abschluss noetig
+    Closeout --> Accepted: Verification synchron
 ```
 
 ### Workflow 2 (Current)
 
-```
-Spec (`🟡 Spec`)
-  v
-spec-change-delivery (direct oder OpenSpec) -> Scope Contract (`🟠 Plan`)
-  v
-Implementierung + Verifikation (`🔵 Implemented`)
-  v
-retro-plan (optional)
-  v
-spec-closeout (optional, für formalen Abschluss) (`🟢 Accepted`)
+```mermaid
+stateDiagram-v2
+    [*] --> Spec
+
+    state "Spec (🟡 Spec)" as Spec
+    state "spec-change-delivery" as Delivery
+    state "Scope Contract (🟠 Plan)" as Plan
+    state "Implementierung + Verifikation" as Implementation
+    state "Implemented (🔵 Implemented)" as Implemented
+    state "retro-plan optional" as Retro
+    state "spec-closeout optional" as Closeout
+    state "Accepted (🟢 Accepted)" as Accepted
+
+    Spec --> Delivery: direct oder OpenSpec
+    Delivery --> Plan: Scope Contract fixiert
+    Plan --> Implementation: DoR erfuellt
+    Implementation --> Implemented: Tests + Evidence gruen
+    Implemented --> Retro: optionales Lernen
+    Implemented --> Closeout: formaler Abschluss
+    Retro --> Closeout: falls Abschluss noetig
+    Closeout --> Accepted: Verification/Archive synchron
 ```
 
 ### Large Spec / Child Spec Pipeline
 
 For Parent-/Master-Specs that trigger the Spec Sizing Gate:
 
-```md
-doc-coauthoring -> Parent Spec (`🟡 Spec`)
-  v
-spec-orchestrator -> Child Schnitt, Coverage, Hardening Queue, optional OpenSpec-Ledger
-  v
-child-spec-hardening -> implementation-ready Child Spec
-  v
-doc-review-autoresolve -> autonomous cleanup + readiness verdict
-  v
-spec-change-delivery -> one child implementation (`🟠 Plan` -> `🔵 Implemented`)
+```mermaid
+stateDiagram-v2
+    [*] --> ParentSpec
+
+    state "Parent Spec (🟡 Spec)" as ParentSpec
+    state "spec-orchestrator" as Orchestrator
+    state "Child-Schnitt + Coverage" as ChildCut
+    state "Hardening Queue (needs_hardening / ready_candidate / blocked)" as Queue
+    state "Parallel Work Gate" as ParallelGate
+    state "child-spec-hardening (Batch/Lanes)" as ParallelHardening
+    state "child-spec-hardening (einzelner Child)" as Hardening
+    state "doc-review-autoresolve" as Review
+    state "Child Spec (🟡 Spec, IMPLEMENTATION READY)" as ReadyChild
+    state "Child Spec (🟡 Spec, READY WITH NON-BLOCKING NOTES)" as ReadyWithNotes
+    state "User Decision / Blocker" as Blocked
+    state "spec-change-delivery" as Delivery
+    state "Child Plan (🟠 Plan)" as ChildPlan
+    state "Child Implemented (🔵 Implemented)" as ChildImplemented
+    state "Child Closeout / Sync" as ChildCloseout
+    state "Child Accepted (🟢 Accepted)" as ChildAccepted
+    state "Naechster Child oder Parent-Closeout" as NextStep
+
+    ParentSpec --> Orchestrator: Sizing Gate feuert
+    Orchestrator --> ChildCut: Slices, Coverage, Ledger
+    ChildCut --> Queue: nicht implementation-ready
+    Queue --> ParallelGate: Dependencies und Write-Sets pruefen
+    ParallelGate --> ParallelHardening: getrennte Spec/Doc-Write-Sets + klare Dependencies
+    ParallelGate --> Hardening: Konflikt, Unklarheit oder zyklische Dependencies
+    ParallelHardening --> Review: Lane-Ergebnisse integrieren
+    Hardening --> Review: autonome Konsistenzpruefung
+    Review --> ReadyChild: Verdict gruen
+    Review --> ReadyWithNotes: non-blocking Notes akzeptiert
+    Review --> Hardening: NEEDS HARDENING
+    Review --> Blocked: NEEDS USER DECISION / blocked
+    Blocked --> Queue: Entscheidung oder Blocker geloest
+    ReadyChild --> Delivery: Handoff + DoR erfuellt
+    ReadyWithNotes --> Delivery: bewusst akzeptierte Notes + Handoff
+    Delivery --> ChildPlan: Scope Contract fixiert
+    ChildPlan --> ChildImplemented: Umsetzung + Verification
+    ChildImplemented --> ChildCloseout: Evidence und Index synchronisieren
+    ChildCloseout --> ChildAccepted: formaler Closeout erfolgreich
+    ChildCloseout --> NextStep: Sync-only oder weiteres Slice
+    ChildAccepted --> NextStep: weiteres Slice oder Parent-Closeout
 ```
 
 `spec-orchestrator` and `child-spec-hardening` normally keep specs in `🟡 Spec`; `spec-change-delivery` owns the transition to `🟠 Plan` once the implementation scope contract is locked.
@@ -315,6 +396,33 @@ Parallel Work hat zwei unterschiedliche Modi:
 Parallel Spec/Doc Hardening ist normalerweise unproblematisch parallelisierbar, sobald Dependencies und Schreibdateien klar sind. Parallel Implementation ist strenger und darf nur starten, wenn zusaetzlich die Runtime-/Code-Write-Sets disjunkt sind, Contracts stabil sind und die Integration seriell gesteuert wird.
 
 In beiden Modi darf Parallel Work erst starten, wenn ein Parent-/Child-Schnitt oder Arbeitsblock-Schnitt existiert und die betroffenen Lanes explizit getrennte Write-Sets, Shared-File-Regeln, Verification Commands und eine Merge-/Sync-Reihenfolge haben.
+
+Praktisch heisst das: Nach `spec-orchestrator` wird Parallel Work aktiv als naheliegender Modus geprueft. Wenn die Lane-Gates erfuellt sind, laeuft Child-Spec-/Doc-Hardening parallel als Batch oder mehrere Lanes; wenn nicht, wird serialisiert.
+
+```mermaid
+stateDiagram-v2
+    [*] --> CandidateLanes
+
+    state "Child-Schnitt / Hardening Queue" as CandidateLanes
+    state "Parallel Work Gate" as ParallelGate
+    state "Parallel Spec/Doc Hardening" as ParallelSpecHardening
+    state "Implementation-ready Lanes" as ImplementationReadyLanes
+    state "Parallel Implementation" as ParallelImplementation
+    state "Serialisierter Modus" as SerialMode
+    state "Integrations-Owner Sync" as IntegrationSync
+    state "Mini-Retro / Handoff" as MiniRetro
+
+    CandidateLanes --> ParallelGate: Dependencies, Write-Sets, Shared Files pruefen
+    ParallelGate --> ParallelSpecHardening: Spec/Doc-Write-Sets getrennt
+    ParallelGate --> ImplementationReadyLanes: implementation-ready + Runtime-Write-Sets disjunkt
+    ParallelGate --> SerialMode: Konflikt, Unklarheit oder fehlender Integrations-Owner
+    ImplementationReadyLanes --> ParallelImplementation: stabile Contracts + Gate Verification
+    ParallelSpecHardening --> IntegrationSync: Cross-Lane-Review
+    ParallelImplementation --> IntegrationSync: Merge + Verification-Replay
+    SerialMode --> IntegrationSync: serieller Fortschritt
+    IntegrationSync --> MiniRetro: offene Konflikte und Evidence sichtbar halten
+    MiniRetro --> [*]
+```
 
 Minimale Kontrollflaeche:
 

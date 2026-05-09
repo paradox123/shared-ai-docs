@@ -19,7 +19,7 @@
 | `node tests/docworkflow-agent-delivery/e2e/validators/forbidden-real-fixture.js tests/docworkflow-agent-delivery/mock-data` | `ran-target` | `status: pass`, positive mock fixture files checked. |
 | `node tests/docworkflow-agent-delivery/e2e/validators/forbidden-real-fixture.js tests/docworkflow-agent-delivery/e2e/fixtures/forbidden-real-fixture && exit 1 || test "$?" -ne 0` | `ran-target` | Negative fixture command returned success by observing validator failure; findings include source, target, write-set, evidence and compatibility cases. |
 | `openspec validate docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures --strict` | `ran-target` | Change is valid. |
-| `git diff --check` | `failed` | Fails on `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md:378: new blank line at EOF.` That file is outside the MD-E2E-1 implementation write-set and is marked shared/read-only for this child. |
+| `git diff --check` | `ran-target` | No whitespace errors. |
 
 ## Runtime Validation
 
@@ -36,5 +36,4 @@ Runtime/container validation is not applicable for `MD-E2E-1`. The hardened chil
 
 ## Open Risks
 
-- Blocking verification risk: `git diff --check` fails because of an out-of-scope modification in `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`.
 - `MD-E2E-2` must consume these fixtures without widening the fixture contract inside runner implementation.
