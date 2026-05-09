@@ -1,5 +1,5 @@
 **Date:** 2026-05-09
-**Status:** 🔵 Implemented
+**Status:** 🟢 Accepted
 **Scope:** .NET 10 tool that deterministically selects the next Agent Delivery workflow step after spec orchestration.
 **SessionId:** workflow-tooling-evaluate-next-step-delivery
 
@@ -8,14 +8,14 @@
 ## Review Control Surface
 
 - Spec-Variante: Tool delivery spec for Agent Delivery workflow automation.
-- Goldstandard Status: hardened draft, ready for direct implementation via `spec-change-delivery`.
+- Goldstandard Status: accepted; OpenSpec archived.
 - Ziel: Create `skills-repo/tools/EvaluateOrchestrationNextStep.cs`, a .NET 10 file-based app that reads an orchestration pack/Child Index and emits the required next workflow step, first unblocked child, lane classification, and stop-before-delivery decision.
 - In Scope: CLI contract, markdown Child Index parsing, hardening lane classification, user-intent flags, JSON output contract, Markdown summary output, deterministic exit codes, fixture-based tests, docs snippet for skill usage.
 - Out of Scope: editing child specs, generating handoffs, launching agents, running `child-spec-hardening`, implementing runtime/product features, replacing `ValidateChildReadiness.cs`.
 - Wichtigste Test-/Harness-Cases: `ORCH-NEXT-HARDEN-NOW`, `ORCH-NEXT-NO-IMPLEMENTATION-STILL-HARDENS`, `ORCH-NEXT-ORCHESTRATION-ONLY`, `ORCH-NEXT-ALL-BLOCKED`, `ORCH-NEXT-PARALLEL-DRAFT-ONLY`.
 - Wichtigste Verification Commands: from `/tmp`, `dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/EvaluateOrchestrationNextStep.cs -- --help`; fixture runs under `skills-repo/tests/agent-delivery-workflow-tooling/evaluate-orchestration-next-step/`; `git diff --check`.
 - Offene Entscheidungen: None blocking. Default output is JSON plus optional Markdown; future integration into `spec-orchestrator/SKILL.md` is a separate spec.
-- Readiness Status: READY FOR DIRECT IMPLEMENTATION PLANNING. Command contract rehearsal for the new file waits until the file exists; .NET 10 availability was checked on 2026-05-09 with `dotnet --version == 10.0.203`.
+- Readiness Status: ACCEPTED. Implementation, verification replay, OpenSpec archive and canonical spec validation completed on 2026-05-09.
 
 ## Session Briefing
 
@@ -265,6 +265,19 @@ Success: exits `0`.
 - Testability: fixture cases and JSON assertions are concrete.
 - Residual risk: markdown dependency parsing is necessarily heuristic; the tool must expose reasons and warnings instead of silently overclaiming.
 
+## Closeout Evidence
+
+- OpenSpec archived as `openspec/changes/archive/2026-05-09-agent-delivery-evaluate-orchestration-next-step/`.
+- Canonical spec updated: `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`.
+- Required verification replay passed:
+  - `dotnet --version`
+  - `dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/EvaluateOrchestrationNextStep.cs -- --help`
+  - MD-E2E-like `expects-hardening --no-implementation` evaluator command
+  - MD-E2E-like `orchestration-only --no-implementation` evaluator command
+  - `openspec validate docworkflow-agent-delivery-testsuite --strict`
+  - `git diff --check`
+- Runtime/Compose validation is not applicable because this accepted change is a local tool-only change with no service runtime.
+
 ## History
 
 | Date | SessionId | Change |
@@ -272,3 +285,4 @@ Success: exits `0`.
 | 2026-05-09 | workflow-tooling-specs-initial | Initial hardened spec for `EvaluateOrchestrationNextStep.cs`. |
 | 2026-05-09 | workflow-tooling-evaluate-next-step-delivery | Scope Contract locked in OpenSpec mode for direct implementation of `EvaluateOrchestrationNextStep.cs`. |
 | 2026-05-09 | workflow-tooling-evaluate-next-step-delivery | Implemented the evaluator tool, fixture packs, OpenSpec change, and verification evidence. |
+| 2026-05-09 | workflow-tooling-evaluate-next-step-delivery | Accepted and closed: replayed verification, archived OpenSpec change, and validated canonical spec. |

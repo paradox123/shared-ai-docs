@@ -1,5 +1,5 @@
 **Date:** 2026-05-09
-**Status:** IMPLEMENTATION READY
+**Status:** 🔵 Implemented
 **Scope:** Child spec for mock data, manifests, mock target fixtures and forbidden-real-fixture validators.
 
 ---
@@ -445,5 +445,7 @@ Rationale:
 |---|---|---|
 | 2026-05-09 | Codex | Initial child skeleton created by spec-orchestrator. |
 | 2026-05-09 | Codex | Hardened MD-E2E-1 with fixture layout, manifest contract, canonical examples, validator contracts, verification lifecycle and implementation-ready handoff. |
+| 2026-05-09 | Codex | Locked spec-change-delivery scope contract for OpenSpec implementation. |
+| 2026-05-09 | Codex | Implemented source-controlled mock fixtures, manifests, validators, negative fixtures and OpenSpec evidence. |
 
 SessionId: 2026-05-09-md-e2e-1-child-spec-hardening

@@ -248,3 +248,194 @@ The testsuite SHALL provide an L3 runtime temp-repo delivery pilot that runs or 
 - **THEN** Parent Coverage for `DWT-PR3`, `DWT-PR4` and `DWT-PR5` SHALL remain present
 - **AND** DWT-S5 evidence, retained DWT-S3 predecessor evidence and OpenSpec ledger state SHALL remain distinguishable
 - **AND** no descendant child SHALL be implementation-authorized by DWT-S5 closeout.
+
+### Requirement: Post-orchestration next-step evaluator
+
+The testsuite SHALL provide a deterministic local tool that evaluates an Agent Delivery orchestration pack after `spec-orchestrator` creates or updates a Child Index and reports the next workflow step without relying on prose interpretation.
+
+#### Scenario: Hardening is required after orchestration
+
+- **GIVEN** an orchestration pack with a Child Index where the first child is `NEEDS HARDENING` and has no unresolved predecessor dependency
+- **WHEN** `EvaluateOrchestrationNextStep.cs` runs with `--intent expects-hardening`
+- **THEN** the JSON result SHALL set `required_next_skill` to `child-spec-hardening`
+- **AND** it SHALL set `first_unblocked_child` to that child id
+- **AND** it SHALL classify that child as `harden_now`.
+
+#### Scenario: No implementation does not block hardening
+
+- **GIVEN** an orchestration pack where hardening is expected
+- **WHEN** `EvaluateOrchestrationNextStep.cs` runs with `--intent expects-hardening --no-implementation`
+- **THEN** the JSON result SHALL still set `required_next_skill` to `child-spec-hardening`
+- **AND** it SHALL set `delivery_allowed` to `false`.
+
+#### Scenario: User-requested orchestration-only is explicit
+
+- **GIVEN** an orchestration pack where hardening would otherwise be expected
+- **WHEN** `EvaluateOrchestrationNextStep.cs` runs with `--intent orchestration-only`
+- **THEN** the JSON result SHALL set `trigger_result` to `orchestration_only_by_user_request`
+- **AND** it SHALL NOT require a hardening start.
+
+#### Scenario: Delivery is gated by implementation-ready verdict and intent
+
+- **GIVEN** an orchestration pack whose first child is `IMPLEMENTATION READY`
+- **WHEN** `EvaluateOrchestrationNextStep.cs` runs without `--no-implementation`
+- **THEN** the JSON result SHALL set `required_next_skill` to `spec-change-delivery`
+- **AND** it SHALL set `delivery_allowed` to `true`.
+- **WHEN** the same command runs with `--no-implementation`
+- **THEN** it SHALL set `delivery_allowed` to `false`
+- **AND** it SHALL NOT route to `spec-change-delivery`.
+
+### Requirement: Child handoff synchronization tool
+
+The testsuite SHALL provide a deterministic local .NET file-based tool that generates, checks and synchronizes one Child Session Handoff from one exact operational Child Index row.
+
+#### Scenario: Missing handoff is generated from Child Index
+
+- **GIVEN** a Child Index fixture with an exact operational row for a stable child id
+- **AND** the requested handoff path is missing
+- **WHEN** `SyncChildHandoff.cs` runs with `--write`
+- **THEN** it SHALL create the requested handoff file
+- **AND** the generated handoff SHALL include child id, child spec, Child Index / Queue, target repository, next skill, current verdict, allowed write-set, verification and evidence/OpenSpec fields derived from the row and CLI inputs.
+
+#### Scenario: Current handoff passes check
+
+- **GIVEN** an existing handoff whose controlled fields match the Child Index row and CLI inputs
+- **WHEN** `SyncChildHandoff.cs` runs with `--check`
+- **THEN** it SHALL exit `0`
+- **AND** it SHALL report status `current`.
+
+#### Scenario: Stale controlled field blocks check
+
+- **GIVEN** an existing handoff whose current verdict differs from the Child Index row
+- **WHEN** `SyncChildHandoff.cs` runs with `--check --format json`
+- **THEN** it SHALL exit `1`
+- **AND** the JSON findings SHALL include `FIELD_DRIFT` for `Aktueller Verdict`.
+
+#### Scenario: Dry run does not write
+
+- **GIVEN** an existing stale handoff
+- **WHEN** `SyncChildHandoff.cs` runs with `--dry-run`
+- **THEN** it SHALL print the proposed synchronized handoff
+- **AND** it SHALL leave the existing handoff bytes unchanged.
+
+#### Scenario: Manual notes are preserved by explicit section
+
+- **GIVEN** an existing handoff with a section named `## Notes Preserved By Sync`
+- **WHEN** `SyncChildHandoff.cs` runs with `--write`
+- **THEN** it SHALL rewrite controlled fields from the Child Index row
+- **AND** it SHALL preserve that section and all following text verbatim.
+
+#### Scenario: Approximate write-set blocks synchronization
+
+- **GIVEN** a Child Index row whose `Allowed Write-Set` contains approximate language such as `TBD`, `likely`, `as needed` or `etc.`
+- **WHEN** `SyncChildHandoff.cs` runs without `--allow-approx-write-set`
+- **THEN** it SHALL exit `1`
+- **AND** it SHALL report `APPROX_WRITE_SET`.
+
+### Requirement: Orchestration pack validation tool
+
+The testsuite SHALL provide a deterministic local validator for Agent Delivery orchestration packs that rejects malformed Child Index structures, stale artifact pointers, inconsistent hardening queues, contradictory next actions, and unsupported workflow advancement claims.
+
+#### Scenario: Valid orchestration pack passes
+
+- **GIVEN** an orchestration pack with the exact operational Child Index columns
+- **AND** every referenced child spec and handoff file exists
+- **AND** the Hardening Queue agrees with the Child Index verdicts
+- **WHEN** `ValidateOrchestrationPack.cs` validates the pack
+- **THEN** it SHALL exit `0`
+- **AND** JSON output SHALL include `schema: agent-delivery.validate-orchestration-pack.v1`
+- **AND** JSON output SHALL include `valid: true`.
+
+#### Scenario: Missing handoff fails
+
+- **GIVEN** an orchestration pack whose Child Index references a missing Session Handoff file
+- **WHEN** `ValidateOrchestrationPack.cs` validates the pack
+- **THEN** it SHALL exit `1`
+- **AND** JSON output SHALL include a finding with code `missing-handoff` and the affected child id.
+
+#### Scenario: Stale next action fails
+
+- **GIVEN** an orchestration pack whose Child Index row says `NEEDS HARDENING`
+- **AND** that same row routes directly to `spec-change-delivery`
+- **WHEN** `ValidateOrchestrationPack.cs` validates the pack
+- **THEN** it SHALL exit `1`
+- **AND** JSON output SHALL include `status-next-action-mismatch`.
+
+#### Scenario: Compressed child index fails
+
+- **GIVEN** an orchestration pack that uses compressed or aliased Child Index columns such as `Slice`, `Status`, or `Implementation Gate`
+- **WHEN** `ValidateOrchestrationPack.cs` validates the pack
+- **THEN** it SHALL exit non-zero
+- **AND** output SHALL name the compressed or aliased Child Index columns.
+
+#### Scenario: False advancement claim fails
+
+- **GIVEN** an orchestration pack that explicitly claims the workflow advanced, hardening started, launch happened, delivery started, or closeout was accepted
+- **AND** the pack contains only queue/handoff setup without matching evidence
+- **WHEN** `ValidateOrchestrationPack.cs` validates the pack
+- **THEN** it SHALL exit `1`
+- **AND** JSON output SHALL include `false-advancement-claim`.
+
+### Requirement: Spec-orchestrator uses post-orchestration evaluator gate
+
+The `spec-orchestrator` skill SHALL run the accepted post-orchestration next-step evaluator after it creates or updates an operational Child Index and Hardening Queue, then follow the evaluator verdict instead of restating transition rules in broad prose.
+
+#### Scenario: Orchestrator runs evaluator after queue creation
+
+- **GIVEN** `spec-orchestrator` has created or updated an operational Child Index and Hardening Queue
+- **WHEN** it reaches the post-orchestration transition point
+- **THEN** the skill instructions SHALL require running `EvaluateOrchestrationNextStep.cs`
+- **AND** the command SHALL pass the orchestration pack/index path, repository path, Child Index section, intent and JSON output format.
+
+#### Scenario: Hardening verdict starts hardening unless user stopped there
+
+- **GIVEN** the evaluator JSON sets `required_next_skill` to `child-spec-hardening`
+- **WHEN** the user did not explicitly request `orchestration-only` or `stop-before-hardening`
+- **THEN** the skill instructions SHALL route the first unblocked child to `child-spec-hardening`
+- **AND** `--no-implementation` SHALL NOT suppress this hardening route.
+
+#### Scenario: Delivery verdict remains gated
+
+- **GIVEN** the evaluator JSON sets `required_next_skill` to `spec-change-delivery`
+- **WHEN** the user did not explicitly request implementation or readiness gates are not valid
+- **THEN** the skill instructions SHALL stop at the implementation handoff instead of starting delivery.
+
+#### Scenario: Final wording reports evaluator status token
+
+- **GIVEN** the evaluator emitted `final_status_token`
+- **WHEN** `spec-orchestrator` reports its result
+- **THEN** the final response SHALL include that token
+- **AND** it SHALL not imply workflow advancement when only a queue was created.
+
+### Requirement: Workflow Doctor post-orchestration wrapper
+
+The testsuite SHALL provide a reduced Workflow Doctor that wraps accepted Agent Delivery workflow tooling for the `post-orchestration` phase without adding new workflow policy.
+
+#### Scenario: Post-orchestration evaluation is aggregated
+
+- **GIVEN** an orchestration pack accepted by `EvaluateOrchestrationNextStep.cs`
+- **WHEN** `WorkflowDoctor.cs` runs with `--phase post-orchestration --format json`
+- **THEN** the JSON report SHALL contain exactly one tool run for `EvaluateOrchestrationNextStep.cs`
+- **AND** the report SHALL include the underlying parsed JSON result
+- **AND** the report SHALL surface the recommended next action fields from the underlying evaluator.
+
+#### Scenario: Required next step can fail the wrapper
+
+- **GIVEN** an orchestration pack where `EvaluateOrchestrationNextStep.cs` reports a required next skill
+- **WHEN** `WorkflowDoctor.cs` runs with `--fail-on-required-next-step`
+- **THEN** the wrapper SHALL exit `1`
+- **AND** the aggregate report SHALL keep the underlying parsed JSON visible.
+
+#### Scenario: Unsupported broader phases are blocked
+
+- **GIVEN** Slice A only supports `post-orchestration`
+- **WHEN** `WorkflowDoctor.cs` runs with `--phase pre-delivery`
+- **THEN** it SHALL exit `2`
+- **AND** it SHALL explain that the phase is outside Slice A.
+
+#### Scenario: Missing underlying tool is explicit
+
+- **GIVEN** `EvaluateOrchestrationNextStep.cs` is absent beside `WorkflowDoctor.cs`
+- **WHEN** `WorkflowDoctor.cs` runs with `--phase post-orchestration`
+- **THEN** it SHALL exit `2`
+- **AND** it SHALL include a missing-underlying-tool finding.

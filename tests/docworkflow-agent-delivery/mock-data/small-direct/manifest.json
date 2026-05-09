@@ -1,0 +1,29 @@
+{
+  "fixture_id": "mock-small-direct-v1",
+  "fixture_version": "1.0.0",
+  "spec_type": "small-direct",
+  "expected_delivery_mode": "direct",
+  "runner_mode": "local-mock-session-runner",
+  "session_strategy": "direct-no-child-session",
+  "source_spec": "mock-small-direct-spec.md",
+  "target_repo": "mock-target",
+  "expected_children": [],
+  "expected_outputs": ["mock-target/output/small-direct-result.json"],
+  "forbidden_outputs": ["child-index.md", "child-session-handoffs/**", "child-specs/**"],
+  "expected_sessions": [],
+  "expected_closeout_state": {
+    "child_index_created": false,
+    "child_specs_created": false,
+    "child_handoffs_created": false
+  },
+  "expected_output_json": {
+    "mode": "direct",
+    "result": "ok",
+    "source": "mock-small-direct"
+  },
+  "forbidden_source_paths": [
+    "/Users/dh/Documents/DanielsVault/ki-fuer-kmu/**",
+    "ki-fuer-kmu/**"
+  ]
+}
+

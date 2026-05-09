@@ -1,0 +1,7 @@
+{
+  "fixture_id": "forbidden-write-set",
+  "allowed_write_set": [
+    "ki-fuer-kmu/**"
+  ]
+}
+

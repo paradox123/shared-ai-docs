@@ -1,0 +1,27 @@
+## Child Session Handoff
+
+- Parent: tests/sync-child-handoff/fixtures/stale-verdict/parent.md
+- Stable Child ID: SYNC-1
+- Child: SYNC-1
+- Child Spec: tests/sync-child-handoff/fixtures/stale-verdict/child-spec.md
+- Child Index / Queue: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/sync-child-handoff/fixtures/stale-verdict/control-index.md section `Child Index`
+- Handoff File: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/sync-child-handoff/fixtures/stale-verdict/child-session-handoff.md
+- Target Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs
+- Codex Session / Log: not created by SyncChildHandoff
+- Session Evidence: not created by SyncChildHandoff
+- Handoff Timestamp: 2026-05-09
+- Naechster Modus/Skill: spec-change-delivery
+- Aktueller Verdict: NEEDS HARDENING
+- Scope Summary: Parent Coverage: SYNC-P1 handoff synchronization. Dependencies: none.
+- Non-Goals: No agent session launch; no edits outside the allowed write-set.
+- Allowed Write-Set: `skills-repo/tools/SyncChildHandoff.cs`; `tests/sync-child-handoff/fixtures/stale-verdict/**`
+- Shared / Read-only Files: `docs/doc-workflow.md`; `skills-repo/tools/ValidateChildReadiness.cs`; `skills-repo/tools/AgentDeliverySessionLauncher.cs`
+- Verification Lifecycle:
+  - Rehearsal / Preflight: not recorded by SyncChildHandoff
+  - Delivery Gate: `dotnet run skills-repo/tools/SyncChildHandoff.cs -- --help`; `git diff --check`
+  - Pre-Archive Closeout: not recorded by SyncChildHandoff
+  - Post-Archive / Current Replay: not recorded by SyncChildHandoff
+- Evidence / OpenSpec: openspec/changes/agent-delivery-sync-child-handoff/; tests/sync-child-handoff/fixtures/stale-verdict/evidence.json
+- Retained Evidence: tests/sync-child-handoff/fixtures/stale-verdict/evidence.json
+- Offene Blocker oder non-blocking Notes: no deferred fixture scope
+- Fresh Session empfohlen: Yes

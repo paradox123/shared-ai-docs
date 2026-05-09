@@ -281,6 +281,33 @@ Hardening queue format:
 
 For contract-heavy children, include `Canonical Examples/Fixtures decision` in Required Hardening.
 
+### Tool Gate: Post-Orchestration Next Step
+
+After creating or updating the operational Child Index and Hardening Queue, run:
+
+```sh
+dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/EvaluateOrchestrationNextStep.cs -- \
+  --pack <orchestration-pack-or-index.md> \
+  --repo <target-repo-or-workspace> \
+  --child-index-section "Child Index" \
+  --intent <expects-hardening|expects-implementation-ready|hardening-queue-only|orchestration-only|stop-before-hardening|unknown> \
+  --format json
+```
+
+Add `--no-implementation` when the user forbids runtime/product implementation. This must not suppress `child-spec-hardening`; it only prevents routing to `spec-change-delivery`.
+
+Run tool, follow verdict:
+
+| Evaluator result | Required action |
+|---|---|
+| `errors` non-empty or exit `2` | Stop, report `final_status_token`, and fix/synchronize the orchestration artifacts before hardening or delivery. |
+| `required_next_skill = child-spec-hardening` | Start or hand off `first_unblocked_child` to `child-spec-hardening`, unless the user explicitly requested `orchestration-only` or `stop-before-hardening`. |
+| `required_next_skill = spec-change-delivery` | Stop at the implementation handoff unless the user explicitly requested implementation and all readiness gates remain valid. |
+| `required_next_skill = spec-orchestrator` | Continue synchronizing this orchestration pack before any downstream handoff. |
+| `required_next_skill = none` | Report no required next workflow step. |
+
+Final wording must include the evaluator's `final_status_token` and must not imply workflow advancement when only a queue was created.
+
 ### 8. Decide Parallelization
 
 Create a Parallel Work Control Surface:
@@ -372,6 +399,11 @@ Mode:
 | Child | Current Status | Required Hardening | Sources To Read | Blockers | Next Handoff Target |
 |---|---|---|---|---|---|
 
+**Tool Gate**
+- final_status_token:
+- required_next_skill:
+- first_unblocked_child:
+
 **Parallelization**
 | Lane | Child/Work Block | Mode | Safe? | Owner/Agent | Allowed Write-Sets | Shared Files / Read-only Files | Dependencies | Verification Commands | Integration Owner | Merge/Sync Order |
 |---|---|---|---|---|---|---|---|---|---|---|
@@ -433,6 +465,8 @@ If files were edited, include changed files and verification performed. Include 
 - Prefer a small generated delivery pack over a long narrative essay.
 
 ## Hand-Off To Other Skills
+
+After the Tool Gate runs, use the evaluator verdict as the routing source of truth. Do not manually infer the next workflow skill from the prose below.
 
 - Use `doc-coauthoring` first when no parent spec/draft exists yet, or when parent/child requirement text itself needs authoring.
 - Use `child-spec-hardening` after this skill when a child draft or hardening queue item must become implementation-ready.
