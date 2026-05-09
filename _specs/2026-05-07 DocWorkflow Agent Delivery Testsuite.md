@@ -12,7 +12,7 @@
 - In Scope: Testlevel L0-L3, Skill-Unit-Tests, Skill-Chain-/Teil-E2E-Tests, Runtime-E2E-Pfade in Temp-Repos, Style-/Usability-Gates, Effizienz-/Telemetry-Gates, Automation-first Harness-Anforderungen, Framework-first-Research, Fixture- und Testisolation, Parent-only Orchestration-Fixtures, Spec-Sizing-Gate, Parent-Control-Layer-Erhalt, Child-Schnitt, operativer Child Index, Child-Hardening-Gates, persistierte Child Session Handoffs, Single-Child-Delivery-Gates, Closeout-Sync, Next-Child-Abbruch, Evidence-Artefakte, klare Automatisierungsgrenzen.
 - Out of Scope: Aenderungen an KI-fuer-KMU-Originalspecs, pauschale Legacy-Migrationen, Runtime-Implementierung ausserhalb von Temp-Repos, vollstaendige Agent-Runner-Implementierung in dieser Spec, agentische Vollausfuehrung der gesamten Testsuite als Standardpfad.
 - Wichtigste Test-/Harness-Cases: Child-Slices `DWT-S0` bis `DWT-S5`; Skill-Unit-Tests fuer `spec-orchestrator`, `child-spec-hardening`, `spec-change-delivery`, `spec-closeout`; `TC1D oversized parent does not enter direct implementation`, `TC1A Parent-only orchestration produces child control surface`, `TC1B plausible child skeleton cannot become ready`, `TC1C ready child requires validator and high-risk command rehearsal`, `TC1E orchestration plus hardening produces readiness matrix`, `TC2A ready child delivery kickoff is temp-repo only`, `TC2B after S3 closeout DWT-S5 remains blocked`, `TC2C stale next handoff blocks`, `TC2D parent coverage cannot disappear during closeout`, `DWT-S5-L3A` through `DWT-S5-L3F` runtime-temp-repo pilot gates, Style-/Usability-Gates und Effizienz-/Telemetry-Gates.
-- Wichtigste Verification Commands: `bash -n tests/docworkflow-agent-delivery/scripts/*.sh`; `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all`; `tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh all --keep`; `tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh all --keep`; `tests/docworkflow-agent-delivery/scripts/run-l2-single-child-closeout-checks.sh all --keep`; `tests/docworkflow-agent-delivery/scripts/run-reporting-contract-checks.sh all --keep`; retained DWT-S5 post-archive `ran-target` evidence assertion; `openspec validate docworkflow-agent-delivery-testsuite --strict`; `git diff --check`.
+- Wichtigste Verification Commands: `bash -n tests/docworkflow-agent-delivery/scripts/*.sh`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep`; mock-only compatibility `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all --keep`; `tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh all --keep`; `tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh all --keep`; `tests/docworkflow-agent-delivery/scripts/run-l2-single-child-closeout-checks.sh all --keep`; `tests/docworkflow-agent-delivery/scripts/run-reporting-contract-checks.sh all --keep`; retained DWT-S5 post-archive `ran-target` evidence assertion; `openspec validate docworkflow-agent-delivery-testsuite --strict`; `git diff --check`.
 - Offene Entscheidungen: Keine blockierenden Entscheidungen fuer die Spec. Framework-ADR wurde durch `DWT-S0` mit `ADOPT_WITH_LIMITATIONS` re-evaluiert; Promptfoo bleibt primaerer Agent-/Coding-Agent-Eval-Rahmen, braucht aber explizite Codex-Auth-Provisionierung und stabile npm-/Registry-Connectivity. Inspect AI bleibt strategischer Fallback, wird aber nicht als naechster Pfad aktiviert. .NET 10 file-based Apps bleiben eine bevorzugte Option fuer kleine deterministische Harness-Hilfen.
 - Readiness Status: Parent Spec accepted and closed as the completed control layer for `DWT-S0` through `DWT-S5`. All child slices are accepted, archived, evidence-synchronized, and no descendant child or follow-up scope is released by this parent closeout.
 
@@ -48,7 +48,7 @@ Die aktuelle Testsuite unter `tests/docworkflow-agent-delivery/` ist als erster 
 1. Entsteht aus einem Parent-only-Start wirklich ein Child-Schnitt mit Child Specs, Child Index, Coverage Matrix, Hardening Queue und mindestens einem implementation-ready Child?
 2. Bricht der Workflow nach einer abgeschlossenen Child-Delivery wirklich ab, wenn der naechste Child noch nicht implementation-ready ist?
 
-Der aktuelle Harness bestaetigt vor allem bereits vorhandene KI-fuer-KMU-Artefakte. Das ist als Regression Gate wertvoll, darf aber nicht als Beweis fuer Agent-Orchestration oder post-closeout Next-Child-Gating gelten.
+Der historische L0-Harness bestaetigte vor allem bereits vorhandene KI-fuer-KMU-Artefakte. Diese Evidence bleibt historische/read-only Regressionserinnerung und darf nicht als aktueller positiver Agent-Delivery-E2E-Beweis gelten. Der aktuelle Standardpfad fuer den Agent-Delivery-Mock-E2E-Nachweis ist `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep`; reale Produktfixtures sind dort verboten.
 
 ## 3. Zielbild
 
@@ -655,23 +655,25 @@ Ausfuehrungskontext:
 - Shell: `zsh` oder `bash`; Skripte selbst deklarieren `#!/usr/bin/env bash`.
 - Plattform: macOS als primaerer Authoring-/Harness-Kontext; Linux-Kompatibilitaet fuer spaetere Container-/CI-Gates ist wuenschenswert, aber nicht L0-blockierend.
 
-Aktuelle L0-Verifikation:
+Aktueller Agent-Delivery-Mock-E2E-Gate:
 
 ```sh
 bash -n tests/docworkflow-agent-delivery/scripts/setup-fixture.sh
 bash -n tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh
-tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all
+tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep
+tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all --keep
 ```
 
 Success Criteria:
 
 - Syntaxchecks enden mit Exit `0`.
-- `run-contract-checks.sh all` endet mit Exit `0`, solange Bash-L0 als bestehender Smoke-Harness existiert.
-- Evidence zeigt L0 als Contract Smoke, nicht als E2E-Orchestration-Beweis.
+- `run-mock-e2e-checks.sh all --keep` endet mit Exit `0` und erzeugt Mock-E2E-Evidence ohne KI-fuer-KMU- oder andere Realprojekt-Fixtures.
+- `run-contract-checks.sh all --keep` endet mit Exit `0` nur als mock-only Kompatibilitaetsshim fuer denselben Standard-Gate.
+- Historische L0-/DWT-Evidence bleibt als Contract Smoke oder retained Parent-Closeout-Evidence dokumentiert, nicht als aktuelle positive Mock-E2E-Fixture-Quelle.
 
-Zukuenftige L1/L2-Verifikation:
+Aktuelle L1/L2/L3-Verifikation:
 
-Konkrete Commands fuer Skill-Unit-, Chain-/Teil-E2E-, Style- und Efficiency-Gates werden im Plan festgelegt, nachdem Framework- und Runner-Optionen bewertet wurden. Sie duerfen erst als Gate gelten, wenn die entsprechenden Harnesses existieren.
+Die akzeptierten DWT-S0 bis DWT-S5 Harnesses und retained Evidence bleiben fuer die Parent-Testsuite gueltig. Sie beweisen die DWT Parent/Child-Harness-Schichten, ersetzen aber nicht den mock-first Agent-Delivery-E2E-Standardpfad aus `run-mock-e2e-checks.sh all --keep`.
 
 High-risk Command Contract:
 
@@ -794,5 +796,6 @@ Review-Ergebnis:
 | 2026-05-08 | Codex | DWT-S5 hardened to `IMPLEMENTATION READY` with child spec, Parent Child Index row, persisted handoff, active OpenSpec change, retained DWT-S3 dependency checks and runtime-temp-repo evidence contract; no runtime or Docker/container proof was run during hardening. |
 | 2026-05-08 | Codex | DWT-S5 accepted and OpenSpec archived with retained Promptfoo/Codex `ran-target` L3 runtime temp-repo evidence; no descendant child was released. |
 | 2026-05-08 | Codex | Parent Spec accepted/closed after DWT-S0 through DWT-S5 archive/evidence sync, full parent closeout verification replay and documentation sync; no descendant child or follow-up scope released. |
+| 2026-05-09 | Codex | Synchronized current Agent Delivery Mock E2E documentation: `run-mock-e2e-checks.sh all --keep` is the standard gate, `run-contract-checks.sh all --keep` is mock-only compatibility, and KI-fuer-KMU evidence is historical/read-only only. |
 
 SessionId: 2026-05-07-docworkflow-agent-delivery-testsuite

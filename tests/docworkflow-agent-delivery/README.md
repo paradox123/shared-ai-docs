@@ -37,6 +37,18 @@ Kompatibilitaetsname fuer den mock-only Standard-Gate:
 tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all --keep
 ```
 
+Der lokale Mock-E2E-Basispfad nutzt nur source-controlled Mockdaten unter `tests/docworkflow-agent-delivery/mock-data/**` und isolierte Evidence-Ordner unter `tests/docworkflow-agent-delivery/e2e/evidence/**`. `run-contract-checks.sh all --keep` bleibt ein mock-only Kompatibilitaetsname fuer denselben Standard-Gate; TC1/TC2 Legacy-Selectoren sind explicit-fixture-only und nicht der aktuelle Agent-Delivery-E2E-Erfolgsnachweis. `setup-fixture.sh` ist kein No-Argument-Standardpfad und darf nur mit expliziter Fixture-Quelle ausserhalb des Standard-Mock-E2E-Basispfads verwendet werden.
+
+Akzeptierte Mock-E2E-Evidence:
+
+| Slice | Bedeutung | Evidence |
+|---|---|---|
+| `MD-E2E-1` | Mock fixture family, Manifeste und Forbidden-Real-Fixture-Validator akzeptiert. | `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/implementation-evidence.md` |
+| `MD-E2E-2` | Local Mock Session Runner fuer `large`, `small` und `all` akzeptiert. | `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-2-local-runner/implementation-evidence.md`; `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-all/aggregate-summary.json` |
+| `MD-E2E-3` | `run-mock-e2e-checks.sh all --keep` als fuehrender Standard-Gate und `run-contract-checks.sh all --keep` als mock-only Shim akzeptiert. | `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/implementation-evidence.md`; `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-3-mock-all/aggregate-summary.json`; `tests/docworkflow-agent-delivery/e2e/evidence/20260509T082132Z-all/aggregate-summary.json` |
+
+KI-fuer-KMU und andere reale Produkt-Repositories sind nur historische/read-only oder verbotene Real-Fixture-Kontexte. Sie sind keine Standard-Fixture, kein Fallback, keine Kompatibilitaetsquelle und kein Target Workspace fuer den Mock-E2E-Gate. Ein spaeterer Live-Agent-/Codex-Session-Pfad gehoert zu `MD-E2E-5` und darf den lokalen Mock-E2E-Basispfad nicht ersetzen.
+
 DWT-S1 L1 deterministic-only checks:
 
 ```sh

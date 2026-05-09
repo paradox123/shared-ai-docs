@@ -1,5 +1,5 @@
 **Date:** 2026-05-09
-**Status:** 🟡 Spec
+**Status:** 🔵 Implemented
 **Scope:** Mockdaten und Ende-zu-Ende-Harness fuer den Agent Delivery Workflow ohne reale Produkt-Specs
 
 ---
@@ -7,14 +7,14 @@
 ## Review Control Surface
 
 - Spec-Variante: Child-/Ergaenzungsspec zur DocWorkflow Agent Delivery Testsuite.
-- Goldstandard Status: hardened draft, ready for implementation planning.
+- Goldstandard Status: local mock-first baseline accepted; optional live-agent follow-up deferred.
 - Ziel: Die Testsuite soll den Agent Delivery Workflow mit synthetischen Mock-Specs Ende-zu-Ende pruefen: ein kleiner Mock fuer den Large-Spec-Pfad muss automatisch in Parent/Child-Delivery mit Folgesessions gehen und am Ende die Datei `count.txt` mit `1` bis `5` erzeugen; kleine Direct-Specs muessen direkt geliefert werden, ohne kuenstlichen Split.
 - In Scope: source-controlled Mockdaten, kleine Large-Path Mock-Parent-Spec mit Mock-Sizing-Directive, kleine Mock-Direct-Spec, Anpassung bestehender Tests an diese Mockdaten, neue Assertions und neue Mock-E2E-Tests, erwartete triviale Runtime-Ergebnisse, automatische Session-Start-/Queue-Evidence, Parent/Child-Orchestration, Child-Hardening, Single-Child-Delivery, Closeout, Next-Session-Handoff, negative Guards gegen echte Projektfixtures.
 - Out of Scope: KI-fuer-KMU oder andere reale Produkt-Specs als Testdatenquelle, produktive Runtime-Features, echte externe Infrastruktur, Docker als Pflicht fuer den Mock-E2E-Basispfad, vollstaendige App-Entwicklung.
 - Wichtigste Test-/Harness-Cases: `MOCK-LARGE-E2E` fuer den vollstaendigen Pfad von Mock-Parent-Spec bis fertiger `count.txt`; `MOCK-SMALL-E2E` fuer kleine Direct-Spec ohne Split; `MOCK-MIGRATE-EXISTING-TESTS` fuer Umstellung vorhandener L0/L1/L2/L3/Reporting-Checks auf Mockdaten; `MOCK-FORBID-REAL-FIXTURE` gegen KI-fuer-KMU-/Realprojekt-Testdaten; `MOCK-SESSION-CHAIN` fuer Session-Launch-Evidence und Handoff-Kette.
-- Wichtigste Verification Commands: `bash -n tests/docworkflow-agent-delivery/scripts/*.sh`; zukuenftig `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh large --keep`; zukuenftig `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh small --keep`; zukuenftig `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep`; `openspec validate docworkflow-agent-delivery-testsuite --strict`; `git diff --check`.
+- Wichtigste Verification Commands: `bash -n tests/docworkflow-agent-delivery/scripts/*.sh`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh large --keep`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh small --keep`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep`; `openspec validate docworkflow-agent-delivery-testsuite --strict`; `git diff --check`.
 - Offene Entscheidungen: Keine blockierenden Entscheidungen. Docker bleibt fuer diese Mock-E2E-Basis optional; der akzeptierte E2E-Pfad nutzt einen lokalen Mock Session Runner, der echte Session-Grenzen, Handoffs, Resume-Schritte und Evidence deterministisch materialisiert, ohne externe Infrastruktur zu brauchen.
-- Readiness Status: READY WITH NON-BLOCKING NOTES for implementation planning. The local Mock Session Runner command cannot be rehearsed before it exists; the implementing slice must create it first, then run the declared verification commands before closeout.
+- Readiness Status: Implemented for the local mock-first baseline. `MD-E2E-1` through `MD-E2E-4` are accepted with retained evidence; `MD-E2E-5` remains a deferred optional live-agent follow-up.
 
 ## Session Briefing
 
@@ -463,9 +463,10 @@ Empfohlene Umsetzungsslices:
 | `MD-E2E-1` | Mockdaten, Manifeste, Mock Target Fixture und Forbidden-Path Validator. | Ja, vor Runner-Integration. | Manifest-Schema und Forbidden-Real-Fixture-Test gruen. |
 | `MD-E2E-2` | Local Mock Session Runner und `run-mock-e2e-checks.sh large/small/all`. | Nach `MD-E2E-1`. | Large und Small E2E erzeugen erwartete Artefakte. |
 | `MD-E2E-3` | Migration/Deaktivierung alter Standard-Gates und README/Parent-Sync. | Nach Runner-Vertrag stabil. | Standard-`all` nutzt Mockdaten und keine KI-fuer-KMU-Quelle. |
-| `MD-E2E-4` | Optionaler Live-Agent-/Codex-Session-Pfad. | Separater Follow-up. | Live-Pfad schreibt kompatible Evidence, ersetzt aber nicht den lokalen Basispfad. |
+| `MD-E2E-4` | Finaler README-/Parent-/OpenSpec-conditional-/Evidence-Dokumentationssync. | Nach `MD-E2E-1` bis `MD-E2E-3` Acceptance. | Docs nennen den mock-only Standard-Gate, verlinken akzeptierte Evidence und behaupten keinen Live-Agent-Erfolg. |
+| `MD-E2E-5` | Optionaler Live-Agent-/Codex-Session-Pfad. | Separater Follow-up. | Live-Pfad schreibt kompatible Evidence, ersetzt aber nicht den lokalen Basispfad. |
 
-Der erste akzeptierte Implementation-Ready Scope umfasst `MD-E2E-1` bis `MD-E2E-3`. `MD-E2E-4` ist optionaler spaeterer Ausbau.
+Der erste lokale Mock-E2E-Basispfad umfasst `MD-E2E-1` bis `MD-E2E-4`: Fixture, Runner, Standard-Gate-Migration und finaler Dokumentationssync. `MD-E2E-5` ist optionaler spaeterer Ausbau.
 
 ## 4.7 New Test Proposals
 
@@ -740,7 +741,7 @@ Operational rule:
 
 - Jeder Child startet mit `child-spec-hardening`.
 - `MD-E2E-1`, `MD-E2E-2` und `MD-E2E-3` sind akzeptiert; ihre OpenSpec-Archive und Evidence-Pfade sind im Orchestration Pack verlinkt.
-- `MD-E2E-4` ist der naechste fuehrende Child fuer `child-spec-hardening`.
+- `MD-E2E-4` ist akzeptiert; README, Parent-/DWT-Dokumentation, Orchestration Pack, Handoff und Evidence-Ledger sind auf den mock-first Standard-Gate synchronisiert.
 - `spec-change-delivery` darf erst nach dokumentiertem Hardening-Verdict `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` fuer genau einen weiteren Child starten.
 - KI-fuer-KMU faellt vollstaendig aus den Standard-Testdaten heraus und darf nicht als Compatibility Fixture erhalten bleiben.
 
@@ -755,5 +756,8 @@ Operational rule:
 | 2026-05-09 | Codex | Added spec-orchestrator control layer, child spec pointers and explicit block against implementing this Parent Spec as one bounded delivery slice. |
 | 2026-05-09 | Codex | Synced parent control notes after MD-E2E-3 acceptance and OpenSpec archive; MD-E2E-4 is now the next hardening target. |
 | 2026-05-09 | Codex | Synchronized parent orchestration status after accepting and archiving MD-E2E-2 local mock runner evidence. |
+| 2026-05-09 | Codex | Hardened MD-E2E-4 as the final documentation-sync child and moved optional live-agent/Codex support to MD-E2E-5 follow-up. |
+| 2026-05-09 | Codex | Accepted MD-E2E-4 documentation sync; README, DWT parent wording, orchestration control surfaces and evidence ledger now document the mock-first local baseline without live-agent success claims. |
+| 2026-05-09 | Codex | Closed MD-E2E-4 spec/OpenSpec state; no active MD-E2E-4 OpenSpec change existed, canonical validation passed and MD-E2E-5 remains deferred. |
 
 SessionId: 2026-05-09-docworkflow-agent-delivery-mock-data-e2e-harness

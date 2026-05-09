@@ -6,21 +6,21 @@
 - Child Index / Queue: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md` section `Child Index`
 - Handoff File: `_specs/child-session-handoffs/md-e2e-4-session-handoff.md`
 - Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`
-- Codex Session / Log: not created; delivery launch is blocked until hardening verdict exists.
-- Session Evidence: no launch evidence; orchestration-only handoff.
+- Codex Session / Log: manual `spec-change-delivery` session; no automated launch evidence was created for MD-E2E-4.
+- Session Evidence: implementation evidence recorded in `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-4 Documentation Sync.md`.
 - Handoff Timestamp: 2026-05-09
-- Naechster Modus/Skill: `child-spec-hardening` for `MD-E2E-4` after MD-E2E-1 through MD-E2E-3 evidence exists.
-- Aktueller Verdict: NEEDS HARDENING; not implementation-ready.
-- Scope Summary: Harden the final README, parent spec, orchestration pack, OpenSpec/canonical and evidence sync plan for the mock-first Agent Delivery E2E workflow.
-- Non-Goals: No runner fixes, no missing evidence invention, no live-agent path, no behavior changes outside docs and control surfaces.
-- Allowed Write-Set: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-4 Documentation Sync.md`; `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md`; `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md`; `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md`; `_specs/child-session-handoffs/md-e2e-4-session-handoff.md`; `tests/docworkflow-agent-delivery/README.md`; `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md` only if hardening selects OpenSpec canonical sync.
+- Naechster Modus/Skill: none for `MD-E2E-4`; optional `MD-E2E-5` needs separate hardening before live-agent work.
+- Aktueller Verdict: ACCEPTED.
+- Scope Summary: Final README, parent spec, orchestration pack, DWT parent spec, conditional OpenSpec/canonical and evidence documentation sync delivered for the mock-first Agent Delivery E2E workflow.
+- Non-Goals: No runner fixes, no fixture edits, no missing evidence invention, no live-agent path, no behavior changes outside docs and control surfaces.
+- Allowed Write-Set: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-4 Documentation Sync.md`; `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md`; `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md`; `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md`; `_specs/child-session-handoffs/md-e2e-4-session-handoff.md`; `tests/docworkflow-agent-delivery/README.md`; `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md` only if canonical sync is required.
 - Shared / Read-only Files: runner scripts and fixture files; accepted MD-E2E-1 through MD-E2E-3 evidence; KI-fuer-KMU and real product repositories.
 - Verification Lifecycle:
-  - Rehearsal / Preflight: collect accepted evidence paths from prior children.
+  - Rehearsal / Preflight: accepted evidence paths are concrete in the child spec; `openspec validate docworkflow-agent-delivery-testsuite --strict`, `git diff --check` and pre-acceptance `ValidateChildReadiness.cs` are valid command contracts.
   - Delivery Gate: `git diff --check`; `openspec validate docworkflow-agent-delivery-testsuite --strict` if OpenSpec canonical spec changes.
-  - Pre-Archive Closeout: update child index rows, parent history and README standard command.
-  - Post-Archive / Current Replay: not available yet.
-- Evidence / OpenSpec: proposed ledger `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-4-doc-sync/`; not created in orchestration pass. Prior accepted evidence now includes `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/implementation-evidence.md`, `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-3-mock-all/mock-e2e-summary.json`, and `tests/docworkflow-agent-delivery/e2e/evidence/20260509T082132Z-all/mock-e2e-summary.json`.
-- Retained Evidence: MD-E2E-1, MD-E2E-2 and MD-E2E-3 accepted evidence is available via the Orchestration Pack.
-- Offene Blocker oder non-blocking Notes: No predecessor evidence blocker remains for hardening; docs must not claim optional live-agent success.
-- Fresh Session empfohlen: Yes.
+  - Pre-Archive Closeout: update child index row, parent history, DWT parent doc wording if stale, README standard command/evidence notes and this handoff.
+  - Post-Archive / Current Replay: docs-sync evidence exists in the child spec; canonical OpenSpec replay was not required because the canonical spec was unchanged; accepted-state Child Index/handoff assertion replaces `ValidateChildReadiness.cs` after closeout because accepted rows are intentionally no longer implementation-allowing.
+- Evidence / OpenSpec: canonical OpenSpec sync was not touched because accepted MD-E2E-1 through MD-E2E-3 archives already added mock fixture, local runner and mock-only standard-gate requirements to `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`.
+- Retained Evidence: `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/implementation-evidence.md`; `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-2-local-runner/implementation-evidence.md`; `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/mock-e2e-summary.json`; `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-small/mock-e2e-summary.json`; `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-all/mock-e2e-summary.json`; `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-all/aggregate-summary.json`; `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/implementation-evidence.md`; `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-3-mock-all/mock-e2e-summary.json`; `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-3-mock-all/aggregate-summary.json`; `tests/docworkflow-agent-delivery/e2e/evidence/20260509T082132Z-all/mock-e2e-summary.json`; `tests/docworkflow-agent-delivery/e2e/evidence/20260509T082132Z-all/aggregate-summary.json`.
+- Offene Blocker oder non-blocking Notes: No predecessor evidence blocker remains. No optional live-agent success is claimed; `MD-E2E-5` remains deferred.
+- Fresh Session empfohlen: only for a future separately hardened `MD-E2E-5`.
