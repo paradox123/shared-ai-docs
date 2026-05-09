@@ -6,22 +6,21 @@
 - Child Index / Queue: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md` section `Child Index`
 - Handoff File: `_specs/child-session-handoffs/md-e2e-5-session-handoff.md`
 - Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`
-- Codex Session / Log: not created; follow-up is deferred.
-- Session Evidence: no launch evidence; deferred follow-up handoff.
+- Codex Session / Log: not launched for delivery; hardening-only update in current local session.
+- Session Evidence: no delivery launch evidence; Child Index sync is required before queue or implementation.
 - Handoff Timestamp: 2026-05-09
-- Naechster Modus/Skill: none now; later `child-spec-hardening` only after local baseline acceptance.
-- Aktueller Verdict: DEFERRED FOLLOW-UP; not implementation-ready.
-- Scope Summary: Future optional live-agent/Codex path that writes compatible evidence but never replaces the local mock baseline.
-- Non-Goals: No first-baseline work, no standard gate dependency on live provider, no network/auth requirement for `run-mock-e2e-checks.sh all --keep`, no KI-fuer-KMU fixtures.
-- Allowed Write-Set: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-5 Live Agent Follow-up.md`; `_specs/child-session-handoffs/md-e2e-5-session-handoff.md`; future live-agent harness files selected by later hardening.
-- Shared / Read-only Files: accepted local runner and baseline evidence; README standard command; mock fixture contracts.
+- Naechster Modus/Skill: parent/orchestrator sync, then `child-spec-hardening` validation; `spec-change-delivery` only after Child Index sync, readiness validation and launch/queue evidence.
+- Aktueller Verdict: NEEDS PARENT/ORCHESTRATOR SYNC.
+- Scope Summary: Optional live Agent/Codex evidence path that writes supplemental launch/live summaries while preserving the accepted local mock baseline as the required standard gate.
+- Non-Goals: No first-baseline work; no replacement of `run-mock-e2e-checks.sh all --keep`; no standard gate dependency on live provider, network, Docker, Codex auth or manual starts; no KI-fuer-KMU or other real product fixtures; no live success claim without matching launch evidence.
+- Allowed Write-Set: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-5 Live Agent Follow-up.md`; `_specs/child-session-handoffs/md-e2e-5-session-handoff.md`; `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-5-live-agent-follow-up/**`; `tests/docworkflow-agent-delivery/scripts/run-live-agent-e2e-checks.sh`; `tests/docworkflow-agent-delivery/e2e/live-agent/**`; `tests/docworkflow-agent-delivery/e2e/evidence/live-agent-md-e2e-5-*`; `_specs/agent-delivery-session-launches/*-md-e2e-5/**`
+- Shared / Read-only Files: `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`; `tests/docworkflow-agent-delivery/e2e/mock-runner/**`; `tests/docworkflow-agent-delivery/mock-data/**`; `tests/docworkflow-agent-delivery/README.md`; accepted MD-E2E-1 through MD-E2E-4 specs, handoffs, OpenSpec archives and retained evidence; KI-fuer-KMU and all other real product repositories; `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md` until an integration-owner sync explicitly edits the MD-E2E-5 Child Index row.
 - Verification Lifecycle:
-  - Rehearsal / Preflight: not applicable until reopened.
-  - Delivery Gate: future hardening must define.
-  - Pre-Archive Closeout: future only.
-  - Post-Archive / Current Replay: not available.
-- Evidence / OpenSpec: proposed future ledger `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-5-live-agent-follow-up/`; not created.
-- Retained Evidence: none.
-- Offene Blocker oder non-blocking Notes: Deferred until MD-E2E-1 through MD-E2E-4 are accepted. Auth/provider/network blockers must be represented as `blocked`, not pass.
-- Fresh Session empfohlen: No current session; reopen later.
-
+  - Rehearsal / Preflight: `git diff --check`; `ValidateChildReadiness.cs --allow-non-ready` currently expected to report Child Index/handoff verdict mismatch until integration-owner sync; after sync, rerun without `--allow-non-ready`.
+  - Delivery Gate: `bash -n tests/docworkflow-agent-delivery/scripts/run-live-agent-e2e-checks.sh`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep --run-id closeout-md-e2e-5-local-baseline`; `tests/docworkflow-agent-delivery/scripts/run-live-agent-e2e-checks.sh blocked --keep --run-id closeout-md-e2e-5-blocked`; `tests/docworkflow-agent-delivery/scripts/run-live-agent-e2e-checks.sh all --keep --run-id closeout-md-e2e-5-all`; `dotnet run skills-repo/tools/ValidateAgentDeliveryLaunchEvidence.cs -- --fixture tests/docworkflow-agent-delivery/e2e/live-agent/fixtures/launch-evidence`; `openspec validate docworkflow-agent-mock-e2e-md-e2e-5-live-agent-follow-up --strict`.
+  - Pre-Archive Closeout: local baseline replay retained; live summary retained; launch evidence retained or blocked/manual state recorded; no-real-fixture and secret scans pass; OpenSpec change validates.
+  - Post-Archive / Current Replay: `openspec validate docworkflow-agent-delivery-testsuite --strict`; `git diff --check`; local baseline remains replayable through `run-mock-e2e-checks.sh all --keep`.
+- Evidence / OpenSpec: proposed ledger `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-5-live-agent-follow-up/`; no delivery evidence created in this hardening run; queue evidence required under `_specs/agent-delivery-session-launches/*-md-e2e-5/` before delivery starts.
+- Retained Evidence: accepted local baseline evidence from MD-E2E-1 through MD-E2E-4 remains read-only predecessor evidence; MD-E2E-5 has no retained live evidence yet.
+- Offene Blocker oder non-blocking Notes: Blocking: Child Index row still says `DEFERRED FOLLOW-UP` and must be synchronized with this handoff and child spec before implementation. Runtime provider/auth/network unavailability must later be represented as `blocked` or `manual_start_required`, not pass.
+- Fresh Session empfohlen: Yes, after Child Index sync and launch/queue evidence; use a fresh `spec-change-delivery` session for the optional live-agent implementation.

@@ -1,5 +1,5 @@
 **Date:** 2026-05-09
-**Status:** 🔵 Implemented
+**Status:** 🟢 Accepted
 **Scope:** Mockdaten und Ende-zu-Ende-Harness fuer den Agent Delivery Workflow ohne reale Produkt-Specs
 
 ---
@@ -14,7 +14,7 @@
 - Wichtigste Test-/Harness-Cases: `MOCK-LARGE-E2E` fuer den vollstaendigen Pfad von Mock-Parent-Spec bis fertiger `count.txt`; `MOCK-SMALL-E2E` fuer kleine Direct-Spec ohne Split; `MOCK-MIGRATE-EXISTING-TESTS` fuer Umstellung vorhandener L0/L1/L2/L3/Reporting-Checks auf Mockdaten; `MOCK-FORBID-REAL-FIXTURE` gegen KI-fuer-KMU-/Realprojekt-Testdaten; `MOCK-SESSION-CHAIN` fuer Session-Launch-Evidence und Handoff-Kette.
 - Wichtigste Verification Commands: `bash -n tests/docworkflow-agent-delivery/scripts/*.sh`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh large --keep`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh small --keep`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep`; `openspec validate docworkflow-agent-delivery-testsuite --strict`; `git diff --check`.
 - Offene Entscheidungen: Keine blockierenden Entscheidungen. Docker bleibt fuer diese Mock-E2E-Basis optional; der akzeptierte E2E-Pfad nutzt einen lokalen Mock Session Runner, der echte Session-Grenzen, Handoffs, Resume-Schritte und Evidence deterministisch materialisiert, ohne externe Infrastruktur zu brauchen.
-- Readiness Status: Implemented for the local mock-first baseline. `MD-E2E-1` through `MD-E2E-4` are accepted with retained evidence; `MD-E2E-5` remains a deferred optional live-agent follow-up.
+- Readiness Status: Accepted and closed for the local mock-first baseline. `MD-E2E-1` through `MD-E2E-4` are accepted with retained evidence; `MD-E2E-5` remains a deferred optional live-agent follow-up.
 
 ## Session Briefing
 
@@ -714,12 +714,12 @@ Review-Ergebnis:
 
 ## 12. Mini-Retro
 
-- Was wurde entschieden? Reale Produkt-Specs, insbesondere KI-fuer-KMU, duerfen nicht mehr als E2E-Testdatenquelle fuer den Agent Delivery Workflow dienen.
-- Was wurde geaendert? Eine neue Mockdaten-Spec definiert grosse und kleine synthetische Specs, Migration vorhandener Tests, neue Mock-E2E-Tests, erwartete Outputs, Session-Automation-Evidence und forbidden-real-fixture Guards.
-- Was bleibt offen? Die konkrete Implementierung der Mockdaten, des lokalen Mock Session Runners und der Standard-Gate-Migration erfolgt in einem Folge-Change; Live-Agent-Integration ist optionaler spaeterer Ausbau.
-- Welche Evidenz/Verification fehlt? Functional Verification fehlt bis zur Implementierung; diese Spec definiert die spaeteren Gates.
-- Welche Skill-/Workflow-Reibung ist aufgefallen? E2E-Tests brauchen bewusst langweilige Mock-Domaenen, sonst kippen sie in Produktentwicklung statt Workflow-Validierung.
-- Session-/Kontextzustand: Spec authored; ready for review and later planning.
+- Was wurde entschieden? Die lokale mock-first Baseline ist der akzeptierte Standardnachweis fuer den Agent Delivery E2E Workflow; reale Produkt-Specs, insbesondere KI-fuer-KMU, bleiben als Standard-Testdatenquelle verboten.
+- Was wurde geaendert? `MD-E2E-1` bis `MD-E2E-4` wurden als Child Specs akzeptiert und geschlossen; der Parent ist auf den aktuellen gruenen `run-mock-e2e-checks.sh all --keep` Replay synchronisiert.
+- Was bleibt offen? `MD-E2E-5` bleibt ein optionaler, separat zu haertender Live-Agent-/Codex-Session-Follow-up und darf die lokale Baseline nicht ersetzen.
+- Welche Evidenz/Verification fehlt? Fuer den lokalen Mock-Basispfad fehlt keine Pflicht-Evidence; Live-Agent-Evidence existiert bewusst noch nicht.
+- Welche Skill-/Workflow-Reibung ist aufgefallen? Die Testsuite beweist jetzt den lokalen Workflow deterministisch, aber sie beweist noch nicht, dass echte externe Agent-Sessions ohne weitere Adapter-/Auth-Arbeit funktionieren.
+- Session-/Kontextzustand: Parent-Spec geschlossen; neue Live-Agent-Arbeit muss als separater Follow-up starten.
 
 ## 13. Delivery Orchestration Pack
 
@@ -745,6 +745,41 @@ Operational rule:
 - `spec-change-delivery` darf erst nach dokumentiertem Hardening-Verdict `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` fuer genau einen weiteren Child starten.
 - KI-fuer-KMU faellt vollstaendig aus den Standard-Testdaten heraus und darf nicht als Compatibility Fixture erhalten bleiben.
 
+## 14. Parent Closeout Evidence
+
+Closeout status: `ACCEPTED`.
+
+Verification replay on 2026-05-09:
+
+| Command | Result | Evidence |
+|---|---|---|
+| `bash -n tests/docworkflow-agent-delivery/scripts/*.sh` | ran/pass | Shell syntax check exited `0`. |
+| `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh large --keep` | ran/pass | `tests/docworkflow-agent-delivery/e2e/evidence/20260509T110806Z-large/mock-e2e-summary.json`; result `PASS`. |
+| `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh small --keep` | ran/pass | `tests/docworkflow-agent-delivery/e2e/evidence/20260509T110806Z-small/mock-e2e-summary.json`; result `PASS`. |
+| `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep` | ran/pass | `tests/docworkflow-agent-delivery/e2e/evidence/20260509T110815Z-all/mock-e2e-summary.json`; aggregate result `PASS`. |
+| `openspec validate docworkflow-agent-delivery-testsuite --strict` | ran/pass | OpenSpec reported `Specification 'docworkflow-agent-delivery-testsuite' is valid`. |
+| `git diff --check` | ran/pass | Patch hygiene check exited `0`. |
+
+Current all-run result:
+
+- Aggregate summary: `tests/docworkflow-agent-delivery/e2e/evidence/20260509T110815Z-all/aggregate-summary.json` reports `overall_workflow_status: pass`, `large_status: pass`, `small_status: pass`, and `runner_mode: local-mock-session-runner`.
+- Large summary: `tests/docworkflow-agent-delivery/e2e/evidence/20260509T110815Z-all/large/mock-e2e-summary.json` reports `sizing_decision: parent_child`, `session_chain_status: pass`, `expected_outputs_status: pass`, `forbidden_fixture_status: pass`, `evidence_truth: ran-target`, and generated artifact counts `child_spec_count: 5`, `child_handoff_count: 5`, `child_session_count: 5`.
+- Child run evidence: `ML-C1` through `ML-C5` each have `final_status: ran-target` and `closeout_status: closed` under `tests/docworkflow-agent-delivery/e2e/evidence/20260509T110815Z-all/large/sessions/`.
+- Final output: `tests/docworkflow-agent-delivery/e2e/evidence/20260509T110815Z-all/large/mock-target/output/count.txt` contains exactly `1`, `2`, `3`, `4`, `5` on separate lines.
+- Small summary: `tests/docworkflow-agent-delivery/e2e/evidence/20260509T110815Z-all/small/mock-e2e-summary.json` remains the direct path evidence and produces `small/mock-target/output/small-direct-result.json` without child-control artifacts.
+
+OpenSpec closeout status:
+
+- `openspec list --json` returned no active changes.
+- No parent OpenSpec archive was created in this closeout because the child changes already archived their implementation ledgers and the canonical `docworkflow-agent-delivery-testsuite` spec is valid.
+- Canonical spec: `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`.
+
+Documentation sync:
+
+- RAG-first closeout discovery ran with `rag workflow spec-closeout --scope all`; results were broad and did not identify a more precise stale public/project doc than the already synchronized README, DWT parent spec and orchestration pack.
+- Repo search confirmed the current standard gate wording in `tests/docworkflow-agent-delivery/README.md`, `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md`, and `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md`.
+- No additional project docs update is required for this parent closeout.
+
 ## History
 
 | Date | Author | Change |
@@ -759,5 +794,6 @@ Operational rule:
 | 2026-05-09 | Codex | Hardened MD-E2E-4 as the final documentation-sync child and moved optional live-agent/Codex support to MD-E2E-5 follow-up. |
 | 2026-05-09 | Codex | Accepted MD-E2E-4 documentation sync; README, DWT parent wording, orchestration control surfaces and evidence ledger now document the mock-first local baseline without live-agent success claims. |
 | 2026-05-09 | Codex | Closed MD-E2E-4 spec/OpenSpec state; no active MD-E2E-4 OpenSpec change existed, canonical validation passed and MD-E2E-5 remains deferred. |
+| 2026-05-09 | Codex | Closed the Parent Spec after verification replay; `run-mock-e2e-checks.sh all --keep` passed with five `ran-target + closed` mock child sessions and final `count.txt` output `1` through `5`. |
 
 SessionId: 2026-05-09-docworkflow-agent-delivery-mock-data-e2e-harness

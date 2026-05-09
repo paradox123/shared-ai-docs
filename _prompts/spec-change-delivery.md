@@ -66,3 +66,64 @@ Unterbreche erst wenn komplett fertig implementiert ODER blocker/open items auft
 
 change ist akzeptiert, schließe spec/open-spec
 
+
+## Start Agent Delivery Workflow Regression Test
+
+Starte einen echten Regressionstest fuer den Agent Delivery Workflow.
+
+Wichtig:
+- Diese Session ist nur Kontrollsession.
+- Der eigentliche Workflow muss in einer separaten, vom Agent Delivery Session Launcher gestarteten Session laufen.
+- Keine Single-Session-Simulation.
+- Kein `run-mock-e2e-checks.sh` als Ersatz.
+- Keine Abkuerzungen.
+- Der Test gilt nur als gruen, wenn echte Launcher-/Session-Evidence fuer Parent und Child-Sessions existiert.
+
+Aufgabe:
+1. Bereite einen frischen Test-Parent fuer den Agent Delivery Workflow vor.
+2. Starte den Workflow ueber `skills-repo/tools/AgentDeliverySessionLauncher.cs` mit `--mode launch --agent codex`.
+3. Die gestartete Parent-Session muss aus dem Parent:
+   - ein Orchestration Pack erzeugen,
+   - fuenf Child Specs erzeugen,
+   - fuenf Child Handoffs erzeugen,
+   - fuer die Child-Arbeit wiederum `AgentDeliverySessionLauncher.cs --mode launch --agent codex` verwenden.
+4. Jeder Child muss in einer eigenen Launcher-Session laufen.
+5. Jeder Child muss sein Readiness-/Handoff-Gate bestehen, bevor er delivered.
+6. Jeder Child schreibt genau seinen eigenen Wert in `target/output/count.txt`:
+   - Child 1 schreibt `1`
+   - Child 2 schreibt `2`
+   - Child 3 schreibt `3`
+   - Child 4 schreibt `4`
+   - Child 5 schreibt `5`
+7. Am Ende muss `target/output/count.txt` exakt enthalten:
+
+1
+2
+3
+4
+5
+
+8. Pruefe die Evidence:
+   - Parent Launcher Evidence existiert.
+   - Child Launcher Evidence fuer alle fuenf Childs existiert.
+   - Alle Childs haben `final_status: ran-target`.
+   - Alle Childs haben `closeout_status: closed`.
+   - Finale Closeout Summary hat `overall_status: pass`.
+
+Wenn der Prozess irgendwo fehlschlaegt oder haengt:
+- Stoppe den Test.
+- Beende keine fremden Prozesse, aber beende von dir gestartete haengende Testprozesse sauber.
+- Melde exakt:
+  - an welchem Child / Schritt der Workflow gescheitert ist,
+  - welche Evidence existiert,
+  - welche Evidence fehlt,
+  - welchen Inhalt `count.txt` zu diesem Zeitpunkt hat.
+- Finaler Verdict muss dann `NOT READY` sein.
+
+Berichte am Ende knapp:
+- Run-Verzeichnis
+- gestartete Launcher-Sessions
+- Status pro Child
+- finaler `count.txt` Inhalt
+- finale Verdict: `READY` oder `NOT READY`
+

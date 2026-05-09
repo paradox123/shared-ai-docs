@@ -1,0 +1,88 @@
+{
+  "schema_version": "agent-delivery.session-launch.v1",
+  "status": "launched",
+  "created_at": "2026-05-09T11:36:18.7791520\u002B00:00",
+  "started_at": "2026-05-09T11:36:19.0785720\u002B00:00",
+  "completed_at": "2026-05-09T11:37:49.6541370\u002B00:00",
+  "parent": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md",
+  "target_id": "RSW-C1",
+  "target_role": "child",
+  "target_spec": "child-specs/rsw-c1.md",
+  "control_index": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md",
+  "handoff_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md",
+  "target_workspace": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "session_title": "RSW-C1 spec-change-delivery - deliver rsw c1 in",
+  "next_skill": "spec-change-delivery",
+  "next_mode": "spec-change-delivery",
+  "current_verdict": "IMPLEMENTATION READY",
+  "scope_summary": "Deliver RSW-C1 in a launcher-created child Codex session by writing exactly 1\\n to target/output/count.txt, then persist RSW-C1 delivery and closeout evidence.",
+  "non_goals": [
+    "Do not write values 2, 3, 4, or 5",
+    "do not edit parent input",
+    "do not edit orchestration-pack.md",
+    "do not edit handoffs",
+    "do not use run-mock-e2e-checks.sh",
+    "do not edit unrelated specs or project docs."
+  ],
+  "allowed_write_set": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/**",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json"
+  ],
+  "read_only_files": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c1.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md",
+    "skills-repo/skills/spec-change-delivery/SKILL.md",
+    "skills-repo/tools/ValidateChildReadiness.cs"
+  ],
+  "verification": [
+    "assert count.txt becomes exactly 1 newline",
+    "assert delivery-evidence/rsw-c1/delivery.json exists",
+    "assert closeout/children/rsw-c1.json has final_status ran-target and closeout_status closed"
+  ],
+  "evidence_openspec": [
+    "direct smoke ledger in delivery-evidence/rsw-c1/ and closeout/children/rsw-c1.json",
+    "delivery-evidence/rsw-c1/delivery.json and closeout/children/rsw-c1.json"
+  ],
+  "open_notes": [
+    "Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, or allowed write-set is inconsistent, stop with NOT READY and write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/not-ready.md."
+  ],
+  "fresh_session_required": true,
+  "agent": {
+    "requested_provider": "codex",
+    "adapter_id": "codex-cli",
+    "adapter_status": "supported",
+    "launch_capability": "launch",
+    "command_contract": "codex exec --json -C \u003Ctarget_workspace\u003E --output-last-message \u003Clast-message.md\u003E -"
+  },
+  "mechanism": {
+    "type": "launch",
+    "recommended_command": "codex exec --json -C \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0027 --output-last-message \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/20260509T113618Z-rsw-c1/last-message.md\u0027 - \u003C \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/20260509T113618Z-rsw-c1/start-prompt.md\u0027",
+    "actual_command": "\u0027codex\u0027 \u0027exec\u0027 \u0027--json\u0027 \u0027-C\u0027 \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0027 \u0027--output-last-message\u0027 \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/20260509T113618Z-rsw-c1/last-message.md\u0027 \u0027-\u0027",
+    "adapter_available": true
+  },
+  "evidence_paths": {
+    "prompt": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/20260509T113618Z-rsw-c1/start-prompt.md",
+    "events": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/20260509T113618Z-rsw-c1/agent-events.jsonl",
+    "last_message": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/20260509T113618Z-rsw-c1/last-message.md"
+  },
+  "codex_app": {
+    "visibility_status": "verified_same_project",
+    "thread_id": "019e0c86-281d-7450-a466-8475e79e233f",
+    "rollout_path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T13-36-19-019e0c86-281d-7450-a466-8475e79e233f.jsonl",
+    "thread_source": "exec",
+    "thread_cwd_observed": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "thread_title_observed": "Session Title: RSW-C1 spec-change-delivery - deliver rsw c1 in\n\nWir arbeiten in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs.\n\nStarte eine frische Agent-Delivery-Session aus folgendem persistierten Handoff.\n\nPflicht: Lies zuerst das Handoff, den Control Index / die Queue und das Target-Artefakt. Validiere, dass Target-ID, Target-Rolle, Handoff-Pfad, Control Index, aktueller Verdict, Target Workspace und Allowed Write-Set konsistent sind. Arbeite nur im erlaubten Write-Set. Wenn ein Gate stale, widerspruechlich oder unvollstaendig ist, stoppe mit NOT READY und persistiere Evidence statt zu implementieren.\n\n- Parent: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md\n- Target ID: RSW-C1\n- Target Role: child\n- Target Spec: child-specs/rsw-c1.md\n- Control Index / Queue: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md\n- Handoff File: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md\n- Target Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Project CWD / App-Kontext: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Session Title: RSW-C1 spec-change-delivery - deliver rsw c1 in\n- Next Mode / Skill: spec-change-delivery\n- Requested Agent Provider: codex\n- Agent Adapter Status: supported; codex-cli\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C1 in a launcher-created child Codex session by writing exactly 1\\n to target/output/count.txt, then persist RSW-C1 delivery and closeout evidence.\n- Non-Goals: Do not write values 2, 3, 4, or 5; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/**; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json\n- Shared / Read-only Files: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c1.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md; skills-repo/skills/spec-change-delivery/SKILL.md; skills-repo/tools/ValidateChildReadiness.cs\n- Verification Commands: dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C1 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md; node -e \u0022const fs=require(\u0027fs\u0027); if (fs.readFileSync(\u0027tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt\u0027,\u0027utf8\u0027) !== \u00271\\n\u0027) process.exit(1);\u0022; node -e \u0022const fs=require(\u0027fs\u0027); const s=JSON.parse(fs.readFileSync(\u0027tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json\u0027,\u0027utf8\u0027)); if (s.final_status !== \u0027ran-target\u0027 || s.closeout_status !== \u0027closed\u0027) process.exit(1);\u0022\n- Evidence / OpenSpec: direct smoke ledger only; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/delivery.json; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, or allowed write-set is inconsistent, stop with NOT READY and write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/not-ready.md.\n\n## Persisted Handoff\n\n# Agent Delivery Session Handoff: RSW-C1\n\n- Parent: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md\u0060\n- Target ID: RSW-C1\n- Target Role: child\n- Child Spec: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c1.md\u0060\n- Child Index / Queue: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md\u0060\n- Handoff File: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md\u0060\n- Target Repository / Working Directory: \u0060/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0060\n- Next Mode / Skill: spec-change-delivery\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C1 in a launcher-created child Codex session by writing exactly \u00601\\n\u0060 to \u0060target/output/count.txt\u0060, then persist RSW-C1 delivery and closeout evidence.\n- Non-Goals: Do not write values 2, 3, 4, or 5; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt\u0060; \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/**\u0060; \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json\u0060\n- Shared / Read-only Files: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md\u0060; \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md\u0060; \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c1.md\u0060; \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md\u0060; \u0060skills-repo/skills/spec-change-delivery/SKILL.md\u0060; \u0060skills-repo/tools/ValidateChildReadiness.cs\u0060\n- Verification Commands: \u0060dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C1 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md\u0060; \u0060node -e \u0022const fs=require(\u0027fs\u0027); if (fs.readFileSync(\u0027tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt\u0027,\u0027utf8\u0027) !== \u00271\\n\u0027) process.exit(1);\u0022\u0060; \u0060node -e \u0022const fs=require(\u0027fs\u0027); const s=JSON.parse(fs.readFileSync(\u0027tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json\u0027,\u0027utf8\u0027)); if (s.final_status !== \u0027ran-target\u0027 || s.closeout_status !== \u0027closed\u0027) process.exit(1);\u0022\u0060\n- Evidence / OpenSpec: direct smoke ledger only; write \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/delivery.json\u0060; write \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json\u0060; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, or allowed write-set is inconsistent, stop with NOT READY and write \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/not-ready.md\u0060.\n\n## Required Child Behavior\n\n1. Read this handoff, the Child Index row, and the child spec before writing.\n2. Validate that \u0060count.txt\u0060 is absent or empty before delivery. If it is non-empty, stop with NOT READY evidence.\n3. Create \u0060target/output/\u0060 if needed and write exactly \u00601\\n\u0060 to \u0060count.txt\u0060.\n4. Write \u0060delivery-evidence/rsw-c1/delivery.json\u0060 with \u0060target_id\u0060, \u0060final_status: ran-target\u0060, \u0060written_value: \u00221\u0022\u0060, and \u0060observed_output: \u00221\\n\u0022\u0060.\n5. Write \u0060closeout/children/rsw-c1.json\u0060 with \u0060target_id\u0060, \u0060final_status: ran-target\u0060, \u0060closeout_status: closed\u0060, and \u0060output_status: pass\u0060.\n6. Run the verification commands and report the result.",
+    "title_status": "observed_different"
+  },
+  "blockers": [],
+  "warnings": [
+    "ValidateChildReadiness.cs passed: Child readiness validation passed for RSW-C1."
+  ],
+  "prompt_sha256": "a3cfc9cfa5ee49edddf617a047ccbeb77e298bfed346d0cfd4c643c8ef186860",
+  "exit_code": 0,
+  "stderr_excerpt": "2026-05-09T11:36:19.699924Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: prompt must be at most 128 characters path=/Users/dh/.codex/.tmp/plugins/plugins/build-ios-apps/.codex-plugin/plugin.json\n2026-05-09T11:36:19.700592Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/plugin-eval/.codex-plugin/plugin.json\n2026-05-09T11:36:19.708523Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/twilio-developer-kit/.codex-plugin/plugin.json\n2026-05-09T11:36:19.708600Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/openai-developers/.codex-plugin/plugin.json\n2026-05-09T11:36:21.718304Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: prompt must be at most 128 characters path=/Users/dh/.codex/.tmp/plugins/plugins/build-ios-apps/.codex-plugin/plugin.json\n2026-05-09T11:36:21.718566Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/plugin-eval/.codex-plugin/plugin.json\n2026-05-09T11:36:21.720392Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/twilio-developer-kit/.codex-plugin/plugin.json\n2026-05-09T11:36:21.720424Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/openai-developers/.codex-plugin/plugin.json\n2026-05-09T11:36:21.730669Z  WARN codex_core_skills::loader: ignoring interface.icon_small: icon path must not contain \u0027..\u0027\n2026-05-09T11:36:21.730679Z  WARN codex_core_skills::loader: ignoring interface.icon_large: icon path must not contain \u0027..\u0027\n2026"
+}

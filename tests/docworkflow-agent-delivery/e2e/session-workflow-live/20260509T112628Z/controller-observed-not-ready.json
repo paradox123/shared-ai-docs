@@ -1,0 +1,31 @@
+{
+  "run_id": "20260509T112628Z",
+  "observed_by": "control-session",
+  "verdict": "NOT READY",
+  "fresh_session_mechanism": "AgentDeliverySessionLauncher.cs --mode launch using headless codex exec",
+  "ui_visibility": "not visible as Codex app sidebar chat; launched as background CLI sessions",
+  "passed_until": [
+    "parent handoff prepared by control session",
+    "parent codex exec session started",
+    "parent session created orchestration-pack.md",
+    "parent session created five child specs",
+    "parent session created five child handoffs",
+    "child RSW-C1 launched and completed",
+    "child RSW-C2 launched and completed",
+    "child RSW-C3 launched and completed",
+    "child RSW-C4 launched and completed"
+  ],
+  "failed_at": "RSW-C5 child launch",
+  "failure_detail": "RSW-C5 start-prompt.md was created, but no launch-request.json, evidence.json, last-message.md, delivery-evidence/rsw-c5/delivery.json, closeout/children/rsw-c5.json, or final closeout summary appeared before the control session terminated the hung CLI processes.",
+  "final_count_txt_observed": "1\n2\n3\n4\n",
+  "missing_expected_final_count_txt": "1\n2\n3\n4\n5\n",
+  "terminated_processes": [
+    "codex exec for RSW-C5",
+    "parent codex exec for RSW-PARENT"
+  ],
+  "notes": [
+    "This run did cross actual launcher-created headless CLI session boundaries.",
+    "It did not create visible Codex app sidebar chats.",
+    "The workflow is not green because the final child session did not complete."
+  ]
+}
