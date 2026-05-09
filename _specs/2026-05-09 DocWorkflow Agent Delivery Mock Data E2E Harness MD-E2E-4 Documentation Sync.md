@@ -13,7 +13,7 @@
 - Out of Scope: changing runtime behavior, fixing runner failures, creating missing evidence, live-agent path.
 - Wichtigste Test-/Harness-Cases: documentation coverage for `MOCK-LARGE-E2E`, `MOCK-SMALL-E2E`, `MOCK-MIGRATE-EXISTING-TESTS`, `MOCK-FORBID-REAL-FIXTURE`.
 - Wichtigste Verification Commands: `git diff --check`; `openspec validate docworkflow-agent-delivery-testsuite --strict` only if OpenSpec canonical spec changes.
-- Offene Entscheidungen: final evidence paths and whether OpenSpec canonical spec sync is in scope depend on prior closeouts.
+- Offene Entscheidungen: whether additional DWT parent docs beyond README/parent/control sync are in scope remains a hardening decision; prior closeout evidence paths are now known.
 - Readiness Status: NEEDS HARDENING.
 
 ## Goal
@@ -29,7 +29,7 @@ Make the documentation tell the truth after implementation: the leading E2E regr
 
 ## Dependencies
 
-- MD-E2E-1 through MD-E2E-3 implemented or at least their accepted evidence paths are known.
+- MD-E2E-1 through MD-E2E-3 accepted; archive and retained evidence paths are known.
 - Parent spec and orchestration pack.
 
 ## Allowed Write-Set
@@ -45,7 +45,7 @@ Make the documentation tell the truth after implementation: the leading E2E regr
 ## Shared / Read-only Files
 
 - Runner scripts and fixture files are read-only evidence sources for this child.
-- Accepted MD-E2E-1 through MD-E2E-3 evidence is read-only.
+- Accepted MD-E2E-1 through MD-E2E-3 evidence is read-only, including `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/implementation-evidence.md`.
 - KI-fuer-KMU and other real product repositories remain forbidden fixture sources.
 
 ## Acceptance Criteria
@@ -78,11 +78,10 @@ If no OpenSpec file changes in implementation, the OpenSpec command can be docum
 
 ## Hardening Bedarf
 
-- Determine final evidence links from prior children.
+- Verify final evidence links from accepted prior children.
 - Decide whether `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md` and OpenSpec canonical sync are mandatory or conditional.
 - Define exact documentation assertions to avoid stale success claims.
 
 ## Empfohlene Naechste Session
 
-Harden after MD-E2E-3 implementation evidence exists. Draft-only parallel work is safe, final sync is not.
-
+Harden now that MD-E2E-3 is accepted and archived. Draft-only parallel work is safe, final sync must cite accepted evidence.

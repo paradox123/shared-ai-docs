@@ -20,8 +20,7 @@
   - Delivery Gate: `git diff --check`; `openspec validate docworkflow-agent-delivery-testsuite --strict` if OpenSpec canonical spec changes.
   - Pre-Archive Closeout: update child index rows, parent history and README standard command.
   - Post-Archive / Current Replay: not available yet.
-- Evidence / OpenSpec: proposed ledger `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-4-doc-sync/`; not created in orchestration pass.
-- Retained Evidence: none yet.
-- Offene Blocker oder non-blocking Notes: Final sync waits for real accepted evidence; docs must not claim optional live-agent success.
+- Evidence / OpenSpec: proposed ledger `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-4-doc-sync/`; not created in orchestration pass. Prior accepted evidence now includes `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/implementation-evidence.md`, `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-3-mock-all/mock-e2e-summary.json`, and `tests/docworkflow-agent-delivery/e2e/evidence/20260509T082132Z-all/mock-e2e-summary.json`.
+- Retained Evidence: MD-E2E-1, MD-E2E-2 and MD-E2E-3 accepted evidence is available via the Orchestration Pack.
+- Offene Blocker oder non-blocking Notes: No predecessor evidence blocker remains for hardening; docs must not claim optional live-agent success.
 - Fresh Session empfohlen: Yes.
-

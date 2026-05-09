@@ -1,5 +1,5 @@
 **Date:** 2026-05-09
-**Status:** 🔵 Implemented
+**Status:** 🟢 Accepted
 **Scope:** Hardened child spec for replacing/deactivating old standard Agent Delivery gates that still default to KI-fuer-KMU fixture data.
 
 ---
@@ -14,7 +14,7 @@
 - Wichtigste Test-/Harness-Cases: `MOCK-STANDARD-ALL-MOCK`, `MOCK-CONTRACT-ALL-SHIM`, `MOCK-LEGACY-FIXTURE-NO-DEFAULT`, `MOCK-FORBID-REAL-FIXTURE`, `MOCK-README-STANDARD-COMMAND`.
 - Wichtigste Verification Commands: `bash -n tests/docworkflow-agent-delivery/scripts/*.sh`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep --run-id closeout-md-e2e-3-mock-all`; `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all --keep`; no-default-KI-fuer-KMU guards over scripts and README; `openspec validate docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration --strict`; `git diff --check`.
 - Offene Entscheidungen: none.
-- Readiness Status: IMPLEMENTATION READY; implementation evidence captured for standard gate migration.
+- Readiness Status: ACCEPTED; implementation evidence captured and OpenSpec archived for standard gate migration.
 
 ## Goal
 
@@ -305,21 +305,30 @@ Implementation sessions must read the handoff, Child Index row and this child sp
 
 - `bash -n tests/docworkflow-agent-delivery/scripts/*.sh`: passed.
 - `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep --run-id closeout-md-e2e-3-mock-all`: passed; retained evidence at `tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-3-mock-all/mock-e2e-summary.json`.
-- `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all --keep`: passed as a mock-only shim; retained evidence at `tests/docworkflow-agent-delivery/e2e/evidence/20260509T081555Z-all/mock-e2e-summary.json`.
+- `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all --keep`: passed as a mock-only shim; retained closeout replay evidence at `tests/docworkflow-agent-delivery/e2e/evidence/20260509T082132Z-all/mock-e2e-summary.json`.
 - No-default-real-fixture guards over executable scripts and README: passed.
 - Negative setup checks: no-arg fixture setup exits `2`; explicit forbidden real fixture source exits non-zero; legacy `tc1` without explicit fixture exits `2`.
 - `openspec validate docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration --strict`: passed.
 - `ValidateChildReadiness.cs` for `MD-E2E-3`: passed.
 - `git diff --check`: passed.
 
+## Acceptance Closeout
+
+- User acceptance: accepted on 2026-05-09.
+- Closeout replay: all required verification commands reran successfully on 2026-05-09.
+- Replay note: the first closeout replay of `run-mock-e2e-checks.sh all --keep --run-id closeout-md-e2e-3-mock-all` found the retained run directory already present; the generated MD-E2E-3 evidence directory was regenerated and the exact spec command then passed.
+- Compatibility shim replay evidence: `tests/docworkflow-agent-delivery/e2e/evidence/20260509T082132Z-all/mock-e2e-summary.json`.
+- OpenSpec archive: `openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/`.
+- Canonical OpenSpec spec: `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`, validated with `openspec validate docworkflow-agent-delivery-testsuite --strict`.
+
 ## Mini-Retro
 
 - Was wurde entschieden? The standard gate is `run-mock-e2e-checks.sh all --keep`; `run-contract-checks.sh all` can only survive as a mock-only shim or non-leading legacy command.
 - Was wurde geaendert? The standard command path now routes to mock-only evidence; legacy fixture setup is explicit-only and rejects forbidden real sources; README quickstart points to the mock E2E gate.
-- Was bleibt offen? Final parent/canonical documentation synchronization remains MD-E2E-4; OpenSpec archive is a post-acceptance closeout step.
+- Was bleibt offen? Final parent/project documentation synchronization remains MD-E2E-4; OpenSpec archive is complete.
 - Welche Evidenz/Verification fehlt? No required MD-E2E-3 delivery evidence is missing after this implementation run.
-- Welche Skill-/Workflow-Reibung ist aufgefallen? The child-readiness validator still expects an implementation-allowing verdict even after delivery evidence exists, so the index/handoff keep `IMPLEMENTATION READY` while appending implemented evidence.
-- Session-/Kontextzustand: Implemented with retained evidence; ready for acceptance/closeout and MD-E2E-4 documentation sync.
+- Welche Skill-/Workflow-Reibung ist aufgefallen? The fixed closeout run id was not idempotent while retained evidence already existed; regenerating only the generated MD-E2E-3 evidence directory allowed the exact spec command to replay cleanly.
+- Session-/Kontextzustand: Accepted and archived; MD-E2E-4 documentation sync is the next child to harden.
 
 ## History
 
@@ -327,3 +336,4 @@ Implementation sessions must read the handoff, Child Index row and this child sp
 |---|---|---|
 | 2026-05-09 | Codex | Hardened MD-E2E-3 from skeleton to implementation-ready migration contract. |
 | 2026-05-09 | Codex | Implemented MD-E2E-3 standard gate migration and captured closeout evidence. |
+| 2026-05-09 | Codex | Accepted MD-E2E-3, archived OpenSpec change and synchronized closeout evidence. |
