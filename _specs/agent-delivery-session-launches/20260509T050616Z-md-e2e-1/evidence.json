@@ -1,0 +1,92 @@
+{
+  "schema_version": "agent-delivery.session-launch.v1",
+  "status": "blocked",
+  "created_at": "2026-05-09T05:06:16.7528690\u002B00:00",
+  "started_at": null,
+  "completed_at": null,
+  "parent": "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md",
+  "target_id": "MD-E2E-1",
+  "target_role": "child",
+  "target_spec": "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-1 Mock Fixtures.md",
+  "control_index": "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md",
+  "handoff_path": "_specs/child-session-handoffs/md-e2e-1-session-handoff.md",
+  "target_workspace": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "session_title": "MD-E2E-1 spec-change-delivery - implement source controlled large",
+  "next_skill": "spec-change-delivery for MD-E2E-1 only.",
+  "next_mode": "spec-change-delivery for MD-E2E-1 only.",
+  "current_verdict": "IMPLEMENTATION READY; hardening completed for fixture, manifest and forbidden-path validator contract",
+  "scope_summary": "Implement source-controlled large and small mock fixtures, manifest.json contracts, minimal mock target roots, Node manifest validator, Node forbidden-real-fixture validator and validator exercise fixtures.",
+  "non_goals": [
+    "No local mock session runner, no run-mock-e2e-checks.sh, no standard gate migration, no README or parent closeout docs, no live-agent path, no KI-fuer-KMU compatibility fixture."
+  ],
+  "allowed_write_set": [
+    "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-1 Mock Fixtures.md",
+    "_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md",
+    "_specs/child-session-handoffs/md-e2e-1-session-handoff.md",
+    "openspec/changes/docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/**",
+    "tests/docworkflow-agent-delivery/mock-data/large-parent/**",
+    "tests/docworkflow-agent-delivery/mock-data/small-direct/**",
+    "tests/docworkflow-agent-delivery/e2e/validators/mock-manifest-schema.js",
+    "tests/docworkflow-agent-delivery/e2e/validators/forbidden-real-fixture.js",
+    "tests/docworkflow-agent-delivery/e2e/fixtures/manifest-schema-valid-large/**",
+    "tests/docworkflow-agent-delivery/e2e/fixtures/manifest-schema-valid-small/**",
+    "tests/docworkflow-agent-delivery/e2e/fixtures/forbidden-real-fixture/**"
+  ],
+  "read_only_files": [
+    "tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh",
+    "tests/docworkflow-agent-delivery/scripts/setup-fixture.sh",
+    "tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh",
+    "tests/docworkflow-agent-delivery/README.md",
+    "_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md",
+    "openspec/specs/docworkflow-agent-delivery-testsuite/spec.md",
+    "KI-fuer-KMU and real product repositories."
+  ],
+  "verification": [
+    "Preflight: node --version",
+    "git diff --check",
+    "ValidateChildReadiness.cs for MD-E2E-1. Delivery: manifest schema validator, forbidden-real-fixture validator positive scan, forbidden-real-fixture negative scan, git diff --check"
+  ],
+  "evidence_openspec": [
+    "openspec/changes/docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/",
+    "Hardening evidence: child spec, handoff and Child Index synchronized",
+    "implementation closeout must link manifest files, source specs, validator outputs and no-KI-fuer-KMU evidence"
+  ],
+  "open_notes": [
+    "None for hardening. Implementation must stop if any positive fixture contains KI-fuer-KMU or a real product fixture marker."
+  ],
+  "fresh_session_required": true,
+  "agent": {
+    "requested_provider": "codex",
+    "adapter_id": "codex-cli",
+    "adapter_status": "supported",
+    "launch_capability": "launch",
+    "command_contract": "codex exec --json -C \u003Ctarget_workspace\u003E --output-last-message \u003Clast-message.md\u003E -"
+  },
+  "mechanism": {
+    "type": "queue",
+    "recommended_command": null,
+    "actual_command": null,
+    "adapter_available": true
+  },
+  "evidence_paths": {
+    "prompt": "_specs/agent-delivery-session-launches/20260509T050616Z-md-e2e-1/start-prompt.md",
+    "events": null,
+    "last_message": null
+  },
+  "codex_app": {
+    "visibility_status": "not_applicable",
+    "thread_id": null,
+    "rollout_path": null,
+    "thread_source": null,
+    "thread_cwd_observed": null,
+    "thread_title_observed": null,
+    "title_status": "not_applicable"
+  },
+  "blockers": [
+    "Handoff is missing \u0060Verification\u0060."
+  ],
+  "warnings": [
+    "ValidateChildReadiness.cs passed: Child readiness validation passed for MD-E2E-1."
+  ]
+}
