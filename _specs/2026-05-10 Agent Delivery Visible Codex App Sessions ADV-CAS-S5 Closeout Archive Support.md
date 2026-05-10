@@ -8,12 +8,12 @@
 
 - Modus/Skill: `child-spec-hardening`.
 - Source of Truth: `_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md`; `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md`; `skills-repo/skills/spec-closeout/SKILL.md`; `docs/doc-workflow.md`; `skills-repo/tools/AgentDeliverySessionLauncher.cs`; `skills-repo/tools/ValidateAgentDeliveryLaunchEvidence.cs`; generated local app-server protocol references under `/tmp/codex-app-schema/`.
-- Ziel: Harden only child `ADV-CAS-S5` into a contract-heavy closeout/archive support spec that can later be made implementation-ready after S1/S2 freeze the visible evidence schema.
+- Ziel: Harden only child `ADV-CAS-S5` into a contract-heavy closeout/archive support spec that can later be made implementation-ready after S2 delivers the reusable visible evidence validator.
 - Nicht-Ziele: No runtime code edits; no orchestration pack edit; no child handoff edit; no Launcher implementation; no validator implementation; no test fixture creation; no `MD-E2E-5` run; no app-server archive call in this hardening run.
 - In Scope: Review Control Surface, archive contract for `thread/archive`, closeout evidence fields, no-thread/headless statuses, negative unarchived `READY` case, verification lifecycle, parent conformance, and final readiness verdict.
 - Erwarteter Output: this child spec file only.
 - Verification/Review: content-quality review and `git diff --check` after the spec edit. `ValidateChildReadiness.cs` is intentionally not an implementation-ready gate here because the lane may not update the Child Index or create a persisted S5 handoff.
-- Offene Entscheidungen: No product decision is requested in this hardening pass. Blocking dependency remains S2 validator schema and S1 delivery evidence shape.
+- Offene Entscheidungen: No product decision is requested in this hardening pass. Blocking dependency is now S2 validator delivery; S1 evidence shape is stable.
 
 ## Review Control Surface
 
@@ -21,11 +21,11 @@
 - Goldstandard Status: candidate child spec, not implementation-ready because predecessor schema contracts are missing.
 - Ziel: Define how `spec-closeout` archives visible Codex-App sessions opened for a child run, records explicit archive statuses for headless/no-thread evidence, and blocks final `READY` when any visible thread remains unarchived.
 - In Scope: `spec-closeout` closeout gate behavior; app-server `thread/archive` request/response contract; post-archive proof using `thread/list`; closeout archive summary fields; status enums for visible, headless, queued, manual, no-thread and failure cases; negative false-positive case where a child closeout claims `READY` while visible sessions remain unarchived.
-- Out of Scope: Launcher app-server adapter implementation; S1/S2 visible evidence schema implementation; MD-E2E-5 runner implementation; live Codex-App session creation; direct SQLite mutation; broad project docs sync beyond closeout wording; archiving historical evidence created before this parent unless explicitly linked to the target child run.
+- Out of Scope: Launcher app-server adapter implementation; S2 visible evidence validator implementation; MD-E2E-5 runner implementation; live Codex-App session creation; direct SQLite mutation; broad project docs sync beyond closeout wording; archiving historical evidence created before this parent unless explicitly linked to the target child run.
 - Key Test/Harness Cases: visible archive positive; already archived positive; headless `codex exec` gets `not_app_visible_not_archived`; queued/manual without a thread gets `no_thread_created`; manual-visible without thread proof fails; visible thread archive failure returns `NOT_READY`; post-archive proof failure returns `NOT_READY`; mixed child run with all visible sessions archived and all non-visible records explicit can return `READY`; negative unarchived `READY` case fails.
 - Key Verification Commands: `codex app-server --help`; `codex app-server generate-ts --out /tmp/codex-app-schema`; inspect generated `ThreadArchiveParams`, `ThreadArchiveResponse`, `ThreadListParams`; future delivery command for S5 archive fixture suite; future validator command after S2 validator schema; `git diff --check`. Do not run `MD-E2E-5` for this child hardening.
-- Open Decisions / Blockers: `[MISSING S1/S2 evidence schema]` S5 cannot finalize exact consumed field names, validator class names, or fixture manifests until S1 and S2 freeze the visible launch evidence schema and validator behavior.
-- Readiness Status: `NEEDS HARDENING - waiting for S2 validator schema and S1 delivery evidence shape`.
+- Open Decisions / Blockers: `[MISSING S2 validator delivery]` S5 cannot finalize validator class names, fixture manifests, or archive-summary coupling until S2 is delivered.
+- Readiness Status: `NEEDS HARDENING - waiting for S2 validator delivery`.
 
 ## Goal
 
@@ -67,12 +67,12 @@
 
 | Parent Requirement | Child Claim | Conformance | Action |
 |---|---|---|---|
-| `ADV-PR9` | `spec-closeout` must archive every visible thread for the child run before final `READY`. | preserves | Implement S5 only after S1/S2 schema fields are frozen. |
+| `ADV-PR9` | `spec-closeout` must archive every visible thread for the child run before final `READY`. | preserves | Implement S5 only after S2 validator delivery is stable. |
 | `ADV-PR5` | S5 defines consumed and emitted fields, but exact upstream evidence names remain provisional. | defers_to_child | S1 owns launch evidence production; S2 owns validator schema. S5 must resync after both exist. |
 | `ADV-PR7` | S5 does not run or implement `MD-E2E-5`; it provides the archive condition that S3 must consume. | narrows_with_rationale | S3 remains the live workflow integration owner. |
 | `ADV-PR10` | S5 treats headless `exec` as `not_app_visible_not_archived`, never as archived visible evidence. | preserves | Add closeout docs/skill wording during S5 delivery. |
 
-Conformance verdict: no parent contradiction found. Implementation readiness is blocked only by missing S1/S2 evidence schema and by the current lane's read-only control surfaces.
+Conformance verdict: no parent contradiction found. Implementation readiness is blocked by S2 validator delivery and S5 fixture/Child Index promotion.
 
 ## Decision Freeze Pack
 
@@ -90,7 +90,7 @@ Frozen for S5:
 
 Blocking marker:
 
-- `[MISSING S1/S2 evidence schema]` Exact source fields and validator fixture layout cannot be final until S1/S2 produce stable `session_visibility` and validator contracts.
+- `[MISSING S2 validator delivery]` Exact validator fixture layout and reusable validator names cannot be final until S2 is delivered.
 
 ## Normative Contract
 
@@ -114,7 +114,7 @@ S5 must not archive sessions for sibling children, parent orchestration runs, un
 
 ### Consumed Launch Evidence Fields
 
-The S5 archive evaluator consumes these fields. Names are provisional until S1/S2 freeze the schema, but the semantics are required:
+The S5 archive evaluator consumes the S1 fields below. Validator coupling remains provisional until S2 delivery, but the archive semantics are required:
 
 | Field | Required For | Meaning |
 |---|---|---|
@@ -134,7 +134,7 @@ The S5 archive evaluator consumes these fields. Names are provisional until S1/S
 | `prompt_sha256` | launched records | Prompt linkage for forensic grouping. |
 | `evidence_paths.prompt` | queued/launched records | Prompt path retained with the launch record. |
 
-If S1/S2 choose different field names, S5 must update this table before implementation.
+If S2 delivery changes validator names or fixture schema, S5 must update this table before implementation.
 
 ### Archive Status Values
 
@@ -233,7 +233,7 @@ Pattern: hybrid.
 - Embedded examples in this spec are compact, parseable examples for the intended summary shape.
 - Full fixtures must be created during S5 implementation under `tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout/**`.
 - Fixture manifests must name each case, its input launch evidence files, the expected `archive_status` records, expected final closeout verdict, and whether app-server calls are replayed through a mock transcript or a real opted-in app-server process.
-- Fixtures are not required before this hardening pass ends because final verdict is blocked on S1/S2 schema.
+- Fixtures are not required before this hardening pass ends because final verdict is blocked on S2 validator delivery.
 
 Required future fixture paths:
 
@@ -291,7 +291,7 @@ Required failure behavior:
 
 Do not run `MD-E2E-5` during S5 hardening or S5 implementation. `MD-E2E-5` belongs to S3 after S1/S2/S4/S5 contracts exist.
 
-Command contract for future S5 hardening completion after S1/S2:
+Command contract for future S5 hardening completion after S2 delivery:
 
 ```sh
 cd /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs
@@ -340,7 +340,7 @@ S5 is ready for implementation only when all are true:
 7. App-server protocol rehearsal confirms `thread/archive` and `ThreadListParams.archived`.
 8. Fixture manifests exist or are in the implementation write-set with exact expected outcomes.
 
-Current DoR verdict: `NEEDS HARDENING - waiting for S2 validator schema and S1 delivery evidence shape`.
+Current DoR verdict: `NEEDS HARDENING - waiting for S2 validator delivery`.
 
 ## Definition of Done / Closeout Evidence
 
@@ -371,7 +371,7 @@ Read-only for this run:
 - `skills-repo/tools/ValidateChildReadiness.cs`
 - `tests/docworkflow-agent-delivery/**`
 
-Future S5 implementation write-set after S2 validator schema and S1 delivery evidence shape stabilize:
+Future S5 implementation write-set after S2 validator delivery:
 
 - `skills-repo/skills/spec-closeout/SKILL.md`
 - `docs/doc-workflow.md`
@@ -395,14 +395,14 @@ Dependencies:
 | Dependency | Status | Why It Matters |
 |---|---|---|
 | S1 evidence schema | missing | S5 needs exact launch/session fields and visibility class shape. |
-| S2 validator schema | missing | S5 needs the canonical validator names and fixture manifest contract. |
+| S2 validator delivery | pending | S5 needs the canonical validator names and fixture manifest contract. |
 | App-server protocol archive support | observed in generated schema | `thread/archive`, archive notification and `ThreadListParams.archived` exist locally, but S5 has not rehearsed a live archive. |
 | Orchestration pack S5 row | read-only | Current row says S5 needs hardening and no handoff exists. |
 
 Parallelism:
 
-- S5 hardening can proceed as a contract draft in parallel only as long as S1/S2 files remain read-only.
-- S5 implementation must wait until S1/S2 schema is stable.
+- S5 hardening can proceed as a contract draft while S2 is implementation-ready.
+- S5 implementation must wait until S2 validator delivery is stable.
 - S3 final live `MD-E2E-5` must wait until S5 archive behavior is implemented and accepted.
 
 ## Closeout Sync Targets
@@ -436,20 +436,20 @@ Future handoff target:
 
 Future next mode:
 
-- `spec-change-delivery` only after S2 validator schema and S1 delivery evidence shape stabilize, S5 resync, Child Index sync, S5 handoff creation and readiness validation.
+- `spec-change-delivery` only after S2 validator delivery, S5 resync, Child Index sync, S5 handoff creation and readiness validation.
 
 ## Content Quality Review
 
 - Correctness/domain fit: pass for a closeout/archive child. The spec uses app-server `thread/archive` and treats headless `exec` as non-visible evidence.
 - Scope discipline: pass. Runtime implementation, MD-E2E-5 and shared control edits remain out of scope.
-- Completeness: partial by design. Archive statuses, fields, cases and verification lifecycle are defined, but exact S1/S2 field names are still blocked.
-- Consistency: pass. Review Control Surface, DoR and verdict all state that S5 waits for S2 validator schema and S1 delivery evidence shape.
+- Completeness: partial by design. Archive statuses, fields, cases and verification lifecycle are defined, but exact S2 validator coupling is still blocked.
+- Consistency: pass. Review Control Surface, DoR and verdict all state that S5 waits for S2 validator delivery.
 - Feasibility: pass as a future companion-tool implementation. Local generated schema includes `ThreadArchiveParams`, `ThreadArchiveResponse`, `ThreadArchivedNotification` and `ThreadListParams.archived`.
 - Verifiability: partial by design. Negative unarchived `READY`, headless/no-thread, archive failure and proof failure cases are concrete, but fixture files and validators are future implementation artifacts.
 
 ## Final Hardening Verdict
 
-`NEEDS HARDENING - waiting for S2 validator schema and S1 delivery evidence shape`.
+`NEEDS HARDENING - waiting for S2 validator delivery`.
 
 Implementation must not start from this S5 spec yet.
 
@@ -464,15 +464,16 @@ Blocking items:
 
 - Was wurde entschieden? S5 should be a `spec-closeout` plus closeout companion-tool contract, not a Launcher change. Visible threads require app-server `thread/archive`; headless and queued/no-thread records require explicit archive statuses.
 - Was wurde geaendert? Created the S5 child spec with Review Control Surface, archive contract, evidence fields, no-thread/headless statuses, negative unarchived `READY` case, verification lifecycle and parent conformance.
-- Was bleibt offen? S1/S2 evidence schema, S5 handoff, Child Index sync, fixture manifests and readiness validation.
+- Was bleibt offen? S2 validator delivery, S5 fixture manifests, S5 readiness validation and possible Child Index promotion.
 - Welche Evidenz/Verification fehlt? No live archive call, no MD-E2E-5 run, no S5 fixture execution, no `ValidateChildReadiness.cs` pass.
-- Welche Skill-/Workflow-Reibung ist aufgefallen? S5 can be contract-hardened before S1/S2, but cannot become implementation-ready without exact predecessor schema and shared control-surface sync.
-- Session-/Kontextzustand: Stop after this hardening draft; continue after S2 validator schema and S1 delivery evidence shape stabilize.
+- Welche Skill-/Workflow-Reibung ist aufgefallen? S5 can be contract-hardened before S2 delivery, but should not become implementation-ready before exact validator semantics exist.
+- Session-/Kontextzustand: Stop after this hardening draft; continue after S2 validator delivery.
 
 ## History
 
 | Date | Author | Change |
 |---|---|---|
 | 2026-05-10 | Codex | Created S5 closeout archive support child spec as a contract-heavy hardening draft; final verdict remains blocked on S1/S2 evidence schema. |
+| 2026-05-10 | Codex | Re-hardened S5 after S1 implementation and S2 promotion; S5 now waits specifically for S2 validator delivery. |
 
 SessionId: 2026-05-10-adv-cas-s5-closeout-archive-support-hardening

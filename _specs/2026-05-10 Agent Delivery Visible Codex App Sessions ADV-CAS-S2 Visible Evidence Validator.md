@@ -1,30 +1,30 @@
 **Date:** 2026-05-10
-**Status:** 🟡 Spec
-**Scope:** Child spec hardening for `ADV-CAS-S2 Visible Evidence Validator` under parent `_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md`.
+**Status:** 🟢 Accepted
+**Scope:** Child spec implementation for `ADV-CAS-S2 Visible Evidence Validator` under parent `_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md`.
 
 ---
 
 ## Review Control Surface
 
 - Spec Variant: Contract-heavy Parent/Child validation child spec.
-- Goldstandard Status: post-S1 hardened child spec; implementation-ready for the validator slice.
+- Goldstandard Status: accepted validator slice against the S1 `agent-delivery.session-launch.v2` schema.
 - Goal: Define the validator contract, fixture strategy, negative matrix, acceptance cases and verification lifecycle for proving that Agent Delivery evidence represents a real visible Codex-App session rather than a headless or queued false positive.
 - In Scope: evidence class validation; visible-app positive validation; false-positive rejection for `codex exec`, `source='exec'`, missing visibility class, wrong title, wrong cwd, missing thread, queued-only evidence and unarchived visible sessions; fixture manifest requirements; future tool command contract; parent coverage and conformance.
-- Out of Scope: creating visible sessions; implementing the app-server Launcher adapter; editing `AgentDeliverySessionLauncher.cs`; editing validator/runtime/test files in this hardening run; creating handoffs or launch evidence; running `MD-E2E-5`; changing closeout archive implementation.
+- Out of Scope: creating visible sessions; implementing the app-server Launcher adapter; editing `AgentDeliverySessionLauncher.cs`; creating live launch evidence; running `MD-E2E-5`; changing closeout archive implementation.
 - Key Test / Harness Cases: positive app-server evidence passes; headless `codex exec` evidence fails visible-session validation; `status: "launched"` without `session_visibility.class: "visible_codex_app_session"` fails; `thread_source_observed: "exec"` fails; wrong parent-prefixed title fails; wrong initiating cwd fails; missing thread/list proof fails; queued/manual-only evidence cannot count as visible; visible evidence with missing prompt or turn linkage fails; visible evidence with required closeout archive still unarchived fails.
 - Key Verification Commands: hardening/readiness: `dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateAgentDeliveryLaunchEvidence.cs -- --help`; `node tests/docworkflow-agent-delivery/e2e/validators/visible-app-launcher-s1.js tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-launcher-s1`; `cd /tmp && dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateChildReadiness.cs -- --index /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-05-10\ Agent\ Delivery\ Visible\ Codex\ App\ Sessions\ Orchestration\ Pack.md --child ADV-CAS-S2 --handoff /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/child-session-handoffs/adv-cas-s2-session-handoff.md`; future S2 delivery: `dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs -- --fixture /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-evidence`; existing launch-evidence regression remains green through `dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateAgentDeliveryLaunchEvidence.cs -- --fixture /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/agent-delivery-session-launcher/fixtures/launch-evidence`; `git diff --check`.
-- Open Blockers: None for S2 implementation readiness. Fixture files and `ValidateVisibleCodexAppSessionEvidence.cs` are in the S2 implementation write-set.
-- Readiness Status: IMPLEMENTATION READY for exactly `ADV-CAS-S2`.
+- Open Blockers: None for S2 validator closeout. Fixture files and `ValidateVisibleCodexAppSessionEvidence.cs` exist in the S2 implementation write-set.
+- Readiness Status: ACCEPTED for exactly `ADV-CAS-S2`.
 
 ## Session Briefing
 
-- Modus/Skill: `child-spec-hardening`.
+- Modus/Skill: `spec-change-delivery`.
 - Source of Truth: parent spec `_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md`; orchestration pack `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md`; `skills-repo/tools/ValidateAgentDeliveryLaunchEvidence.cs`; `docs/doc-workflow.md`; current Launcher evidence behavior in `skills-repo/tools/AgentDeliverySessionLauncher.cs`.
-- Ziel: Harden only the S2 validator child contract so a later implementation session knows exactly what evidence to accept and reject.
-- Nicht-Ziele: no runtime implementation, no test runner edits, no MD-E2E-5 execution, no app-server launch, no orchestration pack or handoff edits.
-- In Scope: this child spec, Child Index sync and persisted S2 handoff.
-- Erwarteter Output: this hardened child spec with explicit blockers.
-- Verification/Review: content-quality review, command-contract notes, and local hardening checks that do not run live visible-session workflows.
+- Ziel: Implement the S2 validator and fixture matrix so downstream children can distinguish real visible Codex-App evidence from headless or queued false positives.
+- Nicht-Ziele: no Launcher adapter implementation, no MD-E2E-5 execution, no app-server launch and no closeout archive implementation.
+- In Scope: validator tool, visible evidence fixtures, validator wrapper, this child spec, Child Index sync and persisted S2 handoff.
+- Erwarteter Output: implemented validator slice with retained fixture evidence.
+- Verification/Review: local validator fixtures, setup-error check, existing launch-evidence regression and readiness/diff checks that do not run live visible-session workflows.
 - Offene Entscheidungen: no product decision is needed from the user.
 
 ## Goal
@@ -383,7 +383,7 @@ S2 is ready for implementation only after all of these are true:
 7. Future implementation write-set is confirmed as concrete and does not include unrelated runner, workflow doc or app-server adapter files.
 8. Hardening command-contract rehearsal evidence is captured.
 
-Current status: not ready. The primary blockers are `[MISSING S1 schema sync]` and missing source-controlled visible evidence fixtures.
+Current status: implemented. The S1 schema is synchronized and source-controlled visible evidence fixtures now exist for the validator matrix.
 
 ## Definition of Done / Closeout Evidence
 
@@ -397,6 +397,21 @@ S2 implementation is done only when:
 6. Validation output avoids leaking prompt bodies, environment values or secret-like tokens.
 7. Closeout retains fixture summaries and command output references.
 8. No MD-E2E-5 live run is claimed as S2 evidence.
+
+Current closeout evidence:
+
+1. `ValidateVisibleCodexAppSessionEvidence.cs` exists and validates the S1 `agent-delivery.session-launch.v2` visible-session schema.
+2. `tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-evidence/` covers the positive fixture, expected negative classes and setup-error case.
+3. Fixture validation reports `RESULT: PASS (11 cases)`.
+4. Existing launch-evidence regression reports `RESULT: PASS (10 cases)`.
+5. No live visible session launch or `MD-E2E-5` run was executed for S2.
+
+Acceptance closeout evidence:
+
+1. Required verification was replayed on 2026-05-10 and passed.
+2. `openspec list --json` showed no active `agent-delivery-visible-session-validator` change; no S2 OpenSpec archive was required or possible.
+3. Agent Delivery launch evidence search found no S2 `visible_codex_app_session` records; archive status is `no_s2_visible_thread_created`.
+4. The Child Index, Parent Coverage rows and S2 handoff were synchronized to accepted S2 evidence.
 
 ## Dependencies and Write-Set
 
@@ -445,24 +460,24 @@ Serial dependencies:
 
 Parallelization:
 
-1. S2 hardening can overlap with S4 only while S1 schema is stable or once S2 keeps S1-dependent fields explicitly blocked.
-2. S2 implementation must not run in parallel with S1 implementation while the evidence schema is still changing.
+1. S2 implementation can proceed now that S1 evidence schema is stable.
+2. S4 implementation can proceed in parallel with S2 if integration ownership avoids write conflicts in shared runner/testcase docs.
 
 ## Closeout Sync Targets
 
-These are not writable in this hardening lane, but must be synchronized by the integration owner before implementation readiness:
+These are synchronized for implementation readiness and must stay current through delivery:
 
 1. `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md` Child Index row for `ADV-CAS-S2`:
    - `Session Handoff` should point to `_specs/child-session-handoffs/adv-cas-s2-session-handoff.md`.
-   - `Readiness / Hardening Verdict` should mirror this spec while blocked: `NEEDS HARDENING - requires S1 schema sync and fixture implementation`.
+   - `Readiness / Hardening Verdict` should mirror this spec: `IMPLEMENTATION READY`.
    - `Child Spec` should point to this file.
 2. `_specs/child-session-handoffs/adv-cas-s2-session-handoff.md` should be kept synchronized during later integration sync.
-3. OpenSpec ledger `openspec/changes/agent-delivery-visible-session-validator/` should be created only when implementation starts.
-4. Later closeout must retain S2 fixture command output and visible-validator fixture summaries.
+3. OpenSpec ledger `openspec/changes/agent-delivery-visible-session-validator/` was not created in this delivery because the session handoff write-set did not include OpenSpec artifacts; closeout records this as `not_used`.
+4. Closeout retained S2 fixture command output and visible-validator fixture summaries in this spec, Child Index and handoff.
 
 ## Child Session Handoff
 
-No persisted S2 handoff was created in this hardening run because the user's write ownership is limited to this child spec file and the child is not implementation-ready.
+The persisted S2 handoff exists at the path below and was synchronized during implementation delivery.
 
 Required future handoff path:
 
@@ -476,8 +491,8 @@ Minimum future handoff contract:
 2. Child: `ADV-CAS-S2`.
 3. Child Spec: this file.
 4. Child Index / Queue: `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md`.
-5. Current Verdict: `IMPLEMENTATION READY`.
-6. Next Mode/Skill: `spec-change-delivery`.
+5. Current Verdict: `ACCEPTED`.
+6. Next Mode/Skill: dependent child delivery/hardening after acceptance.
 7. Allowed Write-Set: concrete validator/tool/fixture/spec paths only; no Launcher adapter, runner integration, closeout skill, docs or MD-E2E-5 live runner files.
 
 ## Content Quality Review
@@ -493,21 +508,23 @@ Minimum future handoff contract:
 | Verifiability | pass | S2 has concrete fixture cases and future commands; command contracts were rehearsed where possible. |
 | Traceability | pass | Parent requirements `ADV-PR1`, `ADV-PR5`, `ADV-PR6` and `ADV-PR10` are mapped. |
 
-## Hardening Verdict
+## Closeout Verdict
 
-Final readiness verdict:
+Final accepted verdict:
 
 ```text
-IMPLEMENTATION READY
+ACCEPTED
 ```
 
 Blocking findings: none.
 
-Implementation notes:
+Implementation and closeout results:
 
-1. S2 must add the reusable visible-session validator and fixture family in the allowed write-set.
-2. S2 must keep the existing `ValidateAgentDeliveryLaunchEvidence.cs` fixture regression green.
-3. S2 must not run `MD-E2E-5`.
+1. S2 added the reusable visible-session validator and fixture family in the allowed write-set.
+2. S2 kept the existing `ValidateAgentDeliveryLaunchEvidence.cs` fixture regression green.
+3. S2 did not run `MD-E2E-5`.
+4. S2 closeout found no visible S2 app session evidence to archive.
+5. S2 had no active OpenSpec change to archive.
 
 Non-blocking notes:
 
@@ -518,8 +535,8 @@ Non-blocking notes:
 
 - Was wurde entschieden? S2 is a validator/fixture child only. It validates visible-session evidence and false positives, but it does not launch, archive or run live workflows.
 - Was wurde geaendert? Created this child spec with Review Control Surface, parent conformance, contract, fixture strategy, harness cases, verification lifecycle, then re-hardened it against the implemented S1 schema.
-- Was bleibt offen? S2 implementation must create the reusable validator and visible evidence fixtures.
-- Welche Evidenz/Verification fehlt? No future visible-session validator exists yet; no S2 visible evidence fixtures exist yet.
+- Was bleibt offen? S3/S5 can now consume the accepted S2 validator contract.
+- Welche Evidenz/Verification fehlt? No live `MD-E2E-5` evidence exists by design; S2 only retains local validator fixture evidence and has no S2 visible thread to archive.
 - Welche Skill-/Workflow-Reibung ist aufgefallen? S1's local validator provides a useful pattern, but S2 must generalize it without taking over Launcher or MD-E2E-5 scope.
 - Session-/Kontextzustand: Ready for a fresh `spec-change-delivery` session for S2.
 
@@ -529,5 +546,8 @@ Non-blocking notes:
 |---|---|---|
 | 2026-05-10 | Codex | Created and hardened the `ADV-CAS-S2 Visible Evidence Validator` child spec as a blocked draft. |
 | 2026-05-10 | Codex | Re-hardened S2 after S1 implementation, synchronized the concrete S1 evidence schema, and promoted S2 to `IMPLEMENTATION READY`. |
+| 2026-05-10 | Codex | Locked the S2 delivery scope in `spec-change-delivery` and implemented the visible-session validator and fixture family. |
+| 2026-05-10 | Codex | Verified S2 fixture validation, setup-error handling and existing launch-evidence regression; marked S2 implemented. |
+| 2026-05-10 | Codex | Accepted S2 after verification replay, synchronized Child Index/handoff evidence, and recorded no active S2 OpenSpec archive target. |
 
 SessionId: 2026-05-10-adv-cas-s2-visible-evidence-validator-hardening

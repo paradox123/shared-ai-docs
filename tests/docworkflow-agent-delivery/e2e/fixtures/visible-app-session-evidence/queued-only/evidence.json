@@ -1,0 +1,14 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "queued",
+  "execution_channel": "app_server",
+  "adapter_id": "codex-app-server",
+  "target_id": "ADV-CAS-S2",
+  "initiating_project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "session_title": "ADV-CAS-1: Implementation - S2 Visible Evidence Validator",
+  "session_visibility": {
+    "class": "queued_manual_start",
+    "visible_in_codex_app": false,
+    "proof_status": "not_visible"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "launched",
+  "execution_channel": "headless_cli",
+  "adapter_id": "codex-cli",
+  "target_id": "ADV-CAS-S2",
+  "mechanism": {
+    "actual_command": "codex exec --json --dangerously-bypass-approvals"
+  },
+  "session_visibility": {
+    "class": "headless_cli_session",
+    "visible_in_codex_app": false,
+    "proof_status": "not_visible",
+    "proof_method": "codex_exec_downgrade"
+  }
+}

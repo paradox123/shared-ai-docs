@@ -6,12 +6,12 @@
 - Child Index / Queue: `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md` section `Child Index`
 - Handoff File: `_specs/child-session-handoffs/adv-cas-s2-session-handoff.md`
 - Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`
-- Codex Session / Log: not launched; parallel hardening draft only.
-- Session Evidence: no visible-session evidence created by S2; S1 implementation evidence is the schema source for this validator child.
+- Codex Session / Log: manual implementation session in current Codex thread; no automated S2 launch evidence was present.
+- Session Evidence: no live visible session evidence created by S2; retained S2 evidence is the validator fixture summary and setup-error check.
 - Handoff Timestamp: 2026-05-10
-- Naechster Modus/Skill: `spec-change-delivery`
-- Aktueller Verdict: IMPLEMENTATION READY.
-- Scope Summary: Implement the reusable visible-session evidence validator and fixture family against the S1 `agent-delivery.session-launch.v2` app-server evidence schema.
+- Naechster Modus/Skill: dependent child delivery/hardening.
+- Aktueller Verdict: IMPLEMENTATION READY
+- Scope Summary: Accepted the reusable visible-session evidence validator and fixture family against the S1 `agent-delivery.session-launch.v2` app-server evidence schema.
 - Non-Goals: No Launcher adapter implementation; no MD-E2E-5 runner; no closeout archive implementation; no live visible session launch.
 - Allowed Write-Set: `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S2 Visible Evidence Validator.md`; `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md`; `_specs/child-session-handoffs/adv-cas-s2-session-handoff.md`; `skills-repo/tools/ValidateAgentDeliveryLaunchEvidence.cs`; `skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs`; `tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-evidence/**`; `tests/docworkflow-agent-delivery/e2e/validators/visible-app-session-evidence.js`
 - Shared / Read-only Files: `_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md`; `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S1 Launcher Visible App Adapter.md`; `skills-repo/tools/AgentDeliverySessionLauncher.cs`; `skills-repo/skills/spec-closeout/SKILL.md`; `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`; `tests/docworkflow-agent-delivery/testcases/md-e2e-5-visible-codex-app-sessions.md`
@@ -20,7 +20,9 @@
   - Delivery Gate: S2 implementation must run positive app-server, headless exec, wrong title, wrong cwd, missing thread, queued-only, prompt-hash mismatch and unarchived negative fixture cases; existing launch-evidence fixture regression must remain green.
   - Pre-Archive Closeout: retain validator fixture summaries.
   - Post-Archive / Current Replay: `ValidateChildReadiness.cs` for implementation-ready S2.
-- Evidence / OpenSpec: Proposed ledger `openspec/changes/agent-delivery-visible-session-validator/`; no delivery evidence exists yet.
-- Retained Evidence: S2 draft lane reported existing launch-evidence fixture regression `RESULT: PASS (10 cases)`.
-- Offene Blocker oder non-blocking Notes: No implementation blocker. Do not run `MD-E2E-5` in S2.
-- Fresh Session empfohlen: Yes, start `spec-change-delivery` for S2.
+- Evidence / OpenSpec: No active S2 OpenSpec change exists; `agent-delivery-visible-session-validator` was proposed only and is recorded as `not_used` for closeout.
+- Closeout Verdict: ACCEPTED.
+- Retained Evidence: S2 visible validator fixture command `RESULT: PASS (11 cases)`; setup-error fixture exits `2` as expected; existing launch-evidence fixture regression `RESULT: PASS (10 cases)`; closeout verification replay passed.
+- Archive Status: no S2 `visible_codex_app_session` launch evidence found under `_specs/agent-delivery-session-launches/`; `archive_status: no_s2_visible_thread_created`.
+- Offene Blocker oder non-blocking Notes: No S2 closeout blocker. Do not run `MD-E2E-5` in S2.
+- Fresh Session empfohlen: No for S2 implementation; continue with acceptance/closeout or the next dependent child.

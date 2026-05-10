@@ -1,0 +1,10 @@
+{
+  "cases": [
+    {
+      "id": "S2-VIS-012-malformed-setup",
+      "expect": "fail",
+      "expectedFailureClass": "invalid_schema",
+      "evidence": "missing/evidence.json"
+    }
+  ]
+}

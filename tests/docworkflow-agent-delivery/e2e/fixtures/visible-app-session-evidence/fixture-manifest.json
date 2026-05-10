@@ -1,0 +1,79 @@
+{
+  "cases": [
+    {
+      "id": "S2-VIS-001-positive-app-server",
+      "expect": "pass",
+      "evidence": "positive-app-server/evidence.json",
+      "prompt": "positive-app-server/start-prompt.md",
+      "transcript": "positive-app-server/app-server-transcript.jsonl"
+    },
+    {
+      "id": "S2-VIS-002-headless-exec",
+      "expect": "fail",
+      "expectedFailureClass": "headless_cli_not_visible",
+      "evidence": "headless-exec/evidence.json"
+    },
+    {
+      "id": "S2-VIS-003-source-exec",
+      "expect": "fail",
+      "expectedFailureClass": "source_exec_not_visible",
+      "evidence": "source-exec/evidence.json"
+    },
+    {
+      "id": "S2-VIS-004-launched-without-visible-class",
+      "expect": "fail",
+      "expectedFailureClass": "missing_visible_class",
+      "evidence": "launched-without-visible-class/evidence.json"
+    },
+    {
+      "id": "S2-VIS-005-wrong-title",
+      "expect": "fail",
+      "expectedFailureClass": "wrong_title",
+      "evidence": "wrong-title/evidence.json"
+    },
+    {
+      "id": "S2-VIS-006-wrong-cwd",
+      "expect": "fail",
+      "expectedFailureClass": "wrong_cwd",
+      "evidence": "wrong-cwd/evidence.json"
+    },
+    {
+      "id": "S2-VIS-007-missing-thread",
+      "expect": "fail",
+      "expectedFailureClass": "missing_thread",
+      "evidence": "missing-thread/evidence.json"
+    },
+    {
+      "id": "S2-VIS-008-queued-only",
+      "expect": "fail",
+      "expectedFailureClass": "queued_not_visible",
+      "evidence": "queued-only/evidence.json"
+    },
+    {
+      "id": "S2-VIS-009-prompt-hash-mismatch",
+      "expect": "fail",
+      "expectedFailureClass": "prompt_hash_mismatch",
+      "evidence": "prompt-hash-mismatch/evidence.json",
+      "prompt": "prompt-hash-mismatch/start-prompt.md",
+      "transcript": "prompt-hash-mismatch/app-server-transcript.jsonl"
+    },
+    {
+      "id": "S2-VIS-010-empty-thread-no-turn",
+      "expect": "fail",
+      "expectedFailureClass": "missing_turn",
+      "evidence": "empty-thread-no-turn/evidence.json",
+      "prompt": "empty-thread-no-turn/start-prompt.md",
+      "transcript": "empty-thread-no-turn/app-server-transcript.jsonl"
+    },
+    {
+      "id": "S2-VIS-011-unarchived-visible-closeout",
+      "expect": "fail",
+      "expectedFailureClass": "unarchived_visible_session",
+      "evidence": "unarchived-visible-closeout/evidence.json",
+      "prompt": "unarchived-visible-closeout/start-prompt.md",
+      "transcript": "unarchived-visible-closeout/app-server-transcript.jsonl",
+      "closeout": "unarchived-visible-closeout/closeout-summary.json",
+      "requireCloseoutArchived": true
+    }
+  ]
+}
