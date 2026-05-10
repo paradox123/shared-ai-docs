@@ -58,6 +58,7 @@ If input 4 is omitted and context is NCG, assume the default above.
 7. Do not mark a child spec as accepted while Parent Coverage, Child Index/Slice Plan, Backlog/Re-entry, Evidence Links, OpenSpec Status, or Child Session Handoff state are stale or contradictory.
 8. Do not advance the next leading child until the previous child closeout sync is complete and the next child handoff is current, or explicitly blocked/stale in the Child Index.
 9. If a required command is discovered to be stale or environment-fragile during closeout, do not silently replace it and still mark closeout ready. First record the original failure as a command-contract finding, synchronize the target spec/child spec, Child Index/Handoff and OpenSpec/Evidence command list to the corrected command, rerun that corrected command, and only then continue closeout. If the sync is not allowed or needs a decision, return `NOT READY`.
+10. For child-spec closeout, archive every visible Codex-App session opened for that child-spec run before final `READY`. A child-spec run includes Hardening and Implementation sessions, plus any visible/manual-visible follow-up session whose launch evidence points to the same parent spec and target child/spec id. If any visible session cannot be archived, return `NOT READY` unless the user explicitly accepts a retained-session note.
 
 ## Closeout Workflow
 
@@ -135,16 +136,18 @@ Child closeout sync details:
 5. OpenSpec Status: record active, archived, canonical spec path, or blocked status; if OpenSpec archive fails, keep closeout `NOT READY`.
 6. Handoff: update or create the next persisted Child Session Handoff so it points to current parent/index/evidence/OpenSpec state. If the next child is not allowed to proceed, keep or create the handoff but mark its verdict/notes as blocked or stale in both the file and the Child Index.
 7. Agent Delivery Session Launch/Queue Evidence: when closeout releases a next leading handoff, run or require `skills-repo/tools/AgentDeliverySessionLauncher.cs --mode queue --handoff <handoff> --target-id <child> --agent codex --out _specs/agent-delivery-session-launches`. Record the resulting `launch-request.json`/`evidence.json` path, or mark the next handoff as `manual_start_required`, `blocked`, or `failed`. `manual_start_required` is not an automated transition success; `blocked` and `failed` prevent advancing the next child. Do not rely on semantic-only `SessionId` labels; record real Codex session/log evidence or explicit `legacy_reconstructed` source/date for historical pre-launcher transitions.
-8. Verification Lifecycle: replace active-change verification commands with post-archive/current replay commands after archive, for example archive-presence checks plus canonical spec validation. Preserve pre-archive commands as evidence, not as future replay gates.
-9. Retained Evidence: if accepted evidence currently lives in an OS temp path, either copy or regenerate it under a stable workspace evidence path with a manifest/hash, or record a blocking/non-blocking retention limitation before later children consume it.
+8. Codex-App Session Archive: before final child `READY`, find all Agent Delivery session evidence for the same parent and child/spec id. For each evidence record with `session_visibility.class: visible_codex_app_session` and a real `thread_id`, archive the thread via app-server `thread/archive` or prove it is already archived. Record `thread_id`, session title, archive method, archive timestamp, and post-archive evidence showing the thread is archived or absent from the non-archived app list. For headless `codex exec` evidence, record `archive_status: not_app_visible_not_archived`; for queued/manual starts without a thread, record `archive_status: no_thread_created`.
+9. Verification Lifecycle: replace active-change verification commands with post-archive/current replay commands after archive, for example archive-presence checks plus canonical spec validation. Preserve pre-archive commands as evidence, not as future replay gates.
+10. Retained Evidence: if accepted evidence currently lives in an OS temp path, either copy or regenerate it under a stable workspace evidence path with a manifest/hash, or record a blocking/non-blocking retention limitation before later children consume it.
 
 Parent closeout sync details:
 
 1. Confirm every child row has accepted evidence, explicit deferral, or a blocker/re-entry destination.
 2. Confirm Parent Coverage and Child Index agree.
 3. Confirm OpenSpec canonical specs/archive paths are aligned with accepted children.
-4. Run broad RAG-first project docs sync and update stale public/project docs when needed.
-5. Record deferred scope and next re-entry path rather than hiding it in a final summary.
+4. Confirm every child row has session archive evidence, explicit no-thread status, or an accepted retained-session note for all visible Codex-App sessions opened during that child's Hardening/Implementation lifecycle.
+5. Run broad RAG-first project docs sync and update stale public/project docs when needed.
+6. Record deferred scope and next re-entry path rather than hiding it in a final summary.
 
 ### 6) Capture Mini-Retro
 
@@ -168,8 +171,8 @@ Respond with:
 3. OpenSpec closure status and paths
 4. Synchronization result:
    - normal spec: project docs updated, or explicit "none needed" with basis,
-   - child spec: Parent Coverage, Child Index/Slice Plan, Backlog/Re-entry, Evidence links, OpenSpec Status, integration-owner notes, and next persisted Child Session Handoff synced; broad project docs sync only if triggered,
-   - parent spec: broad project docs sync plus child set, coverage, accepted evidence, OpenSpec archive/canonical status, and deferred scope alignment.
+   - child spec: Parent Coverage, Child Index/Slice Plan, Backlog/Re-entry, Evidence links, OpenSpec Status, Codex-App session archive status, integration-owner notes, and next persisted Child Session Handoff synced; broad project docs sync only if triggered,
+   - parent spec: broad project docs sync plus child set, coverage, accepted evidence, Codex-App session archive status, OpenSpec archive/canonical status, and deferred scope alignment.
 5. Changed artifacts
 6. Mini-Retro
 7. Final verdict: `READY` or `NOT READY`

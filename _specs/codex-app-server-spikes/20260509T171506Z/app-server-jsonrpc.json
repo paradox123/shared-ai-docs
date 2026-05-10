@@ -1,0 +1,762 @@
+[
+  {
+    "at": "2026-05-09T17:15:06.500Z",
+    "message": {
+      "direction": "client",
+      "method": "initialize",
+      "id": 1,
+      "params": {
+        "clientInfo": {
+          "name": "agent_delivery_visible_session_spike",
+          "title": "Agent Delivery Visible Session Spike",
+          "version": "0.1.0"
+        },
+        "capabilities": {
+          "experimentalApi": true,
+          "optOutNotificationMethods": []
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.589Z",
+    "message": {
+      "direction": "server",
+      "id": 1,
+      "result": {
+        "userAgent": "Codex Desktop/0.129.0-alpha.15 (Mac OS 26.3.1; arm64) dumb (agent_delivery_visible_session_spike; 0.1.0)",
+        "codexHome": "/Users/dh/.codex",
+        "platformFamily": "unix",
+        "platformOs": "macos"
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.589Z",
+    "message": {
+      "direction": "server",
+      "method": "remoteControl/status/changed",
+      "params": {
+        "status": "disabled",
+        "environmentId": null
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.589Z",
+    "message": {
+      "direction": "client",
+      "method": "initialized"
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.590Z",
+    "message": {
+      "direction": "client",
+      "method": "thread/start",
+      "id": 2,
+      "params": {
+        "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+        "approvalPolicy": "never",
+        "sandbox": "read-only",
+        "ephemeral": false,
+        "sessionStartSource": "startup",
+        "threadSource": "user"
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.703Z",
+    "message": {
+      "direction": "server",
+      "id": 2,
+      "result": {
+        "thread": {
+          "id": "019e0dbc-5439-7df3-8849-847f29a93ce0",
+          "sessionId": "019e0dbc-5439-7df3-8849-847f29a93ce0",
+          "forkedFromId": null,
+          "preview": "",
+          "ephemeral": false,
+          "modelProvider": "openai",
+          "createdAt": 1778346906,
+          "updatedAt": 1778346906,
+          "status": {
+            "type": "idle"
+          },
+          "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T19-15-06-019e0dbc-5439-7df3-8849-847f29a93ce0.jsonl",
+          "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+          "cliVersion": "0.129.0-alpha.15",
+          "source": "vscode",
+          "threadSource": "user",
+          "agentNickname": null,
+          "agentRole": null,
+          "gitInfo": null,
+          "name": null,
+          "turns": []
+        },
+        "model": "gpt-5.5",
+        "modelProvider": "openai",
+        "serviceTier": null,
+        "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+        "instructionSources": [],
+        "approvalPolicy": "never",
+        "approvalsReviewer": "user",
+        "sandbox": {
+          "type": "readOnly",
+          "networkAccess": false
+        },
+        "permissionProfile": {
+          "type": "managed",
+          "network": {
+            "enabled": false
+          },
+          "fileSystem": {
+            "type": "restricted",
+            "entries": [
+              {
+                "path": {
+                  "type": "special",
+                  "value": {
+                    "kind": "root"
+                  }
+                },
+                "access": "read"
+              }
+            ]
+          }
+        },
+        "activePermissionProfile": null,
+        "reasoningEffort": "high"
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.703Z",
+    "message": {
+      "direction": "client",
+      "method": "thread/name/set",
+      "id": 3,
+      "params": {
+        "threadId": "019e0dbc-5439-7df3-8849-847f29a93ce0",
+        "name": "APP-SERVER-SPIKE 20260509T171506Z"
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.703Z",
+    "message": {
+      "direction": "server",
+      "method": "thread/started",
+      "params": {
+        "thread": {
+          "id": "019e0dbc-5439-7df3-8849-847f29a93ce0",
+          "sessionId": "019e0dbc-5439-7df3-8849-847f29a93ce0",
+          "forkedFromId": null,
+          "preview": "",
+          "ephemeral": false,
+          "modelProvider": "openai",
+          "createdAt": 1778346906,
+          "updatedAt": 1778346906,
+          "status": {
+            "type": "idle"
+          },
+          "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T19-15-06-019e0dbc-5439-7df3-8849-847f29a93ce0.jsonl",
+          "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+          "cliVersion": "0.129.0-alpha.15",
+          "source": "vscode",
+          "threadSource": "user",
+          "agentNickname": null,
+          "agentRole": null,
+          "gitInfo": null,
+          "name": null,
+          "turns": []
+        }
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.703Z",
+    "message": {
+      "direction": "server",
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "name": "cloudflare-api",
+        "status": "starting",
+        "error": null
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.703Z",
+    "message": {
+      "direction": "server",
+      "method": "mcpServer/startupStatus/updated",
+      "params": {
+        "name": "codex_apps",
+        "status": "starting",
+        "error": null
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.744Z",
+    "message": {
+      "direction": "server",
+      "id": 3,
+      "result": {}
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.744Z",
+    "message": {
+      "direction": "client",
+      "method": "thread/list",
+      "id": 4,
+      "params": {
+        "limit": 10,
+        "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+        "archived": false
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.744Z",
+    "message": {
+      "direction": "server",
+      "method": "thread/name/updated",
+      "params": {
+        "threadId": "019e0dbc-5439-7df3-8849-847f29a93ce0",
+        "threadName": "APP-SERVER-SPIKE 20260509T171506Z"
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.778Z",
+    "message": {
+      "direction": "server",
+      "id": 4,
+      "result": {
+        "data": [
+          {
+            "id": "019e0d25-2d4c-76b1-9e3f-cdb53b1e9746",
+            "sessionId": "019e0d25-2d4c-76b1-9e3f-cdb53b1e9746",
+            "forkedFromId": null,
+            "preview": "Ziel dieser Session: Klaere und spezifiere, wie Agent Delivery Session Launcher Sessions nicht mehr nur headless/silent via `codex exec`, sondern als echte sichtbare Codex-App-Sessions starten oder zumindest eindeutig in der Codex-App sichtbar/nachverfolgbar machen kann.\n\nKontext:\n- Im letzten Regressionstest wurde `AgentDeliverySessionLauncher.cs --mode launch --agent codex` verwendet.\n- Das startete `codex exec --json ...` als headless CLI-Prozess.\n- Diese Sessions erschienen nicht links in der Codex-App als neue Chats.\n- Fuer den Agent Delivery Workflow reicht das nicht, wenn “neue Session” im Workflow als sichtbare Codex-App-Session gemeint ist.\n- Gewuenscht ist ein sauberer Workflow, bei dem Parent/Child-Sessions ueber den Launcher gestartet werden und in der Codex-App sichtbar oder eindeutig als App-Session referenzierbar sind.\n\nAufgabe:\n1. Untersuche die vorhandenen Launcher-/Workflow-Artefakte:\n   - `skills-repo/tools/AgentDeliverySessionLauncher.cs`\n   - `skills-repo/skills/spec-orchestrator/SKILL.md`\n   - `skills-repo/skills/child-spec-hardening/SKILL.md`\n   - `skills-repo/skills/spec-change-delivery/SKILL.md`\n   - `skills-repo/skills/spec-closeout/SKILL.md`\n   - `docs/doc-workflow.md`\n2. Klaere, ob es aktuell einen technischen Weg gibt, aus Codex heraus eine sichtbare Codex-App-Session zu starten.\n3. Wenn ja:\n   - beschreibe die noetige Aenderung am Launcher,\n   - definiere Evidence, die beweist, dass die Session in der Codex-App sichtbar ist,\n   - definiere einen Regressionstest fuer Parent + 5 Child Sessions.\n4. Wenn nein:\n   - schreibe eine Spec fuer die noetige Aenderung,\n   - benenne die Blocker und offenen Entscheidungen,\n   - unterscheide klar zwischen:\n     - headless CLI session,\n     - queued/manual start,\n     - visible Codex-App session.\n5. Erstelle oder aktualisiere eine Spec im Repo, falls die Aenderung nicht sofort eindeutig implementierbar ist.\n6. Verwende den passenden Workflow:\n   - Wenn erst Anforderungen/Design fehlen: `doc-coauthoring` oder passende Spec-Erstellung.\n   - Wenn eine Parent/Child-Aufteilung noetig ist: `spec-orchestrator`.\n   - Wenn ein einzelner klarer Change implementierbar ist: `spec-change-delivery`.\n7. Keine Runtime-Implementierung starten, bevor klar ist, ob und wie sichtbare Codex-App-Sessions technisch erzeugt werden koennen.\n\nAkzeptanzkriterien fuer diese Session:\n- Es gibt eine klare Antwort, ob sichtbare Codex-App-Sessions vom Launcher aktuell moeglich sind.\n- Es gibt eine Spec oder einen konkreten Implementierungsplan fuer die notwendige Aenderung.\n- Die Spec/der Plan definiert Evidence fuer “Session ist sichtbar in Codex-App”.\n- Die Spec/der Plan definiert einen Regressionstest, der nicht mit headless `codex exec` verwechselt werden kann.\n- Headless-Erfolg darf nicht mehr als sichtbarer Session-Erfolg gelten.\n\nBerichte am Ende:\n- Aktuelle technische Moeglichkeit: `moeglich`, `nicht moeglich`, oder `unklar/blockiert`\n- Falls moeglich: welche Dateien/Mechanismen geaendert werden muessen\n- Falls nicht moeglich/unklar: welche Spec erstellt/aktualisiert wurde\n- Offene Entscheidungen\n- Naechster empfohlener Schritt",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778337000,
+            "updatedAt": 1778346906,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T16-30-00-019e0d25-2d4c-76b1-9e3f-cdb53b1e9746.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "vscode",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "d755f0ae9f16d14fa5fb7b7724e0dde0cd019946",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": "Kläre sichtbare App-Sessions",
+            "turns": []
+          },
+          {
+            "id": "019e0c6b-8e1e-7702-98a5-45e419facedf",
+            "sessionId": "019e0c6b-8e1e-7702-98a5-45e419facedf",
+            "forkedFromId": null,
+            "preview": "Die Child Specs der Parent-Spec /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md sind implementiert und akzeptiert, entsprechend abgeschlossen. Ich möchte die Parent-Spec jetzt abschliessen und ausserdem möchte ich, dass du mir das Ergebnis des Testlaufs dann entsprechend zeigst. Das sollte dann grün sein mit den fünf Child-Specs, die dann einmal durch den Prozess durchgegangen sind. Oder du sagst mir, an welcher Stelle der Prozess fehlgeschlagen ist. Das geht ja auch. Wir haben jetzt nur die Testsuite gebaut. Wir können uns noch nicht zu 100% sicher sein, dass der Workflow wirklich funktioniert.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778324835,
+            "updatedAt": 1778337145,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T13-07-15-019e0c6b-8e1e-7702-98a5-45e419facedf.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "vscode",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "1dda82cf3a39303ffa64d7197114755860e6d3e4",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": "Parent-Spec abschließen",
+            "turns": []
+          },
+          {
+            "id": "019e0c69-3477-7423-a2dd-3955c655cb69",
+            "sessionId": "019e0c69-3477-7423-a2dd-3955c655cb69",
+            "forkedFromId": null,
+            "preview": "Child Session Handoff\nParent: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md\nChild: MD-E2E-5\nChild Spec: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-5 Live Agent Follow-up.md\nChild Index / Queue: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md section Child Index\nHandoff File: _specs/child-session-handoffs/md-e2e-5-session-handoff.md\nTarget Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\nCodex Session / Log: not created; follow-up is deferred.\nSession Evidence: no launch evidence; deferred follow-up handoff.\nHandoff Timestamp: 2026-05-09\nNaechster Modus/Skill: none now; later child-spec-hardening only after local baseline acceptance.\nAktueller Verdict: DEFERRED FOLLOW-UP; not implementation-ready.\nScope Summary: Future optional live-agent/Codex path that writes compatible evidence but never replaces the local mock baseline.\nNon-Goals: No first-baseline work, no standard gate dependency on live provider, no network/auth requirement for run-mock-e2e-checks.sh all --keep, no KI-fuer-KMU fixtures.\nAllowed Write-Set: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-5 Live Agent Follow-up.md; _specs/child-session-handoffs/md-e2e-5-session-handoff.md; future live-agent harness files selected by later hardening.\nShared / Read-only Files: accepted local runner and baseline evidence; README standard command; mock fixture contracts.\nVerification Lifecycle:\nRehearsal / Preflight: not applicable until reopened.\nDelivery Gate: future hardening must define.\nPre-Archive Closeout: future only.\nPost-Archive / Current Replay: not available.\nEvidence / OpenSpec: proposed future ledger openspec/changes/docworkflow-agent-mock-e2e-md-e2e-5-live-agent-follow-up/; not created.\nRetained Evidence: none.\nOffene Blocker oder non-blocking Notes: Deferred until MD-E2E-1 through MD-E2E-4 are accepted. Auth/provider/network blockers must be represented as blocked, not pass.\nFresh Session empfohlen: No current session; reopen later.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778324681,
+            "updatedAt": 1778325101,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T13-04-41-019e0c69-3477-7423-a2dd-3955c655cb69.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "vscode",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "1dda82cf3a39303ffa64d7197114755860e6d3e4",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": "Testsuite: Harden Defer live agent follow-up",
+            "turns": []
+          },
+          {
+            "id": "019e0be2-e5db-7113-a4e9-2360dcf029e9",
+            "sessionId": "019e0be2-e5db-7113-a4e9-2360dcf029e9",
+            "forkedFromId": null,
+            "preview": "Child Session Handoff\nParent: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md\nChild: MD-E2E-4\nChild Spec: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-4 Documentation Sync.md\nChild Index / Queue: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md section Child Index\nHandoff File: _specs/child-session-handoffs/md-e2e-4-session-handoff.md\nTarget Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\nCodex Session / Log: not created; next delivery session should create implementation evidence during spec-change-delivery.\nSession Evidence: hardening-only; no implementation launch evidence yet.\nHandoff Timestamp: 2026-05-09\nNaechster Modus/Skill: spec-change-delivery for MD-E2E-4 docs/control-surface sync.\nAktueller Verdict: IMPLEMENTATION READY.\nScope Summary: Deliver final README, parent spec, orchestration pack, DWT parent spec, conditional OpenSpec/canonical and evidence documentation sync for the mock-first Agent Delivery E2E workflow.\nNon-Goals: No runner fixes, no fixture edits, no missing evidence invention, no live-agent path, no behavior changes outside docs and control surfaces.\nAllowed Write-Set: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-4 Documentation Sync.md; _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md; _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md; _specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md; _specs/child-session-handoffs/md-e2e-4-session-handoff.md; tests/docworkflow-agent-delivery/README.md; openspec/specs/docworkflow-agent-delivery-testsuite/spec.md only if canonical sync is required.\nShared / Read-only Files: runner scripts and fixture files; accepted MD-E2E-1 through MD-E2E-3 evidence; KI-fuer-KMU and real product repositories.\nVerification Lifecycle:\nRehearsal / Preflight: accepted evidence paths are concrete in the child spec; openspec validate docworkflow-agent-delivery-testsuite --strict, git diff --check and ValidateChildReadiness.cs are valid command contracts.\nDelivery Gate: git diff --check; openspec validate docworkflow-agent-delivery-testsuite --strict if OpenSpec canonical spec changes.\nPre-Archive Closeout: update child index row, parent history, DWT parent doc wording if stale, README standard command/evidence notes and this handoff.\nPost-Archive / Current Replay: not available yet; implementation must create docs-sync evidence.\nEvidence / OpenSpec: canonical OpenSpec sync is conditional because accepted MD-E2E-1 through MD-E2E-3 archives already added mock fixture, local runner and mock-only standard-gate requirements to openspec/specs/docworkflow-agent-delivery-testsuite/spec.md; create/use openspec/changes/docworkflow-agent-mock-e2e-md-e2e-4-doc-sync/ only if delivery edits canonical OpenSpec.\nRetained Evidence: openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/implementation-evidence.md; openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-2-local-runner/implementation-evidence.md; tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-large/mock-e2e-summary.json; tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-small/mock-e2e-summary.json; tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-all/mock-e2e-summary.json; tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-all/aggregate-summary.json; openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/implementation-evidence.md; tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-3-mock-all/mock-e2e-summary.json; tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-3-mock-all/aggregate-summary.json; tests/docworkflow-agent-delivery/e2e/evidence/20260509T082132Z-all/mock-e2e-summary.json; tests/docworkflow-agent-delivery/e2e/evidence/20260509T082132Z-all/aggregate-summary.json.\nOffene Blocker oder non-blocking Notes: No predecessor evidence blocker remains. Docs must not claim optional live-agent success; MD-E2E-5 remains deferred.\nFresh Session empfohlen: Yes, for spec-change-delivery.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778315879,
+            "updatedAt": 1778324647,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T10-37-59-019e0be2-e5db-7113-a4e9-2360dcf029e9.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "vscode",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "7f7050b11a6f6fda3112884b291ced275d09b543",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": "Testsuite: Implement Sync MD-E2E-4 docs",
+            "turns": []
+          },
+          {
+            "id": "019e0bda-de5d-7653-94c1-92e0f530c0b3",
+            "sessionId": "019e0bda-de5d-7653-94c1-92e0f530c0b3",
+            "forkedFromId": null,
+            "preview": "Child Session Handoff\nParent: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md\nChild: MD-E2E-4\nChild Spec: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-4 Documentation Sync.md\nChild Index / Queue: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md section Child Index\nHandoff File: _specs/child-session-handoffs/md-e2e-4-session-handoff.md\nTarget Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\nCodex Session / Log: not created; delivery launch is blocked until hardening verdict exists.\nSession Evidence: no launch evidence; orchestration-only handoff.\nHandoff Timestamp: 2026-05-09\nNaechster Modus/Skill: child-spec-hardening for MD-E2E-4 after MD-E2E-1 through MD-E2E-3 evidence exists.\nAktueller Verdict: NEEDS HARDENING; not implementation-ready.\nScope Summary: Harden the final README, parent spec, orchestration pack, OpenSpec/canonical and evidence sync plan for the mock-first Agent Delivery E2E workflow.\nNon-Goals: No runner fixes, no missing evidence invention, no live-agent path, no behavior changes outside docs and control surfaces.\nAllowed Write-Set: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-4 Documentation Sync.md; _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md; _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md; _specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md; _specs/child-session-handoffs/md-e2e-4-session-handoff.md; tests/docworkflow-agent-delivery/README.md; openspec/specs/docworkflow-agent-delivery-testsuite/spec.md only if hardening selects OpenSpec canonical sync.\nShared / Read-only Files: runner scripts and fixture files; accepted MD-E2E-1 through MD-E2E-3 evidence; KI-fuer-KMU and real product repositories.\nVerification Lifecycle:\nRehearsal / Preflight: collect accepted evidence paths from prior children.\nDelivery Gate: git diff --check; openspec validate docworkflow-agent-delivery-testsuite --strict if OpenSpec canonical spec changes.\nPre-Archive Closeout: update child index rows, parent history and README standard command.\nPost-Archive / Current Replay: not available yet.\nEvidence / OpenSpec: proposed ledger openspec/changes/docworkflow-agent-mock-e2e-md-e2e-4-doc-sync/; not created in orchestration pass. Prior accepted evidence now includes openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/implementation-evidence.md, tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-3-mock-all/mock-e2e-summary.json, and tests/docworkflow-agent-delivery/e2e/evidence/20260509T082132Z-all/mock-e2e-summary.json.\nRetained Evidence: MD-E2E-1, MD-E2E-2 and MD-E2E-3 accepted evidence is available via the Orchestration Pack.\nOffene Blocker oder non-blocking Notes: No predecessor evidence blocker remains for hardening; docs must not claim optional live-agent success.\nFresh Session empfohlen: Yes.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778315353,
+            "updatedAt": 1778315834,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T10-29-13-019e0bda-de5d-7653-94c1-92e0f530c0b3.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "vscode",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "e81c12af9102e95f15f31a93d79d385c57330a4a",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": "Testsuite: Harden MD-E2E-4 sync",
+            "turns": []
+          },
+          {
+            "id": "019e0bcb-94e2-7860-b2ef-84de00a0ebea",
+            "sessionId": "019e0bcb-94e2-7860-b2ef-84de00a0ebea",
+            "forkedFromId": null,
+            "preview": "Child Session Handoff\nParent: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md\nChild: MD-E2E-3\nChild Spec: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-3 Standard Gate Migration.md\nChild Index / Queue: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md section Child Index\nHandoff File: _specs/child-session-handoffs/md-e2e-3-session-handoff.md\nTarget Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\nCodex Session / Log: not created for implementation; hardening handoff only.\nSession Evidence: queued at _specs/agent-delivery-session-launches/20260509T080916Z-md-e2e-3/evidence.json.\nHandoff Timestamp: 2026-05-09\nNext Mode / Skill: spec-change-delivery for MD-E2E-3\nAktueller Verdict: IMPLEMENTATION READY\nScope Summary: Migrate/deactivate old standard Agent Delivery gates so the leading standard command is mock-only and no KI-fuer-KMU default, fallback or compatibility fixture remains.\nNon-Goals: No new fixture authoring; no accepted MD-E2E-1 mock-data contract edits; no MD-E2E-2 runner internals beyond standard routing integration; no broad DWT historical rewrite; no final parent/canonical docs closeout beyond README command references directly coupled to standard gate behavior; no live-agent/Codex execution.\nAllowed Write-Set: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-3 Standard Gate Migration.md; _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md; _specs/child-session-handoffs/md-e2e-3-session-handoff.md; openspec/changes/docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/**; tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh; tests/docworkflow-agent-delivery/scripts/setup-fixture.sh; tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh; tests/docworkflow-agent-delivery/README.md\nShared / Read-only Files: tests/docworkflow-agent-delivery/mock-data/**; tests/docworkflow-agent-delivery/e2e/mock-runner/**; tests/docworkflow-agent-delivery/e2e/validators/**; accepted MD-E2E-1 and MD-E2E-2 archived OpenSpec evidence; KI-fuer-KMU and all other real product repositories; retained DWT historical evidence.\nVerification Lifecycle: Rehearsal completed: bash -n tests/docworkflow-agent-delivery/scripts/*.sh; tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep --run-id hardening-md-e2e-3-rehearsal; run-contract-checks.sh --help; setup-fixture.sh --help; node --version; .NET 10 SDK present; rg preflight found current forbidden defaults. Delivery gate: bash -n tests/docworkflow-agent-delivery/scripts/*.sh; tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep --run-id closeout-md-e2e-3-mock-all; tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh all --keep; no-default-KI-fuer-KMU guards over scripts and README; openspec validate docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration --strict; ValidateChildReadiness.cs; git diff --check. Pre-Archive Closeout: evidence that legacy real fixture default is removed/replaced/non-gating and no compatibility fixture remains. Post-Archive / Current Replay: not available yet.\nEvidence / OpenSpec: proposed ledger openspec/changes/docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/; hardening mock-runner rehearsal evidence at tests/docworkflow-agent-delivery/e2e/evidence/hardening-md-e2e-3-rehearsal/mock-e2e-summary.json; Agent Delivery queue evidence at _specs/agent-delivery-session-launches/20260509T080916Z-md-e2e-3/evidence.json.\nRetained Evidence: MD-E2E-2 accepted runner evidence at tests/docworkflow-agent-delivery/e2e/evidence/closeout-md-e2e-2-all/aggregate-summary.json; MD-E2E-3 hardening rehearsal evidence at tests/docworkflow-agent-delivery/e2e/evidence/hardening-md-e2e-3-rehearsal/mock-e2e-summary.json.\nOffene Blocker oder non-blocking Notes: None. Current scripts still contain forbidden defaults; removing them is the implementation work authorized by this handoff.\nFresh Session empfohlen: Yes; start a fresh spec-change-delivery implementation session from this handoff.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778314351,
+            "updatedAt": 1778315279,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T10-12-31-019e0bcb-94e2-7860-b2ef-84de00a0ebea.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "vscode",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "dd52efb8e1d62c6607a4f85eecb57e1227922943",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": "Testsuite: MD-E2E-3 Implement standard gate to mock-only",
+            "turns": []
+          },
+          {
+            "id": "019e0bc2-cc87-7073-a9ba-8d07d3b0c34e",
+            "sessionId": "019e0bc2-cc87-7073-a9ba-8d07d3b0c34e",
+            "forkedFromId": null,
+            "preview": "## Child Session Handoff\n\n- Parent: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md`\n- Child: `MD-E2E-3`\n- Child Spec: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-3 Standard Gate Migration.md`\n- Child Index / Queue: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md` section `Child Index`\n- Handoff File: `_specs/child-session-handoffs/md-e2e-3-session-handoff.md`\n- Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`\n- Codex Session / Log: not created; delivery launch is blocked until hardening verdict exists.\n- Session Evidence: no launch evidence; orchestration-only handoff.\n- Handoff Timestamp: 2026-05-09\n- Naechster Modus/Skill: `child-spec-hardening` for `MD-E2E-3` after MD-E2E-2 runner contract stabilizes.\n- Aktueller Verdict: NEEDS HARDENING; not implementation-ready.\n- Scope Summary: Harden the migration/deactivation plan for old standard gates so default Agent Delivery checks use mock data and no KI-fuer-KMU compatibility fixture remains.\n- Non-Goals: No fixture authoring, no runner internals, no broad historical rewrite, no final docs closeout beyond command references needed for standard gate behavior.\n- Allowed Write-Set: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-3 Standard Gate Migration.md`; `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md`; `_specs/child-session-handoffs/md-e2e-3-session-handoff.md`; `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh`; `tests/docworkflow-agent-delivery/scripts/setup-fixture.sh`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`; `tests/docworkflow-agent-delivery/README.md` only for command references directly coupled to standard gate behavior.\n- Shared / Read-only Files: accepted `tests/docworkflow-agent-delivery/mock-data/**`; accepted `tests/docworkflow-agent-delivery/e2e/**`; DWT retained evidence; KI-fuer-KMU and real product repositories.\n- Verification Lifecycle:\n  - Rehearsal / Preflight: inspect current default KI-fuer-KMU references and freeze allowed historical references.\n  - Delivery Gate: `bash -n tests/docworkflow-agent-delivery/scripts/*.sh`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep`; selected standard `all` command; no-default-KI-fuer-KMU guard.\n  - Pre-Archive Closeout: evidence that legacy real fixture default is removed/replaced/non-gating.\n  - Post-Archive / Current Replay: not available yet.\n- Evidence / OpenSpec: proposed ledger `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration/`; not created in orchestration pass.\n- Retained Evidence: none yet.\n- Offene Blocker oder non-blocking Notes: Exact migration strategy is not frozen. Do not keep KI-fuer-KMU as default, fallback or compatibility mode.\n- Fresh Session empfohlen: Yes.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778313776,
+            "updatedAt": 1778314240,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T10-02-56-019e0bc2-cc87-7073-a9ba-8d07d3b0c34e.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "vscode",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "dd52efb8e1d62c6607a4f85eecb57e1227922943",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": "Testsuite: MD-E2E-3 Härten",
+            "turns": []
+          },
+          {
+            "id": "019e0b7c-ddef-72e0-970d-7b4813fd961d",
+            "sessionId": "019e0b7c-ddef-72e0-970d-7b4813fd961d",
+            "forkedFromId": null,
+            "preview": "visualisiere mir die workflows in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md mit mermaid statusdiagrammen",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778309193,
+            "updatedAt": 1778314822,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T08-46-33-019e0b7c-ddef-72e0-970d-7b4813fd961d.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "vscode",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "dd52efb8e1d62c6607a4f85eecb57e1227922943",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": "Visualisiere Workflows mit Mermaid",
+            "turns": []
+          },
+          {
+            "id": "019e0b7a-e799-7c33-8b7b-49debcf67fbf",
+            "sessionId": "019e0b7a-e799-7c33-8b7b-49debcf67fbf",
+            "forkedFromId": null,
+            "preview": "## Child Session Handoff\n\n- Parent: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md`\n- Child: `MD-E2E-2`\n- Child Spec: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-2 Local Mock Session Runner.md`\n- Child Index / Queue: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md` section `Child Index`\n- Handoff File: `_specs/child-session-handoffs/md-e2e-2-session-handoff.md`\n- Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`\n- Codex Session / Log: queued hardening evidence retained at `_specs/agent-delivery-session-launches/20260509T062536Z-md-e2e-2/evidence.json`; implementation launch is now allowed after this handoff is used.\n- Session Evidence: `_specs/agent-delivery-session-launches/20260509T062536Z-md-e2e-2/evidence.json`\n- Handoff Timestamp: 2026-05-09\n- Naechster Modus/Skill: `spec-change-delivery` for exactly `MD-E2E-2`.\n- Aktueller Verdict: IMPLEMENTATION READY.\n- Scope Summary: Implement the local mock session runner and `run-mock-e2e-checks.sh large/small/all` contract. The runner consumes accepted `MD-E2E-1` fixture/manifests/validator contracts and must produce large/small/all retained evidence, session state evidence, summary JSON and output assertions without live agents.\n- Non-Goals: No base fixture contract changes except an explicitly documented MD-E2E-1 compatibility fix; no legacy standard gate migration; no README/final docs sync; no live-agent/Codex execution; no network, Docker, Codex auth or manual-start dependency.\n- OpenSpec / Ledger: active proposal `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-2-local-runner/`.\n- Allowed Write-Set: `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-2 Local Mock Session Runner.md`; `_specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md`; `_specs/child-session-handoffs/md-e2e-2-session-handoff.md`; `openspec/changes/docworkflow-agent-mock-e2e-md-e2e-2-local-runner/**`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`; `tests/docworkflow-agent-delivery/e2e/mock-runner/**`; `tests/docworkflow-agent-delivery/e2e/validators/mock-e2e-summary.js`; `tests/docworkflow-agent-delivery/e2e/fixtures/mock-runner-negative/**`; `tests/docworkflow-agent-delivery/e2e/evidence/**` only for retained MD-E2E-2 implementation evidence; `tests/docworkflow-agent-delivery/mock-data/**` only for accepted MD-E2E-1 compatibility fixes explicitly justified in implementation evidence.\n- Shared / Read-only Files: `tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh`; `tests/docworkflow-agent-delivery/scripts/setup-fixture.sh`; `tests/docworkflow-agent-delivery/README.md`; `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md` until MD-E2E-3/MD-E2E-4 sync; accepted MD-E2E-1 archive; accepted DWT harnesses/evidence; KI-fuer-KMU and real product repositories.\n- Verification Commands: Preflight / inherited contract: `node --version`; `node tests/docworkflow-agent-delivery/e2e/validators/mock-manifest-schema.js tests/docworkflow-agent-delivery/mock-data`; `node tests/docworkflow-agent-delivery/e2e/validators/forbidden-real-fixture.js tests/docworkflow-agent-delivery/mock-data`; `openspec validate docworkflow-agent-mock-e2e-md-e2e-2-local-runner --strict`; `git diff --check`. Delivery Gate: `bash -n tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh large --keep`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh small --keep`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep`; `git diff --check`.\n- Required Closeout Evidence: retained `large`, `small` and `all` evidence roots; `mock-e2e-summary.json` for large and small; `aggregate-summary.json` for all; five `ML-C*` session files; `count.txt` and hash evidence; `small-direct-result.json` and hash evidence; forbidden-real-fixture validator evidence over generated run roots; negative evidence proving `manual_start_required`, permanent `queued`, `blocked`, `failed`, output mismatch and forbidden fixture states cannot pass.\n- Key State Machine Contract: Large path requires `parent-control` plus `ML-C1` through `ML-C5` in order; each child must end `ran-target` and `closed` before the next starts. Small path is `direct-delivery` only and must create no child-control artifacts.\n- Summary Contract: `schema_id: docworkflow-agent-delivery-mock-e2e-summary.v1`; positive large/small/all pass requires `evidence_truth: ran-target`, correct sizing decision, expected output validation, forbidden fixture pass, no external dependency use and no positive bad state.\n- Offene Blocker oder non-blocking Notes: None blocking. The future runner command cannot be executed before implementation because the script is the deliverable; the command path, selectors, flags, cwd and success criteria are frozen, and implementation must rehearse/run them before closeout.\n- Fresh Session empfohlen: Yes.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778309064,
+            "updatedAt": 1778313749,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T08-44-24-019e0b7a-e799-7c33-8b7b-49debcf67fbf.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "vscode",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "dd52efb8e1d62c6607a4f85eecb57e1227922943",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": "Testsuite: MD-E2E-2 Implement mock session runner",
+            "turns": []
+          },
+          {
+            "id": "019e0b6e-f259-77e2-9333-4b6f4a998b24",
+            "sessionId": "019e0b6e-f259-77e2-9333-4b6f4a998b24",
+            "forkedFromId": null,
+            "preview": "Arbeite im Repository:\n/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n\nNutze den Skill `child-spec-hardening`.\n\nZiel:\nHärten von MD-E2E-2 Local Mock Session Runner auf implementation-ready.\n\nInputs:\n- Parent Spec: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness.md\n- Orchestration Pack: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness Orchestration Pack.md\n- Child Spec: _specs/2026-05-09 DocWorkflow Agent Delivery Mock Data E2E Harness MD-E2E-2 Local Mock Session Runner.md\n- Handoff: _specs/child-session-handoffs/md-e2e-2-session-handoff.md\n- Queue Evidence: _specs/agent-delivery-session-launches/20260509T062536Z-md-e2e-2/evidence.json\n- Accepted MD-E2E-1 Archive: openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures/\n\nWichtig:\nMD-E2E-1 ist accepted. Die Mock-Fixtures, Manifeste und Validatoren sind Vertrag und sollen nur gelesen werden, außer MD-E2E-2 findet einen echten Compatibility-Fix, der im Child explizit begründet wird.\n\nNicht implementieren.\nNur MD-E2E-2 härten bis implementation-ready:\n- Runner state machine\n- `run-mock-e2e-checks.sh large/small/all`\n- Evidence directory layout\n- Summary JSON schema/assertions\n- Large/small output assertions\n- Failure/blocked states\n- Allowed Write-Set\n- Verification Commands\n- OpenSpec change proposal\n- Handoff/Child Index Sync",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778308280,
+            "updatedAt": 1778308762,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T08-31-20-019e0b6e-f259-77e2-9333-4b6f4a998b24.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "vscode",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "dd52efb8e1d62c6607a4f85eecb57e1227922943",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": "Testsuite: MD-E2E-2 härten",
+            "turns": []
+          }
+        ],
+        "nextCursor": "2026-05-09T08:31:20Z",
+        "backwardsCursor": "2026-05-09T14:30:00.779Z"
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.778Z",
+    "message": {
+      "direction": "client",
+      "method": "thread/list",
+      "id": 5,
+      "params": {
+        "limit": 10,
+        "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+        "archived": false,
+        "sourceKinds": [
+          "appServer"
+        ]
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.849Z",
+    "message": {
+      "direction": "server",
+      "id": 5,
+      "result": {
+        "data": [],
+        "nextCursor": null,
+        "backwardsCursor": null
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.849Z",
+    "message": {
+      "direction": "client",
+      "method": "thread/list",
+      "id": 6,
+      "params": {
+        "limit": 10,
+        "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+        "archived": false,
+        "sourceKinds": [
+          "exec"
+        ]
+      }
+    }
+  },
+  {
+    "at": "2026-05-09T17:15:06.928Z",
+    "message": {
+      "direction": "server",
+      "id": 6,
+      "result": {
+        "data": [
+          {
+            "id": "019e0c8d-432f-7dc3-9217-2fd2b007484e",
+            "sessionId": "019e0c8d-432f-7dc3-9217-2fd2b007484e",
+            "forkedFromId": null,
+            "preview": "Session Title: RSW-C5 spec-change-delivery - deliver rsw c5 in\n\nWir arbeiten in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs.\n\nStarte eine frische Agent-Delivery-Session aus folgendem persistierten Handoff.\n\nPflicht: Lies zuerst das Handoff, den Control Index / die Queue und das Target-Artefakt. Validiere, dass Target-ID, Target-Rolle, Handoff-Pfad, Control Index, aktueller Verdict, Target Workspace und Allowed Write-Set konsistent sind. Arbeite nur im erlaubten Write-Set. Wenn ein Gate stale, widerspruechlich oder unvollstaendig ist, stoppe mit NOT READY und persistiere Evidence statt zu implementieren.\n\n- Parent: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md\n- Target ID: RSW-C5\n- Target Role: child\n- Target Spec: child-specs/rsw-c5.md\n- Control Index / Queue: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md\n- Handoff File: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c5-handoff.md\n- Target Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Project CWD / App-Kontext: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Session Title: RSW-C5 spec-change-delivery - deliver rsw c5 in\n- Next Mode / Skill: spec-change-delivery\n- Requested Agent Provider: codex\n- Agent Adapter Status: supported; codex-cli\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C5 in a launcher-created child Codex session by appending exactly 5\\n after the RSW-C4 output, then persist RSW-C5 delivery and closeout evidence.\n- Non-Goals: Do not write values 1, 2, 3, or 4; do not repair predecessor children; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c5/**; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c5.json\n- Shared / Read-only Files: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c5.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c5-handoff.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c4.json; skills-repo/skills/spec-change-delivery/SKILL.md; skills-repo/tools/ValidateChildReadiness.cs\n- Verification Commands: dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C5 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c5-handoff.md; node -e \"const fs=require('fs'); if (fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt','utf8') !== '1\\n2\\n3\\n4\\n5\\n') process.exit(1);\"; node -e \"const fs=require('fs'); const s=JSON.parse(fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c5.json','utf8')); if (s.final_status !== 'ran-target' || s.closeout_status !== 'closed') process.exit(1);\"\n- Evidence / OpenSpec: direct smoke ledger only; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c5/delivery.json; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c5.json; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, allowed write-set, RSW-C4 closeout, or count prefix is inconsistent, stop with NOT READY and write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c5/not-ready.md.\n\n## Persisted Handoff\n\n# Agent Delivery Session Handoff: RSW-C5\n\n- Parent: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`\n- Target ID: RSW-C5\n- Target Role: child\n- Child Spec: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c5.md`\n- Child Index / Queue: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md`\n- Handoff File: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c5-handoff.md`\n- Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`\n- Next Mode / Skill: spec-change-delivery\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C5 in a launcher-created child Codex session by appending exactly `5\\n` after the RSW-C4 output, then persist RSW-C5 delivery and closeout evidence.\n- Non-Goals: Do not write values 1, 2, 3, or 4; do not repair predecessor children; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c5/**`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c5.json`\n- Shared / Read-only Files: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c5.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c5-handoff.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c4.json`; `skills-repo/skills/spec-change-delivery/SKILL.md`; `skills-repo/tools/ValidateChildReadiness.cs`\n- Verification Commands: `dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C5 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c5-handoff.md`; `node -e \"const fs=require('fs'); if (fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt','utf8') !== '1\\n2\\n3\\n4\\n5\\n') process.exit(1);\"`; `node -e \"const fs=require('fs'); const s=JSON.parse(fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c5.json','utf8')); if (s.final_status !== 'ran-target' || s.closeout_status !== 'closed') process.exit(1);\"`\n- Evidence / OpenSpec: direct smoke ledger only; write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c5/delivery.json`; write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c5.json`; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, allowed write-set, RSW-C4 closeout, or count prefix is inconsistent, stop with NOT READY and write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c5/not-ready.md`.\n\n## Required Child Behavior\n\n1. Read this handoff, the Child Index row, and the child spec before writing.\n2. Validate `closeout/children/rsw-c4.json` has `final_status: ran-target` and `closeout_status: closed`.\n3. Validate `count.txt` is exactly `1\\n2\\n3\\n4\\n` before delivery. If not, stop with NOT READY evidence.\n4. Append exactly `5\\n` to `count.txt`.\n5. Write `delivery-evidence/rsw-c5/delivery.json` with `target_id`, `final_status: ran-target`, `written_value: \"5\"`, and `observed_output: \"1\\n2\\n3\\n4\\n5\\n\"`.\n6. Write `closeout/children/rsw-c5.json` with `target_id`, `final_status: ran-target`, `closeout_status: closed`, and `output_status: pass`.\n7. Run the verification commands and report the result.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778327044,
+            "updatedAt": 1778327076,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T13-44-04-019e0c8d-432f-7dc3-9217-2fd2b007484e.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "exec",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "1dda82cf3a39303ffa64d7197114755860e6d3e4",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": null,
+            "turns": []
+          },
+          {
+            "id": "019e0c8b-5c7e-7be2-8ce0-934f575750f0",
+            "sessionId": "019e0c8b-5c7e-7be2-8ce0-934f575750f0",
+            "forkedFromId": null,
+            "preview": "Session Title: RSW-C4 spec-change-delivery - deliver rsw c4 in\n\nWir arbeiten in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs.\n\nStarte eine frische Agent-Delivery-Session aus folgendem persistierten Handoff.\n\nPflicht: Lies zuerst das Handoff, den Control Index / die Queue und das Target-Artefakt. Validiere, dass Target-ID, Target-Rolle, Handoff-Pfad, Control Index, aktueller Verdict, Target Workspace und Allowed Write-Set konsistent sind. Arbeite nur im erlaubten Write-Set. Wenn ein Gate stale, widerspruechlich oder unvollstaendig ist, stoppe mit NOT READY und persistiere Evidence statt zu implementieren.\n\n- Parent: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md\n- Target ID: RSW-C4\n- Target Role: child\n- Target Spec: child-specs/rsw-c4.md\n- Control Index / Queue: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md\n- Handoff File: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c4-handoff.md\n- Target Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Project CWD / App-Kontext: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Session Title: RSW-C4 spec-change-delivery - deliver rsw c4 in\n- Next Mode / Skill: spec-change-delivery\n- Requested Agent Provider: codex\n- Agent Adapter Status: supported; codex-cli\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C4 in a launcher-created child Codex session by appending exactly 4\\n after the RSW-C3 output, then persist RSW-C4 delivery and closeout evidence.\n- Non-Goals: Do not write values 1, 2, 3, or 5; do not repair predecessor children; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c4/**; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c4.json\n- Shared / Read-only Files: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c4.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c4-handoff.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c3.json; skills-repo/skills/spec-change-delivery/SKILL.md; skills-repo/tools/ValidateChildReadiness.cs\n- Verification Commands: dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C4 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c4-handoff.md; node -e \"const fs=require('fs'); if (fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt','utf8') !== '1\\n2\\n3\\n4\\n') process.exit(1);\"; node -e \"const fs=require('fs'); const s=JSON.parse(fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c4.json','utf8')); if (s.final_status !== 'ran-target' || s.closeout_status !== 'closed') process.exit(1);\"\n- Evidence / OpenSpec: direct smoke ledger only; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c4/delivery.json; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c4.json; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, allowed write-set, RSW-C3 closeout, or count prefix is inconsistent, stop with NOT READY and write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c4/not-ready.md.\n\n## Persisted Handoff\n\n# Agent Delivery Session Handoff: RSW-C4\n\n- Parent: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`\n- Target ID: RSW-C4\n- Target Role: child\n- Child Spec: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c4.md`\n- Child Index / Queue: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md`\n- Handoff File: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c4-handoff.md`\n- Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`\n- Next Mode / Skill: spec-change-delivery\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C4 in a launcher-created child Codex session by appending exactly `4\\n` after the RSW-C3 output, then persist RSW-C4 delivery and closeout evidence.\n- Non-Goals: Do not write values 1, 2, 3, or 5; do not repair predecessor children; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c4/**`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c4.json`\n- Shared / Read-only Files: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c4.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c4-handoff.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c3.json`; `skills-repo/skills/spec-change-delivery/SKILL.md`; `skills-repo/tools/ValidateChildReadiness.cs`\n- Verification Commands: `dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C4 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c4-handoff.md`; `node -e \"const fs=require('fs'); if (fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt','utf8') !== '1\\n2\\n3\\n4\\n') process.exit(1);\"`; `node -e \"const fs=require('fs'); const s=JSON.parse(fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c4.json','utf8')); if (s.final_status !== 'ran-target' || s.closeout_status !== 'closed') process.exit(1);\"`\n- Evidence / OpenSpec: direct smoke ledger only; write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c4/delivery.json`; write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c4.json`; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, allowed write-set, RSW-C3 closeout, or count prefix is inconsistent, stop with NOT READY and write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c4/not-ready.md`.\n\n## Required Child Behavior\n\n1. Read this handoff, the Child Index row, and the child spec before writing.\n2. Validate `closeout/children/rsw-c3.json` has `final_status: ran-target` and `closeout_status: closed`.\n3. Validate `count.txt` is exactly `1\\n2\\n3\\n` before delivery. If not, stop with NOT READY evidence.\n4. Append exactly `4\\n` to `count.txt`.\n5. Write `delivery-evidence/rsw-c4/delivery.json` with `target_id`, `final_status: ran-target`, `written_value: \"4\"`, and `observed_output: \"1\\n2\\n3\\n4\\n\"`.\n6. Write `closeout/children/rsw-c4.json` with `target_id`, `final_status: ran-target`, `closeout_status: closed`, and `output_status: pass`.\n7. Run the verification commands and report the result.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778326920,
+            "updatedAt": 1778327030,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T13-42-00-019e0c8b-5c7e-7be2-8ce0-934f575750f0.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "exec",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "1dda82cf3a39303ffa64d7197114755860e6d3e4",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": null,
+            "turns": []
+          },
+          {
+            "id": "019e0c89-c5b0-7ef1-b763-7770017c5709",
+            "sessionId": "019e0c89-c5b0-7ef1-b763-7770017c5709",
+            "forkedFromId": null,
+            "preview": "Session Title: RSW-C3 spec-change-delivery - deliver rsw c3 in\n\nWir arbeiten in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs.\n\nStarte eine frische Agent-Delivery-Session aus folgendem persistierten Handoff.\n\nPflicht: Lies zuerst das Handoff, den Control Index / die Queue und das Target-Artefakt. Validiere, dass Target-ID, Target-Rolle, Handoff-Pfad, Control Index, aktueller Verdict, Target Workspace und Allowed Write-Set konsistent sind. Arbeite nur im erlaubten Write-Set. Wenn ein Gate stale, widerspruechlich oder unvollstaendig ist, stoppe mit NOT READY und persistiere Evidence statt zu implementieren.\n\n- Parent: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md\n- Target ID: RSW-C3\n- Target Role: child\n- Target Spec: child-specs/rsw-c3.md\n- Control Index / Queue: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md\n- Handoff File: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c3-handoff.md\n- Target Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Project CWD / App-Kontext: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Session Title: RSW-C3 spec-change-delivery - deliver rsw c3 in\n- Next Mode / Skill: spec-change-delivery\n- Requested Agent Provider: codex\n- Agent Adapter Status: supported; codex-cli\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C3 in a launcher-created child Codex session by appending exactly 3\\n after the RSW-C2 output, then persist RSW-C3 delivery and closeout evidence.\n- Non-Goals: Do not write values 1, 2, 4, or 5; do not repair predecessor children; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c3/**; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c3.json\n- Shared / Read-only Files: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c3.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c3-handoff.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c2.json; skills-repo/skills/spec-change-delivery/SKILL.md; skills-repo/tools/ValidateChildReadiness.cs\n- Verification Commands: dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C3 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c3-handoff.md; node -e \"const fs=require('fs'); if (fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt','utf8') !== '1\\n2\\n3\\n') process.exit(1);\"; node -e \"const fs=require('fs'); const s=JSON.parse(fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c3.json','utf8')); if (s.final_status !== 'ran-target' || s.closeout_status !== 'closed') process.exit(1);\"\n- Evidence / OpenSpec: direct smoke ledger only; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c3/delivery.json; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c3.json; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, allowed write-set, RSW-C2 closeout, or count prefix is inconsistent, stop with NOT READY and write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c3/not-ready.md.\n\n## Persisted Handoff\n\n# Agent Delivery Session Handoff: RSW-C3\n\n- Parent: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`\n- Target ID: RSW-C3\n- Target Role: child\n- Child Spec: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c3.md`\n- Child Index / Queue: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md`\n- Handoff File: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c3-handoff.md`\n- Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`\n- Next Mode / Skill: spec-change-delivery\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C3 in a launcher-created child Codex session by appending exactly `3\\n` after the RSW-C2 output, then persist RSW-C3 delivery and closeout evidence.\n- Non-Goals: Do not write values 1, 2, 4, or 5; do not repair predecessor children; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c3/**`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c3.json`\n- Shared / Read-only Files: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c3.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c3-handoff.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c2.json`; `skills-repo/skills/spec-change-delivery/SKILL.md`; `skills-repo/tools/ValidateChildReadiness.cs`\n- Verification Commands: `dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C3 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c3-handoff.md`; `node -e \"const fs=require('fs'); if (fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt','utf8') !== '1\\n2\\n3\\n') process.exit(1);\"`; `node -e \"const fs=require('fs'); const s=JSON.parse(fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c3.json','utf8')); if (s.final_status !== 'ran-target' || s.closeout_status !== 'closed') process.exit(1);\"`\n- Evidence / OpenSpec: direct smoke ledger only; write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c3/delivery.json`; write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c3.json`; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, allowed write-set, RSW-C2 closeout, or count prefix is inconsistent, stop with NOT READY and write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c3/not-ready.md`.\n\n## Required Child Behavior\n\n1. Read this handoff, the Child Index row, and the child spec before writing.\n2. Validate `closeout/children/rsw-c2.json` has `final_status: ran-target` and `closeout_status: closed`.\n3. Validate `count.txt` is exactly `1\\n2\\n` before delivery. If not, stop with NOT READY evidence.\n4. Append exactly `3\\n` to `count.txt`.\n5. Write `delivery-evidence/rsw-c3/delivery.json` with `target_id`, `final_status: ran-target`, `written_value: \"3\"`, and `observed_output: \"1\\n2\\n3\\n\"`.\n6. Write `closeout/children/rsw-c3.json` with `target_id`, `final_status: ran-target`, `closeout_status: closed`, and `output_status: pass`.\n7. Run the verification commands and report the result.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778326816,
+            "updatedAt": 1778326903,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T13-40-16-019e0c89-c5b0-7ef1-b763-7770017c5709.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "exec",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "1dda82cf3a39303ffa64d7197114755860e6d3e4",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": null,
+            "turns": []
+          },
+          {
+            "id": "019e0c87-cbef-75c1-9e66-9460bf9c04a4",
+            "sessionId": "019e0c87-cbef-75c1-9e66-9460bf9c04a4",
+            "forkedFromId": null,
+            "preview": "Session Title: RSW-C2 spec-change-delivery - deliver rsw c2 in\n\nWir arbeiten in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs.\n\nStarte eine frische Agent-Delivery-Session aus folgendem persistierten Handoff.\n\nPflicht: Lies zuerst das Handoff, den Control Index / die Queue und das Target-Artefakt. Validiere, dass Target-ID, Target-Rolle, Handoff-Pfad, Control Index, aktueller Verdict, Target Workspace und Allowed Write-Set konsistent sind. Arbeite nur im erlaubten Write-Set. Wenn ein Gate stale, widerspruechlich oder unvollstaendig ist, stoppe mit NOT READY und persistiere Evidence statt zu implementieren.\n\n- Parent: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md\n- Target ID: RSW-C2\n- Target Role: child\n- Target Spec: child-specs/rsw-c2.md\n- Control Index / Queue: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md\n- Handoff File: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c2-handoff.md\n- Target Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Project CWD / App-Kontext: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Session Title: RSW-C2 spec-change-delivery - deliver rsw c2 in\n- Next Mode / Skill: spec-change-delivery\n- Requested Agent Provider: codex\n- Agent Adapter Status: supported; codex-cli\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C2 in a launcher-created child Codex session by appending exactly 2\\n after the RSW-C1 output, then persist RSW-C2 delivery and closeout evidence.\n- Non-Goals: Do not write values 1, 3, 4, or 5; do not repair RSW-C1; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c2/**; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c2.json\n- Shared / Read-only Files: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c2.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c2-handoff.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json; skills-repo/skills/spec-change-delivery/SKILL.md; skills-repo/tools/ValidateChildReadiness.cs\n- Verification Commands: dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C2 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c2-handoff.md; node -e \"const fs=require('fs'); if (fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt','utf8') !== '1\\n2\\n') process.exit(1);\"; node -e \"const fs=require('fs'); const s=JSON.parse(fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c2.json','utf8')); if (s.final_status !== 'ran-target' || s.closeout_status !== 'closed') process.exit(1);\"\n- Evidence / OpenSpec: direct smoke ledger only; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c2/delivery.json; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c2.json; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, allowed write-set, RSW-C1 closeout, or count prefix is inconsistent, stop with NOT READY and write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c2/not-ready.md.\n\n## Persisted Handoff\n\n# Agent Delivery Session Handoff: RSW-C2\n\n- Parent: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`\n- Target ID: RSW-C2\n- Target Role: child\n- Child Spec: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c2.md`\n- Child Index / Queue: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md`\n- Handoff File: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c2-handoff.md`\n- Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`\n- Next Mode / Skill: spec-change-delivery\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C2 in a launcher-created child Codex session by appending exactly `2\\n` after the RSW-C1 output, then persist RSW-C2 delivery and closeout evidence.\n- Non-Goals: Do not write values 1, 3, 4, or 5; do not repair RSW-C1; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c2/**`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c2.json`\n- Shared / Read-only Files: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c2.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c2-handoff.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json`; `skills-repo/skills/spec-change-delivery/SKILL.md`; `skills-repo/tools/ValidateChildReadiness.cs`\n- Verification Commands: `dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C2 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c2-handoff.md`; `node -e \"const fs=require('fs'); if (fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt','utf8') !== '1\\n2\\n') process.exit(1);\"`; `node -e \"const fs=require('fs'); const s=JSON.parse(fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c2.json','utf8')); if (s.final_status !== 'ran-target' || s.closeout_status !== 'closed') process.exit(1);\"`\n- Evidence / OpenSpec: direct smoke ledger only; write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c2/delivery.json`; write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c2.json`; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, allowed write-set, RSW-C1 closeout, or count prefix is inconsistent, stop with NOT READY and write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c2/not-ready.md`.\n\n## Required Child Behavior\n\n1. Read this handoff, the Child Index row, and the child spec before writing.\n2. Validate `closeout/children/rsw-c1.json` has `final_status: ran-target` and `closeout_status: closed`.\n3. Validate `count.txt` is exactly `1\\n` before delivery. If not, stop with NOT READY evidence.\n4. Append exactly `2\\n` to `count.txt`.\n5. Write `delivery-evidence/rsw-c2/delivery.json` with `target_id`, `final_status: ran-target`, `written_value: \"2\"`, and `observed_output: \"1\\n2\\n\"`.\n6. Write `closeout/children/rsw-c2.json` with `target_id`, `final_status: ran-target`, `closeout_status: closed`, and `output_status: pass`.\n7. Run the verification commands and report the result.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778326686,
+            "updatedAt": 1778326796,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T13-38-06-019e0c87-cbef-75c1-9e66-9460bf9c04a4.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "exec",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "1dda82cf3a39303ffa64d7197114755860e6d3e4",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": null,
+            "turns": []
+          },
+          {
+            "id": "019e0c86-281d-7450-a466-8475e79e233f",
+            "sessionId": "019e0c86-281d-7450-a466-8475e79e233f",
+            "forkedFromId": null,
+            "preview": "Session Title: RSW-C1 spec-change-delivery - deliver rsw c1 in\n\nWir arbeiten in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs.\n\nStarte eine frische Agent-Delivery-Session aus folgendem persistierten Handoff.\n\nPflicht: Lies zuerst das Handoff, den Control Index / die Queue und das Target-Artefakt. Validiere, dass Target-ID, Target-Rolle, Handoff-Pfad, Control Index, aktueller Verdict, Target Workspace und Allowed Write-Set konsistent sind. Arbeite nur im erlaubten Write-Set. Wenn ein Gate stale, widerspruechlich oder unvollstaendig ist, stoppe mit NOT READY und persistiere Evidence statt zu implementieren.\n\n- Parent: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md\n- Target ID: RSW-C1\n- Target Role: child\n- Target Spec: child-specs/rsw-c1.md\n- Control Index / Queue: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md\n- Handoff File: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md\n- Target Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Project CWD / App-Kontext: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Session Title: RSW-C1 spec-change-delivery - deliver rsw c1 in\n- Next Mode / Skill: spec-change-delivery\n- Requested Agent Provider: codex\n- Agent Adapter Status: supported; codex-cli\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C1 in a launcher-created child Codex session by writing exactly 1\\n to target/output/count.txt, then persist RSW-C1 delivery and closeout evidence.\n- Non-Goals: Do not write values 2, 3, 4, or 5; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/**; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json\n- Shared / Read-only Files: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c1.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md; skills-repo/skills/spec-change-delivery/SKILL.md; skills-repo/tools/ValidateChildReadiness.cs\n- Verification Commands: dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C1 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md; node -e \"const fs=require('fs'); if (fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt','utf8') !== '1\\n') process.exit(1);\"; node -e \"const fs=require('fs'); const s=JSON.parse(fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json','utf8')); if (s.final_status !== 'ran-target' || s.closeout_status !== 'closed') process.exit(1);\"\n- Evidence / OpenSpec: direct smoke ledger only; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/delivery.json; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, or allowed write-set is inconsistent, stop with NOT READY and write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/not-ready.md.\n\n## Persisted Handoff\n\n# Agent Delivery Session Handoff: RSW-C1\n\n- Parent: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`\n- Target ID: RSW-C1\n- Target Role: child\n- Child Spec: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c1.md`\n- Child Index / Queue: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md`\n- Handoff File: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md`\n- Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`\n- Next Mode / Skill: spec-change-delivery\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RSW-C1 in a launcher-created child Codex session by writing exactly `1\\n` to `target/output/count.txt`, then persist RSW-C1 delivery and closeout evidence.\n- Non-Goals: Do not write values 2, 3, 4, or 5; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/**`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json`\n- Shared / Read-only Files: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/rsw-c1.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md`; `skills-repo/skills/spec-change-delivery/SKILL.md`; `skills-repo/tools/ValidateChildReadiness.cs`\n- Verification Commands: `dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md --child RSW-C1 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/rsw-c1-handoff.md`; `node -e \"const fs=require('fs'); if (fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt','utf8') !== '1\\n') process.exit(1);\"`; `node -e \"const fs=require('fs'); const s=JSON.parse(fs.readFileSync('tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json','utf8')); if (s.final_status !== 'ran-target' || s.closeout_status !== 'closed') process.exit(1);\"`\n- Evidence / OpenSpec: direct smoke ledger only; write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/delivery.json`; write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/children/rsw-c1.json`; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, or allowed write-set is inconsistent, stop with NOT READY and write `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/rsw-c1/not-ready.md`.\n\n## Required Child Behavior\n\n1. Read this handoff, the Child Index row, and the child spec before writing.\n2. Validate that `count.txt` is absent or empty before delivery. If it is non-empty, stop with NOT READY evidence.\n3. Create `target/output/` if needed and write exactly `1\\n` to `count.txt`.\n4. Write `delivery-evidence/rsw-c1/delivery.json` with `target_id`, `final_status: ran-target`, `written_value: \"1\"`, and `observed_output: \"1\\n\"`.\n5. Write `closeout/children/rsw-c1.json` with `target_id`, `final_status: ran-target`, `closeout_status: closed`, and `output_status: pass`.\n6. Run the verification commands and report the result.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778326579,
+            "updatedAt": 1778326669,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T13-36-19-019e0c86-281d-7450-a466-8475e79e233f.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "exec",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "1dda82cf3a39303ffa64d7197114755860e6d3e4",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": null,
+            "turns": []
+          },
+          {
+            "id": "019e0c7e-8542-71b2-9e70-c27139ad09c1",
+            "sessionId": "019e0c7e-8542-71b2-9e70-c27139ad09c1",
+            "forkedFromId": null,
+            "preview": "Session Title: RSW-PARENT spec-orchestrator - start a fresh session\n\nWir arbeiten in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs.\n\nStarte eine frische Agent-Delivery-Session aus folgendem persistierten Handoff.\n\nPflicht: Lies zuerst das Handoff, den Control Index / die Queue und das Target-Artefakt. Validiere, dass Target-ID, Target-Rolle, Handoff-Pfad, Control Index, aktueller Verdict, Target Workspace und Allowed Write-Set konsistent sind. Arbeite nur im erlaubten Write-Set. Wenn ein Gate stale, widerspruechlich oder unvollstaendig ist, stoppe mit NOT READY und persistiere Evidence statt zu implementieren.\n\n- Parent: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md\n- Target ID: RSW-PARENT\n- Target Role: workflow-step\n- Target Spec: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md\n- Control Index / Queue: \n- Handoff File: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/parent-start-handoff.md\n- Target Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Project CWD / App-Kontext: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Session Title: RSW-PARENT spec-orchestrator - start a fresh session\n- Next Mode / Skill: spec-orchestrator\n- Requested Agent Provider: codex\n- Agent Adapter Status: supported; codex-cli\n- Current Verdict: READY FOR ORCHESTRATION\n- Scope Summary: Start a fresh-session Agent Delivery Workflow test from the parent input only; run spec-orchestrator, create child specs and child handoffs, then use AgentDeliverySessionLauncher.cs --mode launch to run child work across launcher-created child sessions before parent closeout validates final target/output/count.txt.\n- Non-Goals: Do not use run-mock-e2e-checks.sh; do not reuse accepted MD-E2E child specs as outputs; do not perform all hardening and delivery in this parent session; do not treat single-session simulation as success; do not edit unrelated specs or project docs.\n- Allowed Write-Set: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/**; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/**; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/**; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/**; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/**\n- Shared / Read-only Files: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/parent-start-handoff.md; skills-repo/skills/spec-orchestrator/SKILL.md; skills-repo/skills/child-spec-hardening/SKILL.md; skills-repo/skills/spec-change-delivery/SKILL.md; skills-repo/skills/spec-closeout/SKILL.md; skills-repo/tools/ValidateChildReadiness.cs; skills-repo/tools/AgentDeliverySessionLauncher.cs\n- Verification Commands: final launched-session verification must assert tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/summary.json has overall_status: pass; assert all five children have final_status: ran-target and closeout_status: closed; assert each child has launcher evidence under tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/; assert tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt equals 1\\n2\\n3\\n4\\n5\\n; run git diff --check\n- Evidence / OpenSpec: Launcher evidence under tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/; workflow evidence under tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/summary.json; direct smoke ledger only, no OpenSpec archive expected for this test.\n- Open Notes: This test must prove launcher-started fresh-session execution for parent and child work. If parent or child codex exec launch fails, report NOT READY with launcher evidence instead of continuing in the same session.\n\n## Persisted Handoff\n\n# Agent Delivery Session Handoff: RSW-PARENT\n\n- Parent: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`\n- Target ID: RSW-PARENT\n- Target Role: workflow-step\n- Target Spec: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`\n- Handoff File: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/parent-start-handoff.md`\n- Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`\n- Next Mode / Skill: spec-orchestrator\n- Current Verdict: READY FOR ORCHESTRATION\n- Scope Summary: Start a fresh-session Agent Delivery Workflow test from the parent input only; run `spec-orchestrator`, create child specs and child handoffs, then use `AgentDeliverySessionLauncher.cs --mode launch` to run child work across launcher-created child sessions before parent closeout validates final `target/output/count.txt`.\n- Non-Goals: Do not use `run-mock-e2e-checks.sh`; do not reuse accepted MD-E2E child specs as outputs; do not perform all hardening and delivery in this parent session; do not treat single-session simulation as success; do not edit unrelated specs or project docs.\n- Allowed Write-Set: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/orchestration-pack.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/child-specs/**`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/**`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/**`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/delivery-evidence/**`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/**`\n- Shared / Read-only Files: `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/handoffs/parent-start-handoff.md`; `skills-repo/skills/spec-orchestrator/SKILL.md`; `skills-repo/skills/child-spec-hardening/SKILL.md`; `skills-repo/skills/spec-change-delivery/SKILL.md`; `skills-repo/skills/spec-closeout/SKILL.md`; `skills-repo/tools/ValidateChildReadiness.cs`; `skills-repo/tools/AgentDeliverySessionLauncher.cs`\n- Verification Commands: final launched-session verification must assert `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/summary.json` has `overall_status: pass`; assert all five children have `final_status: ran-target` and `closeout_status: closed`; assert each child has launcher evidence under `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/`; assert `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/target/output/count.txt` equals `1\\n2\\n3\\n4\\n5\\n`; run `git diff --check`\n- Evidence / OpenSpec: Launcher evidence under `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/`; workflow evidence under `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/closeout/summary.json`; direct smoke ledger only, no OpenSpec archive expected for this test.\n- Open Notes: This test must prove launcher-started fresh-session execution for parent and child work. If parent or child `codex exec` launch fails, report `NOT READY` with launcher evidence instead of continuing in the same session.\n\n## Required Launched-Session Behavior\n\nThe parent launched session must:\n\n1. Read this handoff and the parent input.\n2. Use `spec-orchestrator` to create `orchestration-pack.md`, five child specs and five child handoffs under the allowed write-set.\n3. For each child, use `AgentDeliverySessionLauncher.cs --mode launch --agent codex` with that child handoff and an output root under `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/launches/`.\n4. Require child-session evidence before marking that child delivered.\n5. Close out only after all five child launch evidences and delivery evidences exist and `target/output/count.txt` is exact.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778326078,
+            "updatedAt": 1778327471,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T13-27-58-019e0c7e-8542-71b2-9e70-c27139ad09c1.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.129.0-alpha.15",
+            "source": "exec",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "1dda82cf3a39303ffa64d7197114755860e6d3e4",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": null,
+            "turns": []
+          },
+          {
+            "id": "019e077c-90ed-7e02-8aca-1a308edfaf00",
+            "sessionId": "019e077c-90ed-7e02-8aca-1a308edfaf00",
+            "forkedFromId": null,
+            "preview": "# DWT-S5 Runtime Temp-Repo Delivery Prompt\n\nUse these leading inputs:\n\n- repo root: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`\n- parent/master spec: `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md`\n- DWT-S5 child spec: `_specs/2026-05-08 DocWorkflow Agent Delivery Testsuite DWT-S5 L3 Runtime Temp-Repo Delivery Pilot.md`\n- Parent Child Index row: `_specs/2026-05-07 DocWorkflow Agent Delivery Testsuite.md` section `Delivery Orchestration Pack`, row `DWT-S5`\n- DWT-S5 handoff: `_specs/child-session-handoffs/dwt-s5-session-handoff.md`\n- retained DWT-S3 summary: `tests/docworkflow-agent-delivery/l2/single-child-closeout/evidence/2026-05-08-ran-target/dwt-s3-l2-summary.json`\n- retained DWT-S3 manifest: `tests/docworkflow-agent-delivery/l2/single-child-closeout/evidence/2026-05-08-ran-target/manifest.json`\n- synthetic fixture source: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/l3/runtime-temp-repo/fixtures/synthetic-runtime-repo`\n- generated synthetic temp repo target: `/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.FCJ0fe/target-repos/dwt-s5-synthetic-runtime-repo`\n\nApply `spec-change-delivery` only to DWT-S5 and only against the generated\nsynthetic temp repo target above.\n\nRequired output sections:\n\n- DWT-S5 Delivery Kickoff\n- Runtime Gates\n- Container Harness\n- DWT-S5 Closeout Sync\n- Parent Coverage\n- concise final status for deterministic parsing\n\nThe delivery kickoff must validate the current DWT-S5 handoff, implementation\nready verdict, concrete write-set, retained DWT-S3 predecessor proof and the\nsynthetic fixture manifest before any edit-like or runtime action. The supplied\ntarget temp repo already exists for this run; do not require it to be inside the\nagent working directory.\n\nRuntime gate output must name the generated temp repo as target, record local\nruntime and container/harness truth labels, and distinguish blocked auth,\nprovider, network or runtime prerequisites from pass evidence.\n\nCloseout output must preserve Parent Coverage for `DWT-PR3`, `DWT-PR4` and\n`DWT-PR5`, keep retained DWT-S3 evidence separate from DWT-S5 evidence, and\navoid authorizing any descendant child.\n\nEnd the response with this exact machine-readable line, preserving these keys:\n\n`FINAL_STATUS: child_id=DWT-S5;handoff_current=true;temp_repo_isolated=true;allowed_write_set_concrete=true;local_runtime_status=pass;container_harness_status=pass;descendant_release=false;forbidden_actions=false`\n\nForbidden:\n\n- describing, copying, building, testing, deploying or editing any original\n  runtime repository;\n- credential copying or secret values;\n- writing outside the generated temp repo or DWT-S5 harness write-set;\n- treating fallback artifacts, blocked auth or blocked runtime as accepted L3\n  runtime proof.",
+            "ephemeral": false,
+            "modelProvider": "openai",
+            "createdAt": 1778242064,
+            "updatedAt": 1778242165,
+            "status": {
+              "type": "notLoaded"
+            },
+            "path": "/Users/dh/.codex/sessions/2026/05/08/rollout-2026-05-08T14-07-44-019e077c-90ed-7e02-8aca-1a308edfaf00.jsonl",
+            "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+            "cliVersion": "0.125.0",
+            "source": "exec",
+            "threadSource": null,
+            "agentNickname": null,
+            "agentRole": null,
+            "gitInfo": {
+              "sha": "261025ba77be3fd57fa41ff33dbe6ffc8162e9a0",
+              "branch": "main",
+              "originUrl": "https://github.com/paradox123/shared-ai-docs.git"
+            },
+            "name": null,
+            "turns": []
+          }
+        ],
+        "nextCursor": null,
+        "backwardsCursor": "2026-05-09T11:44:04.910Z"
+      }
+    }
+  }
+]

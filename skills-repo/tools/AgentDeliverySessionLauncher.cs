@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization.Metadata;
 using System.Text.RegularExpressions;
 
@@ -26,7 +27,7 @@ return result.ExitCode;
 
 sealed class Launcher
 {
-    private const string SchemaVersion = "agent-delivery.session-launch.v1";
+    private const string SchemaVersion = "agent-delivery.session-launch.v2";
     private readonly Options options;
     private readonly List<string> blockers = [];
     private readonly List<string> warnings = [];
@@ -80,12 +81,33 @@ sealed class Launcher
         ValidateWriteSet("Handoff Allowed Write-Set", handoff.AllowedWriteSet);
         ValidateWorkspace(handoff.TargetWorkspace);
 
-        var agent = AgentContract.For(options.Agent!);
+        var adapter = AdapterContract.For(options.Adapter!);
+        var agent = AgentContract.For(options.Agent!, adapter);
         var command = BuildCodexCommand(handoff.TargetWorkspace, Path.Combine(runDir, "last-message.md"));
-        var sessionTitle = BuildSessionTitle(options.TargetId!, handoff.NextSkill, handoff.ScopeSummary);
+        var parentSpecAbbrevAndNumber = BuildParentSpecAbbrevAndNumber(options.TargetId!);
+        var sessionStage = BuildSessionStage(handoff.NextSkill);
+        var childSpecDesignation = BuildChildSpecDesignation(options.TargetId!, handoff.TargetSpec, handoff.ScopeSummary);
+        var sessionTitle = BuildSessionTitle(parentSpecAbbrevAndNumber, sessionStage, childSpecDesignation);
         ValidateSessionTitle(sessionTitle);
+        var initiatingProjectCwd = ResolveInitiatingProjectCwd(handoff);
+        var projectCwdSource = ResolveProjectCwdSource();
+        ValidateInitiatingProjectCwd(initiatingProjectCwd);
 
-        var request = BuildLaunchRequest(createdAt, runDir, handoff, handoffPath, controlIndexPath, sessionTitle, agent, command);
+        var request = BuildLaunchRequest(
+            createdAt,
+            runDir,
+            handoff,
+            handoffPath,
+            controlIndexPath,
+            sessionTitle,
+            parentSpecAbbrevAndNumber,
+            sessionStage,
+            childSpecDesignation,
+            initiatingProjectCwd,
+            projectCwdSource,
+            agent,
+            adapter,
+            command);
         if (controlRow is not null)
         {
             ApplyControlRow(request, controlRow);
@@ -119,11 +141,13 @@ sealed class Launcher
         ((Dictionary<string, object?>)request["evidence_paths"]!)["prompt"] = RelativeOrFull(promptPath);
         request["prompt_sha256"] = promptHash;
 
-        var status = DetermineInitialStatus(agent);
+        var status = DetermineInitialStatus(agent, adapter);
         request["status"] = status;
         ((Dictionary<string, object?>)request["mechanism"]!)["type"] = status == "queued" ? "queue" : "manual";
         ((Dictionary<string, object?>)request["mechanism"]!)["recommended_command"] = agent.IsCodex
-            ? $"codex exec --json -C {ShellQuote(handoff.TargetWorkspace)} --output-last-message {ShellQuote(Path.Combine(runDir, "last-message.md"))} - < {ShellQuote(promptPath)}"
+            ? adapter.Kind == AdapterKind.CodexAppServer
+                ? $"dotnet run skills-repo/tools/AgentDeliverySessionLauncher.cs -- --handoff {ShellQuote(handoffPath)} --target-id {ShellQuote(options.TargetId!)} --agent codex --mode launch --adapter codex-app-server --initiating-project-cwd {ShellQuote(initiatingProjectCwd)}"
+                : $"codex exec --json -C {ShellQuote(handoff.TargetWorkspace)} --output-last-message {ShellQuote(Path.Combine(runDir, "last-message.md"))} - < {ShellQuote(promptPath)}"
             : "Open a fresh session in the requested provider and paste start-prompt.md.";
 
         if (agent.IsCodex && (options.Mode is "launch" or "auto"))
@@ -143,7 +167,14 @@ sealed class Launcher
             }
             else
             {
-                await LaunchCodexAsync(request, prompt, runDir, handoff.TargetWorkspace, command);
+                if (adapter.Kind == AdapterKind.CodexAppServer)
+                {
+                    await LaunchCodexAppServerAsync(request, prompt, runDir, initiatingProjectCwd, sessionTitle);
+                }
+                else
+                {
+                    await LaunchCodexAsync(request, prompt, runDir, handoff.TargetWorkspace, command);
+                }
             }
         }
         else if (!agent.IsCodex)
@@ -421,15 +452,33 @@ sealed class Launcher
         }
     }
 
-    private Dictionary<string, object?> BuildLaunchRequest(DateTimeOffset createdAt, string runDir, Handoff handoff, string handoffPath, string? controlIndexPath, string sessionTitle, AgentContract agent, string[] command)
+    private Dictionary<string, object?> BuildLaunchRequest(
+        DateTimeOffset createdAt,
+        string runDir,
+        Handoff handoff,
+        string handoffPath,
+        string? controlIndexPath,
+        string sessionTitle,
+        string parentSpecAbbrevAndNumber,
+        string sessionStage,
+        string childSpecDesignation,
+        string initiatingProjectCwd,
+        string projectCwdSource,
+        AgentContract agent,
+        AdapterContract adapter,
+        string[] command)
     {
         var promptPath = Path.Combine(runDir, "start-prompt.md");
         var eventsPath = Path.Combine(runDir, "agent-events.jsonl");
         var lastMessagePath = Path.Combine(runDir, "last-message.md");
+        var transcriptPath = Path.Combine(runDir, "app-server-transcript.jsonl");
+        var executionChannel = adapter.ExecutionChannel;
         return new Dictionary<string, object?>
         {
             ["schema_version"] = SchemaVersion,
             ["status"] = "queued",
+            ["execution_channel"] = executionChannel,
+            ["adapter_id"] = adapter.AdapterId,
             ["created_at"] = createdAt.ToString("O"),
             ["started_at"] = null,
             ["completed_at"] = null,
@@ -439,8 +488,13 @@ sealed class Launcher
             ["target_spec"] = handoff.TargetSpec,
             ["control_index"] = controlIndexPath is null ? handoff.ControlIndex : RelativeOrFull(controlIndexPath),
             ["handoff_path"] = RelativeOrFull(handoffPath),
+            ["initiating_project_cwd"] = initiatingProjectCwd,
             ["target_workspace"] = StripBackticks(handoff.TargetWorkspace),
+            ["project_cwd_source"] = projectCwdSource,
             ["project_cwd"] = StripBackticks(handoff.TargetWorkspace),
+            ["parent_spec_abbrev_and_number"] = parentSpecAbbrevAndNumber,
+            ["session_stage"] = sessionStage,
+            ["child_spec_designation"] = childSpecDesignation,
             ["session_title"] = sessionTitle,
             ["next_skill"] = handoff.NextSkill,
             ["next_mode"] = handoff.NextMode,
@@ -471,9 +525,12 @@ sealed class Launcher
             ["evidence_paths"] = new Dictionary<string, object?>
             {
                 ["prompt"] = RelativeOrFull(promptPath),
-                ["events"] = options.Mode == "launch" && agent.IsCodex ? RelativeOrFull(eventsPath) : null,
-                ["last_message"] = options.Mode == "launch" && agent.IsCodex ? RelativeOrFull(lastMessagePath) : null,
+                ["events"] = options.Mode == "launch" && agent.IsCodex && adapter.Kind == AdapterKind.CodexExec ? RelativeOrFull(eventsPath) : null,
+                ["last_message"] = options.Mode == "launch" && agent.IsCodex && adapter.Kind == AdapterKind.CodexExec ? RelativeOrFull(lastMessagePath) : null,
+                ["app_server_transcript"] = adapter.Kind == AdapterKind.CodexAppServer ? RelativeOrFull(transcriptPath) : null,
             },
+            ["session_visibility"] = NewSessionVisibility(adapter),
+            ["app_server"] = NewAppServerEvidence(adapter, transcriptPath),
             ["codex_app"] = new Dictionary<string, object?>
             {
                 ["visibility_status"] = "not_applicable",
@@ -507,7 +564,8 @@ sealed class Launcher
         sb.AppendLine($"- Control Index / Queue: {request["control_index"]}");
         sb.AppendLine($"- Handoff File: {request["handoff_path"]}");
         sb.AppendLine($"- Target Repository / Working Directory: {request["target_workspace"]}");
-        sb.AppendLine($"- Project CWD / App-Kontext: {request["project_cwd"]}");
+        sb.AppendLine($"- Initiating Project CWD / App-Kontext: {request["initiating_project_cwd"]}");
+        sb.AppendLine($"- Target Workspace: {request["target_workspace"]}");
         sb.AppendLine($"- Session Title: {sessionTitle}");
         sb.AppendLine($"- Next Mode / Skill: {handoff.NextSkill}");
         sb.AppendLine($"- Requested Agent Provider: {options.Agent}");
@@ -528,7 +586,7 @@ sealed class Launcher
         return sb.ToString();
     }
 
-    private string DetermineInitialStatus(AgentContract agent)
+    private string DetermineInitialStatus(AgentContract agent, AdapterContract adapter)
     {
         if (!agent.IsCodex)
         {
@@ -590,6 +648,22 @@ sealed class Launcher
         request["exit_code"] = process.ExitCode;
         request["stderr_excerpt"] = Redact(stderr, 2000);
         request["status"] = process.ExitCode == 0 ? "launched" : "failed";
+        request["execution_channel"] = "headless_cli";
+        request["adapter_id"] = "codex-cli";
+        request["session_visibility"] = new Dictionary<string, object?>
+        {
+            ["class"] = "headless_cli_session",
+            ["visible_in_codex_app"] = false,
+            ["proof_status"] = "not_visible",
+            ["proof_method"] = "codex_exec_downgrade",
+            ["thread_id"] = null,
+            ["thread_source_observed"] = null,
+            ["source_kind_observed"] = null,
+            ["cwd_observed"] = null,
+            ["title_observed"] = null,
+            ["rollout_path"] = null,
+            ["sidebar_or_default_list_observed"] = false,
+        };
         ((Dictionary<string, object?>)request["evidence_paths"]!)["events"] = RelativeOrFull(eventsPath);
         ((Dictionary<string, object?>)request["evidence_paths"]!)["last_message"] = RelativeOrFull(Path.Combine(runDir, "last-message.md"));
 
@@ -598,6 +672,100 @@ sealed class Launcher
         if (Convert.ToString(codexApp["visibility_status"]) == "wrong_project")
         {
             warnings.Add("Codex thread metadata was found, but it points at a different project cwd.");
+        }
+    }
+
+    private async Task LaunchCodexAppServerAsync(Dictionary<string, object?> request, string prompt, string runDir, string initiatingProjectCwd, string sessionTitle)
+    {
+        var startedAt = DateTimeOffset.UtcNow;
+        request["started_at"] = startedAt.ToString("O");
+        request["status"] = "launched";
+        ((Dictionary<string, object?>)request["mechanism"]!)["type"] = "launch";
+        ((Dictionary<string, object?>)request["mechanism"]!)["actual_command"] = "codex app-server --listen stdio://";
+
+        var transcriptPath = Path.Combine(runDir, "app-server-transcript.jsonl");
+        var stderrPath = Path.Combine(runDir, "app-server-stderr.log");
+        try
+        {
+            var result = await CodexAppServerJsonRpcClient.LaunchVisibleSessionAsync(new AppServerLaunchRequest
+            {
+                Cwd = initiatingProjectCwd,
+                Prompt = prompt,
+                SessionTitle = sessionTitle,
+                TranscriptPath = transcriptPath,
+                StderrPath = stderrPath,
+                Timeout = TimeSpan.FromMinutes(options.AppServerTimeoutMinutes),
+            });
+
+            request["completed_at"] = DateTimeOffset.UtcNow.ToString("O");
+            request["app_server"] = new Dictionary<string, object?>
+            {
+                ["listen"] = "stdio://",
+                ["thread_start_observed"] = result.ThreadStartObserved,
+                ["thread_name_set_observed"] = result.ThreadNameSetObserved,
+                ["turn_start_observed"] = result.TurnStartObserved,
+                ["turn_completed_status"] = result.TurnCompletedStatus,
+                ["thread_list_observed"] = result.ThreadListObserved,
+                ["transcript_path"] = RelativeOrFull(transcriptPath),
+                ["stderr_path"] = File.Exists(stderrPath) ? RelativeOrFull(stderrPath) : null,
+            };
+            ((Dictionary<string, object?>)request["evidence_paths"]!)["app_server_transcript"] = RelativeOrFull(transcriptPath);
+
+            var verified = result.Visible &&
+                           SamePath(result.CwdObserved ?? "", initiatingProjectCwd) &&
+                           string.Equals(result.TitleObserved, sessionTitle, StringComparison.Ordinal) &&
+                           result.TurnCompletedStatus == "completed";
+            request["status"] = verified ? "launched" : "failed";
+            if (!verified)
+            {
+                blockers.Add("App-server launch completed, but visibility proof did not satisfy thread/list cwd/title/turn requirements.");
+            }
+
+            request["session_visibility"] = new Dictionary<string, object?>
+            {
+                ["class"] = verified ? "visible_codex_app_session" : "visibility_proof_failed",
+                ["visible_in_codex_app"] = verified,
+                ["proof_status"] = verified ? "verified" : "failed",
+                ["proof_method"] = "app_server_thread_list",
+                ["thread_id"] = result.ThreadId,
+                ["thread_source_observed"] = result.ThreadSourceObserved,
+                ["source_kind_observed"] = result.SourceKindObserved,
+                ["cwd_observed"] = result.CwdObserved,
+                ["title_observed"] = result.TitleObserved,
+                ["rollout_path"] = result.RolloutPath,
+                ["sidebar_or_default_list_observed"] = result.DefaultListObserved,
+            };
+        }
+        catch (Exception ex)
+        {
+            request["completed_at"] = DateTimeOffset.UtcNow.ToString("O");
+            request["status"] = "blocked";
+            blockers.Add("codex app-server adapter failed: " + Redact(ex.Message, 1000));
+            request["app_server"] = new Dictionary<string, object?>
+            {
+                ["listen"] = "stdio://",
+                ["thread_start_observed"] = false,
+                ["thread_name_set_observed"] = false,
+                ["turn_start_observed"] = false,
+                ["turn_completed_status"] = "blocked",
+                ["thread_list_observed"] = false,
+                ["transcript_path"] = File.Exists(transcriptPath) ? RelativeOrFull(transcriptPath) : null,
+                ["stderr_path"] = File.Exists(stderrPath) ? RelativeOrFull(stderrPath) : null,
+            };
+            request["session_visibility"] = new Dictionary<string, object?>
+            {
+                ["class"] = "app_server_blocked",
+                ["visible_in_codex_app"] = false,
+                ["proof_status"] = "blocked",
+                ["proof_method"] = "app_server_thread_list",
+                ["thread_id"] = null,
+                ["thread_source_observed"] = null,
+                ["source_kind_observed"] = null,
+                ["cwd_observed"] = null,
+                ["title_observed"] = null,
+                ["rollout_path"] = null,
+                ["sidebar_or_default_list_observed"] = false,
+            };
         }
     }
 
@@ -614,8 +782,8 @@ sealed class Launcher
             ["agent"] = new Dictionary<string, object?>
             {
                 ["requested_provider"] = options.Agent,
-                ["adapter_id"] = AgentContract.For(options.Agent!).AdapterId,
-                ["adapter_status"] = AgentContract.For(options.Agent!).AdapterStatus,
+                ["adapter_id"] = AdapterContract.For(options.Adapter!).AdapterId,
+                ["adapter_status"] = "blocked_before_adapter_selection",
             },
             ["secret_guard_blocked_prompt_persistence"] = secretBlocked,
             ["blockers"] = blockers.Select(b => Redact(b, 500)).ToArray(),
@@ -632,20 +800,140 @@ sealed class Launcher
         return copy;
     }
 
-    private static string BuildSessionTitle(string targetId, string nextSkill, string scope)
+    private static Dictionary<string, object?> NewSessionVisibility(AdapterContract adapter)
     {
-        var skill = ExtractSkill(nextSkill);
-        var summary = Regex.Replace(scope.ToLowerInvariant(), @"[^a-z0-9]+", " ").Trim();
-        var words = summary.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(4);
-        var suffix = string.Join(" ", words);
-        var title = $"{targetId} {skill} - {suffix}".Trim();
+        if (adapter.Kind == AdapterKind.CodexExec)
+        {
+            return new Dictionary<string, object?>
+            {
+                ["class"] = "queued_manual_start",
+                ["visible_in_codex_app"] = false,
+                ["proof_status"] = "not_visible",
+                ["proof_method"] = "not_applicable",
+                ["thread_id"] = null,
+                ["thread_source_observed"] = null,
+                ["source_kind_observed"] = null,
+                ["cwd_observed"] = null,
+                ["title_observed"] = null,
+                ["rollout_path"] = null,
+                ["sidebar_or_default_list_observed"] = false,
+            };
+        }
+
+        return new Dictionary<string, object?>
+        {
+            ["class"] = "pending_app_server_visibility",
+            ["visible_in_codex_app"] = false,
+            ["proof_status"] = "pending",
+            ["proof_method"] = "app_server_thread_list",
+            ["thread_id"] = null,
+            ["thread_source_observed"] = null,
+            ["source_kind_observed"] = null,
+            ["cwd_observed"] = null,
+            ["title_observed"] = null,
+            ["rollout_path"] = null,
+            ["sidebar_or_default_list_observed"] = false,
+        };
+    }
+
+    private static Dictionary<string, object?> NewAppServerEvidence(AdapterContract adapter, string transcriptPath)
+    {
+        return new Dictionary<string, object?>
+        {
+            ["listen"] = "stdio://",
+            ["thread_start_observed"] = false,
+            ["thread_name_set_observed"] = false,
+            ["turn_start_observed"] = false,
+            ["turn_completed_status"] = "not_started",
+            ["thread_list_observed"] = false,
+            ["transcript_path"] = adapter.Kind == AdapterKind.CodexAppServer ? RelativeOrFull(transcriptPath) : null,
+        };
+    }
+
+    private static string BuildSessionTitle(string parentSpecAbbrevAndNumber, string sessionStage, string childSpecDesignation)
+    {
+        var title = $"{parentSpecAbbrevAndNumber}: {sessionStage} - {childSpecDesignation}".Trim();
         return title.Length <= 80 ? title : title[..80].Trim();
     }
 
-    private static string ExtractSkill(string value)
+    private static string BuildParentSpecAbbrevAndNumber(string targetId)
     {
-        var match = Regex.Match(value, @"spec-[a-z-]+|child-spec-hardening|spec-orchestrator|agent-delivery-retro-review", RegexOptions.IgnoreCase);
-        return match.Success ? match.Value : value.Split(';', ',').First().Trim();
+        var match = Regex.Match(targetId, @"^(?<prefix>[A-Z][A-Z0-9-]*?)-S\d+$", RegexOptions.IgnoreCase);
+        if (match.Success)
+        {
+            return match.Groups["prefix"].Value.ToUpperInvariant() + "-1";
+        }
+
+        return targetId.ToUpperInvariant();
+    }
+
+    private static string BuildSessionStage(string nextSkill)
+    {
+        if (nextSkill.Contains("child-spec-hardening", StringComparison.OrdinalIgnoreCase))
+        {
+            return "Hardening";
+        }
+
+        return "Implementation";
+    }
+
+    private static string BuildChildSpecDesignation(string targetId, string targetSpec, string scope)
+    {
+        var raw = Path.GetFileNameWithoutExtension(StripMarkdownPath(targetSpec));
+        var index = raw.IndexOf(targetId, StringComparison.OrdinalIgnoreCase);
+        if (index >= 0)
+        {
+            raw = raw[index..];
+        }
+        else
+        {
+            raw = $"{targetId} {scope}";
+        }
+
+        raw = Regex.Replace(raw, @"^\d{4}-\d{2}-\d{2}\s+", "");
+        raw = Regex.Replace(raw, @"\s+", " ").Trim();
+        raw = Regex.Replace(raw, @"\bVisible App\b", "Visible-App", RegexOptions.IgnoreCase);
+        return raw;
+    }
+
+    private string ResolveInitiatingProjectCwd(Handoff handoff)
+    {
+        if (!string.IsNullOrWhiteSpace(options.InitiatingProjectCwd))
+        {
+            return Path.GetFullPath(options.InitiatingProjectCwd);
+        }
+
+        var cwd = Directory.GetCurrentDirectory();
+        if (Path.IsPathRooted(cwd) && Directory.Exists(cwd))
+        {
+            return Path.GetFullPath(cwd);
+        }
+
+        return Path.GetFullPath(StripBackticks(handoff.TargetWorkspace));
+    }
+
+    private string ResolveProjectCwdSource()
+    {
+        if (!string.IsNullOrWhiteSpace(options.InitiatingProjectCwd))
+        {
+            return "explicit_cli_arg";
+        }
+
+        return "current_thread_cwd";
+    }
+
+    private void ValidateInitiatingProjectCwd(string initiatingProjectCwd)
+    {
+        if (!Path.IsPathRooted(initiatingProjectCwd))
+        {
+            blockers.Add($"Initiating project cwd must be absolute: {initiatingProjectCwd}");
+            return;
+        }
+
+        if (!Directory.Exists(initiatingProjectCwd))
+        {
+            blockers.Add($"Initiating project cwd does not exist: {initiatingProjectCwd}");
+        }
     }
 
     private static string[] BuildCodexCommand(string workspace, string lastMessagePath) =>
@@ -792,6 +1080,9 @@ sealed class Options
     public string? TargetId { get; private init; }
     public string? Agent { get; private init; } = "codex";
     public string Mode { get; private init; } = "queue";
+    public string? Adapter { get; private init; } = "codex-exec";
+    public string? InitiatingProjectCwd { get; private init; }
+    public int AppServerTimeoutMinutes { get; private init; } = 30;
     public string? OutPath { get; private init; }
     public string? ControlIndexPath { get; private init; }
     public bool DryRun { get; private init; }
@@ -799,7 +1090,9 @@ sealed class Options
     public bool IsValid => !string.IsNullOrWhiteSpace(HandoffPath) &&
                            !string.IsNullOrWhiteSpace(TargetId) &&
                            !string.IsNullOrWhiteSpace(Agent) &&
-                           (Mode is "queue" or "launch" or "auto");
+                           (Mode is "queue" or "launch" or "auto") &&
+                           (Adapter is "codex-exec" or "codex-app-server") &&
+                           AppServerTimeoutMinutes > 0;
 
     public static Options Parse(string[] args)
     {
@@ -807,6 +1100,9 @@ sealed class Options
         string? targetId = null;
         string? agent = "codex";
         string mode = "queue";
+        string adapter = "codex-exec";
+        string? initiatingProjectCwd = null;
+        var appServerTimeoutMinutes = 30;
         string? outPath = null;
         string? controlIndex = null;
         var dryRun = false;
@@ -832,6 +1128,16 @@ sealed class Options
                 case "--mode" when i + 1 < args.Length:
                     mode = args[++i];
                     break;
+                case "--adapter" when i + 1 < args.Length:
+                    adapter = args[++i];
+                    break;
+                case "--initiating-project-cwd" when i + 1 < args.Length:
+                    initiatingProjectCwd = args[++i];
+                    break;
+                case "--app-server-timeout-minutes" when i + 1 < args.Length && int.TryParse(args[i + 1], out var timeout):
+                    appServerTimeoutMinutes = timeout;
+                    i++;
+                    break;
                 case "--out" when i + 1 < args.Length:
                     outPath = args[++i];
                     break;
@@ -850,6 +1156,9 @@ sealed class Options
             TargetId = targetId,
             Agent = agent,
             Mode = mode,
+            Adapter = adapter,
+            InitiatingProjectCwd = initiatingProjectCwd,
+            AppServerTimeoutMinutes = appServerTimeoutMinutes,
             OutPath = outPath,
             ControlIndexPath = controlIndex,
             DryRun = dryRun,
@@ -867,6 +1176,12 @@ sealed class Options
           --agent <provider>        Agent provider. Defaults to codex. v1 launches only codex.
           --mode <queue|launch|auto>
                                    queue writes launch artifacts, launch executes supported adapter, auto launches when possible.
+          --adapter <codex-exec|codex-app-server>
+                                   codex-exec is headless CLI evidence; codex-app-server starts a visible app-server-backed thread.
+          --initiating-project-cwd <path>
+                                   CWD used for app-server thread/start. Defaults to the current directory.
+          --app-server-timeout-minutes <minutes>
+                                   Timeout for app-server turn completion. Defaults to 30.
           --control-index <path>    Override Control Index path from the handoff.
           --out <dir>               Output root. Defaults to _specs/agent-delivery-session-launches.
           --dry-run                 Persist launch command/evidence without executing codex.
@@ -917,6 +1232,13 @@ sealed class Handoff
 
         foreach (var line in lines)
         {
+            if (currentMultiline is not null && Regex.IsMatch(line, @"^\s{2,}[-*]\s+"))
+            {
+                if (multiline.Length > 0) multiline.Append("; ");
+                multiline.Append(Regex.Replace(line.Trim(), @"^[-*]\s*", ""));
+                continue;
+            }
+
             var bullet = Regex.Match(line, @"^\s*[-*]\s*(?<label>[^:]+):\s*(?<value>.*)$");
             if (bullet.Success)
             {
@@ -932,12 +1254,6 @@ sealed class Handoff
                     fields[label] = value;
                 }
                 continue;
-            }
-
-            if (currentMultiline is not null && Regex.IsMatch(line, @"^\s{2,}[-*]\s+"))
-            {
-                if (multiline.Length > 0) multiline.Append("; ");
-                multiline.Append(Regex.Replace(line.Trim(), @"^[-*]\s*", ""));
             }
         }
         Flush();
@@ -969,15 +1285,39 @@ sealed class Handoff
     private static string Clean(string value) => value.Replace("`", "").Trim();
 }
 
+enum AdapterKind
+{
+    CodexExec,
+    CodexAppServer
+}
+
+sealed record AdapterContract(AdapterKind Kind, string AdapterId, string ExecutionChannel, string CommandContract)
+{
+    public static AdapterContract For(string adapter) =>
+        adapter switch
+        {
+            "codex-app-server" => new AdapterContract(
+                AdapterKind.CodexAppServer,
+                "codex-app-server",
+                "app_server",
+                "codex app-server --listen stdio:// using initialize, thread/start, thread/name/set, turn/start, thread/list"),
+            _ => new AdapterContract(
+                AdapterKind.CodexExec,
+                "codex-cli",
+                "headless_cli",
+                "codex exec --json -C <target_workspace> --output-last-message <last-message.md> -"),
+        };
+}
+
 sealed record AgentContract(string Provider, string AdapterId, string AdapterStatus, string LaunchCapability, string CommandContract)
 {
     public bool IsCodex => Provider.Equals("codex", StringComparison.OrdinalIgnoreCase);
 
-    public static AgentContract For(string provider)
+    public static AgentContract For(string provider, AdapterContract adapter)
     {
         if (provider.Equals("codex", StringComparison.OrdinalIgnoreCase))
         {
-            return new AgentContract("codex", "codex-cli", "supported", "launch", "codex exec --json -C <target_workspace> --output-last-message <last-message.md> -");
+            return new AgentContract("codex", adapter.AdapterId, "supported", "launch", adapter.CommandContract);
         }
 
         return new AgentContract(provider, "unsupported", "unsupported", "none", "No v1 adapter implemented for this provider.");
@@ -1053,6 +1393,365 @@ sealed class MarkdownTable
         if (trimmed.StartsWith("|")) trimmed = trimmed[1..];
         if (trimmed.EndsWith("|")) trimmed = trimmed[..^1];
         return trimmed.Split('|').Select(c => c.Trim()).ToArray();
+    }
+}
+
+sealed class AppServerLaunchRequest
+{
+    public required string Cwd { get; init; }
+    public required string Prompt { get; init; }
+    public required string SessionTitle { get; init; }
+    public required string TranscriptPath { get; init; }
+    public required string StderrPath { get; init; }
+    public required TimeSpan Timeout { get; init; }
+}
+
+sealed class AppServerLaunchResult
+{
+    public string? ThreadId { get; set; }
+    public string? ThreadSourceObserved { get; set; }
+    public string? SourceKindObserved { get; set; }
+    public string? CwdObserved { get; set; }
+    public string? TitleObserved { get; set; }
+    public string? RolloutPath { get; set; }
+    public string TurnCompletedStatus { get; set; } = "not_started";
+    public bool ThreadStartObserved { get; set; }
+    public bool ThreadNameSetObserved { get; set; }
+    public bool TurnStartObserved { get; set; }
+    public bool ThreadListObserved { get; set; }
+    public bool DefaultListObserved { get; set; }
+    public bool Visible => !string.IsNullOrWhiteSpace(ThreadId) &&
+                           !string.IsNullOrWhiteSpace(CwdObserved) &&
+                           !string.IsNullOrWhiteSpace(TitleObserved) &&
+                           !string.IsNullOrWhiteSpace(RolloutPath) &&
+                           string.Equals(SourceKindObserved, "vscode", StringComparison.OrdinalIgnoreCase);
+}
+
+static class CodexAppServerJsonRpcClient
+{
+    public static async Task<AppServerLaunchResult> LaunchVisibleSessionAsync(AppServerLaunchRequest request)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(request.TranscriptPath)!);
+        await using var transcript = new StreamWriter(request.TranscriptPath, false, TextEncoding.Utf8NoBom);
+        var stderr = new StringBuilder();
+        var pending = new Dictionary<int, TaskCompletionSource<JsonNode?>>();
+        var pendingLock = new object();
+        var completed = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        using var process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "codex",
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                ArgumentList = { "app-server", "--listen", "stdio://" }
+            },
+            EnableRaisingEvents = true
+        };
+
+        if (!process.Start())
+        {
+            throw new InvalidOperationException("Could not start codex app-server process.");
+        }
+
+        var stderrTask = Task.Run(async () =>
+        {
+            while (await process.StandardError.ReadLineAsync() is { } line)
+            {
+                stderr.AppendLine(RedactStatic(line, 2000));
+            }
+        });
+
+        var readTask = Task.Run(async () =>
+        {
+            while (await process.StandardOutput.ReadLineAsync() is { } line)
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                {
+                    continue;
+                }
+
+                JsonNode? node = null;
+                try
+                {
+                    node = JsonNode.Parse(line);
+                }
+                catch
+                {
+                    continue;
+                }
+
+                if (node is null)
+                {
+                    continue;
+                }
+
+                await WriteTranscriptLineAsync(transcript, "server", node);
+                var id = node?["id"]?.GetValue<int?>();
+                if (id is not null)
+                {
+                    TaskCompletionSource<JsonNode?>? tcs = null;
+                    lock (pendingLock)
+                    {
+                        if (pending.TryGetValue(id.Value, out tcs))
+                        {
+                            pending.Remove(id.Value);
+                        }
+                    }
+                    tcs?.TrySetResult(node);
+                }
+
+                var method = node?["method"]?.GetValue<string>();
+                if (method == "turn/completed")
+                {
+                    var status = node?["params"]?["turn"]?["status"]?.GetValue<string>();
+                    completed.TrySetResult(status);
+                }
+            }
+        });
+
+        using var timeout = new CancellationTokenSource(request.Timeout);
+        timeout.Token.Register(() => completed.TrySetCanceled(timeout.Token));
+
+        async Task<JsonNode?> SendRequestAsync(int id, string method, JsonObject parameters)
+        {
+            var outbound = new JsonObject
+            {
+                ["jsonrpc"] = "2.0",
+                ["id"] = id,
+                ["method"] = method,
+                ["params"] = parameters,
+            };
+            var tcs = new TaskCompletionSource<JsonNode?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            lock (pendingLock)
+            {
+                pending[id] = tcs;
+            }
+
+            await WriteTranscriptLineAsync(transcript, "client", outbound);
+            await process.StandardInput.WriteLineAsync(outbound.ToJsonString());
+            await process.StandardInput.FlushAsync();
+            var response = await tcs.Task.WaitAsync(timeout.Token);
+            ThrowIfError(response, method);
+            return response;
+        }
+
+        async Task SendNotificationAsync(string method, JsonObject parameters)
+        {
+            var outbound = new JsonObject
+            {
+                ["jsonrpc"] = "2.0",
+                ["method"] = method,
+                ["params"] = parameters,
+            };
+            await WriteTranscriptLineAsync(transcript, "client", outbound);
+            await process.StandardInput.WriteLineAsync(outbound.ToJsonString());
+            await process.StandardInput.FlushAsync();
+        }
+
+        try
+        {
+            await SendRequestAsync(1, "initialize", new JsonObject
+            {
+                ["clientInfo"] = new JsonObject
+                {
+                    ["name"] = "agent_delivery_session_launcher",
+                    ["title"] = "Agent Delivery Session Launcher",
+                    ["version"] = "0.1.0",
+                },
+                ["capabilities"] = new JsonObject
+                {
+                    ["experimentalApi"] = true,
+                    ["optOutNotificationMethods"] = new JsonArray(),
+                },
+            });
+            await SendNotificationAsync("initialized", new JsonObject());
+
+            var result = new AppServerLaunchResult();
+            var threadStart = await SendRequestAsync(2, "thread/start", new JsonObject
+            {
+                ["cwd"] = request.Cwd,
+                ["approvalPolicy"] = "never",
+                ["sandbox"] = "workspace-write",
+                ["ephemeral"] = false,
+                ["sessionStartSource"] = "startup",
+                ["threadSource"] = "user",
+            });
+            result.ThreadStartObserved = true;
+            result.ThreadId = threadStart?["result"]?["thread"]?["id"]?.GetValue<string>();
+            if (string.IsNullOrWhiteSpace(result.ThreadId))
+            {
+                throw new InvalidOperationException("thread/start response did not include result.thread.id.");
+            }
+
+            await SendRequestAsync(3, "thread/name/set", new JsonObject
+            {
+                ["threadId"] = result.ThreadId,
+                ["name"] = request.SessionTitle,
+            });
+            result.ThreadNameSetObserved = true;
+
+            await SendRequestAsync(4, "turn/start", new JsonObject
+            {
+                ["threadId"] = result.ThreadId,
+                ["cwd"] = request.Cwd,
+                ["approvalPolicy"] = "never",
+                ["sandboxPolicy"] = new JsonObject
+                {
+                    ["type"] = "workspaceWrite",
+                    ["writableRoots"] = new JsonArray(request.Cwd),
+                    ["networkAccess"] = true,
+                    ["excludeTmpdirEnvVar"] = false,
+                    ["excludeSlashTmp"] = false,
+                },
+                ["input"] = new JsonArray(new JsonObject
+                {
+                    ["type"] = "text",
+                    ["text"] = request.Prompt,
+                    ["text_elements"] = new JsonArray(),
+                }),
+            });
+            result.TurnStartObserved = true;
+            result.TurnCompletedStatus = await completed.Task.WaitAsync(timeout.Token) ?? "unknown";
+
+            var defaultList = await SendRequestAsync(5, "thread/list", new JsonObject
+            {
+                ["limit"] = 20,
+                ["cwd"] = request.Cwd,
+                ["archived"] = false,
+            });
+            result.ThreadListObserved = true;
+            ApplyThreadListHit(result, defaultList, request);
+            result.DefaultListObserved = !string.IsNullOrWhiteSpace(result.CwdObserved);
+
+            var sourceList = await SendRequestAsync(6, "thread/list", new JsonObject
+            {
+                ["limit"] = 20,
+                ["cwd"] = request.Cwd,
+                ["sourceKinds"] = new JsonArray("vscode"),
+                ["archived"] = false,
+            });
+            ApplyThreadListHit(result, sourceList, request);
+            return result;
+        }
+        finally
+        {
+            try
+            {
+                if (!process.HasExited)
+                {
+                    process.Kill(entireProcessTree: true);
+                }
+            }
+            catch
+            {
+                // Best-effort cleanup for the per-run app-server process.
+            }
+
+            await readTask.WaitAsync(TimeSpan.FromSeconds(2)).ContinueWith(_ => { });
+            await stderrTask.WaitAsync(TimeSpan.FromSeconds(2)).ContinueWith(_ => { });
+            if (stderr.Length > 0)
+            {
+                await File.WriteAllTextAsync(request.StderrPath, stderr.ToString(), TextEncoding.Utf8NoBom);
+            }
+        }
+    }
+
+    private static void ApplyThreadListHit(AppServerLaunchResult result, JsonNode? response, AppServerLaunchRequest request)
+    {
+        var data = response?["result"]?["data"]?.AsArray();
+        if (data is null)
+        {
+            return;
+        }
+
+        foreach (var thread in data)
+        {
+            if (thread?["id"]?.GetValue<string>() != result.ThreadId)
+            {
+                continue;
+            }
+
+            result.CwdObserved ??= thread?["cwd"]?.GetValue<string>();
+            result.TitleObserved ??= thread?["name"]?.GetValue<string>();
+            result.RolloutPath ??= thread?["path"]?.GetValue<string>();
+            result.ThreadSourceObserved ??= thread?["source"]?.GetValue<string>();
+            result.SourceKindObserved ??= thread?["source"]?.GetValue<string>();
+            if (string.Equals(result.CwdObserved, request.Cwd, StringComparison.Ordinal) &&
+                string.Equals(result.TitleObserved, request.SessionTitle, StringComparison.Ordinal))
+            {
+                return;
+            }
+        }
+    }
+
+    private static void ThrowIfError(JsonNode? response, string method)
+    {
+        var error = response?["error"];
+        if (error is not null)
+        {
+            throw new InvalidOperationException($"{method} failed: {error.ToJsonString()}");
+        }
+    }
+
+    private static async Task WriteTranscriptLineAsync(StreamWriter writer, string direction, JsonNode node)
+    {
+        var copy = node.DeepClone();
+        RedactPromptLikePayload(copy);
+        var line = new JsonObject
+        {
+            ["at"] = DateTimeOffset.UtcNow.ToString("O"),
+            ["direction"] = direction,
+            ["id"] = copy?["id"]?.DeepClone(),
+            ["method"] = copy?["method"]?.DeepClone(),
+            ["message"] = copy,
+        };
+        await writer.WriteLineAsync(line.ToJsonString());
+        await writer.FlushAsync();
+    }
+
+    private static void RedactPromptLikePayload(JsonNode? node)
+    {
+        if (node is JsonObject obj)
+        {
+            foreach (var property in obj.ToList())
+            {
+                if (property.Value is null)
+                {
+                    continue;
+                }
+
+                if ((property.Key.Equals("text", StringComparison.OrdinalIgnoreCase) ||
+                     property.Key.Equals("preview", StringComparison.OrdinalIgnoreCase) ||
+                     property.Key.Equals("aggregated_output", StringComparison.OrdinalIgnoreCase)) &&
+                    property.Value is JsonValue value &&
+                    value.TryGetValue<string>(out var text) &&
+                    text.Length > 240)
+                {
+                    obj[property.Key] = text[..240] + " [TRUNCATED]";
+                    continue;
+                }
+
+                RedactPromptLikePayload(property.Value);
+            }
+        }
+        else if (node is JsonArray array)
+        {
+            foreach (var item in array)
+            {
+                RedactPromptLikePayload(item);
+            }
+        }
+    }
+
+    private static string RedactStatic(string text, int maxLength)
+    {
+        text = Regex.Replace(text, @"Authorization:\s*Bearer\s+[^\s]+", "Authorization: Bearer [REDACTED]", RegexOptions.IgnoreCase);
+        text = Regex.Replace(text, @"(?i)(password|token|secret|api[_-]?key)\s*=\s*[^\s;]+", "$1=[REDACTED]");
+        return text.Length <= maxLength ? text : text[..maxLength];
     }
 }
 

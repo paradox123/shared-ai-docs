@@ -1,0 +1,63 @@
+{
+  "cases": [
+    {
+      "id": "S1-APP-SERVER-POSITIVE",
+      "expect": "pass",
+      "evidence": "positive/evidence.json",
+      "prompt": "positive/start-prompt.md",
+      "transcript": "positive/app-server-transcript.jsonl"
+    },
+    {
+      "id": "S1-EXEC-HEADLESS-NEGATIVE",
+      "expect": "headless",
+      "evidence": "headless/evidence.json"
+    },
+    {
+      "id": "S1-EMPTY-THREAD-NOT-VISIBLE",
+      "expect": "fail-positive-contract",
+      "evidence": "empty-thread/evidence.json",
+      "prompt": "empty-thread/start-prompt.md",
+      "transcript": "empty-thread/app-server-transcript.jsonl"
+    },
+    {
+      "id": "S1-WRONG-TITLE",
+      "expect": "fail-positive-contract",
+      "evidence": "wrong-title/evidence.json",
+      "prompt": "wrong-title/start-prompt.md",
+      "transcript": "wrong-title/app-server-transcript.jsonl"
+    },
+    {
+      "id": "S1-WRONG-CWD",
+      "expect": "fail-positive-contract",
+      "evidence": "wrong-cwd/evidence.json",
+      "prompt": "wrong-cwd/start-prompt.md",
+      "transcript": "wrong-cwd/app-server-transcript.jsonl"
+    },
+    {
+      "id": "S1-TURN-FAILED",
+      "expect": "fail-positive-contract",
+      "evidence": "turn-failed/evidence.json",
+      "prompt": "turn-failed/start-prompt.md",
+      "transcript": "turn-failed/app-server-transcript.jsonl"
+    },
+    {
+      "id": "S1-PROMPT-HASH-MISMATCH",
+      "expect": "fail-positive-contract",
+      "evidence": "prompt-hash-mismatch/evidence.json",
+      "prompt": "prompt-hash-mismatch/start-prompt.md",
+      "transcript": "prompt-hash-mismatch/app-server-transcript.jsonl"
+    },
+    {
+      "id": "S1-APP-SERVER-UNAVAILABLE",
+      "expect": "fail-positive-contract",
+      "evidence": "app-server-unavailable/evidence.json",
+      "prompt": "app-server-unavailable/start-prompt.md",
+      "transcript": "app-server-unavailable/app-server-transcript.jsonl"
+    },
+    {
+      "id": "S1-SECRET-REDACTION",
+      "expect": "blocked-secret",
+      "evidence": "secret-redaction/evidence.json"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "status": "turn_completed",
+  "threadId": "019e0dbc-5439-7df3-8849-847f29a93ce0",
+  "completedStatus": "completed",
+  "hitDefault": {
+    "id": "019e0dbc-5439-7df3-8849-847f29a93ce0",
+    "source": "vscode",
+    "threadSource": null,
+    "name": "APP-SERVER-SPIKE 20260509T171506Z",
+    "preview": "Reply exactly APP_SERVER_SPIKE_OK. Do not inspect files, do not run commands, and do not edit files.",
+    "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T19-15-06-019e0dbc-5439-7df3-8849-847f29a93ce0.jsonl",
+    "status": {
+      "type": "idle"
+    }
+  },
+  "hitVscode": {
+    "id": "019e0dbc-5439-7df3-8849-847f29a93ce0",
+    "source": "vscode",
+    "threadSource": null,
+    "name": "APP-SERVER-SPIKE 20260509T171506Z",
+    "preview": "Reply exactly APP_SERVER_SPIKE_OK. Do not inspect files, do not run commands, and do not edit files.",
+    "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T19-15-06-019e0dbc-5439-7df3-8849-847f29a93ce0.jsonl",
+    "status": {
+      "type": "idle"
+    }
+  },
+  "hitSearch": null
+}

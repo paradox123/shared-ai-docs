@@ -1,0 +1,61 @@
+{
+  "schema_version": "agent-delivery.gate-evidence.v1",
+  "target_id": "ADV-CAS-S1",
+  "session_title": "ADV-CAS-1: Implementation - ADV-CAS-S1 Visible Adapter Smoke",
+  "verdict": "SUPERSEDED",
+  "reason": "Initial gate check was captured before the launcher evidence files were present and before the smoke handoff was synchronized. Kept as historical diagnostic evidence; superseded by repaired smoke artifacts and subsequent launch evidence.",
+  "checked_paths": {
+    "handoff_file": "_specs/agent-delivery-session-launches/adv-cas-s1-visible-smoke-handoff.md",
+    "declared_target_spec": "_specs/agent-delivery-session-launches/ADV-CAS-S1 Visible Adapter Smoke.md",
+    "declared_launch_run_dir": "_specs/agent-delivery-session-launches/20260510T081130Z-adv-cas-s1",
+    "parent_spec": "_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md",
+    "shared_adapter_spec": "_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S1 Launcher Visible App Adapter.md"
+  },
+  "findings": [
+    {
+      "id": "missing_target_spec",
+      "severity": "blocking",
+      "detail": "The handoff and start prompt declare _specs/agent-delivery-session-launches/ADV-CAS-S1 Visible Adapter Smoke.md as Target Spec, but no file exists at that path."
+    },
+    {
+      "id": "missing_control_index",
+      "severity": "blocking",
+      "detail": "The kickoff prompt leaves Control Index / Queue blank, so the Target ID, Target Role, handoff pointer, verdict, workspace and allowed write-set cannot be reconciled against a current control row."
+    },
+    {
+      "id": "incomplete_launch_evidence",
+      "severity": "blocking",
+      "detail": "The matching run directory contains start-prompt.md and app-server-transcript.jsonl only; launch-request.json and evidence.json are absent, so spec-change-delivery rule 28a cannot confirm a current queued/launched transition for the same Target ID and handoff path."
+    },
+    {
+      "id": "target_role_contract_mismatch",
+      "severity": "blocking",
+      "detail": "The kickoff declares Target Role workflow-step, while the hardened ADV-CAS-S1 adapter spec defines S1 as a child implementation target. The smoke handoff itself has no Target Role field to resolve this discrepancy."
+    }
+  ],
+  "observed_app_server_trace": {
+    "transcript_path": "_specs/agent-delivery-session-launches/20260510T081130Z-adv-cas-s1/app-server-transcript.jsonl",
+    "method_order_observed": [
+      "initialize",
+      "thread/start",
+      "thread/name/set",
+      "turn/start"
+    ],
+    "thread_id_observed": "019e10f1-037f-7d43-8431-74beddf8d0ee",
+    "cwd_observed": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "title_observed": "ADV-CAS-1: Implementation - ADV-CAS-S1 Visible Adapter Smoke",
+    "note": "This trace supports that an app-server turn was started, but the kickoff gate failed before the smoke could be treated as delivery evidence."
+  },
+  "allowed_write_set_respected": [
+    "_specs/agent-delivery-session-launches/**"
+  ],
+  "changed_files": [
+    "_specs/agent-delivery-session-launches/20260510T081130Z-adv-cas-s1/not-ready-gate-evidence.json"
+  ],
+  "superseded_by": {
+    "run_dir": "_specs/agent-delivery-session-launches/20260510T082007Z-adv-cas-s1",
+    "evidence": "_specs/agent-delivery-session-launches/20260510T082007Z-adv-cas-s1/evidence.json",
+    "launch_request": "_specs/agent-delivery-session-launches/20260510T082007Z-adv-cas-s1/launch-request.json",
+    "summary": "Fresh launcher run after handoff/control-index repair produced app-server visible smoke evidence with completed turn and exact final response."
+  }
+}

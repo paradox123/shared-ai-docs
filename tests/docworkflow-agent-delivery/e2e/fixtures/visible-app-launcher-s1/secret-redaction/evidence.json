@@ -1,0 +1,13 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "blocked",
+  "target_id": "ADV-CAS-S1",
+  "secret_guard_blocked_prompt_persistence": true,
+  "session_visibility": {
+    "class": "secret_blocked_before_launch",
+    "visible_in_codex_app": false
+  },
+  "blockers": [
+    "Secret-like content detected before prompt persistence: OpenAI API key"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "status": "thread_started",
+  "initialize": {
+    "userAgent": "Codex Desktop/0.129.0-alpha.15 (Mac OS 26.3.1; arm64) dumb (agent_delivery_visible_session_spike; 0.1.0)",
+    "codexHome": "/Users/dh/.codex",
+    "platformFamily": "unix",
+    "platformOs": "macos"
+  },
+  "thread_id": "019e0dbc-5439-7df3-8849-847f29a93ce0",
+  "session_id": "019e0dbc-5439-7df3-8849-847f29a93ce0",
+  "title_requested": "APP-SERVER-SPIKE 20260509T171506Z",
+  "thread_start_source_observed": "vscode",
+  "thread_start_path": "/Users/dh/.codex/sessions/2026/05/09/rollout-2026-05-09T19-15-06-019e0dbc-5439-7df3-8849-847f29a93ce0.jsonl",
+  "thread_start_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "thread_start_ephemeral": false,
+  "default_list_hit": null,
+  "app_server_list_hit": null,
+  "exec_list_hit": null,
+  "proof_limits": "This proves app-server thread creation/listing via protocol, not human-observed desktop sidebar rendering."
+}

@@ -1,0 +1,4 @@
+{"direction":"client","method":"initialize","id":1}
+{"direction":"client","method":"thread/start","id":2}
+{"direction":"client","method":"thread/name/set","id":3}
+{"direction":"client","method":"thread/list","id":4}
