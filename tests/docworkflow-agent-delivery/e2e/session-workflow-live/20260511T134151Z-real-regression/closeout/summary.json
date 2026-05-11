@@ -1,0 +1,69 @@
+{
+  "target_id": "RADW-PARENT",
+  "overall_status": "pass",
+  "final_status": "closed",
+  "closeout_status": "closed",
+  "parent": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/input/test-parent.md",
+  "orchestration_pack": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/orchestration-pack.md",
+  "child_spec_count": 5,
+  "child_handoff_count": 5,
+  "parent_launcher_evidence": {
+    "status": "present",
+    "path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/launches/parent/20260511T134245Z-radw-parent/start-prompt.md"
+  },
+  "children": [
+    {
+      "target_id": "RADW-C1",
+      "launcher_status": "launched",
+      "launcher_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/launches/children/20260511T134913Z-radw-c1/evidence.json",
+      "delivery_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/delivery-evidence/radw-c1/delivery.json",
+      "closeout": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/closeout/children/radw-c1.json",
+      "final_status": "ran-target",
+      "closeout_status": "closed"
+    },
+    {
+      "target_id": "RADW-C2",
+      "launcher_status": "launched",
+      "launcher_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/launches/children/20260511T135154Z-radw-c2/evidence.json",
+      "delivery_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/delivery-evidence/radw-c2/delivery.json",
+      "closeout": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/closeout/children/radw-c2.json",
+      "final_status": "ran-target",
+      "closeout_status": "closed"
+    },
+    {
+      "target_id": "RADW-C3",
+      "launcher_status": "launched",
+      "launcher_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/launches/children/20260511T135439Z-radw-c3/evidence.json",
+      "delivery_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/delivery-evidence/radw-c3/delivery.json",
+      "closeout": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/closeout/children/radw-c3.json",
+      "final_status": "ran-target",
+      "closeout_status": "closed"
+    },
+    {
+      "target_id": "RADW-C4",
+      "launcher_status": "launched",
+      "launcher_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/launches/children/20260511T135706Z-radw-c4/evidence.json",
+      "delivery_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/delivery-evidence/radw-c4/delivery.json",
+      "closeout": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/closeout/children/radw-c4.json",
+      "final_status": "ran-target",
+      "closeout_status": "closed"
+    },
+    {
+      "target_id": "RADW-C5",
+      "launcher_status": "launched",
+      "launcher_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/launches/children/20260511T135931Z-radw-c5/evidence.json",
+      "delivery_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/delivery-evidence/radw-c5/delivery.json",
+      "closeout": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/closeout/children/radw-c5.json",
+      "final_status": "ran-target",
+      "closeout_status": "closed"
+    }
+  ],
+  "final_output_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T134151Z-real-regression/target/output/count.txt",
+  "final_output": "1\n2\n3\n4\n5\n",
+  "verification": {
+    "readiness_validated_before_launch": true,
+    "child_launcher_evidence_status": "pass",
+    "child_closeout_status": "pass",
+    "final_output_status": "pass"
+  }
+}

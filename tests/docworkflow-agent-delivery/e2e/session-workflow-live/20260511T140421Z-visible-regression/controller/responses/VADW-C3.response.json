@@ -1,0 +1,24 @@
+{
+  "schema_id": "agent-delivery.visible-session-controller.response.v1",
+  "request_id": "VADW-C3",
+  "request_sha256": "e3fdbd939ec00b04ec80637850e7583784783e1f26d64319b1075bf4f3af2d1b",
+  "status": "launched",
+  "created_at": "2026-05-11T14:22:42.0184060\u002B00:00",
+  "completed_at": "2026-05-11T14:22:42.0184080\u002B00:00",
+  "launcher": {
+    "command": "\u0027dotnet\u0027 \u0027run\u0027 \u0027skills-repo/tools/AgentDeliverySessionLauncher.cs\u0027 \u0027--\u0027 \u0027--handoff\u0027 \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/handoffs/vadw-c3-handoff.md\u0027 \u0027--target-id\u0027 \u0027VADW-C3\u0027 \u0027--mode\u0027 \u0027launch\u0027 \u0027--agent\u0027 \u0027codex\u0027 \u0027--adapter\u0027 \u0027codex-app-server\u0027 \u0027--initiating-project-cwd\u0027 \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0027 \u0027--out\u0027 \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/children\u0027 \u0027--app-server-timeout-minutes\u0027 \u002730\u0027 \u0027--app-server-request-timeout-seconds\u0027 \u002760\u0027",
+    "exit_code": 0,
+    "run_dir": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/children/20260511T142013Z-vadw-c3",
+    "evidence_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/children/20260511T142013Z-vadw-c3/evidence.json",
+    "transcript_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/children/20260511T142013Z-vadw-c3/app-server-transcript.jsonl",
+    "stderr_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/children/20260511T142013Z-vadw-c3/app-server-stderr.log"
+  },
+  "output_assertion": {
+    "path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/target/output/count.txt",
+    "expected_text": "1\n2\n3\n",
+    "actual_text_sha256": "14c5e74c4b96ccef41cd94db73a9ec3348038ac094feca4fd897cecffa07cdae",
+    "status": "pass"
+  },
+  "blockers": [],
+  "warnings": []
+}

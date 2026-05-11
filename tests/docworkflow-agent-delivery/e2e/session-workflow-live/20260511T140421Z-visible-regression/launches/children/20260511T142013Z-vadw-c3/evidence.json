@@ -1,0 +1,118 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "launched",
+  "execution_channel": "app_server",
+  "adapter_id": "codex-app-server",
+  "created_at": "2026-05-11T14:20:13.2774540\u002B00:00",
+  "started_at": "2026-05-11T14:20:13.5650570\u002B00:00",
+  "completed_at": "2026-05-11T14:22:42.0025020\u002B00:00",
+  "parent": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/input/test-parent.md",
+  "target_id": "VADW-C3",
+  "target_role": "child",
+  "target_spec": "child-specs/vadw-c3.md",
+  "control_index": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/orchestration-pack.md",
+  "handoff_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/handoffs/vadw-c3-handoff.md",
+  "initiating_project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "target_workspace": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "project_cwd_source": "explicit_cli_arg",
+  "project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "parent_spec_abbrev_and_number": "VADW-C3",
+  "session_stage": "Implementation",
+  "child_spec_designation": "vadw-c3",
+  "session_title": "VADW-C3: Implementation - vadw-c3",
+  "next_skill": "spec-change-delivery",
+  "next_mode": "spec-change-delivery",
+  "current_verdict": "IMPLEMENTATION READY",
+  "scope_summary": "Run as visible controller-launched child VADW-C3. Verify count.txt is 1\\n2\\n, update it to exact text 1\\n2\\n3\\n, then write VADW-C3 closeout evidence.",
+  "non_goals": [
+    "Do not edit parent orchestration files, child specs, handoffs, controller requests, controller responses, launcher code, or unrelated repository files",
+    "do not use run-mock-e2e-checks.sh",
+    "do not launch child sessions directly",
+    "do not perform work for VADW-C1, VADW-C2, VADW-C4, or VADW-C5."
+  ],
+  "allowed_write_set": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/target/output/count.txt",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/delivery-evidence/vadw-c3/**",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/closeout/vadw-c3-closeout.json"
+  ],
+  "read_only_files": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/input/test-parent.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/orchestration-pack.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/child-specs/vadw-c3.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/handoffs/vadw-c3-handoff.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/closeout/vadw-c2-closeout.json",
+    "skills-repo/tools/ValidateChildReadiness.cs",
+    "skills-repo/tools/AgentDeliverySessionLauncher.cs"
+  ],
+  "verification": [
+    "dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/orchestration-pack.md --child VADW-C3 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/handoffs/vadw-c3-handoff.md",
+    "assert output text equals 1\\n2\\n3\\n"
+  ],
+  "evidence_openspec": [
+    "direct regression ledger: closeout/vadw-c3-closeout.json",
+    "delivery-evidence/vadw-c3/",
+    "closeout/vadw-c3-closeout.json",
+    "controller response controller/responses/VADW-C3.response.json"
+  ],
+  "open_notes": [
+    "Fresh visible child session required. If predecessor output is not exactly 1\\n2\\n, stop with NOT READY evidence inside the allowed child closeout path."
+  ],
+  "fresh_session_required": true,
+  "agent": {
+    "requested_provider": "codex",
+    "adapter_id": "codex-app-server",
+    "adapter_status": "supported",
+    "launch_capability": "launch",
+    "command_contract": "codex app-server --listen stdio:// using initialize, thread/start, thread/name/set, turn/start, thread/list"
+  },
+  "mechanism": {
+    "type": "launch",
+    "recommended_command": "dotnet run skills-repo/tools/AgentDeliverySessionLauncher.cs -- --handoff \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/handoffs/vadw-c3-handoff.md\u0027 --target-id \u0027VADW-C3\u0027 --agent codex --mode launch --adapter codex-app-server --initiating-project-cwd \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0027",
+    "actual_command": "codex app-server --listen stdio://",
+    "adapter_available": true
+  },
+  "evidence_paths": {
+    "prompt": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/children/20260511T142013Z-vadw-c3/start-prompt.md",
+    "events": null,
+    "last_message": null,
+    "app_server_transcript": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/children/20260511T142013Z-vadw-c3/app-server-transcript.jsonl"
+  },
+  "session_visibility": {
+    "class": "visible_codex_app_session",
+    "visible_in_codex_app": true,
+    "proof_status": "verified",
+    "proof_method": "app_server_thread_list",
+    "thread_id": "019e1768-f019-72f3-9472-75a8aae67892",
+    "thread_source_observed": "vscode",
+    "source_kind_observed": "vscode",
+    "cwd_observed": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "title_observed": "VADW-C3: Implementation - vadw-c3",
+    "rollout_path": "/Users/dh/.codex/sessions/2026/05/11/rollout-2026-05-11T16-20-13-019e1768-f019-72f3-9472-75a8aae67892.jsonl",
+    "sidebar_or_default_list_observed": true
+  },
+  "app_server": {
+    "listen": "stdio://",
+    "request_timeout_seconds": 60,
+    "thread_start_observed": true,
+    "thread_name_set_observed": true,
+    "turn_start_observed": true,
+    "turn_completed_status": "completed",
+    "thread_list_observed": true,
+    "transcript_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/children/20260511T142013Z-vadw-c3/app-server-transcript.jsonl",
+    "stderr_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/children/20260511T142013Z-vadw-c3/app-server-stderr.log"
+  },
+  "codex_app": {
+    "visibility_status": "not_applicable",
+    "thread_id": null,
+    "rollout_path": null,
+    "thread_source": null,
+    "thread_cwd_observed": null,
+    "thread_title_observed": null,
+    "title_status": "not_applicable"
+  },
+  "blockers": [],
+  "warnings": [
+    "ValidateChildReadiness.cs passed: Child readiness validation passed for VADW-C3."
+  ],
+  "prompt_sha256": "c628108b7c4180d84bffa6534aa83dc800428454f65523c51bf794dfb7ed7a3b"
+}

@@ -1,0 +1,20 @@
+{
+  "schema_id": "agent-delivery.visible-session-controller.request.v1",
+  "request_id": "VADW-C3",
+  "requested_by": {
+    "target_id": "VADW-PARENT"
+  },
+  "child": {
+    "target_id": "VADW-C3",
+    "handoff_path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/handoffs/vadw-c3-handoff.md",
+    "expected_output_path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/target/output/count.txt",
+    "expected_output_text": "1\n2\n3\n"
+  },
+  "launch": {
+    "agent": "codex",
+    "adapter": "codex-app-server",
+    "mode": "launch",
+    "initiating_project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "out": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/children"
+  }
+}

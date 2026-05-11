@@ -117,6 +117,12 @@ Regeln:
 
 Ein Agent-Delivery-Handoff ist die fachliche Startquelle; die technische Uebergabe in eine frische Agent-Session wird durch Agent Delivery Session Launch/Queue Evidence belegt. Standardort ist `_specs/agent-delivery-session-launches/`. Das lokale Tool `skills-repo/tools/AgentDeliverySessionLauncher.cs` erzeugt pro Run mindestens `launch-request.json`, `start-prompt.md` und `evidence.json`; bei Launch koennen `agent-events.jsonl` und `last-message.md` dazukommen.
 
+Rollen:
+1. `AgentDeliverySessionLauncher.cs` ist das Basiswerkzeug fuer genau eine Session. Er erzeugt Queue-/Launch-Evidence und kann mit `--adapter codex-app-server` eine sichtbare Codex-App-Session starten.
+2. `AgentDeliveryVisibleSessionController.cs` ist der externe Orchestrator fuer sichtbare Parent/Child-Session-Ketten. Er startet Parent und Children ausserhalb des Parent-Turns, konsumiert Child-Requests und ruft den Launcher pro Session auf.
+3. Wenn ein Workflow eine controller-backed sichtbare Multi-Session-Kette verlangt, z. B. `MD-E2E-5`, darf die Parent-Session keine Child-Launcher-, `codex app-server`- oder sonstige Child-Start-Kommandos ausfuehren. Die Child-Starts muessen ueber den externen Controller laufen.
+4. Skills duerfen fuer normale Handoff-/Queue-Arbeit direkt den Launcher verlangen. Fuer controller-backed sichtbare Multi-Session-Arbeit muessen sie Controller-Evidence, Controller-Requests/Responses und die darunterliegenden Launcher-Evidence zusammen pruefen.
+
 Statuswerte:
 1. `launched`: ein implementierter Adapter hat eine frische Session wirklich gestartet.
 2. `queued`: ein vollstaendiger maschinenlesbarer Startauftrag und Prompt liegen fuer einen implementierten Queue-/Launch-Adapter vor.

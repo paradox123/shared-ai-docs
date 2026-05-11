@@ -1,0 +1,121 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "launched",
+  "execution_channel": "app_server",
+  "adapter_id": "codex-app-server",
+  "created_at": "2026-05-11T14:05:23.1115790\u002B00:00",
+  "started_at": "2026-05-11T14:05:23.2350200\u002B00:00",
+  "completed_at": "2026-05-11T14:14:33.7194140\u002B00:00",
+  "parent": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/input/test-parent.md",
+  "target_id": "VADW-PARENT",
+  "target_role": "workflow-step",
+  "target_spec": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/input/test-parent.md",
+  "control_index": "",
+  "handoff_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/handoffs/parent-handoff.md",
+  "initiating_project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "target_workspace": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "project_cwd_source": "explicit_cli_arg",
+  "project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "parent_spec_abbrev_and_number": "VADW-PARENT",
+  "session_stage": "Implementation",
+  "child_spec_designation": "VADW-PARENT Start a fresh visible regression test of the Agent Delivery Workflow from the parent input only. Create an orchestration pack, exactly five child specs, exactly five child handoffs, then publish exactly five controller requests so AgentDeliveryVisibleSessionController.cs launches each child through AgentDeliverySessionLauncher.cs --mode launch --agent codex --adapter codex-app-server.",
+  "session_title": "VADW-PARENT: Implementation - VADW-PARENT Start a fresh visible regression test",
+  "next_skill": "spec-orchestrator plus controller-request-publication",
+  "next_mode": "spec-orchestrator plus controller-request-publication",
+  "current_verdict": "READY FOR ORCHESTRATION",
+  "scope_summary": "Start a fresh visible regression test of the Agent Delivery Workflow from the parent input only. Create an orchestration pack, exactly five child specs, exactly five child handoffs, then publish exactly five controller requests so AgentDeliveryVisibleSessionController.cs launches each child through AgentDeliverySessionLauncher.cs --mode launch --agent codex --adapter codex-app-server.",
+  "non_goals": [
+    "Do not use run-mock-e2e-checks.sh",
+    "do not reuse prior accepted output",
+    "do not launch child sessions directly from shell in the parent session",
+    "do not perform child delivery inside this parent session",
+    "do not treat queue-only, mock, manual, headless CLI, or single-session work as success",
+    "do not edit unrelated repository files."
+  ],
+  "allowed_write_set": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/orchestration-pack.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/child-specs/**",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/handoffs/**",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/controller/requests/**",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/closeout/summary.json"
+  ],
+  "read_only_files": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/input/test-parent.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/handoffs/parent-handoff.md",
+    "skills-repo/skills/spec-orchestrator/SKILL.md",
+    "skills-repo/tools/ValidateChildReadiness.cs",
+    "skills-repo/tools/AgentDeliverySessionLauncher.cs",
+    "skills-repo/tools/AgentDeliveryVisibleSessionController.cs"
+  ],
+  "verification": [
+    "validate every child handoff with dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/orchestration-pack.md --child \u003CVADW-CN\u003E --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/handoffs/vadw-cN-handoff.md before publishing that child request",
+    "controller validates child output after launch",
+    "final controller-side verification must assert parent and child evidence is visible, every child closeout JSON has final_status: ran-target and closeout_status: closed, controller/controller-summary.json has status: pass, closeout/summary.json has overall_status: pass, and target/output/count.txt equals 1\\n2\\n3\\n4\\n5\\n",
+    "run git diff --check"
+  ],
+  "evidence_openspec": [
+    "Visible launcher evidence under tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/",
+    "workflow evidence under tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/delivery-evidence/ and tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/closeout/",
+    "controller evidence under tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/controller/",
+    "direct regression ledger only, no OpenSpec archive expected."
+  ],
+  "open_notes": [
+    "This run is intentionally visible. The parent session is launched by AgentDeliveryVisibleSessionController.cs, which delegates to AgentDeliverySessionLauncher.cs --adapter codex-app-server. The parent must create the control surface and publish request JSON files. The external controller launches children serially as visible Codex-App sessions. If a visible launch, readiness gate, or delivery fails, write NOT READY evidence with the exact failed child/step, existing evidence, missing evidence, and current count.txt content."
+  ],
+  "fresh_session_required": true,
+  "agent": {
+    "requested_provider": "codex",
+    "adapter_id": "codex-app-server",
+    "adapter_status": "supported",
+    "launch_capability": "launch",
+    "command_contract": "codex app-server --listen stdio:// using initialize, thread/start, thread/name/set, turn/start, thread/list"
+  },
+  "mechanism": {
+    "type": "launch",
+    "recommended_command": "dotnet run skills-repo/tools/AgentDeliverySessionLauncher.cs -- --handoff \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/handoffs/parent-handoff.md\u0027 --target-id \u0027VADW-PARENT\u0027 --agent codex --mode launch --adapter codex-app-server --initiating-project-cwd \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0027",
+    "actual_command": "codex app-server --listen stdio://",
+    "adapter_available": true
+  },
+  "evidence_paths": {
+    "prompt": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/parent/20260511T140523Z-vadw-parent/start-prompt.md",
+    "events": null,
+    "last_message": null,
+    "app_server_transcript": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/parent/20260511T140523Z-vadw-parent/app-server-transcript.jsonl"
+  },
+  "session_visibility": {
+    "class": "visible_codex_app_session",
+    "visible_in_codex_app": true,
+    "proof_status": "verified",
+    "proof_method": "app_server_thread_list",
+    "thread_id": "019e175b-5ad0-7d80-8adb-72b040ebf5a8",
+    "thread_source_observed": "vscode",
+    "source_kind_observed": "vscode",
+    "cwd_observed": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "title_observed": "VADW-PARENT: Implementation - VADW-PARENT Start a fresh visible regression test",
+    "rollout_path": "/Users/dh/.codex/sessions/2026/05/11/rollout-2026-05-11T16-05-23-019e175b-5ad0-7d80-8adb-72b040ebf5a8.jsonl",
+    "sidebar_or_default_list_observed": true
+  },
+  "app_server": {
+    "listen": "stdio://",
+    "request_timeout_seconds": 60,
+    "thread_start_observed": true,
+    "thread_name_set_observed": true,
+    "turn_start_observed": true,
+    "turn_completed_status": "completed",
+    "thread_list_observed": true,
+    "transcript_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/parent/20260511T140523Z-vadw-parent/app-server-transcript.jsonl",
+    "stderr_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T140421Z-visible-regression/launches/parent/20260511T140523Z-vadw-parent/app-server-stderr.log"
+  },
+  "codex_app": {
+    "visibility_status": "not_applicable",
+    "thread_id": null,
+    "rollout_path": null,
+    "thread_source": null,
+    "thread_cwd_observed": null,
+    "thread_title_observed": null,
+    "title_status": "not_applicable"
+  },
+  "blockers": [],
+  "warnings": [],
+  "prompt_sha256": "5c54ceab5e9b1d8a354ec3e5cf1affc6b455449ed59086397708ca7da0da0a9b"
+}
