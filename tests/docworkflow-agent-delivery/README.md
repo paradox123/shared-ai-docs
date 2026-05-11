@@ -24,6 +24,10 @@ Diese Testsuite prueft den shared-ai-docs Agent Delivery Workflow fuer Parent-/C
 | `scripts/run-reporting-contract-checks.sh` | Fuehrt DWT-S4 Summary-, Telemetry-, Style- und Efficiency-Contract-Checks aus und schreibt `evidence/dwt-s4-reporting-summary.json`. |
 | `reporting/fixtures/` | DWT-S4 positive, negative, warning, blocked and retained-baseline reporting fixtures. |
 | `reporting/validators/` | Deterministic Node validator for DWT-S4 reporting fixtures. |
+| `e2e/fixtures/control-session-boundary/` | ADV-CAS-S4 control-session boundary fixtures for observed-only behavior and direct-write/session-role false positives. |
+| `e2e/validators/control-boundary-summary.js` | Deterministic validator for `docworkflow-agent-delivery-control-boundary-summary.v1` fixture replay. |
+| `e2e/fixtures/visible-app-session-closeout/` | ADV-CAS-S5 visible Codex-App closeout archive fixtures for archived, already archived, headless, queued, retained and failure cases. |
+| `e2e/validators/visible-session-closeout-summary.js` | Thin Node wrapper around `ArchiveVisibleCodexAppSession.cs` for S5 closeout archive fixture replay. |
 
 ## Schnellstart
 
@@ -79,6 +83,28 @@ DWT-S5 L3 runtime temp-repo checks:
 tests/docworkflow-agent-delivery/scripts/run-l3-runtime-temp-repo-checks.sh all
 ```
 
+ADV-CAS-S4 control-session boundary fixture checks:
+
+```sh
+tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh control-boundary
+node tests/docworkflow-agent-delivery/e2e/validators/control-boundary-summary.js tests/docworkflow-agent-delivery/e2e/fixtures/control-session-boundary
+```
+
+ADV-CAS-S3 / `MD-E2E-5` live visible Codex-App session gate:
+
+```sh
+tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh --run-id <id> --keep
+```
+
+This command is an opt-in live gate and does not replace `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep`. It writes `visible-session-summary.json` under the retained run directory and exits non-zero with `overall_workflow_status: "not_ready"` when the live visible-session, S4, S5, or output evidence is incomplete. A passing live run must retain `visible-session-summary.json`, parent plus five child visible-session evidence records, S4 control-boundary status, S5 archive/no-thread evidence and final output proof for exact `1\n2\n3\n4\n5\n`.
+
+ADV-CAS-S5 visible Codex-App closeout archive checks:
+
+```sh
+dotnet run skills-repo/tools/ArchiveVisibleCodexAppSession.cs -- --fixture tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout --mode validate
+dotnet run skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs -- --fixture tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout
+```
+
 Optional mit behaltenem L1-Evidence-Ordner:
 
 ```sh
@@ -132,6 +158,7 @@ Automatisierbar:
 - DWT-S3 current-handoff Delivery-Kickoff, stale Handoff Blocker, Temp-Workspace-Isolation, synthetic Closeout Sync, DWT-S5 Blockade, blocked-agent Ehrlichkeit und DWT-S4-kompatible Summary/Telemetry.
 - DWT-S4 Summary-v1-Felder, Legacy-Kompatibilitaet fuer die retained DWT-S1 Summary, Telemetry-Verbote, Style-/Handoff-Sync, Efficiency-Warnungen und Downstream-Release-Blockaden.
 - DWT-S5 synthetic Temp-Repo-Materialisierung, current-handoff Delivery-Kickoff, local runtime gate, container/harness gate, forbidden-target/secret Blocker, Closeout-Sync und DWT-S4-kompatible Summary/Telemetry.
+- ADV-CAS-S4 Control-Session Boundary fuer observed-only Control-Verhalten, verbotene direkte Orchestration-/Hardening-/Delivery-/Closeout-/Output-Writes, ununterscheidbare Session-Rollen und Mock-Runner-Substitute.
 
 Agentischer Dry-Run:
 

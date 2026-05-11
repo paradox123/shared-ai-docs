@@ -1,0 +1,16 @@
+{
+  "schema_id": "agent-delivery.visible-session-closeout-archive.v1",
+  "parent": "_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md",
+  "target_id": "ADV-CAS-S5",
+  "overall_archive_status": "READY",
+  "created_at": "2026-05-10T00:03:00Z",
+  "session_records": [
+    {
+      "evidence_path": "headless-not-app-visible/evidence.json",
+      "execution_channel": "headless_cli",
+      "visibility_class": "headless_cli_session",
+      "thread_id": "",
+      "archive_status": "not_app_visible_not_archived"
+    }
+  ]
+}

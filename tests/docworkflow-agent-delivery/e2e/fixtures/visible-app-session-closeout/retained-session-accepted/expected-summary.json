@@ -1,0 +1,18 @@
+{
+  "schema_id": "agent-delivery.visible-session-closeout-archive.v1",
+  "parent": "_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md",
+  "target_id": "ADV-CAS-S5",
+  "overall_archive_status": "READY",
+  "created_at": "2026-05-10T00:10:00Z",
+  "session_records": [
+    {
+      "evidence_path": "retained-session-accepted/evidence.json",
+      "execution_channel": "manual_visible",
+      "visibility_class": "visible_codex_app_session",
+      "thread_id": "thread-s5-retained",
+      "archive_status": "retained_session_accepted",
+      "retention_accepted_by": "fixture-user",
+      "retention_reason": "Retained intentionally for fixture coverage only."
+    }
+  ]
+}

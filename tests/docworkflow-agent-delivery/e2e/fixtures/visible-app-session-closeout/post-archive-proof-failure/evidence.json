@@ -1,0 +1,32 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "parent": "_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md",
+  "target_id": "ADV-CAS-S5",
+  "target_spec": "_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S5 Closeout Archive Support.md",
+  "handoff_path": "_specs/child-session-handoffs/adv-cas-s5-session-handoff.md",
+  "status": "launched",
+  "execution_channel": "app_server",
+  "adapter_id": "codex-app-server",
+  "initiating_project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "session_title": "ADV-CAS-1: Implementation - S5 Closeout Archive Support",
+  "prompt_sha256": "e19e53343bf45e886730c9637c6ab755b17b559a0dda45d7ca9b72fc71ed73ec",
+  "session_visibility": {
+    "class": "visible_codex_app_session",
+    "visible_in_codex_app": true,
+    "proof_status": "verified",
+    "proof_method": "app_server_thread_list",
+    "thread_id": "thread-s5-proof-failure",
+    "thread_source_observed": "vscode",
+    "source_kind_observed": "vscode",
+    "cwd_observed": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "title_observed": "ADV-CAS-1: Implementation - S5 Closeout Archive Support",
+    "sidebar_or_default_list_observed": true
+  },
+  "app_server": {
+    "thread_start_observed": true,
+    "thread_name_set_observed": true,
+    "turn_start_observed": true,
+    "turn_completed_status": "completed",
+    "thread_list_observed": true
+  }
+}

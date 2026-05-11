@@ -1,6 +1,6 @@
 **Date:** 2026-05-10
-**Status:** 🟡 Spec
-**Scope:** Hardened child contract for `ADV-CAS-S4 Control Session Boundary` under `_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md`. Documentation-only hardening; no runtime implementation and no live `MD-E2E-5` execution.
+**Status:** 🟢 Accepted
+**Scope:** Hardened child contract plus delivered fixture/validator slice for `ADV-CAS-S4 Control Session Boundary` under `_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md`. No live `MD-E2E-5` execution.
 
 ---
 
@@ -13,14 +13,14 @@ This child freezes the Review Control Surface, allowed/prohibited control-sessio
 ## Review Control Surface
 
 - Spec-Variante: Contract-heavy child spec for workflow/test boundary enforcement.
-- Goldstandard Status: hardened child spec, implementation-ready after Child Index and handoff sync.
+- Goldstandard Status: S4 control-boundary fixture/validator slice accepted; live runner integration remains S3-owned.
 - Ziel: Define an enforceable control-session boundary so `MD-E2E-5` fails if the invoking/control session directly performs orchestration, hardening, delivery, closeout, or output writes instead of delegating workflow work to Launcher-created visible Codex-App sessions.
 - In Scope: Review Control Surface, allowed/prohibited control-session actions, control-session identity/provenance fields, machine-readable boundary summary schema, evidence linkage, negative cases for direct orchestration/hardening/delivery/closeout/output writes, verification lifecycle, parent conformance, later implementation write-set contract.
 - Out of Scope: Launcher adapter changes, visible-session validator changes outside S4 boundary fields, closeout archive support, running `MD-E2E-5`, launching Codex-App sessions, changing `run-mock-e2e-checks.sh`, or changing `mock-runner/run.js`.
 - Key test/harness cases: positive observed-only control session; direct orchestration pack write; direct child spec or hardening write; direct child delivery evidence write; direct closeout summary write; direct `target/output/count.txt` write; indistinguishable control/parent/child session evidence; final output correct but boundary violated; visible-session evidence correct but control provenance missing.
-- Key verification commands: documentation-only hardening checks are `git diff --check -- _specs/2026-05-10\ Agent\ Delivery\ Visible\ Codex\ App\ Sessions\ ADV-CAS-S4\ Control\ Session\ Boundary.md` and JSON parse checks for embedded canonical examples. Later implementation gates are defined in `Verification Commands` but must not run in this hardening session.
+- Key verification commands: `ValidateChildReadiness.cs`, `bash -n tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`, control-boundary fixture replay, targeted positive/direct-output fixture checks, embedded JSON parse, and `git diff --check`. Live `MD-E2E-5` must not run in S4 delivery.
 - Open decisions: none blocking for the S4 contract.
-- Readiness Status: IMPLEMENTATION READY for exactly `ADV-CAS-S4`.
+- Readiness Status: ACCEPTED for exactly `ADV-CAS-S4`; S4 fixture/validator delivery completed for the control-boundary slice.
 
 ## In Scope
 
@@ -35,14 +35,14 @@ This child freezes the Review Control Surface, allowed/prohibited control-sessio
 
 ## Out of Scope
 
-1. No edits to `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md`.
-2. No creation or update of `_specs/child-session-handoffs/adv-cas-s4-session-handoff.md`.
-3. No edits to `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`.
-4. No edits to `tests/docworkflow-agent-delivery/e2e/mock-runner/run.js`.
-5. No edits to `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`.
-6. No edits to Launcher, validators, workflow skills, docs, tests, or runtime code.
-7. No `MD-E2E-5` run, app-server launch, or `codex exec` launch.
-8. No acceptance of mock-runner evidence as live visible-session evidence.
+1. No Launcher adapter implementation.
+2. No visible-session validator implementation outside S4 boundary fields.
+3. No closeout archive support.
+4. No live `MD-E2E-5` run, app-server launch, or `codex exec` launch.
+5. No edits to `tests/docworkflow-agent-delivery/e2e/mock-runner/run.js`.
+6. No edits to `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`.
+7. No acceptance of mock-runner evidence as live visible-session evidence.
+8. No S3 live runner integration beyond the S4-local `control-boundary` fixture selector.
 
 ## Parent/Master Coverage
 
@@ -357,7 +357,7 @@ node -e "const fs=require('fs'); const p='_specs/2026-05-10 Agent Delivery Visib
 
 Do not run `MD-E2E-5` in this hardening session.
 
-### Future Implementation Verification Contract
+### S4 Implementation Verification Contract
 
 After an integration owner syncs the Child Index and persisted S4 handoff, readiness must include:
 
@@ -369,10 +369,11 @@ dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/t
   --handoff /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/child-session-handoffs/adv-cas-s4-session-handoff.md
 ```
 
-Later S4/S3 implementation gates must include, at minimum:
+S4 implementation gates include, at minimum:
 
 ```sh
 bash -n tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh
+node tests/docworkflow-agent-delivery/e2e/validators/control-boundary-summary.js tests/docworkflow-agent-delivery/e2e/fixtures/control-session-boundary
 node tests/docworkflow-agent-delivery/e2e/validators/control-boundary-summary.js tests/docworkflow-agent-delivery/e2e/fixtures/control-session-boundary/positive-observed-only.json
 node tests/docworkflow-agent-delivery/e2e/validators/control-boundary-summary.js tests/docworkflow-agent-delivery/e2e/fixtures/control-session-boundary/direct-output-write.json
 ```
@@ -408,18 +409,26 @@ S4 is implementation-ready because these conditions are now true:
 7. Future implementation write-set is accepted by the integration owner.
 8. S1/S2 visible-session evidence schema dependencies are either implemented or explicitly frozen for S4 fixture work.
 
-Current verdict: IMPLEMENTATION READY.
+Current verdict: ACCEPTED.
 
 ## Definition of Done / Closeout Evidence
 
-Future S4 implementation is done only when:
+S4 implementation is done when:
 
 1. Control-boundary validator or runner checks exist and cover all S4 harness cases.
 2. Positive observed-only fixture passes.
 3. Negative direct orchestration, hardening, delivery, closeout, output, mock-substitute, and indistinguishable-session cases fail.
 4. Runner summary preserves separate `control_session_status`, `session_chain_status`, `workflow_delivery_status`, `visible_session_status`, and `overall_workflow_status`.
-5. S3 runner consumes S4 status before accepting live `MD-E2E-5`.
-6. Closeout evidence retains fixture results and notes whether live `MD-E2E-5` was not run, blocked, failed, or passed.
+5. S3 runner consumption remains explicitly downstream before accepting live `MD-E2E-5`.
+6. Closeout evidence retains fixture results and notes that live `MD-E2E-5` was not run in S4 delivery.
+
+Current S4 delivery evidence:
+
+1. `control-boundary-summary.js` fixture suite: `RESULT: PASS (9 cases)`.
+2. `run-visible-app-session-workflow-checks.sh control-boundary`: `RESULT: PASS (9 cases)`.
+3. Targeted positive and direct-output fixture checks: pass.
+4. `bash -n tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`: pass.
+5. Live `MD-E2E-5`: not run by design.
 
 ## Dependencies and Write-Set
 
@@ -447,7 +456,7 @@ docs/**
 
 Integration owner for shared control files: parent/orchestration pack owner. Required sync is listed in `Child Session Handoff`.
 
-### Future Implementation Write-Set To Validate
+### Accepted Implementation Write-Set
 
 The future implementation owner must narrow and validate this proposed write-set before delivery:
 
@@ -517,7 +526,7 @@ Integration-owner sync applied for implementation:
 
 ## Hardening Verdict
 
-Verdict: IMPLEMENTATION READY.
+Verdict: ACCEPTED.
 
 Rationale:
 
@@ -532,9 +541,36 @@ Rationale:
 - Correctness/domain fit: Pass. The child targets the exact parent requirement that the control session must not execute workflow steps directly.
 - Scope discipline: Pass. Launcher implementation, S2 validator delivery, S5 closeout archive support, and live `MD-E2E-5` execution remain out of scope.
 - Completeness: Pass. The spec defines roles, actions, prohibited writes, evidence fields, statuses, negative cases, verification commands, dependencies, and closeout sync targets.
-- Consistency: Pass. Review Control Surface, contract, cases, handoff and Child Index row all agree on `IMPLEMENTATION READY`.
-- Verifiability: Pass for contract depth. Future fixtures and commands are concrete; live `MD-E2E-5` remains deliberately future-only.
+- Consistency: Pass. Review Control Surface, contract, cases, handoff and Child Index row all agree on `ACCEPTED`.
+- Verifiability: Pass for contract depth and delivered fixtures; live `MD-E2E-5` remains deliberately future-only.
 - Remaining blocker: none for S4 implementation readiness.
+
+## Delivery Verdict
+
+Verdict: IMPLEMENTED for the S4 control-boundary fixture/validator slice.
+
+Rationale:
+
+1. Source-controlled fixtures now cover the positive observed-only path and S4 negative cases.
+2. `control-boundary-summary.js` validates boundary schema, separated status fields, distinct workflow identities, prohibited control writes, expected violation codes, and mock-runner substitute rejection.
+3. `run-visible-app-session-workflow-checks.sh control-boundary` replays the S4 fixture gate without launching live Codex-App sessions.
+4. Live `MD-E2E-5` remains S3-owned and was not run.
+
+## Closeout Verdict
+
+Verdict: ACCEPTED for the S4 control-boundary fixture/validator slice.
+
+OpenSpec status: no active `agent-delivery-visible-control-boundary` change exists in `openspec list --json`; the proposed ledger was not created during S4 delivery, so there is no S4 OpenSpec directory to archive.
+
+Closeout replay:
+
+1. `ValidateChildReadiness.cs` for `ADV-CAS-S4`: pass before acceptance sync.
+2. `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh control-boundary`: `RESULT: PASS (9 cases)`.
+3. `bash -n tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`: pass.
+4. Targeted `positive-observed-only.json` and `direct-output-write.json` validator checks: pass.
+5. Embedded canonical JSON parse: pass.
+6. `git diff --check` over S4 closeout write-set: pass.
+7. Visible Codex-App session archive: not applicable; S4 delivery created no launcher-visible Codex-App session and did not run live `MD-E2E-5`.
 
 ## Mini-Retro
 
@@ -550,5 +586,7 @@ Rationale:
 |---|---|---|
 | 2026-05-10 | Codex | Created hardened `ADV-CAS-S4 Control Session Boundary` child spec as a ready candidate with implementation blocked on Child Index/handoff sync and readiness validator run. |
 | 2026-05-10 | Codex | Promoted S4 to `IMPLEMENTATION READY` after Child Index/handoff sync. |
+| 2026-05-11 | Codex | Implemented S4 control-boundary fixtures, validator, non-live script selector, README/testcase sync, and retained passing fixture replay evidence. |
+| 2026-05-11 | Codex | Accepted S4 after closeout verification replay; recorded that no active S4 OpenSpec ledger exists to archive and live `MD-E2E-5` remains S3-owned. |
 
 SessionId: 2026-05-10-adv-cas-s4-control-session-boundary-hardening

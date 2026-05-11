@@ -1,0 +1,15 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "parent": "_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md",
+  "target_id": "ADV-CAS-S5",
+  "status": "launched",
+  "execution_channel": "headless_cli",
+  "adapter_id": "codex-cli",
+  "session_visibility": {
+    "class": "headless_cli_session",
+    "visible_in_codex_app": false,
+    "proof_status": "not_visible",
+    "proof_method": "codex_exec_downgrade",
+    "source_kind_observed": "exec"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "parent": "_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md",
+  "target_id": "ADV-CAS-S5",
+  "status": "manual_start_required",
+  "execution_channel": "manual_queue",
+  "session_visibility": {
+    "class": "queued_manual_start",
+    "visible_in_codex_app": false,
+    "proof_status": "queued_no_thread"
+  }
+}

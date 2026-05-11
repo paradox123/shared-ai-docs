@@ -1,0 +1,37 @@
+{
+  "schema_id": "agent-delivery.visible-session-closeout-archive.v1",
+  "parent": "_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md",
+  "target_id": "ADV-CAS-S5",
+  "overall_archive_status": "READY",
+  "created_at": "2026-05-10T00:07:00Z",
+  "session_records": [
+    {
+      "evidence_path": "mixed-child-run/evidence.json",
+      "execution_channel": "app_server",
+      "visibility_class": "visible_codex_app_session",
+      "thread_id": "thread-s5-mixed-visible",
+      "session_title": "ADV-CAS-1: Implementation - S5 Closeout Archive Support",
+      "archive_status": "archived",
+      "archive_method": "app_server_thread_archive",
+      "post_archive_proof": {
+        "method": "thread/list",
+        "archived_false_absent": true,
+        "archived_true_present": true
+      }
+    },
+    {
+      "evidence_path": "mixed-child-run/headless-evidence.json",
+      "execution_channel": "headless_cli",
+      "visibility_class": "headless_cli_session",
+      "thread_id": "",
+      "archive_status": "not_app_visible_not_archived"
+    },
+    {
+      "evidence_path": "mixed-child-run/queued-evidence.json",
+      "execution_channel": "manual_queue",
+      "visibility_class": "queued_manual_start",
+      "thread_id": "",
+      "archive_status": "no_thread_created"
+    }
+  ]
+}

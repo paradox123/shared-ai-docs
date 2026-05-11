@@ -125,7 +125,12 @@ static List<string> ValidateManifest(FixtureManifest manifest)
         {
             errors.Add($"{testCase.Id}: expect must be pass or fail");
         }
-        if (testCase.Expect == "fail" && string.IsNullOrWhiteSpace(testCase.ExpectedFailureClass))
+        if (testCase.ExpectedVisibleOutcome is not null and not "pass" and not "fail")
+        {
+            errors.Add($"{testCase.Id}: expectedVisibleOutcome must be pass or fail");
+        }
+        var visibleOutcome = testCase.ExpectedVisibleOutcome ?? testCase.Expect;
+        if (visibleOutcome == "fail" && string.IsNullOrWhiteSpace(testCase.ExpectedVisibleFailureClass ?? testCase.ExpectedFailureClass))
         {
             errors.Add($"{testCase.Id}: expectedFailureClass is required for failing cases");
         }
@@ -152,17 +157,24 @@ static CaseResult ValidateCase(CaseDefinition testCase, string baseDir)
         ValidateVisibleEvidence(testCase, evidence, prompt, transcript, closeout, failures);
     }
 
+    var expectedOutcome = testCase.ExpectedVisibleOutcome ?? testCase.Expect;
     var actual = failures.Count == 0 ? "pass" : "fail";
     var actualFailureClass = failures.FirstOrDefault()?.Class;
-    var matches = testCase.Expect == "pass"
+    var expectedFailureClass = testCase.ExpectedVisibleFailureClass ?? testCase.ExpectedFailureClass;
+    var matches = expectedOutcome == "pass"
         ? actual == "pass"
-        : actual == "fail" && string.Equals(actualFailureClass, testCase.ExpectedFailureClass, StringComparison.Ordinal);
+        : actual == "fail" && string.Equals(actualFailureClass, expectedFailureClass, StringComparison.Ordinal);
 
-    return new CaseResult(testCase.Id, testCase.Expect, testCase.ExpectedFailureClass, actual, actualFailureClass, matches, failures, setupErrors);
+    return new CaseResult(testCase.Id, expectedOutcome, expectedFailureClass, actual, actualFailureClass, matches, failures, setupErrors);
 }
 
 static void ValidateVisibleEvidence(CaseDefinition testCase, JsonDocument evidence, string? prompt, string? transcript, JsonDocument? closeout, List<ValidationFailure> failures)
 {
+    if (testCase.SkipVisibleEvidenceValidation)
+    {
+        return;
+    }
+
     var expectedTitle = testCase.ExpectTitle ?? DefaultExpectedTitle;
     var expectedCwd = testCase.ExpectInitiatingProjectCwd ?? DefaultExpectedCwd;
     var schema = GetString(evidence, "schema_version");
@@ -251,12 +263,39 @@ static void ValidateVisibleEvidence(CaseDefinition testCase, JsonDocument eviden
 
     if (testCase.RequireCloseoutArchived)
     {
-        var archived = GetBool(closeout, "archived") ?? GetBool(closeout, "visible_session_archived");
+        var archived = GetBool(closeout, "archived") ??
+            GetBool(closeout, "visible_session_archived") ??
+            GetS5ArchiveStatus(closeout, threadId);
         if (archived != true)
         {
             Add(failures, "unarchived_visible_session", "closeout-required visible session remains unarchived");
         }
     }
+}
+
+static bool? GetS5ArchiveStatus(JsonDocument? closeout, string? threadId)
+{
+    if (closeout is null ||
+        GetString(closeout, "schema_id") != "agent-delivery.visible-session-closeout-archive.v1" ||
+        !closeout.RootElement.TryGetProperty("session_records", out var records) ||
+        records.ValueKind != JsonValueKind.Array)
+    {
+        return null;
+    }
+
+    foreach (var record in records.EnumerateArray())
+    {
+        var recordThreadId = GetElementString(record, "thread_id");
+        if (!string.IsNullOrWhiteSpace(threadId) && recordThreadId != threadId)
+        {
+            continue;
+        }
+
+        var archiveStatus = GetElementString(record, "archive_status");
+        return archiveStatus is "archived" or "already_archived";
+    }
+
+    return false;
 }
 
 static bool TranscriptHasOrderedProof(string? transcript, string? expectedThreadId)
@@ -395,6 +434,20 @@ static string? GetString(JsonDocument? document, params string[] path)
     return current.ValueKind == JsonValueKind.String ? current.GetString() : current.ToString();
 }
 
+static string? GetElementString(JsonElement element, params string[] path)
+{
+    JsonElement current = element;
+    foreach (var segment in path)
+    {
+        if (current.ValueKind != JsonValueKind.Object || !current.TryGetProperty(segment, out current))
+        {
+            return null;
+        }
+    }
+
+    return current.ValueKind == JsonValueKind.String ? current.GetString() : current.ToString();
+}
+
 static bool? GetBool(JsonDocument? document, params string[] path)
 {
     if (document is null) return null;
@@ -435,10 +488,13 @@ sealed class CaseDefinition
     public string? Transcript { get; set; }
     public string? Closeout { get; set; }
     public string Expect { get; set; } = "fail";
+    public string? ExpectedVisibleOutcome { get; set; }
     public string? ExpectedFailureClass { get; set; }
     public string? ExpectTitle { get; set; }
     public string? ExpectInitiatingProjectCwd { get; set; }
+    public string? ExpectedVisibleFailureClass { get; set; }
     public bool RequireCloseoutArchived { get; set; }
+    public bool SkipVisibleEvidenceValidation { get; set; }
 }
 
 sealed record ValidationFailure(string Class, string Message);

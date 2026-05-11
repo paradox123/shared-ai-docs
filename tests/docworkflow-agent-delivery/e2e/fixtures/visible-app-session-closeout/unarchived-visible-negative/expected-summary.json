@@ -1,0 +1,17 @@
+{
+  "schema_id": "agent-delivery.visible-session-closeout-archive.v1",
+  "parent": "_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md",
+  "target_id": "ADV-CAS-S5",
+  "overall_archive_status": "READY",
+  "created_at": "2026-05-10T00:08:00Z",
+  "session_records": [
+    {
+      "evidence_path": "unarchived-visible-negative/evidence.json",
+      "execution_channel": "app_server",
+      "visibility_class": "visible_codex_app_session",
+      "thread_id": "thread-s5-unarchived",
+      "session_title": "ADV-CAS-1: Implementation - S5 Closeout Archive Support",
+      "archive_status": "unarchived"
+    }
+  ]
+}

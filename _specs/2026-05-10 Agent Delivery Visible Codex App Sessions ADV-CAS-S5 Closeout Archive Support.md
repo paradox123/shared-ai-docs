@@ -1,6 +1,6 @@
 **Date:** 2026-05-10
-**Status:** IMPLEMENTATION READY
-**Scope:** Hardened child contract for `ADV-CAS-S5 Closeout Archive Support`. Documentation/spec hardening only; no runtime implementation, no live `thread/archive` call, and no live `MD-E2E-5` execution.
+**Status:** 🟢 Accepted
+**Scope:** Delivered and accepted `ADV-CAS-S5 Closeout Archive Support`. Adds closeout archive tooling, S5 fixtures, S2 validator bridge and workflow/docs sync; no live `thread/archive` call and no live `MD-E2E-5` execution.
 
 ---
 
@@ -18,14 +18,14 @@
 ## Review Control Surface
 
 - Spec-Variante: Contract-heavy Parent/Child closeout child spec.
-- Goldstandard Status: hardened child spec, implementation-ready after accepted S2 validator sync.
+- Goldstandard Status: accepted child spec after S5 delivery and closeout.
 - Ziel: Define how `spec-closeout` archives visible Codex-App sessions opened for a child run, records explicit archive statuses for headless/no-thread evidence, and blocks final `READY` when any visible thread remains unarchived.
 - In Scope: `spec-closeout` closeout gate behavior; app-server `thread/archive` request/response contract; post-archive proof using `thread/list`; closeout archive summary fields; status enums for visible, headless, queued, manual, no-thread and failure cases; negative false-positive case where a child closeout claims `READY` while visible sessions remain unarchived.
 - Out of Scope: Launcher app-server adapter implementation; S2 visible evidence validator implementation; MD-E2E-5 runner implementation; live Codex-App session creation; direct SQLite mutation; broad project docs sync beyond closeout wording; archiving historical evidence created before this parent unless explicitly linked to the target child run.
 - Key Test/Harness Cases: visible archive positive; already archived positive; headless/not-app-visible evidence gets `not_app_visible_not_archived`; queued/manual without a thread gets `no_thread_created`; visible thread archive failure returns `NOT_READY`; post-archive proof failure returns `NOT_READY`; mixed child run with archived visible plus explicit non-visible records returns `READY`; negative unarchived `READY` case fails with S2-compatible `unarchived_visible_session`; manual-visible without thread proof fails.
 - Key Verification Commands: `codex app-server --help`; `codex app-server generate-ts --out /tmp/codex-app-schema-adv-cas-s5`; inspect generated `ThreadArchiveParams`, `ThreadArchiveResponse`, `ThreadListParams`; parse embedded JSON examples; future S5 fixture suite through `ArchiveVisibleCodexAppSession.cs`; S2 validator closeout coupling through `ValidateVisibleCodexAppSessionEvidence.cs`; `git diff --check`; `ValidateChildReadiness.cs` for `ADV-CAS-S5`. Do not run `MD-E2E-5` for S5 hardening.
 - Open Decisions / Blockers: none for implementation readiness.
-- Readiness Status: IMPLEMENTATION READY for exactly `ADV-CAS-S5`.
+- Readiness Status: ACCEPTED for exactly `ADV-CAS-S5`.
 
 ## Goal
 
@@ -72,7 +72,7 @@
 | `ADV-PR7` | S5 does not run or implement `MD-E2E-5`; it provides the archive condition that S3 must consume. | narrows_with_rationale | S3 remains the live workflow integration owner. |
 | `ADV-PR10` | S5 treats headless `exec` as `not_app_visible_not_archived`, never as archived visible evidence. | preserves | Add closeout docs/skill wording during S5 delivery. |
 
-Conformance verdict: no parent contradiction found. Implementation readiness is satisfied after accepted S2 validator sync and S5 Child Index/handoff promotion.
+Conformance verdict: no parent contradiction found. S5 delivery and closeout are accepted after validator sync, fixture replay and Child Index/handoff promotion.
 
 ## Decision Freeze Pack
 
@@ -405,6 +405,32 @@ Current hardening verification result:
 - S2 visible evidence regression: passed, `ValidateVisibleCodexAppSessionEvidence.cs --fixture` reported `RESULT: PASS (11 cases)`.
 - `ValidateChildReadiness.cs`: passed for `ADV-CAS-S5`.
 
+Current delivery verification result:
+
+- S5 archive fixture suite: passed, `ArchiveVisibleCodexAppSession.cs --fixture tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout --mode validate` reported `RESULT: PASS (10 cases)`.
+- S5/S2 closeout bridge: passed, `ValidateVisibleCodexAppSessionEvidence.cs --fixture tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout` reported `RESULT: PASS (10 cases)`.
+- S2 visible evidence regression: passed, `ValidateVisibleCodexAppSessionEvidence.cs --fixture tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-evidence` reported `RESULT: PASS (11 cases)`.
+- Source wording check: passed for `thread/archive`, `archive_status`, `not_app_visible_not_archived`, `no_thread_created`, and `visible_codex_app_session`.
+- `ValidateChildReadiness.cs`: passed for `ADV-CAS-S5` after delivery sync.
+- `git diff --check`: passed.
+- `MD-E2E-5`: not run by design; belongs to S3.
+- Live `thread/archive`: not run by design; live archive mode remains opt-in.
+
+Current closeout verification result:
+
+- `codex app-server --help`: passed.
+- `codex app-server generate-ts --out /tmp/codex-app-schema-adv-cas-s5`: passed.
+- Generated protocol file presence checks for `ThreadArchiveParams.ts`, `ThreadArchiveResponse.ts`, and `ThreadListParams.ts`: passed.
+- S5 archive fixture suite: passed, `RESULT: PASS (10 cases)`.
+- S5/S2 closeout bridge: passed, `RESULT: PASS (10 cases)`.
+- S2 visible evidence regression: passed, `RESULT: PASS (11 cases)`.
+- Source wording check: passed for `thread/archive`, `archive_status`, `not_app_visible_not_archived`, `no_thread_created`, and `visible_codex_app_session`.
+- `ValidateChildReadiness.cs`: passed before accepted-status sync.
+- OpenSpec archive: passed; archived as `openspec/changes/archive/2026-05-11-agent-delivery-visible-session-closeout-archive/`.
+- `git diff --check`: passed before accepted-status sync.
+- `MD-E2E-5`: not run by design; belongs to S3.
+- Live `thread/archive`: not run by design; live archive mode remains opt-in.
+
 ## Definition of Ready for Implementation
 
 S5 is ready for implementation only when all are true:
@@ -418,7 +444,7 @@ S5 is ready for implementation only when all are true:
 7. App-server protocol rehearsal confirms `thread/archive` and `ThreadListParams.archived`.
 8. S5 fixture manifests are defined as source-controlled implementation artifacts with exact expected outcomes.
 
-Current DoR verdict: IMPLEMENTATION READY for exactly `ADV-CAS-S5`.
+Current DoR verdict: satisfied; implementation has been delivered for exactly `ADV-CAS-S5`.
 
 ## Definition of Done / Closeout Evidence
 
@@ -458,14 +484,14 @@ S5 implementation write-set:
 - `tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout/**`
 - `tests/docworkflow-agent-delivery/e2e/validators/visible-session-closeout-summary.js`
 - `tests/docworkflow-agent-delivery/README.md`
-- `openspec/changes/agent-delivery-visible-session-closeout-archive/**`
+- `openspec/changes/archive/2026-05-11-agent-delivery-visible-session-closeout-archive/**`
 
 Future implementation read-only files:
 
 - `skills-repo/tools/AgentDeliverySessionLauncher.cs`
 - S1 child spec and S1 retained evidence
 - S2 child spec and S2 retained validator evidence
-- S3/S4 child specs until S5 closeout evidence is accepted
+- S3/S4 child specs until their own child gates are ready
 - `_specs/codex-app-server-spikes/20260509T171506Z/**`
 
 Dependencies:
@@ -475,27 +501,27 @@ Dependencies:
 | S1 evidence schema | implemented | S5 consumes the `agent-delivery.session-launch.v2` visible/headless/queued evidence fields. |
 | S2 validator delivery | accepted | S5 consumes `ValidateVisibleCodexAppSessionEvidence.cs`, S2 fixture root, and `unarchived_visible_session`. |
 | App-server protocol archive support | rehearsed schema, no live archive | `thread/archive`, archive notification and `ThreadListParams.archived` are confirmed by generated schema; live archive remains delivery opt-in only. |
-| Orchestration pack S5 row | synchronized by this hardening run | Row must say `IMPLEMENTATION READY` and point to the S5 handoff before implementation starts. |
+| Orchestration pack S5 row | accepted by closeout run | Row records `ACCEPTED`, archived OpenSpec path and retained S5 fixture evidence. |
 
 Parallelism:
 
 - S5 hardening is complete after accepted S2 validator sync.
-- S5 implementation may start in a fresh `spec-change-delivery` session.
-- S3 final live `MD-E2E-5` must wait until S5 archive behavior is implemented and accepted.
+- S5 implementation is accepted and closed.
+- S3 final live `MD-E2E-5` may consume S5 archive behavior after S4/S3 gates are ready.
 
 ## Closeout Sync Targets
 
-When S5 is eventually delivered and accepted, closeout sync must update:
+S5 closeout sync updated:
 
 1. S5 child spec status and implementation evidence.
 2. Orchestration pack Child Index row for `ADV-CAS-S5`.
 3. Parent coverage for `ADV-PR9`.
 4. Next child/handoff state for S3 if S3 becomes the leading live-test child.
 5. `spec-closeout` skill wording and docs workflow wording.
-6. S5 OpenSpec archive or ledger path.
+6. S5 OpenSpec archive path.
 7. Retained evidence paths for archive fixture summaries.
 
-This hardening lane updates only the S5 child spec, Child Index row and S5 handoff. The implementation/closeout owner must apply runtime evidence and accepted-status sync after S5 delivery.
+This closeout run updates the S5 child spec, Child Index row, S5 handoff, closeout skill, workflow docs, tools, fixtures, README and archived OpenSpec ledger.
 
 ## Child Session Handoff
 
@@ -505,43 +531,47 @@ Persisted S5 implementation handoff:
 
 The handoff must remain synchronized with the Child Index row and must carry:
 
-1. `Aktueller Verdict: IMPLEMENTATION READY`.
-2. Future implementation write-set for `skills-repo/skills/spec-closeout/SKILL.md`, `docs/doc-workflow.md`, `skills-repo/tools/ArchiveVisibleCodexAppSession.cs`, `skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs`, `tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout/**`, `tests/docworkflow-agent-delivery/e2e/validators/visible-session-closeout-summary.js`, `tests/docworkflow-agent-delivery/README.md`, and `openspec/changes/agent-delivery-visible-session-closeout-archive/**`.
+1. `Aktueller Verdict: ACCEPTED / CLOSED`.
+2. Accepted implementation write-set for `skills-repo/skills/spec-closeout/SKILL.md`, `docs/doc-workflow.md`, `skills-repo/tools/ArchiveVisibleCodexAppSession.cs`, `skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs`, `tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout/**`, `tests/docworkflow-agent-delivery/e2e/validators/visible-session-closeout-summary.js`, `tests/docworkflow-agent-delivery/README.md`, and `openspec/changes/archive/2026-05-11-agent-delivery-visible-session-closeout-archive/**`.
 3. Explicit non-goals: no live `MD-E2E-5` in S5 delivery, no Launcher adapter work, no S3 runner edits except a handoff note if this spec explicitly requires it, no direct SQLite mutation, no live archive call unless opt-in.
 4. Verification gates for S5 fixture validation, S2 visible evidence regression, source search for archive/status wording, `git diff --check`, and no MD-E2E-5.
 
 Next mode:
 
-- `spec-change-delivery` for exactly `ADV-CAS-S5`.
+- no further S5 action; continue with S4/S3 according to the orchestration pack.
 
 ## Content Quality Review
 
 - Correctness/domain fit: pass for a closeout/archive child. The spec uses app-server `thread/archive` and treats headless `exec` as non-visible evidence.
 - Scope discipline: pass. Runtime implementation, MD-E2E-5 and shared control edits remain out of scope.
 - Completeness: pass. Archive statuses, fields, cases, S2 validator coupling, tool expectations, fixture family and verification lifecycle are defined.
-- Consistency: pass. Review Control Surface, DoR and verdict all state that S5 is implementation-ready after accepted S2 validator delivery.
+- Consistency: pass. Review Control Surface, DoR, delivery and closeout verdicts all state that S5 is accepted after S2 validator delivery and S5 archive fixture replay.
 - Feasibility: pass as a future companion-tool implementation. Local generated schema includes `ThreadArchiveParams`, `ThreadArchiveResponse`, `ThreadArchivedNotification` and `ThreadListParams.archived`.
 - Verifiability: pass for implementation readiness. Negative unarchived `READY`, headless/no-thread, archive failure, proof failure and mixed child run cases are concrete; fixture files and validators are explicitly in the S5 implementation write-set.
 
 ## Final Hardening Verdict
 
-IMPLEMENTATION READY for exactly `ADV-CAS-S5`.
+IMPLEMENTATION READY for exactly `ADV-CAS-S5` before delivery; superseded by accepted closeout.
 
-Implementation may start with `spec-change-delivery` using this child spec, the synchronized Child Index row, and `_specs/child-session-handoffs/adv-cas-s5-session-handoff.md`.
+Implementation completed and closeout accepted using this child spec, the synchronized Child Index row, and `_specs/child-session-handoffs/adv-cas-s5-session-handoff.md`.
 
 Non-blocking notes:
 
 1. Live `thread/archive` remains opt-in for delivery; fixture/mock transcript validation is the default gate.
 2. `retained_session_accepted` requires explicit user acceptance and must not be treated as ordinary archive success by the S2 validator.
 
+## Final Delivery Verdict
+
+ACCEPTED for `ADV-CAS-S5`. S5 now has the closeout archive companion tool, S5 fixture family, S2 validator bridge, docs/skill wording, README entry and archived OpenSpec evidence required for downstream S3 consumption.
+
 ## Mini-Retro
 
 - Was wurde entschieden? S5 should be a `spec-closeout` plus closeout companion-tool contract, not a Launcher change. Visible threads require app-server `thread/archive`; headless and queued/no-thread records require explicit archive statuses.
 - Was wurde geaendert? Re-hardened S5 after accepted S2, synchronized validator names/failure classes, finalized archive summary/tool expectations, defined the source-controlled closeout fixture family, and promoted the Child Index/handoff path for implementation.
-- Was bleibt offen? Runtime implementation, source-controlled S5 fixtures, S5 tool/validator changes, docs/skill sync, and later S3 live MD-E2E-5 consumption.
-- Welche Evidenz/Verification fehlt? No live archive call, no MD-E2E-5 run, and no S5 fixture execution because this is hardening only.
+- Was bleibt offen? Later S3 live MD-E2E-5 consumption and any explicitly opted-in live archive call.
+- Welche Evidenz/Verification fehlt? No live archive call and no MD-E2E-5 run by design; S5 fixture and validator evidence is retained in source-controlled fixtures and archived OpenSpec evidence.
 - Welche Skill-/Workflow-Reibung ist aufgefallen? S2's accepted closeout check is intentionally narrow (`archived` / `visible_session_archived` booleans), so S5 implementation must preserve that bridge while adding the richer closeout summary schema.
-- Session-/Kontextzustand: Start a fresh `spec-change-delivery` session for `ADV-CAS-S5`.
+- Session-/Kontextzustand: No further S5 session needed; continue with S4/S3 according to the orchestration pack.
 
 ## History
 
@@ -550,5 +580,7 @@ Non-blocking notes:
 | 2026-05-10 | Codex | Created S5 closeout archive support child spec as a contract-heavy hardening draft; final verdict remains blocked on S1/S2 evidence schema. |
 | 2026-05-10 | Codex | Re-hardened S5 after S1 implementation and S2 promotion; S5 now waits specifically for S2 validator delivery. |
 | 2026-05-10 | Codex | Re-hardened S5 after accepted S2 validator delivery; synchronized S2 contract names, fixture/failure classes, archive tool expectations, Child Index and handoff; promoted to implementation-ready. |
+| 2026-05-11 | Codex | Implemented S5 closeout archive support, fixture suite, S2 validator bridge, docs/skill sync and OpenSpec evidence; delivery gates passed. |
+| 2026-05-11 | Codex | Accepted S5 closeout, replayed verification, archived OpenSpec change and synchronized Child Index/handoff evidence. |
 
 SessionId: 2026-05-10-adv-cas-s5-closeout-archive-support-hardening

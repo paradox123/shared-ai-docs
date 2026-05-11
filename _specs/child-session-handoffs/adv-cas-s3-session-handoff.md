@@ -6,22 +6,23 @@
 - Child Index / Queue: `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md` section `Child Index`
 - Handoff File: `_specs/child-session-handoffs/adv-cas-s3-session-handoff.md`
 - Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`
-- Codex Session / Log: not launched; blocked integration child.
-- Session Evidence: no live MD-E2E-5 run and no visible app sessions created.
-- Handoff Timestamp: 2026-05-10
-- Naechster Modus/Skill: `child-spec-hardening`
-- Aktueller Verdict: NEEDS HARDENING.
-- Scope Summary: Harden the serialized MD-E2E-5 integration child only after S1 adapter, S2 validator, S4 control-boundary and S5 archive contracts are delivered or promoted.
-- Non-Goals: No live MD-E2E-5 execution in hardening; no Launcher adapter implementation; no validator implementation; no archive implementation; no replacement of the mock-only standard gate.
+- Codex Session / Log: not launched for implementation; S3 hardening completed in the current control session.
+- Agent Delivery Launch / Queue Evidence: `manual_start_required` for the next fresh `spec-change-delivery` session. No `_specs/agent-delivery-session-launches/**` evidence was created because live visible session execution is out of scope for hardening.
+- Session Evidence: S3 runner implementation rehearsal retained `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T103700Z-adv-cas-s3-rehearsal/visible-session-summary.json` with `overall_workflow_status: "not_ready"` because no live parent/child visible-session evidence exists yet. No S3 visible app sessions were created in hardening or this retained not-ready rehearsal.
+- Handoff Timestamp: 2026-05-11
+- Naechster Modus/Skill: `spec-change-delivery` for exactly `ADV-CAS-S3`.
+- Aktueller Verdict: IMPLEMENTATION READY.
+- Scope Summary: Implement the live `MD-E2E-5` visible Codex-App session runner integration. The runner must retain parent plus five child visible-session evidence records, validate S2 visible evidence, consume S4 observed-only control-boundary status, consume S5 archive/no-thread closeout evidence, and prove final output `1\n2\n3\n4\n5\n`.
+- Non-Goals: No Launcher adapter implementation; no visible validator implementation; no archive implementation; no mock-only standard gate replacement; no direct SQLite mutation; no manual backfill of historical evidence; no broad docs/workflow edits outside the S3 runner/testcase/README integration.
 - Allowed Write-Set: `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S3 MD-E2E-5 Integration.md`; `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md`; `_specs/child-session-handoffs/adv-cas-s3-session-handoff.md`; `tests/docworkflow-agent-delivery/testcases/md-e2e-5-visible-codex-app-sessions.md`; `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`; `tests/docworkflow-agent-delivery/README.md`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/**`; `tests/docworkflow-agent-delivery/e2e/evidence/*visible-app*`
-- Shared / Read-only Files: `skills-repo/tools/AgentDeliverySessionLauncher.cs`; `skills-repo/tools/ValidateAgentDeliveryLaunchEvidence.cs`; `skills-repo/skills/spec-closeout/SKILL.md`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`; `tests/docworkflow-agent-delivery/e2e/mock-runner/run.js`
+- Shared / Read-only Files: `skills-repo/tools/AgentDeliverySessionLauncher.cs`; `skills-repo/tools/AgentDeliveryCodexAppServerClient.cs`; `skills-repo/tools/ValidateAgentDeliveryLaunchEvidence.cs`; `skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs`; `skills-repo/tools/ArchiveVisibleCodexAppSession.cs`; `skills-repo/skills/spec-closeout/SKILL.md`; `docs/doc-workflow.md`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`; `tests/docworkflow-agent-delivery/e2e/mock-runner/run.js`; `tests/docworkflow-agent-delivery/e2e/validators/control-boundary-summary.js`; `tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-evidence/**`; `tests/docworkflow-agent-delivery/e2e/fixtures/control-session-boundary/**`; `tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout/**`
 - Verification Lifecycle:
-  - Rehearsal / Preflight: `bash -n tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`; `git diff --check`
+  - Rehearsal / Preflight: `bash -n tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`; `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh control-boundary`; `node tests/docworkflow-agent-delivery/e2e/validators/control-boundary-summary.js tests/docworkflow-agent-delivery/e2e/fixtures/control-session-boundary`; `dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs -- --fixture /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-evidence`; `dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ArchiveVisibleCodexAppSession.cs -- --fixture /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout --mode validate`; `git diff --check`
+  - Readiness Gate: `cd /tmp && dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateChildReadiness.cs -- --index /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-05-10\ Agent\ Delivery\ Visible\ Codex\ App\ Sessions\ Orchestration\ Pack.md --child ADV-CAS-S3 --handoff /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/child-session-handoffs/adv-cas-s3-session-handoff.md`
   - Delivery Gate: later launcher/control workflow only: `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh --run-id <id> --keep`
-  - Pre-Archive Closeout: retain visible-session summary, control-boundary status, archive/no-thread evidence and final output proof.
-  - Post-Archive / Current Replay: `ValidateChildReadiness.cs --allow-non-ready` until prerequisites are accepted.
-- Evidence / OpenSpec: Proposed ledger `openspec/changes/agent-delivery-visible-md-e2e-5-suite/`; no delivery evidence exists yet.
-- Retained Evidence: none for live MD-E2E-5.
-- Offene Blocker oder non-blocking Notes: Blocking for implementation: S1/S2/S4/S5 prerequisites.
-- Fresh Session empfohlen: Yes, but only after prerequisite children are ready/accepted.
-
+  - Pre-Archive Closeout: retain visible-session summary, S2 validator output, S4 control-boundary summary, final output proof and S5 archive/no-thread status.
+  - Post-Archive / Current Replay: S3 delivery must keep S2/S4/S5 fixture gates green and retain live `MD-E2E-5` evidence before any accepted closeout.
+- Evidence / OpenSpec: Proposed ledger remains `openspec/changes/agent-delivery-visible-md-e2e-5-suite/`; no S3 ledger was created during hardening.
+- Retained Evidence: hardening verification output plus S3 not-ready runner rehearsal under `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T103700Z-adv-cas-s3-rehearsal/`. No passing live `MD-E2E-5` evidence exists yet.
+- Open Notes: The S3 runner command now exists and retains machine-readable not-ready summaries. A passing closeout still requires a live run that proves app-server launch, S2 validation, S4 observed-only boundary, S5 archive summary, and exact final output; otherwise stop with `NOT READY` and retain failure evidence under the S3 run directory.
+- Fresh Session empfohlen: Yes, start one fresh `spec-change-delivery` session for `ADV-CAS-S3`.

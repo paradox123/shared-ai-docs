@@ -6,21 +6,21 @@
 - Child Index / Queue: `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md` section `Child Index`
 - Handoff File: `_specs/child-session-handoffs/adv-cas-s4-session-handoff.md`
 - Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`
-- Codex Session / Log: not launched; parallel hardening draft only.
-- Session Evidence: no live MD-E2E-5 run; draft lane parsed embedded examples and checked whitespace.
+- Codex Session / Log: manual S4 `spec-change-delivery` session; no launcher-created visible session.
+- Session Evidence: no live MD-E2E-5 run; S4 fixture/validator lane replayed control-boundary positive/negative cases.
 - Handoff Timestamp: 2026-05-10
 - Naechster Modus/Skill: `spec-change-delivery`
-- Aktueller Verdict: IMPLEMENTATION READY.
+- Aktueller Verdict: ACCEPTED.
 - Scope Summary: Implement the Control Session Boundary fixture/validator slice so the future MD-E2E-5 control runner can prove observed-only control behavior and reject direct orchestration, hardening, delivery, closeout or output writes.
 - Non-Goals: No Launcher adapter implementation; no visible-session validator implementation outside S4 boundary fields; no closeout archive support; no live MD-E2E-5 run in S4 hardening.
 - Allowed Write-Set: `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S4 Control Session Boundary.md`; `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md`; `_specs/child-session-handoffs/adv-cas-s4-session-handoff.md`; `tests/docworkflow-agent-delivery/e2e/fixtures/control-session-boundary/**`; `tests/docworkflow-agent-delivery/e2e/validators/control-boundary-summary.js`; `tests/docworkflow-agent-delivery/testcases/md-e2e-5-visible-codex-app-sessions.md`; `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`; `tests/docworkflow-agent-delivery/README.md`
 - Shared / Read-only Files: `_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md`; `skills-repo/tools/AgentDeliverySessionLauncher.cs`; `skills-repo/tools/ValidateAgentDeliveryLaunchEvidence.cs`; `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh`; `tests/docworkflow-agent-delivery/e2e/mock-runner/run.js`; `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md`
 - Verification Lifecycle:
   - Rehearsal / Preflight: embedded JSON examples parse; whitespace check; `git diff --check`
-  - Delivery Gate: later S4 implementation must run control-boundary positive/negative fixture validation; do not run live MD-E2E-5 here.
+  - Delivery Gate: control-boundary positive/negative fixture validation; do not run live MD-E2E-5 here.
   - Pre-Archive Closeout: retain control-boundary fixture summaries and README/testcase sync evidence.
-  - Post-Archive / Current Replay: `ValidateChildReadiness.cs` for implementation-ready S4.
-- Evidence / OpenSpec: Proposed ledger `openspec/changes/agent-delivery-visible-control-boundary/`; no delivery evidence exists yet.
-- Retained Evidence: S4 draft lane reported embedded JSON parse and whitespace pass.
+  - Post-Archive / Current Replay: replay `run-visible-app-session-workflow-checks.sh control-boundary`; `ValidateChildReadiness.cs` remains pre-acceptance evidence only.
+- Evidence / OpenSpec: `not_used`: no active `agent-delivery-visible-control-boundary` change exists in `openspec list --json`; proposed ledger was never created, so there is no S4 OpenSpec directory to archive.
+- Retained Evidence: `control-boundary-summary.js` fixture suite `RESULT: PASS (9 cases)`; `run-visible-app-session-workflow-checks.sh control-boundary` `RESULT: PASS (9 cases)`; targeted positive/direct-output fixture checks pass; `bash -n` for the non-live script passes; embedded JSON parse and whitespace checks retained; no visible Codex-App session was created for S4.
 - Offene Blocker oder non-blocking Notes: No implementation blocker. Do not run live `MD-E2E-5` in S4.
-- Fresh Session empfohlen: Yes, start `spec-change-delivery` for S4 when integration ownership is clear.
+- Fresh Session empfohlen: S4 fixture/validator slice is accepted; use S3 hardening/delivery for live `MD-E2E-5` integration, or replay S4 only if fixture evidence must be refreshed.
