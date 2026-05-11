@@ -1,0 +1,1 @@
+{"at":"2026-05-11T09:00:23.5355260\u002B00:00","direction":"client","id":1,"method":"initialize","message":{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"clientInfo":{"name":"agent_delivery_session_launcher","title":"Agent Delivery Session Launcher","version":"0.1.0"},"capabilities":{"experimentalApi":true,"optOutNotificationMethods":[]}}}}
