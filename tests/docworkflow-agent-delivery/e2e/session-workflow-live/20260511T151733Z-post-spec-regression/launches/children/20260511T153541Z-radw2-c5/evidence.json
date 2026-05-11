@@ -1,0 +1,118 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "failed",
+  "execution_channel": "headless_cli",
+  "adapter_id": "codex-cli",
+  "created_at": "2026-05-11T15:35:41.9892390\u002B00:00",
+  "started_at": "2026-05-11T15:35:42.3473420\u002B00:00",
+  "completed_at": "2026-05-11T15:42:54.6812150\u002B00:00",
+  "parent": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/input/test-parent.md",
+  "target_id": "RADW2-C5",
+  "target_role": "child",
+  "target_spec": "child-specs/radw2-c5.md",
+  "control_index": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/orchestration-pack.md",
+  "handoff_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/handoffs/radw2-c5-handoff.md",
+  "initiating_project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "target_workspace": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "project_cwd_source": "current_thread_cwd",
+  "project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "parent_spec_abbrev_and_number": "RADW2-C5",
+  "session_stage": "Implementation",
+  "child_spec_designation": "radw2-c5",
+  "session_title": "RADW2-C5: Implementation - radw2-c5",
+  "next_skill": "spec-change-delivery",
+  "next_mode": "spec-change-delivery",
+  "current_verdict": "IMPLEMENTATION READY",
+  "scope_summary": "Deliver RADW2-C5 in a launcher-created child Codex session by changing target/output/count.txt from exactly 1\\n2\\n3\\n4\\n to exactly 1\\n2\\n3\\n4\\n5\\n, then persist RADW2-C5 delivery and closeout evidence.",
+  "non_goals": [
+    "Do not rewrite prior lines except to preserve them",
+    "do not edit parent input",
+    "do not edit orchestration-pack.md",
+    "do not edit handoffs",
+    "do not use run-mock-e2e-checks.sh",
+    "do not edit unrelated specs or project docs."
+  ],
+  "allowed_write_set": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/target/output/count.txt",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/delivery-evidence/radw2-c5/**",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/closeout/children/radw2-c5.json"
+  ],
+  "read_only_files": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/input/test-parent.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/orchestration-pack.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/child-specs/radw2-c5.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/handoffs/radw2-c5-handoff.md",
+    "skills-repo/skills/spec-change-delivery/SKILL.md",
+    "skills-repo/tools/ValidateChildReadiness.cs"
+  ],
+  "verification": [
+    "assert count.txt becomes exactly 1 newline 2 newline 3 newline 4 newline 5 newline",
+    "assert delivery-evidence/radw2-c5/delivery.json exists",
+    "assert closeout/children/radw2-c5.json has final_status ran-target and closeout_status closed"
+  ],
+  "evidence_openspec": [
+    "direct regression ledger in delivery-evidence/radw2-c5/ and closeout/children/radw2-c5.json",
+    "delivery-evidence/radw2-c5/delivery.json and closeout/children/radw2-c5.json"
+  ],
+  "open_notes": [
+    "Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, allowed write-set, prior child closeout, or current count prefix is inconsistent, stop with NOT READY and write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/delivery-evidence/radw2-c5/not-ready.md."
+  ],
+  "fresh_session_required": true,
+  "agent": {
+    "requested_provider": "codex",
+    "adapter_id": "codex-cli",
+    "adapter_status": "supported",
+    "launch_capability": "launch",
+    "command_contract": "codex exec --json -C \u003Ctarget_workspace\u003E --output-last-message \u003Clast-message.md\u003E -"
+  },
+  "mechanism": {
+    "type": "launch",
+    "recommended_command": "codex exec --json -C \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0027 --output-last-message \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/launches/children/20260511T153541Z-radw2-c5/last-message.md\u0027 - \u003C \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/launches/children/20260511T153541Z-radw2-c5/start-prompt.md\u0027",
+    "actual_command": "\u0027codex\u0027 \u0027exec\u0027 \u0027--json\u0027 \u0027-C\u0027 \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0027 \u0027--output-last-message\u0027 \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/launches/children/20260511T153541Z-radw2-c5/last-message.md\u0027 \u0027-\u0027",
+    "adapter_available": true
+  },
+  "evidence_paths": {
+    "prompt": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/launches/children/20260511T153541Z-radw2-c5/start-prompt.md",
+    "events": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/launches/children/20260511T153541Z-radw2-c5/agent-events.jsonl",
+    "last_message": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/launches/children/20260511T153541Z-radw2-c5/last-message.md",
+    "app_server_transcript": null
+  },
+  "session_visibility": {
+    "class": "headless_cli_session",
+    "visible_in_codex_app": false,
+    "proof_status": "not_visible",
+    "proof_method": "codex_exec_downgrade",
+    "thread_id": null,
+    "thread_source_observed": null,
+    "source_kind_observed": null,
+    "cwd_observed": null,
+    "title_observed": null,
+    "rollout_path": null,
+    "sidebar_or_default_list_observed": false
+  },
+  "app_server": {
+    "listen": "stdio://",
+    "thread_start_observed": false,
+    "thread_name_set_observed": false,
+    "turn_start_observed": false,
+    "turn_completed_status": "not_started",
+    "thread_list_observed": false,
+    "transcript_path": null
+  },
+  "codex_app": {
+    "visibility_status": "verified_same_project",
+    "thread_id": "019e17ae-0aa8-7dc3-8023-eaabfdce36e2",
+    "rollout_path": "/Users/dh/.codex/sessions/2026/05/11/rollout-2026-05-11T17-35-42-019e17ae-0aa8-7dc3-8023-eaabfdce36e2.jsonl",
+    "thread_source": "exec",
+    "thread_cwd_observed": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "thread_title_observed": "Session Title: RADW2-C5: Implementation - radw2-c5\n\nWir arbeiten in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs.\n\nStarte eine frische Agent-Delivery-Session aus folgendem persistierten Handoff.\n\nPflicht: Lies zuerst das Handoff, den Control Index / die Queue und das Target-Artefakt. Validiere, dass Target-ID, Target-Rolle, Handoff-Pfad, Control Index, aktueller Verdict, Target Workspace und Allowed Write-Set konsistent sind. Arbeite nur im erlaubten Write-Set. Wenn ein Gate stale, widerspruechlich oder unvollstaendig ist, stoppe mit NOT READY und persistiere Evidence statt zu implementieren.\n\n- Parent: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/input/test-parent.md\n- Target ID: RADW2-C5\n- Target Role: child\n- Target Spec: child-specs/radw2-c5.md\n- Control Index / Queue: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/orchestration-pack.md\n- Handoff File: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/handoffs/radw2-c5-handoff.md\n- Target Repository / Working Directory: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Initiating Project CWD / App-Kontext: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Target Workspace: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\n- Session Title: RADW2-C5: Implementation - radw2-c5\n- Next Mode / Skill: spec-change-delivery\n- Requested Agent Provider: codex\n- Agent Adapter Status: supported; codex-cli\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RADW2-C5 in a launcher-created child Codex session by changing target/output/count.txt from exactly 1\\n2\\n3\\n4\\n to exactly 1\\n2\\n3\\n4\\n5\\n, then persist RADW2-C5 delivery and closeout evidence.\n- Non-Goals: Do not rewrite prior lines except to preserve them; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/target/output/count.txt; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/delivery-evidence/radw2-c5/**; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/closeout/children/radw2-c5.json\n- Shared / Read-only Files: tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/input/test-parent.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/orchestration-pack.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/child-specs/radw2-c5.md; tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/handoffs/radw2-c5-handoff.md; skills-repo/skills/spec-change-delivery/SKILL.md; skills-repo/tools/ValidateChildReadiness.cs\n- Verification Commands: dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/orchestration-pack.md --child RADW2-C5 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/handoffs/radw2-c5-handoff.md; node -e \u0022const fs=require(\u0027fs\u0027); if (fs.readFileSync(\u0027tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/target/output/count.txt\u0027,\u0027utf8\u0027) !== \u00271\\n2\\n3\\n4\\n5\\n\u0027) process.exit(1);\u0022; node -e \u0022const fs=require(\u0027fs\u0027); const s=JSON.parse(fs.readFileSync(\u0027tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/closeout/children/radw2-c5.json\u0027,\u0027utf8\u0027)); if (s.final_status !== \u0027ran-target\u0027 || s.closeout_status !== \u0027closed\u0027) process.exit(1);\u0022\n- Evidence / OpenSpec: direct regression ledger only; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/delivery-evidence/radw2-c5/delivery.json; write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/closeout/children/radw2-c5.json; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, allowed write-set, prior child closeout, or current count prefix is inconsistent, stop with NOT READY and write tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/delivery-evidence/radw2-c5/not-ready.md.\n\n## Persisted Handoff\n\n# Agent Delivery Session Handoff: RADW2-C5\n\n- Parent: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/input/test-parent.md\u0060\n- Target ID: RADW2-C5\n- Target Role: child\n- Child Spec: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/child-specs/radw2-c5.md\u0060\n- Child Index / Queue: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/orchestration-pack.md\u0060\n- Handoff File: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/handoffs/radw2-c5-handoff.md\u0060\n- Target Repository / Working Directory: \u0060/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0060\n- Next Mode / Skill: spec-change-delivery\n- Current Verdict: IMPLEMENTATION READY\n- Scope Summary: Deliver RADW2-C5 in a launcher-created child Codex session by changing \u0060target/output/count.txt\u0060 from exactly \u00601\\n2\\n3\\n4\\n\u0060 to exactly \u00601\\n2\\n3\\n4\\n5\\n\u0060, then persist RADW2-C5 delivery and closeout evidence.\n- Non-Goals: Do not rewrite prior lines except to preserve them; do not edit parent input; do not edit orchestration-pack.md; do not edit handoffs; do not use run-mock-e2e-checks.sh; do not edit unrelated specs or project docs.\n- Allowed Write-Set: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/target/output/count.txt\u0060; \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/delivery-evidence/radw2-c5/**\u0060; \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/closeout/children/radw2-c5.json\u0060\n- Shared / Read-only Files: \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/input/test-parent.md\u0060; \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/orchestration-pack.md\u0060; \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/child-specs/radw2-c5.md\u0060; \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/handoffs/radw2-c5-handoff.md\u0060; \u0060skills-repo/skills/spec-change-delivery/SKILL.md\u0060; \u0060skills-repo/tools/ValidateChildReadiness.cs\u0060\n- Verification Commands: \u0060dotnet run skills-repo/tools/ValidateChildReadiness.cs -- --index tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/orchestration-pack.md --child RADW2-C5 --handoff tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/handoffs/radw2-c5-handoff.md\u0060; \u0060node -e \u0022const fs=require(\u0027fs\u0027); if (fs.readFileSync(\u0027tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/target/output/count.txt\u0027,\u0027utf8\u0027) !== \u00271\\n2\\n3\\n4\\n5\\n\u0027) process.exit(1);\u0022\u0060; \u0060node -e \u0022const fs=require(\u0027fs\u0027); const s=JSON.parse(fs.readFileSync(\u0027tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/closeout/children/radw2-c5.json\u0027,\u0027utf8\u0027)); if (s.final_status !== \u0027ran-target\u0027 || s.closeout_status !== \u0027closed\u0027) process.exit(1);\u0022\u0060\n- Evidence / OpenSpec: direct regression ledger only; write \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/delivery-evidence/radw2-c5/delivery.json\u0060; write \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/closeout/children/radw2-c5.json\u0060; no OpenSpec archive expected.\n- Open Notes: Fresh child session is required. If the handoff, Child Index row, target workspace, verdict, allowed write-set, prior child closeout, or current count prefix is inconsistent, stop with NOT READY and write \u0060tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T151733Z-post-spec-regression/delivery-evidence/radw2-c5/not-ready.md\u0060.\n\n## Required Child Behavior\n\n1. Read this handoff, the Child Index row, and the child spec before writing.\n2. Validate that \u0060count.txt\u0060 exists and equals exactly \u00601\\n2\\n3\\n4\\n\u0060. If not, stop with NOT READY evidence.\n3. Write exactly \u00601\\n2\\n3\\n4\\n5\\n\u0060 to \u0060count.txt\u0060.\n4. Write \u0060delivery-evidence/radw2-c5/delivery.json\u0060 with \u0060target_id\u0060, \u0060final_status: ran-target\u0060, \u0060written_value: \u00225\u0022\u0060, and \u0060observed_output: \u00221\\n2\\n3\\n4\\n5\\n\u0022\u0060.\n5. Write \u0060closeout/children/radw2-c5.json\u0060 with \u0060target_id\u0060, \u0060final_status: ran-target\u0060, \u0060closeout_status: closed\u0060, and \u0060output_status: pass\u0060.\n6. Run the verification commands and report the result.",
+    "title_status": "observed_different"
+  },
+  "blockers": [],
+  "warnings": [
+    "ValidateChildReadiness.cs passed: Child readiness validation passed for RADW2-C5."
+  ],
+  "prompt_sha256": "05ad09850ebba6694cde3245ed1bba134a858b5661e319ab3e1beb286aebd10d",
+  "exit_code": 143,
+  "stderr_excerpt": "2026-05-11T15:35:42.843536Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: prompt must be at most 128 characters path=/Users/dh/.codex/.tmp/plugins/plugins/build-ios-apps/.codex-plugin/plugin.json\n2026-05-11T15:35:42.844958Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/plugin-eval/.codex-plugin/plugin.json\n2026-05-11T15:35:42.853382Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/twilio-developer-kit/.codex-plugin/plugin.json\n2026-05-11T15:35:42.853541Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/openai-developers/.codex-plugin/plugin.json\n2026-05-11T15:35:44.393598Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: prompt must be at most 128 characters path=/Users/dh/.codex/.tmp/plugins/plugins/build-ios-apps/.codex-plugin/plugin.json\n2026-05-11T15:35:44.393979Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/plugin-eval/.codex-plugin/plugin.json\n2026-05-11T15:35:44.396456Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/twilio-developer-kit/.codex-plugin/plugin.json\n2026-05-11T15:35:44.396492Z  WARN codex_core_plugins::manifest: ignoring interface.defaultPrompt: maximum of 3 prompts is supported path=/Users/dh/.codex/.tmp/plugins/plugins/openai-developers/.codex-plugin/plugin.json\n2026-05-11T15:35:44.409648Z  WARN codex_core_skills::loader: ignoring interface.icon_small: icon path must not contain \u0027..\u0027\n2026-05-11T15:35:44.409661Z  WARN codex_core_skills::loader: ignoring interface.icon_large: icon path must not contain \u0027..\u0027\n2026"
+}

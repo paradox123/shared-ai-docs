@@ -5,6 +5,7 @@
 - [ ] 1.3 Implement controller-backed visible multi-session resolution for controller summary, requests, responses, retained visible-session summary, and matched per-session launcher evidence.
 - [ ] 1.4 Implement closeout archive resolution for archive summaries, explicit no-thread statuses, accepted retained-session notes, and matched session evidence paths.
 - [ ] 1.5 Return deterministic `pass`, `not_ready`, and `fail` verdicts with blockers, warnings, evidence paths, and recommended next action.
+- [ ] 1.6 Document canonical resolver inputs and claim levels for launcher-only, controller-backed visible multi-session, and closeout archive modes.
 
 ## 2. Fixtures And Validators
 
@@ -17,7 +18,7 @@
 ## 3. Skill Slimming
 
 - [ ] 3.1 Update `docs/doc-workflow.md` with the canonical resolver command and output contract.
-- [ ] 3.2 Slim `spec-orchestrator`, `child-spec-hardening`, `spec-change-delivery`, `spec-closeout`, and `agent-delivery-retro-review` so they call or require the resolver instead of duplicating detailed evidence checks.
+- [ ] 3.2 Slim `spec-orchestrator`, `child-spec-hardening`, `spec-change-delivery`, `spec-closeout`, and `agent-delivery-retro-review` only after resolver fixture replay passes, so they call or require the resolver instead of duplicating detailed evidence checks.
 - [ ] 3.3 Preserve skill stop conditions: resolver `not_ready` or `fail` blocks implementation, closeout, and next-child release.
 - [ ] 3.4 Verify the skills still state Launcher, Controller, and archive roles consistently with `docs/doc-workflow.md`.
 
