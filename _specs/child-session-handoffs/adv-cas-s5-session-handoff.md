@@ -6,21 +6,21 @@
 - Child Index / Queue: `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md` section `Child Index`
 - Handoff File: `_specs/child-session-handoffs/adv-cas-s5-session-handoff.md`
 - Target Repository / Working Directory: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`
-- Codex Session / Log: not launched; parallel hardening draft only.
-- Session Evidence: no archive/live evidence created; draft lane parsed embedded examples and checked whitespace.
+- Codex Session / Log: not launched for implementation; hardening sync only.
+- Session Evidence: no archive/live evidence created; S5 hardening parsed 4 embedded JSON blocks, rehearsed `codex app-server --help`, generated `/tmp/codex-app-schema-adv-cas-s5/v2/ThreadArchiveParams.ts`, `ThreadArchiveResponse.ts` and `ThreadListParams.ts`, passed the S2 visible evidence fixture regression with `RESULT: PASS (11 cases)`, passed `git diff --check`, and passed `ValidateChildReadiness.cs`.
 - Handoff Timestamp: 2026-05-10
-- Naechster Modus/Skill: `child-spec-hardening`
-- Aktueller Verdict: NEEDS HARDENING.
-- Scope Summary: Re-harden S5 after S2 validator delivery so closeout can archive visible Codex-App sessions via `thread/archive` and reject READY when visible sessions remain unarchived.
-- Non-Goals: No Launcher adapter implementation; no MD-E2E-5 runner; no live archive call in hardening; no direct SQLite mutation.
-- Allowed Write-Set: `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S5 Closeout Archive Support.md`; `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md`; `_specs/child-session-handoffs/adv-cas-s5-session-handoff.md`; `skills-repo/skills/spec-closeout/SKILL.md`; `docs/doc-workflow.md`; `skills-repo/tools/ArchiveVisibleCodexAppSession.cs`; `skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs`; `tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout/**`; `tests/docworkflow-agent-delivery/e2e/validators/visible-session-closeout-summary.js`; `tests/docworkflow-agent-delivery/README.md`
-- Shared / Read-only Files: `_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md`; `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S1 Launcher Visible App Adapter.md`; `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S2 Visible Evidence Validator.md`; `skills-repo/tools/AgentDeliverySessionLauncher.cs`; `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`
+- Naechster Modus/Skill: `spec-change-delivery`
+- Aktueller Verdict: IMPLEMENTATION READY.
+- Scope Summary: Implement S5 closeout archive support so `spec-closeout` archives visible Codex-App sessions via `thread/archive`, records explicit headless/no-thread archive statuses, preserves S2 validator failure classes, and rejects READY when visible sessions remain unarchived.
+- Non-Goals: No Launcher adapter implementation; no MD-E2E-5 runner; no live MD-E2E-5 run; no live archive call unless explicitly opted into delivery live mode; no direct SQLite mutation; no S3 runner edits except a handoff note if the S5 implementation finds a real integration blocker.
+- Allowed Write-Set: `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S5 Closeout Archive Support.md`; `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions Orchestration Pack.md`; `_specs/child-session-handoffs/adv-cas-s5-session-handoff.md`; `skills-repo/skills/spec-closeout/SKILL.md`; `docs/doc-workflow.md`; `skills-repo/tools/ArchiveVisibleCodexAppSession.cs`; `skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs`; `tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout/**`; `tests/docworkflow-agent-delivery/e2e/validators/visible-session-closeout-summary.js`; `tests/docworkflow-agent-delivery/README.md`; `openspec/changes/agent-delivery-visible-session-closeout-archive/**`
+- Shared / Read-only Files: `_specs/2026-05-09 Agent Delivery Visible Codex App Sessions.md`; `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S1 Launcher Visible App Adapter.md`; `_specs/2026-05-10 Agent Delivery Visible Codex App Sessions ADV-CAS-S2 Visible Evidence Validator.md`; `skills-repo/tools/AgentDeliverySessionLauncher.cs`; `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`; `tests/docworkflow-agent-delivery/testcases/md-e2e-5-visible-codex-app-sessions.md`
 - Verification Lifecycle:
-  - Rehearsal / Preflight: embedded JSON examples parse; whitespace check; `git diff --check`
-  - Delivery Gate: later S5 implementation must run archive-positive, already-archived, headless-not-app-visible, queued-no-thread, archive-failure and visible-unarchived-negative fixtures.
+  - Rehearsal / Preflight: embedded JSON examples parse; `codex app-server --help`; `codex app-server generate-ts --out /tmp/codex-app-schema-adv-cas-s5`; `git diff --check`; `ValidateChildReadiness.cs`.
+  - Delivery Gate: S5 implementation must run visible-archive-positive, already-archived, headless-not-app-visible, queued-no-thread, archive-failure, post-archive-proof-failure, mixed-child-run and unarchived-visible-negative fixtures.
   - Pre-Archive Closeout: retain archive fixture summaries and closeout skill/docs sync evidence.
-  - Post-Archive / Current Replay: `ValidateChildReadiness.cs --allow-non-ready` until S5 is promoted.
+  - Post-Archive / Current Replay: replay S5 archive fixture summary, S2 visible evidence regression and source wording checks before S5 closeout.
 - Evidence / OpenSpec: Proposed ledger `openspec/changes/agent-delivery-visible-session-closeout-archive/`; no delivery evidence exists yet.
-- Retained Evidence: S5 draft lane reported `git diff --check` and embedded JSON parse pass.
-- Offene Blocker oder non-blocking Notes: Blocking for implementation: S2 validator delivery must be stable; archive fixture manifests do not exist yet.
-- Fresh Session empfohlen: Yes, continue with `child-spec-hardening` after S2 schema is stable.
+- Retained Evidence: S5 hardening updates this handoff and the Child Index; no live session evidence was created; no live `thread/archive` call was made.
+- Offene Blocker oder non-blocking Notes: No blocker for implementation readiness. Non-blocking: live `thread/archive` remains opt-in; retained visible sessions require explicit user acceptance.
+- Fresh Session empfohlen: Yes, start `spec-change-delivery` for exactly ADV-CAS-S5.
