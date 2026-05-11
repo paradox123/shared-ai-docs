@@ -84,6 +84,7 @@ const summaryPath = path.join(runDir, "visible-session-summary.json");
 const outputPath = path.join(runDir, "target/output/count.txt");
 const controlSummaryPath = path.join(runDir, "control/control-boundary-summary.json");
 const archiveSummaryPath = path.join(runDir, "closeout/archive-summary.json");
+const controllerSummaryPath = path.join(runDir, "controller/controller-summary.json");
 const canonicalFixture = path.join(repoRoot, "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260509T112628Z/input/test-parent.md");
 
 const setup = prepareRunDir();
@@ -192,6 +193,7 @@ function prepareRunDir() {
 function evaluateRun() {
   const reportLines = [];
   const visibleResults = validateVisibleSessions();
+  const controllerResult = validateControllerSummary(visibleResults.controllerEvidenceMap);
   const outputResult = validateFinalOutput();
   const controlResult = validateControlBoundary();
   const archiveResult = validateArchiveSummary();
@@ -209,13 +211,14 @@ function evaluateRun() {
   const secretRedactionStatus = redactionResult.ok ? "pass" : "fail";
 
   const allPass = visibleStatus === "pass" &&
+    controllerResult.ok &&
     finalOutputStatus === "pass" &&
     controlStatus === "observed_only" &&
     archiveStatus === "READY" &&
     secretRedactionStatus === "pass";
 
   const overallStatus = allPass ? "pass" :
-    visibleStatus === "not_ready" || finalOutputStatus === "not_ready" || controlStatus === "not_ready" || archiveStatus === "READY_NO_SESSION_EVIDENCE"
+    visibleStatus === "not_ready" || !controllerResult.exists || finalOutputStatus === "not_ready" || controlStatus === "not_ready" || archiveStatus === "READY_NO_SESSION_EVIDENCE"
       ? "not_ready"
       : "fail";
 
@@ -243,9 +246,11 @@ function evaluateRun() {
     control_boundary_summary: rel(controlSummaryPath),
     closeout_archive_summary: rel(archiveSummaryPath),
     s2_visible_validator: visibleResults.validatorProof,
+    controller_summary: controllerResult.proof,
     s4_control_boundary_validator: controlResult.validatorProof,
     s5_archive_validator: archiveResult.validatorProof,
     failure_reasons: [
+      ...controllerResult.failures,
       ...visibleResults.failures,
       ...outputResult.failures,
       ...controlResult.failures,
@@ -283,11 +288,12 @@ function validateVisibleSessions() {
   const threadIds = new Set();
   const evidencePaths = [];
   const validatorRuns = [];
+  const controllerEvidenceMap = loadControllerEvidenceMap();
   let missingCount = 0;
 
   for (const role of roles) {
     const targetId = targetIds[role];
-    const evidencePath = findEvidencePath(role);
+    const evidencePath = findEvidencePath(role, controllerEvidenceMap);
     const record = {
       target_id: targetId,
       evidence_path: evidencePath ? rel(evidencePath) : rel(path.join(runDir, "launches", role, "evidence.json")),
@@ -359,16 +365,108 @@ function validateVisibleSessions() {
     parent: records.get("parent"),
     children,
     validatorProof: validatorRuns
+    ,
+    controllerEvidenceMap
   };
 }
 
-function findEvidencePath(role) {
+function findEvidencePath(role, controllerEvidenceMap) {
+  const targetId = targetIds[role];
+  if (controllerEvidenceMap.has(targetId)) return controllerEvidenceMap.get(targetId);
   const canonical = path.join(runDir, "launches", role, "evidence.json");
   if (fs.existsSync(canonical)) return canonical;
   const roleRoot = path.join(runDir, "launches", role);
-  if (!fs.existsSync(roleRoot)) return null;
-  const matches = walk(roleRoot).filter((file) => path.basename(file) === "evidence.json").sort();
+  const searchRoots = [];
+  if (fs.existsSync(roleRoot)) searchRoots.push(roleRoot);
+  const controllerChildRoot = path.join(runDir, "launches", "children");
+  if (role !== "parent" && fs.existsSync(controllerChildRoot)) searchRoots.push(controllerChildRoot);
+  const matches = searchRoots.flatMap((root) => walk(root))
+    .filter((file) => path.basename(file) === "evidence.json")
+    .filter((file) => {
+      const evidence = readJson(file);
+      return evidence.ok && evidence.value?.target_id === targetId;
+    })
+    .sort();
   return matches.length === 1 ? matches[0] : null;
+}
+
+function loadControllerEvidenceMap() {
+  const evidence = new Map();
+  if (!fs.existsSync(controllerSummaryPath)) return evidence;
+  const summary = readJson(controllerSummaryPath);
+  if (!summary.ok) return evidence;
+
+  const parentPath = resolveMaybe(summary.value?.parent?.evidence_path);
+  if (parentPath && fs.existsSync(parentPath)) evidence.set("RSW-PARENT", parentPath);
+
+  const requests = Array.isArray(summary.value?.requests) ? summary.value.requests : [];
+  for (const request of requests) {
+    const responsePath = resolveMaybe(request.response_path);
+    if (!responsePath || !fs.existsSync(responsePath)) continue;
+    const response = readJson(responsePath);
+    if (!response.ok) continue;
+    const targetId = response.value?.request_id;
+    const evidencePath = resolveMaybe(response.value?.launcher?.evidence_path);
+    if (targetId && evidencePath && fs.existsSync(evidencePath)) evidence.set(targetId, evidencePath);
+  }
+  return evidence;
+}
+
+function validateControllerSummary(controllerEvidenceMap) {
+  const failures = [];
+  if (!fs.existsSync(controllerSummaryPath)) {
+    return { ok: false, exists: false, failures: ["Controller summary is missing."], proof: null };
+  }
+
+  const summary = readJson(controllerSummaryPath);
+  if (!summary.ok) {
+    return { ok: false, exists: true, failures: [`Controller summary JSON is invalid: ${summary.error}`], proof: null };
+  }
+
+  if (summary.value.schema_id !== "agent-delivery.visible-session-controller.summary.v1") {
+    failures.push("Controller summary schema_id is invalid.");
+  }
+  if (summary.value.status !== "pass") {
+    failures.push(`Controller summary status is ${summary.value.status || "<missing>"}.`);
+  }
+  if (!controllerEvidenceMap.has("RSW-PARENT")) {
+    failures.push("Controller summary does not resolve RSW-PARENT evidence.");
+  }
+
+  const requests = Array.isArray(summary.value.requests) ? summary.value.requests : [];
+  for (const role of childRoles) {
+    const targetId = targetIds[role];
+    const request = requests.find((item) => item.request_id === targetId);
+    if (!request) {
+      failures.push(`Controller summary has no request for ${targetId}.`);
+      continue;
+    }
+    if (request.status !== "launched") {
+      failures.push(`Controller request ${targetId} status is ${request.status || "<missing>"}.`);
+    }
+    if (!controllerEvidenceMap.has(targetId)) {
+      failures.push(`Controller response does not resolve evidence for ${targetId}.`);
+    }
+  }
+  if (requests.filter((item) => /^RSW-C[1-5]$/.test(String(item.request_id || ""))).length !== 5) {
+    failures.push("Controller summary must include exactly five RSW child requests.");
+  }
+
+  return {
+    ok: failures.length === 0,
+    exists: true,
+    failures,
+    proof: {
+      path: rel(controllerSummaryPath),
+      status: summary.value.status,
+      request_count: requests.length
+    }
+  };
+}
+
+function resolveMaybe(raw) {
+  if (!raw) return null;
+  return path.isAbsolute(raw) ? raw : path.resolve(repoRoot, raw);
 }
 
 function runVisibleValidator(evidencePath) {
@@ -384,6 +482,7 @@ function runVisibleValidator(evidencePath) {
   ];
 
   const evidence = readJson(evidencePath);
+  if (evidence.value?.session_title) args.push("--expect-title", evidence.value.session_title);
   const prompt = resolveEvidencePath(evidence.value, dir, "prompt") || path.join(dir, "start-prompt.md");
   const transcript = resolveEvidencePath(evidence.value, dir, "app_server_transcript") || path.join(dir, "app-server-transcript.jsonl");
   if (fs.existsSync(prompt)) args.push("--prompt", prompt);

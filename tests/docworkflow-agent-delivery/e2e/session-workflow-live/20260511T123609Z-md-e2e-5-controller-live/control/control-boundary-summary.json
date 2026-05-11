@@ -1,0 +1,146 @@
+{
+  "schema_id": "docworkflow-agent-delivery-control-boundary-summary.v1",
+  "fixture_id": "md-e2e-5-controller-live",
+  "fixture_expectation": {
+    "case_id": "S3-POSITIVE-CONTROLLER-MD-E2E-5",
+    "should_pass_boundary": true,
+    "expected_control_session_status": "observed_only",
+    "expected_overall_workflow_status": "pass",
+    "expected_violation_codes": []
+  },
+  "run_id": "20260511T123609Z-md-e2e-5-controller-live",
+  "detection_method": "controller-summary-and-launch-evidence",
+  "control_session": {
+    "control_session_id": "control-md-e2e-5-controller",
+    "control_actor_kind": "external_controller_process",
+    "allowed_actions": [
+      "prepare_input",
+      "invoke_controller",
+      "observe_evidence",
+      "write_control_report",
+      "write_archive_summary"
+    ],
+    "prohibited_actions_observed": []
+  },
+  "workflow_sessions": [
+    {
+      "session_role": "parent_workflow",
+      "session_id": "019e170c-9e18-72d1-b44e-b88f30256f02",
+      "launch_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/launches/parent/20260511T123923Z-rsw-parent/evidence.json"
+    },
+    {
+      "session_role": "child_workflow",
+      "session_id": "019e170e-7196-7011-9a65-13f6c4f87db1",
+      "target_child_id": "RSW-C1",
+      "launch_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/launches/children/20260511T124122Z-rsw-c1/evidence.json"
+    },
+    {
+      "session_role": "child_workflow",
+      "session_id": "019e1710-0772-7e43-9dbc-5b67a462f4f4",
+      "target_child_id": "RSW-C2",
+      "launch_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/launches/children/20260511T124306Z-rsw-c2/evidence.json"
+    },
+    {
+      "session_role": "child_workflow",
+      "session_id": "019e1712-bcc0-75d2-b7a1-36c2932f361d",
+      "target_child_id": "RSW-C3",
+      "launch_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/launches/children/20260511T124604Z-rsw-c3/evidence.json"
+    },
+    {
+      "session_role": "child_workflow",
+      "session_id": "019e1715-6fc3-7aa2-a4e6-e6bdc45beac0",
+      "target_child_id": "RSW-C4",
+      "launch_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/launches/children/20260511T124901Z-rsw-c4/evidence.json"
+    },
+    {
+      "session_role": "child_workflow",
+      "session_id": "019e1717-2eb2-7f13-8dfe-9f2a80a04bee",
+      "target_child_id": "RSW-C5",
+      "launch_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/launches/children/20260511T125055Z-rsw-c5/evidence.json"
+    }
+  ],
+  "write_observations": [
+    {
+      "artifact_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/control/control-boundary-summary.json",
+      "artifact_class": "control_report",
+      "actor_role": "control",
+      "writer_session_id": "control-md-e2e-5-controller",
+      "allowed": true
+    },
+    {
+      "artifact_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/target/output/count.txt",
+      "artifact_class": "target_output",
+      "actor_role": "child_workflow",
+      "writer_session_id": "019e170e-7196-7011-9a65-13f6c4f87db1",
+      "allowed": true
+    },
+    {
+      "artifact_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/delivery-evidence/rsw-c1/delivery.json",
+      "artifact_class": "child_delivery_evidence",
+      "actor_role": "child_workflow",
+      "writer_session_id": "019e170e-7196-7011-9a65-13f6c4f87db1",
+      "allowed": true
+    },
+    {
+      "artifact_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/target/output/count.txt",
+      "artifact_class": "target_output",
+      "actor_role": "child_workflow",
+      "writer_session_id": "019e1710-0772-7e43-9dbc-5b67a462f4f4",
+      "allowed": true
+    },
+    {
+      "artifact_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/delivery-evidence/rsw-c2/delivery.json",
+      "artifact_class": "child_delivery_evidence",
+      "actor_role": "child_workflow",
+      "writer_session_id": "019e1710-0772-7e43-9dbc-5b67a462f4f4",
+      "allowed": true
+    },
+    {
+      "artifact_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/target/output/count.txt",
+      "artifact_class": "target_output",
+      "actor_role": "child_workflow",
+      "writer_session_id": "019e1712-bcc0-75d2-b7a1-36c2932f361d",
+      "allowed": true
+    },
+    {
+      "artifact_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/delivery-evidence/rsw-c3/delivery.json",
+      "artifact_class": "child_delivery_evidence",
+      "actor_role": "child_workflow",
+      "writer_session_id": "019e1712-bcc0-75d2-b7a1-36c2932f361d",
+      "allowed": true
+    },
+    {
+      "artifact_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/target/output/count.txt",
+      "artifact_class": "target_output",
+      "actor_role": "child_workflow",
+      "writer_session_id": "019e1715-6fc3-7aa2-a4e6-e6bdc45beac0",
+      "allowed": true
+    },
+    {
+      "artifact_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/delivery-evidence/rsw-c4/delivery.json",
+      "artifact_class": "child_delivery_evidence",
+      "actor_role": "child_workflow",
+      "writer_session_id": "019e1715-6fc3-7aa2-a4e6-e6bdc45beac0",
+      "allowed": true
+    },
+    {
+      "artifact_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/target/output/count.txt",
+      "artifact_class": "target_output",
+      "actor_role": "child_workflow",
+      "writer_session_id": "019e1717-2eb2-7f13-8dfe-9f2a80a04bee",
+      "allowed": true
+    },
+    {
+      "artifact_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/delivery-evidence/rsw-c5/delivery.json",
+      "artifact_class": "child_delivery_evidence",
+      "actor_role": "child_workflow",
+      "writer_session_id": "019e1717-2eb2-7f13-8dfe-9f2a80a04bee",
+      "allowed": true
+    }
+  ],
+  "control_session_status": "observed_only",
+  "session_chain_status": "pass",
+  "workflow_delivery_status": "pass",
+  "visible_session_status": "pass",
+  "overall_workflow_status": "pass"
+}

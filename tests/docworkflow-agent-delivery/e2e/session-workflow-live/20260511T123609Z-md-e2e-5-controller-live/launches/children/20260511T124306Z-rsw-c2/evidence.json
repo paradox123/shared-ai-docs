@@ -1,0 +1,106 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "launched",
+  "execution_channel": "app_server",
+  "adapter_id": "codex-app-server",
+  "created_at": "2026-05-11T12:43:06.7445690\u002B00:00",
+  "started_at": "2026-05-11T12:43:06.8447110\u002B00:00",
+  "completed_at": "2026-05-11T12:46:03.9923150\u002B00:00",
+  "parent": "MD-E2E-5 External Controller Integration",
+  "target_id": "RSW-C2",
+  "target_role": "workflow-step",
+  "target_spec": "openspec/changes/agent-delivery-md-e2e-5-external-controller-integration/specs/docworkflow-agent-delivery-testsuite/spec.md",
+  "control_index": "",
+  "handoff_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/handoffs/rsw-c2-handoff.md",
+  "initiating_project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "target_workspace": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "project_cwd_source": "explicit_cli_arg",
+  "project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "parent_spec_abbrev_and_number": "RSW-C2",
+  "session_stage": "Implementation",
+  "child_spec_designation": "RSW-C2 Append the second MD-E2E-5 output line and child evidence.",
+  "session_title": "RSW-C2: Implementation - RSW-C2 Append the second MD-E2E-5 output line and child",
+  "next_skill": "spec-change-delivery",
+  "next_mode": "spec-change-delivery",
+  "current_verdict": "IMPLEMENTATION READY",
+  "scope_summary": "Append the second MD-E2E-5 output line and child evidence.",
+  "non_goals": [
+    "Do not write values 1, 3, 4, or 5",
+    "do not launch other sessions",
+    "do not edit controller files."
+  ],
+  "allowed_write_set": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/target/output/count.txt",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/delivery-evidence/rsw-c2/**",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/closeout/children/rsw-c2.json"
+  ],
+  "read_only_files": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/handoffs/parent-handoff.md",
+    "skills-repo/tools/AgentDeliveryVisibleSessionController.cs"
+  ],
+  "verification": [
+    "Controller validates expected output after this child exits."
+  ],
+  "evidence_openspec": [
+    "openspec/changes/agent-delivery-md-e2e-5-external-controller-integration"
+  ],
+  "open_notes": [
+    "none."
+  ],
+  "fresh_session_required": true,
+  "agent": {
+    "requested_provider": "codex",
+    "adapter_id": "codex-app-server",
+    "adapter_status": "supported",
+    "launch_capability": "launch",
+    "command_contract": "codex app-server --listen stdio:// using initialize, thread/start, thread/name/set, turn/start, thread/list"
+  },
+  "mechanism": {
+    "type": "launch",
+    "recommended_command": "dotnet run skills-repo/tools/AgentDeliverySessionLauncher.cs -- --handoff \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/handoffs/rsw-c2-handoff.md\u0027 --target-id \u0027RSW-C2\u0027 --agent codex --mode launch --adapter codex-app-server --initiating-project-cwd \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0027",
+    "actual_command": "codex app-server --listen stdio://",
+    "adapter_available": true
+  },
+  "evidence_paths": {
+    "prompt": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/launches/children/20260511T124306Z-rsw-c2/start-prompt.md",
+    "events": null,
+    "last_message": null,
+    "app_server_transcript": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/launches/children/20260511T124306Z-rsw-c2/app-server-transcript.jsonl"
+  },
+  "session_visibility": {
+    "class": "visible_codex_app_session",
+    "visible_in_codex_app": true,
+    "proof_status": "verified",
+    "proof_method": "app_server_thread_list",
+    "thread_id": "019e1710-0772-7e43-9dbc-5b67a462f4f4",
+    "thread_source_observed": "vscode",
+    "source_kind_observed": "vscode",
+    "cwd_observed": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "title_observed": "RSW-C2: Implementation - RSW-C2 Append the second MD-E2E-5 output line and child",
+    "rollout_path": "/Users/dh/.codex/sessions/2026/05/11/rollout-2026-05-11T14-43-06-019e1710-0772-7e43-9dbc-5b67a462f4f4.jsonl",
+    "sidebar_or_default_list_observed": true
+  },
+  "app_server": {
+    "listen": "stdio://",
+    "request_timeout_seconds": 60,
+    "thread_start_observed": true,
+    "thread_name_set_observed": true,
+    "turn_start_observed": true,
+    "turn_completed_status": "completed",
+    "thread_list_observed": true,
+    "transcript_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/launches/children/20260511T124306Z-rsw-c2/app-server-transcript.jsonl",
+    "stderr_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/launches/children/20260511T124306Z-rsw-c2/app-server-stderr.log"
+  },
+  "codex_app": {
+    "visibility_status": "not_applicable",
+    "thread_id": null,
+    "rollout_path": null,
+    "thread_source": null,
+    "thread_cwd_observed": null,
+    "thread_title_observed": null,
+    "title_status": "not_applicable"
+  },
+  "blockers": [],
+  "warnings": [],
+  "prompt_sha256": "a68f44b7ddcfff8062f0b55076a16b3a2404f699c6bed4118e2e5b800a1415d0"
+}

@@ -1,0 +1,9 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "launched",
+  "target_id": "CTRL-PARENT",
+  "session_visibility": {
+    "class": "visible_codex_app_session",
+    "visible_in_codex_app": true
+  }
+}

@@ -20,6 +20,7 @@ The live run must include:
 
 - parent visible-session evidence,
 - five child visible-session evidence records for `RSW-C1` through `RSW-C5`,
+- external controller summary and one response per child request,
 - S4 control-boundary summary,
 - S5 closeout archive summary,
 - final `target/output/count.txt`,
@@ -66,4 +67,10 @@ For the live run, parent plus five child evidence records must pass the S2 visib
 
 ## Current Delivery Status
 
-S3 now has an executable `--run-id <id> --keep` gate. It writes `visible-session-summary.json` for both pass and retained `not_ready` runs. A pass must not be claimed until real parent plus five child visible Codex-App session evidence, S4 control-boundary status, S5 archive evidence, and exact final output are retained under the live run directory.
+S3 now has a passing retained controller-backed live run:
+
+```text
+tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/
+```
+
+The parent published five child launch requests, the external controller launched `RSW-C1` through `RSW-C5`, and the runner wrote `visible-session-summary.json` with `overall_workflow_status: "pass"`.

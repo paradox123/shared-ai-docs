@@ -1,0 +1,107 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "launched",
+  "execution_channel": "app_server",
+  "adapter_id": "codex-app-server",
+  "created_at": "2026-05-11T12:06:47.8991380\u002B00:00",
+  "started_at": "2026-05-11T12:06:47.9813650\u002B00:00",
+  "completed_at": "2026-05-11T12:09:06.3417600\u002B00:00",
+  "parent": "Agent Delivery External Visible Session Controller MVP",
+  "target_id": "CTRL-PARENT",
+  "target_role": "workflow-step",
+  "target_spec": "_specs/2026-05-11 Agent Delivery External Visible Session Controller MVP.md",
+  "control_index": "",
+  "handoff_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T120609Z-external-controller-mvp/handoffs/parent-handoff.md",
+  "initiating_project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "target_workspace": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "project_cwd_source": "explicit_cli_arg",
+  "project_cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+  "parent_spec_abbrev_and_number": "CTRL-PARENT",
+  "session_stage": "Implementation",
+  "child_spec_designation": "CTRL-PARENT Publish exactly one external-controller child request for CTRL-C1 and stop.",
+  "session_title": "CTRL-PARENT: Implementation - CTRL-PARENT Publish exactly one external-controlle",
+  "next_skill": "controller-request-publication",
+  "next_mode": "controller-request-publication",
+  "current_verdict": "IMPLEMENTATION READY",
+  "scope_summary": "Publish exactly one external-controller child request for CTRL-C1 and stop.",
+  "non_goals": [
+    "Do not launch the child",
+    "do not run AgentDeliverySessionLauncher.cs",
+    "do not run codex app-server",
+    "do not touch MD-E2E-5."
+  ],
+  "allowed_write_set": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T120609Z-external-controller-mvp/controller/requests/**"
+  ],
+  "read_only_files": [
+    "skills-repo/tools/AgentDeliverySessionLauncher.cs",
+    "skills-repo/tools/AgentDeliveryVisibleSessionController.cs",
+    "_specs/2026-05-11 Agent Delivery External Visible Session Controller MVP.md"
+  ],
+  "verification": [
+    "Controller owns verification after this parent publishes the request."
+  ],
+  "evidence_openspec": [
+    "openspec/changes/agent-delivery-visible-session-controller-mvp",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T120609Z-external-controller-mvp"
+  ],
+  "open_notes": [
+    "This parent session exists only to publish a request artifact. The external controller launches CTRL-C1."
+  ],
+  "fresh_session_required": true,
+  "agent": {
+    "requested_provider": "codex",
+    "adapter_id": "codex-app-server",
+    "adapter_status": "supported",
+    "launch_capability": "launch",
+    "command_contract": "codex app-server --listen stdio:// using initialize, thread/start, thread/name/set, turn/start, thread/list"
+  },
+  "mechanism": {
+    "type": "launch",
+    "recommended_command": "dotnet run skills-repo/tools/AgentDeliverySessionLauncher.cs -- --handoff \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T120609Z-external-controller-mvp/handoffs/parent-handoff.md\u0027 --target-id \u0027CTRL-PARENT\u0027 --agent codex --mode launch --adapter codex-app-server --initiating-project-cwd \u0027/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs\u0027",
+    "actual_command": "codex app-server --listen stdio://",
+    "adapter_available": true
+  },
+  "evidence_paths": {
+    "prompt": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T120609Z-external-controller-mvp/launches/parent/20260511T120647Z-ctrl-parent/start-prompt.md",
+    "events": null,
+    "last_message": null,
+    "app_server_transcript": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T120609Z-external-controller-mvp/launches/parent/20260511T120647Z-ctrl-parent/app-server-transcript.jsonl"
+  },
+  "session_visibility": {
+    "class": "visible_codex_app_session",
+    "visible_in_codex_app": true,
+    "proof_status": "verified",
+    "proof_method": "app_server_thread_list",
+    "thread_id": "019e16ee-c832-7af1-a61a-89154bea4cc0",
+    "thread_source_observed": "vscode",
+    "source_kind_observed": "vscode",
+    "cwd_observed": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "title_observed": "CTRL-PARENT: Implementation - CTRL-PARENT Publish exactly one external-controlle",
+    "rollout_path": "/Users/dh/.codex/sessions/2026/05/11/rollout-2026-05-11T14-06-48-019e16ee-c832-7af1-a61a-89154bea4cc0.jsonl",
+    "sidebar_or_default_list_observed": true
+  },
+  "app_server": {
+    "listen": "stdio://",
+    "request_timeout_seconds": 30,
+    "thread_start_observed": true,
+    "thread_name_set_observed": true,
+    "turn_start_observed": true,
+    "turn_completed_status": "completed",
+    "thread_list_observed": true,
+    "transcript_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T120609Z-external-controller-mvp/launches/parent/20260511T120647Z-ctrl-parent/app-server-transcript.jsonl",
+    "stderr_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T120609Z-external-controller-mvp/launches/parent/20260511T120647Z-ctrl-parent/app-server-stderr.log"
+  },
+  "codex_app": {
+    "visibility_status": "not_applicable",
+    "thread_id": null,
+    "rollout_path": null,
+    "thread_source": null,
+    "thread_cwd_observed": null,
+    "thread_title_observed": null,
+    "title_status": "not_applicable"
+  },
+  "blockers": [],
+  "warnings": [],
+  "prompt_sha256": "9bd52996673e3861cdb4dbff9671c8177f0a94f0f137698eb15eeb9e1edf9ea5"
+}

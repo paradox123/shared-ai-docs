@@ -1,6 +1,6 @@
 **Date:** 2026-05-11
-**Status:** 🟢 Implementation Ready
-**Scope:** Hardened child contract for `ADV-CAS-S3` Agent Delivery Workflow Test Suite integration of `MD-E2E-5`. This child defines the live visible Codex-App session regression runner contract and handoff; it does not run the live regression during hardening.
+**Status:** 🟢 Accepted
+**Scope:** Accepted child delivery for `ADV-CAS-S3` Agent Delivery Workflow Test Suite integration of `MD-E2E-5`. The live visible Codex-App regression runner now passes against retained controller-backed parent plus five child session evidence.
 **SessionId:** adv-cas-s3-hardening-20260511
 
 ---
@@ -9,7 +9,7 @@
 
 `ADV-CAS-S3` integrates the parent-visible session requirements into the Agent Delivery Workflow Test Suite as `MD-E2E-5`.
 
-The future runner must start from the real-session workflow parent fixture, launch the parent workflow and five child workflow sessions through the S1 app-server Launcher path, validate every parent/child visible-session evidence record through the accepted S2 validator, consume the accepted S4 control-boundary summary, consume the accepted S5 archive/no-thread closeout summary, and fail unless the final output is exactly:
+The accepted runner starts from the real-session workflow parent fixture, launches the parent workflow and five child workflow sessions through the S1 app-server Launcher path, validates every parent/child visible-session evidence record through the accepted S2 validator, consumes the accepted S4 control-boundary summary, consumes the accepted S5 archive/no-thread closeout summary, and fails unless the final output is exactly:
 
 ```text
 1
@@ -22,14 +22,14 @@ The future runner must start from the real-session workflow parent fixture, laun
 ## Review Control Surface
 
 - Spec-Variant: Contract-heavy integration child spec.
-- Goldstandard Status: hardened implementation-ready contract for S3 delivery; S1 is implemented and S2/S4/S5 are accepted prerequisites.
+- Goldstandard Status: accepted S3 delivery; S1 is implemented, S2/S4/S5 are accepted prerequisites, and retained controller-backed live `MD-E2E-5` evidence passes.
 - Goal: Add `MD-E2E-5` as the live visible Codex-App session regression that gates both final workflow output and visible-session evidence.
 - In Scope: runner CLI contract; visible-session summary schema; run directory/evidence tree; parent plus five child visible-session evidence requirements; S2 validator coupling; S4 control-boundary coupling; S5 closeout/archive coupling; final-output gate; README/testcase synchronization; implementation handoff.
-- Out of Scope: running live `MD-E2E-5` during hardening; Launcher app-server adapter implementation; visible evidence validator implementation; archive tool implementation; replacing `run-mock-e2e-checks.sh all --keep`; accepting mock/headless/queued evidence as visible-session proof.
+- Out of Scope: Launcher app-server adapter implementation; visible evidence validator implementation; archive tool implementation; replacing `run-mock-e2e-checks.sh all --keep`; accepting mock/headless/queued evidence as visible-session proof.
 - Key Test / Harness Cases: positive Parent+5 Child visible workflow; final output correct but visible evidence missing fails; visible evidence present but final output wrong fails; headless/queued/source-exec/wrong-title/wrong-cwd child evidence fails; control-session takeover fails; unarchived visible session fails; mock-runner substitute fails; setup/usage errors exit distinctly.
-- Key Verification Commands: hardening rehearsal: `bash -n tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`; `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh control-boundary`; `node tests/docworkflow-agent-delivery/e2e/validators/control-boundary-summary.js tests/docworkflow-agent-delivery/e2e/fixtures/control-session-boundary`; `dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs -- --fixture /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-evidence`; `dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ArchiveVisibleCodexAppSession.cs -- --fixture /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout --mode validate`; `cd /tmp && dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateChildReadiness.cs -- --index /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-05-10\ Agent\ Delivery\ Visible\ Codex\ App\ Sessions\ Orchestration\ Pack.md --child ADV-CAS-S3 --handoff /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/child-session-handoffs/adv-cas-s3-session-handoff.md`; `git diff --check`. Future delivery gate only: `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh --run-id <id> --keep`.
-- Open Decisions / Blockers: none for implementation readiness. Live app-server execution remains a delivery-session responsibility.
-- Readiness Status: IMPLEMENTATION READY for exactly `ADV-CAS-S3`.
+- Key Verification Commands: hardening rehearsal: `bash -n tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh`; `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh control-boundary`; `node tests/docworkflow-agent-delivery/e2e/validators/control-boundary-summary.js tests/docworkflow-agent-delivery/e2e/fixtures/control-session-boundary`; `dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs -- --fixture /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-evidence`; `dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ArchiveVisibleCodexAppSession.cs -- --fixture /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/tests/docworkflow-agent-delivery/e2e/fixtures/visible-app-session-closeout --mode validate`; `cd /tmp && dotnet run /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/ValidateChildReadiness.cs -- --index /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/2026-05-10\ Agent\ Delivery\ Visible\ Codex\ App\ Sessions\ Orchestration\ Pack.md --child ADV-CAS-S3 --handoff /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/child-session-handoffs/adv-cas-s3-session-handoff.md`; accepted delivery replay: `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh --run-id 20260511T123609Z-md-e2e-5-controller-live --keep --initiating-project-cwd /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`; controller fixture replays; live control-boundary validation; live archive-summary validation; canonical OpenSpec spec validation; `git diff --check`.
+- Open Decisions / Blockers: none.
+- Readiness Status: ACCEPTED for exactly `ADV-CAS-S3`.
 
 ## Session Briefing
 
@@ -316,20 +316,20 @@ Delivery success criteria:
 
 Anti-loop rule: do not add commands that only verify that verification commands were listed. Each command must either parse/lint the runner, replay accepted fixture gates, validate child readiness, or execute the live S3 runner.
 
-## Definition of Ready for Implementation
+## Historical Definition of Ready for Implementation
 
-S3 is ready for a fresh `spec-change-delivery` session when:
+Before delivery, S3 was ready for a fresh `spec-change-delivery` session when:
 
-1. This child spec reports `IMPLEMENTATION READY`.
-2. The Child Index row for `ADV-CAS-S3` reports `IMPLEMENTATION READY` and points to `_specs/child-session-handoffs/adv-cas-s3-session-handoff.md`.
-3. The S3 handoff verdict is `IMPLEMENTATION READY`.
+1. This child spec reported `IMPLEMENTATION READY`.
+2. The Child Index row for `ADV-CAS-S3` reported `IMPLEMENTATION READY` and pointed to `_specs/child-session-handoffs/adv-cas-s3-session-handoff.md`.
+3. The S3 handoff verdict was `IMPLEMENTATION READY`.
 4. S1 is implemented and S2/S4/S5 are accepted in the Child Index.
 5. The hardening verification commands above pass, except the future live delivery gate remains explicitly not run.
 6. The implementation session accepts that live app-server execution is in scope and retains evidence.
 
 ## Definition of Done / Closeout Evidence
 
-S3 delivery is done only when the implementation session retains:
+S3 delivery is accepted because the implementation/closeout sessions retained:
 
 1. The exact command used: `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh --run-id <id> --keep`.
 2. `tests/docworkflow-agent-delivery/e2e/session-workflow-live/<run-id>/visible-session-summary.json`.
@@ -391,11 +391,18 @@ After S3 delivery:
 4. Keep the mock-only standard gate documentation intact and add live `MD-E2E-5` evidence paths.
 5. Archive or close any S3 OpenSpec ledger only if one is created during delivery.
 
+Closeout sync completed on 2026-05-11:
+
+- S3 Child Index row updated to `ACCEPTED`.
+- S3 handoff updated with retained live evidence and closeout status.
+- OpenSpec archived to `openspec/changes/archive/2026-05-11-agent-delivery-md-e2e-5-external-controller-integration/`.
+- README and `MD-E2E-5` testcase point at accepted controller-backed live evidence.
+
 ## Child Session Handoff
 
 Persisted handoff: `_specs/child-session-handoffs/adv-cas-s3-session-handoff.md`.
 
-Fresh implementation session is recommended. Agent Delivery launch/queue evidence is not created in this hardening run because live session execution is out of scope; the handoff records `manual_start_required` for the next `spec-change-delivery` run.
+The accepted implementation evidence is retained under `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/`.
 
 ## Hardening Verification Record
 
@@ -427,13 +434,49 @@ Retained rehearsal evidence:
 |---|---|
 | `tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh --run-id 20260511T103700Z-adv-cas-s3-rehearsal --keep` | Retained `visible-session-summary.json` with `overall_workflow_status: "not_ready"` and exit `1` because no live parent/child visible-session evidence, S4 summary, S5 archive summary, or final output existed for that run id. |
 
-This is implementation evidence for the runner behavior, not an accepted live `MD-E2E-5` pass. Accepted closeout still requires retained S1/S2/S4/S5-compatible live evidence and exact final output.
+This is implementation evidence for the runner behavior, not an accepted live `MD-E2E-5` pass. The accepted live pass is recorded below.
+
+## Accepted Closeout Record
+
+S3 accepted closeout on 2026-05-11 retained a controller-backed live `MD-E2E-5` run:
+
+```sh
+tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh --run-id 20260511T123609Z-md-e2e-5-controller-live --keep --initiating-project-cwd /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs
+```
+
+Result: `MD-E2E-5 pass`.
+
+Retained evidence:
+
+- `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/controller/controller-summary.json`
+- `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/visible-session-summary.json`
+- `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/control/control-boundary-summary.json`
+- `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/closeout/archive-summary.json`
+- `tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/target/output/count.txt`
+
+Closeout verification replay:
+
+| Check | Result |
+|---|---|
+| Live `MD-E2E-5` runner replay | Passed; `MD-E2E-5 pass`. |
+| Controller MVP fixture replay | Passed; `RESULT: PASS (6 controller fixture cases)`. |
+| Controller MD-E2E-5 fixture replay | Passed; `RESULT: PASS (2 controller fixture cases)`. |
+| Live control-boundary summary validation | Passed; `RESULT: PASS (1 cases)`. |
+| Live archive summary validation | Passed; `PASS: archive-summary.json expected=pass actual=pass`. |
+| `openspec validate agent-delivery-md-e2e-5-external-controller-integration --strict` | Passed before archive. Post-archive replay by change id is stale because the change is archived; canonical spec replay is listed below. |
+| `openspec validate docworkflow-agent-delivery-testsuite --strict` | Passed after archive; canonical testsuite spec is valid. |
+| `git diff --check` | Passed before archive and will be replayed after closeout sync. |
+
+OpenSpec closeout:
+
+- Archived change: `openspec/changes/archive/2026-05-11-agent-delivery-md-e2e-5-external-controller-integration/`
+- Canonical spec updated: `openspec/specs/docworkflow-agent-delivery-testsuite/spec.md`
 
 ## Hardening Verdict
 
-`IMPLEMENTATION READY` for exactly `ADV-CAS-S3`.
+`ACCEPTED` for exactly `ADV-CAS-S3`.
 
-S3 remains serialized as the integration child. The next session should use `spec-change-delivery` and implement only the S3 runner/testcase/docs/evidence write-set above. It must not run or claim the live `MD-E2E-5` pass until the delivery command executes and retains visible-session evidence.
+S3 is closed with retained live controller-backed `MD-E2E-5` evidence. No further S3 delivery action is required unless a future regression changes the accepted S1/S2/S4/S5 contracts.
 
 ## History
 
@@ -441,3 +484,4 @@ S3 remains serialized as the integration child. The next session should use `spe
 |---|---|---|
 | 2026-05-11 | Codex | Hardened S3 into an implementation-ready live `MD-E2E-5` integration contract consuming accepted S1/S2/S4/S5 prerequisites. |
 | 2026-05-11 | Codex | Implemented the S3 live runner command and retained a not-ready rehearsal summary proving missing live evidence does not pass. |
+| 2026-05-11 | Codex | Accepted S3 after retained controller-backed live `MD-E2E-5` pass and archived OpenSpec change `agent-delivery-md-e2e-5-external-controller-integration`. |

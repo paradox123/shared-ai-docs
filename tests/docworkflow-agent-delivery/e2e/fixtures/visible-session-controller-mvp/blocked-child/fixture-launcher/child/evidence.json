@@ -1,0 +1,9 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "blocked",
+  "target_id": "CTRL-C1",
+  "app_server": {
+    "failure_phase": "app_server_initialize_timeout",
+    "failure_method": "initialize"
+  }
+}

@@ -98,6 +98,14 @@ tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks
 
 This command is an opt-in live gate and does not replace `tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh all --keep`. It writes `visible-session-summary.json` under the retained run directory and exits non-zero with `overall_workflow_status: "not_ready"` when the live visible-session, S4, S5, or output evidence is incomplete. A passing live run must retain `visible-session-summary.json`, parent plus five child visible-session evidence records, S4 control-boundary status, S5 archive/no-thread evidence and final output proof for exact `1\n2\n3\n4\n5\n`.
 
+Accepted controller-backed live evidence:
+
+```text
+tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/
+```
+
+In that run, `RSW-PARENT` published five launch requests, `AgentDeliveryVisibleSessionController.cs` launched `RSW-C1` through `RSW-C5` externally, and `run-visible-app-session-workflow-checks.sh --run-id 20260511T123609Z-md-e2e-5-controller-live --keep` reported `MD-E2E-5 pass`.
+
 ADV-CAS-S5 visible Codex-App closeout archive checks:
 
 ```sh
