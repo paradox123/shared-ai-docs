@@ -695,12 +695,14 @@ sealed class Launcher
                 TranscriptPath = transcriptPath,
                 StderrPath = stderrPath,
                 Timeout = TimeSpan.FromMinutes(options.AppServerTimeoutMinutes),
+                RequestTimeout = TimeSpan.FromSeconds(options.AppServerRequestTimeoutSeconds),
             });
 
             request["completed_at"] = DateTimeOffset.UtcNow.ToString("O");
             request["app_server"] = new Dictionary<string, object?>
             {
                 ["listen"] = "stdio://",
+                ["request_timeout_seconds"] = options.AppServerRequestTimeoutSeconds,
                 ["thread_start_observed"] = result.ThreadStartObserved,
                 ["thread_name_set_observed"] = result.ThreadNameSetObserved,
                 ["turn_start_observed"] = result.TurnStartObserved,
@@ -736,6 +738,41 @@ sealed class Launcher
                 ["sidebar_or_default_list_observed"] = result.DefaultListObserved,
             };
         }
+        catch (AppServerPhaseTimeoutException ex)
+        {
+            request["completed_at"] = DateTimeOffset.UtcNow.ToString("O");
+            request["status"] = "blocked";
+            blockers.Add($"codex app-server adapter timed out during `{ex.Method}` after {ex.Timeout.TotalSeconds:0} seconds.");
+            request["app_server"] = new Dictionary<string, object?>
+            {
+                ["listen"] = "stdio://",
+                ["request_timeout_seconds"] = options.AppServerRequestTimeoutSeconds,
+                ["failure_phase"] = ex.Phase,
+                ["failure_method"] = ex.Method,
+                ["thread_start_observed"] = false,
+                ["thread_name_set_observed"] = false,
+                ["turn_start_observed"] = false,
+                ["turn_completed_status"] = "blocked",
+                ["thread_list_observed"] = false,
+                ["transcript_path"] = File.Exists(transcriptPath) ? RelativeOrFull(transcriptPath) : null,
+                ["stderr_path"] = File.Exists(stderrPath) ? RelativeOrFull(stderrPath) : null,
+            };
+            ((Dictionary<string, object?>)request["evidence_paths"]!)["app_server_transcript"] = File.Exists(transcriptPath) ? RelativeOrFull(transcriptPath) : null;
+            request["session_visibility"] = new Dictionary<string, object?>
+            {
+                ["class"] = "app_server_blocked",
+                ["visible_in_codex_app"] = false,
+                ["proof_status"] = "blocked",
+                ["proof_method"] = "app_server_thread_list",
+                ["thread_id"] = null,
+                ["thread_source_observed"] = null,
+                ["source_kind_observed"] = null,
+                ["cwd_observed"] = null,
+                ["title_observed"] = null,
+                ["rollout_path"] = null,
+                ["sidebar_or_default_list_observed"] = false,
+            };
+        }
         catch (Exception ex)
         {
             request["completed_at"] = DateTimeOffset.UtcNow.ToString("O");
@@ -744,6 +781,8 @@ sealed class Launcher
             request["app_server"] = new Dictionary<string, object?>
             {
                 ["listen"] = "stdio://",
+                ["request_timeout_seconds"] = options.AppServerRequestTimeoutSeconds,
+                ["failure_phase"] = "app_server_adapter_exception",
                 ["thread_start_observed"] = false,
                 ["thread_name_set_observed"] = false,
                 ["turn_start_observed"] = false,
@@ -1083,6 +1122,7 @@ sealed class Options
     public string? Adapter { get; private init; } = "codex-exec";
     public string? InitiatingProjectCwd { get; private init; }
     public int AppServerTimeoutMinutes { get; private init; } = 30;
+    public int AppServerRequestTimeoutSeconds { get; private init; } = 60;
     public string? OutPath { get; private init; }
     public string? ControlIndexPath { get; private init; }
     public bool DryRun { get; private init; }
@@ -1092,7 +1132,8 @@ sealed class Options
                            !string.IsNullOrWhiteSpace(Agent) &&
                            (Mode is "queue" or "launch" or "auto") &&
                            (Adapter is "codex-exec" or "codex-app-server") &&
-                           AppServerTimeoutMinutes > 0;
+                           AppServerTimeoutMinutes > 0 &&
+                           AppServerRequestTimeoutSeconds > 0;
 
     public static Options Parse(string[] args)
     {
@@ -1103,6 +1144,7 @@ sealed class Options
         string adapter = "codex-exec";
         string? initiatingProjectCwd = null;
         var appServerTimeoutMinutes = 30;
+        var appServerRequestTimeoutSeconds = 60;
         string? outPath = null;
         string? controlIndex = null;
         var dryRun = false;
@@ -1138,6 +1180,10 @@ sealed class Options
                     appServerTimeoutMinutes = timeout;
                     i++;
                     break;
+                case "--app-server-request-timeout-seconds" when i + 1 < args.Length && int.TryParse(args[i + 1], out var requestTimeout):
+                    appServerRequestTimeoutSeconds = requestTimeout;
+                    i++;
+                    break;
                 case "--out" when i + 1 < args.Length:
                     outPath = args[++i];
                     break;
@@ -1159,6 +1205,7 @@ sealed class Options
             Adapter = adapter,
             InitiatingProjectCwd = initiatingProjectCwd,
             AppServerTimeoutMinutes = appServerTimeoutMinutes,
+            AppServerRequestTimeoutSeconds = appServerRequestTimeoutSeconds,
             OutPath = outPath,
             ControlIndexPath = controlIndex,
             DryRun = dryRun,
@@ -1182,6 +1229,8 @@ sealed class Options
                                    CWD used for app-server thread/start. Defaults to the current directory.
           --app-server-timeout-minutes <minutes>
                                    Timeout for app-server turn completion. Defaults to 30.
+          --app-server-request-timeout-seconds <seconds>
+                                   Timeout for individual app-server JSON-RPC requests such as initialize. Defaults to 60.
           --control-index <path>    Override Control Index path from the handoff.
           --out <dir>               Output root. Defaults to _specs/agent-delivery-session-launches.
           --dry-run                 Persist launch command/evidence without executing codex.
@@ -1404,6 +1453,22 @@ sealed class AppServerLaunchRequest
     public required string TranscriptPath { get; init; }
     public required string StderrPath { get; init; }
     public required TimeSpan Timeout { get; init; }
+    public required TimeSpan RequestTimeout { get; init; }
+}
+
+sealed class AppServerPhaseTimeoutException : TimeoutException
+{
+    public AppServerPhaseTimeoutException(string phase, string method, TimeSpan timeout)
+        : base($"{phase} after {timeout.TotalSeconds:0} seconds")
+    {
+        Phase = phase;
+        Method = method;
+        Timeout = timeout;
+    }
+
+    public string Phase { get; }
+    public string Method { get; }
+    public TimeSpan Timeout { get; }
 }
 
 sealed class AppServerLaunchResult
@@ -1513,9 +1578,6 @@ static class CodexAppServerJsonRpcClient
             }
         });
 
-        using var timeout = new CancellationTokenSource(request.Timeout);
-        timeout.Token.Register(() => completed.TrySetCanceled(timeout.Token));
-
         async Task<JsonNode?> SendRequestAsync(int id, string method, JsonObject parameters)
         {
             var outbound = new JsonObject
@@ -1534,7 +1596,21 @@ static class CodexAppServerJsonRpcClient
             await WriteTranscriptLineAsync(transcript, "client", outbound);
             await process.StandardInput.WriteLineAsync(outbound.ToJsonString());
             await process.StandardInput.FlushAsync();
-            var response = await tcs.Task.WaitAsync(timeout.Token);
+            JsonNode? response;
+            try
+            {
+                response = await tcs.Task.WaitAsync(request.RequestTimeout);
+            }
+            catch (TimeoutException)
+            {
+                lock (pendingLock)
+                {
+                    pending.Remove(id);
+                }
+
+                throw new AppServerPhaseTimeoutException($"app_server_{NormalizeMethodForPhase(method)}_timeout", method, request.RequestTimeout);
+            }
+
             ThrowIfError(response, method);
             return response;
         }
@@ -1615,7 +1691,14 @@ static class CodexAppServerJsonRpcClient
                 }),
             });
             result.TurnStartObserved = true;
-            result.TurnCompletedStatus = await completed.Task.WaitAsync(timeout.Token) ?? "unknown";
+            try
+            {
+                result.TurnCompletedStatus = await completed.Task.WaitAsync(request.Timeout) ?? "unknown";
+            }
+            catch (TimeoutException)
+            {
+                throw new AppServerPhaseTimeoutException("app_server_turn_completion_timeout", "turn/completed", request.Timeout);
+            }
 
             var defaultList = await SendRequestAsync(5, "thread/list", new JsonObject
             {
@@ -1696,6 +1779,9 @@ static class CodexAppServerJsonRpcClient
             throw new InvalidOperationException($"{method} failed: {error.ToJsonString()}");
         }
     }
+
+    private static string NormalizeMethodForPhase(string method) =>
+        Regex.Replace(method, @"[^A-Za-z0-9]+", "_").Trim('_').ToLowerInvariant();
 
     private static async Task WriteTranscriptLineAsync(StreamWriter writer, string direction, JsonNode node)
     {
