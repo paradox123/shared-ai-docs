@@ -1,0 +1,10 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "blocked",
+  "target_id": "ER-C1",
+  "handoff_path": "tests/docworkflow-agent-delivery/e2e/fixtures/evidence-resolver/blocked-launch/handoff.md",
+  "agent": {
+    "requested_provider": "codex",
+    "adapter_status": "supported"
+  }
+}

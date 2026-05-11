@@ -31,12 +31,13 @@ Required where available:
 - Child Specs and Child Session Handoffs.
 - OpenSpec active/archive changes and canonical specs.
 - Evidence, closeout reports, retained summaries, command logs.
-- Agent Delivery Session Launch/Queue Evidence under `_specs/agent-delivery-session-launches/`, especially `launch-request.json`, `start-prompt.md`, `evidence.json`, `manual_start_required`, `blocked`, and `failed` statuses.
+- Agent Delivery Session Launch/Queue Evidence under `_specs/agent-delivery-session-launches/` or run-local evidence roots.
+- Resolver output from `WorkflowDoctor.cs --phase evidence-resolution`, when available, for launcher-only, controller-backed visible multi-session, or closeout archive claims.
 - For controller-backed visible multi-session workflows, `AgentDeliveryVisibleSessionController.cs` summaries, request/response artifacts, retained visible-session summaries, and the matching per-session launcher evidence produced underneath the controller.
 - History rows and SessionId lines.
 - Codex session logs under `.codex/sessions/**/*.jsonl` and `.codex/archived_sessions/*.jsonl` when they are relevant and available.
 
-If session ids are semantic labels rather than real Codex ids, document the gap and reconstruct through handoffs/history/evidence as far as possible. For future work, semantic-only `SessionId` is a finding unless the handoff also has matching launch evidence, a real Codex session id plus `.codex/...jsonl` log path, `manual_start_required` evidence, or explicit `legacy_reconstructed` source/date for historical pre-launcher transitions.
+If session ids are semantic labels rather than real Codex ids, document the gap and reconstruct through handoffs/history/evidence as far as possible. For future work, semantic-only `SessionId` is a finding unless the handoff also has resolver-backed launch/controller/archive evidence or explicit `legacy_reconstructed` source/date for historical pre-launcher transitions.
 
 ## Review Questions
 
@@ -52,7 +53,7 @@ Compare the actual flow against the desired Agent Delivery Workflow:
 8. Did post-archive/current replay commands replace active-change commands?
 9. Was accepted evidence stable enough for future fresh sessions, or only stored in temp paths?
 10. Were decisions, blockers and next actions visible early enough for the next session?
-11. Did each claimed fresh-session transition have Agent Delivery Session Launch/Queue Evidence with matching Target-ID and Handoff path, or controller summary/request/response artifacts that point to matching per-session launcher evidence? Missing launcher/controller evidence is a workflow finding; `manual_start_required` is a manual residue, while `blocked` and `failed` should have stopped follow-up delivery.
+11. Did each claimed fresh-session, controller-backed, or archive transition have a matching resolver verdict? Missing resolver inputs are a workflow finding; resolver `not_ready`/`fail` should have stopped follow-up delivery.
 
 ## Output Format
 
@@ -119,4 +120,4 @@ When a pattern is likely to recur:
 - A static fixture is used as proof of agentic orchestration.
 - Optional validators leave a green result with weaker evidence.
 - Session IDs in specs are semantic labels, but real Codex session logs are not linked.
-- Agent Delivery Session Launch/Queue Evidence is missing, stale, points at a different handoff, or records `manual_start_required`, `blocked`, or `failed` while the workflow narrative claims a successful automated transition.
+- Agent Delivery resolver input is missing, stale, points at a different handoff/run, or emits `not_ready`/`fail` while the workflow narrative claims a successful transition.

@@ -1,0 +1,1 @@
+{"type":"item.completed","item":{"type":"command_execution","command":"dotnet run skills-repo/tools/AgentDeliverySessionLauncher.cs -- --handoff child.md --target-id ER-C1 --mode launch --agent codex"}}

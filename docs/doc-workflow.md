@@ -123,6 +123,32 @@ Rollen:
 3. Wenn ein Workflow eine controller-backed sichtbare Multi-Session-Kette verlangt, z. B. `MD-E2E-5`, darf die Parent-Session keine Child-Launcher-, `codex app-server`- oder sonstige Child-Start-Kommandos ausfuehren. Die Child-Starts muessen ueber den externen Controller laufen.
 4. Skills duerfen fuer normale Handoff-/Queue-Arbeit direkt den Launcher verlangen. Fuer controller-backed sichtbare Multi-Session-Arbeit muessen sie Controller-Evidence, Controller-Requests/Responses und die darunterliegenden Launcher-Evidence zusammen pruefen.
 
+Canonical Evidence Resolver:
+
+```sh
+dotnet run skills-repo/tools/WorkflowDoctor.cs -- --phase evidence-resolution --mode <launcher_only|controller_visible_multi_session|closeout_archive> ...
+```
+
+Der Resolver ist der kanonische Gate-Check fuer konkrete Launcher-/Controller-/Archive-Artefakte. Er gibt maschinenlesbares JSON aus:
+
+- `schema_id: agent-delivery.evidence-resolution.v1`
+- `verdict: pass | not_ready | fail`
+- `mode: launcher_only | controller_visible_multi_session | closeout_archive`
+- `target_id` oder `run_id`
+- `evidence_paths`
+- `blockers`
+- `warnings`
+- `recommended_next_action`
+
+Claim-Level:
+
+- `launcher_only --claim-level queued`: `queued` oder `launched` ist erlaubt, solange Target-ID, Handoff-Pfad, `launch-request.json`, `start-prompt.md` und `evidence.json` konsistent sind.
+- `launcher_only --claim-level launched`: erfordert `status: launched`.
+- `controller_visible_multi_session`: erfordert Controller-Summary, Requests, Responses, retained visible-session summary und passende per-session Launcher-Evidence. Parent-started Child-Launches blockieren den Gate.
+- `closeout_archive`: erfordert eine gueltige visible-session archive summary. `retained_session_accepted`, explizite no-thread Status und echte Archive-Proofs koennen passieren; unarchivierte sichtbare Sessions, `manual_visible_missing_thread`, `archive_failed` und `proof_failed` blockieren.
+
+Skills sollen fuer Evidence-Konsistenz diesen Resolver aufrufen oder verlangen und bei `not_ready` oder `fail` stoppen. `docs/doc-workflow.md` bleibt die kanonische Rollenbeschreibung; Skills sollen keine alternativen Launcher-/Controller-/Archive-Rollen definieren.
+
 Statuswerte:
 1. `launched`: ein implementierter Adapter hat eine frische Session wirklich gestartet.
 2. `queued`: ein vollstaendiger maschinenlesbarer Startauftrag und Prompt liegen fuer einen implementierten Queue-/Launch-Adapter vor.

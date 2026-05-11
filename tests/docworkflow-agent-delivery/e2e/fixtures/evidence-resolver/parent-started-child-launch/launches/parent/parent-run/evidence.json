@@ -1,0 +1,10 @@
+{
+  "schema_version": "agent-delivery.session-launch.v2",
+  "status": "launched",
+  "target_id": "ER-PARENT",
+  "handoff_path": "tests/docworkflow-agent-delivery/e2e/fixtures/evidence-resolver/parent-started-child-launch/parent-handoff.md",
+  "agent": {
+    "requested_provider": "codex",
+    "adapter_status": "supported"
+  }
+}

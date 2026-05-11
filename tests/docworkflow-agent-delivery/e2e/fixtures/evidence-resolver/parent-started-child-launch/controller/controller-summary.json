@@ -1,0 +1,20 @@
+{
+  "schema_id": "agent-delivery.visible-session-controller.summary.v1",
+  "run_dir": "tests/docworkflow-agent-delivery/e2e/fixtures/evidence-resolver/parent-started-child-launch",
+  "status": "pass",
+  "parent": {
+    "target_id": "ER-PARENT",
+    "status": "launched",
+    "evidence_path": "tests/docworkflow-agent-delivery/e2e/fixtures/evidence-resolver/parent-started-child-launch/launches/parent/parent-run/evidence.json"
+  },
+  "requests": [
+    {
+      "request_id": "ER-C1",
+      "request_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/controller/requests/RSW-C1.request.json",
+      "response_path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T123609Z-md-e2e-5-controller-live/controller/responses/RSW-C1.response.json",
+      "status": "launched"
+    }
+  ],
+  "blockers": [],
+  "warnings": []
+}

@@ -1,0 +1,87 @@
+{
+  "schema_version": "agent-delivery.real-regression-closeout.v1",
+  "target_id": "RADW3-PARENT",
+  "overall_status": "pass",
+  "parent": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/input/test-parent.md",
+  "orchestration_pack": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/orchestration-pack.md",
+  "parent_launch_evidence": {
+    "status": "present",
+    "paths": [
+      "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/launches/parent/20260511T160118Z-radw3-parent/start-prompt.md"
+    ]
+  },
+  "child_specs": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/child-specs/radw3-c1.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/child-specs/radw3-c2.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/child-specs/radw3-c3.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/child-specs/radw3-c4.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/child-specs/radw3-c5.md"
+  ],
+  "child_handoffs": [
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/handoffs/radw3-c1-handoff.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/handoffs/radw3-c2-handoff.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/handoffs/radw3-c3-handoff.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/handoffs/radw3-c4-handoff.md",
+    "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/handoffs/radw3-c5-handoff.md"
+  ],
+  "children": [
+    {
+      "target_id": "RADW3-C1",
+      "launcher_status": "launched",
+      "launcher_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/launches/children/20260511T160748Z-radw3-c1/evidence.json",
+      "delivery_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/delivery-evidence/radw3-c1/delivery.json",
+      "closeout": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/closeout/children/radw3-c1.json",
+      "final_status": "ran-target",
+      "closeout_status": "closed"
+    },
+    {
+      "target_id": "RADW3-C2",
+      "launcher_status": "launched",
+      "launcher_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/launches/children/20260511T160954Z-radw3-c2/evidence.json",
+      "delivery_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/delivery-evidence/radw3-c2/delivery.json",
+      "closeout": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/closeout/children/radw3-c2.json",
+      "final_status": "ran-target",
+      "closeout_status": "closed"
+    },
+    {
+      "target_id": "RADW3-C3",
+      "launcher_status": "launched",
+      "launcher_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/launches/children/20260511T161221Z-radw3-c3/evidence.json",
+      "delivery_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/delivery-evidence/radw3-c3/delivery.json",
+      "closeout": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/closeout/children/radw3-c3.json",
+      "final_status": "ran-target",
+      "closeout_status": "closed"
+    },
+    {
+      "target_id": "RADW3-C4",
+      "launcher_status": "launched",
+      "launcher_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/launches/children/20260511T161414Z-radw3-c4/evidence.json",
+      "delivery_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/delivery-evidence/radw3-c4/delivery.json",
+      "closeout": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/closeout/children/radw3-c4.json",
+      "final_status": "ran-target",
+      "closeout_status": "closed"
+    },
+    {
+      "target_id": "RADW3-C5",
+      "launcher_status": "launched",
+      "launcher_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/launches/children/20260511T161647Z-radw3-c5/evidence.json",
+      "delivery_evidence": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/delivery-evidence/radw3-c5/delivery.json",
+      "closeout": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/closeout/children/radw3-c5.json",
+      "final_status": "ran-target",
+      "closeout_status": "closed"
+    }
+  ],
+  "final_output": {
+    "path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live/20260511T160023Z-post-implementation-regression/target/output/count.txt",
+    "expected": "1\n2\n3\n4\n5\n",
+    "observed": "1\n2\n3\n4\n5\n",
+    "status": "pass"
+  },
+  "verification": {
+    "readiness_validations": "passed for RADW3-C1 through RADW3-C5 before launch",
+    "child_launcher_evidence": "exactly five child launch evidence records found with status launched",
+    "child_closeouts": "exactly five child closeout JSON files found with final_status ran-target and closeout_status closed",
+    "final_count": "pass",
+    "git_diff_check": "pass"
+  }
+}
