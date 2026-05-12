@@ -1,7 +1,0 @@
-command: /Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node scripts/container-harness.js
-cwd: /var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.FCJ0fe/target-repos/dwt-s5-synthetic-runtime-repo
-exit_status: 0
-stdout:
-{"gate":"container-harness","status":"pass","cwd":"/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/docworkflow-agent-delivery-l3-runtime-temp-repo.FCJ0fe/target-repos/dwt-s5-synthetic-runtime-repo","harness":"node-fixture"}
-
-stderr:

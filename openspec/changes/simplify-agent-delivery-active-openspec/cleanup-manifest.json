@@ -1,0 +1,360 @@
+{
+  "schema_id": "agent-delivery.cleanup-manifest.v1",
+  "change": "simplify-agent-delivery-active-openspec",
+  "entries": [
+    {
+      "path": "tests/docworkflow-agent-delivery/e2e/evidence",
+      "action": "delete",
+      "category": "generated-evidence-and-obsolete-e2e",
+      "reason": "Retired session-workflow, visible-session, launcher/controller, and mock E2E evidence for the old default Agent Delivery workflow."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/e2e/fixtures",
+      "action": "delete",
+      "category": "obsolete-e2e-fixtures",
+      "reason": "Old E2E fixtures target child sessions, handoffs, launcher/controller evidence, and visible-session proof."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/e2e/mock-runner",
+      "action": "delete",
+      "category": "obsolete-e2e-runner",
+      "reason": "Old mock runner validates retired large/small Agent Delivery paths."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/e2e/session-workflow-live",
+      "action": "delete",
+      "category": "obsolete-live-e2e",
+      "reason": "Live visible-session workflow evidence is legacy/debug-only and not part of the simplified default gate."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/l1",
+      "action": "delete",
+      "category": "obsolete-tests",
+      "reason": "Old DWT L1 child-readiness/provenance checks validate the retired Parent/Child workflow rather than Active OpenSpec Scope."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/l2",
+      "action": "delete",
+      "category": "obsolete-tests",
+      "reason": "Old DWT L2 parent orchestration and child closeout harnesses are replaced by active-scope validation."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/l3",
+      "action": "delete",
+      "category": "obsolete-tests",
+      "reason": "Old DWT L3 runtime-temp-repo pilot is not part of the simplified default workflow."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/mock-data",
+      "action": "delete",
+      "category": "obsolete-fixtures",
+      "reason": "Mock large/small Agent Delivery fixtures support the retired mock E2E runner."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/reporting",
+      "action": "delete",
+      "category": "obsolete-fixtures",
+      "reason": "Reporting fixtures target old child handoff/session telemetry contracts."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/spikes",
+      "action": "delete",
+      "category": "obsolete-fixtures",
+      "reason": "Promptfoo adoption spike evidence is historical and no longer a default simplified workflow gate."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/testcases",
+      "action": "delete",
+      "category": "obsolete-testcases",
+      "reason": "Old DWT/MD-E2E testcases describe retired session-orchestration behavior."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/scripts/run-l1-contract-checks.sh",
+      "action": "delete",
+      "category": "obsolete-scripts",
+      "reason": "Replaced by simplified active-scope validation."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/scripts/run-l2-parent-orchestration-checks.sh",
+      "action": "delete",
+      "category": "obsolete-scripts",
+      "reason": "Parent orchestration is no longer a default Agent Delivery validation path."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/scripts/run-l2-single-child-closeout-checks.sh",
+      "action": "delete",
+      "category": "obsolete-scripts",
+      "reason": "Child closeout harness is retired with the old session workflow."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/scripts/run-l3-runtime-temp-repo-checks.sh",
+      "action": "delete",
+      "category": "obsolete-scripts",
+      "reason": "Runtime temp repo pilot is no longer a default gate."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/scripts/run-mock-e2e-checks.sh",
+      "action": "delete",
+      "category": "obsolete-scripts",
+      "reason": "Mock E2E runner validates retired large/small Agent Delivery paths."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/scripts/run-visible-app-session-workflow-checks.sh",
+      "action": "delete",
+      "category": "obsolete-scripts",
+      "reason": "Visible Codex-App sessions are legacy/debug-only and not a default gate."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/scripts/run-reporting-contract-checks.sh",
+      "action": "delete",
+      "category": "obsolete-scripts",
+      "reason": "Old telemetry/reporting contract belongs to the retired workflow."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh",
+      "action": "delete",
+      "category": "obsolete-scripts",
+      "reason": "Old aggregate contract check is replaced by run-simplified-agent-delivery-checks.sh."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/scripts/setup-fixture.sh",
+      "action": "delete",
+      "category": "obsolete-scripts",
+      "reason": "Only used by retired fixture families."
+    },
+    {
+      "path": "skills-repo/tools/AgentDeliverySessionLauncher.cs",
+      "action": "delete",
+      "category": "obsolete-tools",
+      "reason": "Default workflow no longer launches or queues child sessions."
+    },
+    {
+      "path": "skills-repo/tools/AgentDeliveryVisibleSessionController.cs",
+      "action": "delete",
+      "category": "obsolete-tools",
+      "reason": "Controller-backed visible multi-session orchestration is retired from the default workflow."
+    },
+    {
+      "path": "skills-repo/tools/ArchiveVisibleCodexAppSession.cs",
+      "action": "delete",
+      "category": "obsolete-tools",
+      "reason": "Visible-session archive proof is legacy/debug-only and not retained as default tooling."
+    },
+    {
+      "path": "skills-repo/tools/EvaluateOrchestrationNextStep.cs",
+      "action": "delete",
+      "category": "obsolete-tools",
+      "reason": "Next-step orchestration is replaced by choosing or creating a narrow active OpenSpec change."
+    },
+    {
+      "path": "skills-repo/tools/SyncChildHandoff.cs",
+      "action": "delete",
+      "category": "obsolete-tools",
+      "reason": "Child Session Handoff synchronization is retired from the default workflow."
+    },
+    {
+      "path": "skills-repo/tools/ValidateAgentDeliveryLaunchEvidence.cs",
+      "action": "delete",
+      "category": "obsolete-tools",
+      "reason": "Launch evidence is no longer a default success proof."
+    },
+    {
+      "path": "skills-repo/tools/ValidateChildReadiness.cs",
+      "action": "delete",
+      "category": "obsolete-tools",
+      "reason": "Child Index/Handoff readiness is replaced by Active OpenSpec Scope validation."
+    },
+    {
+      "path": "skills-repo/tools/ValidateOrchestrationPack.cs",
+      "action": "delete",
+      "category": "obsolete-tools",
+      "reason": "Orchestration packs are not the simplified default control surface."
+    },
+    {
+      "path": "skills-repo/tools/ValidateVisibleCodexAppSessionEvidence.cs",
+      "action": "delete",
+      "category": "obsolete-tools",
+      "reason": "Visible-session evidence validation is retired from the default workflow."
+    },
+    {
+      "path": "skills-repo/tools/WorkflowDoctor.cs",
+      "action": "delete",
+      "category": "obsolete-tools",
+      "reason": "WorkflowDoctor phases supported the retired orchestration/evidence resolver workflow."
+    },
+    {
+      "path": "openspec/changes/agent-delivery-run-profiles-compact-debug",
+      "action": "delete",
+      "category": "obsolete-active-change",
+      "reason": "Run profiles are part of the retired launcher/controller workflow and conflict with the simplified default."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-07-docworkflow-agent-testsuite-dwt-s0-framework-spike",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical Promptfoo-first spike for retired DWT testsuite."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-07-docworkflow-agent-testsuite-dwt-s1-l1-deterministic-harness",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical DWT L1 harness for retired child/session workflow."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s2-l2-parent-first-orchestration-agent-harness",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical DWT L2 parent-first orchestration harness."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s3-l2-single-child-delivery-closeout-gate-harness",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical DWT L2 child closeout harness."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s4-reporting-telemetry-contract",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical reporting/telemetry contract for retired workflow."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-08-docworkflow-agent-testsuite-dwt-s5-l3-runtime-temp-repo-delivery-pilot",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical DWT L3 runtime-temp-repo pilot."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-09-agent-delivery-evaluate-orchestration-next-step",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical orchestration next-step evaluator change."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-09-agent-delivery-spec-orchestrator-gate-integration",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical spec-orchestrator gate integration for retired workflow."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-09-agent-delivery-sync-child-handoff",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical child handoff sync change."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-09-agent-delivery-validate-orchestration-pack",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical orchestration pack validator change."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-09-agent-delivery-workflow-doctor",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical WorkflowDoctor wrapper change."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-1-mock-fixtures",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical mock E2E fixture change."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-2-local-runner",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical mock E2E runner change."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-09-docworkflow-agent-mock-e2e-md-e2e-3-standard-gate-migration",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical mock-only standard gate migration."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-11-agent-delivery-evidence-resolver-skill-slimming",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical resolver-based skill slimming change replaced by tool-enforced active scope."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-11-agent-delivery-md-e2e-5-external-controller-integration",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical external controller integration change."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-11-agent-delivery-visible-app-launcher-adapter",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical visible launcher adapter change."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-11-agent-delivery-visible-session-closeout-archive",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical visible-session archive change."
+    },
+    {
+      "path": "openspec/changes/archive/2026-05-11-agent-delivery-visible-session-controller-mvp",
+      "action": "delete",
+      "category": "obsolete-archived-change",
+      "reason": "Historical visible-session controller MVP change."
+    },
+    {
+      "path": "docs/doc-workflow.md",
+      "action": "retain",
+      "category": "canonical-docs",
+      "reason": "Canonical workflow document updated with Active OpenSpec Scope."
+    },
+    {
+      "path": "openspec/changes/simplify-agent-delivery-active-openspec",
+      "action": "retain",
+      "category": "active-change",
+      "reason": "Current active implementation contract and cleanup evidence home."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/active-scope",
+      "action": "retain",
+      "category": "simplified-regression",
+      "reason": "New active-scope fixtures for simplified workflow validation."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/e2e/active-openspec",
+      "action": "retain",
+      "category": "simplified-regression",
+      "reason": "New deterministic E2E proving large parent specs are delivered through five active OpenSpec slices."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/scripts/run-active-openspec-e2e-checks.sh",
+      "action": "retain",
+      "category": "simplified-regression",
+      "reason": "New Active OpenSpec E2E entrypoint."
+    },
+    {
+      "path": "tests/docworkflow-agent-delivery/scripts/run-simplified-agent-delivery-checks.sh",
+      "action": "retain",
+      "category": "simplified-regression",
+      "reason": "New simplified validation entrypoint."
+    },
+    {
+      "path": "skills-repo/tools/ValidateActiveOpenSpecScope.cs",
+      "action": "retain",
+      "category": "simplified-validator",
+      "reason": "New active OpenSpec scope validator."
+    },
+    {
+      "path": "skills-repo/tools/ValidateAgentDeliveryCleanup.cs",
+      "action": "retain",
+      "category": "simplified-validator",
+      "reason": "New cleanup manifest validator."
+    },
+    {
+      "path": "skills-repo/tools/ValidateSkillProseBudget.cs",
+      "action": "retain",
+      "category": "simplified-validator",
+      "reason": "New Skill-MD prose budget validator."
+    }
+  ]
+}

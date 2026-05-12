@@ -1,3 +1,0 @@
-command: npx --yes --package promptfoo@0.121.9 promptfoo validate config -c tests/docworkflow-agent-delivery/spikes/dwt-s0/promptfooconfig.yaml
-Configuration is valid.
-exit_status=0

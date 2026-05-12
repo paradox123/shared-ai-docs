@@ -1,8 +1,0 @@
-{
-  "fixture_id": "stale-dwt-s5-handoff",
-  "fixture_version": "1.0.0",
-  "child_id": "DWT-S5",
-  "handoff_path": "_specs/child-session-handoffs/stale-dwt-s5-session-handoff.md",
-  "readiness_verdict": "STALE",
-  "expected_blocker": "stale_or_mismatched_dwt_s5_handoff"
-}

@@ -1,7 +1,0 @@
-{
-  "fixture_id": "downstream-s2-s3-blocked",
-  "fixture_kind": "downstream-release-guard",
-  "downstream_path": "downstream-summary.json",
-  "expected_case": "DWT-S4-R6",
-  "expected_status": "blocked"
-}

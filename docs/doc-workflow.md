@@ -26,13 +26,11 @@ Hier werden die gemeinsamen Begriffe gepflegt:
 - **Definition of Done (DoD)**
 - **Decision Freeze Pack**
 - **Session Briefing**
-- **Child Index**
-- **Child Session Handoff**
+- **Active OpenSpec Scope**
 - **Review Control Surface**
 - **Parallel Work Control Surface**
 - **Mini-Retro**
 - **Spec Goldstandard**
-- **Agent Delivery Session Launch/Queue Evidence**
 
 Die Skills dürfen diese Begriffe lokal kurz restaten, sollen aber **keine abweichenden Definitionen** einführen. Änderungen an der gemeinsamen Bedeutung werden zuerst hier gepflegt.
 
@@ -63,7 +61,43 @@ Regeln:
 4. Ausgeschlossene Themen werden als Nicht-Ziele sichtbar gehalten, damit sie nicht nebenbei in den Scope rutschen.
 5. Bei Review-/Spec-Arbeit wird zusaetzlich die `Review Control Surface` der betroffenen Spec geprueft oder angelegt.
 
-## Child Session Handoff Template (kurz)
+## Active OpenSpec Scope
+
+Agent Delivery nutzt standardmaessig keinen Session-Neustart als Scope-Kontrolle. Der aktive Implementierungskontext ist genau ein enger OpenSpec Change.
+
+Regeln:
+1. Bei grossem oder scope-sensiblem Agent-Delivery-Work startet Implementierung erst, wenn ein aktiver OpenSpec Change den aktuellen Slice fuehrt.
+2. Parent-/Master-Specs, Research-Material und alte Workflow-Artefakte sind reference-only. Sie koennen Conformance und Coverage pruefen, aber sie erweitern den aktiven Scope nicht.
+3. Es gibt keine separate Micro-Spec, Scope Capsule oder Handoff-Datei als Pflicht-Source-of-Truth. Eine kurze Active-Context-Ansicht darf aus dem OpenSpec Change abgeleitet werden, bleibt aber rein abgeleitet.
+4. Default-Erfolg braucht OpenSpec-Artefakte, Diff-/Cleanup-Evidence und Verification. Child-Session-Launches, sichtbare Codex-App-Sessions, Controller-Evidence und Session-Archive sind legacy/debug-only.
+5. Skills tragen keine langen Agent-Delivery-Regeltexte. Sie verweisen auf diese Quelle und auf die Validatoren.
+
+Validatoren:
+
+```sh
+dotnet run skills-repo/tools/ValidateActiveOpenSpecScope.cs -- --change <change-name> [--parent <path>]
+dotnet run skills-repo/tools/ValidateAgentDeliveryCleanup.cs -- --manifest openspec/changes/<change-name>/cleanup-manifest.json --root <repo-root>
+dotnet run skills-repo/tools/ValidateSkillProseBudget.cs -- --root <repo-root>
+tests/docworkflow-agent-delivery/scripts/run-active-openspec-e2e-checks.sh [--keep]
+```
+
+Abgeleitete Active-Context-Ansicht:
+
+```md
+- Active OpenSpec Change:
+- Goal:
+- In scope:
+- Out of scope:
+- Write-set / Impact:
+- Verification:
+- Parent/reference sources:
+```
+
+Wenn diese Ansicht dem OpenSpec Change widerspricht, gewinnt der OpenSpec Change.
+
+## Legacy: Child Session Handoff Template (debug-only / historical)
+
+Dieser Abschnitt beschreibt den alten Parent/Child-Session-Pfad. Er ist nicht mehr der Default fuer Agent Delivery und darf nur noch als explizit begruendeter legacy/debug Pfad verwendet werden.
 
 Ein Child Session Handoff ist der kompakte Startpunkt fuer die naechste Child-Hardening-, Delivery- oder Closeout-Session. Es ersetzt nicht Parent Spec, Child Spec, OpenSpec oder Evidence; es verweist nur auf die fuehrenden Artefakte und die naechste erlaubte Aktion.
 
@@ -113,27 +147,45 @@ Regeln:
 7. `Verification Lifecycle` trennt Command-Rehearsal, Delivery-Gate, Pre-Archive-Closeout und aktuellen Post-Archive-Replay. Ein nach OpenSpec-Archive ungueltiger Active-Change-Command darf nicht als aktueller Replay-Command im Handoff stehen bleiben.
 8. Temp-Evidence darf als Laufnachweis dienen, aber accepted Baseline-Evidence muss entweder an einem stabilen Workspace-Pfad persistiert oder mit Retention-/Hash-/Wiederherstellungsanweisung im Handoff referenziert werden.
 
-## Agent Delivery Session Launch/Queue Evidence
+## Legacy: Agent Delivery Session Launch/Queue Evidence (debug-only / historical)
 
-Ein Agent-Delivery-Handoff ist die fachliche Startquelle; die technische Uebergabe in eine frische Agent-Session wird durch Agent Delivery Session Launch/Queue Evidence belegt. Standardort ist `_specs/agent-delivery-session-launches/`. Das lokale Tool `skills-repo/tools/AgentDeliverySessionLauncher.cs` erzeugt pro Run mindestens `launch-request.json`, `start-prompt.md` und `evidence.json`; bei Launch koennen `agent-events.jsonl` und `last-message.md` dazukommen.
+Dieser Abschnitt beschreibt den alten Launch-/Controller-/Archive-Nachweis. Er ist nicht mehr der Default fuer Agent Delivery und darf nur noch als explizit begruendeter legacy/debug Pfad verwendet werden.
+
+Ein Agent-Delivery-Handoff ist die fachliche Startquelle; die technische Uebergabe in eine frische Agent-Session wird durch Agent Delivery Session Launch/Queue Evidence belegt. Standardort ist `_specs/agent-delivery-session-launches/`. Agent Delivery Run Profiles steuern, ob ein Run kompakte maschinenlesbare Evidence oder volle sichtbare Diagnose-Evidence erzeugt.
 
 Rollen:
-1. `AgentDeliverySessionLauncher.cs` ist das Basiswerkzeug fuer genau eine Session. Er erzeugt Queue-/Launch-Evidence und kann mit `--adapter codex-app-server` eine sichtbare Codex-App-Session starten.
-2. `AgentDeliveryVisibleSessionController.cs` ist der externe Orchestrator fuer sichtbare Parent/Child-Session-Ketten. Er startet Parent und Children ausserhalb des Parent-Turns, konsumiert Child-Requests und ruft den Launcher pro Session auf.
+1. `AgentDeliverySessionLauncher.cs` ist das Basiswerkzeug fuer genau eine Session. Er erzeugt profilabhaengige Queue-/Launch-Evidence.
+2. `AgentDeliveryVisibleSessionController.cs` ist der externe Orchestrator fuer Parent/Child-Session-Ketten. In `debug` startet er Parent und Children sichtbar ausserhalb des Parent-Turns, konsumiert Child-Requests und ruft den Launcher pro Session auf; in `compact` delegiert er Headless-Launches und schreibt eine kompakte Aggregat-Summary.
 3. Wenn ein Workflow eine controller-backed sichtbare Multi-Session-Kette verlangt, z. B. `MD-E2E-5`, darf die Parent-Session keine Child-Launcher-, `codex app-server`- oder sonstige Child-Start-Kommandos ausfuehren. Die Child-Starts muessen ueber den externen Controller laufen.
 4. Skills duerfen fuer normale Handoff-/Queue-Arbeit direkt den Launcher verlangen. Fuer controller-backed sichtbare Multi-Session-Arbeit muessen sie Controller-Evidence, Controller-Requests/Responses und die darunterliegenden Launcher-Evidence zusammen pruefen.
+
+### Agent Delivery Run Profiles
+
+`compact` ist der Default fuer Launcher und Controller. `debug` ist explizit per `--profile debug` oder `--debug`. `--profile compact` ist nur die ausgeschriebene Default-Form. Ungueltige Profilwerte sowie inkompatible Profil-/Adapter-Kombinationen sind Setup-Fehler mit Exit Code `2`.
+
+Profilregeln:
+1. `compact` laeuft headless/background, nutzt fuer Codex standardmaessig `codex-exec`/`codex-cli` und erstellt keine sichtbaren Codex-App-Sessions.
+2. `compact` persistiert auf Erfolg nur minimale maschinenlesbare Evidence: beim Launcher `sessions/<target-id>.summary.json`, beim Controller `run-summary.json` plus eine kompakte Child-Liste. Workflow-eigene Zielausgaben und Closeout-Artefakte duerfen erhalten bleiben.
+3. `compact` behaelt auf Erfolg keine rohen Prompt-Bodies, keine App-Server-Transcripts, keine grossen Event-Streams und keine vollen Controller-Request/Response-Bodies. Jede zusaetzliche Diagnose-Datei muss in der Summary begruendet sein.
+4. `compact` Failure startet niemals automatisch `debug`. Der Run stoppt am fehlgeschlagenen Gate und schreibt eine kompakte Failure-Summary mit fehlgeschlagenem Schritt/Child, vorhandener Evidence, fehlender Evidence, Terminal-Verdict `NOT READY` und einem reproduzierbaren `debug_rerun_command`.
+5. `debug` nutzt fuer Codex `codex-app-server` und die sichtbare Controller-Schiene. Debug behaelt volle Diagnose-Evidence: `start-prompt.md`, `launch-request.json`, `evidence.json`, `app-server-transcript.jsonl`, stdout/stderr, Controller-Requests/Responses, Controller-Summary und `debug-index.json`.
+6. `debug` Success fuer sichtbare Claims braucht `session_visibility.class: "visible_codex_app_session"` fuer jede Session, die als sichtbar behauptet wird.
+7. `--debug` ist ein Alias fuer `--profile debug`. `--profile debug --adapter codex-exec` ist ein Setup-Fehler. `--profile compact --adapter codex-app-server` ist ein Setup-Fehler, ausser ein expliziter Visibility-Test-Override ist gesetzt.
+8. Ein Handoff darf in Prosa Debug verlangen, aber das Tool-Profil ist autoritativ fuer das Verhalten.
+9. Workflows, die Sichtbarkeit testen oder verlangen, duerfen nicht mit compact/headless Evidence gruen werden. Sie muessen `debug` oder ein explizites Visibility-Test-Profil verwenden.
 
 Canonical Evidence Resolver:
 
 ```sh
-dotnet run skills-repo/tools/WorkflowDoctor.cs -- --phase evidence-resolution --mode <launcher_only|controller_visible_multi_session|closeout_archive> ...
+dotnet run <legacy-workflow-doctor> -- --phase evidence-resolution --mode <launcher_only|controller_run|controller_visible_multi_session|closeout_archive> ...
 ```
 
 Der Resolver ist der kanonische Gate-Check fuer konkrete Launcher-/Controller-/Archive-Artefakte. Er gibt maschinenlesbares JSON aus:
 
 - `schema_id: agent-delivery.evidence-resolution.v1`
 - `verdict: pass | not_ready | fail`
-- `mode: launcher_only | controller_visible_multi_session | closeout_archive`
+- `mode: launcher_only | controller_run | controller_visible_multi_session | closeout_archive`
+- `profile_observed: compact | debug | unknown`
 - `target_id` oder `run_id`
 - `evidence_paths`
 - `blockers`
@@ -142,9 +194,10 @@ Der Resolver ist der kanonische Gate-Check fuer konkrete Launcher-/Controller-/A
 
 Claim-Level:
 
-- `launcher_only --claim-level queued`: `queued` oder `launched` ist erlaubt, solange Target-ID, Handoff-Pfad, `launch-request.json`, `start-prompt.md` und `evidence.json` konsistent sind.
-- `launcher_only --claim-level launched`: erfordert `status: launched`.
-- `controller_visible_multi_session`: erfordert Controller-Summary, Requests, Responses, retained visible-session summary und passende per-session Launcher-Evidence. Parent-started Child-Launches blockieren den Gate.
+- `launcher_only --claim-level queued`: `queued` oder `launched` ist erlaubt, solange Target-ID, Handoff-Pfad und profilgerechte Launcher-Evidence konsistent sind. Bei `compact` reicht die kompakte Session-Summary; bei `debug` bleiben Prompt/Launch-Request/Evidence Teil des Nachweises.
+- `launcher_only --claim-level launched`: erfordert `status: launched`; `--claim-level visible` erfordert `profile_observed: debug` und `session_visibility.class: visible_codex_app_session`.
+- `controller_run`: prueft profilbewusste Controller-Summaries. Compact kann mit Headless-Parent/Children, Output-Status und Child-Closeout `pass` werden; fehlender Closeout bleibt `not_ready`, selbst wenn der Output korrekt ist.
+- `controller_visible_multi_session`: erfordert Debug-Profil, Controller-Summary, Requests, Responses, retained visible-session summary und passende per-session Launcher-Evidence mit `visible_codex_app_session`. Parent-started Child-Launches blockieren den Gate.
 - `closeout_archive`: erfordert eine gueltige visible-session archive summary. `retained_session_accepted`, explizite no-thread Status und echte Archive-Proofs koennen passieren; unarchivierte sichtbare Sessions, `manual_visible_missing_thread`, `archive_failed` und `proof_failed` blockieren.
 
 Skills sollen fuer Evidence-Konsistenz diesen Resolver aufrufen oder verlangen und bei `not_ready` oder `fail` stoppen. `docs/doc-workflow.md` bleibt die kanonische Rollenbeschreibung; Skills sollen keine alternativen Launcher-/Controller-/Archive-Rollen definieren.
@@ -157,10 +210,10 @@ Statuswerte:
 5. `failed`: ein Launch wurde versucht, schlug aber fehl oder Evidence konnte nicht vollstaendig geschrieben werden.
 
 Regeln:
-1. Skills duerfen "frische Session gestartet/gequeued" nur behaupten, wenn `launch-request.json` und `evidence.json` fuer dieselbe Target-ID und denselben Handoff-Pfad existieren und `status` `launched` oder `queued` ist.
+1. Skills duerfen "frische Session gestartet/gequeued" nur behaupten, wenn profilgerechte Evidence fuer dieselbe Target-ID und denselben Handoff-Pfad existiert und `status` `launched` oder `queued` ist. Compact-Evidence darf minimal sein; Debug-Evidence muss die volle Diagnosekette enthalten.
 2. `manual_start_required` ist ein sichtbarer manueller Rest, aber kein automatisierter Uebergangserfolg.
 3. `blocked` und `failed` blockieren Folge-Delivery und muessen in Control-Artefakten sichtbar bleiben.
-4. Fuer `codex`-Launches muss Evidence `project_cwd` und `codex_app.visibility_status` enthalten; `verified_same_project` ist nur erlaubt, wenn der beobachtete Thread-`cwd` dem Target Workspace entspricht.
+4. Fuer `debug`-Codex-Launches muss Evidence App-Server-/Codex-App-Sichtbarkeitsfelder enthalten; sichtbarer Erfolg ist nur erlaubt, wenn der beobachtete Thread-`cwd` dem initiierenden Projektkontext entspricht.
 5. Ein semantischer `SessionId` wie `2026-05-08-...` ist nur ein menschlicher Alias. Fuer zukuenftige forensische Session-Evidence braucht ein Handoff entweder passende Launch/Queue-Evidence, eine echte Codex Session-ID plus `.codex/...jsonl` Logpfad, `manual_start_required` mit Startauftrag-Evidence oder den expliziten historischen Marker `legacy_reconstructed` mit Rekonstruktionsquelle und Datum.
 6. `legacy_reconstructed` darf historische/pre-launcher Uebergaenge erklaeren, zaehlt aber nicht als automatischer Launch-/Queue-Erfolg.
 7. Headless `codex exec`-Erfolg ist keine sichtbare Codex-App-Session. `status: launched` und `codex_app.visibility_status: verified_same_project` belegen bei `thread_source/source='exec'` nur eine nachvollziehbare CLI-Session im richtigen Workspace. Sie duerfen nicht als Beweis gelten, dass ein neuer Chat in der Codex-App-Seitenleiste sichtbar ist.
@@ -649,7 +702,9 @@ Ein Delivery-Vorhaben braucht genau eine fuehrende Fortschritts- und Evidenzflae
 
 Kein Change soll denselben Fortschritt parallel in `refine-plan`, OpenSpec `tasks.md`, Child Index und Hardening Queue pflegen. Child Index und Hardening Queue duerfen Slices steuern, aber nicht die fein granularen OpenSpec-/Plan-Tasks duplizieren.
 
-## Parent-/Child-Spec Orchestrierung
+## Legacy: Parent-/Child-Spec Orchestrierung
+
+Dieser Abschnitt bleibt als historical reference erhalten. Fuer neuen Agent-Delivery-Default gilt `Active OpenSpec Scope`: ein enger OpenSpec Change fuehrt die Implementierung; Parent-/Master-Specs bleiben reference-only.
 
 Wenn eine Spec wegen Scope-Druck in Child Specs aufgeteilt wird, muss die Parent Spec als Kontrollschicht erhalten bleiben. Child Specs duerfen den Scope nur schneiden, nicht verschwinden lassen.
 
@@ -704,7 +759,9 @@ Parallel-Lane-Regeln:
 5. Nach Rueckkehr aller Lanes fuehrt der Integrations-Owner Merge, Cross-Slice-Review, Parent-Coverage-/Index-Update und die gemeinsame Verification-Replay in der festgelegten Reihenfolge aus.
 6. Wenn Write-Sets, Shared Files, Dependencies, Verification Commands, Integrations-Owner oder Merge-/Sync-Reihenfolge nicht klar sind, wird serialisiert.
 
-## Child-Spec-Hardening Pipeline
+## Legacy: Child-Spec-Hardening Pipeline
+
+Dieser Abschnitt bleibt als historical reference fuer alte Parent/Child-Arbeiten erhalten. Neue Agent-Delivery-Umsetzung soll Scope in kleine OpenSpec Changes schneiden und die Validatoren aus `Active OpenSpec Scope` nutzen.
 
 Die Zerlegung und die Tiefe sind getrennte Verantwortungen:
 

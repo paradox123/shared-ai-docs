@@ -1,8 +1,0 @@
-{
-  "schema_id": "docworkflow-agent-delivery-mock-forbidden-policy.v1",
-  "forbidden_source_paths": [
-    "/Users/dh/Documents/DanielsVault/ki-fuer-kmu/**",
-    "ki-fuer-kmu/**"
-  ],
-  "policy_source": "accepted-md-e2e-1"
-}

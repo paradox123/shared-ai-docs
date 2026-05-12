@@ -1,6 +1,0 @@
-{"direction":"client","method":"initialize","id":1}
-{"direction":"client","method":"thread/start","id":2}
-{"direction":"client","method":"thread/name/set","id":3}
-{"direction":"client","method":"turn/start","id":4}
-{"direction":"server","method":"turn/completed"}
-{"direction":"client","method":"thread/list","id":5}

@@ -1,7 +1,0 @@
-{
-  "fixture_id": "efficiency-justified-broad-read-warn",
-  "fixture_kind": "warning-efficiency",
-  "telemetry_path": "agent-run-manifest.json",
-  "expected_case": "DWT-S4-R5",
-  "expected_status": "warn"
-}

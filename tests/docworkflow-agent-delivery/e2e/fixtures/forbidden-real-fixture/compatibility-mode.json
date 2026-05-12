@@ -1,6 +1,0 @@
-{
-  "fixture_id": "forbidden-compatibility-mode",
-  "fixture_mode": "compatibility_fixture",
-  "fallback": "kmu_fixture_fallback"
-}
-

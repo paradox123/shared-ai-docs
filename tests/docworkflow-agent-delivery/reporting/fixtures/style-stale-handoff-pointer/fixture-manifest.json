@@ -1,8 +1,0 @@
-{
-  "fixture_id": "style-stale-handoff-pointer",
-  "fixture_kind": "negative-style",
-  "style_path": "style-fixture.json",
-  "expected_case": "DWT-S4-R4",
-  "expected_status": "fail",
-  "expected_failure": "stale_handoff_or_index_pointer"
-}

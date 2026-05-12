@@ -1,3 +1,0 @@
-command: PATH="/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin:$PATH" node --version
-v24.14.0
-exit_status=0

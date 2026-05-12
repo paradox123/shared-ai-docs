@@ -1,3 +1,0 @@
-tmp_home=/tmp/docworkflow-agent-delivery-dwt-s0-home.v975P2
-tmp_cache=/tmp/docworkflow-agent-delivery-dwt-s0-npm-cache.JqpYch
-tmp_codex_home=/tmp/docworkflow-agent-delivery-dwt-s0-codex-home.dHmKx2

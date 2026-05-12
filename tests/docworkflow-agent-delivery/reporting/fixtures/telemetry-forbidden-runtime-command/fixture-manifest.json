@@ -1,8 +1,0 @@
-{
-  "fixture_id": "telemetry-forbidden-runtime-command",
-  "fixture_kind": "negative-telemetry",
-  "telemetry_path": "agent-run-manifest.json",
-  "expected_case": "DWT-S4-R3",
-  "expected_status": "fail",
-  "expected_failure": "forbidden_runtime_command"
-}

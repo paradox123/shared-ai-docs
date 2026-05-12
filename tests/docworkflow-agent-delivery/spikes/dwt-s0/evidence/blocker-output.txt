@@ -1,5 +1,0 @@
-No final blocker: the Codex SDK provider run succeeded after CODEX_HOME_OVERRIDE pointed to a temp copy of local Codex auth.
-Captured reproducible pre-success blockers:
-- promptfoo-eval-relative-path-blocker.txt: relative working_dir was not resolved from the config directory.
-- promptfoo-eval-isolated-auth-blocker.txt: empty isolated CODEX_HOME produced 401 Missing bearer/basic authentication.
-- promptfoo-debug.txt history: one isolated cold npx rehearsal previously hit npm ETIMEDOUT before retry succeeded.
