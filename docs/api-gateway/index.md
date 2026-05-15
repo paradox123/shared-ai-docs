@@ -15,9 +15,6 @@ Diese Seite sammelt die lokale Dokumentation fuer das LiteLLM-basierte API-Gatew
 - [LiteLLM API Gateway auf Azure](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/api-gateway/litellm-api-gateway-azure.md)
   Zielarchitektur, Plattformwahl, Risiken und empfohlener Ausbaupfad fuer Azure.
 
-- [Documentation & Planning Workflow](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/doc-workflow.md)
-  Allgemeiner Workflow fuer Doku-, Planungs- und Umsetzungsarbeit.
-
 ## Empfohlene Lesereihenfolge
 
 1. lokale Gateway-Doku lesen

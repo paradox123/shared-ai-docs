@@ -330,13 +330,13 @@ The MVP starts with manual/Codex-maintained entity notes, but each update must a
 
 | Event | Entity update in MVP | Later workflow owner |
 |---|---|---|
-| Spec created | Create `type: spec` entity note | `doc-coauthoring` |
-| Spec planned | Update spec status and delivery link | `refine-plan` / `spec-change-delivery` |
+| Spec created | Create `type: spec` entity note | direct Codex session flow |
+| Spec planned | Update spec status and delivery link | direct Codex session flow |
 | Artifact created | Add artifact link or artifact entity | Delivery run |
-| Verification recorded | Add evidence and environment status | `spec-change-delivery` / `spec-closeout` |
+| Verification recorded | Add evidence and environment status | direct Codex session flow |
 | Release assembled | Create `type: release` entity note | release workflow |
 | Follow-up found | Create `type: backlog_item` entity note | review / retro / closeout |
-| Learning found | Create `type: learning_item` entity note | `retro-plan` / `improve-skills` |
+| Learning found | Create `type: learning_item` entity note | `improve-skills` |
 
 ## Terms
 

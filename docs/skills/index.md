@@ -11,14 +11,19 @@ Diese Seite sammelt die Dokumentation fuer gemeinsame Agent-Skills, lokale Runti
 
 ## Eigene Workflow-Skills
 
-- `spec-orchestrator`
-  Orchestriert große Parent-/Master-Specs in Child-Delivery-Packs, Coverage-Matrizen, Readiness-Checks und Parallel-Lanes.
+Aktuell gepflegte, weiterhin aktive Skills in diesem Repo:
 
-- `child-spec-hardening`
-  Haertet Child-Spec-Drafts oder Orchestrator-Hardening-Queue-Eintraege zu implementation-ready Delivery Specs mit Parent-Conformance, Normative Contract, Harness-Cases, Verification Commands und Auto-Resolve-Loop.
-
-- `agent-delivery-retro-review`
-  Reviewed abgeschlossene oder laufende Parent-/Child-Delivery-Abläufe als Meta-Test, rekonstruiert Sessions/Handoffs/Evidence und leitet daraus konkrete Workflow-, Skill-, Template- oder Validator-Haertungen ab.
+- `apply-for-position`
+- `check-build-watcher`
+- `context-bootstrap`
+- `documentation`
+- `frontend-design`
+- `improve-skills`
+- `qmd`
+- `qmd-release`
+- `rag-documentation-research`
+- `skill-creator`
+- `webapp-testing`
 
 ## Empfohlene Lesereihenfolge
 
