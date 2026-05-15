@@ -127,3 +127,8 @@ Berichte am Ende knapp:
 - finaler `count.txt` Inhalt
 - finale Verdict: `READY` oder `NOT READY`
 
+## ToDo NCG
+
+Login per KFZ Kennzeichen
+- Textbox auf Login Bildschirm ziehen
+- Textbox erlaubt Email und KFZ 

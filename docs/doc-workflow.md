@@ -95,132 +95,8 @@ Abgeleitete Active-Context-Ansicht:
 
 Wenn diese Ansicht dem OpenSpec Change widerspricht, gewinnt der OpenSpec Change.
 
-## Legacy: Child Session Handoff Template (debug-only / historical)
-
-Dieser Abschnitt beschreibt den alten Parent/Child-Session-Pfad. Er ist nicht mehr der Default fuer Agent Delivery und darf nur noch als explizit begruendeter legacy/debug Pfad verwendet werden.
-
-Ein Child Session Handoff ist der kompakte Startpunkt fuer die naechste Child-Hardening-, Delivery- oder Closeout-Session. Es ersetzt nicht Parent Spec, Child Spec, OpenSpec oder Evidence; es verweist nur auf die fuehrenden Artefakte und die naechste erlaubte Aktion.
-
-Persistenzregel:
-1. Bei Parent/Child-Vorhaben muss jedes fuehrende Child Session Handoff als auffindbares Artefakt persistiert werden, nicht nur im Chat oder in einem Orchestration-Pack.
-2. Standardort ist ein `child-session-handoffs/`-Ordner neben dem Child Index, z. B. `_specs/child-session-handoffs/s3-session-handoff.md`.
-3. Wenn kein eigener Child-Index-Dateipfad existiert, liegt das Handoff neben dem Parent-, Slice-Plan- oder Delivery-Orchestration-Pack-Artefakt, das den Child Index enthaelt.
-4. Der Child Index muss pro Child auf das persistierte Handoff zeigen. Ein reines Inline-Handoff ist nur als Fallback erlaubt, wenn der Index einen stabilen Abschnittsanker oder Patch-Zielpfad benennt.
-5. Ein Handoff ist stale, wenn Target Repository / Working Directory, Child Spec, Hardening Verdict, Child Index, Evidence/OpenSpec-Status oder Next Action voneinander abweichen. Stale Handoffs duerfen nicht als Implementierungsfreigabe gelten.
-
-```md
-## Child Session Handoff
-
-- Parent:
-- Child:
-- Child Spec:
-- Child Index / Queue:
-- Handoff File:
-- Target Repository / Working Directory:
-- Codex Session / Log:
-- Session Evidence:
-- Handoff Timestamp:
-- Naechster Modus/Skill:
-- Aktueller Verdict:
-- Scope Summary:
-- Non-Goals:
-- Allowed Write-Set:
-- Shared / Read-only Files:
-- Verification Lifecycle:
-  - Rehearsal / Preflight:
-  - Delivery Gate:
-  - Pre-Archive Closeout:
-  - Post-Archive / Current Replay:
-- Evidence / OpenSpec:
-- Retained Evidence:
-- Offene Blocker oder non-blocking Notes:
-- Fresh Session empfohlen:
-```
-
-Regeln:
-1. `spec-orchestrator` erzeugt oder aktualisiert ein persistiertes Handoff fuer den naechsten empfohlenen Child und verlinkt es im Child Index.
-2. `child-spec-hardening` liefert bei `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` immer ein persistiertes Handoff fuer die Implementierung und synchronisiert den Child-Index-Pointer.
-3. `spec-change-delivery` darf ein Child-Handoff als Kickoff-Quelle nutzen, muss aber trotzdem Target Repository / Working Directory, Child Spec, Parent Conformance, Child Index und Hardening Verdict pruefen.
-4. `spec-closeout` aktualisiert das naechste Handoff oder markiert es im Child Index als stale/blockiert, damit der naechste fuehrende Child nicht aus veralteten Status-/Evidence-Links startet.
-5. Bei grossen Parent/Child-Vorhaben wird pro Child-Implementation normalerweise eine frische Session empfohlen.
-6. Wenn ein Hardening-Run einen Child auf `IMPLEMENTATION READY` setzt, ist das ein Handoff-Punkt. Der Run liefert ein frisches Handoff und stoppt dort, ausser der User hat ausdruecklich denselben Run auch fuer Delivery freigegeben.
-7. `Verification Lifecycle` trennt Command-Rehearsal, Delivery-Gate, Pre-Archive-Closeout und aktuellen Post-Archive-Replay. Ein nach OpenSpec-Archive ungueltiger Active-Change-Command darf nicht als aktueller Replay-Command im Handoff stehen bleiben.
-8. Temp-Evidence darf als Laufnachweis dienen, aber accepted Baseline-Evidence muss entweder an einem stabilen Workspace-Pfad persistiert oder mit Retention-/Hash-/Wiederherstellungsanweisung im Handoff referenziert werden.
-
-## Legacy: Agent Delivery Session Launch/Queue Evidence (debug-only / historical)
-
-Dieser Abschnitt beschreibt den alten Launch-/Controller-/Archive-Nachweis. Er ist nicht mehr der Default fuer Agent Delivery und darf nur noch als explizit begruendeter legacy/debug Pfad verwendet werden.
-
-Ein Agent-Delivery-Handoff ist die fachliche Startquelle; die technische Uebergabe in eine frische Agent-Session wird durch Agent Delivery Session Launch/Queue Evidence belegt. Standardort ist `_specs/agent-delivery-session-launches/`. Agent Delivery Run Profiles steuern, ob ein Run kompakte maschinenlesbare Evidence oder volle sichtbare Diagnose-Evidence erzeugt.
-
-Rollen:
-1. `AgentDeliverySessionLauncher.cs` ist das Basiswerkzeug fuer genau eine Session. Er erzeugt profilabhaengige Queue-/Launch-Evidence.
-2. `AgentDeliveryVisibleSessionController.cs` ist der externe Orchestrator fuer Parent/Child-Session-Ketten. In `debug` startet er Parent und Children sichtbar ausserhalb des Parent-Turns, konsumiert Child-Requests und ruft den Launcher pro Session auf; in `compact` delegiert er Headless-Launches und schreibt eine kompakte Aggregat-Summary.
-3. Wenn ein Workflow eine controller-backed sichtbare Multi-Session-Kette verlangt, z. B. `MD-E2E-5`, darf die Parent-Session keine Child-Launcher-, `codex app-server`- oder sonstige Child-Start-Kommandos ausfuehren. Die Child-Starts muessen ueber den externen Controller laufen.
-4. Skills duerfen fuer normale Handoff-/Queue-Arbeit direkt den Launcher verlangen. Fuer controller-backed sichtbare Multi-Session-Arbeit muessen sie Controller-Evidence, Controller-Requests/Responses und die darunterliegenden Launcher-Evidence zusammen pruefen.
-
-### Agent Delivery Run Profiles
-
-`compact` ist der Default fuer Launcher und Controller. `debug` ist explizit per `--profile debug` oder `--debug`. `--profile compact` ist nur die ausgeschriebene Default-Form. Ungueltige Profilwerte sowie inkompatible Profil-/Adapter-Kombinationen sind Setup-Fehler mit Exit Code `2`.
-
-Profilregeln:
-1. `compact` laeuft headless/background, nutzt fuer Codex standardmaessig `codex-exec`/`codex-cli` und erstellt keine sichtbaren Codex-App-Sessions.
-2. `compact` persistiert auf Erfolg nur minimale maschinenlesbare Evidence: beim Launcher `sessions/<target-id>.summary.json`, beim Controller `run-summary.json` plus eine kompakte Child-Liste. Workflow-eigene Zielausgaben und Closeout-Artefakte duerfen erhalten bleiben.
-3. `compact` behaelt auf Erfolg keine rohen Prompt-Bodies, keine App-Server-Transcripts, keine grossen Event-Streams und keine vollen Controller-Request/Response-Bodies. Jede zusaetzliche Diagnose-Datei muss in der Summary begruendet sein.
-4. `compact` Failure startet niemals automatisch `debug`. Der Run stoppt am fehlgeschlagenen Gate und schreibt eine kompakte Failure-Summary mit fehlgeschlagenem Schritt/Child, vorhandener Evidence, fehlender Evidence, Terminal-Verdict `NOT READY` und einem reproduzierbaren `debug_rerun_command`.
-5. `debug` nutzt fuer Codex `codex-app-server` und die sichtbare Controller-Schiene. Debug behaelt volle Diagnose-Evidence: `start-prompt.md`, `launch-request.json`, `evidence.json`, `app-server-transcript.jsonl`, stdout/stderr, Controller-Requests/Responses, Controller-Summary und `debug-index.json`.
-6. `debug` Success fuer sichtbare Claims braucht `session_visibility.class: "visible_codex_app_session"` fuer jede Session, die als sichtbar behauptet wird.
-7. `--debug` ist ein Alias fuer `--profile debug`. `--profile debug --adapter codex-exec` ist ein Setup-Fehler. `--profile compact --adapter codex-app-server` ist ein Setup-Fehler, ausser ein expliziter Visibility-Test-Override ist gesetzt.
-8. Ein Handoff darf in Prosa Debug verlangen, aber das Tool-Profil ist autoritativ fuer das Verhalten.
-9. Workflows, die Sichtbarkeit testen oder verlangen, duerfen nicht mit compact/headless Evidence gruen werden. Sie muessen `debug` oder ein explizites Visibility-Test-Profil verwenden.
-
-Canonical Evidence Resolver:
-
-```sh
-dotnet run <legacy-workflow-doctor> -- --phase evidence-resolution --mode <launcher_only|controller_run|controller_visible_multi_session|closeout_archive> ...
-```
-
-Der Resolver ist der kanonische Gate-Check fuer konkrete Launcher-/Controller-/Archive-Artefakte. Er gibt maschinenlesbares JSON aus:
-
-- `schema_id: agent-delivery.evidence-resolution.v1`
-- `verdict: pass | not_ready | fail`
-- `mode: launcher_only | controller_run | controller_visible_multi_session | closeout_archive`
-- `profile_observed: compact | debug | unknown`
-- `target_id` oder `run_id`
-- `evidence_paths`
-- `blockers`
-- `warnings`
-- `recommended_next_action`
-
-Claim-Level:
-
-- `launcher_only --claim-level queued`: `queued` oder `launched` ist erlaubt, solange Target-ID, Handoff-Pfad und profilgerechte Launcher-Evidence konsistent sind. Bei `compact` reicht die kompakte Session-Summary; bei `debug` bleiben Prompt/Launch-Request/Evidence Teil des Nachweises.
-- `launcher_only --claim-level launched`: erfordert `status: launched`; `--claim-level visible` erfordert `profile_observed: debug` und `session_visibility.class: visible_codex_app_session`.
-- `controller_run`: prueft profilbewusste Controller-Summaries. Compact kann mit Headless-Parent/Children, Output-Status und Child-Closeout `pass` werden; fehlender Closeout bleibt `not_ready`, selbst wenn der Output korrekt ist.
-- `controller_visible_multi_session`: erfordert Debug-Profil, Controller-Summary, Requests, Responses, retained visible-session summary und passende per-session Launcher-Evidence mit `visible_codex_app_session`. Parent-started Child-Launches blockieren den Gate.
-- `closeout_archive`: erfordert eine gueltige visible-session archive summary. `retained_session_accepted`, explizite no-thread Status und echte Archive-Proofs koennen passieren; unarchivierte sichtbare Sessions, `manual_visible_missing_thread`, `archive_failed` und `proof_failed` blockieren.
-
-Skills sollen fuer Evidence-Konsistenz diesen Resolver aufrufen oder verlangen und bei `not_ready` oder `fail` stoppen. `docs/doc-workflow.md` bleibt die kanonische Rollenbeschreibung; Skills sollen keine alternativen Launcher-/Controller-/Archive-Rollen definieren.
-
-Statuswerte:
-1. `launched`: ein implementierter Adapter hat eine frische Session wirklich gestartet.
-2. `queued`: ein vollstaendiger maschinenlesbarer Startauftrag und Prompt liegen fuer einen implementierten Queue-/Launch-Adapter vor.
-3. `manual_start_required`: der Prompt ist vollstaendig, aber der angeforderte Agent-Provider hat keinen implementierten automatischen v1-Adapter.
-4. `blocked`: Konsistenz-, Verdict-, Workspace- oder Secret-Gate verhindert eine gueltige Startfreigabe.
-5. `failed`: ein Launch wurde versucht, schlug aber fehl oder Evidence konnte nicht vollstaendig geschrieben werden.
-
-Regeln:
-1. Skills duerfen "frische Session gestartet/gequeued" nur behaupten, wenn profilgerechte Evidence fuer dieselbe Target-ID und denselben Handoff-Pfad existiert und `status` `launched` oder `queued` ist. Compact-Evidence darf minimal sein; Debug-Evidence muss die volle Diagnosekette enthalten.
-2. `manual_start_required` ist ein sichtbarer manueller Rest, aber kein automatisierter Uebergangserfolg.
-3. `blocked` und `failed` blockieren Folge-Delivery und muessen in Control-Artefakten sichtbar bleiben.
-4. Fuer `debug`-Codex-Launches muss Evidence App-Server-/Codex-App-Sichtbarkeitsfelder enthalten; sichtbarer Erfolg ist nur erlaubt, wenn der beobachtete Thread-`cwd` dem initiierenden Projektkontext entspricht.
-5. Ein semantischer `SessionId` wie `2026-05-08-...` ist nur ein menschlicher Alias. Fuer zukuenftige forensische Session-Evidence braucht ein Handoff entweder passende Launch/Queue-Evidence, eine echte Codex Session-ID plus `.codex/...jsonl` Logpfad, `manual_start_required` mit Startauftrag-Evidence oder den expliziten historischen Marker `legacy_reconstructed` mit Rekonstruktionsquelle und Datum.
-6. `legacy_reconstructed` darf historische/pre-launcher Uebergaenge erklaeren, zaehlt aber nicht als automatischer Launch-/Queue-Erfolg.
-7. Headless `codex exec`-Erfolg ist keine sichtbare Codex-App-Session. `status: launched` und `codex_app.visibility_status: verified_same_project` belegen bei `thread_source/source='exec'` nur eine nachvollziehbare CLI-Session im richtigen Workspace. Sie duerfen nicht als Beweis gelten, dass ein neuer Chat in der Codex-App-Seitenleiste sichtbar ist.
-8. Wenn ein Workflow ausdruecklich eine sichtbare Codex-App-Session verlangt, muss Evidence eine eigene Sichtbarkeitsklasse oder gleichwertige Felder enthalten, die `headless_cli_session`, `queued_manual_start` und `visible_codex_app_session` unterscheiden. Sichtbarer Erfolg braucht eine echte App-/App-Server-/UI- oder manuell bestaetigte Thread-Referenz; Queue- und Headless-Erfolg bleiben nur traceable, nicht sichtbar.
-9. Der lokal nachgewiesene technische Pfad fuer maschinell erzeugte sichtbare/interactive-source Codex-Sessions ist `codex app-server`: `thread/start`, `thread/name/set`, `turn/start`, danach `thread/list` mit derselben Thread-ID, `source: "vscode"`, passendem `cwd`, Titel und Rollout-Pfad. Ein leerer `thread/start` ohne Turn reicht nicht als sichtbarer Session-Erfolg.
-10. Sichtbare Agent-Delivery-Sessions muessen im initiierenden Codex-Projekt geoeffnet werden: `thread/start.cwd` und beobachtetes `cwd` entsprechen dem `cwd` der Parent-/aktuellen Codex-Session, sofern kein expliziter anderer Projektkontext gewaehlt wurde. Der Titel folgt `{ParentSpecAbbrevAndNumber}: {Hardening|Implementation} - {ChildSpecDesignation}`, z. B. `DWT-1: Implementation - S3 Content Bundle`. Der Prefix stammt aus der Parent-Spec; eine Child-ID wie `DWT-S3` darf die Parent-Spec-Nummer nicht ersetzen.
-11. `spec-closeout` archiviert alle sichtbaren Codex-App-Sessions, die fuer die jeweilige Child-Spec-Bearbeitung geoeffnet wurden, bevor Child-Closeout `READY` melden darf. Der closeout-nahe Nachweis laeuft ueber `ArchiveVisibleCodexAppSession.cs`: fixture/summary validation bleibt der Standard, live `thread/archive` ist explizit opt-in. Headless- und Queue-Evidence erhalten stattdessen explizite Archivstatus wie `not_app_visible_not_archived` oder `no_thread_created`; `manual_visible_missing_thread`, `archive_failed`, `proof_failed` und unarchivierte sichtbare Threads blockieren `READY`, sofern keine explizite `retained_session_accepted`-Notiz mit Akzeptanzperson und Grund vorliegt.
+Hinweis:
+- Nicht mehr ausfuehrbare Legacy-Artefakte (alte Handoff-/Launcher-/Controller-/Archive-Mechanik) sind aus dem Default-Workflow entfernt. Historische Details bleiben nur in der Git-Historie nachvollziehbar.
 
 ## Mini-Retro Template (kurz)
 
@@ -702,109 +578,13 @@ Ein Delivery-Vorhaben braucht genau eine fuehrende Fortschritts- und Evidenzflae
 
 Kein Change soll denselben Fortschritt parallel in `refine-plan`, OpenSpec `tasks.md`, Child Index und Hardening Queue pflegen. Child Index und Hardening Queue duerfen Slices steuern, aber nicht die fein granularen OpenSpec-/Plan-Tasks duplizieren.
 
-## Legacy: Parent-/Child-Spec Orchestrierung
+## Scope Slicing Guidance
 
-Dieser Abschnitt bleibt als historical reference erhalten. Fuer neuen Agent-Delivery-Default gilt `Active OpenSpec Scope`: ein enger OpenSpec Change fuehrt die Implementierung; Parent-/Master-Specs bleiben reference-only.
-
-Wenn eine Spec wegen Scope-Druck in Child Specs aufgeteilt wird, muss die Parent Spec als Kontrollschicht erhalten bleiben. Child Specs duerfen den Scope nur schneiden, nicht verschwinden lassen.
-
-### Child Index als operative Steuerzentrale
-
-Der Child Index ist die operative Steuerzentrale eines Parent/Child-Vorhabens. Er ist nicht der Delivery-Ledger und nicht die fein granulare Taskliste. Er beantwortet: welche Child Specs existieren, welche Parent-Anforderungen sie abdecken, welcher Child als naechstes fuehrt, welche Hardening-/Delivery-/Closeout-Gates blockieren und wo Evidence oder Re-entry liegen.
-
-Minimale Child-Index-Flaeche:
-
-| Child | Child Spec | Parent Coverage | Readiness / Hardening Verdict | Session Handoff | OpenSpec / Ledger | Dependencies | Allowed Write-Set | Verification | Evidence / Closeout | Backlog / Re-entry | Next Action |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-
-Regeln:
-1. `spec-orchestrator` erzeugt oder aktualisiert den Child Index, sobald Parent/Child genutzt wird. Wenn kein eigener Index existiert, wird die Kontrollflaeche im Parent, Slice-Plan oder Delivery Orchestration Pack angelegt.
-2. Die Spalte `Child` enthaelt einen stabilen maschinenlesbaren Child-ID wie `S3`, nicht einen gemischten Anzeigenamen wie `S3 Content Bundle`. Menschliche Titel stehen in `Child Spec`, `Parent Coverage` oder einer separaten Zusatzspalte.
-3. Child-ID, Handoff-Dateiname, Handoff-Feld `Child`, Validator-/Delivery-Aufruf und OpenSpec-/Ledger-Verweise muessen dieselbe Child-ID verwenden; der konkrete Pfad steht im Handoff-Feld `Child Spec`. Abweichungen blockieren Implementierungsfreigabe, weil eine frische Session sonst den Ziel-Child nicht eindeutig findet.
-4. Der Child Index haelt Slice-Status, Coverage, Abhaengigkeiten, Hardening Queue, Handoff-Pointer, Next Action, Evidence-/Closeout-Links und Backlog-/Re-entry-Verweise. Er dupliziert keine OpenSpec-Tasks und keine detaillierten Implementierungspläne.
-5. Die Hardening Queue ist ein Ausschnitt des Child Index fuer nicht implementation-ready Children. Sie nennt Required Hardening, Sources To Read und Blockers, aber keine fein granularen Delivery-Tasks.
-6. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn die Child-Index-Tabelle die exakten Spaltennamen aus der Mindestflaeche oben enthaelt und die Ziel-Child-Zeile fuer jede Spalte vollstaendig ausgefuellt ist.
-7. Zusammengelegte oder umbenannte Ersatzspalten wie `Dependencies / Evidence`, `Allowed Next Mode`, `Implementation Gate`, `Closeout Sync`, `Status`, `Verdict`, `Ledger`, `Gate` oder aehnliche Kurzformen gelten nicht als operational. Sie koennen zusaetzlich existieren, ersetzen aber keine Pflichtspalte.
-8. Eine alte Kurzform wie `Slice | Spec | Status | Hardening Verdict | Session Handoff` ist nur ein Migrationszwischenstand und blockiert Implementierung.
-9. `Allowed Write-Set` muss fuer `IMPLEMENTATION READY` als verbindliche, durch `spec-change-delivery` durchsetzbare Liste oder Musterliste formuliert sein. Unverbindliche Formulierungen wie `voraussichtlich`, `likely`, `probably`, `expected`, `TBD`, `to be decided`, `etc.`, `and related files` oder `as needed` blockieren Implementierungsfreigabe.
-10. Ein Child darf nur als `IMPLEMENTATION READY` gelten, wenn ein dokumentiertes Hardening Verdict mit Parent Conformance, Content-Quality-Ergebnis, Verification Depth und DoR/DoD vorliegt und der Child Index auf ein aktuelles persistiertes Handoff zeigt.
-11. `ready_candidate` bedeutet nur: der Schnitt wirkt plausibel. Es ist kein Implementierungsfreigabe-Status.
-12. Nach Hardening, Delivery und Closeout muessen Child Spec, Parent Coverage, Child Index, Child Session Handoff, Backlog/Re-entry, Evidence Links und OpenSpec Status synchron sein.
-13. Der Child Index benennt den naechsten fuehrenden Child erst, nachdem die vorherige Child-Synchronisation abgeschlossen oder explizit als blockiert dokumentiert ist.
-
-Pflichtbestandteile:
-
-1. Parent Spec oder Slice-Plan mit Coverage-Matrix: jede Parent-Anforderung ist `done`, `partial`, `pending`, `blocked` oder bewusst `out_of_scope`.
-2. Child-Spec-Index mit Status, Parent Coverage, Hardening Verdict, Handoff-Pointer, Abhaengigkeiten, naechstem empfohlenem Slice und Links auf Evidence/Closeout/Re-entry.
-3. Jede Child Spec enthaelt vor Umsetzung mindestens eine Review Control Surface, Scope, Non-Goals, Master-/Parent-Abdeckung, Parent-Scope-Conformance, Decision Freeze Pack, konkrete Acceptance Criteria und Verification Commands.
-4. Restscope wird nicht nur als "Next Step" in einer abgeschlossenen Spec abgelegt, sondern als Backlog-/Child-Spec-Eintrag mit Trigger, Done-Signal und Abhaengigkeit.
-5. Closeout einer Child Spec synchronisiert Parent Spec, Slice-Plan/Index, Backlog und OpenSpec-Artefakte, bevor der naechste Slice als fuehrend gilt.
-6. Breiter Projekt-Dokumentations-Sync laeuft normalerweise beim Parent-Closeout. Child-Closeout triggert breiten Docs-Sync nur, wenn der Child selbst user-facing/project docs veraendert oder oeffentliche Contract-Dokumentation stale machen wuerde.
-
-Parent-Scope-Conformance ist ein blockierendes Gate nach jeder Child-Spec-Nacharbeit:
-
-1. Jede Parent-Anforderung, die der Child beruehrt, wird als `preserves`, `extends`, `narrows_with_rationale`, `defers_to_child`, `missing_from_child` oder `contradicts_parent` markiert.
-2. `contradicts_parent` blockiert Implementierung.
-3. `missing_from_child` blockiert Implementierung, wenn kein benannter Child-/Backlog-Reentry existiert.
-4. Bewusste Scope-Verengung ist erlaubt, aber nur mit Rationale und Ziel fuer den Restscope.
-
-Parallelisierung ist je nach Modus unterschiedlich zu bewerten: Child-Spec-/Doc-Hardening kann parallel laufen, sobald die jeweiligen Spec-/Doc-Write-Sets getrennt sind und Dependencies eingehalten werden; Runtime-Implementierung braucht zusaetzlich implementation-ready Specs, stabile Contracts und disjunkte Code-/Artefakt-Write-Sets.
-
-Parallel-Lane-Regeln:
-
-1. Vor Start eine Parallel Work Control Surface erstellen: Child/Arbeitsblock, Modus (`spec/doc hardening` oder `implementation`), Owner/Agent, erlaubte Write-Sets, Shared Files / Read-only Files, Abhaengigkeiten, Verification Commands, Integrations-Owner, Merge-/Sync-Reihenfolge.
-2. Shared Control Files wie Parent Spec, Slice-Plan, Index, Backlog, gemeinsame Contracts, gemeinsame Helpers oder gemeinsame Verification-Skripte haben genau einen Integrations-Owner.
-3. Parallel arbeitende Implementation-Lanes laufen in getrennten Branches/Worktrees oder klar getrennten OpenSpec Changes, wenn sie mehr als reine Read-only-Analyse leisten.
-4. Kein paralleler Implementation-Change darf denselben zentralen Contract still veraendern; Contract-, Schema-, Harness- oder Shared-Helper-Aenderungen laufen zuerst als serialer Integrations-/Prerequisite-Schritt.
-5. Nach Rueckkehr aller Lanes fuehrt der Integrations-Owner Merge, Cross-Slice-Review, Parent-Coverage-/Index-Update und die gemeinsame Verification-Replay in der festgelegten Reihenfolge aus.
-6. Wenn Write-Sets, Shared Files, Dependencies, Verification Commands, Integrations-Owner oder Merge-/Sync-Reihenfolge nicht klar sind, wird serialisiert.
-
-## Legacy: Child-Spec-Hardening Pipeline
-
-Dieser Abschnitt bleibt als historical reference fuer alte Parent/Child-Arbeiten erhalten. Neue Agent-Delivery-Umsetzung soll Scope in kleine OpenSpec Changes schneiden und die Validatoren aus `Active OpenSpec Scope` nutzen.
-
-Die Zerlegung und die Tiefe sind getrennte Verantwortungen:
-
-1. `doc-coauthoring` erstellt oder schaerft die Parent-Spec.
-2. `spec-orchestrator` erzeugt Child-Schnitt, Coverage, Conformance, Dependencies, Parallel-Lanes und Hardening Queue.
-3. `child-spec-hardening` arbeitet einzelne Child Specs oder Batches aus der Hardening Queue bis zur Implementierungsreife aus.
-4. `doc-review-autoresolve` laeuft direkt im Anschluss oder innerhalb des Hardening-Schritts, um autonome Inkonsistenzen zu beheben und ein Readiness Verdict zu liefern.
-5. `spec-change-delivery` implementiert genau einen Child, nachdem ein dokumentiertes Hardening Verdict `IMPLEMENTATION READY` oder bewusst akzeptierte `READY WITH NON-BLOCKING NOTES` meldet.
-
-Hardening Queue Beispiel:
-
-| Child | Status | Required Hardening | Inputs |
-|---|---|---|---|
-| S3 | needs_hardening | Normative Contract, Canonical Examples/Fixtures, Pflicht-Cases, Verification nach S1/S2-Muster | Parent V2-FR-031/031a/031b, accepted S1/S2 |
-| S4 | ready_candidate | Content-Freshness-Vertrag, Guide-Cases, Rendering ohne LLM | Parent Provider-Guide-Anforderungen |
-| S6 | blocked | Dependency-Blocker erhalten, keine Fake-Inputs akzeptieren | S2/S3/S5 Evidence |
-
-`spec-orchestrator` darf einen Child als `ready_candidate` markieren, wenn der Schnitt plausibel ist. `IMPLEMENTATION READY` ist erst erlaubt, wenn `child-spec-hardening` ein dokumentiertes Hardening Verdict erzeugt oder eine bestehende Child Spec dieses Verdict mit derselben Gate-Tiefe bereits sichtbar enthaelt.
-
-Child-Spec-Hardening-Pflichtgates:
-
-1. Review Control Surface: Ziel, In/Out of Scope, wichtigste Cases/Commands, offene Entscheidungen und Readiness sind aktuell und widerspruchsfrei.
-2. Status-Provenance: `done`, `accepted` oder `reference_done` nur mit Evidence/Closeout/Verification-Replay; sonst `parent_claims_done`.
-3. Normative Contract: Felder, Statuswerte, Fehler-/Blockerpfade, Artefakte, Security/Redaction, Fallbacks und Beispiele/Fixtures soweit relevant.
-4. Canonical Examples/Fixtures: contract-heavy Specs entscheiden explizit zwischen eingebetteten Beispielen, referenzierten Fixture-Dateien oder Hybrid; Pflichtpfade, normative Felder und Harness-Nachweis sind dokumentiert.
-5. Harness-/Verification-Cases: positive, negative, fallback, blocked und secret/redaction cases mit erwarteten Exit-/Statuswerten und Artefakten.
-6. Verification Commands: konkreter Execution Context, risk-based Preflight, Gate Verification, Runtime-Readiness, Success Criteria und Anti-Loop-Regel.
-7. Content Quality Review: Korrektheit, Scope, Vollstaendigkeit, Konsistenz, Eindeutigkeit, Machbarkeit, Testbarkeit, Traceability, Abstraktionsniveau und Lifecycle-Fit.
-8. DoR/DoD: Definition of Ready fuer Umsetzung und Definition of Done/Closeout Evidence sind vorhanden oder bewusst irrelevant.
-9. Handoff: Bei `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` existiert ein persistiertes Child Session Handoff mit Target Repository / Working Directory, naechstem Modus, Write-Set, Verification Commands, Evidence/OpenSpec und offenen Notes; der Child Index verlinkt genau dieses Handoff.
-10. Hardening Verification: Vor `IMPLEMENTATION READY` oder `READY WITH NON-BLOCKING NOTES` muss `git diff --check` gruen sein. Wenn die Child Spec eingebettete maschinenlesbare Beispiele enthaelt, muessen die relevanten Beispiele geparst oder bewusst als nicht-parsebare Pseudobeispiele gekennzeichnet werden; parsefehlerhafte normative Beispiele blockieren Readiness.
-
-Contract-heavy Beispielregel:
-1. Eingebettete YAML-/JSON-/TOML-/Schema-/Manifest-Beispiele, die als kanonisch oder kopierbar beschrieben werden, muessen syntaktisch parsebar sein.
-2. Wenn ein Beispiel bewusst gekuerzt oder nicht parsebar ist, muss es als `pseudo-*`, `sketch` oder `excerpt` markiert werden und darf nicht als kanonische Implementierungsquelle gelten.
-3. Parse- oder Lint-Kommandos fuer die eingebetteten Beispiele gehoeren zur Hardening Verification, wenn Standardtools im Repo oder in der lokalen Umgebung verfuegbar sind.
-4. Ein parsefehlerhaftes kanonisches Beispiel ist kein non-blocking Note; es ist mindestens `NEEDS HARDENING`.
-
-Child-Hardening-Scope-Regel:
-1. `child-spec-hardening` darf den Ziel-Child, den Child Index und das zugehoerige Child Session Handoff synchronisieren.
-2. Parent Spec, Slice-Plan, akzeptierte Vorgaenger-Childs und OpenSpec-Archive sind im Child-Hardening read-only, ausser der User beauftragt explizit einen Integrations-/Closeout-Sync.
-3. Wenn Hardening entdeckt, dass Vorgaengerstatus, Parent Coverage oder Slice-Plan stale sind, wird ein klarer Sync-Patch oder Folgeauftrag dokumentiert. Der Ziel-Child darf trotzdem nur dann `IMPLEMENTATION READY` werden, wenn der Child Index fuer diesen Child vollstaendig und widerspruchsfrei ist.
-4. Akzeptierte Vorgaenger wie S1/S2 duerfen als Evidence-/Verification-Rezept genutzt werden; sie werden nicht pauschal migriert, archiviert oder in ihrem Status geaendert.
+Wenn eine Spec wegen Scope-Druck in mehrere Slices zerlegt wird, bleibt die Regel fuer die Umsetzung unveraendert:
+1. Pro Implementierungsrun gibt es genau einen aktiven, engen OpenSpec Change.
+2. Parent-/Master-Specs und Research bleiben reference-only.
+3. Jeder Slice braucht klare In-/Out-of-Scope-Grenzen, Write-set/Impact und Verification.
+4. Der naechste Slice startet erst, wenn der aktuelle Slice verifiziert und dokumentiert ist.
 
 ## Definition of Ready (vor Implementierung)
 
@@ -883,7 +663,7 @@ Regeln:
 4. Wenn die Sync-Aenderung nicht im aktuellen Scope erlaubt ist oder eine echte Entscheidung braucht, bleibt das Ergebnis `NOT READY` und wird an `child-spec-hardening`, `spec-change-delivery` oder den Integrations-Owner zurueckgegeben.
 5. Evidence muss Originalfehler und korrigierten Lauf unterscheiden. Der Originalfehler darf nicht als `ran/pass` umetikettiert werden.
 6. Commands, die nur vor einem OpenSpec-Archive sinnvoll sind, werden als `Pre-Archive Closeout` markiert. Nach Archive ersetzt ein `Post-Archive / Current Replay` die aktive Change-Validierung durch Archive-Presence plus canonical spec validation.
-7. Gemeinsame `.NET` file-based Validatoren werden aus einem neutralen CWD gestartet, damit kein Zielrepo-`global.json` oder Projekt-CWD den Lauf verfälscht, z. B. `(cd /tmp && dotnet run /absolute/path/to/ValidateChildReadiness.cs -- --index /absolute/index.md --child <id> --handoff /absolute/handoff.md)`.
+7. Gemeinsame `.NET` file-based Validatoren werden aus einem neutralen CWD gestartet, damit kein Zielrepo-`global.json` oder Projekt-CWD den Lauf verfälscht, z. B. `(cd /tmp && dotnet run /absolute/path/to/<validator>.cs -- --args ...)`.
 
 ### Risk-Based Command Contract Rehearsal
 
@@ -1006,7 +786,6 @@ Hinweis:
 | Spezifikation (ohne OpenSpec) | `_specs/` | `YYYY-MM-DD <Titel>.md` |
 | Plan | neben Spec oder Projektordner | `<name>-plan.md` |
 | OpenSpec Change (optional) | `openspec/changes/<change>/` | Standard-Artefakte |
-| Child Session Handoff | `child-session-handoffs/` neben Child Index | `<child-id>-session-handoff.md` |
 | Retro/Mini-Retro | inline im Plan/Spec/Handoff oder eigene Datei | `<name>-retro.md` |
 
 ## Übergänge
