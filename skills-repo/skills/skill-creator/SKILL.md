@@ -367,7 +367,16 @@ Once development of the skill is complete, validate the skill folder to catch ba
 scripts/quick_validate.py <path/to/skill-folder>
 ```
 
-The validation script checks YAML frontmatter format, required fields, and naming rules. If validation fails, fix the reported issues and run the command again.
+The validation script checks YAML frontmatter format, required fields, and naming rules. It requires a Python environment with `PyYAML` available. If the validator cannot run because that dependency is missing, do not get stuck repeatedly retrying it:
+
+1. Do a lightweight manual validation instead:
+   - confirm the file starts with YAML frontmatter delimited by `---`
+   - confirm frontmatter contains only `name` and `description`
+   - confirm the folder name matches the skill name
+2. State clearly in your handoff that `quick_validate.py` was skipped due to missing `PyYAML`.
+3. Only spend more time fixing the validator environment when the user asked for validator/tooling work specifically.
+
+If validation fails, fix the reported issues and run the command again.
 
 ### Step 6: Iterate
 

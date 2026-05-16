@@ -90,3 +90,17 @@
   signal: The DWT-S5 active-child runtime command became stale after OpenSpec archive, and parent closeout had to replace it with archive-presence plus canonical spec validation.
   latest_evidence: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/agent-delivery-retro-review-2026-05-08.md
   suggested_skill_or_playbook: Closeout must preserve pre-archive commands as historical evidence and publish a separate post-archive/current replay command set.
+
+- name: codex-automation-bootstrap-paths
+  scope: general
+  counter: 4
+  signal: Multiple automation runs rediscovered how to resolve `~/.codex`, `memory.md`, and session-log anchors when `$CODEX_HOME` was unset, causing blank-path probes and fallback churn.
+  latest_evidence: /Users/dh/.codex/sessions/2026/05/16/rollout-2026-05-16T09-02-06-019e2f97-9ffb-7d33-9649-0526b6d6a9a3.jsonl
+  suggested_skill_or_playbook: Strengthen `improve-skills` and `build-codex-automations` with deterministic `$CODEX_HOME` fallback, explicit `memory.md` semantics, and a no-`/automations` probe rule.
+
+- name: ncg-backend-wrapper-git-root
+  scope: project:ncg-backend
+  counter: 2
+  signal: Agents start in the wrapper folder and hit `fatal: not a git repository` before switching to `backend/`, which repeats avoidable structure discovery.
+  latest_evidence: /Users/dh/.codex/sessions/2026/05/16/rollout-2026-05-16T09-02-01-019e2f97-8be2-73c1-96c9-11e63fc73f6a.jsonl
+  suggested_skill_or_playbook: Add an `ncg-backend` playbook note that git-root commands run in `backend/` while solution/runtime commands still anchor in `backend/sources`.

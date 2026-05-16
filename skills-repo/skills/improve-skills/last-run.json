@@ -1,14 +1,7 @@
 {
-  "last_run": "2026-05-06T05:52:00.797Z",
-  "newest_session_timestamp": "2026-05-06T05:52:00.797Z",
-  "sessions_processed": [
-    "/Users/dh/.codex/sessions/2026/05/04/rollout-2026-05-04T09-32-48-019df1e7-698b-73f3-b891-ecbe5c6a7f28.jsonl",
-    "/Users/dh/.codex/sessions/2026/05/04/rollout-2026-05-04T11-31-07-019df253-bcc3-76a1-aaea-478af40394b4.jsonl",
-    "/Users/dh/.codex/sessions/2026/05/05/rollout-2026-05-05T07-53-12-019df6b2-958e-7891-af7a-0d3b69dd1cea.jsonl",
-    "/Users/dh/.codex/sessions/2026/05/05/rollout-2026-05-05T14-33-59-019df821-83ed-77f1-a0a0-864be881d118.jsonl",
-    "/Users/dh/.codex/sessions/2026/05/05/rollout-2026-05-05T16-57-49-019df8a5-34bc-7642-93eb-91dad8f57dfa.jsonl",
-    "/Users/dh/.codex/sessions/2026/05/05/rollout-2026-05-05T17-48-36-019df8d3-b142-7c22-9c48-0d755090556b.jsonl",
-    "/Users/dh/.codex/sessions/2026/05/06/rollout-2026-05-06T07-51-15-019dfbd7-2bd6-7fa1-8f25-82d26fbebc66.jsonl"
-  ],
-  "summary": "Added parent/child spec orchestration and parallel lane guardrails to doc-workflow, doc-coauthoring, refine-plan and spec-change-delivery; recorded parent-child-spec-orchestration candidate and report."
+  "last_run": "2026-05-16T07:02:09.435Z",
+  "processed_window_start": "2026-05-15T10:15:49.533Z",
+  "newest_session_timestamp": "2026-05-16T07:02:09.435Z",
+  "sessions_reviewed_count": 8,
+  "summary": "Updated improve-skills and build-codex-automations with deterministic automation bootstrap rules, synced the stale ncg-docs ncg-documentation copy to the newer ~/ path and QMD fallback guidance, and tracked codex-automation-bootstrap-paths plus ncg-backend-wrapper-git-root."
 }
