@@ -11,10 +11,12 @@ Default environment assumptions:
 
 - User home is `~/`.
 - Codex automation definitions live under `~/.codex/automations/<automation-id>/automation.toml`.
+- Codex automation working memory should live under `~/.codex/automations/<automation-id>/memory.md` when the automation needs persisted run state.
 - Personal/shared skills live in `~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills`.
 - Prefer the Codex app `automation_update` tool for create, update, view, and delete operations when it is available.
 - Use direct TOML reads for inspection, explanation, and prompt extraction.
 - Do not use Windows paths, `.lnk` shortcuts, PowerShell-specific snippets, Node-RED, Home Assistant, Traefik, or homelab assumptions unless the user explicitly introduces that stack.
+- If a prompt references `$CODEX_HOME` and it is unset, normalize to `~/.codex` instead of probing multiple candidate directories.
 
 ## Decision Tree
 
@@ -33,7 +35,7 @@ Execute only the matching branch unless the user asks for alternatives.
 Use this branch for requests about automations that already exist.
 
 1. Locate `~/.codex/automations/<automation-id>/automation.toml`.
-2. Treat `automation.toml` as the automation definition.
+2. Treat `automation.toml` as the automation definition, and inspect `memory.md` beside it when the automation uses persisted run state.
 3. Read these fields when present: `id`, `kind`, `name`, `prompt`, `status`, `rrule`, `model`, `reasoning_effort`, `execution_environment`, `cwds`, `created_at`, and `updated_at`.
 4. If the user asks for the automation text or prompt, return the decoded `prompt` value.
 5. If the user asks for the file verbatim, return the TOML contents exactly enough to satisfy the request.
@@ -68,6 +70,8 @@ Use this branch when no custom helper script is needed.
 Prompt guidance:
 
 - Keep schedule details out of the prompt when using `automation_update`; schedule belongs in the automation fields.
+- When the automation needs stable cross-run state, include `Automation ID: <id>` and `Automation memory: ~/.codex/automations/<id>/memory.md` in the prompt contract.
+- If the prompt names a specific tool or action primitive such as a task/todo creator, either confirm that tool is available in the target environment or write a fallback path into the prompt.
 - Include constraints, output format, and what to do when nothing changed.
 - Do not ask the automation to edit files unless that is truly desired.
 - For repo work, specify whether it may modify files, create commits, or only report findings.
@@ -96,7 +100,10 @@ Workflow:
    - empty/no-op path
    - forced failing-helper path
 6. Create or update the Codex automation prompt so it calls the helper and interprets the output.
-7. Verify one full run or the closest safe dry run before declaring completion.
+7. For review automations, keep operational state in `memory.md` rather than encoding per-run state into `automation.toml`.
+8. If the prompt asks the automation to create a task/todo via a tool that may not exist in every environment, define a fallback that records the suggested diff or action in `memory.md` with an explicit waiting status.
+9. If the automation inspects Codex session history, anchor it to `~/.codex/session_index.jsonl`, bounded `~/.codex/sessions/YYYY/MM/*.jsonl` windows, and the automation memory before any broad home-directory scan.
+10. Verify one full run or the closest safe dry run before declaring completion.
 
 Only extract a new reusable skill when the helper pattern is clearly useful beyond one automation.
 

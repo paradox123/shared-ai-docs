@@ -18,28 +18,42 @@ Use this skill to inspect sessions since the previous run and answer four questi
 
 ## Inputs
 
-- Primary source: `.claude/projects/**/*.jsonl`
-- Co-primary source for Codex Desktop runs: `.codex/sessions/**/*.jsonl` (and `.codex/archived_sessions/*.jsonl` when needed)
-- Supporting sources when useful: `.claude/history/sessions/**`, `.claude/history/research/**`, `.claude/history/raw-outputs/**`, `.claude/debug/latest`
-- Skill files to inspect or update: prefer `.agents/skills/*/SKILL.md`; if unavailable use `.claude/skills/*/SKILL.md`
-- Persistent run cursor: prefer `.agents/skills/improve-skills/last-run.json`; if unavailable use `.claude/skills/improve-skills/last-run.json`
+- Primary source: `~/.claude/projects/**/*.jsonl`
+- Co-primary source for Codex Desktop runs: `~/.codex/sessions/**/*.jsonl` (and `~/.codex/archived_sessions/*.jsonl` when needed)
+- Fast recent-session index for Codex Desktop runs: `~/.codex/session_index.jsonl`
+- Supporting sources when useful: `~/.claude/history/sessions/**`, `~/.claude/history/research/**`, `~/.claude/history/raw-outputs/**`, `~/.claude/debug/latest`
+- Skill files to inspect or update: prefer `.agents/skills/*/SKILL.md`; if unavailable use `~/.claude/skills/*/SKILL.md`
+- Persistent run cursor: prefer `.agents/skills/improve-skills/last-run.json`; if unavailable use `~/.claude/skills/improve-skills/last-run.json`
 - Persistent candidate memory: prefer `/memories/improve-skills.md`; if `/memories` is unavailable, reuse an existing improve-skills report/memory file in the active docs workspace and note the fallback path in the report
 
-Prefer project session logs first because they preserve tool calls, retries, and agent behavior in sequence. When `.claude/projects` does not include the active Codex thread, use `.codex/sessions` as the authoritative source for that run window.
+Prefer project session logs first because they preserve tool calls, retries, and agent behavior in sequence. When `~/.claude/projects` does not include the active Codex thread, use `~/.codex/sessions` as the authoritative source for that run window.
 When multiple unrelated workspaces are present in the same time window, filter candidate sessions by `cwd`/workspace relevance first to avoid cross-project noise in findings.
+
+For automation threads, resolve Codex home before any memory or automation-path reads:
+
+```bash
+CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
+```
+
+Use `"$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md"` instead of assuming `$CODEX_HOME` is exported.
 
 ## First Run And Cursor Handling
 
 Before creating any new memory file, view `/memories/` and reuse an existing improve-skills note if present.
 If `/memories/` does not exist, locate an existing improve-skills note/report in the active docs workspace and reuse that path instead of inventing a new random location.
 
-Read `.agents/skills/improve-skills/last-run.json` if it exists; otherwise read `.claude/skills/improve-skills/last-run.json`.
+If the automation prompt explicitly provides `Automation memory: ...`, treat that file as the primary persisted state for this run. Do not invent a parallel memory file elsewhere unless the prompt explicitly asks for one.
+If a prompt references `$CODEX_HOME` and that variable is unset, normalize to `~/.codex` immediately instead of probing broad home-directory candidates.
+When writing paths that refer to the user's home directory in the final report or memory, prefer `~/...` over absolute `/Users/...` paths.
+
+Read `.agents/skills/improve-skills/last-run.json` if it exists; otherwise read `~/.claude/skills/improve-skills/last-run.json`.
 
 - If it exists, only inspect sessions newer than the stored timestamp.
 - If it does not exist, do a bounded first pass over the most recent relevant sessions and say clearly in the report that this was an initial baseline run.
 - At the end of a successful run, update the cursor file you used with the timestamp of the newest processed session and a short run summary.
 
 Use a bounded first pass rather than scanning everything blindly.
+Before running git commands during session review, confirm the actual repo root with `git rev-parse --show-toplevel 2>/dev/null`. If the current workspace is a wrapper folder rather than the git root, switch to the real repo root instead of retrying failing git commands from the wrapper path.
 
 ## What Counts As Evidence
 
@@ -75,6 +89,14 @@ For every finding, classify it along two axes:
 
 Inspect session artifacts newer than the last-run cursor.
 
+For Codex Desktop session selection, prefer bounded, portable methods in this order:
+
+1. `~/.codex/session_index.jsonl` filtered by timestamp and `cwd`
+2. sorted file paths under `~/.codex/sessions/**` and `~/.codex/archived_sessions/**`, using the ISO-like timestamp embedded in the filename
+3. `jq` filtering on `session_meta.payload.timestamp` inside a bounded set of recent files
+
+Avoid starting with broad `find ~/.codex ...` scans, and do not rely on GNU-only `find -newermt` semantics because they are not portable across Daniel's macOS environment.
+
 For each candidate session, capture:
 
 - session id or file path
@@ -87,6 +109,7 @@ Session selection rule:
 
 - Prefer sessions whose `cwd` matches the active workspace/task path.
 - Only include cross-workspace sessions if the user explicitly asked for a cross-project review.
+- For automation runs, inspect `~/.codex/automations/<automation-id>/automation.toml` and `memory.md` before broad session-log discovery so prompt intent and pending diffs are known up front.
 
 ### Step 2: Identify improvement-worthy patterns
 
@@ -99,6 +122,8 @@ Look for patterns such as:
 - repeated documentation fetches after a skill already triggered
 
 Focus on root cause. Do not just say "the agent explored." Explain what guidance was missing.
+
+For automation-run sessions, compare the automation prompt against the tools actually available in that run. If the prompt calls for a missing tool or workflow primitive, classify that as an automation-instruction issue first instead of letting repeated tool or filesystem probing dominate the diagnosis.
 
 ### Step 3: Improve existing skills when justified
 
@@ -115,9 +140,19 @@ Typical improvements:
 
 Keep edits minimal and evidence-driven. Do not rewrite unrelated sections.
 
+Automation-instruction review:
+
+- When the reviewed session is itself an automation run, separately decide whether the drift came from a weak skill or from weak automation instructions.
+- Skills should contain the reusable "how to do this kind of task" knowledge.
+- Automation prompts should contain task-specific scope, project paths, required outputs, and state-file conventions.
+- Automation prompts should not depend on a named task/todo tool without a fallback when that tool may be absent from some run environments.
+- Do not auto-edit automations during an improve-skills run unless the user explicitly asked for that behavior.
+- Record high-value automation prompt changes as proposed diffs in the report and memory. If a dedicated task or todo tool is unavailable in the current environment, mark the suggestion as deferred rather than silently dropping it.
+
 ### Step 4: Track new-skill candidates in memory
 
-Store recurring discovery patterns in `/memories/improve-skills.md`.
+Store recurring discovery patterns in the explicit automation memory when one was provided.
+Otherwise store them in `/memories/improve-skills.md`.
 If `/memories` is unavailable, store them in the reused fallback note path and explicitly mention that path in the report.
 
 For each candidate, keep one concise entry with:
@@ -137,6 +172,7 @@ Good candidate examples:
 - finding the right CLI for a specialized file transformation
 - iterating through multiple execution environments to find one that works
 - repeatedly splitting oversized tasks into stable helper flows
+- repeatedly hunting for session stores, automation files, or missing task/todo tooling before the real review work can begin
 
 ### Step 5: Escalate strong candidates
 
@@ -217,6 +253,7 @@ If active-thread evidence exists but has not yet been persisted to session logs,
 - Project-specific structure-discovery patterns usually belong in project playbooks, not global skills.
 - If the same discovery pattern appears in multiple unrelated projects, upgrade it from project-scoped to general.
 - When unsure whether something is a skill gap or a one-off, record it as a candidate and wait for another occurrence.
+- If the automation text itself is the root cause, prefer one explicit deferred prompt diff over repeated attempts to rediscover an equivalent missing tool.
 
 ## Example Findings
 

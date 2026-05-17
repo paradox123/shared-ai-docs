@@ -52,6 +52,7 @@ If QMD is not installed, use a fallback sequence:
 - Exact phrase: `"connection pool"` (quoted)
 - Exclude terms: `performance -sports` (minus prefix)
 - Code identifiers work: `handleError async`
+- Environment variables, secret names, CLI flags, and exact IDs should use `qmd search` first, not `qmd query`
 
 **vec (semantic)**
 - Full natural language question
@@ -133,6 +134,12 @@ qmd get "#abc123"                 # By docid
 qmd multi-get "journals/2026-*.md" -l 40  # Batch pull snippets by glob
 qmd multi-get notes/foo.md,notes/bar.md   # Comma-separated list, preserves order
 ```
+
+Prefer this decision rule:
+
+- `qmd search "<exact-term>" -c <collection> --files` for exact names, variables, filenames, route fragments, or identifier discovery
+- `qmd query "<question>" -c <collection>` for natural-language questions where you do not know the document vocabulary yet
+- If `qmd search` already finds the right files, do not escalate to `qmd query` unless you still need semantic ranking across many candidates
 
 ## Setup
 
