@@ -45,6 +45,8 @@ If `/memories/` does not exist, locate an existing improve-skills note/report in
 If the automation prompt explicitly provides `Automation memory: ...`, treat that file as the primary persisted state for this run. Do not invent a parallel memory file elsewhere unless the prompt explicitly asks for one.
 If a prompt references `$CODEX_HOME` and that variable is unset, normalize to `~/.codex` immediately instead of probing broad home-directory candidates.
 When writing paths that refer to the user's home directory in the final report or memory, prefer `~/...` over absolute `/Users/...` paths.
+If the automation memory already contains a newer `Last review` or processed-window end than the prompt's `Last run`, treat the memory file as authoritative and use the prompt timestamp only as a fallback.
+If the prompt also includes a human-written or auto-inserted `Last run:` header and it disagrees with the memory file's latest processed window, trust the memory file, note the mismatch in the report, and do not rescan the older prompt window just because the header is stale.
 
 Read `.agents/skills/improve-skills/last-run.json` if it exists; otherwise read `~/.claude/skills/improve-skills/last-run.json`.
 
@@ -96,6 +98,31 @@ For Codex Desktop session selection, prefer bounded, portable methods in this or
 3. `jq` filtering on `session_meta.payload.timestamp` inside a bounded set of recent files
 
 Avoid starting with broad `find ~/.codex ...` scans, and do not rely on GNU-only `find -newermt` semantics because they are not portable across Daniel's macOS environment.
+Do not start with broad `rg --files ~/ ... ~/.codex` discovery either; it pulls in unrelated shell history, prompts, and app resources and adds noise without improving session selection.
+Do not assume `~/.codex/session_index.jsonl` contains `cwd` or file paths. In current Codex Desktop runs it may expose only `id`, `thread_name`, and `updated_at`. Use it as a coarse recency index first, then resolve `cwd`, prompt, and workspace scope from `session_meta` inside the actual session file.
+When you need `cwd` or a prompt snippet from the actual session files, prefer a short bounded `python3` extractor over ad hoc retries. Example:
+
+```bash
+python3 - <<'PY'
+import json, glob, os
+from datetime import datetime
+cutoff = datetime.fromisoformat("2026-05-18T07:50:46+00:00")
+for path in sorted(glob.glob(os.path.expanduser("~/.codex/sessions/2026/05/18/*.jsonl"))):
+    meta = None
+    for line in open(path):
+        obj = json.loads(line)
+        if obj.get("type") == "session_meta":
+            meta = obj["payload"]
+            break
+    if not meta:
+        continue
+    ts = datetime.fromisoformat(meta["timestamp"].replace("Z", "+00:00"))
+    if ts > cutoff:
+        print(meta["timestamp"], meta.get("cwd"), path)
+PY
+```
+
+If you need to parse JSON piped from another command, do not combine the producer with `python3 - <<'PY'` on the same pipeline because the heredoc consumes stdin. Use `python3 -c '...'`, a temp file, or inspect the raw JSON first.
 
 For each candidate session, capture:
 
@@ -110,6 +137,7 @@ Session selection rule:
 - Prefer sessions whose `cwd` matches the active workspace/task path.
 - Only include cross-workspace sessions if the user explicitly asked for a cross-project review.
 - For automation runs, inspect `~/.codex/automations/<automation-id>/automation.toml` and `memory.md` before broad session-log discovery so prompt intent and pending diffs are known up front.
+- Exclude sibling `Learn` runs created by the same automation fan-out unless they provide direct evidence of automation drift or a weakness in this skill itself.
 
 ### Step 2: Identify improvement-worthy patterns
 
@@ -148,6 +176,8 @@ Automation-instruction review:
 - Automation prompts should not depend on a named task/todo tool without a fallback when that tool may be absent from some run environments.
 - Do not auto-edit automations during an improve-skills run unless the user explicitly asked for that behavior.
 - Record high-value automation prompt changes as proposed diffs in the report and memory. If a dedicated task or todo tool is unavailable in the current environment, mark the suggestion as deferred rather than silently dropping it.
+- When a high-value automation prompt diff is deferred because the task/todo tool is unavailable, persist a `Pending automation prompt diffs` section in memory with the target automation, rationale, and a unified diff snippet.
+- On the next run, check that pending section before reviewing new sessions. If the user has accepted a deferred automation diff in the meantime, back up the target `automation.toml` first and then apply the approved change.
 
 ### Step 4: Track new-skill candidates in memory
 

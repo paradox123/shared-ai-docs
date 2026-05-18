@@ -1,7 +1,7 @@
 ---
 name: rag-documentation-research
 description: RAG-first documentation research for DanielsVault. USE WHEN users ask to find, research, or narrow documentation sources before planning or implementation. MUST trigger on phrases like "durchsuche die dokumentation", "durchsuche docs", "research the documentation", "search the documentation", "find relevant docs", "welche dokumente sind relevant", and for `research-for-review` or `spec-closeout` source discovery. Prefer `rag` as default runtime and use `qmd` only as optional discovery add-on.
-compatibility: Requires local `rag` runtime at /Users/dh/Documents/DanielsVault/_shared/danielsvault-rag; optional `qmd` add-on.
+compatibility: Requires local `rag` runtime at `~/Documents/DanielsVault/_shared/danielsvault-rag`; optional `qmd` add-on.
 ---
 
 # RAG Documentation Research
@@ -34,7 +34,7 @@ Also trigger for source discovery before:
 ## Preflight
 
 ```bash
-cd /Users/dh/Documents/DanielsVault/_shared/danielsvault-rag
+cd ~/Documents/DanielsVault/_shared/danielsvault-rag
 export PATH="$PWD/.venv/bin:$PATH"
 command -v rag
 rag --version
@@ -54,12 +54,15 @@ Default scope:
 3. Run workflow commands for delivery-oriented source sets.
 4. Use `qmd` only when discovery looks too narrow or wording is too fuzzy.
 5. When using `--scope all`, filter/de-prioritize generated artifact paths (for example `/.rag/`, `/.git/`, `/node_modules/`) in the final source shortlist.
+6. For exact env vars, secret names, route fragments, endpoint paths, certificate files, or other literal identifiers, do at most one structured pass and one hybrid/semantic pass before switching to `qmd search` or `rg`.
 
 Recommended commands:
 
 ```bash
 rag retrieve semantic --scope ncg/ncg-docs --query "<question>" --top-k 5 --format json
-rag retrieve structured --scope ncg/ncg-docs --record-type ci_setting_fact --filter "<filter>"
+rag retrieve structured --scope ncg/ncg-docs --record-type ci_setting_fact --filter "setting_name=<EXACT_TERM>"
+rag retrieve structured --scope ncg/ncg-docs --record-type ci_setting_fact --filter "setting_name~term1|term2|term3"
+rag retrieve hybrid --scope ncg/ncg-docs --record-type ci_setting_fact --query "<question>" --top-k 5 --format json
 rag workflow research-for-review --scope ncg/ncg-docs --query "<question>" --top-k 5 --format json
 rag workflow spec-closeout --scope ncg/ncg-docs --change "<change>" --top-k 5 --format json
 ```
@@ -76,6 +79,27 @@ Optional discovery add-on:
 qmd query "<question>" -c shared-ai-docs
 ```
 
+Current JSON shapes:
+
+- `rag retrieve semantic ... --format json` returns `hits[]`
+- `rag retrieve hybrid ... --format json` returns `hits[]`
+- `rag retrieve structured ... --format json` returns `facts[]`
+
+Do not assume a generic `results[]` key unless you already inspected the raw output for the installed runtime.
+
+Exact-term sequence:
+
+```bash
+rag retrieve structured --scope ncg/ncg-docs --record-type ci_setting_fact --filter "setting_name=<EXACT_TERM>" --top-k 10 --format json
+rag retrieve hybrid --scope ncg/ncg-docs --record-type ci_setting_fact --query "<EXACT_TERM> <repo/service/context>" --top-k 7 --format json
+qmd search "<EXACT_TERM>" -c ncg-docs -n 20 --files
+rg -n -F "<EXACT_TERM>" ~/Documents/DanielsVault/ncg/ncg-docs/docs
+```
+
+If `rag retrieve structured` reports `unsupported filter expression`, rewrite once into `field=value` or `field~a|b` form and move on.
+If `rag retrieve hybrid` errors because `--record-type` is missing, add it once and continue; do not iterate on multiple hybrid shapes first.
+If the chunk store looks stale or schema-mismatched for the current runtime, fall back to `qmd` or `rg` instead of spending a routine documentation task debugging or mutating the shared RAG runtime/store.
+
 ## Output Contract
 
 Always return:
@@ -91,3 +115,4 @@ Always return:
 1. Do not claim functional/system validation from retrieval alone.
 2. Do not replace exact structured lookups with fuzzy-only search when structured path is available.
 3. If `rag` preflight fails, report blocker and only then fall back to `qmd`/`rg` with explicit label.
+4. Treat RAG store refresh, re-ingest, or schema repair as separate maintenance work unless the user explicitly asked to repair the retrieval runtime itself.
