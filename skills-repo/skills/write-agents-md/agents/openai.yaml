@@ -1,0 +1,4 @@
+interface:
+  display_name: "Write AGENTS.md"
+  short_description: "Create compact repo agent instructions"
+  default_prompt: "Use $write-agents-md to create or update a concise AGENTS.md for this repository."
