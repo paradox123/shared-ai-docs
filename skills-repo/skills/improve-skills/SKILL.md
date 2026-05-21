@@ -16,6 +16,19 @@ Use this skill to inspect sessions since the previous run and answer four questi
 3. Which repeated discovery behaviors should become new skills or project-scoped playbooks?
 4. What changed this run, and what should be escalated in the report?
 
+## Codex Desktop Quick Start
+
+For Codex Desktop automation reviews, start with this exact bootstrap sequence before any broader discovery or repo commands:
+
+1. `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"`
+2. Read `"$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml"`
+3. Read the prompt-provided memory path, normalized through `CODEX_HOME_RESOLVED`
+4. Read `"$CODEX_HOME_RESOLVED/session_index.jsonl"`
+5. Run one bounded `python3` extractor against only the matching recent day folders under `~/.codex/sessions/YYYY/MM/DD/`
+6. Parse session JSONL from `response_item` records first, not from assumed top-level `message` or `tool_call` rows
+
+Do not begin with `git status`, broad `find ~/.codex`, broad `rg --files ~/.codex`, or raw `$CODEX_HOME/...` paths. Those detours are recurring evidence of this skill not being followed closely enough.
+
 ## Inputs
 
 - Primary source: `~/.claude/projects/**/*.jsonl`
@@ -36,6 +49,18 @@ CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
 ```
 
 Use `"$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md"` instead of assuming `$CODEX_HOME` is exported.
+Do not probe raw `$CODEX_HOME` first and do not print paths like `"$CODEX_HOME/automations/..."` before normalization; when the variable is unset that produces misleading `/automations/...` output and usually triggers avoidable follow-up discovery.
+
+For Codex Desktop automation runs, use this fast path before any broader discovery:
+
+1. resolve `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"`
+2. read `"$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml"`
+3. read the prompt-provided memory path, normalized through `CODEX_HOME_RESOLVED` when needed
+4. read `"$CODEX_HOME_RESOLVED/session_index.jsonl"`
+5. use one bounded `python3` extractor against the specific recent session dates from the index, built around Codex `response_item` records rather than Claude-style top-level `message` rows
+6. if you need concrete session files for indexed ids, resolve them from `session_meta.payload.id` inside those bounded day folders; if a candidate id is missing there, check `~/.../.codex/archived_sessions` before broadening the search
+
+Do not start a Codex Desktop improve-skills run by probing the home directory, searching for the session store, or experimenting with multiple filesystem roots. Assume `~/.codex` unless the prompt or environment proves otherwise.
 
 ## First Run And Cursor Handling
 
@@ -47,6 +72,7 @@ If a prompt references `$CODEX_HOME` and that variable is unset, normalize to `~
 When writing paths that refer to the user's home directory in the final report or memory, prefer `~/...` over absolute `/Users/...` paths.
 If the automation memory already contains a newer `Last review` or processed-window end than the prompt's `Last run`, treat the memory file as authoritative and use the prompt timestamp only as a fallback.
 If the prompt also includes a human-written or auto-inserted `Last run:` header and it disagrees with the memory file's latest processed window, trust the memory file, note the mismatch in the report, and do not rescan the older prompt window just because the header is stale.
+If the automation memory path from the prompt does not exist yet, create it at the end of the run instead of falling back to unrelated workspace notes.
 
 Read `.agents/skills/improve-skills/last-run.json` if it exists; otherwise read `~/.claude/skills/improve-skills/last-run.json`.
 
@@ -55,7 +81,7 @@ Read `.agents/skills/improve-skills/last-run.json` if it exists; otherwise read 
 - At the end of a successful run, update the cursor file you used with the timestamp of the newest processed session and a short run summary.
 
 Use a bounded first pass rather than scanning everything blindly.
-Before running git commands during session review, confirm the actual repo root with `git rev-parse --show-toplevel 2>/dev/null`. If the current workspace is a wrapper folder rather than the git root, switch to the real repo root instead of retrying failing git commands from the wrapper path.
+Before running git commands during session review, confirm the actual repo root with `git rev-parse --show-toplevel 2>/dev/null`. Do not start with `git status` or other repo commands from an unverified workspace, because automation fan-out worktrees and wrapper folders may not expose `.git` at the current `cwd`. If `git rev-parse` fails, skip git-based context instead of retrying more git commands from the same path.
 
 ## What Counts As Evidence
 
@@ -94,19 +120,40 @@ Inspect session artifacts newer than the last-run cursor.
 For Codex Desktop session selection, prefer bounded, portable methods in this order:
 
 1. `~/.codex/session_index.jsonl` filtered by timestamp and `cwd`
-2. sorted file paths under `~/.codex/sessions/**` and `~/.codex/archived_sessions/**`, using the ISO-like timestamp embedded in the filename
+2. sorted file paths under `~/.codex/sessions/**` and `~/.codex/archived_sessions/**`, using the ISO-like timestamp embedded in the filename only as a coarse locator for the right day/window
 3. `jq` filtering on `session_meta.payload.timestamp` inside a bounded set of recent files
+
+For the common Learn-automation case, first collect the candidate days from `session_index.jsonl` and then inspect only those day folders under `~/.codex/sessions/YYYY/MM/DD/` plus any matching `archived_sessions` entries. Do not iterate every month folder when the index already narrows the date range.
+Do not assume a same-day automation run still lives under `~/.codex/sessions/YYYY/MM/DD/`; completed Codex Desktop automation runs may already have moved into `~/.codex/archived_sessions/` even when the index entry is from the current day.
+Codex Desktop session files currently use rollout-style names such as `rollout-2026-05-20T09-01-36-<id>.jsonl`; use the filename timestamp only to narrow the search window, then make the real cutoff decision from `session_meta.payload.timestamp`.
+Treat the embedded id as something you verify from `session_meta`, not as a filename pattern you have to guess manually.
+When an automation runs in worktree mode, do not expect `session_meta.cwd` to equal the source repo path from `automation.toml`. Match both the configured source `cwd` and Codex worktree variants such as `~/.codex/worktrees/*/<repo-tail>` where `<repo-tail>` is the trailing project path like `private/Portfolio` or `shared-ai-docs`.
 
 Avoid starting with broad `find ~/.codex ...` scans, and do not rely on GNU-only `find -newermt` semantics because they are not portable across Daniel's macOS environment.
 Do not start with broad `rg --files ~/ ... ~/.codex` discovery either; it pulls in unrelated shell history, prompts, and app resources and adds noise without improving session selection.
 Do not assume `~/.codex/session_index.jsonl` contains `cwd` or file paths. In current Codex Desktop runs it may expose only `id`, `thread_name`, and `updated_at`. Use it as a coarse recency index first, then resolve `cwd`, prompt, and workspace scope from `session_meta` inside the actual session file.
+Do not assume `session_meta` repeats the thread title from the index. In current Codex Desktop logs it may have no `title` or `thread_name` at all, so use the index for human-readable names and the session file for authoritative `id`, `cwd`, and timestamps.
+Do not convert a session id directly into a guessed rollout filename. Resolve candidate files from bounded day folders first, then confirm the id from each file's `session_meta` payload.
+If an id from `session_index.jsonl` is not present in the bounded day folders you already chose, check `~/.codex/archived_sessions/` for `rollout-*<id>*.jsonl` next. Do not escalate to `rg ~/.codex/sessions ~/.codex/archived_sessions` across the whole store just to rediscover one archived file.
+`session_index.jsonl` timestamps may vary in fractional-second precision. Normalize them once in a bounded parser instead of retrying ad hoc `datetime.fromisoformat(...)` snippets or shell date conversions.
 When you need `cwd` or a prompt snippet from the actual session files, prefer a short bounded `python3` extractor over ad hoc retries. Example:
 
 ```bash
 python3 - <<'PY'
-import json, glob, os
+import json, glob, os, re
 from datetime import datetime
 cutoff = datetime.fromisoformat("2026-05-18T07:50:46+00:00")
+
+def parse_ts(raw):
+    raw = raw.strip()
+    if raw.endswith("Z"):
+        raw = raw[:-1] + "+00:00"
+    m = re.match(r"^(.*\.)(\d+)([+-]\d\d:\d\d)$", raw)
+    if m:
+        frac = m.group(2)
+        raw = m.group(1) + frac[:6].ljust(6, "0") + m.group(3)
+    return datetime.fromisoformat(raw)
+
 for path in sorted(glob.glob(os.path.expanduser("~/.codex/sessions/2026/05/18/*.jsonl"))):
     meta = None
     for line in open(path):
@@ -116,9 +163,50 @@ for path in sorted(glob.glob(os.path.expanduser("~/.codex/sessions/2026/05/18/*.
             break
     if not meta:
         continue
-    ts = datetime.fromisoformat(meta["timestamp"].replace("Z", "+00:00"))
+    ts = parse_ts(meta["timestamp"])
     if ts > cutoff:
         print(meta["timestamp"], meta.get("cwd"), path)
+PY
+```
+
+When reviewing several sibling automation sessions, do not inspect JSONL structure one file at a time. Start with one bounded extractor that prints `session_meta`, first user prompt snippet, and function-call names for all candidate files so you can identify the few logs worth deeper inspection before reading raw events.
+Do not start raw session inspection with `sed -n`, `head`, or wide `rg` against individual JSONL files just to discover their structure. Use those only after a bounded extractor has already identified a specific session and you need one targeted evidence snippet.
+
+For Codex Desktop JSONL logs, do not assume Claude-style top-level `message` or `tool_call` records. In current Codex session files:
+
+- `session_meta` still contains the authoritative session id, timestamp, and `cwd`
+- `session_meta` often does not carry a useful thread title; use the `session_index.jsonl` `thread_name` as the human label and join it back by session id when you need that context
+- user and assistant messages usually appear as `response_item` records whose payload has `type == "message"` plus `role`
+- tool calls usually appear as `response_item` records whose payload has `type == "function_call"` and may also be nested under `payload.item.type == "function_call"` depending on recorder/version
+
+Build extractors around `response_item` first, and only fall back to raw event inspection if a bounded sample shows a different shape. Do not spend multiple retries on parsers that expect top-level `message` or `tool_call` rows.
+If your first bounded extractor already yields `session_meta`, user messages, and function-call names, do not switch back to ad hoc per-file probing unless you need a quoted evidence excerpt for the final report.
+
+Starter extractor for Codex Desktop sessions:
+
+```bash
+python3 - <<'PY'
+import json, glob, os
+for path in sorted(glob.glob(os.path.expanduser("~/.codex/sessions/2026/05/21/*.jsonl"))):
+    meta = None
+    first_user = None
+    calls = []
+    with open(path) as f:
+        for line in f:
+            obj = json.loads(line)
+            if obj.get("type") == "session_meta":
+                meta = obj["payload"]
+                continue
+            if obj.get("type") != "response_item":
+                continue
+            payload = obj.get("payload", {})
+            if payload.get("type") == "message" and payload.get("role") == "user" and not first_user:
+                texts = [item.get("text", "") for item in payload.get("content", []) if item.get("type") == "input_text"]
+                first_user = " ".join(texts)[:220]
+            elif payload.get("type") == "function_call":
+                calls.append(payload.get("name"))
+    if meta:
+        print(meta["timestamp"], meta.get("cwd"), first_user, calls[:10], path)
 PY
 ```
 
@@ -135,9 +223,11 @@ For each candidate session, capture:
 Session selection rule:
 
 - Prefer sessions whose `cwd` matches the active workspace/task path.
+- For automation worktree runs, also treat `~/.codex/worktrees/*/<repo-tail>` as in-scope when the suffix matches one of the automation `cwds`; do not drop those sessions as cross-workspace noise.
 - Only include cross-workspace sessions if the user explicitly asked for a cross-project review.
 - For automation runs, inspect `~/.codex/automations/<automation-id>/automation.toml` and `memory.md` before broad session-log discovery so prompt intent and pending diffs are known up front.
 - Exclude sibling `Learn` runs created by the same automation fan-out unless they provide direct evidence of automation drift or a weakness in this skill itself.
+- If sibling `Learn` fan-out runs all show the same discovery pattern, treat that repetition as one skill-gap finding with multiple evidence points, not as unrelated noise.
 
 ### Step 2: Identify improvement-worthy patterns
 
@@ -178,6 +268,7 @@ Automation-instruction review:
 - Record high-value automation prompt changes as proposed diffs in the report and memory. If a dedicated task or todo tool is unavailable in the current environment, mark the suggestion as deferred rather than silently dropping it.
 - When a high-value automation prompt diff is deferred because the task/todo tool is unavailable, persist a `Pending automation prompt diffs` section in memory with the target automation, rationale, and a unified diff snippet.
 - On the next run, check that pending section before reviewing new sessions. If the user has accepted a deferred automation diff in the meantime, back up the target `automation.toml` first and then apply the approved change.
+- If the automation prompt explicitly says "Create User Todo" but no such tool exists in the run, do not spend time searching for a substitute tool. Record the diff under `Pending automation prompt diffs`, call out the missing-tool mismatch in the report, and continue.
 
 ### Step 4: Track new-skill candidates in memory
 

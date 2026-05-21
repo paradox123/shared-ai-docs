@@ -22,6 +22,10 @@ Determine whether the target is:
 - a migration from a deprecated skill, `CLAUDE.md`, README, runbook, or bootstrap document
 
 If moving context from another source, inspect the source and its references before deleting anything. Separate durable repo knowledge from workflow mechanics that no longer belong in always-loaded context.
+Before drafting, explicitly list:
+- contradictions between current guidance sources
+- redundant or obvious instructions that can be deleted
+- content that belongs in a deeper doc or nested `AGENTS.md` instead of the root file
 
 ### 2. Inspect Before Writing
 
@@ -37,12 +41,13 @@ Use web only when the user asks for a specific external guide or the local sourc
 
 Keep root `AGENTS.md` small. Include only guidance that is relevant to nearly every task in that repo:
 - one-sentence project orientation
-- essential startup checklist, if this repo needs one
+- essential startup checklist, only when the repo truly needs one
 - package manager or non-obvious build/test/runtime commands
 - critical guardrails that prevent expensive mistakes
 - pointers to deeper docs for language rules, testing, CI, architecture, ops, security, or domain details
 
 Prefer capabilities over brittle file maps. Mention stable directories and canonical docs, but avoid long inventories that will go stale.
+Do not spend space on obvious defaults that Codex already knows unless the repo has a meaningful local variant.
 
 ### 4. Draft Structure
 
@@ -76,6 +81,7 @@ Only if the repo has a real convention.
 ```
 
 For monorepos, keep root guidance about the monorepo and shared tooling. Add nested `AGENTS.md` files for package-specific commands, conventions, and runtime details.
+If the existing file is oversized, split detailed workflows into deeper docs or nested `AGENTS.md` files and leave short breadcrumbs in the root file.
 
 ### 5. Migrate From Deprecated Sources
 
@@ -84,13 +90,16 @@ When replacing a skill or bootstrap document:
 - extract stable, important content such as canonical docs, command entry points, deployment constraints, and security rules
 - discard invocation mechanics, output contracts, auto-load triggers, and duplicated docs
 - summarize the extracted content into `AGENTS.md` as breadcrumbs and durable rules
+- when the source contains too much detail for root `AGENTS.md`, create or reuse a deeper doc and link to it instead of flattening everything into the root file
 - remove the deprecated source only after verifying the replacement covers the important content
 
 ### 6. Validate
 
 Before finishing:
 - run `git status --short` in every affected repo
+- compare the new guidance against the old sources for unresolved contradictions
 - inspect the diff for accidental bulk copy, stale paths, contradictions, and over-specific file maps
+- check whether any line is redundant, vague, or obvious enough to delete
 - search for deprecated source names if deleting or migrating one
 - confirm the target `AGENTS.md` points to deeper docs instead of embedding them
 - mention any unrelated dirty worktree state separately

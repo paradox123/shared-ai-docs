@@ -71,6 +71,17 @@ Prompt guidance:
 
 - Keep schedule details out of the prompt when using `automation_update`; schedule belongs in the automation fields.
 - When the automation needs stable cross-run state, include `Automation ID: <id>` and `Automation memory: ~/.codex/automations/<id>/memory.md` in the prompt contract.
+- For automation prompts that inspect Codex session history or other automation state, write the state bootstrap into the prompt explicitly instead of assuming the agent will infer it:
+
+```text
+Automation state:
+- Resolve Codex home with `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` before reading automation files.
+- Read memory from `"$CODEX_HOME_RESOLVED/automations/<id>/memory.md"`.
+- Read the automation definition from `"$CODEX_HOME_RESOLVED/automations/<id>/automation.toml"` before broad session discovery.
+- Prefer `"$CODEX_HOME_RESOLVED/session_index.jsonl"` plus a bounded extractor against matching `sessions/YYYY/MM/DD/*.jsonl` files instead of broad home-directory scans or raw `rg` across every session file.
+- Do not probe alternate Codex-home candidates such as `~/Library/Application Support/Codex` unless the user or environment explicitly says the session store is elsewhere.
+```
+
 - If the prompt names a specific tool or action primitive such as a task/todo creator, either confirm that tool is available in the target environment or write a fallback path into the prompt.
 - Include constraints, output format, and what to do when nothing changed.
 - Do not ask the automation to edit files unless that is truly desired.
@@ -103,7 +114,13 @@ Workflow:
 7. For review automations, keep operational state in `memory.md` rather than encoding per-run state into `automation.toml`.
 8. If the prompt asks the automation to create a task/todo via a tool that may not exist in every environment, define a fallback that records the suggested diff or action in `memory.md` with an explicit waiting status.
 9. If the automation inspects Codex session history, anchor it to `~/.codex/session_index.jsonl`, bounded `~/.codex/sessions/YYYY/MM/*.jsonl` windows, and the automation memory before any broad home-directory scan.
-10. Verify one full run or the closest safe dry run before declaring completion.
+10. When an automation prompt or helper needs `$CODEX_HOME`, normalize once with `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` instead of probing multiple candidate directories.
+11. Prefer a short bounded `python3` extractor for rollout/session JSONL inspection over broad `rg` scans across raw session files, especially when you need timestamps, `cwd`, prompts, or tool-call metadata.
+12. When you use `session_index.jsonl`, treat `id` and `updated_at` as coarse routing fields only. Do not ask the automation to reconstruct rollout filenames from the id; have it resolve bounded candidate files first and confirm ids from `session_meta`.
+13. If the automation narrows candidate files by rollout filename timestamps, use that only to find the right day/window. Make the actual cutoff decision from `session_meta.payload.timestamp`, not from the filename alone.
+14. If the automation depends on `updated_at` filtering, note in the prompt or helper that timestamp precision may vary. Normalize timestamps in one parser instead of mixing shell date parsing with repeated `datetime.fromisoformat(...)` retries.
+15. Keep session-inspection shell snippets portable. Avoid bash-only features such as `mapfile` unless you explicitly run them under `bash -lc`; default zsh shells should use portable loops or the bounded Python path instead.
+16. Verify one full run or the closest safe dry run before declaring completion.
 
 Only extract a new reusable skill when the helper pattern is clearly useful beyond one automation.
 
