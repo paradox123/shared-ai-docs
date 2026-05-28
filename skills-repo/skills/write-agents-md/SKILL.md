@@ -11,6 +11,8 @@ Write compact, durable repo guidance for coding agents. Preserve important conte
 
 Read [agents-md-principles.md](references/agents-md-principles.md) when the task involves refactoring a large file, migrating context from another source, or deciding what belongs in root vs nested guidance.
 
+If this task is running inside a Codex automation and the prompt or local workflow expects an automation memory file, resolve `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` before any memory read or write. Do not read from or write to raw `$CODEX_HOME/...` paths when `$CODEX_HOME` may be unset.
+
 ## Workflow
 
 ### 1. Establish Scope
@@ -27,6 +29,18 @@ Before drafting, explicitly list:
 - redundant or obvious instructions that can be deleted
 - content that belongs in a deeper doc or nested `AGENTS.md` instead of the root file
 
+When the prompt already provides repo-local `AGENTS.md` instructions or an explicit target `cwd`, treat that as the target scope immediately. Do not start with `pwd`, `ls`, `find ..`, or sibling-worktree probing just to rediscover which repository you are in.
+If the task runs from a Codex automation worktree, resolve the actual repo root with `git rev-parse --show-toplevel 2>/dev/null` once if needed, then inspect the target repo directly.
+If the task is an automation run with `Automation ID:` / memory metadata in the prompt, normalize Codex home first and read those files before repo reads or memory-path debugging:
+
+```bash
+CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
+sed -n '1,200p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml" 2>/dev/null || true
+sed -n '1,200p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" 2>/dev/null || true
+```
+
+Do not probe raw `$CODEX_HOME` with `printf`, `ls`, or `test -f` inside `set -u` shells before this normalization. In Daniel's environment, `~/.codex` is the default unless the prompt proves otherwise.
+
 ### 2. Inspect Before Writing
 
 Use local sources first:
@@ -34,6 +48,27 @@ Use local sources first:
 - `README.md`, package manifests, solution files, compose files, task runners, test configs
 - local specs or architecture docs such as OpenSpec, ADRs, docs folders, and runbooks
 - repo-local skills when they document operational workflows
+
+When the task is an automation run with persisted memory, normalize Codex home once and read the named automation files directly instead of probing:
+
+```bash
+CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
+sed -n '1,200p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" 2>/dev/null || true
+sed -n '1,200p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml" 2>/dev/null || true
+```
+
+For recurring AGENTS-maintenance automations, use this startup order:
+1. resolve `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` once
+2. read the named automation `memory.md` and `automation.toml`
+3. read the target repo `AGENTS.md` plus one canonical root doc such as `README.md`
+4. run one bounded `rg --files` inventory for manifests, test runners, compose/task files, and nested `AGENTS.md`
+5. read only the repo-local docs or skills that the bounded inventory points to
+
+Do not probe raw `$CODEX_HOME/...` first when the variable may be unset.
+Prefer targeted file reads and `rg --files` from the confirmed repo root. Avoid `pwd && ls -la && find .. -name AGENTS.md` style orientation probes unless the target repo truly cannot be identified from the prompt, cwd, or git root.
+Do not start recurring AGENTS-maintenance runs with `git remote -v`, `git log`, `git ls-tree -r HEAD`, or broad `find` over parent directories just to infer the repo structure. Use those only if local docs and bounded file inventory still leave a concrete uncertainty that matters for the guidance.
+For update-style automation runs, start from the existing root `AGENTS.md`, the main `README.md`, and the few canonical docs or specs most likely to contain new durable workflow facts. Do not escalate to broad repo inventories such as `git ls-tree -r`, `find . -maxdepth 4`, `git remote -v`, or multi-tree `find openspec ...` scans unless those first reads fail to identify the relevant workflow source.
+When the repo is still sparse or mostly scaffolding, prefer a minimal `AGENTS.md` derived from the concrete files that exist. Do not pad the discovery pass with commit history or remote inspection just to manufacture more guidance.
 
 Use web only when the user asks for a specific external guide or the local source points to one. When using external guidance, cite the URL in the final response.
 
@@ -103,3 +138,4 @@ Before finishing:
 - search for deprecated source names if deleting or migrating one
 - confirm the target `AGENTS.md` points to deeper docs instead of embedding them
 - mention any unrelated dirty worktree state separately
+- when writing automation memory or user-facing notes, normalize home-directory paths to `~/...` instead of `/Users/...`

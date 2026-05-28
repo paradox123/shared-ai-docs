@@ -11,7 +11,23 @@ To test local web applications, write native Python Playwright scripts.
 **Helper Scripts Available**:
 - `scripts/with_server.py` - Manages server lifecycle (supports multiple servers)
 
-**Always run scripts with `--help` first** to see usage. DO NOT read the source until you try running the script first and find that a customized solution is abslutely necessary. These scripts can be very large and thus pollute your context window. They exist to be called directly as black-box scripts rather than ingested into your context window.
+Use the helper scripts as black boxes. Start with the stable invocation patterns below and only fall back to `--help` when the known-good shape does not fit the task. Do not read the source unless the helper cannot express the workflow you need.
+
+For Codex Desktop sessions, prefer the bundled runtimes when you need Playwright quickly:
+
+```bash
+~/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 \
+  <skill-dir>/scripts/with_server.py \
+  --server "<dev-server-command>" \
+  --port <port> \
+  -- python /tmp/your_playwright_script.py
+```
+
+If you need Node packages inside the Node REPL Playwright fallback, add the bundled module root once:
+
+```text
+js_add_node_module_dir path=~/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules
+```
 
 ## Decision Tree: Choosing Your Approach
 
@@ -22,8 +38,8 @@ User task → Is it static HTML?
     │         └─ Fails/Incomplete → Treat as dynamic (below)
     │
     └─ No (dynamic webapp) → Is the server already running?
-        ├─ No → Run: python scripts/with_server.py --help
-        │        Then use the helper + write simplified Playwright script
+        ├─ No → Use the known-good `with_server.py` pattern below
+        │        Then write the smallest Playwright script that verifies the task
         │
         └─ Yes → Reconnaissance-then-action:
             1. Navigate and wait for networkidle
@@ -34,7 +50,7 @@ User task → Is it static HTML?
 
 ## Example: Using with_server.py
 
-To start a server, run `--help` first, then use the helper:
+Use a direct known-good invocation first:
 
 **Single server:**
 ```bash
@@ -48,6 +64,18 @@ python scripts/with_server.py \
   --server "cd frontend && npm run dev" --port 5173 \
   -- python your_automation.py
 ```
+
+If you are in Codex Desktop and want the fully qualified bundled runtime form:
+
+```bash
+~/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 \
+  ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/webapp-testing/scripts/with_server.py \
+  --server "npm run dev -- --host 127.0.0.1 --port 4173" \
+  --port 4173 \
+  -- python /tmp/your_automation.py
+```
+
+Only run `python scripts/with_server.py --help` when you already know you need a variant that the stable examples above do not cover.
 
 To create an automation script, include only Playwright logic (servers are managed automatically):
 ```python
@@ -82,7 +110,8 @@ with sync_playwright() as p:
 
 ## Best Practices
 
-- **Use bundled scripts as black boxes** - To accomplish a task, consider whether one of the scripts available in `scripts/` can help. These scripts handle common, complex workflows reliably without cluttering the context window. Use `--help` to see usage, then invoke directly. 
+- **Use bundled scripts as black boxes** - To accomplish a task, consider whether one of the scripts available in `scripts/` can help. These scripts handle common, complex workflows reliably without cluttering the context window. Start from the stable examples in this skill and use `--help` only when those examples clearly do not fit.
+- For Codex Desktop local-app checks, assume `with_server.py` plus a minimal Playwright script is the default path when the Browser plugin does not expose a callable browser tool in the turn.
 - Use `sync_playwright()` for synchronous scripts
 - Always close the browser when done
 - Use descriptive selectors: `text=`, `role=`, CSS selectors, or IDs

@@ -9,6 +9,21 @@ A discipline for hard bugs. Skip phases only when explicitly justified.
 
 When exploring the codebase, use the project's domain glossary to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
 
+## Fast Path: Pasted HTTP Auth Failures
+
+If the user pasted a `fetch(...)`, `curl`, bearer token, JWT, or an OIDC/OAuth request that is failing with `401`, `403`, or "missing scope", do this before broad repo spelunking:
+
+1. Decode the JWT header and payload locally without printing the raw token in full.
+2. Check the obvious claim mismatches first:
+   - `exp`, `nbf`, `iat` against the current time
+   - `aud` / `azp` / `client_id` / issuer alignment
+   - `scope` / `scp` / role claims versus the failing endpoint
+   - subject, email, tenant, or environment mismatches between the pasted request and the reported user
+3. Compare those claims with the endpoint's documented or coded auth requirements before tracing deeper service internals.
+4. If safe, replay one sanitized request with a fresh token or the same request shape to separate stale-token failures from backend drift.
+
+If one of those checks already explains the failure, report it immediately and only then continue into deeper service/debug work for any remaining mismatch.
+
 ## Phase 1 — Build a feedback loop
 
 **This is the skill.** Everything else is mechanical. If you have a fast, deterministic, agent-runnable pass/fail signal for the bug, you will find the cause — bisection, hypothesis-testing, and instrumentation all just consume that signal. If you don't have one, no amount of staring at code will save you.

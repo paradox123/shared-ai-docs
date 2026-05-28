@@ -7,6 +7,9 @@ description: Design, create, inspect, update, or troubleshoot Codex automations 
 
 Use this skill to design and implement automations in Daniel's environment.
 
+Do not use this skill as the primary workflow for retrospective session-review tasks such as `Learn`, skill-gap audits, or "review sessions since last run" requests. Use `improve-skills` first for those reviews, and only come back here after the bounded evidence pass confirms a concrete automation prompt/config change or helper-design question.
+For Learn-style Codex Desktop reviews, the earliest acceptable point to open this skill is after the canonical `automation.toml`, normalized automation memory, and `session_index.jsonl` bootstrap reads are already on screen.
+
 Default environment assumptions:
 
 - User home is `~/`.
@@ -76,16 +79,36 @@ Prompt guidance:
 ```text
 Automation state:
 - Resolve Codex home with `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` before reading automation files.
+- Read the automation definition from `"$CODEX_HOME_RESOLVED/automations/<id>/automation.toml"` before broader discovery.
 - Read memory from `"$CODEX_HOME_RESOLVED/automations/<id>/memory.md"`.
-- Read the automation definition from `"$CODEX_HOME_RESOLVED/automations/<id>/automation.toml"` before broad session discovery.
+- If memory already records `Processed window end` or `Last review`, derive the working cutoff from that value and use any prompt-level `Last run:` only as a fallback.
 - Prefer `"$CODEX_HOME_RESOLVED/session_index.jsonl"` plus a bounded extractor against matching `sessions/YYYY/MM/DD/*.jsonl` files instead of broad home-directory scans or raw `rg` across every session file.
 - Do not probe alternate Codex-home candidates such as `~/Library/Application Support/Codex` unless the user or environment explicitly says the session store is elsewhere.
+- Do not start with repo orientation commands such as `git status`, `README.md`, `pwd`, `ls`, repo-wide `git log`, or prompt-fragment searches like `rg -n "Last run|Automation ID|Create User Todo"` across `~/` or `~/.codex`.
+- Do not load automation-authoring or project skills during that bootstrap unless the bounded session pass already proved they are needed for a concrete finding.
+- If the automation will run inside repos that inject `AGENTS.md` startup checklists, say explicitly that repo-local startup guidance is deferred until after the automation-state bootstrap and the first bounded session pass.
+- If the first user-visible content may include both an injected `# AGENTS.md instructions for ...` block and automation metadata such as `Automation ID:` or `Last run:`, tell the automation to treat the automation metadata as authoritative bootstrap inputs and the AGENTS block as background context.
 ```
 
 - If the prompt names a specific tool or action primitive such as a task/todo creator, either confirm that tool is available in the target environment or write a fallback path into the prompt.
+- Treat named tool availability as a run-environment contract, not a filesystem-discovery task. Check the active tool context when you have it; otherwise assume the tool is unavailable and use the fallback. Do not search `~/`, `~/.codex`, session logs, or prompt files just to prove whether a named tool such as `Create User Todo` exists.
+- If the prompt expects shell snippets to pass values into embedded Python via `os.environ`, state that the snippet must `export` those variables first or invoke Python as `VAR=value python3 ...`. A plain shell assignment on the line before `python3 - <<'PY'` is not visible inside Python.
+- For session-driven review automations, include an explicit stop condition for no-change audits. If the bounded session pass shows no relevant product/repo work beyond the current automation thread, tell the automation to stop there instead of widening into repo-wide `git status`, `git log`, or documentation sweeps.
 - Include constraints, output format, and what to do when nothing changed.
 - Do not ask the automation to edit files unless that is truly desired.
 - For repo work, specify whether it may modify files, create commits, or only report findings.
+
+For review-style automations that inspect Codex sessions, prefer including a short literal bootstrap contract instead of paraphrasing the rules. A copy-pasteable prompt fragment is more reliable than a looser summary:
+
+```text
+Bootstrap rules:
+- Treat `Automation ID`, `Automation memory`, and `Last run` as automation metadata, not as strings to rediscover.
+- Resolve `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` once, then read `automation.toml`, normalized `memory.md`, and `session_index.jsonl` before any repo inspection.
+- If `memory.md` contains `Processed window end` or `Last review`, that value overrides the prompt `Last run:` header.
+- If the run starts inside a repo with injected `AGENTS.md` startup instructions, defer those repo-local startup steps until after the bounded session pass proves repo context is needed.
+- Do not begin with `git status`, `README.md`, `pwd`, `ls`, broad `find ~/.codex`, raw `$CODEX_HOME/...` probes, or prompt-fragment searches across `~/` or `~/.codex`.
+- If the required task/todo tool is unavailable, record the pending diff/action in `memory.md` and report it instead of searching the filesystem for the tool.
+```
 
 ## Hybrid Codex Automation
 
@@ -113,14 +136,20 @@ Workflow:
 6. Create or update the Codex automation prompt so it calls the helper and interprets the output.
 7. For review automations, keep operational state in `memory.md` rather than encoding per-run state into `automation.toml`.
 8. If the prompt asks the automation to create a task/todo via a tool that may not exist in every environment, define a fallback that records the suggested diff or action in `memory.md` with an explicit waiting status.
+   Do not ask the automation to hunt for the task/todo tool with `rg`, `find`, or prompt-text searches. If the named tool is not available in the run context, record the pending action in memory and report the mismatch.
 9. If the automation inspects Codex session history, anchor it to `~/.codex/session_index.jsonl`, bounded `~/.codex/sessions/YYYY/MM/*.jsonl` windows, and the automation memory before any broad home-directory scan.
 10. When an automation prompt or helper needs `$CODEX_HOME`, normalize once with `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` instead of probing multiple candidate directories.
-11. Prefer a short bounded `python3` extractor for rollout/session JSONL inspection over broad `rg` scans across raw session files, especially when you need timestamps, `cwd`, prompts, or tool-call metadata.
-12. When you use `session_index.jsonl`, treat `id` and `updated_at` as coarse routing fields only. Do not ask the automation to reconstruct rollout filenames from the id; have it resolve bounded candidate files first and confirm ids from `session_meta`.
-13. If the automation narrows candidate files by rollout filename timestamps, use that only to find the right day/window. Make the actual cutoff decision from `session_meta.payload.timestamp`, not from the filename alone.
-14. If the automation depends on `updated_at` filtering, note in the prompt or helper that timestamp precision may vary. Normalize timestamps in one parser instead of mixing shell date parsing with repeated `datetime.fromisoformat(...)` retries.
-15. Keep session-inspection shell snippets portable. Avoid bash-only features such as `mapfile` unless you explicitly run them under `bash -lc`; default zsh shells should use portable loops or the bounded Python path instead.
-16. Verify one full run or the closest safe dry run before declaring completion.
+11. If your helper shell uses `set -u`, never read raw `$CODEX_HOME/...` paths before that normalization step; make the prompt/helper show `CODEX_HOME_RESOLVED` explicitly instead of implying the variable is always exported.
+12. Prefer a short bounded `python3` extractor for rollout/session JSONL inspection over broad `rg` scans across raw session files, especially when you need timestamps, `cwd`, prompts, or tool-call metadata.
+13. When you use `session_index.jsonl`, treat `id` and `updated_at` as coarse routing fields only. Do not ask the automation to reconstruct rollout filenames from the id; have it resolve bounded candidate files first and confirm ids from `session_meta`.
+14. If the automation narrows candidate files by rollout filename timestamps, use that only to find the right day/window. Make the actual cutoff decision from `session_meta.payload.timestamp`, not from the filename alone.
+15. If the automation depends on `updated_at` filtering, note in the prompt or helper that timestamp precision may vary. Normalize timestamps in one parser instead of mixing shell date parsing with repeated `datetime.fromisoformat(...)` retries.
+16. Keep bounded Python helpers dependency-light. Prefer stdlib modules such as `json`, `datetime`, `glob`, `re`, and `pathlib` for session parsing unless the automation explicitly provisions another package. Do not assume `python-dateutil` is installed for simple cutoff parsing.
+17. When a shell helper feeds values into embedded Python through `os.environ`, either `export` them first or use inline environment assignment on the Python command itself. Do not rely on non-exported shell variables surviving into `python3 - <<'PY'`.
+18. Keep session-inspection shell snippets portable. Avoid bash-only features such as `mapfile` unless you explicitly run them under `bash -lc`; default zsh shells should use portable loops or the bounded Python path instead.
+19. For cross-repo review automations, do not front-load `git status`, `git log`, or repo sweeps across every configured workspace. Let the bounded session pass decide which repos, if any, need follow-up inspection.
+20. If a review automation includes both a prompt-level `Last run:` header and persisted memory, make the prompt say which one wins. Default to memory `Processed window end` or `Last review`, with the header as a first-run fallback only, and tell the automation not to run duplicate extractors for both windows once the authoritative cutoff is known.
+21. Verify one full run or the closest safe dry run before declaring completion.
 
 Only extract a new reusable skill when the helper pattern is clearly useful beyond one automation.
 

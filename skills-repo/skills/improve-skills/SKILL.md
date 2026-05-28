@@ -7,6 +7,8 @@ description: Review Claude session history since the last run to find where exis
 
 Review recent session history, improve weak skills when the evidence is strong enough, track repeated discovery patterns as future skill candidates, and produce a concise report. For Parent/Child Agent Delivery process reviews where the target is a specific parent spec, child index, handoffs, OpenSpec evidence, and workflow self-optimization, prefer `agent-delivery-retro-review` first and use this skill only for broader cross-session skill-gap aggregation.
 
+Normal skill-loading order has an explicit exception here: if this skill is selected for a Codex Desktop automation review, do not open this `SKILL.md` first just because a general workflow says to read the skill body after triggering. The bootstrap below is the first part of the workflow. Start with the automation/session reads, then return to this file only after `automation.toml`, normalized memory, and `session_index.jsonl` are already on screen.
+
 ## Goal
 
 Use this skill to inspect sessions since the previous run and answer four questions:
@@ -26,8 +28,44 @@ For Codex Desktop automation reviews, start with this exact bootstrap sequence b
 4. Read `"$CODEX_HOME_RESOLVED/session_index.jsonl"`
 5. Run one bounded `python3` extractor against only the matching recent day folders under `~/.codex/sessions/YYYY/MM/DD/`
 6. Parse session JSONL from `response_item` records first, not from assumed top-level `message` or `tool_call` rows
+7. Treat the current repo or worktree `cwd` as incidental until the session evidence proves you need repo-specific context
 
-Do not begin with `git status`, broad `find ~/.codex`, broad `rg --files ~/.codex`, or raw `$CODEX_HOME/...` paths. Those detours are recurring evidence of this skill not being followed closely enough.
+Self-check: after your first three shell reads, you should already have the automation definition, automation memory status, and `session_index.jsonl` on screen. If not, stop and restart the bootstrap instead of continuing with repo orientation or broader discovery.
+When the prompt includes both injected repo AGENTS/start-work guidance and automation metadata such as `Automation ID:` or `Last run:`, the automation metadata wins for startup order. Defer the repo checklist until after the bounded session pass proves repo-specific context is needed.
+If higher-level automation instructions say to "read memory first", treat that as compatible with this bootstrap only when the automation file and `session_index.jsonl` follow immediately in the same opening batch. A memory-only start does not satisfy the bootstrap.
+If you realize you already started with repo-orientation commands, raw `$CODEX_HOME` probes, or broad `~/.codex` discovery, do not continue from that mixed state. Discard that branch of exploration, run the exact bootstrap sequence above, and only keep findings reproduced from the bounded bootstrap path.
+A wrong first command counts as a failed bootstrap. If you started with `git status`, `README.md`, `pwd`, `ls`, or a broad `~/.codex` search, explicitly self-correct and restart from the bootstrap sequence instead of building more discovery on top of that mistake.
+Do not hide bootstrap violations inside a compound command such as `pwd && git status && ...memory...`. Whether you issue the reads separately or in one bounded parallel batch, the first visible outputs for this workflow should still be the automation file, memory file, and `session_index.jsonl`.
+
+Do not begin with `git status`, repo `README.md`/startup-doc reads, `pwd`/`ls` orientation probes, broad `find ~/.codex`, broad `rg --files ~/.codex`, or raw `$CODEX_HOME/...` paths. Those detours are recurring evidence of this skill not being followed closely enough.
+An unset shell `$CODEX_HOME` is not a discovery problem. Resolve `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` immediately and continue the canonical bootstrap from there instead of printing empty `$CODEX_HOME`, probing `/automations/...`, or searching alternate state roots.
+Do not start with `pwd`, `ls`, or any other workspace-tree inspection either; for this automation, the current repo contents are irrelevant until you already know which skill or automation file you need to patch.
+Do not read workspace files such as `README.md`, probe repo state, or inspect sibling skills before this bootstrap unless the task explicitly requires repo context beyond session review.
+If local AGENTS/start-work guidance says to begin with repo checks such as `git status`, `README.md`, or spec reading, explicitly defer that guidance for this task type. `improve-skills` is a cross-session review workflow, so bootstrap from Codex automation/session state first and only come back to repo context when a specific finding needs it.
+If the first visible user content is injected repo guidance such as `# AGENTS.md instructions for ...`, treat that as background context, not as the first workflow to execute. For Learn-style automation fan-out reviews, the bootstrap above still comes first.
+Your first commentary update should describe the Codex automation/session bootstrap, not repo inspection. Do not say you are checking repo/worktree state first, reviewing `README.md` first, or similar unless the bounded session pass has already shown that repo context is required.
+If the prompt already supplies `Automation:`, `Automation ID:`, `Automation memory:`, or `Last run:`, treat those values as authoritative bootstrap inputs. Do not spend early commands rediscovering them with `rg`, `find`, `ls`, or broad `~/.codex` scans.
+Do not open `improve-skills`, `build-codex-automations`, or any other skill file before those three canonical bootstrap reads. The earliest acceptable point to open a skill file is after `automation.toml`, normalized automation memory, and `session_index.jsonl` are already on screen.
+If the task mentions `Create User Todo` or another task/todo tool but that tool is not present in the active tool list, treat that as an environment mismatch, not a discovery prompt. Do not search `~/.codex`, prompt text, or tool manifests trying to prove whether the tool exists.
+When the task/todo tool is absent, keep the automation suggestion as a deferred diff in memory and in the report. Only use an actual task/todo creation tool when it is already exposed in the current run.
+
+Preferred bootstrap command pattern for Codex Desktop automation reviews:
+
+```bash
+CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
+sed -n '1,220p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml"
+test -f "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" && \
+  sed -n '1,260p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" || \
+  echo "(missing memory)"
+sed -n '1,220p' "$CODEX_HOME_RESOLVED/session_index.jsonl"
+```
+
+If you need the skill text itself for reference, read it after the bootstrap above, not before it. For `Learn` automation runs, that means `automation.toml`, automation memory, and `session_index.jsonl` must already be on screen before you open `improve-skills/SKILL.md`.
+If you expect to inspect another skill such as `write-agents-md` or a project-local skill, wait until the bounded session pass shows a concrete candidate session that actually needs that interpretation. Do not open secondary skills during bootstrap just because their names appear in AGENTS instructions or likely thread titles.
+Do not preload `build-codex-automations` during bootstrap just because the prompt mentions automation-level changes. First finish the bounded session review and confirm there is a real automation-instructions finding; only then open `build-codex-automations` if you need help shaping the deferred prompt diff.
+If another skill suggests a different automation-file read order for a retrospective Learn-style review, keep this skill's bootstrap order here: `automation.toml`, then automation memory, then `session_index.jsonl`. Treat the mismatch as a skill-conflict finding to patch later instead of mixing the two workflows mid-run.
+For Learn-automation fan-out runs, treat the current workspace as incidental until a candidate session explicitly points back to a repo-local skill or file. Do not read `README.md`, run `git status`, or inspect project files before the session index and bounded extractor steps are complete.
+If the run starts inside a project worktree because an automation fans out across repositories, treat that repo as incidental context until the bounded session pass proves it is relevant. Do not read `README.md`, OpenSpec files, or repo-specific docs during bootstrap just because local AGENTS instructions usually say to; for cross-session skill-review tasks, session evidence and automation state come first.
 
 ## Inputs
 
@@ -50,6 +88,10 @@ CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
 
 Use `"$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md"` instead of assuming `$CODEX_HOME` is exported.
 Do not probe raw `$CODEX_HOME` first and do not print paths like `"$CODEX_HOME/automations/..."` before normalization; when the variable is unset that produces misleading `/automations/...` output and usually triggers avoidable follow-up discovery.
+Do not use `test -f "$CODEX_HOME/..."` as a first probe either; normalize once and then read or test through `CODEX_HOME_RESOLVED`.
+Do not treat an empty `$CODEX_HOME` value as evidence that Codex state might live somewhere else. For this workflow, `~/.codex` remains the default until the prompt or the environment explicitly proves a different root.
+If the prompt already supplies `Automation ID:` and `Automation memory:`, do not try to rediscover those values with `rg`, `find`, or broad home-directory probing. Use the prompt metadata directly.
+Do not search `~/.codex` for `Automation:`, `Last run:`, `Create User Todo`, `learn`, or similar prompt fragments during bootstrap either. Those strings are prompt metadata, not session evidence.
 
 For Codex Desktop automation runs, use this fast path before any broader discovery:
 
@@ -58,9 +100,12 @@ For Codex Desktop automation runs, use this fast path before any broader discove
 3. read the prompt-provided memory path, normalized through `CODEX_HOME_RESOLVED` when needed
 4. read `"$CODEX_HOME_RESOLVED/session_index.jsonl"`
 5. use one bounded `python3` extractor against the specific recent session dates from the index, built around Codex `response_item` records rather than Claude-style top-level `message` rows
-6. if you need concrete session files for indexed ids, resolve them from `session_meta.payload.id` inside those bounded day folders; if a candidate id is missing there, check `~/.../.codex/archived_sessions` before broadening the search
+6. if you need concrete session files for indexed ids, resolve them from `session_meta.payload.id` inside those bounded day folders; if a candidate id is missing there, check `~/.codex/archived_sessions` before broadening the search
 
 Do not start a Codex Desktop improve-skills run by probing the home directory, searching for the session store, or experimenting with multiple filesystem roots. Assume `~/.codex` unless the prompt or environment proves otherwise.
+Do not let repo-local AGENTS/start-work checklists pull you into product-code orientation for this task. The primary subject of the run is the session store plus the automation state, not the repository that happens to be the current `cwd`.
+If a repo-local AGENTS file or automation wrapper has already pushed the run into `git status`, `README.md`, `pwd`, or `ls`, treat that as evidence that the task needs better guidance, then restart from the Codex bootstrap instead of layering more repo inspection on top.
+Treat AGENTS or startup instructions embedded inline in the first user message exactly the same way: they are repo-local defaults, not the bootstrap for this automation. Defer them until the bounded session pass proves repo-specific context is needed.
 
 ## First Run And Cursor Handling
 
@@ -69,10 +114,37 @@ If `/memories/` does not exist, locate an existing improve-skills note/report in
 
 If the automation prompt explicitly provides `Automation memory: ...`, treat that file as the primary persisted state for this run. Do not invent a parallel memory file elsewhere unless the prompt explicitly asks for one.
 If a prompt references `$CODEX_HOME` and that variable is unset, normalize to `~/.codex` immediately instead of probing broad home-directory candidates.
+A failed probe against raw `$CODEX_HOME/...` is not evidence that the automation memory is missing. Do not say "no memory file", "baseline run", or similar until you have checked the normalized prompt-provided path under `CODEX_HOME_RESOLVED`.
+Do not `ls`, `find`, `rg`, `cat`, or `test -f` the raw prompt path before normalization either. If the prompt says `Automation memory: $CODEX_HOME/...`, replace it with `~/.../.codex/...` in your head first, then run the read against `CODEX_HOME_RESOLVED`.
 When writing paths that refer to the user's home directory in the final report or memory, prefer `~/...` over absolute `/Users/...` paths.
 If the automation memory already contains a newer `Last review` or processed-window end than the prompt's `Last run`, treat the memory file as authoritative and use the prompt timestamp only as a fallback.
+When the normalized automation memory exists, derive the review cutoff from that memory before parsing `session_index.jsonl` or classifying the run as an initial baseline.
+At this stage, use the memory file only for cutoff/state bootstrap. Do not start grepping candidate names, pending-diff headings, or prior report labels from memory before you finish the current bounded session-evidence pass.
+Do not reopen memory just to search for strings like existing candidate names, `Pending automation prompt diffs`, or old report section titles while you are still collecting the new-session evidence set. First collect the current evidence window, then come back to memory to merge counters and deferred items.
+If the memory file yields the authoritative newer cutoff, stop using the prompt timestamp immediately and do not keep scanning the older prompt window out of caution.
+Do not run one extractor from the prompt `Last run` and a second extractor from the memory cutoff just to compare them. Pick the authoritative cutoff once from the normalized memory and keep the rest of the run on that single timeline.
 If the prompt also includes a human-written or auto-inserted `Last run:` header and it disagrees with the memory file's latest processed window, trust the memory file, note the mismatch in the report, and do not rescan the older prompt window just because the header is stale.
+If the normalized automation memory exists and already contains the current session family, prefer its `Processed window end` or `Last review` value as the cutoff. Do not fall back to the older prompt header just because it is easier to parse.
+Prefer extracting that authoritative cutoff once with a bounded parser instead of manually retyping the prompt timestamp. Example:
+
+```bash
+python3 - <<'PY'
+import pathlib, re
+mem = pathlib.Path.home() / ".codex" / "automations" / "learn" / "memory.md"
+text = mem.read_text() if mem.exists() else ""
+m = re.search(r"Processed window end:\s*(\S+)", text)
+if not m:
+    m = re.search(r"Last review:\s*(\S+)", text)
+print(m.group(1) if m else "2026-05-24T07:01:58.892Z")
+PY
+```
+
+Once that extractor yields a memory-backed cutoff, keep reusing the captured value. Do not hardcode the stale prompt `Last run:` into later `python3` snippets out of convenience.
+For Learn-style fan-out runs, falling back to the stale prompt `Last run` after the memory read is a workflow error, not a harmless duplicate. Restart the extractor with the effective cutoff instead of carrying both windows forward.
 If the automation memory path from the prompt does not exist yet, create it at the end of the run instead of falling back to unrelated workspace notes.
+Treat a missing automation memory file as expected on first run. Print a simple `(missing memory)` marker and continue; do not search the workspace or home directory for substitute state files unless the prompt explicitly names another location.
+If the normalized automation memory exists but your first read clipped, timed out, or mixed too much surrounding output into the result, rerun that same normalized read in a tighter bounded form. Do not downgrade the run to "missing memory" or branch into substitute-state discovery.
+If the normalized automation reads and `session_index.jsonl` are already on screen, do not reopen this skill file before the first bounded extractor unless you have a concrete ambiguity that the existing bootstrap steps do not answer.
 
 Read `.agents/skills/improve-skills/last-run.json` if it exists; otherwise read `~/.claude/skills/improve-skills/last-run.json`.
 
@@ -81,7 +153,11 @@ Read `.agents/skills/improve-skills/last-run.json` if it exists; otherwise read 
 - At the end of a successful run, update the cursor file you used with the timestamp of the newest processed session and a short run summary.
 
 Use a bounded first pass rather than scanning everything blindly.
+For automation review tasks, do not perform repo-orientation reading as a default startup step. Only pull `README.md`, OpenSpec, AGENTS, or repo-local docs later if a concrete candidate session or finding needs project-specific interpretation.
+If you notice that your first command was `git status`, `pwd`, `ls`, `README.md`, a broad `find ~/.codex`, or a raw `$CODEX_HOME/...` probe, treat that as a bootstrap failure. Restart from the three canonical reads instead of layering more discovery on top of the wrong start.
 Before running git commands during session review, confirm the actual repo root with `git rev-parse --show-toplevel 2>/dev/null`. Do not start with `git status` or other repo commands from an unverified workspace, because automation fan-out worktrees and wrapper folders may not expose `.git` at the current `cwd`. If `git rev-parse` fails, skip git-based context instead of retrying more git commands from the same path.
+If the first bounded parser fails because of timestamp precision, record shape, or one bad assumption, patch that same bounded parser and rerun it. Do not pivot into exploratory `sed`, `head`, `find`, `rg`, or one-file-at-a-time JSONL inspection just to recover from the first parser error.
+If the first bootstrap read fails for a reason you already understand, such as unset `$CODEX_HOME`, clipped output, or mixed timestamp precision, correct that exact read and continue the same bootstrap. Do not add a new discovery branch like `find $CODEX_HOME`, broad `find ~/.codex`, or `rg --files ~` just to re-prove where Codex stores its state.
 
 ## What Counts As Evidence
 
@@ -128,14 +204,21 @@ Do not assume a same-day automation run still lives under `~/.codex/sessions/YYY
 Codex Desktop session files currently use rollout-style names such as `rollout-2026-05-20T09-01-36-<id>.jsonl`; use the filename timestamp only to narrow the search window, then make the real cutoff decision from `session_meta.payload.timestamp`.
 Treat the embedded id as something you verify from `session_meta`, not as a filename pattern you have to guess manually.
 When an automation runs in worktree mode, do not expect `session_meta.cwd` to equal the source repo path from `automation.toml`. Match both the configured source `cwd` and Codex worktree variants such as `~/.codex/worktrees/*/<repo-tail>` where `<repo-tail>` is the trailing project path like `private/Portfolio` or `shared-ai-docs`.
+Normalize timestamps in the very first bounded extractor, including `session_index.jsonl` `updated_at` values. Do not compare raw timestamp strings or feed unnormalized fractional-second values directly into `datetime.fromisoformat(...)`.
 
 Avoid starting with broad `find ~/.codex ...` scans, and do not rely on GNU-only `find -newermt` semantics because they are not portable across Daniel's macOS environment.
 Do not start with broad `rg --files ~/ ... ~/.codex` discovery either; it pulls in unrelated shell history, prompts, and app resources and adds noise without improving session selection.
+Do not start with broad `rg -n` over `~/` or `~/.codex` for prompt fragments like `Last run`, `Automation ID`, `Create User Todo`, or `Automation:` either. Those strings are bootstrap inputs, not evidence to rediscover.
+Do not use broad `rg` over `~/.codex` just to rediscover automation prompt text, `Last run`, or `Automation ID` markers that were already present in the prompt and automation files you read during bootstrap.
+Do not read the current rollout JSONL with `sed`, `head`, or one-off parsers just to learn the log shape of the very session you are currently authoring. Use a sibling candidate session plus one bounded extractor instead.
+Do not pivot from that bounded extractor into opening other same-batch current-day rollouts one file at a time just to re-validate the same JSON shape. Once one bounded extractor has shown the `response_item` layout for the active run window, reuse that knowledge unless you need a targeted evidence excerpt.
+Do not run `git status`, `git rev-parse`, `pwd`, `ls`, or repo-README reads as "orientation" for this automation before the session bootstrap. Those checks are orthogonal to the task unless a later finding explicitly requires repo-local context.
 Do not assume `~/.codex/session_index.jsonl` contains `cwd` or file paths. In current Codex Desktop runs it may expose only `id`, `thread_name`, and `updated_at`. Use it as a coarse recency index first, then resolve `cwd`, prompt, and workspace scope from `session_meta` inside the actual session file.
 Do not assume `session_meta` repeats the thread title from the index. In current Codex Desktop logs it may have no `title` or `thread_name` at all, so use the index for human-readable names and the session file for authoritative `id`, `cwd`, and timestamps.
 Do not convert a session id directly into a guessed rollout filename. Resolve candidate files from bounded day folders first, then confirm the id from each file's `session_meta` payload.
 If an id from `session_index.jsonl` is not present in the bounded day folders you already chose, check `~/.codex/archived_sessions/` for `rollout-*<id>*.jsonl` next. Do not escalate to `rg ~/.codex/sessions ~/.codex/archived_sessions` across the whole store just to rediscover one archived file.
 `session_index.jsonl` timestamps may vary in fractional-second precision. Normalize them once in a bounded parser instead of retrying ad hoc `datetime.fromisoformat(...)` snippets or shell date conversions.
+If you hit this timestamp-precision issue on the first pass, fix the parser once and continue with the same bounded extraction plan; do not branch into alternate filesystem-discovery tactics.
 When you need `cwd` or a prompt snippet from the actual session files, prefer a short bounded `python3` extractor over ad hoc retries. Example:
 
 ```bash
@@ -169,14 +252,25 @@ for path in sorted(glob.glob(os.path.expanduser("~/.codex/sessions/2026/05/18/*.
 PY
 ```
 
+If your bounded extractor needs shell values such as `CODEX_HOME_RESOLVED`, `AUTOMATION_ID`, or a computed cutoff inside Python, export them first or invoke Python as `VAR=value python3 ...`. A plain shell assignment on the line before `python3 - <<'PY'` is not visible inside `os.environ`, so do not write extractors that silently fall back to `~/.codex` or a stale cutoff by accident.
+
 When reviewing several sibling automation sessions, do not inspect JSONL structure one file at a time. Start with one bounded extractor that prints `session_meta`, first user prompt snippet, and function-call names for all candidate files so you can identify the few logs worth deeper inspection before reading raw events.
+If you want to confirm the payload shape, have that same bounded extractor print `payload.type` counts or one representative user/tool sample for the full candidate set. Do not fall back to separate one-file probes for that confirmation step.
+When a session starts with an injected `# AGENTS.md instructions for ...` block, do not treat that wrapper as the only user-prompt summary. Have the bounded extractor capture the first substantive post-wrapper user task as well, or explicitly mark the first snippet as AGENTS-wrapper-only so you do not misclassify the session purpose.
+Treat a standalone `<environment_context>` user message the same way: it is wrapper metadata, not the substantive task. If both wrappers appear, skip both and capture the first real post-wrapper user request.
+If the first user `response_item` is only `<environment_context>...</environment_context>`, treat it the same way: environment metadata is not the substantive task request. Keep scanning until you find the first non-wrapper, non-environment user message or explicitly label the session as missing one.
 Do not start raw session inspection with `sed -n`, `head`, or wide `rg` against individual JSONL files just to discover their structure. Use those only after a bounded extractor has already identified a specific session and you need one targeted evidence snippet.
+If you still need an event-shape reminder after the bounded extractor, inspect the current run or one already-selected evidence file. Do not open sibling `Learn` sessions merely to rediscover the generic Codex JSONL layout.
+Once the bounded extractor already gives `session_meta`, first prompt text, and function-call names for the sibling `Learn` runs, do not open their raw rollout files with `sed -n` or `head` unless you need a concrete quoted snippet for one specific session id.
+Do not open unrelated project-local or shared skill files after the bounded extractor just because a candidate session happened in that repo or mentioned docs/spec work. First confirm from the session evidence that the skill was actually used, missed, or should have been used; only then inspect that specific skill file.
 
 For Codex Desktop JSONL logs, do not assume Claude-style top-level `message` or `tool_call` records. In current Codex session files:
 
 - `session_meta` still contains the authoritative session id, timestamp, and `cwd`
 - `session_meta` often does not carry a useful thread title; use the `session_index.jsonl` `thread_name` as the human label and join it back by session id when you need that context
 - user and assistant messages usually appear as `response_item` records whose payload has `type == "message"` plus `role`
+- the first user `response_item` may be an injected AGENTS wrapper instead of the substantive task request, so prefer the first non-wrapper user message when summarizing the session intent
+- the first user `response_item` may also be a pure `<environment_context>` block; skip that too when deriving session intent
 - tool calls usually appear as `response_item` records whose payload has `type == "function_call"` and may also be nested under `payload.item.type == "function_call"` depending on recorder/version
 
 Build extractors around `response_item` first, and only fall back to raw event inspection if a bounded sample shows a different shape. Do not spend multiple retries on parsers that expect top-level `message` or `tool_call` rows.
@@ -202,7 +296,12 @@ for path in sorted(glob.glob(os.path.expanduser("~/.codex/sessions/2026/05/21/*.
             payload = obj.get("payload", {})
             if payload.get("type") == "message" and payload.get("role") == "user" and not first_user:
                 texts = [item.get("text", "") for item in payload.get("content", []) if item.get("type") == "input_text"]
-                first_user = " ".join(texts)[:220]
+                text = " ".join(texts).strip()
+                if text.startswith("<environment_context>"):
+                    continue
+                if text.startswith("# AGENTS.md instructions for "):
+                    continue
+                first_user = text[:220]
             elif payload.get("type") == "function_call":
                 calls.append(payload.get("name"))
     if meta:
@@ -228,6 +327,7 @@ Session selection rule:
 - For automation runs, inspect `~/.codex/automations/<automation-id>/automation.toml` and `memory.md` before broad session-log discovery so prompt intent and pending diffs are known up front.
 - Exclude sibling `Learn` runs created by the same automation fan-out unless they provide direct evidence of automation drift or a weakness in this skill itself.
 - If sibling `Learn` fan-out runs all show the same discovery pattern, treat that repetition as one skill-gap finding with multiple evidence points, not as unrelated noise.
+- If sibling `Learn` runs already provide the evidence you need, stop there. Do not widen the scan into unrelated recent sessions just to make the report feel broader.
 
 ### Step 2: Identify improvement-worthy patterns
 
