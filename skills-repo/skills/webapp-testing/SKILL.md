@@ -6,7 +6,10 @@ license: Complete terms in LICENSE.txt
 
 # Web Application Testing
 
-To test local web applications, write native Python Playwright scripts.
+To test local web applications, write native Playwright scripts. Prefer Python
+when the runtime already has `playwright`; otherwise switch directly to the
+Node/Browser fallback below instead of searching the filesystem or installing
+packages ad hoc.
 
 **Helper Scripts Available**:
 - `scripts/with_server.py` - Manages server lifecycle (supports multiple servers)
@@ -23,11 +26,36 @@ For Codex Desktop sessions, prefer the bundled runtimes when you need Playwright
   -- python /tmp/your_playwright_script.py
 ```
 
-If you need Node packages inside the Node REPL Playwright fallback, add the bundled module root once:
+Before choosing the Python form, verify the module is actually present:
+
+```bash
+~/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 \
+  -c "import playwright"
+```
+
+If that import fails, do not run `find /Users/...`, `npm ls -g`, or
+`npm install` just to rediscover Playwright. Use one of these fallbacks:
+
+- If the Browser plugin/tool is available, use it for the rendered check.
+- If you need Node packages inside the Node REPL Playwright fallback, add the bundled module root once:
 
 ```text
 js_add_node_module_dir path=~/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules
 ```
+
+- If you need a shell `node` script under `with_server.py`, set `NODE_PATH` to
+  the bundled module root and import CommonJS packages through the default export:
+
+```javascript
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+const { chromium } = require("playwright-core");
+```
+
+If Playwright reports that its bundled browser executable is missing, first try
+launching an installed system browser such as Google Chrome with
+`executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"`.
+Only ask to install browsers or npm packages when no local browser path works.
 
 ## Decision Tree: Choosing Your Approach
 

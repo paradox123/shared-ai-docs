@@ -93,6 +93,7 @@ Automation state:
 - If the prompt names a specific tool or action primitive such as a task/todo creator, either confirm that tool is available in the target environment or write a fallback path into the prompt.
 - Treat named tool availability as a run-environment contract, not a filesystem-discovery task. Check the active tool context when you have it; otherwise assume the tool is unavailable and use the fallback. Do not search `~/`, `~/.codex`, session logs, or prompt files just to prove whether a named tool such as `Create User Todo` exists.
 - If the prompt expects shell snippets to pass values into embedded Python via `os.environ`, state that the snippet must `export` those variables first or invoke Python as `VAR=value python3 ...`. A plain shell assignment on the line before `python3 - <<'PY'` is not visible inside Python.
+- Do not put shell parameter expansion such as `${CODEX_HOME:-~/.codex}` inside Python strings, `Path(...)`, or `os.path.expanduser(...)`. Resolve Codex home in shell first and pass it as `sys.argv` or an exported environment variable, or use `Path.home() / ".codex"` directly when no shell override is required.
 - For session-driven review automations, include an explicit stop condition for no-change audits. If the bounded session pass shows no relevant product/repo work beyond the current automation thread, tell the automation to stop there instead of widening into repo-wide `git status`, `git log`, or documentation sweeps.
 - Include constraints, output format, and what to do when nothing changed.
 - Do not ask the automation to edit files unless that is truly desired.
@@ -146,10 +147,11 @@ Workflow:
 15. If the automation depends on `updated_at` filtering, note in the prompt or helper that timestamp precision may vary. Normalize timestamps in one parser instead of mixing shell date parsing with repeated `datetime.fromisoformat(...)` retries.
 16. Keep bounded Python helpers dependency-light. Prefer stdlib modules such as `json`, `datetime`, `glob`, `re`, and `pathlib` for session parsing unless the automation explicitly provisions another package. Do not assume `python-dateutil` is installed for simple cutoff parsing.
 17. When a shell helper feeds values into embedded Python through `os.environ`, either `export` them first or use inline environment assignment on the Python command itself. Do not rely on non-exported shell variables surviving into `python3 - <<'PY'`.
-18. Keep session-inspection shell snippets portable. Avoid bash-only features such as `mapfile` unless you explicitly run them under `bash -lc`; default zsh shells should use portable loops or the bounded Python path instead.
-19. For cross-repo review automations, do not front-load `git status`, `git log`, or repo sweeps across every configured workspace. Let the bounded session pass decide which repos, if any, need follow-up inspection.
-20. If a review automation includes both a prompt-level `Last run:` header and persisted memory, make the prompt say which one wins. Default to memory `Processed window end` or `Last review`, with the header as a first-run fallback only, and tell the automation not to run duplicate extractors for both windows once the authoritative cutoff is known.
-21. Verify one full run or the closest safe dry run before declaring completion.
+18. Do not copy shell fallback expressions such as `${CODEX_HOME:-~/.codex}` into Python path code. Shell expansion happens before Python starts; inside Python, pass the resolved value as an argument/environment variable or construct `Path.home() / ".codex"`.
+19. Keep session-inspection shell snippets portable. Avoid bash-only features such as `mapfile` unless you explicitly run them under `bash -lc`; default zsh shells should use portable loops or the bounded Python path instead.
+20. For cross-repo review automations, do not front-load `git status`, `git log`, or repo sweeps across every configured workspace. Let the bounded session pass decide which repos, if any, need follow-up inspection.
+21. If a review automation includes both a prompt-level `Last run:` header and persisted memory, make the prompt say which one wins. Default to memory `Processed window end` or `Last review`, with the header as a first-run fallback only, and tell the automation not to run duplicate extractors for both windows once the authoritative cutoff is known.
+22. Verify one full run or the closest safe dry run before declaring completion.
 
 Only extract a new reusable skill when the helper pattern is clearly useful beyond one automation.
 
