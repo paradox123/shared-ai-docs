@@ -14,6 +14,10 @@ Use this skill whenever documentation retrieval is the first bottleneck.
 2. `qmd` is optional for broader discovery.
 3. Source-backed output is mandatory.
 
+## Automation Session Guard
+
+When this skill is loaded only as a support skill inside a session-review automation, do not run RAG preflight or documentation retrieval first. Defer startup order to the primary review skill, such as `improve-skills` and its Codex Desktop session-review reference, then use RAG only for docs, repos, services, or identifiers the bounded session evidence actually implicates.
+
 ## Trigger Phrases
 
 Trigger immediately when users say or imply:
@@ -40,6 +44,10 @@ command -v rag
 rag --version
 rag runtime health
 ```
+
+## Local Runtime Transfer Mode
+
+Use [runtime-transfer.md](references/runtime-transfer.md) when the user asks to move, package, reinstall, or explain the local DanielsVault RAG setup itself. Do not load that reference for ordinary documentation retrieval.
 
 Default scope:
 

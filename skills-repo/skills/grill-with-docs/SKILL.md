@@ -1,15 +1,21 @@
 ---
 name: grill-with-docs
-description: Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates documentation (CONTEXT.md, ADRs) inline as decisions crystallise. Use when user wants to stress-test a plan against their project's language and documented decisions.
+description: Decision-discovery review, also called grill-me, that challenges a plan, PRD, issue, spec, or design against existing domain language, ADRs, docs, code, and reference research. Use when user wants to expose material business rules, inconsistencies, missing acceptance criteria, or architecture decisions before downstream work.
 ---
 
 <what-to-do>
 
-Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+Run a decision-discovery review of the plan, PRD, issue, spec, or design under discussion. Your job is to find material business rules, domain inconsistencies, missing acceptance criteria, and architecture decisions that must be made or documented.
 
-Ask the questions one at a time, waiting for feedback on each question before continuing.
+Answer as much as possible yourself before asking the user. Start from the artifact and sources already named or clearly canonical for the topic. Use broader repository, Daniel's Vault, code, RAG/QMD, or external reference research only when a concrete contradiction or missing decision requires it.
 
-If a question can be answered by exploring the codebase, explore the codebase instead.
+When you do need user input, ask one question at a time, waiting for feedback before continuing. For each question, provide your recommended answer and the evidence or conflict that makes the question necessary.
+
+If a question can be answered from the named artifact, source-of-truth docs, ADRs, code, Daniel's Vault, or reputable external references without broad discovery, answer it yourself instead of asking the user.
+
+Do not ask questions just to continue the grill. If no material unresolved decision remains, summarize the resolved findings and move to the requested downstream artifact or stop.
+
+If the user asks for "one question at a time", keep every grill turn to one main question. When the user asks for a plain-language explanation, translation, or example, answer that request and then restate the current question instead of silently advancing.
 
 </what-to-do>
 
@@ -17,41 +23,24 @@ If a question can be answered by exploring the codebase, explore the codebase in
 
 ## Domain awareness
 
-During codebase exploration, also look for existing documentation:
-
-### File structure
-
-Most repos have a single context:
-
-```
-/
-├── CONTEXT.md
-├── docs/
-│   └── adr/
-│       ├── 0001-event-sourced-orders.md
-│       └── 0002-postgres-for-write-model.md
-└── src/
-```
-
-If a `CONTEXT-MAP.md` exists at the root, the repo has multiple contexts. The map points to where each one lives:
-
-```
-/
-├── CONTEXT-MAP.md
-├── docs/
-│   └── adr/                          ← system-wide decisions
-├── src/
-│   ├── ordering/
-│   │   ├── CONTEXT.md
-│   │   └── docs/adr/                 ← context-specific decisions
-│   └── billing/
-│       ├── CONTEXT.md
-│       └── docs/adr/
-```
-
-Create files lazily — only when you have something to write. If no `CONTEXT.md` exists, create one when the first term is resolved. If no `docs/adr/` exists, create it when the first ADR is needed.
+During codebase exploration, also look for source-of-truth domain docs. Most repos use root `CONTEXT.md` plus `docs/adr/`; multi-context repos use `CONTEXT-MAP.md` to route to context-specific glossary/ADR folders. Create docs lazily only when you have a resolved term or ADR-worthy decision to capture.
 
 ## During the session
+
+### Start with a decision evidence pass
+
+Before asking any question or closing the grill, read the smallest source set needed to know whether user input is actually necessary:
+
+- the actual artifact being grilled: PRD, issue, OpenSpec change, proposal, design, tasks, or acceptance criteria
+- directly named specs, docs, code files, issue links, or prior session references from the user prompt
+- `CONTEXT-MAP.md` or `CONTEXT.md` only when domain terms are being clarified
+- ADRs likely to govern the topic only when the artifact implies an architectural or operating decision
+- a narrow search for exact terms, states, boundaries, or claims when the named sources leave ambiguity
+- RAG/QMD, broader repo/code reads, or external references only after a specific question needs that evidence
+
+Do not run a broad repository startup checklist just because one exists in `AGENTS.md`, unless you are about to edit code or the user explicitly asked for full repo orientation. Keep discovery tied to the artifact being grilled.
+
+Use [decision-review.md](references/decision-review.md) for the full decision map, question gate, capture rules, and closeout checklist when the grill is non-trivial or about downstream artifacts.
 
 ### Challenge against the glossary
 
@@ -71,7 +60,7 @@ When the user states how something works, check whether the code agrees. If you 
 
 ### Update CONTEXT.md inline
 
-When a term is resolved, update `CONTEXT.md` right there. Don't batch these up — capture them as they happen. Use the format in [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
+When a new or changed canonical domain term is resolved and it is not already documented, update the appropriate `CONTEXT.md` right there. Don't batch these up — capture them as they happen. Use the format in [CONTEXT-FORMAT.md](./CONTEXT-FORMAT.md).
 
 `CONTEXT.md` should be totally devoid of implementation details. Do not treat `CONTEXT.md` as a spec, a scratch pad, or a repository for implementation decisions. It is a glossary and nothing else.
 

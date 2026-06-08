@@ -1,383 +1,145 @@
 ---
 name: improve-skills
-description: Review Claude session history since the last run to find where existing skills were unclear, missing usage patterns, or failed to prevent avoidable tool discovery. USE WHEN the user asks to improve skills, review sessions for skill gaps, inspect tool usage for unclear instructions, find recurring discovery patterns, or turn repeated agent exploration into improved skills or new skill candidates.
+description: Review Claude/Codex session history to find where existing skills were unclear, missing usage patterns, or caused avoidable discovery. USE WHEN the user asks to improve skills, review sessions for skill gaps, inspect tool-usage failures, evaluate a named skill from recent sessions, or turn repeated agent exploration into skill/playbook candidates.
 ---
 
 # improve-skills
 
-Review recent session history, improve weak skills when the evidence is strong enough, track repeated discovery patterns as future skill candidates, and produce a concise report. For Parent/Child Agent Delivery process reviews where the target is a specific parent spec, child index, handoffs, OpenSpec evidence, and workflow self-optimization, prefer `agent-delivery-retro-review` first and use this skill only for broader cross-session skill-gap aggregation.
-
-Normal skill-loading order has an explicit exception here: if this skill is selected for a Codex Desktop automation review, do not open this `SKILL.md` first just because a general workflow says to read the skill body after triggering. The bootstrap below is the first part of the workflow. Start with the automation/session reads, then return to this file only after `automation.toml`, normalized memory, and `session_index.jsonl` are already on screen.
-If the host runtime or system-level skill contract explicitly requires opening the selected skill file before any other work, satisfy that requirement with a minimal read, then immediately run the canonical automation/session bootstrap. Treat that mandatory skill-load as a loader exception, not as evidence that the agent should restart or self-correct. Do not combine the exception with repo orientation, broad discovery, secondary skill reads, raw `$CODEX_HOME` probes, or session searches before the bootstrap.
-
-## Goal
-
-Use this skill to inspect sessions since the previous run and answer four questions:
-
-1. Which existing skills should be improved because the instructions were not clear enough?
-2. Which tool-usage failures or retries point to missing usage guidance inside a skill?
-3. Which repeated discovery behaviors should become new skills or project-scoped playbooks?
-4. What changed this run, and what should be escalated in the report?
-
-## Codex Desktop Quick Start
-
-For Codex Desktop automation reviews, start with this exact bootstrap sequence before any broader discovery or repo commands:
-
-1. `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"`
-2. Read `"$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml"`
-3. Read the prompt-provided memory path, normalized through `CODEX_HOME_RESOLVED`
-4. Read `"$CODEX_HOME_RESOLVED/session_index.jsonl"`
-5. Run one bounded `python3` extractor against only the matching recent day folders under `~/.codex/sessions/YYYY/MM/DD/`
-6. Parse session JSONL from `response_item` records first, not from assumed top-level `message` or `tool_call` rows
-7. Treat the current repo or worktree `cwd` as incidental until the session evidence proves you need repo-specific context
-
-Self-check: after your first three shell reads, you should already have the automation definition, automation memory status, and `session_index.jsonl` on screen. If not, stop and restart the bootstrap instead of continuing with repo orientation or broader discovery.
-When the prompt includes both injected repo AGENTS/start-work guidance and automation metadata such as `Automation ID:` or `Last run:`, the automation metadata wins for startup order. Defer the repo checklist, including explicitly named startup documents such as `VAULT_AGENT_STRUCTURE.md`, `README.md`, OpenSpec files, or repo-local routing matrices, until after the bounded session pass proves repo-specific context is needed.
-If higher-level automation instructions say to "read memory first", treat that as compatible with this bootstrap only when the automation file and `session_index.jsonl` follow immediately in the same opening batch. A memory-only start does not satisfy the bootstrap.
-If you realize you already started with repo-orientation commands, raw `$CODEX_HOME` probes, or broad `~/.codex` discovery, do not continue from that mixed state. Discard that branch of exploration, run the exact bootstrap sequence above, and only keep findings reproduced from the bounded bootstrap path.
-A wrong first command counts as a failed bootstrap. If you started with `git status`, `README.md`, `pwd`, `ls`, or a broad `~/.codex` search, explicitly self-correct and restart from the bootstrap sequence instead of building more discovery on top of that mistake.
-Do not hide bootstrap violations inside a compound command such as `pwd && git status && ...memory...`. Whether you issue the reads separately or in one bounded parallel batch, the first visible outputs for this workflow should still be the automation file, memory file, and `session_index.jsonl`.
-
-Do not begin with `git status`, repo `README.md`/startup-doc reads, `pwd`/`ls` orientation probes, broad `find ~/.codex`, broad `rg --files ~/.codex`, or raw `$CODEX_HOME/...` paths. Those detours are recurring evidence of this skill not being followed closely enough.
-An unset shell `$CODEX_HOME` is not a discovery problem. Resolve `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` immediately and continue the canonical bootstrap from there instead of printing empty `$CODEX_HOME`, probing `/automations/...`, or searching alternate state roots.
-Do not start with `pwd`, `ls`, or any other workspace-tree inspection either; for this automation, the current repo contents are irrelevant until you already know which skill or automation file you need to patch.
-Do not read workspace files such as `README.md`, probe repo state, or inspect sibling skills before this bootstrap unless the task explicitly requires repo context beyond session review.
-If local AGENTS/start-work guidance says to begin with repo checks such as `git status`, `README.md`, or spec reading, explicitly defer that guidance for this task type. `improve-skills` is a cross-session review workflow, so bootstrap from Codex automation/session state first and only come back to repo context when a specific finding needs it.
-If the first visible user content is injected repo guidance such as `# AGENTS.md instructions for ...`, treat that as background context, not as the first workflow to execute. For Learn-style automation fan-out reviews, the bootstrap above still comes first.
-Your first commentary update should describe the Codex automation/session bootstrap, not repo inspection. Do not say you are checking repo/worktree state first, reviewing `README.md` first, or similar unless the bounded session pass has already shown that repo context is required.
-If the prompt already supplies `Automation:`, `Automation ID:`, `Automation memory:`, or `Last run:`, treat those values as authoritative bootstrap inputs. Do not spend early commands rediscovering them with `rg`, `find`, `ls`, or broad `~/.codex` scans.
-Do not open `improve-skills`, `build-codex-automations`, or any other skill file before those three canonical bootstrap reads, except for a mandatory host/runtime skill-load of this exact selected skill. The earliest acceptable point to open any secondary skill file is after `automation.toml`, normalized automation memory, and `session_index.jsonl` are already on screen.
-If the task mentions `Create User Todo` or another task/todo tool but that tool is not present in the active tool list, treat that as an environment mismatch, not a discovery prompt. Do not search `~/.codex`, prompt text, or tool manifests trying to prove whether the tool exists.
-When the task/todo tool is absent, keep the automation suggestion as a deferred diff in memory and in the report. Only use an actual task/todo creation tool when it is already exposed in the current run.
-
-Preferred bootstrap command pattern for Codex Desktop automation reviews:
-
-```bash
-CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
-sed -n '1,220p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml"
-test -f "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" && \
-  sed -n '1,260p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" || \
-  echo "(missing memory)"
-sed -n '1,220p' "$CODEX_HOME_RESOLVED/session_index.jsonl"
-```
-
-If you need the skill text itself for reference, read it after the bootstrap above, not before it. For `Learn` automation runs, that means `automation.toml`, automation memory, and `session_index.jsonl` must already be on screen before you open `improve-skills/SKILL.md`.
-If you expect to inspect another skill such as `write-agents-md` or a project-local skill, wait until the bounded session pass shows a concrete candidate session that actually needs that interpretation. Do not open secondary skills during bootstrap just because their names appear in AGENTS instructions or likely thread titles.
-Do not preload `build-codex-automations` during bootstrap just because the prompt mentions automation-level changes. First finish the bounded session review and confirm there is a real automation-instructions finding; only then open `build-codex-automations` if you need help shaping the deferred prompt diff.
-If another skill suggests a different automation-file read order for a retrospective Learn-style review, keep this skill's bootstrap order here: `automation.toml`, then automation memory, then `session_index.jsonl`. Treat the mismatch as a skill-conflict finding to patch later instead of mixing the two workflows mid-run.
-For Learn-automation fan-out runs, treat the current workspace as incidental until a candidate session explicitly points back to a repo-local skill or file. Do not read `README.md`, run `git status`, or inspect project files before the session index and bounded extractor steps are complete.
-If the run starts inside a project worktree because an automation fans out across repositories, treat that repo as incidental context until the bounded session pass proves it is relevant. Do not read `README.md`, OpenSpec files, or repo-specific docs during bootstrap just because local AGENTS instructions usually say to; for cross-session skill-review tasks, session evidence and automation state come first.
-
-## Inputs
-
-- Primary source: `~/.claude/projects/**/*.jsonl`
-- Co-primary source for Codex Desktop runs: `~/.codex/sessions/**/*.jsonl` (and `~/.codex/archived_sessions/*.jsonl` when needed)
-- Fast recent-session index for Codex Desktop runs: `~/.codex/session_index.jsonl`
-- Supporting sources when useful: `~/.claude/history/sessions/**`, `~/.claude/history/research/**`, `~/.claude/history/raw-outputs/**`, `~/.claude/debug/latest`
-- Skill files to inspect or update: prefer `.agents/skills/*/SKILL.md`; if unavailable use `~/.claude/skills/*/SKILL.md`
-- Persistent run cursor: prefer `.agents/skills/improve-skills/last-run.json`; if unavailable use `~/.claude/skills/improve-skills/last-run.json`
-- Persistent candidate memory: prefer `/memories/improve-skills.md`; if `/memories` is unavailable, reuse an existing improve-skills report/memory file in the active docs workspace and note the fallback path in the report
-
-Prefer project session logs first because they preserve tool calls, retries, and agent behavior in sequence. When `~/.claude/projects` does not include the active Codex thread, use `~/.codex/sessions` as the authoritative source for that run window.
-When multiple unrelated workspaces are present in the same time window, filter candidate sessions by `cwd`/workspace relevance first to avoid cross-project noise in findings.
-
-For automation threads, resolve Codex home before any memory or automation-path reads:
-
-```bash
-CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
-```
-
-Use `"$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md"` instead of assuming `$CODEX_HOME` is exported.
-Do not probe raw `$CODEX_HOME` first and do not print paths like `"$CODEX_HOME/automations/..."` before normalization; when the variable is unset that produces misleading `/automations/...` output and usually triggers avoidable follow-up discovery.
-Do not use `test -f "$CODEX_HOME/..."` as a first probe either; normalize once and then read or test through `CODEX_HOME_RESOLVED`.
-Do not treat an empty `$CODEX_HOME` value as evidence that Codex state might live somewhere else. For this workflow, `~/.codex` remains the default until the prompt or the environment explicitly proves a different root.
-If the prompt already supplies `Automation ID:` and `Automation memory:`, do not try to rediscover those values with `rg`, `find`, or broad home-directory probing. Use the prompt metadata directly.
-Do not search `~/.codex` for `Automation:`, `Last run:`, `Create User Todo`, `learn`, or similar prompt fragments during bootstrap either. Those strings are prompt metadata, not session evidence.
-
-For Codex Desktop automation runs, use this fast path before any broader discovery:
-
-1. resolve `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"`
-2. read `"$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml"`
-3. read the prompt-provided memory path, normalized through `CODEX_HOME_RESOLVED` when needed
-4. read `"$CODEX_HOME_RESOLVED/session_index.jsonl"`
-5. use one bounded `python3` extractor against the specific recent session dates from the index, built around Codex `response_item` records rather than Claude-style top-level `message` rows
-6. if you need concrete session files for indexed ids, resolve them from `session_meta.payload.id` inside those bounded day folders; if a candidate id is missing there, check `~/.codex/archived_sessions` before broadening the search
-
-Do not start a Codex Desktop improve-skills run by probing the home directory, searching for the session store, or experimenting with multiple filesystem roots. Assume `~/.codex` unless the prompt or environment proves otherwise.
-Do not let repo-local AGENTS/start-work checklists pull you into product-code orientation for this task. The primary subject of the run is the session store plus the automation state, not the repository that happens to be the current `cwd`.
-If a repo-local AGENTS file or automation wrapper has already pushed the run into `git status`, `README.md`, `pwd`, or `ls`, treat that as evidence that the task needs better guidance, then restart from the Codex bootstrap instead of layering more repo inspection on top.
-Treat AGENTS or startup instructions embedded inline in the first user message exactly the same way: they are repo-local defaults, not the bootstrap for this automation. Defer them until the bounded session pass proves repo-specific context is needed.
-
-## First Run And Cursor Handling
-
-Before creating any new memory file, view `/memories/` and reuse an existing improve-skills note if present.
-If `/memories/` does not exist, locate an existing improve-skills note/report in the active docs workspace and reuse that path instead of inventing a new random location.
-
-If the automation prompt explicitly provides `Automation memory: ...`, treat that file as the primary persisted state for this run. Do not invent a parallel memory file elsewhere unless the prompt explicitly asks for one.
-If a prompt references `$CODEX_HOME` and that variable is unset, normalize to `~/.codex` immediately instead of probing broad home-directory candidates.
-A failed probe against raw `$CODEX_HOME/...` is not evidence that the automation memory is missing. Do not say "no memory file", "baseline run", or similar until you have checked the normalized prompt-provided path under `CODEX_HOME_RESOLVED`.
-Do not `ls`, `find`, `rg`, `cat`, or `test -f` the raw prompt path before normalization either. If the prompt says `Automation memory: $CODEX_HOME/...`, replace it with `~/.../.codex/...` in your head first, then run the read against `CODEX_HOME_RESOLVED`.
-When writing paths that refer to the user's home directory in the final report or memory, prefer `~/...` over absolute `/Users/...` paths.
-If the automation memory already contains a newer `Last review` or processed-window end than the prompt's `Last run`, treat the memory file as authoritative and use the prompt timestamp only as a fallback.
-When the normalized automation memory exists, derive the review cutoff from that memory before parsing `session_index.jsonl` or classifying the run as an initial baseline.
-At this stage, use the memory file only for cutoff/state bootstrap. Do not start grepping candidate names, pending-diff headings, or prior report labels from memory before you finish the current bounded session-evidence pass.
-Do not reopen memory just to search for strings like existing candidate names, `Pending automation prompt diffs`, or old report section titles while you are still collecting the new-session evidence set. First collect the current evidence window, then come back to memory to merge counters and deferred items.
-If the memory file yields the authoritative newer cutoff, stop using the prompt timestamp immediately and do not keep scanning the older prompt window out of caution.
-Do not run one extractor from the prompt `Last run` and a second extractor from the memory cutoff just to compare them. Pick the authoritative cutoff once from the normalized memory and keep the rest of the run on that single timeline.
-If the prompt also includes a human-written or auto-inserted `Last run:` header and it disagrees with the memory file's latest processed window, trust the memory file, note the mismatch in the report, and do not rescan the older prompt window just because the header is stale.
-If the normalized automation memory exists and already contains the current session family, prefer its `Processed window end` or `Last review` value as the cutoff. Do not fall back to the older prompt header just because it is easier to parse.
-Prefer extracting that authoritative cutoff once with a bounded parser instead of manually retyping the prompt timestamp. Example:
-
-```bash
-python3 - <<'PY'
-import pathlib, re
-mem = pathlib.Path.home() / ".codex" / "automations" / "learn" / "memory.md"
-text = mem.read_text() if mem.exists() else ""
-m = re.search(r"Processed window end:\s*(\S+)", text)
-if not m:
-    m = re.search(r"Last review:\s*(\S+)", text)
-print(m.group(1) if m else "2026-05-24T07:01:58.892Z")
-PY
-```
-
-Once that extractor yields a memory-backed cutoff, keep reusing the captured value. Do not hardcode the stale prompt `Last run:` into later `python3` snippets out of convenience.
-For Learn-style fan-out runs, falling back to the stale prompt `Last run` after the memory read is a workflow error, not a harmless duplicate. Restart the extractor with the effective cutoff instead of carrying both windows forward.
-If the automation memory path from the prompt does not exist yet, create it at the end of the run instead of falling back to unrelated workspace notes.
-Treat a missing automation memory file as expected on first run. Print a simple `(missing memory)` marker and continue; do not search the workspace or home directory for substitute state files unless the prompt explicitly names another location.
-If the normalized automation memory exists but your first read clipped, timed out, or mixed too much surrounding output into the result, rerun that same normalized read in a tighter bounded form. Do not downgrade the run to "missing memory" or branch into substitute-state discovery.
-If the normalized automation reads and `session_index.jsonl` are already on screen, do not reopen this skill file before the first bounded extractor unless you have a concrete ambiguity that the existing bootstrap steps do not answer.
-
-Read `.agents/skills/improve-skills/last-run.json` if it exists; otherwise read `~/.claude/skills/improve-skills/last-run.json`.
-
-- If it exists, only inspect sessions newer than the stored timestamp.
-- If it does not exist, do a bounded first pass over the most recent relevant sessions and say clearly in the report that this was an initial baseline run.
-- At the end of a successful run, update the cursor file you used with the timestamp of the newest processed session and a short run summary.
-
-Use a bounded first pass rather than scanning everything blindly.
-For automation review tasks, do not perform repo-orientation reading as a default startup step. Only pull `README.md`, OpenSpec, AGENTS, or repo-local docs later if a concrete candidate session or finding needs project-specific interpretation.
-If you notice that your first command was `git status`, `pwd`, `ls`, `README.md`, a broad `find ~/.codex`, or a raw `$CODEX_HOME/...` probe, treat that as a bootstrap failure. Restart from the three canonical reads instead of layering more discovery on top of the wrong start.
-Before running git commands during session review, confirm the actual repo root with `git rev-parse --show-toplevel 2>/dev/null`. Do not start with `git status` or other repo commands from an unverified workspace, because automation fan-out worktrees and wrapper folders may not expose `.git` at the current `cwd`. If `git rev-parse` fails, skip git-based context instead of retrying more git commands from the same path.
-If the first bounded parser fails because of timestamp precision, record shape, or one bad assumption, patch that same bounded parser and rerun it. Do not pivot into exploratory `sed`, `head`, `find`, `rg`, or one-file-at-a-time JSONL inspection just to recover from the first parser error.
-If the first bootstrap read fails for a reason you already understand, such as unset `$CODEX_HOME`, clipped output, or mixed timestamp precision, correct that exact read and continue the same bootstrap. Do not add a new discovery branch like `find $CODEX_HOME`, broad `find ~/.codex`, or `rg --files ~` just to re-prove where Codex stores its state.
-
-## What Counts As Evidence
-
-Treat the following as strong signals that a skill needs improvement:
-
-- The agent used a relevant skill but still had to inspect documentation to learn a basic usage pattern that the skill should have explained.
-- The agent retried several tools for the same job because the expected tool choice or invocation pattern was unclear.
-- The agent searched the repo or surrounding filesystem to rediscover a stable workflow that should have been codified in a skill.
-- The agent had to break a routine task into helper scripts or smaller manual steps because the skill lacked an execution pattern.
-- The agent missed a relevant skill entirely because the description under-triggered.
-
-Do not file an issue just because a task was genuinely novel or required domain research beyond what a skill should reasonably contain.
-
-## Classification Rules
-
-For every finding, classify it along two axes:
-
-### 1. Action Type
-
-- `improve-existing-skill`: A current skill exists but needs clearer instructions, trigger language, examples, decision rules, or CLI usage patterns.
-- `new-skill-candidate`: No suitable skill exists and the behavior repeats enough to justify one.
-- `project-scoped-playbook`: The pattern is real but tied to one repository, folder layout, environment, or project workflow.
-- `no-action`: Interesting observation, but not strong enough yet.
-
-### 2. Scope
-
-- `general`: Useful across projects.
-- `project:<name>`: Clearly tied to one project or workspace.
-
-## Required Workflow
-
-### Step 1: Collect candidate sessions
-
-Inspect session artifacts newer than the last-run cursor.
-
-For Codex Desktop session selection, prefer bounded, portable methods in this order:
-
-1. `~/.codex/session_index.jsonl` filtered by timestamp and `cwd`
-2. sorted file paths under `~/.codex/sessions/**` and `~/.codex/archived_sessions/**`, using the ISO-like timestamp embedded in the filename only as a coarse locator for the right day/window
-3. `jq` filtering on `session_meta.payload.timestamp` inside a bounded set of recent files
-
-For the common Learn-automation case, first collect the candidate days from `session_index.jsonl` and then inspect only those day folders under `~/.codex/sessions/YYYY/MM/DD/` plus any matching `archived_sessions` entries. Do not iterate every month folder when the index already narrows the date range.
-Do not assume a same-day automation run still lives under `~/.codex/sessions/YYYY/MM/DD/`; completed Codex Desktop automation runs may already have moved into `~/.codex/archived_sessions/` even when the index entry is from the current day.
-Codex Desktop session files currently use rollout-style names such as `rollout-2026-05-20T09-01-36-<id>.jsonl`; use the filename timestamp only to narrow the search window, then make the real cutoff decision from `session_meta.payload.timestamp`.
-Treat the embedded id as something you verify from `session_meta`, not as a filename pattern you have to guess manually.
-When an automation runs in worktree mode, do not expect `session_meta.cwd` to equal the source repo path from `automation.toml`. Match both the configured source `cwd` and Codex worktree variants such as `~/.codex/worktrees/*/<repo-tail>` where `<repo-tail>` is the trailing project path like `private/Portfolio` or `shared-ai-docs`.
-Normalize timestamps in the very first bounded extractor, including `session_index.jsonl` `updated_at` values. Do not compare raw timestamp strings or feed unnormalized fractional-second values directly into `datetime.fromisoformat(...)`.
-
-Avoid starting with broad `find ~/.codex ...` scans, and do not rely on GNU-only `find -newermt` semantics because they are not portable across Daniel's macOS environment.
-Do not start with broad `rg --files ~/ ... ~/.codex` discovery either; it pulls in unrelated shell history, prompts, and app resources and adds noise without improving session selection.
-Do not start with broad `rg -n` over `~/` or `~/.codex` for prompt fragments like `Last run`, `Automation ID`, `Create User Todo`, or `Automation:` either. Those strings are bootstrap inputs, not evidence to rediscover.
-Do not use broad `rg` over `~/.codex` just to rediscover automation prompt text, `Last run`, or `Automation ID` markers that were already present in the prompt and automation files you read during bootstrap.
-Do not read the current rollout JSONL with `sed`, `head`, or one-off parsers just to learn the log shape of the very session you are currently authoring. Use a sibling candidate session plus one bounded extractor instead.
-Do not pivot from that bounded extractor into opening other same-batch current-day rollouts one file at a time just to re-validate the same JSON shape. Once one bounded extractor has shown the `response_item` layout for the active run window, reuse that knowledge unless you need a targeted evidence excerpt.
-Do not run `git status`, `git rev-parse`, `pwd`, `ls`, or repo-README reads as "orientation" for this automation before the session bootstrap. Those checks are orthogonal to the task unless a later finding explicitly requires repo-local context.
-Do not assume `~/.codex/session_index.jsonl` contains `cwd` or file paths. In current Codex Desktop runs it may expose only `id`, `thread_name`, and `updated_at`. Use it as a coarse recency index first, then resolve `cwd`, prompt, and workspace scope from `session_meta` inside the actual session file.
-Do not assume `session_meta` repeats the thread title from the index. In current Codex Desktop logs it may have no `title` or `thread_name` at all, so use the index for human-readable names and the session file for authoritative `id`, `cwd`, and timestamps.
-Do not convert a session id directly into a guessed rollout filename. Resolve candidate files from bounded day folders first, then confirm the id from each file's `session_meta` payload.
-If an id from `session_index.jsonl` is not present in the bounded day folders you already chose, check `~/.codex/archived_sessions/` for `rollout-*<id>*.jsonl` next. Do not escalate to `rg ~/.codex/sessions ~/.codex/archived_sessions` across the whole store just to rediscover one archived file.
-`session_index.jsonl` timestamps may vary in fractional-second precision. Normalize them once in a bounded parser instead of retrying ad hoc `datetime.fromisoformat(...)` snippets or shell date conversions.
-If you hit this timestamp-precision issue on the first pass, fix the parser once and continue with the same bounded extraction plan; do not branch into alternate filesystem-discovery tactics.
-When you need `cwd` or a prompt snippet from the actual session files, prefer a short bounded `python3` extractor over ad hoc retries. Example:
-
-```bash
-python3 - <<'PY'
-import json, glob, os, re
-from datetime import datetime
-cutoff = datetime.fromisoformat("2026-05-18T07:50:46+00:00")
-
-def parse_ts(raw):
-    raw = raw.strip()
-    if raw.endswith("Z"):
-        raw = raw[:-1] + "+00:00"
-    m = re.match(r"^(.*\.)(\d+)([+-]\d\d:\d\d)$", raw)
-    if m:
-        frac = m.group(2)
-        raw = m.group(1) + frac[:6].ljust(6, "0") + m.group(3)
-    return datetime.fromisoformat(raw)
-
-for path in sorted(glob.glob(os.path.expanduser("~/.codex/sessions/2026/05/18/*.jsonl"))):
-    meta = None
-    for line in open(path):
-        obj = json.loads(line)
-        if obj.get("type") == "session_meta":
-            meta = obj["payload"]
-            break
-    if not meta:
-        continue
-    ts = parse_ts(meta["timestamp"])
-    if ts > cutoff:
-        print(meta["timestamp"], meta.get("cwd"), path)
-PY
-```
-
-If your bounded extractor needs shell values such as `CODEX_HOME_RESOLVED`, `AUTOMATION_ID`, or a computed cutoff inside Python, export them first or invoke Python as `VAR=value python3 ...`. A plain shell assignment on the line before `python3 - <<'PY'` is not visible inside `os.environ`, so do not write extractors that silently fall back to `~/.codex` or a stale cutoff by accident.
-
-When reviewing several sibling automation sessions, do not inspect JSONL structure one file at a time. Start with one bounded extractor that prints `session_meta`, first user prompt snippet, and function-call names for all candidate files so you can identify the few logs worth deeper inspection before reading raw events.
-If you want to confirm the payload shape, have that same bounded extractor print `payload.type` counts or one representative user/tool sample for the full candidate set. Do not fall back to separate one-file probes for that confirmation step.
-When a session starts with an injected `# AGENTS.md instructions for ...` block, do not treat that wrapper as the only user-prompt summary. Have the bounded extractor capture the first substantive post-wrapper user task as well, or explicitly mark the first snippet as AGENTS-wrapper-only so you do not misclassify the session purpose.
-Treat a standalone `<environment_context>` user message the same way: it is wrapper metadata, not the substantive task. If both wrappers appear, skip both and capture the first real post-wrapper user request.
-If the first user `response_item` is only `<environment_context>...</environment_context>`, treat it the same way: environment metadata is not the substantive task request. Keep scanning until you find the first non-wrapper, non-environment user message or explicitly label the session as missing one.
-Do not start raw session inspection with `sed -n`, `head`, or wide `rg` against individual JSONL files just to discover their structure. Use those only after a bounded extractor has already identified a specific session and you need one targeted evidence snippet.
-If you still need an event-shape reminder after the bounded extractor, inspect the current run or one already-selected evidence file. Do not open sibling `Learn` sessions merely to rediscover the generic Codex JSONL layout.
-Once the bounded extractor already gives `session_meta`, first prompt text, and function-call names for the sibling `Learn` runs, do not open their raw rollout files with `sed -n` or `head` unless you need a concrete quoted snippet for one specific session id.
-Do not open unrelated project-local or shared skill files after the bounded extractor just because a candidate session happened in that repo or mentioned docs/spec work. First confirm from the session evidence that the skill was actually used, missed, or should have been used; only then inspect that specific skill file.
-
-For Codex Desktop JSONL logs, do not assume Claude-style top-level `message` or `tool_call` records. In current Codex session files:
-
-- `session_meta` still contains the authoritative session id, timestamp, and `cwd`
-- `session_meta` often does not carry a useful thread title; use the `session_index.jsonl` `thread_name` as the human label and join it back by session id when you need that context
-- user and assistant messages usually appear as `response_item` records whose payload has `type == "message"` plus `role`
-- the first user `response_item` may be an injected AGENTS wrapper instead of the substantive task request, so prefer the first non-wrapper user message when summarizing the session intent
-- the first user `response_item` may also be a pure `<environment_context>` block; skip that too when deriving session intent
-- tool calls usually appear as `response_item` records whose payload has `type == "function_call"` and may also be nested under `payload.item.type == "function_call"` depending on recorder/version
-
-Build extractors around `response_item` first, and only fall back to raw event inspection if a bounded sample shows a different shape. Do not spend multiple retries on parsers that expect top-level `message` or `tool_call` rows.
-If your first bounded extractor already yields `session_meta`, user messages, and function-call names, do not switch back to ad hoc per-file probing unless you need a quoted evidence excerpt for the final report.
-
-Starter extractor for Codex Desktop sessions:
-
-```bash
-python3 - <<'PY'
-import json, glob, os
-for path in sorted(glob.glob(os.path.expanduser("~/.codex/sessions/2026/05/21/*.jsonl"))):
-    meta = None
-    first_user = None
-    calls = []
-    with open(path) as f:
-        for line in f:
-            obj = json.loads(line)
-            if obj.get("type") == "session_meta":
-                meta = obj["payload"]
-                continue
-            if obj.get("type") != "response_item":
-                continue
-            payload = obj.get("payload", {})
-            if payload.get("type") == "message" and payload.get("role") == "user" and not first_user:
-                texts = [item.get("text", "") for item in payload.get("content", []) if item.get("type") == "input_text"]
-                text = " ".join(texts).strip()
-                if text.startswith("<environment_context>"):
-                    continue
-                if text.startswith("# AGENTS.md instructions for "):
-                    continue
-                first_user = text[:220]
-            elif payload.get("type") == "function_call":
-                calls.append(payload.get("name"))
-    if meta:
-        print(meta["timestamp"], meta.get("cwd"), first_user, calls[:10], path)
-PY
-```
-
-If you need to parse JSON piped from another command, do not combine the producer with `python3 - <<'PY'` on the same pipeline because the heredoc consumes stdin. Use `python3 -c '...'`, a temp file, or inspect the raw JSON first.
-
-For each candidate session, capture:
-
-- session id or file path
-- timestamp
-- project or workspace scope
-- relevant user request
-- evidence snippets showing tool retries, doc lookup, or out-of-skill discovery
-
-Session selection rule:
-
-- Prefer sessions whose `cwd` matches the active workspace/task path.
-- For automation worktree runs, also treat `~/.codex/worktrees/*/<repo-tail>` as in-scope when the suffix matches one of the automation `cwds`; do not drop those sessions as cross-workspace noise.
-- Only include cross-workspace sessions if the user explicitly asked for a cross-project review.
-- For automation runs, inspect `~/.codex/automations/<automation-id>/automation.toml` and `memory.md` before broad session-log discovery so prompt intent and pending diffs are known up front.
-- Exclude sibling `Learn` runs created by the same automation fan-out unless they provide direct evidence of automation drift or a weakness in this skill itself.
-- If sibling `Learn` fan-out runs all show the same discovery pattern, treat that repetition as one skill-gap finding with multiple evidence points, not as unrelated noise.
-- If sibling `Learn` runs already provide the evidence you need, stop there. Do not widen the scan into unrelated recent sessions just to make the report feel broader.
-
-### Step 2: Identify improvement-worthy patterns
-
-Look for patterns such as:
-
-- repeated `grep` or folder traversal to learn structure before work starts
-- repeated attempts to find the correct CLI or invocation syntax
-- fallback chains like Python, JS REPL, shell, then another shell strategy
-- repeated manual chunking or helper-script creation for tasks that recur
-- repeated documentation fetches after a skill already triggered
-
-Focus on root cause. Do not just say "the agent explored." Explain what guidance was missing.
-
-For automation-run sessions, compare the automation prompt against the tools actually available in that run. If the prompt calls for a missing tool or workflow primitive, classify that as an automation-instruction issue first instead of letting repeated tool or filesystem probing dominate the diagnosis.
-
-### Step 3: Improve existing skills when justified
-
-If the evidence points to a specific skill weakness, update that skill directly.
-
-Typical improvements:
-
-- make the description more trigger-friendly
-- add missing tool-choice rules
-- add CLI invocation examples
-- add path conventions, folder anchors, or search strategy guidance
-- add "when not to use" boundaries to reduce confusion
-- add required report format when outcomes were inconsistent
-
-Keep edits minimal and evidence-driven. Do not rewrite unrelated sections.
-
-Automation-instruction review:
-
-- When the reviewed session is itself an automation run, separately decide whether the drift came from a weak skill or from weak automation instructions.
-- Skills should contain the reusable "how to do this kind of task" knowledge.
-- Automation prompts should contain task-specific scope, project paths, required outputs, and state-file conventions.
-- Automation prompts should not depend on a named task/todo tool without a fallback when that tool may be absent from some run environments.
-- Do not auto-edit automations during an improve-skills run unless the user explicitly asked for that behavior.
-- Record high-value automation prompt changes as proposed diffs in the report and memory. If a dedicated task or todo tool is unavailable in the current environment, mark the suggestion as deferred rather than silently dropping it.
-- When a high-value automation prompt diff is deferred because the task/todo tool is unavailable, persist a `Pending automation prompt diffs` section in memory with the target automation, rationale, and a unified diff snippet.
-- On the next run, check that pending section before reviewing new sessions. If the user has accepted a deferred automation diff in the meantime, back up the target `automation.toml` first and then apply the approved change.
-- If the automation prompt explicitly says "Create User Todo" but no such tool exists in the run, do not spend time searching for a substitute tool. Record the diff under `Pending automation prompt diffs`, call out the missing-tool mismatch in the report, and continue.
-
-### Step 4: Track new-skill candidates in memory
-
-Store recurring discovery patterns in the explicit automation memory when one was provided.
-Otherwise store them in `/memories/improve-skills.md`.
-If `/memories` is unavailable, store them in the reused fallback note path and explicitly mention that path in the report.
-
-For each candidate, keep one concise entry with:
+Review recent session evidence, improve skills only when the evidence supports a compact reusable change, track repeated discovery patterns, and produce a concise report.
+
+For Parent/Child Agent Delivery retrospectives that target a specific parent spec, child index, handoffs, OpenSpec evidence, or workflow self-optimization, prefer `agent-delivery-retro-review` first. Use this skill for broader cross-session skill-gap aggregation.
+
+## Scope Gate
+
+Choose the narrowest review mode that matches the request:
+
+1. **Open diff or current skill text review**: inspect the repo diff or named skill files first. Do not start session-log analysis unless the user asks for session evidence.
+2. **Named skill quality review**: inspect only the target skill, its direct repo guidance dependencies, and bounded recent sessions for the named project.
+3. **Codex Desktop automation/session review**: use [codex-desktop-session-review.md](references/codex-desktop-session-review.md) for bootstrap, memory, session-index, JSONL, and extractor details.
+4. **General cross-session review**: inspect sessions newer than the last-run cursor, filtered by workspace/project relevance.
+
+If multiple modes apply, start with the most concrete evidence source already named by the user. Treat repo-local startup instructions as background unless the chosen mode says repo context is needed.
+
+## Evidence Rules
+
+Treat these as strong signals:
+
+- A relevant skill triggered, but the agent still had to rediscover a basic workflow, path, CLI syntax, tool choice, or output shape.
+- The agent retried several tools for the same job because the expected invocation pattern was unclear.
+- The agent searched the repo, home directory, session store, or plugin cache to rediscover a stable workflow that should be codified.
+- The agent missed a relevant skill because the description under-triggered.
+- Several sessions show the same bounded discovery pattern, even if each single instance looks small.
+
+Do not edit a skill for one-off user preference, genuinely novel research, random drift without a clear missing instruction, or facts better owned by project docs, automation prompts, or repo-local `docs/agents/` guidance.
+
+## Skill Entropy Guard
+
+Every skill improvement must reduce net future confusion. Before editing any skill, classify the proposed change as one of:
+
+- replace unclear guidance
+- delete misleading or redundant guidance
+- move detailed workflow into a reference or script
+- narrow the trigger or scope
+- add genuinely missing reusable guidance
+
+Prefer the first four over appending new instructions. If a skill already contains the same kind of warning twice, consolidate before adding anything.
+
+Ask these questions before patching:
+
+1. Is this reusable across multiple tasks?
+2. Does it belong in this skill, or in repo docs, automation prompts, AGENTS.md, ADRs, a reference, or a script?
+3. Is there nearby guidance that should be clarified instead?
+4. Would this create a second source of truth?
+5. Can the fix be one decision rule instead of a playbook?
+
+## Edit Budget
+
+A skill update should usually be one of:
+
+- description change only
+- replace 1-3 bullets
+- add one short decision rule
+- move a long section into `references/`
+- create a script/helper instead of adding procedural text
+
+Avoid net-new long sections in `SKILL.md`. If adding more than about 15 lines, explain in the report why the content cannot live in a reference file, helper script, automation prompt, or project guidance.
+
+## Ownership Rule
+
+Reusable task behavior belongs in one owning skill. Project-specific conventions belong in repo-local guidance. Automation/session startup belongs in the automation/review owner. Tool syntax belongs in the tool skill or a script. Detailed examples belong in references.
+
+Do not copy the same bootstrap, path map, CLI recipe, or policy into support skills. Support skills should defer to the owner.
+
+## Regression Check
+
+After every skill edit, check:
+
+- Did `SKILL.md` get longer?
+- Did it add another negative guard?
+- Did it duplicate instructions from another skill?
+- Did it encode one automation/project incident as global policy?
+- Did it make the skill harder to scan in the first 30 seconds?
+
+If yes, revise toward replacement, deletion, delegation, or reference extraction before finishing.
+
+## Classification
+
+Classify each finding by action type:
+
+- `improve-existing-skill`: a current skill needs clearer trigger language, decision rules, examples, path conventions, or tool usage.
+- `new-skill-candidate`: no suitable skill exists and the behavior repeats enough to justify one.
+- `project-scoped-playbook`: the pattern is real but tied to one repository, folder layout, environment, or project workflow.
+- `automation-instruction-change`: the root cause is a task-specific automation prompt/config, not reusable skill knowledge.
+- `no-action`: useful evidence, but no durable change is warranted.
+
+Classify scope as `general` or `project:<name>`.
+
+For named skill reviews, keep the output distinction explicit:
+
+- `target-skill-change`: concrete instructions patched into the named skill
+- `review-skill-change`: improvements to this workflow because the review itself required avoidable discovery
+- `project-playbook-candidate`: repeated project-specific workflow discovery that is not yet general enough for the named skill
+- `no-change`: evidence was useful, but the current skill already covers it or the task was novel
+
+## Workflow
+
+1. **Collect bounded evidence.** Use the selected scope gate. For Codex Desktop automation/session reviews, load the reference file and follow its bootstrap exactly.
+2. **Identify root cause.** Explain what guidance was missing, not just that the agent explored.
+3. **Choose the owner.** Put reusable task knowledge in skills, project conventions in repo docs/playbooks, run-specific scope/state in automation prompts or memory, and detailed mechanics in references/scripts.
+4. **Patch sparingly.** Prefer replacing or moving text over appending. Keep `SKILL.md` bodies compact; move fragile command recipes, long examples, and runtime-specific parsers into referenced files or scripts.
+5. **Track candidates.** Increment existing candidate counters in the provided automation memory or the configured improve-skills memory. Do not duplicate candidate names.
+6. **Report clearly.** Include what changed, why, evidence, deferred items, and cursor/memory updates.
+
+## Update Rules
+
+Good reasons to edit a skill:
+
+- missing CLI syntax, flags, or output shape for a repeated workflow
+- missing decision criteria for choosing between tools
+- missing path conventions or stable folder anchors
+- weak trigger description that caused a missed invocation
+- missing "when not to use" or owner-boundary guidance
+- repeated bloating of always-loaded skill text that should move into references
+
+Bad reasons to edit a skill:
+
+- one-off task details
+- project-specific doctrine that belongs in `docs/agents/`, AGENTS.md, OpenSpec, ADRs, or a project playbook
+- automation prompt state that belongs in `automation.toml` or `memory.md`
+- external documentation that is expected to change and should be researched when needed
+
+When editing, include in the report:
+
+- which file changed
+- what evidence triggered the update
+- what instruction was added, removed, replaced, or moved
+- why the change should reduce future discovery cost or context load
+
+## Candidate Memory
+
+Store recurring discovery patterns in the explicit automation memory when one was provided. Otherwise use the configured improve-skills memory/cursor path for the environment.
+
+For each candidate, keep one concise entry:
 
 - `name`
 - `scope`
@@ -386,57 +148,11 @@ For each candidate, keep one concise entry with:
 - `latest_evidence`
 - `suggested_skill_or_playbook`
 
-When the same candidate appears again, increment the existing counter instead of creating a duplicate entry.
-
-Good candidate examples:
-
-- understanding a recurring nested folder structure before acting
-- finding the right CLI for a specialized file transformation
-- iterating through multiple execution environments to find one that works
-- repeatedly splitting oversized tasks into stable helper flows
-- repeatedly hunting for session stores, automation files, or missing task/todo tooling before the real review work can begin
-
-### Step 5: Escalate strong candidates
-
-Always call out a candidate in the report when either condition is true:
-
-- the counter is greater than 3
-- the pattern is obviously high leverage even with fewer occurrences
-
-Explain whether it should become:
-
-- a new general skill
-- a project-scoped playbook
-- an addition to an existing skill
-
-## Update Rules For Skills
-
-Only update a skill when the evidence is specific enough to support a concrete improvement.
-
-Good reasons to edit a skill:
-
-- missing CLI syntax or required flags
-- missing decision criteria for choosing between tools
-- missing examples for a repeated workflow
-- weak trigger description that caused a missed invocation
-- missing instructions for bounded discovery before action
-
-Bad reasons to edit a skill:
-
-- one-off user preference changes with no recurrence
-- genuinely new external documentation that the skill could not have predicted
-- random agent drift without a clear pattern
-
-When editing a skill, include in the report:
-
-- which file changed
-- what evidence triggered the update
-- what instruction was added or clarified
-- why the change should reduce future discovery cost
+Escalate a candidate in the report when its counter is greater than 3 or it is obviously high leverage.
 
 ## Report Format
 
-Use this structure exactly:
+Use this structure:
 
 ```markdown
 # Improve Skills Report
@@ -464,34 +180,4 @@ Use this structure exactly:
 - last-run file updated:
 ```
 
-If no skill changes are warranted, say so explicitly. Still report candidate counter changes and deferred items.
-
-If active-thread evidence exists but has not yet been persisted to session logs, mark it as provisional in the report and do not advance the cursor past the newest persisted session timestamp.
-
-## Practical Heuristics
-
-- Prefer a small number of high-confidence skill edits over many speculative edits.
-- If one finding can be fixed by improving an existing skill, prefer that over creating a brand new skill.
-- Project-specific structure-discovery patterns usually belong in project playbooks, not global skills.
-- If the same discovery pattern appears in multiple unrelated projects, upgrade it from project-scoped to general.
-- When unsure whether something is a skill gap or a one-off, record it as a candidate and wait for another occurrence.
-- If the automation text itself is the root cause, prefer one explicit deferred prompt diff over repeated attempts to rediscover an equivalent missing tool.
-
-## Example Findings
-
-**Example 1: Existing skill unclear**
-
-- Session shows a PDF-related skill was used.
-- Agent still searched docs for the basic CLI flags needed to merge files.
-- Action: update the PDF skill with the exact CLI pattern and a short tool-choice note.
-
-**Example 2: New project-scoped playbook**
-
-- Agent repeatedly walks the same nested project directories to discover build artifacts.
-- Pattern only appears in one repository.
-- Action: record a `project-scoped-playbook` candidate and increment its counter.
-
-**Example 3: High-value general candidate**
-
-- Multiple sessions show fallback across Python, shell, and alternate CLIs just to process one file type.
-- Action: raise the candidate prominently in the report even if no new skill is created yet.
+If no skill changes are warranted, say so explicitly. If active-thread evidence has not yet been persisted to session logs, mark it as provisional and do not advance the cursor past the newest persisted session timestamp.

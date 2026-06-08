@@ -1,6 +1,6 @@
 ---
 name: qmd
-description: Search markdown knowledge bases, notes, and documentation using QMD. USE WHEN users ask to search notes, find documents, or look up information across markdown-heavy repos. Prefer QMD for ranked retrieval; if QMD is unavailable, fall back to `rg` and state that fallback explicitly.
+description: Search, update, or maintain markdown knowledge-base indexes using QMD. USE WHEN users ask to search notes, find documents, look up information across markdown-heavy repos, update the local QMD index, refresh embeddings, or run scheduled QMD index maintenance. Prefer QMD for ranked retrieval; if QMD is unavailable, fall back to `rg` and state that fallback explicitly.
 license: MIT
 compatibility: Requires qmd CLI or MCP server. Install via `npm install -g @tobilu/qmd`.
 metadata:
@@ -23,6 +23,14 @@ If QMD is not installed, use a fallback sequence:
 1. `rg --files` to scope candidate files.
 2. `rg -n` keyword probes.
 3. state explicitly that ranking is lexical fallback, not QMD retrieval.
+
+## Automation Session Guard
+
+When QMD is loaded only as a support skill inside a session-review automation, do not run QMD startup or repo search first. Defer startup order to the primary review skill, such as `improve-skills` and its Codex Desktop session-review reference, then use QMD only for docs or identifiers the bounded session evidence actually implicates.
+
+## Scheduled Index Maintenance
+
+Use [scheduled-index-maintenance.md](references/scheduled-index-maintenance.md) for recurring QMD index/update automations. Do not load that reference for ordinary search.
 
 ## MCP: `query`
 

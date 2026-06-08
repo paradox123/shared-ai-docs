@@ -3,7 +3,7 @@ name: to-prd
 description: Turn the current conversation context into a PRD and publish it to the project issue tracker. Use when user wants to create a PRD from the current context.
 ---
 
-This skill takes the current conversation context and codebase understanding and produces a PRD. Do NOT interview the user — just synthesize what you already know.
+This skill takes the current conversation context and codebase understanding and produces a PRD. Do not run an open-ended interview; synthesize what you already know and ask only for explicit approval or truly blocking product/testing decisions.
 
 The issue tracker and triage label vocabulary should have been provided to you — run `/setup-matt-pocock-skills` if not.
 
@@ -15,9 +15,9 @@ The issue tracker and triage label vocabulary should have been provided to you �
 
 A deep module (as opposed to a shallow module) is one which encapsulates a lot of functionality in a simple, testable interface which rarely changes.
 
-Check with the user that these modules match their expectations. Check with the user which modules they want tests written for.
+If module boundaries or testing scope are not already clear enough to publish, ask one concise approval/blocker question. Otherwise record the inferred decisions in the PRD.
 
-3. Write the PRD using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage.
+3. Write the PRD using the template below, then publish it to the project issue tracker. Apply the repo's ready-for-agent label only when the PRD has enough context for an agent to start without more human decisions; otherwise use the repo's decision/triage label.
 
 <prd-template>
 
