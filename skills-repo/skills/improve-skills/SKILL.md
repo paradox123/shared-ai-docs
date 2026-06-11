@@ -5,9 +5,7 @@ description: Review Claude/Codex session history to find where existing skills w
 
 # improve-skills
 
-Review recent session evidence, improve skills only when the evidence supports a compact reusable change, track repeated discovery patterns, and produce a concise report.
-
-For Parent/Child Agent Delivery retrospectives that target a specific parent spec, child index, handoffs, OpenSpec evidence, or workflow self-optimization, prefer `agent-delivery-retro-review` first. Use this skill for broader cross-session skill-gap aggregation.
+Review recent session history, improve weak skills when the evidence is strong enough, track repeated discovery patterns as future skill candidates, and produce a concise report.
 
 ## Scope Gate
 
@@ -20,6 +18,8 @@ Choose the narrowest review mode that matches the request:
 
 If multiple modes apply, start with the most concrete evidence source already named by the user. Treat repo-local startup instructions as background unless the chosen mode says repo context is needed.
 
+When the prompt supplies `Automation ID:`, `Automation memory:`, `Automation:`, or `Last run:`, load the Codex Desktop reference before reading memory paths or probing Codex state. Do not batch memory/Codex-state probes in the same first tool call as this `SKILL.md` read. Normalize `CODEX_HOME` through that reference first; a literal `$CODEX_HOME/...` read is not valid evidence of missing memory when the environment variable is unset.
+
 ## Evidence Rules
 
 Treat these as strong signals:
@@ -31,56 +31,6 @@ Treat these as strong signals:
 - Several sessions show the same bounded discovery pattern, even if each single instance looks small.
 
 Do not edit a skill for one-off user preference, genuinely novel research, random drift without a clear missing instruction, or facts better owned by project docs, automation prompts, or repo-local `docs/agents/` guidance.
-
-## Skill Entropy Guard
-
-Every skill improvement must reduce net future confusion. Before editing any skill, classify the proposed change as one of:
-
-- replace unclear guidance
-- delete misleading or redundant guidance
-- move detailed workflow into a reference or script
-- narrow the trigger or scope
-- add genuinely missing reusable guidance
-
-Prefer the first four over appending new instructions. If a skill already contains the same kind of warning twice, consolidate before adding anything.
-
-Ask these questions before patching:
-
-1. Is this reusable across multiple tasks?
-2. Does it belong in this skill, or in repo docs, automation prompts, AGENTS.md, ADRs, a reference, or a script?
-3. Is there nearby guidance that should be clarified instead?
-4. Would this create a second source of truth?
-5. Can the fix be one decision rule instead of a playbook?
-
-## Edit Budget
-
-A skill update should usually be one of:
-
-- description change only
-- replace 1-3 bullets
-- add one short decision rule
-- move a long section into `references/`
-- create a script/helper instead of adding procedural text
-
-Avoid net-new long sections in `SKILL.md`. If adding more than about 15 lines, explain in the report why the content cannot live in a reference file, helper script, automation prompt, or project guidance.
-
-## Ownership Rule
-
-Reusable task behavior belongs in one owning skill. Project-specific conventions belong in repo-local guidance. Automation/session startup belongs in the automation/review owner. Tool syntax belongs in the tool skill or a script. Detailed examples belong in references.
-
-Do not copy the same bootstrap, path map, CLI recipe, or policy into support skills. Support skills should defer to the owner.
-
-## Regression Check
-
-After every skill edit, check:
-
-- Did `SKILL.md` get longer?
-- Did it add another negative guard?
-- Did it duplicate instructions from another skill?
-- Did it encode one automation/project incident as global policy?
-- Did it make the skill harder to scan in the first 30 seconds?
-
-If yes, revise toward replacement, deletion, delegation, or reference extraction before finishing.
 
 ## Classification
 
