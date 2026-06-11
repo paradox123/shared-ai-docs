@@ -7,6 +7,7 @@ Source guide: https://www.aihero.dev/a-complete-guide-to-agents-md
 - Treat `AGENTS.md` as always-loaded context with a tight instruction budget.
 - Keep the root file as small as possible.
 - Start with a one-sentence project description.
+- Use the recommended OpenSpec/TDD operating example as the default for new and existing `AGENTS.md` files unless the user asks for a different style or repo evidence requires truthful adaptation.
 - Include package manager/build/test commands only when they are non-obvious or canonical.
 - Use progressive disclosure: link to docs, nested `AGENTS.md` files, or skills for details that are not relevant to every task.
 - Prefer stable capabilities, domain concepts, and canonical entry points over exhaustive file maps.
@@ -21,6 +22,7 @@ Root `AGENTS.md`:
 - shared package manager/tooling
 - canonical commands that every agent should know
 - critical guardrails that prevent costly mistakes
+- lifecycle expectations for `Start Work Checklist`, `Development Cycle`, `OpenSpec Change Policy`, and `Change Completion`
 - breadcrumbs to deeper docs
 
 Nested `AGENTS.md`:
@@ -58,7 +60,7 @@ When replacing a deprecated context-bootstrap skill with repo `AGENTS.md` files:
    - workflow routing tables
    - confidence rubric details
    - copied reference docs
-4. Add concise summaries and breadcrumbs to each affected repo's `AGENTS.md`.
+4. Add concise summaries, breadcrumbs, and the recommended OpenSpec/TDD lifecycle sections to each affected repo's `AGENTS.md`, adapted only when the repo evidence or user request requires it.
 5. Delete the deprecated skill only after verifying important content is represented.
 
 ## Smell Checklist
@@ -68,5 +70,7 @@ Before finalizing, ask:
 - Is this path likely to stay valid?
 - Could this be a link to a canonical doc instead of pasted text?
 - Is this a repo-specific guardrail, or something the base agent already knows?
+- Does the file follow the recommended example, or clearly justify why the repo needs a different structure?
+- Does the file tell agents what to read before editing, how to work in vertical slices, and what evidence is required before closing?
 - Does this duplicate another file that is easier to keep current?
 - Will a future agent know where to go next without loading a wall of context?
