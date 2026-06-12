@@ -24,6 +24,19 @@ If the user pasted a `fetch(...)`, `curl`, bearer token, JWT, or an OIDC/OAuth r
 
 If one of those checks already explains the failure, report it immediately and only then continue into deeper service/debug work for any remaining mismatch.
 
+## Fast Path: Prior Codex Session Regression Evidence
+
+Use this branch when the user asks whether something worked in an earlier Codex session, supplies session IDs, or asks you to compare recent sessions as part of a regression diagnosis.
+
+1. Resolve Codex home once:
+   `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"`
+2. Start from `$CODEX_HOME_RESOLVED/session_index.jsonl` filtered by the supplied IDs, thread names, date window, repo name, endpoint, or error text.
+3. Resolve matching rollout files from bounded day folders under `$CODEX_HOME_RESOLVED/sessions/YYYY/MM/DD/` plus `$CODEX_HOME_RESOLVED/archived_sessions/` for indexed IDs that are no longer in the day folder.
+4. Use one small JSONL parser around `session_meta` and `response_item` records to extract timestamp, cwd, first substantive user prompt, tool calls, and final finding.
+5. Only open raw rollout lines after the parser identifies a specific session and you need a short evidence snippet.
+
+Do not begin this branch with broad `find ~/.codex`, repo-wide `rg ~/.codex`, one-rollout-at-a-time `sed`, or ad hoc `jq` sampling. If timestamp precision or JSON shape breaks the first parser, patch that parser and rerun it instead of widening the filesystem search.
+
 ## Phase 1 — Build a feedback loop
 
 **This is the skill.** Everything else is mechanical. If you have a fast, deterministic, agent-runnable pass/fail signal for the bug, you will find the cause — bisection, hypothesis-testing, and instrumentation all just consume that signal. If you don't have one, no amount of staring at code will save you.
