@@ -28,6 +28,15 @@ If QMD is not installed, use a fallback sequence:
 
 When QMD is loaded only as a support skill inside a session-review automation, do not run QMD startup or repo search first. Defer startup order to the primary review skill, such as `improve-skills` and its Codex Desktop session-review reference, then use QMD only for docs or identifiers the bounded session evidence actually implicates.
 
+For repo-specific review or documentation-maintenance automations, confirm that QMD actually indexes the target repo before semantic retrieval:
+
+```bash
+qmd status
+qmd collection list
+```
+
+If the listed collections are unrelated to the target repo, do not run `qmd query` as a broad semantic fallback; it can spend time reranking the wrong corpus. Use `qmd search` only for exact terms that may exist in indexed shared docs, then fall back to targeted `rg` in the repo.
+
 ## Scheduled Index Maintenance
 
 Use [scheduled-index-maintenance.md](references/scheduled-index-maintenance.md) for recurring QMD index/update automations. Do not load that reference for ordinary search.

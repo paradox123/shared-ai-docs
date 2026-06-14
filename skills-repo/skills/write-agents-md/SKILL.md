@@ -14,6 +14,7 @@ Default to creating strong, operational `AGENTS.md` files modeled on the recomme
 Read [agents-md-principles.md](references/agents-md-principles.md) when the task involves refactoring a large file, migrating context from another source, or deciding what belongs in root vs nested guidance.
 
 If this task is running inside a Codex automation and the prompt or local workflow expects an automation memory file, resolve `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` before any memory read or write. Do not read from or write to raw `$CODEX_HOME/...` paths when `$CODEX_HOME` may be unset. If this skill is only a support skill inside a session-review automation, defer startup order to the primary review skill instead of applying the AGENTS-maintenance workflow below.
+If an AGENTS-maintenance automation asks for "newly discovered workflows", "newly discovered commands", or other session-derived updates since the last run, read the named automation state first, then inspect `"$CODEX_HOME_RESOLVED/session_index.jsonl"` with a cutoff from automation memory before repo discovery. Keep that session pass bounded to the target repo/worktree and only open resolved session files when the index shows relevant post-cutoff activity.
 Do not guess skill installation paths such as `~/.codex/skills/.system/write-agents-md/SKILL.md`. When the active session already lists this skill, use the listed path. In Daniel's shared setup the reusable copy normally lives at `~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/write-agents-md/SKILL.md`.
 
 ## Workflow
@@ -40,6 +41,8 @@ If the task is an AGENTS-maintenance automation run with `Automation ID:` / memo
 CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
 sed -n '1,200p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml" 2>/dev/null || true
 sed -n '1,200p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" 2>/dev/null || true
+# Only for session-derived update prompts such as "newly discovered workflows":
+sed -n '1,220p' "$CODEX_HOME_RESOLVED/session_index.jsonl" 2>/dev/null || true
 ```
 
 Do not probe raw `$CODEX_HOME` with `printf`, `ls`, or `test -f` inside `set -u` shells before this normalization. In Daniel's environment, `~/.codex` is the default unless the prompt proves otherwise.
@@ -55,10 +58,11 @@ Use local sources first:
 For recurring AGENTS-maintenance automations, use this startup order:
 1. resolve `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` once
 2. read the named automation `automation.toml` and `memory.md`
-3. resolve the target repo from the current `cwd` or `git rev-parse --show-toplevel`, not from hardcoded sibling paths
-4. read the target repo `AGENTS.md` plus one canonical root doc such as `README.md`
-5. run one bounded `rg --files` inventory for manifests, test runners, compose/task files, and nested `AGENTS.md`
-6. read only the repo-local docs or skills that the bounded inventory points to
+3. if the prompt asks for newly discovered workflows or commands since the last run, derive the cutoff from memory and inspect `session_index.jsonl` before repo discovery
+4. resolve the target repo from the current `cwd` or `git rev-parse --show-toplevel`, not from hardcoded sibling paths
+5. read the target repo `AGENTS.md` plus one canonical root doc such as `README.md`
+6. run one bounded `rg --files` inventory for manifests, test runners, compose/task files, and nested `AGENTS.md`
+7. read only the repo-local docs or skills that the bounded inventory points to
 
 Do not probe raw `$CODEX_HOME/...` first when the variable may be unset.
 Prefer targeted file reads and `rg --files` from the confirmed repo root. Avoid `pwd && ls -la && find .. -name AGENTS.md` style orientation probes unless the target repo truly cannot be identified from the prompt, cwd, or git root.
