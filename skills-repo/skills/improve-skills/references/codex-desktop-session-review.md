@@ -17,6 +17,12 @@ test -f "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" && \
 sed -n '1,220p' "$CODEX_HOME_RESOLVED/session_index.jsonl"
 ```
 
+If higher-priority instructions require loading this skill's `SKILL.md`, a repo startup file such as `VAULT_AGENT_STRUCTURE.md`, or both before task work, keep those reads minimal and isolated. The safe opening sequence is:
+
+1. Read only the required skill/startup file(s); do not include memory, Codex-home probes, `find`, `rg`, `pwd`, `git`, or session reads in that same tool batch.
+2. Read this reference.
+3. Run the canonical automation bootstrap above.
+
 For retrospective Learn-style reviews, the first visible outputs should be the automation file, memory status, and `session_index.jsonl`. If higher-priority host/runtime rules force a minimal skill load or a single named startup file first, satisfy only that requirement and immediately run this bootstrap. Record the forced read as precedence handling, not as avoidable discovery; still count any extra repo orientation beyond the required file as drift.
 
 Do not start with repo orientation (`git status`, `pwd`, `ls`, README, OpenSpec, AGENTS), raw `$CODEX_HOME` probes, broad `find ~/.codex`, broad `rg ~/.codex`, or prompt-fragment searches. If you started that way, restart from the canonical bootstrap and keep only findings reproduced from the bounded path.

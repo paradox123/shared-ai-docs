@@ -1,6 +1,6 @@
 ---
 name: build-codex-automations
-description: Design, create, inspect, update, or troubleshoot Codex automations and local scheduled workflows in Daniel's macOS environment. USE WHEN the user asks for recurring tasks, reminders, monitors, scheduled Codex runs, automation prompts/configs, helper scripts for automations, or deciding whether automation should be direct Codex, scripted, or hybrid.
+description: Design, create, inspect, update, or troubleshoot Codex automations and local scheduled workflows in Daniel's macOS environment. USE WHEN the user asks for recurring tasks, reminders, monitors, scheduled Codex runs, automation prompts/configs, helper scripts for automations, or deciding whether automation should be direct Codex, scripted, or hybrid. Do not use as the primary skill for Learn-style retrospective session reviews or skill-gap audits; use improve-skills first and open this only after the canonical automation/session bootstrap shows a concrete automation-definition issue.
 ---
 
 # Build Codex Automations
