@@ -61,6 +61,8 @@ Prefer bounded sources in this order:
 
 Current `session_index.jsonl` may contain only `id`, `thread_name`, and `updated_at`; use it as a coarse recency index. Resolve authoritative `cwd`, `timestamp`, and id from `session_meta` inside the session file.
 
+Do not assume the indexed id is the filename prefix. Codex Desktop rollout files are often named like `rollout-<timestamp>-<id>.jsonl`, so prefix patterns such as `<id>*.jsonl` and `*/<id>*.jsonl` can miss valid sessions. When resolving indexed ids, scan the bounded day folder and match either `*<id>*.jsonl` or, more robustly, `session_meta.payload.id` inside each file before falling back to `archived_sessions`.
+
 For automation worktree runs, match both configured `cwds` and worktree variants such as `~/.codex/worktrees/*/<repo-tail>`.
 
 Exclude sibling automation fan-out runs unless they provide direct evidence of automation drift or the same repeated skill weakness. If sibling runs already prove the pattern, stop there instead of widening into unrelated sessions.

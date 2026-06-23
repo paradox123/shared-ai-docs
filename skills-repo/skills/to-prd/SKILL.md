@@ -1,6 +1,6 @@
 ---
 name: to-prd
-description: Turn the current conversation context into a PRD and publish it to the project issue tracker. Use when user wants to create a PRD from the current context.
+description: Turn the current conversation context into a PRD and publish it to the project issue tracker, or write a local PRD when publication is unavailable or inappropriate. Use when user wants to create a PRD from the current context.
 ---
 
 This skill takes the current conversation context and codebase understanding and produces a PRD. Do not run an open-ended interview; synthesize what you already know and ask only for explicit approval or truly blocking product/testing decisions.
@@ -18,6 +18,8 @@ A deep module (as opposed to a shallow module) is one which encapsulates a lot o
 If module boundaries or testing scope are not already clear enough to publish, ask one concise approval/blocker question. Otherwise record the inferred decisions in the PRD.
 
 3. Write the PRD using the template below, then publish it to the project issue tracker. Apply the repo's ready-for-agent label only when the PRD has enough context for an agent to start without more human decisions; otherwise use the repo's decision/triage label.
+
+If the repo has no configured issue tracker, the request is in a personal/private knowledge repo, or the PRD contains employer/customer-sensitive material and the user did not explicitly ask for external publication, create a local Markdown PRD instead of publishing externally. State that publication was intentionally skipped, where the PRD was written, and what privacy or tracker constraint caused the local fallback.
 
 <prd-template>
 

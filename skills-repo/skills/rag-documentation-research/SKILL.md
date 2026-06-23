@@ -54,6 +54,7 @@ Default scope:
 1. Start with `ncg/ncg-docs`.
 2. Add broader scope only if the question requires it.
 3. For workflow/skill/prompt governance questions (for example `doc-workflow`, `spec-change-delivery`, `spec-closeout`, `skills-repo`, `_prompts`), run with `--scope all` directly.
+4. Do not assume the current working directory or an arbitrary repo path is a valid RAG scope. If the task concerns a repo outside the configured RAG scopes, run at most one scope check such as `rag inspect chunks --scope <candidate> --limit 5`; when it reports `unsupported scope`, state that RAG is unavailable for that repo and move to the fallback path.
 
 ## Retrieval Flow
 
@@ -63,6 +64,7 @@ Default scope:
 4. Use `qmd` only when discovery looks too narrow or wording is too fuzzy.
 5. When using `--scope all`, filter/de-prioritize generated artifact paths (for example `/.rag/`, `/.git/`, `/node_modules/`) in the final source shortlist.
 6. For exact env vars, secret names, route fragments, endpoint paths, certificate files, or other literal identifiers, do at most one structured pass and one hybrid/semantic pass before switching to `qmd search` or `rg`.
+7. If both RAG scope support and QMD collection coverage exclude the target repo, stop retrieval iteration and use targeted repo reads (`rg`, known docs folders, or repo-local indexes) with an explicit fallback label.
 
 Recommended commands:
 
