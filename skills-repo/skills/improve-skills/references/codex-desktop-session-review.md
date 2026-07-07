@@ -17,6 +17,8 @@ test -f "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" && \
 sed -n '1,220p' "$CODEX_HOME_RESOLVED/session_index.jsonl"
 ```
 
+If the automation prompt explicitly requires the canonical automation reads before secondary skill/reference files, run the canonical bootstrap first, then load this reference and continue from the memory-backed cursor. Record that as prompt precedence, not avoidable discovery.
+
 If higher-priority instructions require loading this skill's `SKILL.md`, a repo startup file such as `VAULT_AGENT_STRUCTURE.md`, or both before task work, keep those reads minimal and isolated. The safe opening sequence is:
 
 1. Read only the required skill/startup file(s); do not include memory, Codex-home probes, `find`, `rg`, `pwd`, `git`, or session reads in that same tool batch.
@@ -62,6 +64,62 @@ Prefer bounded sources in this order:
 Current `session_index.jsonl` may contain only `id`, `thread_name`, and `updated_at`; use it as a coarse recency index. Resolve authoritative `cwd`, `timestamp`, and id from `session_meta` inside the session file.
 
 Do not assume the indexed id is the filename prefix. Codex Desktop rollout files are often named like `rollout-<timestamp>-<id>.jsonl`, so prefix patterns such as `<id>*.jsonl` and `*/<id>*.jsonl` can miss valid sessions. When resolving indexed ids, scan the bounded day folder and match either `*<id>*.jsonl` or, more robustly, `session_meta.payload.id` inside each file before falling back to `archived_sessions`.
+
+Use a resolver before opening raw rollout files or falling back to `rg` over session folders. Keep the day folders derived from indexed `updated_at` values, then inspect `session_meta.payload.id` for every file in those folders:
+
+```bash
+CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}" python3 - <<'PY'
+from pathlib import Path
+from datetime import datetime, timezone
+import json, os, re
+
+home = Path(os.environ["CODEX_HOME_RESOLVED"])
+cutoff_raw = "<memory-cutoff-or-prompt-last-run>"
+
+def parse_ts(raw):
+    raw = str(raw).strip()
+    if raw.endswith("Z"):
+        raw = raw[:-1] + "+00:00"
+    m = re.match(r"^(.*\.)(\d+)([+-]\d\d:\d\d)$", raw)
+    if m:
+        raw = m.group(1) + m.group(2)[:6].ljust(6, "0") + m.group(3)
+    dt = datetime.fromisoformat(raw)
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+cutoff = parse_ts(cutoff_raw)
+entries = []
+for line in (home / "session_index.jsonl").open(errors="replace"):
+    if not line.strip():
+        continue
+    entry = json.loads(line)
+    if parse_ts(entry["updated_at"]) > cutoff:
+        entries.append(entry)
+
+by_id = {}
+days = sorted({parse_ts(entry["updated_at"]).strftime("%Y/%m/%d") for entry in entries})
+for day in days:
+    for path in sorted((home / "sessions" / day).glob("*.jsonl")):
+        try:
+            with path.open(errors="replace") as f:
+                for line in f:
+                    obj = json.loads(line)
+                    if obj.get("type") == "session_meta":
+                        sid = obj.get("payload", {}).get("id") or obj.get("payload", {}).get("session_id")
+                        if sid:
+                            by_id[sid] = path
+                        break
+        except Exception as exc:
+            print("scan_error", path, exc)
+
+for entry in entries:
+    sid = entry["id"]
+    path = by_id.get(sid)
+    if path is None:
+        matches = sorted((home / "archived_sessions").glob(f"*{sid}*.jsonl"))
+        path = matches[0] if matches else None
+    print(entry["updated_at"], sid, entry.get("thread_name"), path or "MISSING")
+PY
+```
 
 For automation worktree runs, match both configured `cwds` and worktree variants such as `~/.codex/worktrees/*/<repo-tail>`.
 

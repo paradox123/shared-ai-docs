@@ -15,6 +15,14 @@ description: Test-driven development with red-green-refactor loop. Use when user
 
 See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking guidelines.
 
+## Seams - where tests go
+
+A **seam** is the public boundary you test at: the interface where you observe behavior without reaching inside. Tests live at seams, never against internals.
+
+Before writing any test, write down the seams under test and confirm them with the user when the seam choice is not already explicit in the task, PRD, or repo guidance. No test is written at an unconfirmed seam. Agreeing the seams up front is how testing effort lands on critical paths and complex logic instead of every edge case.
+
+Ask: "What's the public interface, and which seams should we test?"
+
 ## Anti-Pattern: Horizontal Slices
 
 **DO NOT write all tests first, then all implementation.** This is "horizontal slicing" - treating RED as "write all tests" and GREEN as "write all code."
@@ -25,6 +33,7 @@ This produces **crap tests**:
 - You end up testing the _shape_ of things (data structures, function signatures) rather than user-facing behavior
 - Tests become insensitive to real changes - they pass when behavior breaks, fail when behavior is fine
 - You outrun your headlights, committing to test structure before understanding the implementation
+- Tautological assertions creep in: the expected value is recomputed the same way the code does, so the test can never disagree with the implementation
 
 **Correct approach**: Vertical slices via tracer bullets. One test → one implementation → repeat. Each test responds to what you learned from the previous cycle. Because you just wrote the code, you know exactly what behavior matters and how to verify it.
 
@@ -49,6 +58,7 @@ When exploring the codebase, use the project's domain glossary so that test name
 Before writing any code:
 
 - [ ] Confirm with user what interface changes are needed
+- [ ] Confirm the seam(s) under test
 - [ ] Confirm with user which behaviors to test (prioritize)
 - [ ] Identify opportunities for [deep modules](deep-modules.md) (small interface, deep implementation)
 - [ ] Design interfaces for [testability](interface-design.md)
@@ -82,6 +92,7 @@ GREEN: Minimal code to pass → passes
 Rules:
 
 - One test at a time
+- One seam per slice unless the behavior is inherently cross-seam
 - Only enough code to pass current test
 - Don't anticipate future tests
 - Keep tests focused on observable behavior

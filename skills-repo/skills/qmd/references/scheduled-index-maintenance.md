@@ -24,5 +24,6 @@ qmd status
 ```
 
 3. Run `qmd embed` only if `qmd update` succeeds.
-4. Update the automation memory with run time, command outcomes, indexed file count, vector count, collections touched, and blockers.
-5. Do not repair macOS privacy/TCC, QMD installation, or permission issues during a routine index run; record the blocker and stop.
+4. Capture run time with a portable command such as `date '+%Y-%m-%dT%H:%M:%S%z'`. Do not use GNU-only forms such as `date -Is`; macOS `date` rejects them.
+5. Update the automation memory with run time, command outcomes, indexed file count, vector count, collections touched, and blockers.
+6. Do not repair macOS privacy/TCC, QMD installation, or permission issues during a routine index run; record the blocker and stop.

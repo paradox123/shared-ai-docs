@@ -75,6 +75,8 @@ Only publish an issue with a ready-for-agent / AFK-ready label when the slice ha
 
 Publish issues in dependency order (blockers first) so you can reference real issue identifiers in the "Blocked by" field.
 
+Where the tracker supports it, link each slice to its parent as a native sub-issue and wire blockers as native blocking edges using the mechanics in the issue-tracker docs. The `## Parent` and `## Blocked by` body sections are the fallback when native relationships are unavailable.
+
 For GitHub-specific publishing details and batch checks, use [publishing.md](references/publishing.md).
 
 <issue-template>

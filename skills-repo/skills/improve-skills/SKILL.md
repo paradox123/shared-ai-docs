@@ -18,7 +18,7 @@ Choose the narrowest review mode that matches the request:
 
 If multiple modes apply, start with the most concrete evidence source already named by the user. Treat repo-local startup instructions as background unless the chosen mode says repo context is needed.
 
-When the prompt supplies `Automation ID:`, `Automation memory:`, `Automation:`, or `Last run:`, load the Codex Desktop reference before reading memory paths or probing Codex state. Do not batch memory/Codex-state probes in the same first tool call as this `SKILL.md` read. Normalize `CODEX_HOME` through that reference first; a literal `$CODEX_HOME/...` read is not valid evidence of missing memory when the environment variable is unset.
+When the prompt supplies `Automation ID:`, `Automation memory:`, `Automation:`, or `Last run:`, use the Codex Desktop reference for the session-review mechanics, but honor any prompt-level bootstrap order that explicitly requires canonical automation reads before secondary skill/reference files. Do not batch memory/Codex-state probes in the same first tool call as this `SKILL.md` read unless the automation prompt itself mandates the canonical three-file bootstrap first. Normalize `CODEX_HOME` before reading prompt-provided paths; a literal `$CODEX_HOME/...` read is not valid evidence of missing memory when the environment variable is unset.
 
 ## Skill Patch Integrity Gate
 

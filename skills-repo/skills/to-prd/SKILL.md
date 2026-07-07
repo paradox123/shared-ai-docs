@@ -11,7 +11,7 @@ The issue tracker and triage label vocabulary should have been provided to you â
 
 1. Explore the repo to understand the current state of the codebase, if you haven't already. Use the project's domain glossary vocabulary throughout the PRD, and respect any ADRs in the area you're touching.
 
-2. Sketch out the major modules you will need to build or modify to complete the implementation. Actively look for opportunities to extract deep modules that can be tested in isolation.
+2. Sketch out the major modules and test seams needed to complete the implementation. Existing seams should be preferred to new ones; use the highest seam possible. If new seams are needed, propose them at the highest point you can. The fewer seams across the codebase, the better.
 
 A deep module (as opposed to a shallow module) is one which encapsulates a lot of functionality in a simple, testable interface which rarely changes.
 
