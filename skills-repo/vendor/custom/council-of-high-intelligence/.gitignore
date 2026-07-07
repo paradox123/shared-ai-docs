@@ -1,0 +1,16 @@
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Logs and local tool state
+*.log
+.gstack/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Local scratch
+tmp/
+scratch/
