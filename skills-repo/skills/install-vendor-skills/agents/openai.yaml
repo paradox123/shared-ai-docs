@@ -1,4 +1,4 @@
 interface:
   display_name: "Install Vendor Skills"
-  short_description: "Keep external skill installs aligned"
-  default_prompt: "Use $install-vendor-skills to install or update an external vendor skill while preserving the shared skill setup."
+  short_description: "Keep global vendor skills aligned"
+  default_prompt: "Use $install-vendor-skills to install or update a global external vendor skill while preserving the shared skill setup."

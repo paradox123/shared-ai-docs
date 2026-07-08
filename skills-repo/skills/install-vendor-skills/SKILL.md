@@ -1,17 +1,19 @@
 ---
 name: install-vendor-skills
-description: Install, import, update, or activate skills from external vendors while preserving Daniel's shared skill setup. Use when the user asks to install, set up, pull, import, vendor, activate, sync, or update third-party skills, external skill repositories, Matt Pocock skills, Vercel skills, custom vendor skills, or any non-local skill source for Codex, Claude, Agents, or Copilot.
+description: Install, import, update, or activate global/shared skills from external vendors while preserving Daniel's shared skill setup. Use when the user asks to install, set up, pull, import, vendor, activate, sync, or update third-party global skills, external skill repositories, Matt Pocock skills, Vercel skills, custom vendor skills, or non-local skill sources for global Codex, Claude, Agents, or Copilot; also use when scope is ambiguous so the agent first distinguishes global skills from repo-specific skills.
 ---
 
 # Install Vendor Skills
 
 ## Overview
 
-Use this skill as a setup guardrail. The canonical active skill list is `skills-repo/skills`; external vendor content belongs under `skills-repo/vendor`; Codex links are synchronized from the active list.
+Use this skill as a global-skill setup guardrail. The canonical global active skill list is `skills-repo/skills`; external global vendor content belongs under `skills-repo/vendor`; Codex links are synchronized from the global active list.
+
+This setup does not apply to repo-specific skills. If the user wants skills installed or configured for one repository only, follow that repository's `AGENTS.md`, README, local `.agents/skills`, local `.codex/skills`, or other repo-local convention instead.
 
 ## Canonical Files
 
-Before installing or changing vendor skills, read:
+Before installing or changing global vendor skills, read:
 
 ```text
 /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md
@@ -26,38 +28,44 @@ Use these tools instead of inventing parallel runtime paths:
 
 ## Required Workflow
 
-1. Confirm the git root before edits:
+1. Determine scope before editing:
+
+- Global/shared skill setup: continue with this workflow.
+- Repo-specific skill setup: do not apply the global `skills-repo/skills` policy. Work inside the target repo, read its local agent instructions, and keep the skill local to that repo unless the user explicitly asks to promote it globally.
+- Ambiguous request: inspect the current cwd/repo context and ask only if the scope cannot be inferred.
+
+2. Confirm the global skills git root before global edits:
 
 ```bash
 git -C /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs rev-parse --show-toplevel
 ```
 
-2. Inspect current state before changing anything:
+3. Inspect current global state before changing anything:
 
 ```bash
 git -C /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs status --short
 find /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills -mindepth 1 -maxdepth 1 \( -type d -o -type l \) -exec basename {} \; | sort
 ```
 
-3. Place external vendor source under `skills-repo/vendor/<vendor-name>/`. Do not install external vendor skills directly into `/Users/dh/.codex/skills`, `/Users/dh/.agents/skills`, `/Users/dh/.claude/skills`, or `skills-repo/active-skills`.
+4. Place external global vendor source under `skills-repo/vendor/<vendor-name>/`. Do not install external global vendor skills directly into `/Users/dh/.codex/skills`, `/Users/dh/.agents/skills`, `/Users/dh/.claude/skills`, or `skills-repo/active-skills`.
 
-4. Activate a vendor skill only by adding an entry under `skills-repo/skills`:
+5. Activate a global vendor skill only by adding an entry under `skills-repo/skills`:
 
 ```text
 skills-repo/skills/<skill-name> -> ../vendor/<vendor-path>/<skill-name>
 ```
 
-Use a normal directory in `skills-repo/skills` only for Daniel-owned local skills. Use a symlink for vendor-managed skills so future vendor pulls update the active skill immediately.
+Use a normal directory in `skills-repo/skills` only for Daniel-owned global skills. Use a symlink for vendor-managed global skills so future vendor pulls update the active skill immediately.
 
-5. If the vendor has multiple agent-specific entrypoints, choose the Codex-specific entrypoint for Codex-facing `SKILL.md` when one exists. Example: `council/SKILL.md` points to the vendor's `SKILL.codex.md`.
+6. If the vendor has multiple agent-specific entrypoints, choose the Codex-specific entrypoint for Codex-facing `SKILL.md` when one exists. Example: `council/SKILL.md` points to the vendor's `SKILL.codex.md`.
 
-6. After changing `skills-repo/skills`, synchronize Codex:
+7. After changing `skills-repo/skills`, synchronize Codex:
 
 ```bash
 /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
 ```
 
-7. If hooks are missing or the setup was freshly cloned, install them:
+8. If hooks are missing or the setup was freshly cloned, install them:
 
 ```bash
 /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/install-git-hooks.sh
@@ -67,7 +75,8 @@ Use a normal directory in `skills-repo/skills` only for Daniel-owned local skill
 
 - Do not create or restore `skills-repo/active-skills`.
 - Do not make `/Users/dh/.codex/skills` the source of truth.
-- Do not copy vendor skills into `skills-repo/skills` when a symlink to `vendor/...` can preserve update behavior.
+- Do not apply this global setup to repo-specific skill folders.
+- Do not copy global vendor skills into `skills-repo/skills` when a symlink to `vendor/...` can preserve update behavior.
 - Do not edit a vendor-managed skill through the active symlink unless the user explicitly wants to patch the vendored source. For local adaptations, fork it into a Daniel-owned skill under `skills-repo/skills/<new-name>`.
 - Do not overwrite unrelated dirty work in `shared-ai-docs`.
 

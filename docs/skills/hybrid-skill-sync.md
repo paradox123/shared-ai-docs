@@ -1,8 +1,10 @@
-# Hybrid Skill Sync fuer private und Arbeitsgeraete
+# Hybrid Skill Sync fuer globale Skills
 
 ## Ziel
 
-Dieses Setup nutzt `shared-ai-docs/skills-repo/skills` als einzige aktive Skill-Liste.
+Dieses Setup gilt nur fuer globale beziehungsweise geraeteuebergreifende Skills.
+
+Es nutzt `shared-ai-docs/skills-repo/skills` als einzige aktive globale Skill-Liste.
 
 Das bedeutet:
 
@@ -10,6 +12,23 @@ Das bedeutet:
 2. vendorgemanagte Skills sind unter `skills-repo/skills` als Links auf `skills-repo/vendor/...` sichtbar
 3. Codex, Claude und Agents lesen dieselbe aktive Skill-Liste
 4. es gibt keinen separaten `active-skills/` Aggregationsordner
+
+## Scope
+
+Im Scope:
+
+- globale Skills fuer Codex, Claude, Agents und Copilot
+- gemeinsame Skills, die auf mehreren Geraeten genutzt werden sollen
+- Vendor-Skills, die global aktiv sein sollen
+- Runtime-Links unter `/Users/dh/.codex/skills`, `/Users/dh/.agents/skills`, `/Users/dh/.claude/skills` und dem globalen Copilot-Skillpfad
+
+Nicht im Scope:
+
+- repo-spezifische Skills in einem einzelnen Projekt
+- lokale Skill-Ordner wie `<repo>/.agents/skills` oder `<repo>/.codex/skills`
+- Skills, die nur fuer einen bestimmten Workspace, eine bestimmte Codebase oder ein bestimmtes AGENTS.md gelten
+
+Repo-spezifische Skill-Setups sollen der jeweiligen Repo-Dokumentation folgen. Dieses globale Setup darf sie nicht in `shared-ai-docs/skills-repo/skills` verschieben, ausser der User verlangt ausdruecklich eine globale Aktivierung.
 
 ## Kanonische Struktur
 
@@ -29,7 +48,7 @@ Das bedeutet:
       install-git-hooks.sh
 ```
 
-`skills-repo/skills` ist die aktive Liste. Wenn ein Skill dort nicht steht, soll er nicht als gemeinsamer aktiver Skill behandelt werden.
+`skills-repo/skills` ist die aktive globale Liste. Wenn ein Skill dort nicht steht, soll er nicht als gemeinsamer globaler Skill behandelt werden.
 
 ## Aktuelle Runtime-Mappings auf dem Mac
 
@@ -40,7 +59,7 @@ Diese Pfade zeigen auf dieselbe aktive Liste:
 /Users/dh/.claude/skills -> /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills
 ```
 
-Codex nutzt einzelne Links in:
+Codex nutzt fuer globale Skills einzelne Links in:
 
 ```text
 /Users/dh/.codex/skills/<skill-name> -> /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/<skill-name>
@@ -52,7 +71,7 @@ Die Codex-Links werden mit diesem Tool aktualisiert:
 /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
 ```
 
-Das Tool laesst Codex-Systemskills und Plugin-Runtime-Ordner unveraendert und verwaltet nur Links auf die gemeinsame `skills-repo/skills` Liste.
+Das Tool laesst Codex-Systemskills, Plugin-Runtime-Ordner und repo-spezifische Skills unveraendert und verwaltet nur Links auf die gemeinsame globale `skills-repo/skills` Liste.
 
 ## Vendor-Skills
 
@@ -64,7 +83,7 @@ skills-repo/vendor/mattpocock/
 skills-repo/vendor/vercel/
 ```
 
-Wenn ein vendorgemanagter Skill aktiv sein soll, steht er unter `skills-repo/skills` als Link auf seine Vendor-Quelle. Dadurch wird der aktive Skill automatisch aktualisiert, sobald die Vendor-Quelle durch einen Pull oder Import aktualisiert wird.
+Wenn ein vendorgemanagter Skill global aktiv sein soll, steht er unter `skills-repo/skills` als Link auf seine Vendor-Quelle. Dadurch wird der aktive Skill automatisch aktualisiert, sobald die Vendor-Quelle durch einen Pull oder Import aktualisiert wird.
 
 Beispiel:
 
@@ -72,7 +91,7 @@ Beispiel:
 skills-repo/skills/tdd -> ../vendor/mattpocock/.agents/skills/tdd
 ```
 
-Alle Skills aus `skills-repo/vendor/mattpocock/.agents/skills` sind aktive Skills. Sie werden in `skills-repo/skills` als Links auf die Vendor-Quelle gefuehrt, damit Codex sie verwendet und Vendor-Pulls sofort sichtbar werden.
+Alle Skills aus `skills-repo/vendor/mattpocock/.agents/skills` sind aktive globale Skills. Sie werden in `skills-repo/skills` als Links auf die Vendor-Quelle gefuehrt, damit Codex sie global verwendet und Vendor-Pulls sofort sichtbar werden.
 
 Der fruehere lokale Skill `diagnose` ist nicht mehr aktiv. Die aktive bug-diagnosis Variante kommt aus dem Matt-Pocock-Vendor-Skill `diagnosing-bugs`.
 
@@ -88,7 +107,7 @@ Gruende:
 2. Codex, Claude und Agents wuerden unterschiedliche Pfade sehen.
 3. Vendor-Updates koennten in Kopien oder Aggregationsordnern haengen bleiben.
 
-Die aktive Quelle ist immer:
+Die aktive globale Quelle ist immer:
 
 ```text
 skills-repo/skills
@@ -104,7 +123,7 @@ skills-repo/skills
 
 Das Tool:
 
-1. liest alle Eintraege unter `skills-repo/skills`
+1. liest alle globalen Eintraege unter `skills-repo/skills`
 2. entfernt alte Codex-Links auf dieses Repo oder auf das fruehere `active-skills/`
 3. legt passende Links in `/Users/dh/.codex/skills` an
 
@@ -142,21 +161,21 @@ cmd /c mklink /J "$Copilot" "$RepoSkills"
 
 ## Arbeitsweise
 
-### Eigene Skills bearbeiten
+### Eigene globale Skills bearbeiten
 
 1. Skill unter `skills-repo/skills/<skill-name>` bearbeiten.
 2. Vor Arbeitsbeginn `git pull` im Repo ausfuehren.
 3. Nach Aenderungen committen und pushen.
 4. Auf anderen Geraeten pullen.
 
-### Vendor-Skills aktualisieren
+### Globale Vendor-Skills aktualisieren
 
 1. Vendor-Quelle unter `skills-repo/vendor/<source>` aktualisieren.
-2. Weil aktive Vendor-Skills in `skills-repo/skills` als Links auf Vendor-Quellen liegen, sieht der aktive Skill die neue Vendor-Version sofort.
+2. Weil aktive globale Vendor-Skills in `skills-repo/skills` als Links auf Vendor-Quellen liegen, sieht der aktive Skill die neue Vendor-Version sofort.
 3. Nach einem Pull oder Branch-Wechsel aktualisieren die installierten Hooks die Codex-Links.
 4. Wenn neue aktive Skills hinzukommen, `sync-codex-skill-links.sh` ausfuehren oder die Hooks installieren.
 
-### Vendor-Skills lokal anpassen
+### Globale Vendor-Skills lokal anpassen
 
 Vendor-Skills, die direkt als Link aus `skills-repo/skills` auf `vendor/...` zeigen, sollen nicht direkt im aktiven Pfad angepasst werden. Fuer lokale Aenderungen gibt es zwei saubere Optionen:
 
@@ -180,13 +199,13 @@ Erwartung:
 /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills
 ```
 
-### Codex sieht die aktive Liste
+### Codex sieht die aktive globale Liste
 
 ```bash
 find -L /Users/dh/.codex/skills -mindepth 1 -maxdepth 2 -name SKILL.md -print
 ```
 
-Erwartung: fuer jeden aktiven Skill in `skills-repo/skills` gibt es einen passenden Codex-Link, ausgenommen Codex-Systemskills und Plugin-Runtime-Skills.
+Erwartung: fuer jeden aktiven globalen Skill in `skills-repo/skills` gibt es einen passenden Codex-Link, ausgenommen Codex-Systemskills, Plugin-Runtime-Skills und repo-spezifische Skills.
 
 ### Kein Aggregationsordner
 
@@ -212,9 +231,9 @@ Erwartung:
 
 ## Akzeptanzkriterien
 
-1. `skills-repo/skills` ist die einzige aktive gemeinsame Skill-Liste.
+1. `skills-repo/skills` ist die einzige aktive gemeinsame globale Skill-Liste.
 2. `/Users/dh/.agents/skills` und `/Users/dh/.claude/skills` zeigen auf `skills-repo/skills`.
-3. `/Users/dh/.codex/skills` enthaelt Links fuer die aktiven Skills aus `skills-repo/skills`.
-4. Alle Matt-Pocock-Vendor-Skills sind unter `skills-repo/skills` aktiv und zeigen per Link auf `skills-repo/vendor/mattpocock/.agents/skills/...`.
+3. `/Users/dh/.codex/skills` enthaelt Links fuer die aktiven globalen Skills aus `skills-repo/skills`.
+4. Alle global aktivierten Matt-Pocock-Vendor-Skills sind unter `skills-repo/skills` aktiv und zeigen per Link auf `skills-repo/vendor/mattpocock/.agents/skills/...`.
 5. `skills-repo/active-skills` existiert nicht.
 6. Die Dokumentation beschreibt denselben Zustand, den die lokalen Pfade tatsaechlich verwenden.
