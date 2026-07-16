@@ -1,6 +1,6 @@
 ---
 name: install-vendor-skills
-description: Install, import, update, or activate global/shared skills from external vendors while preserving Daniel's shared skill setup. Use when the user asks to install, set up, pull, import, vendor, activate, sync, or update third-party global skills, external skill repositories, Matt Pocock skills, Vercel skills, custom vendor skills, or non-local skill sources for global Codex, Claude, Agents, or Copilot; also use when scope is ambiguous so the agent first distinguishes global skills from repo-specific skills.
+description: Install, import, update, or activate global/shared skills from external vendors while preserving Daniel's shared skill setup. Use when the user asks to install, set up, pull, import, vendor, activate, sync, or update third-party global skills, external skill repositories, Matt Pocock skills, Vercel skills, custom vendor skills, non-local skill sources, or anything "as described in" hybrid-skill-sync.md for global Codex, Claude, Agents, or Copilot; also use when scope is ambiguous so the agent first distinguishes global skills from repo-specific skills.
 ---
 
 # Install Vendor Skills
@@ -16,14 +16,14 @@ This setup does not apply to repo-specific skills. If the user wants skills inst
 Before installing or changing global vendor skills, read:
 
 ```text
-/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md
+~/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md
 ```
 
 Use these tools instead of inventing parallel runtime paths:
 
 ```text
-/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
-/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/install-git-hooks.sh
+~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
+~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/install-git-hooks.sh
 ```
 
 ## Required Workflow
@@ -37,17 +37,17 @@ Use these tools instead of inventing parallel runtime paths:
 2. Confirm the global skills git root before global edits:
 
 ```bash
-git -C /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs rev-parse --show-toplevel
+git -C ~/Documents/DanielsVault/_shared/shared-ai-docs rev-parse --show-toplevel
 ```
 
 3. Inspect current global state before changing anything:
 
 ```bash
-git -C /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs status --short
-find /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills -mindepth 1 -maxdepth 1 \( -type d -o -type l \) -exec basename {} \; | sort
+git -C ~/Documents/DanielsVault/_shared/shared-ai-docs status --short
+find ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills -mindepth 1 -maxdepth 1 \( -type d -o -type l \) -exec basename {} \; | sort
 ```
 
-4. Place external global vendor source under `skills-repo/vendor/<vendor-name>/`. Do not install external global vendor skills directly into `/Users/dh/.codex/skills`, `/Users/dh/.agents/skills`, `/Users/dh/.claude/skills`, or `skills-repo/active-skills`.
+4. Place external global vendor source under `skills-repo/vendor/<vendor-name>/`. Do not install external global vendor skills directly into `~/.codex/skills`, `~/.agents/skills`, `~/.claude/skills`, or `skills-repo/active-skills`.
 
 5. Activate a global vendor skill only by adding an entry under `skills-repo/skills`:
 
@@ -62,19 +62,19 @@ Use a normal directory in `skills-repo/skills` only for Daniel-owned global skil
 7. After changing `skills-repo/skills`, synchronize Codex:
 
 ```bash
-/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
+~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
 ```
 
 8. If hooks are missing or the setup was freshly cloned, install them:
 
 ```bash
-/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/install-git-hooks.sh
+~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/install-git-hooks.sh
 ```
 
 ## Hard Rules
 
 - Do not create or restore `skills-repo/active-skills`.
-- Do not make `/Users/dh/.codex/skills` the source of truth.
+- Do not make `~/.codex/skills` the source of truth.
 - Do not apply this global setup to repo-specific skill folders.
 - Do not copy global vendor skills into `skills-repo/skills` when a symlink to `vendor/...` can preserve update behavior.
 - Do not edit a vendor-managed skill through the active symlink unless the user explicitly wants to patch the vendored source. For local adaptations, fork it into a Daniel-owned skill under `skills-repo/skills/<new-name>`.
@@ -85,12 +85,12 @@ Use a normal directory in `skills-repo/skills` only for Daniel-owned global skil
 Run these checks before finishing:
 
 ```bash
-test ! -e /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/active-skills
-readlink /Users/dh/.agents/skills
-readlink /Users/dh/.claude/skills
-find -L /Users/dh/.codex/skills -mindepth 1 -maxdepth 2 -name SKILL.md -print | sed 's#/SKILL.md$##' | sed 's#^.*/skills/##' | sort
-find /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills -maxdepth 1 -type l -exec sh -c 'for p do [ -e "$p/SKILL.md" ] || echo "broken active skill: $p -> $(readlink "$p")"; done' sh {} +
-find /Users/dh/.codex/skills -maxdepth 1 -type l -exec sh -c 'for p do [ -e "$p/SKILL.md" ] || echo "broken codex skill: $p -> $(readlink "$p")"; done' sh {} +
+test ! -e ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/active-skills
+readlink ~/.agents/skills
+readlink ~/.claude/skills
+find -L ~/.codex/skills -mindepth 1 -maxdepth 2 -name SKILL.md -print | sed 's#/SKILL.md$##' | sed 's#^.*/skills/##' | sort
+find ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills -maxdepth 1 -type l -exec sh -c 'for p do [ -e "$p/SKILL.md" ] || echo "broken active skill: $p -> $(readlink "$p")"; done' sh {} +
+find ~/.codex/skills -maxdepth 1 -type l -exec sh -c 'for p do [ -e "$p/SKILL.md" ] || echo "broken codex skill: $p -> $(readlink "$p")"; done' sh {} +
 ```
 
 Expected:
@@ -101,4 +101,4 @@ Expected:
 - Broken-link checks print nothing.
 
 ## References
-hybrid skill documentation: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md
+hybrid skill documentation: ~/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md

@@ -14,7 +14,7 @@ sed -n '1,220p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.tom
 test -f "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" && \
   sed -n '1,260p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" || \
   echo "(missing memory)"
-sed -n '1,220p' "$CODEX_HOME_RESOLVED/session_index.jsonl"
+tail -n 260 "$CODEX_HOME_RESOLVED/session_index.jsonl"
 ```
 
 If the automation prompt explicitly requires the canonical automation reads before secondary skill/reference files, run the canonical bootstrap first, then load this reference and continue from the memory-backed cursor. Record that as prompt precedence, not avoidable discovery.
@@ -25,9 +25,9 @@ If higher-priority instructions require loading this skill's `SKILL.md`, a repo 
 2. Read this reference.
 3. Run the canonical automation bootstrap above.
 
-For retrospective Learn-style reviews, the first visible outputs should be the automation file, memory status, and `session_index.jsonl`. If higher-priority host/runtime rules force a minimal skill load or a single named startup file first, satisfy only that requirement and immediately run this bootstrap. Record the forced read as precedence handling, not as avoidable discovery; still count any extra repo orientation beyond the required file as drift.
+For retrospective Learn-style reviews, the first visible outputs should be the automation file, memory status, and a bounded recent excerpt of `session_index.jsonl`. Use a recent tail excerpt for the visible third read so the transcript shows the current window without dumping the full ledger or reading a stale beginning slice. The full index can be parsed immediately afterward through the bounded resolver. If higher-priority host/runtime rules force a minimal skill load or a single named startup file first, satisfy only that requirement and immediately run this bootstrap. Record the forced read as precedence handling, not as avoidable discovery; still count any extra repo orientation beyond the required file as drift.
 
-Do not start with repo orientation (`git status`, `pwd`, `ls`, README, OpenSpec, AGENTS), raw `$CODEX_HOME` probes, broad `find ~/.codex`, broad `rg ~/.codex`, or prompt-fragment searches. If you started that way, restart from the canonical bootstrap and keep only findings reproduced from the bounded path.
+Do not start with repo orientation (`git status`, `pwd`, `ls`, README, OpenSpec, AGENTS), raw `$CODEX_HOME` probes, full-file `cat` of `session_index.jsonl`, broad `find ~/.codex`, broad `rg ~/.codex`, or prompt-fragment searches. If you started that way, restart from the canonical bootstrap and keep only findings reproduced from the bounded path.
 
 If another skill suggests a different startup order for a session-review automation, follow this reference and report the mismatch as a skill-conflict finding. Support skills should defer to this reference instead of copying the bootstrap.
 
