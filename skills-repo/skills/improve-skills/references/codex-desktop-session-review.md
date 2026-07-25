@@ -10,12 +10,31 @@ Canonical bootstrap:
 
 ```bash
 CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
-sed -n '1,220p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml"
-test -f "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" && \
-  sed -n '1,260p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" || \
+AUTOMATION_PATH="$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml"
+MEMORY_PATH="$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md"
+INDEX_PATH="$CODEX_HOME_RESOLVED/session_index.jsonl"
+sed -n '1,220p' "$AUTOMATION_PATH"
+if [ -f "$MEMORY_PATH" ]; then
+  python3 - "$MEMORY_PATH" <<'PY'
+from pathlib import Path
+import sys
+
+text = Path(sys.argv[1]).read_text(errors="replace")
+cap = 16000
+if len(text) <= cap:
+    print(text)
+else:
+    marker = "\n...[bounded memory excerpt]...\n"
+    half = (cap - len(marker)) // 2
+    print(text[:half] + marker + text[-half:])
+PY
+else
   echo "(missing memory)"
-tail -n 260 "$CODEX_HOME_RESOLVED/session_index.jsonl"
+fi
+tail -n 120 "$INDEX_PATH"
 ```
+
+Bound visible memory output by both position and characters. A line limit alone is not a real output bound because stored prompts and diffs can occupy one very long line. If the visible bootstrap still truncates, narrow the character cap; do not print more of the file. Parse full memory or index contents only inside a compact resolver that emits selected fields or rows.
 
 If the automation prompt explicitly requires the canonical automation reads before secondary skill/reference files, run the canonical bootstrap first, then load this reference and continue from the memory-backed cursor. Record that as prompt precedence, not avoidable discovery.
 
@@ -35,22 +54,43 @@ If another skill suggests a different startup order for a session-review automat
 
 Normalize `$CODEX_HOME` before any memory read. An unset `$CODEX_HOME` means use `~/.codex`; it is not evidence that Codex state lives elsewhere.
 
-If the normalized automation memory exists, derive the cutoff from `Processed window end` or `Last review` before parsing `session_index.jsonl`. Use a prompt-level `Last run:` only as a fallback.
+Derive cutoff candidates from each present structured memory field (`Processed window end` and `Last review`) plus prompt `Last run:`. Normalize and compare all present candidates, then use the newest timestamp. Memory is authoritative only when its structured checkpoint is newer; never let stale memory widen a review that has a newer prompt timestamp.
 
 Example cutoff parser:
 
 ```bash
 CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}" python3 - <<'PY'
 from pathlib import Path
+from datetime import datetime, timezone
 import os, re
 mem = Path(os.environ["CODEX_HOME_RESOLVED"]) / "automations" / "<automation-id>" / "memory.md"
 text = mem.read_text() if mem.exists() else ""
-m = re.search(r"Processed window end:\s*(\S+)", text) or re.search(r"Last review:\s*(\S+)", text)
-print(m.group(1) if m else "<prompt-last-run-fallback>")
+prompt_raw = "<prompt-last-run-or-empty>"
+
+def parse_ts(raw):
+    raw = str(raw).strip()
+    if raw.endswith("Z"):
+        raw = raw[:-1] + "+00:00"
+    m = re.match(r"^(.*\.)(\d+)([+-]\d\d:\d\d)$", raw)
+    if m:
+        raw = m.group(1) + m.group(2)[:6].ljust(6, "0") + m.group(3)
+    dt = datetime.fromisoformat(raw)
+    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
+candidates = []
+for field in ("Processed window end", "Last review"):
+    match = re.search(rf"{re.escape(field)}:\s*(\S+)", text)
+    if match:
+        candidates.append(match.group(1))
+if prompt_raw and not prompt_raw.startswith("<"):
+    candidates.append(prompt_raw)
+print(max(candidates, key=parse_ts) if candidates else "<missing-cutoff>")
 PY
 ```
 
-Once the memory-backed cutoff is known, use that single timeline. Do not run duplicate extractors for both the prompt header and memory cutoff.
+Once the newer cutoff is known, use that single timeline. Do not run duplicate extractors for both the prompt header and memory cutoff.
+
+Capture the review-window end from the same `session_index.jsonl` snapshot used for candidate selection, normally the greatest indexed `updated_at` visible in that snapshot. Filter evidence to `(cutoff, review_window_end]`, exclude the current maintenance thread from substantive evidence, and persist that captured watermark as `Processed window end`. Keep the actual completion time in a separate `Run time` field. Never use end-of-run wall clock as the processed cursor: sessions can arrive between the index scan and memory write, and advancing to completion time would skip them on the next run.
 
 ## Candidate Session Selection
 
@@ -125,6 +165,8 @@ For automation worktree runs, match both configured `cwds` and worktree variants
 
 Exclude sibling automation fan-out runs unless they provide direct evidence of automation drift or the same repeated skill weakness. If sibling runs already prove the pattern, stop there instead of widening into unrelated sessions.
 
+Do not treat the current maintenance session as prior work evidence. When the only target-repo match is the same automation title/cwd at the current run boundary, mark it as the current thread and exclude it without opening its raw rollout merely to prove that it is maintenance traffic.
+
 ## Timestamp Handling
 
 Normalize timestamps once in the bounded extractor. Fractional precision may vary.
@@ -151,20 +193,36 @@ Codex Desktop session files usually use:
 
 - `session_meta` for authoritative session id, timestamp, and `cwd`
 - `response_item` payloads for messages and function calls
-- message payloads with `payload.type == "message"` and `payload.role`
-- function calls with `payload.type == "function_call"` or nested recorder variants
+- message payloads with `payload.type == "message"` and `payload.role`, sometimes nested under `payload.item`
+- legacy function calls with `payload.type == "function_call"` and arguments in `payload.arguments`
+- custom-recorder calls with `payload.type == "custom_tool_call"` and recorder input in `payload.input`; these often use recorder name `exec`, while the actionable nested tool appears as `tools.<tool_name>(...)` inside that input
+- corresponding outputs with `payload.type` equal to `function_call_output` or `custom_tool_call_output`
+- assistant final messages with `phase` equal to either `final` or `final_answer`; normalize both instead of sampling raw files when one spelling returns no finals
 
-Skip wrapper-only user messages such as `<environment_context>...</environment_context>` and injected `# AGENTS.md instructions for ...` blocks when deriving the substantive user request.
+Normalize both call layouts in the first extractor. If a custom recorder wraps another tool, report the nested `tools.<tool_name>` value rather than only the generic recorder name; otherwise tool-usage reviews can incorrectly conclude that the session made no calls.
+
+Strip injected wrapper blocks such as `<recommended_plugins>...</recommended_plugins>`, `<environment_context>...</environment_context>`, and `# AGENTS.md instructions for ...` plus its `<INSTRUCTIONS>...</INSTRUCTIONS>` body before deriving the substantive user request. These wrappers can precede the real task inside the same message, so a `startswith(...)` skip alone is insufficient.
 
 Starter extractor:
 
 ```bash
 python3 - <<'PY'
-import json, glob, os
+import json, glob, os, re
+
+def strip_injected_wrappers(text):
+    patterns = [
+        r"<recommended_plugins>.*?</recommended_plugins>",
+        r"# AGENTS\.md instructions for [^\n]+\s*<INSTRUCTIONS>.*?</INSTRUCTIONS>",
+        r"<environment_context>.*?</environment_context>",
+    ]
+    for pattern in patterns:
+        text = re.sub(pattern, "", text, flags=re.DOTALL)
+    return text.strip()
 
 for path in sorted(glob.glob(os.path.expanduser("~/.codex/sessions/YYYY/MM/DD/*.jsonl"))):
     meta = None
     first_user = None
+    last_final = None
     calls = []
     with open(path) as f:
         for line in f:
@@ -174,21 +232,29 @@ for path in sorted(glob.glob(os.path.expanduser("~/.codex/sessions/YYYY/MM/DD/*.
                 continue
             if obj.get("type") != "response_item":
                 continue
-            payload = obj.get("payload", {})
+            raw_payload = obj.get("payload", {})
+            payload = raw_payload.get("item") if isinstance(raw_payload.get("item"), dict) else raw_payload
             if payload.get("type") == "message" and payload.get("role") == "user" and not first_user:
                 texts = [item.get("text", "") for item in payload.get("content", []) if item.get("type") == "input_text"]
-                text = " ".join(texts).strip()
-                if text.startswith("<environment_context>") or text.startswith("# AGENTS.md instructions for "):
+                text = strip_injected_wrappers(" ".join(texts))
+                if not text:
                     continue
                 first_user = text[:220]
+            elif payload.get("type") == "message" and payload.get("role") == "assistant" and payload.get("phase") in {"final", "final_answer"}:
+                texts = [item.get("text", "") for item in payload.get("content", []) if item.get("type") == "output_text"]
+                last_final = " ".join(texts).strip()[:220]
             elif payload.get("type") == "function_call":
                 calls.append(payload.get("name"))
+            elif payload.get("type") == "custom_tool_call":
+                recorder_input = payload.get("input", "")
+                nested = re.findall(r"\btools\.([A-Za-z_][A-Za-z0-9_]*)\s*\(", recorder_input)
+                calls.extend(nested or [f"recorder:{payload.get('name', 'unknown')}"])
     if meta:
-        print(meta.get("timestamp"), meta.get("cwd"), first_user, calls[:12], path)
+        print(meta.get("timestamp"), meta.get("cwd"), first_user, last_final, calls[:12], path)
 PY
 ```
 
-When a bounded extractor already prints session meta, first substantive prompt, and function-call names, do not open raw rollout files one by one unless you need a quoted evidence snippet.
+When a bounded extractor already prints session meta, first substantive prompt, and normalized tool-call names, do not open raw rollout files one by one unless you need a quoted evidence snippet.
 
 If shell values such as `CODEX_HOME_RESOLVED`, `AUTOMATION_ID`, or cutoff are needed inside Python, export them or invoke Python as `VAR=value python3 ...`. A plain shell assignment before `python3 - <<'PY'` is not visible in `os.environ`.
 

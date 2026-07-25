@@ -74,6 +74,7 @@ Prompt guidance:
 
 - Keep schedule details out of the prompt when using `automation_update`; schedule belongs in the automation fields.
 - When the automation needs stable cross-run state, include `Automation ID: <id>` and `Automation memory: ~/.codex/automations/<id>/memory.md` in the prompt contract.
+- Keep the prompt's `Automation ID`, memory path, definition path, and live TOML `id` aligned. When cloning an automation for another project or worktree, give the clone its own adjacent memory unless shared state is an explicit, documented design choice.
 - For automation prompts that inspect Codex session history or other automation state, use the canonical bootstrap contract from `skills-repo/skills/improve-skills/references/codex-desktop-session-review.md`. Copy only the short prompt-facing rules needed for that automation; do not paraphrase a second full JSONL/session playbook here.
 - If the prompt names a specific tool or action primitive such as a task/todo creator, either confirm that tool is available in the target environment or write a fallback path into the prompt.
 - Treat named tool availability as a run-environment contract, not a filesystem-discovery task. Check the active tool context when you have it; otherwise assume the tool is unavailable and use the fallback. Do not search `~/`, `~/.codex`, session logs, or prompt files just to prove whether a named tool such as `Create User Todo` exists.
@@ -108,7 +109,7 @@ Workflow:
    - empty/no-op path
    - forced failing-helper path
 6. Create or update the Codex automation prompt so it calls the helper and interprets the output.
-7. For review automations, keep operational state in `memory.md` rather than encoding per-run state into `automation.toml`.
+7. For review automations, keep operational state in the memory adjacent to that automation's actual ID rather than encoding per-run state into `automation.toml` or silently sharing another automation's ledger. Capture the review-window watermark from the input/index snapshot and persist that as `Processed window end`; record completion wall clock separately as `Run time`.
 8. If the prompt asks the automation to create a task/todo via a tool that may not exist in every environment, define a fallback that records the suggested diff or action in `memory.md` with an explicit waiting status.
    Do not ask the automation to hunt for the task/todo tool with `rg`, `find`, or prompt-text searches. If the named tool is not available in the run context, record the pending action in memory and report the mismatch.
 9. If the automation inspects Codex session history, use `improve-skills/references/codex-desktop-session-review.md` as the source of truth for memory, `session_index.jsonl`, bounded session windows, timestamp normalization, and JSONL shape.
@@ -117,7 +118,7 @@ Workflow:
 12. Prefer a short bounded `python3` extractor for rollout/session JSONL inspection over broad `rg` scans across raw session files, especially when you need timestamps, `cwd`, prompts, or tool-call metadata.
 13. Keep session-inspection shell snippets portable and dependency-light; put detailed parsers in helpers or the central reference instead of the automation prompt.
 14. For cross-repo review automations, do not front-load `git status`, `git log`, or repo sweeps across every configured workspace. Let the bounded session pass decide which repos, if any, need follow-up inspection.
-15. If a review automation includes both a prompt-level `Last run:` header and persisted memory, make the prompt say which one wins. Default to memory `Processed window end` or `Last review`, with the header as a first-run fallback only.
+15. If a review automation includes both a prompt-level `Last run:` header and persisted memory, use the normalized cutoff-selection rule from `improve-skills/references/codex-desktop-session-review.md`. Do not restate a separate memory-vs-header precedence rule here.
 16. Verify one full run or the closest safe dry run before declaring completion.
 
 Only extract a new reusable skill when the helper pattern is clearly useful beyond one automation.
