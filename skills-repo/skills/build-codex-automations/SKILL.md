@@ -78,9 +78,12 @@ Prompt guidance:
 - For automation prompts that inspect Codex session history or other automation state, use the canonical bootstrap contract from `skills-repo/skills/improve-skills/references/codex-desktop-session-review.md`. Copy only the short prompt-facing rules needed for that automation; do not paraphrase a second full JSONL/session playbook here.
 - If the prompt names a specific tool or action primitive such as a task/todo creator, either confirm that tool is available in the target environment or write a fallback path into the prompt.
 - Treat named tool availability as a run-environment contract, not a filesystem-discovery task. Check the active tool context when you have it; otherwise assume the tool is unavailable and use the fallback. Do not search `~/`, `~/.codex`, session logs, or prompt files just to prove whether a named tool such as `Create User Todo` exists.
-- If the prompt expects shell snippets to pass values into embedded Python via `os.environ`, state that the snippet must `export` those variables first or invoke Python as `VAR=value python3 ...`. A plain shell assignment on the line before `python3 - <<'PY'` is not visible inside Python.
+- If a shell snippet passes values into embedded Python, Perl, or another subprocess, make the binding mode explicit. Set values in a prior shell statement before expanding them as positional arguments, or use `VAR=value command ...` and read them from that command's environment. A prefix assignment is not available to expand a sibling argument on the same command line (`VAR=value command "$VAR"` expands the old/unset value), and an unexported assignment on a prior line is not visible through `os.environ`.
 - Do not put shell parameter expansion such as `${CODEX_HOME:-~/.codex}` inside Python strings, `Path(...)`, or `os.path.expanduser(...)`. Resolve Codex home in shell first and pass it as `sys.argv` or an exported environment variable, or use `Path.home() / ".codex"` directly when no shell override is required.
+- When a code-mode JavaScript call embeds shell source, do not paste deeply nested JavaScript -> shell -> Python programs into one template literal. Prefer a task-owned helper or pass arguments structurally. If a short template literal is unavoidable, escape shell `${name}` as `\${name}` so JavaScript does not interpolate it, and escape or avoid every raw backtick. A shell heredoc does not protect its contents from the outer JavaScript parser.
+- For an automation that may trigger, send, deploy, move, or otherwise mutate external state, make the gate deterministic and fail closed. Name the exact response schema and tested parser/helper in the prompt; treat missing keys, `null`, empty output after a parse error, and disagreement with persisted state as blockers rather than a safe zero. For load- or safety-sensitive gates, require two consecutive valid safe observations before mutation.
 - For session-driven review automations, include an explicit stop condition for no-change audits. If the bounded session pass shows no relevant product/repo work beyond the current automation thread, tell the automation to stop there instead of widening into repo-wide `git status`, `git log`, or documentation sweeps.
+- When an automation reads a long or growing `memory.md`, make every visible state read character-bounded (for example, a first/last excerpt whose marker is included in the cap); never `cat` the full memory into tool output. Parse the complete file only inside a targeted helper that emits the fields needed for the run. If state-read order matters, put that contract at the start of the prompt and require the definition plus bounded memory read to finish before unrelated repo, startup, or skill reads. Immediately before patching newest-first memory, reread a small current header excerpt and anchor on stable header fields, not an older run body or a `tail` excerpt. If another run changes the anchor, reread and retry once rather than rebuilding memory from stale output.
 - Include constraints, output format, and what to do when nothing changed.
 - Do not ask the automation to edit files unless that is truly desired.
 - For repo work, specify whether it may modify files, create commits, or only report findings.
@@ -103,23 +106,30 @@ Workflow:
    - inside a skill `scripts/` folder if it is reusable across requests
    - inside the automation folder only when it is unique to that automation
 3. Keep helper output parseable and compact, preferably JSON for structured data.
-4. Make wrappers fail clearly when inner commands fail. Do not return empty success-looking output after a non-zero inner exit.
-5. Add or run a small verifier for:
+4. Make wrappers fail clearly when inner commands fail or their expected JSON/schema is absent. Do not return empty success-looking output after a non-zero inner exit, parser mismatch, or missing required key.
+5. If a collector can outlive one tool turn or its exit status is correctness-critical, run it once through a wrapper that creates one task-owned artifact directory and persists stdout, stderr, and the numeric exit status there. Print the validated artifact-directory path before the first yield. Shell variables do not survive a later tool/exec call, so resume with that explicit quoted path (or pass it as an actual positional argument); do not scan a temp root for the newest directory, reference `$1` without supplying it, or rerun the collector merely to recover state.
+6. Keep macOS/zsh helpers portable:
+   - use the shell builtin or `/bin/test`, not `/usr/bin/test`
+   - never use zsh's special parameters such as the read-only `status` value or the `path` array as ordinary variables; prefer names such as `collector_rc` and `candidate_path`
+   - for a local ISO-8601 timestamp, use `date '+%Y-%m-%dT%H:%M:%S%z'` or Python's timezone-aware `datetime.now().astimezone().isoformat(timespec="seconds")`; macOS `date` does not support GNU `-Is` or the colonized `%:z` directive
+   - quote or explicitly guard optional globs so an empty match does not abort the command
+   - create temporary work under `mktemp -d`, validate the exact task-owned directory before cleanup, and use a policy-compatible bounded deletion method
+7. Add or run a small verifier for:
    - happy path
    - empty/no-op path
    - forced failing-helper path
-6. Create or update the Codex automation prompt so it calls the helper and interprets the output.
-7. For review automations, keep operational state in the memory adjacent to that automation's actual ID rather than encoding per-run state into `automation.toml` or silently sharing another automation's ledger. Capture the review-window watermark from the input/index snapshot and persist that as `Processed window end`; record completion wall clock separately as `Run time`.
-8. If the prompt asks the automation to create a task/todo via a tool that may not exist in every environment, define a fallback that records the suggested diff or action in `memory.md` with an explicit waiting status.
+8. Create or update the Codex automation prompt so it calls the helper and interprets the output.
+9. For review automations, keep operational state in the memory adjacent to that automation's actual ID rather than encoding per-run state into `automation.toml` or silently sharing another automation's ledger. Capture the review-window watermark from the input/index snapshot and persist that as `Processed window end`; record completion wall clock separately as `Run time`.
+10. If the prompt asks the automation to create a task/todo via a tool that may not exist in every environment, define a fallback that records the suggested diff or action in `memory.md` with an explicit waiting status.
    Do not ask the automation to hunt for the task/todo tool with `rg`, `find`, or prompt-text searches. If the named tool is not available in the run context, record the pending action in memory and report the mismatch.
-9. If the automation inspects Codex session history, use `improve-skills/references/codex-desktop-session-review.md` as the source of truth for memory, `session_index.jsonl`, bounded session windows, timestamp normalization, and JSONL shape.
-10. When an automation prompt or helper needs `$CODEX_HOME`, normalize once with `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` instead of probing multiple candidate directories.
-11. If your helper shell uses `set -u`, never read raw `$CODEX_HOME/...` paths before that normalization step; make the prompt/helper show `CODEX_HOME_RESOLVED` explicitly instead of implying the variable is always exported.
-12. Prefer a short bounded `python3` extractor for rollout/session JSONL inspection over broad `rg` scans across raw session files, especially when you need timestamps, `cwd`, prompts, or tool-call metadata.
-13. Keep session-inspection shell snippets portable and dependency-light; put detailed parsers in helpers or the central reference instead of the automation prompt.
-14. For cross-repo review automations, do not front-load `git status`, `git log`, or repo sweeps across every configured workspace. Let the bounded session pass decide which repos, if any, need follow-up inspection.
-15. If a review automation includes both a prompt-level `Last run:` header and persisted memory, use the normalized cutoff-selection rule from `improve-skills/references/codex-desktop-session-review.md`. Do not restate a separate memory-vs-header precedence rule here.
-16. Verify one full run or the closest safe dry run before declaring completion.
+11. If the automation inspects Codex session history, use `improve-skills/references/codex-desktop-session-review.md` as the source of truth for memory, `session_index.jsonl`, bounded session windows, timestamp normalization, and JSONL shape.
+12. When an automation prompt or helper needs `$CODEX_HOME`, normalize once with `CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"` instead of probing multiple candidate directories.
+13. If your helper shell uses `set -u`, never read raw `$CODEX_HOME/...` paths before that normalization step; make the prompt/helper show `CODEX_HOME_RESOLVED` explicitly instead of implying the variable is always exported.
+14. Prefer a short bounded `python3` extractor for rollout/session JSONL inspection over broad `rg` scans across raw session files, especially when you need timestamps, `cwd`, prompts, or tool-call metadata.
+15. Keep session-inspection shell snippets portable and dependency-light; put detailed parsers in helpers or the central reference instead of the automation prompt.
+16. For cross-repo review automations, do not front-load `git status`, `git log`, or repo sweeps across every configured workspace. Let the bounded session pass decide which repos, if any, need follow-up inspection.
+17. If a review automation includes both a prompt-level `Last run:` header and persisted memory, use the normalized cutoff-selection rule from `improve-skills/references/codex-desktop-session-review.md`. Do not restate a separate memory-vs-header precedence rule here.
+18. Verify one full run or the closest safe dry run before declaring completion.
 
 Only extract a new reusable skill when the helper pattern is clearly useful beyond one automation.
 

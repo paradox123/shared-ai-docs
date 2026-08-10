@@ -13,7 +13,7 @@ Choose the narrowest review mode that matches the request:
 
 1. **Open diff or current skill text review**: inspect the repo diff or named skill files first. Do not start session-log analysis unless the user asks for session evidence.
 2. **Named skill quality review**: inspect only the target skill, its direct repo guidance dependencies, and bounded recent sessions for the named project.
-3. **Codex Desktop automation/session review**: use [codex-desktop-session-review.md](references/codex-desktop-session-review.md) for bootstrap, memory, session-index, JSONL, and extractor details.
+3. **Codex Desktop automation/session review**: use [codex-desktop-session-review.md](references/codex-desktop-session-review.md) for bootstrap and review rules, then prefer [resolve_codex_sessions.py](scripts/resolve_codex_sessions.py) for the full-index cutoff, snapshot watermark, rollout resolution, and cross-window carry-forward.
 4. **General cross-session review**: inspect sessions newer than the last-run cursor, filtered by workspace/project relevance.
 
 If multiple modes apply, start with the most concrete evidence source already named by the user. Treat repo-local startup instructions as background unless the chosen mode says repo context is needed.

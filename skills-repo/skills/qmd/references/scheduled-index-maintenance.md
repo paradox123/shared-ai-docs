@@ -6,9 +6,10 @@ Opening sequence:
 
 ```bash
 CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
+MEMORY_PATH="$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md"
 sed -n '1,220p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml"
-test -f "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" && \
-  sed -n '1,220p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md" || \
+test -f "$MEMORY_PATH" && \
+  sed -n '1,220p' "$MEMORY_PATH" || \
   echo "(missing memory)"
 ```
 
@@ -48,5 +49,5 @@ If `qmd` or its required runtime is unavailable, record the blocker in automatio
 
 4. Run `qmd embed` only if `qmd update` succeeds.
 5. Capture run time with a portable command such as `date '+%Y-%m-%dT%H:%M:%S%z'`. Do not use GNU-only forms such as `date -Is`; macOS `date` rejects them.
-6. Update the automation memory with run time, command outcomes, indexed file count, vector count, collections touched, and blockers.
+6. Update the automation memory with run time, command outcomes, indexed file count, vector count, collections touched, and blockers. Immediately before applying the patch, reread a small current header excerpt such as `sed -n '1,40p' "$MEMORY_PATH"` and anchor on the exact current title/header fields. Do not anchor a newest-first insertion on an older run body from the opening output. If the file changed concurrently, reread and retry once.
 7. Do not repair macOS privacy/TCC, QMD installation, runtime, or permission issues during a routine index run; record the blocker and stop.

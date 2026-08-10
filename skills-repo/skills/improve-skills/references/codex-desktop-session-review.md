@@ -21,12 +21,15 @@ import sys
 
 text = Path(sys.argv[1]).read_text(errors="replace")
 cap = 16000
-if len(text) <= cap:
-    print(text)
+marker = "\n...[bounded memory excerpt; middle omitted]...\n"
+if not text:
+    print("(empty memory)")
 else:
-    marker = "\n...[bounded memory excerpt]...\n"
-    half = (cap - len(marker)) // 2
-    print(text[:half] + marker + text[-half:])
+    visible = min(cap - len(marker) - 1, (len(text) * 2) // 3)
+    first = (visible + 1) // 2
+    last = visible - first
+    suffix = text[-last:] if last else ""
+    print(text[:first] + marker + suffix)
 PY
 else
   echo "(missing memory)"
@@ -34,7 +37,11 @@ fi
 tail -n 120 "$INDEX_PATH"
 ```
 
-Bound visible memory output by both position and characters. A line limit alone is not a real output bound because stored prompts and diffs can occupy one very long line. If the visible bootstrap still truncates, narrow the character cap; do not print more of the file. Parse full memory or index contents only inside a compact resolver that emits selected fields or rows.
+Bound visible memory output by both position and characters, and always omit a middle segment instead of printing the complete file even when it fits below the cap. A line limit alone is not a real output bound because stored prompts and diffs can occupy one very long line. If the visible bootstrap still truncates, narrow the character cap; do not print more of the file. Parse full memory or index contents only inside a compact resolver that emits selected fields or rows.
+
+Treat the visible index tail as a recency excerpt, not as a second authoritative snapshot. After any prompt-mandated bootstrap, capture the full index exactly once for candidate selection and derive both the selected rows and `review_window_end` from those captured bytes. If the live index changes later, leave that new state for the next run. Never select from a later live-index read and then replace its watermark with the earlier tail maximum, and never reread the live index to recompute the cursor.
+
+Shell variables are scoped to one shell/tool call. "Resolve Codex home once" means choose one canonical value for the run, not assume `CODEX_HOME_RESOLVED` survives into another exec cell. Keep dependent operations in one shell when practical; otherwise repeat the same normalization at the start of each separate shell or pass the already-resolved path as an explicit quoted argument. Do not compensate with hard-coded home paths, environment dumps, or home-directory probes.
 
 If the automation prompt explicitly requires the canonical automation reads before secondary skill/reference files, run the canonical bootstrap first, then load this reference and continue from the memory-backed cursor. Record that as prompt precedence, not avoidable discovery.
 
@@ -92,6 +99,53 @@ Once the newer cutoff is known, use that single timeline. Do not run duplicate e
 
 Capture the review-window end from the same `session_index.jsonl` snapshot used for candidate selection, normally the greatest indexed `updated_at` visible in that snapshot. Filter evidence to `(cutoff, review_window_end]`, exclude the current maintenance thread from substantive evidence, and persist that captured watermark as `Processed window end`. Keep the actual completion time in a separate `Run time` field. Never use end-of-run wall clock as the processed cursor: sessions can arrive between the index scan and memory write, and advancing to completion time would skip them on the next run.
 
+On macOS, capture completion time with portable BSD/GNU forms such as `date -u '+%Y-%m-%dT%H:%M:%SZ'` for UTC and `date '+%Y-%m-%d %H:%M %Z'` for a local display value. Do not use GNU-only `date -Iseconds` or `date -Is`; a failed timestamp command is not a reason to rebuild or rerun the session resolver.
+
+`session_index.updated_at` is a selection timestamp, not a reliable completion timestamp. A rollout can start before `review_window_end`, remain open at that boundary, and append later without receiving a newer index row. Keep one top-level memory field named `Carry-forward sessions:` containing the resolver's compact JSON array of `{id, line_count, last_activity_at}` checkpoints, or `[]`. The resolver always reselects those ids even when their index rows are older than the next cutoff; line counts prevent same-timestamp appended records from being lost.
+
+For the full-index pass, prefer the bundled resolver and persist its one invocation atomically:
+
+```bash
+CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
+MEMORY_PATH="$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md"
+PROMPT_LAST_RUN='<prompt Last run value>'
+RESOLVER_ARTIFACT_DIR="$(mktemp -d "${TMPDIR:-/tmp}/codex-session-review.XXXXXX")"
+RESOLVER_MANIFEST="$RESOLVER_ARTIFACT_DIR/resolver.stdout.json"
+RESOLVER_STDERR="$RESOLVER_ARTIFACT_DIR/resolver.stderr.log"
+RESOLVER_STATUS="$RESOLVER_ARTIFACT_DIR/resolver.exit-status"
+resolver_exit_status=0
+(
+  set --
+  if [ -n "${CODEX_THREAD_ID:-}" ]; then
+    set -- --exclude-session-id "$CODEX_THREAD_ID"
+  fi
+  python3 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/resolve_codex_sessions.py \
+    --codex-home "$CODEX_HOME_RESOLVED" \
+    --memory "$MEMORY_PATH" \
+    --prompt-last-run "$PROMPT_LAST_RUN" \
+    --recent 0 \
+    --compact \
+    "$@"
+) >"$RESOLVER_MANIFEST" 2>"$RESOLVER_STDERR" || resolver_exit_status=$?
+printf '%s\n' "$resolver_exit_status" >"$RESOLVER_STATUS"
+printf 'resolver_artifact_dir=%s\nresolver_status=%s\n' \
+  "$RESOLVER_ARTIFACT_DIR" "$resolver_exit_status"
+```
+
+Use a temporary-directory template that ends in `XXXXXX`, and use a non-special status name such as `resolver_exit_status`; `status` is read-only in zsh. The printed artifact directory is cross-call state: reuse that exact quoted path after a yield or in a later tool call instead of scanning `/tmp` for the newest match. If the status file is absent, the status is nonzero, or the manifest is invalid, do not rerun the resolver and do not advance memory; inspect only bounded persisted diagnostics.
+
+The canonical flow uses `--recent 0` because the visible bootstrap already displayed the recent index excerpt; suppressing that duplicate changes only the resolver's output payload. `--compact` keeps the persistence fields and the exact session path/line-range manifest while omitting file-wide counters that are not needed for routing. The resolver still captures the full index once, normalizes the prompt and structured-memory cutoffs, drives selection and watermarking from that snapshot, resolves selected rollout paths, and inspects only rollout records timestamped at or before the captured window end. Each resolved session gets a `rollout_window.state`; `open` means it has non-metadata records without a final after the most recent user message, including a session resumed after an older final, while `metadata_only` means it has only `session_meta` in the captured window. Malformed, unreadable, or checkpoint-truncated ranges are unsafe and must not advance the cursor. Records already appended after the window are counted but left for a later review. For a carried session, inspect only its advertised inclusive `review_line_start` to `review_line_end` delta; the full prefix is checkpoint context, not new evidence.
+
+If a selected rollout contains another `session_meta` whose id differs from the selected outer id, the resolver emits `embedded_session_history_detected` plus `rollout_window.embedded_session_metas`. This normally means a cloned or forked task imported an earlier task's history. Do not count file-wide tools, failures, finals, or skill reads as new evidence. Identify a substantive post-clone user turn that is not already present in the embedded task and review only that suffix. If there is no such turn, classify the selected row as `clone_only`, exclude it from session totals and candidate counters, and still consume its index timestamp in the cursor. The resolver reports provenance but does not guess the import boundary or silently discard the row.
+
+Treat `window.cursor_to_persist` and `window.carry_forward_to_persist` as one persistence bundle:
+
+1. Treat a non-empty exported `CODEX_THREAD_ID` as the exact current maintenance session id and pass it with `--exclude-session-id "$CODEX_THREAD_ID"` so it is removed before resolution and carry calculations. Reading that already-exported variable is part of the resolver invocation, not a reason to print `env`, inspect tool inventory, or open the current rollout. If `CODEX_THREAD_ID` is unset, remove only the positively identified current thread from the returned carry list during memory writing; do not infer by title or cwd alone.
+2. Persist the remaining JSON array verbatim on the top-level `Carry-forward sessions:` line. Do not carry metadata-only sessions unless the resolver emitted them because later records were observed.
+3. A carried open session that adds no lines during the next bounded pass is retired after that clean follow-up. If it grows, its checkpoint advances; if it completes, it is removed. This guarantees continuation across an active review boundary without turning the resolver into an unbounded watcher for arbitrarily old resumed tasks.
+
+Advance the cursor only when `window.safe_to_persist` is `true` **and** update `Carry-forward sessions:` in the same memory patch. Exit `2` means the snapshot was readable but incomplete or ambiguous and must not advance memory; exit `1` means the input or cutoff was unusable. Do not rerun the resolver merely to obtain a different watermark.
+
 ## Candidate Session Selection
 
 Prefer bounded sources in this order:
@@ -105,87 +159,17 @@ Current `session_index.jsonl` may contain only `id`, `thread_name`, and `updated
 
 Do not assume the indexed id is the filename prefix. Codex Desktop rollout files are often named like `rollout-<timestamp>-<id>.jsonl`, so prefix patterns such as `<id>*.jsonl` and `*/<id>*.jsonl` can miss valid sessions. When resolving indexed ids, scan the bounded day folder and match either `*<id>*.jsonl` or, more robustly, `session_meta.payload.id` inside each file before falling back to `archived_sessions`.
 
-Use a resolver before opening raw rollout files or falling back to `rg` over session folders. Keep the day folders derived from indexed `updated_at` values, then inspect `session_meta.payload.id` for every file in those folders:
-
-```bash
-CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}" python3 - <<'PY'
-from pathlib import Path
-from datetime import datetime, timezone
-import json, os, re
-
-home = Path(os.environ["CODEX_HOME_RESOLVED"])
-cutoff_raw = "<memory-cutoff-or-prompt-last-run>"
-
-def parse_ts(raw):
-    raw = str(raw).strip()
-    if raw.endswith("Z"):
-        raw = raw[:-1] + "+00:00"
-    m = re.match(r"^(.*\.)(\d+)([+-]\d\d:\d\d)$", raw)
-    if m:
-        raw = m.group(1) + m.group(2)[:6].ljust(6, "0") + m.group(3)
-    dt = datetime.fromisoformat(raw)
-    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
-
-cutoff = parse_ts(cutoff_raw)
-entries = []
-for line in (home / "session_index.jsonl").open(errors="replace"):
-    if not line.strip():
-        continue
-    entry = json.loads(line)
-    if parse_ts(entry["updated_at"]) > cutoff:
-        entries.append(entry)
-
-by_id = {}
-days = sorted({parse_ts(entry["updated_at"]).strftime("%Y/%m/%d") for entry in entries})
-for day in days:
-    for path in sorted((home / "sessions" / day).glob("*.jsonl")):
-        try:
-            with path.open(errors="replace") as f:
-                for line in f:
-                    obj = json.loads(line)
-                    if obj.get("type") == "session_meta":
-                        sid = obj.get("payload", {}).get("id") or obj.get("payload", {}).get("session_id")
-                        if sid:
-                            by_id[sid] = path
-                        break
-        except Exception as exc:
-            print("scan_error", path, exc)
-
-for entry in entries:
-    sid = entry["id"]
-    path = by_id.get(sid)
-    if path is None:
-        matches = sorted((home / "archived_sessions").glob(f"*{sid}*.jsonl"))
-        path = matches[0] if matches else None
-    print(entry["updated_at"], sid, entry.get("thread_name"), path or "MISSING")
-PY
-```
+Use the bundled resolver before opening raw rollout files or falling back to `rg` over session folders. It scans only day folders derived from the captured index rows, verifies `session_meta.payload.id`, uses an exact-id filename fallback for sessions created on a different day, and checks `archived_sessions` last. A missing or ambiguous selected rollout makes the cursor unsafe to persist.
 
 For automation worktree runs, match both configured `cwds` and worktree variants such as `~/.codex/worktrees/*/<repo-tail>`.
 
 Exclude sibling automation fan-out runs unless they provide direct evidence of automation drift or the same repeated skill weakness. If sibling runs already prove the pattern, stop there instead of widening into unrelated sessions.
 
-Do not treat the current maintenance session as prior work evidence. When the only target-repo match is the same automation title/cwd at the current run boundary, mark it as the current thread and exclude it without opening its raw rollout merely to prove that it is maintenance traffic.
+Do not treat the current maintenance session as prior work evidence. If `CODEX_THREAD_ID` is unavailable, title/cwd similarity alone is insufficient to exclude a selected row or open its rollout merely to prove that it is maintenance traffic. Keep an uncertain row in carry-forward state and report current-thread identification as unresolved rather than risking exclusion of a sibling task.
 
 ## Timestamp Handling
 
-Normalize timestamps once in the bounded extractor. Fractional precision may vary.
-
-```python
-import re
-from datetime import datetime
-
-def parse_ts(raw):
-    raw = raw.strip()
-    if raw.endswith("Z"):
-        raw = raw[:-1] + "+00:00"
-    m = re.match(r"^(.*\.)(\d+)([+-]\d\d:\d\d)$", raw)
-    if m:
-        raw = m.group(1) + m.group(2)[:6].ljust(6, "0") + m.group(3)
-    return datetime.fromisoformat(raw)
-```
-
-Do not pivot to broad filesystem discovery just because a first parser missed timestamp precision or record shape. Patch the bounded parser and rerun it.
+The bundled resolver owns timestamp normalization, including variable fractional precision and trailing `Z`; the evidence helper consumes its advertised line ranges and does not recalculate the window. If a new timestamp or record shape breaks either helper, add a focused regression and patch that bundled script. Do not pivot to an inline parser, broad filesystem discovery, or a second live-index snapshot.
 
 ## JSONL Shape
 
@@ -199,64 +183,19 @@ Codex Desktop session files usually use:
 - corresponding outputs with `payload.type` equal to `function_call_output` or `custom_tool_call_output`
 - assistant final messages with `phase` equal to either `final` or `final_answer`; normalize both instead of sampling raw files when one spelling returns no finals
 
-Normalize both call layouts in the first extractor. If a custom recorder wraps another tool, report the nested `tools.<tool_name>` value rather than only the generic recorder name; otherwise tool-usage reviews can incorrectly conclude that the session made no calls.
-
-Strip injected wrapper blocks such as `<recommended_plugins>...</recommended_plugins>`, `<environment_context>...</environment_context>`, and `# AGENTS.md instructions for ...` plus its `<INSTRUCTIONS>...</INSTRUCTIONS>` body before deriving the substantive user request. These wrappers can precede the real task inside the same message, so a `startswith(...)` skip alone is insufficient.
-
-Starter extractor:
+Do not rebuild these parsing rules in an inline script. Persist the successful resolver's compact JSON stdout once, then run the bundled evidence extractor:
 
 ```bash
-python3 - <<'PY'
-import json, glob, os, re
-
-def strip_injected_wrappers(text):
-    patterns = [
-        r"<recommended_plugins>.*?</recommended_plugins>",
-        r"# AGENTS\.md instructions for [^\n]+\s*<INSTRUCTIONS>.*?</INSTRUCTIONS>",
-        r"<environment_context>.*?</environment_context>",
-    ]
-    for pattern in patterns:
-        text = re.sub(pattern, "", text, flags=re.DOTALL)
-    return text.strip()
-
-for path in sorted(glob.glob(os.path.expanduser("~/.codex/sessions/YYYY/MM/DD/*.jsonl"))):
-    meta = None
-    first_user = None
-    last_final = None
-    calls = []
-    with open(path) as f:
-        for line in f:
-            obj = json.loads(line)
-            if obj.get("type") == "session_meta":
-                meta = obj["payload"]
-                continue
-            if obj.get("type") != "response_item":
-                continue
-            raw_payload = obj.get("payload", {})
-            payload = raw_payload.get("item") if isinstance(raw_payload.get("item"), dict) else raw_payload
-            if payload.get("type") == "message" and payload.get("role") == "user" and not first_user:
-                texts = [item.get("text", "") for item in payload.get("content", []) if item.get("type") == "input_text"]
-                text = strip_injected_wrappers(" ".join(texts))
-                if not text:
-                    continue
-                first_user = text[:220]
-            elif payload.get("type") == "message" and payload.get("role") == "assistant" and payload.get("phase") in {"final", "final_answer"}:
-                texts = [item.get("text", "") for item in payload.get("content", []) if item.get("type") == "output_text"]
-                last_final = " ".join(texts).strip()[:220]
-            elif payload.get("type") == "function_call":
-                calls.append(payload.get("name"))
-            elif payload.get("type") == "custom_tool_call":
-                recorder_input = payload.get("input", "")
-                nested = re.findall(r"\btools\.([A-Za-z_][A-Za-z0-9_]*)\s*\(", recorder_input)
-                calls.extend(nested or [f"recorder:{payload.get('name', 'unknown')}"])
-    if meta:
-        print(meta.get("timestamp"), meta.get("cwd"), first_user, last_final, calls[:12], path)
-PY
+RESOLVER_MANIFEST='<exact printed resolver_artifact_dir>/resolver.stdout.json'
+python3 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/extract_codex_session_evidence.py \
+  --manifest "$RESOLVER_MANIFEST"
 ```
 
-When a bounded extractor already prints session meta, first substantive prompt, and normalized tool-call names, do not open raw rollout files one by one unless you need a quoted evidence snippet.
+For a project or privacy allowlist, pass each exact resolver-selected id with repeatable `--session-id <id>`. Unknown, duplicate, or unresolved requested ids fail closed; do not remove the filter and widen the read. The helper opens only resolved sessions and exact inclusive `review_line_start`/`review_line_end` ranges advertised by that manifest.
 
-If shell values such as `CODEX_HOME_RESOLVED`, `AUTOMATION_ID`, or cutoff are needed inside Python, export them or invoke Python as `VAR=value python3 ...`. A plain shell assignment before `python3 - <<'PY'` is not visible in `os.environ`.
+The helper emits at most one 240-character substantive user summary, 12 normalized tool names, and one 240-character final per session, with no tool arguments or outputs, and caps the combined JSON near 20,000 characters. It normalizes direct and nested payloads, unwraps custom-recorder tool names, strips injected wrappers, and aggregates repeated `<heartbeat>` control inputs by bounded automation/state/decision/status fields instead of rendering every heartbeat as a task. If the resolver reports embedded session metadata, the helper emits `manual_suffix_selection_required` without summarizing the imported content; identify the genuine post-clone suffix before counting evidence.
+
+Do not rerun the resolver merely because its stdout was not persisted for the helper. Fix the same invocation's persistence before future runs and inspect exact advertised lines only when a compact summary already identifies a finding that needs a precise failure, command, or result.
 
 ## Automation-Instruction Findings
 
