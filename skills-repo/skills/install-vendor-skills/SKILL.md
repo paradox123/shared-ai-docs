@@ -47,9 +47,14 @@ git -C ~/Documents/DanielsVault/_shared/shared-ai-docs status --short
 find ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills -mindepth 1 -maxdepth 1 \( -type d -o -type l \) -exec basename {} \; | sort
 ```
 
-4. Place external global vendor source under `skills-repo/vendor/<vendor-name>/`. Do not install external global vendor skills directly into `~/.codex/skills`, `~/.agents/skills`, `~/.claude/skills`, or `skills-repo/active-skills`.
+4. Classify the vendor source before updating it:
 
-5. Activate a global vendor skill only by adding an entry under `skills-repo/skills`:
+- Git checkout: update it through that checkout and preserve its repository boundary.
+- Pinned snapshot with a lock file: use the staged three-way update workflow below. Do not treat the snapshot directory as a Git checkout or overwrite local divergences with a blind copy.
+
+5. Place external global vendor source under `skills-repo/vendor/<vendor-name>/`. Do not install external global vendor skills directly into `~/.codex/skills`, `~/.agents/skills`, `~/.claude/skills`, or `skills-repo/active-skills`.
+
+6. Activate a global vendor skill only by adding an entry under `skills-repo/skills`:
 
 ```text
 skills-repo/skills/<skill-name> -> ../vendor/<vendor-path>/<skill-name>
@@ -57,19 +62,34 @@ skills-repo/skills/<skill-name> -> ../vendor/<vendor-path>/<skill-name>
 
 Use a normal directory in `skills-repo/skills` only for Daniel-owned global skills. Use a symlink for vendor-managed global skills so future vendor pulls update the active skill immediately.
 
-6. If the vendor has multiple agent-specific entrypoints, choose the Codex-specific entrypoint for Codex-facing `SKILL.md` when one exists. Example: `council/SKILL.md` points to the vendor's `SKILL.codex.md`.
+7. If the vendor has multiple agent-specific entrypoints, choose the Codex-specific entrypoint for Codex-facing `SKILL.md` when one exists. Example: `council/SKILL.md` points to the vendor's `SKILL.codex.md`.
 
-7. After changing `skills-repo/skills`, synchronize Codex:
+8. After changing `skills-repo/skills`, synchronize Codex:
 
 ```bash
 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
 ```
 
-8. If hooks are missing or the setup was freshly cloned, install them:
+9. If hooks are missing or the setup was freshly cloned, install them:
 
 ```bash
 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/install-git-hooks.sh
 ```
+
+## Updating An Existing Pinned Snapshot
+
+Use this branch when `skills-repo/vendor/<vendor-name>/` contains copied vendor content plus a lock file with an old upstream `sourceRef`.
+
+1. Read the lock's source URL, pinned ref, vendor path, per-skill source paths, and hash meaning. Treat the lock as provenance, not proof that locally overlaid files still equal upstream.
+2. Clone or fetch upstream into one task-owned temporary directory. Bind every upstream history operation to that checkout with `git -C "$upstream_repo"`; a plain `git show`, `git diff`, or `git rev-parse` may silently address the parent repo.
+3. Compare the current vendored tree with the old pinned upstream ref before changing anything. Inventory every local divergence and preserve unrelated parent-repo changes.
+4. Build the new upstream snapshot in a staging directory. For each local divergence, use old pinned upstream as the merge base, the current vendored file as local, and the new upstream file as other. Stop for conflicts, ambiguous renames, or locally changed files deleted upstream.
+5. Generate provenance hashes from the canonical new upstream tree when the existing lock defines hashes that way. Verify local overlays separately; do not redefine a lock field silently to hash the merged overlay.
+6. Review upstream skill additions, removals, and renames. Change only active symlinks already managed by that vendor, and validate their expected old targets before unlinking them.
+7. Apply the staged snapshot to the exact validated vendor directory only after merge and link checks pass. Never run `rsync --delete` or an equivalent destructive copy directly from an unvalidated source or against a broad/unresolved target.
+8. Verify the pinned ref, canonical hashes, expected overlay-only differences, active vendor skill-name set, removed and added runtime links, broken links, and `git diff --check` before finishing.
+
+The detailed lock and overlay contract is maintained in `~/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md` under “Gepinnte Vendor-Snapshots sicher aktualisieren”.
 
 ## Hard Rules
 

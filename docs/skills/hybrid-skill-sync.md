@@ -170,10 +170,51 @@ cmd /c mklink /J "$Copilot" "$RepoSkills"
 
 ### Globale Vendor-Skills aktualisieren
 
-1. Vendor-Quelle unter `skills-repo/vendor/<source>` aktualisieren.
-2. Weil aktive globale Vendor-Skills in `skills-repo/skills` als Links auf Vendor-Quellen liegen, sieht der aktive Skill die neue Vendor-Version sofort.
-3. Nach einem Pull oder Branch-Wechsel aktualisieren die installierten Hooks die Codex-Links.
-4. Wenn neue aktive Skills hinzukommen, `sync-codex-skill-links.sh` ausfuehren oder die Hooks installieren.
+1. Zuerst unterscheiden, ob `skills-repo/vendor/<source>` ein eigener Git-Checkout oder ein kopierter, ueber eine Lockdatei gepinnter Snapshot ist.
+2. Einen Git-Checkout innerhalb seiner eigenen Repo-Grenze aktualisieren. Einen gepinnten Snapshot nicht wie einen Checkout behandeln und nicht blind mit dem neuen Upstream-Stand ueberschreiben.
+3. Weil aktive globale Vendor-Skills in `skills-repo/skills` als Links auf Vendor-Quellen liegen, sieht der aktive Skill die neue Vendor-Version sofort.
+4. Nach einem Pull oder Branch-Wechsel aktualisieren die installierten Hooks die Codex-Links.
+5. Wenn neue aktive Skills hinzukommen, `sync-codex-skill-links.sh` ausfuehren oder die Hooks installieren.
+
+### Gepinnte Vendor-Snapshots sicher aktualisieren
+
+Ein gepinnter Snapshot enthaelt kopierte Vendor-Dateien und eine Lockdatei, die mindestens Quelle, alten `sourceRef`, Vendor-Zielpfad und gegebenenfalls Hashes pro Skill beschreibt. Lokale Anpassungen im kopierten Baum koennen absichtlich vom gepinnten Upstream abweichen.
+
+Der sichere Update-Ablauf ist:
+
+1. Lockdatei lesen und die Bedeutung ihrer Hashes aus bestehender Historie oder Dokumentation klaeren. Bei `skills-repo/vendor/mattpocock/skills-lock.json` beschreiben `computedHash`-Werte den kanonischen Upstream-Inhalt, nicht den lokal zusammengefuehrten Overlay-Stand.
+2. Upstream in einen aufgabeneigenen temporaeren Ordner klonen oder fetchen. Historische Git-Befehle immer explizit an diesen Checkout binden:
+
+```bash
+git -C "$upstream_repo" show "$old_ref:<source-path>"
+git -C "$upstream_repo" diff "$old_ref..$new_ref" -- <source-root>
+git -C "$upstream_repo" rev-parse "$new_ref"
+```
+
+Ein ungebundenes `git show` oder `git diff` kann stattdessen das uebergeordnete `shared-ai-docs` Repo verwenden und scheinbar fehlende Upstream-Pfade melden.
+
+3. Vor dem Schreiben den aktuellen Vendor-Baum gegen den alten gepinnten Upstream-Stand vergleichen und alle lokalen Abweichungen inventarisieren. Diese Abweichungen sind moegliche Overlays und duerfen nicht durch `rsync --delete` verloren gehen.
+4. Den neuen kanonischen Upstream-Baum separat stagen. Fuer jede lokale Abweichung einen Drei-Wege-Vergleich verwenden:
+
+```text
+base  = Datei aus altem gepinntem Upstream-Ref
+local = aktuelle Datei im Vendor-Snapshot
+other = Datei aus neuem Upstream-Ref
+```
+
+Nur konfliktfreie Ergebnisse in den Staging-Baum uebernehmen. Bei Konflikten, Upstream-Loeschungen lokal veraenderter Dateien oder uneindeutigen Renames anhalten und die beabsichtigte Anpassung klaeren.
+
+5. Die neue Lockdatei nach ihrer bestehenden Semantik erzeugen. Wenn ihre Hashes kanonischen Upstream abbilden, aus dem unmodifizierten neuen Upstream-Baum hashen; lokale Overlays separat durch einen erwarteten Vendor/Upstream-Diff pruefen.
+6. Neue, entfernte und umbenannte Skills ermitteln. Unter `skills-repo/skills` nur Links aendern, deren bestehendes Ziel nachweislich zu diesem Vendor gehoert. Vor dem Entfernen das exakte erwartete Linkziel pruefen; Daniel-eigene Ordner und Links anderer Vendoren erhalten.
+7. Erst nach erfolgreichen Merge-, Lock- und Link-Pruefungen den Staging-Baum auf den exakt validierten Vendor-Zielpfad anwenden. Destruktive Synchronisierung wie `rsync --delete` nie direkt aus einer ungeprueften Quelle oder gegen einen breiten beziehungsweise unaufgeloesten Zielpfad ausfuehren.
+8. Danach `sync-codex-skill-links.sh` ausfuehren und mindestens Folgendes verifizieren:
+
+- gepinnter `sourceRef` entspricht dem ausgewaehlten neuen Upstream-Ref
+- Lock-Hashes entsprechen dem kanonischen Upstream nach der dokumentierten Semantik
+- Vendor/Upstream-Differenzen bestehen nur aus den inventarisierten lokalen Overlays
+- aktive Vendor-Skillnamen entsprechen dem erwarteten neuen Set
+- entfernte Runtime-Links fehlen, neue Links zeigen auf vorhandene `SKILL.md` Dateien
+- Broken-Link-Pruefungen bleiben leer und `git diff --check` ist erfolgreich
 
 ### Globale Vendor-Skills lokal anpassen
 

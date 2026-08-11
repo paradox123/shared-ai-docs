@@ -8,14 +8,29 @@ Opening sequence:
 CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
 MEMORY_PATH="$CODEX_HOME_RESOLVED/automations/<automation-id>/memory.md"
 sed -n '1,220p' "$CODEX_HOME_RESOLVED/automations/<automation-id>/automation.toml"
-test -f "$MEMORY_PATH" && \
-  sed -n '1,220p' "$MEMORY_PATH" || \
-  echo "(missing memory)"
+python3 - "$MEMORY_PATH" <<'PY'
+from pathlib import Path
+import sys
+
+path = Path(sys.argv[1])
+if not path.exists():
+    print("(missing memory)")
+    raise SystemExit(0)
+
+text = path.read_text(errors="replace")
+cap = 8000
+marker = "\n...[older memory omitted]...\n"
+if len(text) <= cap:
+    print(text, end="" if text.endswith("\n") else "\n")
+else:
+    visible = max(0, cap - len(marker))
+    print(text[:visible] + marker, end="")
+PY
 ```
 
 Rules:
 
-1. Read the automation definition and memory before repo orientation, vault startup docs, or broad filesystem scans.
+1. Read the automation definition and the character-bounded newest-state memory excerpt before repo orientation, vault startup docs, or broad filesystem scans. QMD maintenance memory is newest-first, so do not print historical tail sections. Parse the complete file only inside a targeted helper that emits the exact state needed for the run.
 2. Resolve the QMD CLI and its runtime before the maintenance commands. Codex automation shells may have a minimal `PATH`, so load Homebrew shellenv if available, then verify both `qmd` and `node`:
 
 ```bash

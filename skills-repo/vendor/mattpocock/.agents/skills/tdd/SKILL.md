@@ -19,11 +19,11 @@ See [tests.md](tests.md) for examples and [mocking.md](mocking.md) for mocking g
 
 A **seam** is the public boundary you test at: the interface where you observe behavior without reaching inside. Tests live at seams, never against internals.
 
-**Test only at pre-agreed seams.** Before writing any test, write down the seams under test and confirm them with the user. No test is written at an unconfirmed seam. You can't test everything — agreeing the seams up front is how testing effort lands on the critical paths and complex logic instead of every edge case.
+Before writing a test, state the seam under test and why it is the narrowest stable public boundary for the requested behavior. When the request, spec, and existing architecture make that choice clear, select the seam yourself and proceed; do not ask the user to design an internal test boundary.
 
-Ask: "What's the public interface, and which seams should we test?"
+Ask for user confirmation only when the seam choice would change or add public behavior, expose a new interface, choose between genuinely different domain contracts, materially expand scope, or cannot be resolved from repository evidence. The user owns product intent; the agent owns ordinary internal test placement.
 
-When the shape of that interface is itself in question — how deep the module is, where the seam belongs, what the interface should expose — use the `/codebase-design` skill for the vocabulary. It is the shared source of the module, interface, depth, seam, adapter, leverage and locality terms, and it is a reference to consult, not a session to run.
+When the shape of the interface is itself in question — how deep the module is, where the seam belongs, or what the interface should expose — load and follow the `codebase-design` skill before selecting the seam. It is the shared source of the module, interface, depth, seam, adapter, leverage, and locality terms.
 
 ## Anti-patterns
 
@@ -33,6 +33,7 @@ When the shape of that interface is itself in question — how deep the module i
 
 ## Rules of the loop
 
+- **A valid red is behavioral.** The test must restore, compile, be discovered, execute, and fail for the expected missing or incorrect behavior. Missing dependencies, assets, imports, test adapters, invalid configuration, zero discovered tests, and other build or harness failures are not red. Repair only the harness, without changing production behavior, then rerun until the intended behavioral failure is observed.
 - **Red before green.** Write the failing test first, then only enough code to pass it. Don't anticipate future tests or add speculative features.
 - **One slice at a time.** One seam, one test, one minimal implementation per cycle.
 - **Refactoring is not part of the loop.** It belongs to the review stage (see the `code-review` skill), not the red → green implementation cycle.
