@@ -1,7 +1,7 @@
 {
-  "last_run": "2026-05-28T07:05:00Z",
-  "processed_window_start": "2026-05-27T06:46:45.525136Z",
-  "newest_session_timestamp": "2026-05-28T07:01:28.555040Z",
-  "sessions_reviewed_count": 27,
-  "summary": "Reviewed the 2026-05-27/28 Learn, Keep NCG wiki, Business Focus, and ki-fuer-kmu issue sessions; patched build-codex-automations with a literal review-automation bootstrap block."
+  "last_run": "2026-08-15T10:50:54Z",
+  "processed_window_start": "2026-08-14T09:01:56.471212Z",
+  "newest_session_timestamp": "2026-08-15T07:01:46.990106Z",
+  "sessions_reviewed_count": 9,
+  "summary": "Reviewed nine bounded session ranges, tightened two skill workflows, added repo/worktree evidence selectors, and retained approval-gated automation prompt fixes."
 }

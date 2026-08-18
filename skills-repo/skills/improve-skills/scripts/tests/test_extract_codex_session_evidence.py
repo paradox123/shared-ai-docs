@@ -218,6 +218,116 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
             self.assertEqual(session["tool_names"], [])
             self.assertIsNone(session["final_summary"])
 
+    def test_clone_boundary_map_and_explicit_suffix_exclude_imported_history(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "clone.jsonl"
+            records = [
+                {
+                    "type": "session_meta",
+                    "payload": {"id": "clone-session"},
+                },
+                {
+                    "type": "session_meta",
+                    "payload": {"id": "source-session"},
+                },
+                response_item(message("user", "IMPORTED_PRIVATE_CONTENT")),
+                response_item(
+                    message("assistant", "imported final", phase="final_answer")
+                ),
+                {"type": "event_msg", "payload": {"type": "task_complete"}},
+                {"type": "event_msg", "payload": {"type": "task_started"}},
+                response_item(message("user", "Actual clone request")),
+                response_item(
+                    {
+                        "type": "function_call",
+                        "name": "exec_command",
+                        "arguments": '{"secret":"DO_NOT_EMIT"}',
+                    }
+                ),
+                response_item(
+                    message("assistant", "clone final", phase="final_answer")
+                ),
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "clone-session",
+                        "thread_name": "Clone",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "state": "complete",
+                            "review_line_start": 1,
+                            "review_line_end": len(records),
+                            "embedded_session_metas": [
+                                {
+                                    "line_number": 2,
+                                    "id": "source-session",
+                                    "timestamp": "2026-08-01T00:00:00Z",
+                                }
+                            ],
+                        },
+                    }
+                ],
+            )
+
+            boundaries = self.run_script(
+                manifest,
+                "--session-id",
+                "clone-session",
+                "--list-clone-boundaries",
+            )
+
+            self.assertEqual(boundaries.returncode, 0, boundaries.stderr)
+            self.assertNotIn("PRIVATE", boundaries.stdout)
+            boundary_session = json.loads(boundaries.stdout)["sessions"][0]
+            self.assertTrue(boundary_session["manual_suffix_selection_required"])
+            boundary_map = boundary_session["clone_boundary_map"]
+            self.assertEqual(
+                boundary_map["task_complete"]["lines"],
+                [5],
+            )
+            self.assertEqual(
+                boundary_map["task_started"]["lines"],
+                [6],
+            )
+            self.assertEqual(
+                boundary_map["substantive_user"]["lines"],
+                [3, 7],
+            )
+
+            suffix = self.run_script(
+                manifest,
+                "--session-id",
+                "clone-session",
+                "--clone-suffix-start",
+                "clone-session=6",
+            )
+
+            self.assertEqual(suffix.returncode, 0, suffix.stderr)
+            self.assertNotIn("IMPORTED_PRIVATE_CONTENT", suffix.stdout)
+            self.assertNotIn("DO_NOT_EMIT", suffix.stdout)
+            suffix_session = json.loads(suffix.stdout)["sessions"][0]
+            self.assertFalse(suffix_session["manual_suffix_selection_required"])
+            self.assertTrue(suffix_session["embedded_history_excluded"])
+            self.assertEqual(suffix_session["selected_suffix_start"], 6)
+            self.assertEqual(suffix_session["user_summary"], "Actual clone request")
+            self.assertEqual(suffix_session["tool_names"], ["exec_command"])
+            self.assertEqual(suffix_session["final_summary"], "clone final")
+
+            unfiltered = self.run_script(
+                manifest,
+                "--clone-suffix-start",
+                "clone-session=6",
+            )
+            self.assertNotEqual(unfiltered.returncode, 0)
+            self.assertIn("require exact --session-id", unfiltered.stderr)
+
     def test_redacts_free_text_heartbeat_labels(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -309,6 +419,186 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
             self.assertNotEqual(unknown.returncode, 0)
             self.assertIn("unknown requested session", unknown.stderr)
             self.assertEqual(unknown.stdout, "")
+
+    def test_path_selectors_union_repeated_roots_and_worktree_tails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            cwd_roots = [root / "repo-a", root / "repo-b"]
+            (cwd_roots[0] / ".git").mkdir(parents=True)
+            cwd_roots[1].mkdir(parents=True)
+            (cwd_roots[1] / ".git").write_text("gitdir: ../metadata\n")
+            worktree_root = Path.home() / ".codex" / "worktrees"
+            sessions = []
+            session_cwds = {
+                "cwd-exact": cwd_roots[0],
+                "cwd-descendant": cwd_roots[1] / "packages" / "api",
+                "worktree-exact": worktree_root / "slot-a" / "repo-a",
+                "worktree-descendant": (
+                    worktree_root / "slot-b" / "repo-b" / "src"
+                ),
+                "blocked": root / "unrelated",
+            }
+            for session_id, cwd in session_cwds.items():
+                rollout = root / f"{session_id}.jsonl"
+                if session_id != "blocked":
+                    rollout.write_text(
+                        json.dumps(
+                            response_item(
+                                message("user", f"request {session_id}")
+                            )
+                        )
+                        + "\n"
+                    )
+                sessions.append(
+                    {
+                        "id": session_id,
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "meta": {"cwd": str(cwd)},
+                        "rollout_window": {
+                            "state": "complete",
+                            "review_line_start": 1,
+                            "review_line_end": 1,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                )
+            manifest = self.write_manifest(root, sessions)
+
+            result = self.run_script(
+                manifest,
+                "--cwd-root",
+                str(cwd_roots[0]),
+                "--cwd-root",
+                str(cwd_roots[1]),
+                "--worktree-tail",
+                "repo-a",
+                "--worktree-tail",
+                "repo-b",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertEqual(
+                [session["id"] for session in output["sessions"]],
+                [
+                    "cwd-exact",
+                    "cwd-descendant",
+                    "worktree-exact",
+                    "worktree-descendant",
+                ],
+            )
+            self.assertEqual(output["counts"]["selected_sessions"], 4)
+            self.assertEqual(output["counts"]["filtered_out_sessions"], 1)
+            self.assertNotIn("request blocked", result.stdout)
+
+            no_match_root = root / "missing-repo"
+            (no_match_root / ".git").mkdir(parents=True)
+            no_match = self.run_script(
+                manifest,
+                "--cwd-root",
+                str(no_match_root),
+                "--worktree-tail",
+                "missing-tail",
+            )
+
+            self.assertEqual(no_match.returncode, 0, no_match.stderr)
+            no_match_output = json.loads(no_match.stdout)
+            self.assertEqual(no_match_output["sessions"], [])
+            self.assertEqual(
+                no_match_output["counts"],
+                {
+                    "manifest_sessions": 5,
+                    "selected_sessions": 0,
+                    "filtered_out_sessions": 5,
+                    "resolved_sessions": 0,
+                    "skipped_unresolved_sessions": 0,
+                    "emitted_sessions": 0,
+                    "omitted_sessions": 0,
+                },
+            )
+
+    def test_path_selectors_fail_closed_on_unsafe_values_and_mixed_modes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo_root = root / "repo"
+            (repo_root / ".git").mkdir(parents=True)
+            rollout = root / "session.jsonl"
+            rollout.write_text(
+                json.dumps(response_item(message("user", "request"))) + "\n"
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "session",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "meta": {"cwd": str(repo_root)},
+                        "rollout_window": {
+                            "state": "complete",
+                            "review_line_start": 1,
+                            "review_line_end": 1,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            unsafe_roots = (
+                ("relative/repo", "absolute"),
+                (str(Path("/")), "too broad"),
+                (str(Path("/tmp")), "too broad"),
+                (str(Path.home()), "too broad"),
+                (str(root / "repo" / ".." / "other"), "must not contain"),
+                (str(root / "not-a-repo"), "existing repository root"),
+            )
+            for unsafe_root, error_text in unsafe_roots:
+                with self.subTest(cwd_root=unsafe_root):
+                    result = self.run_script(
+                        manifest, "--cwd-root", unsafe_root
+                    )
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(error_text, result.stderr)
+                    self.assertEqual(result.stdout, "")
+
+            for invalid_tail in ("", ".", "..", "org/repo", "../repo"):
+                with self.subTest(worktree_tail=invalid_tail):
+                    result = self.run_script(
+                        manifest, "--worktree-tail", invalid_tail
+                    )
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn("single repository names", result.stderr)
+                    self.assertEqual(result.stdout, "")
+
+            mixed_invocations = (
+                (
+                    "--cwd-root",
+                    str(repo_root),
+                    "--session-id",
+                    "session",
+                ),
+                (
+                    "--worktree-tail",
+                    "repo",
+                    "--list-clone-boundaries",
+                ),
+                (
+                    "--cwd-root",
+                    str(repo_root),
+                    "--clone-suffix-start",
+                    "session=1",
+                ),
+            )
+            for invocation in mixed_invocations:
+                with self.subTest(invocation=invocation):
+                    result = self.run_script(manifest, *invocation)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(
+                        "path selectors cannot be combined",
+                        result.stderr,
+                    )
+                    self.assertEqual(result.stdout, "")
 
     def test_session_filter_does_not_open_unselected_rollout_paths(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -21,6 +21,12 @@ If the redacted output is not enough to diagnose the bug, say so and ask the use
 
 Spend disproportionate effort here. **Be aggressive. Be creative. Refuse to give up.**
 
+### Read-only production incident branch
+
+For a production-only or explicitly read-only incident, do not interpret "feedback loop" as permission to reproduce the failure against production. Build a deterministic bounded evidence query instead: fix the environment, time window, issue/request cohort, and representative-event projection, then assert the incident signature over that same cohort. This is an observational diagnosis loop, not a regression test. State its confidence limits, and require a local, mocked, or otherwise isolated red-capable loop before applying a fix.
+
+Never increase traffic, parallelize requests, exhaust a retry budget, or intentionally open a circuit breaker in a shared/live environment solely to raise the reproduction rate without explicit authorization.
+
 ### Ways to construct one — try them in roughly this order
 
 1. **Failing test** at whatever seam reaches the bug — unit, integration, e2e.
@@ -44,11 +50,13 @@ Treat the loop as a product. Once you have _a_ loop, **tighten** it:
 - Can I make the signal sharper? (Assert on the specific symptom, not "didn't crash".)
 - Can I make it more deterministic? (Pin time, seed RNG, isolate filesystem, freeze network.)
 
+For HTTP loops, status alone is not a semantic assertion. Require the expected content type plus a minimal domain-response shape or invariant; a `200` HTML fallback for an API route is a red result, not proof of health.
+
 A 30-second flaky loop is barely better than no loop; a 2-second deterministic one is tight — a debugging superpower.
 
 ### Non-deterministic bugs
 
-The goal is not a clean repro but a **higher reproduction rate**. Loop the trigger 100×, parallelise, add stress, narrow timing windows, inject sleeps. A 50%-flake bug is debuggable; 1% is not — keep raising the rate until it's debuggable.
+The goal is not a clean repro but a **higher reproduction rate**. In a local or isolated environment, loop the trigger 100×, parallelise, add stress, narrow timing windows, or inject sleeps. A 50%-flake bug is debuggable; 1% is not — keep raising the rate until it's debuggable. Do not apply load-amplification advice to shared/live systems; use the read-only incident branch or get explicit authorization and agree on a fixed probe budget first.
 
 ### When you genuinely cannot build a loop
 
@@ -65,9 +73,13 @@ Phase 1 is done when the loop is **tight** and **red-capable**: you can name **o
 
 If you catch yourself reading code to build a theory before this command exists, **stop — jumping straight to a hypothesis is the exact failure this skill prevents.** No red-capable command, no Phase 2.
 
+For the read-only production incident branch, replace the red-capable command criterion with one already-run bounded evidence query that deterministically selects the fixed cohort and detects the exact incident signature. Do not use that observational query to claim a fix is verified.
+
 ## Phase 2 — Reproduce + minimise
 
 Run the loop. Watch it go red — the bug appears.
+
+For the read-only production incident branch, this phase means confirming that the fixed cohort contains the exact incident signature and narrowing to the smallest representative evidence set. Do not generate new live failures or minimize by increasing traffic. Continue causal testing against the captured cohort, then build a local/mock red loop before implementing a fix.
 
 Confirm:
 
@@ -131,7 +143,7 @@ If a correct seam exists:
 
 Required before declaring done:
 
-- [ ] Original repro no longer reproduces (re-run the Phase 1 loop)
+- [ ] Original repro no longer reproduces (re-run the Phase 1 loop); for a historical/read-only incident, the captured cohort is documented and the fix is verified in the isolated loop instead
 - [ ] Regression test passes (or absence of seam is documented)
 - [ ] All `[DEBUG-...]` instrumentation removed (`grep` the prefix)
 - [ ] Throwaway prototypes deleted (or moved to a clearly-marked debug location)

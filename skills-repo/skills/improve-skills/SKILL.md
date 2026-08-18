@@ -104,11 +104,12 @@ When editing, include in the report:
 
 After editing, run a "skill coherence check":
 
-- Re-open the edited `SKILL.md` from top to bottom.
-- Re-open every directly referenced file used by the skill, plus lightweight metadata such as `agents/*.yaml` when present.
+- Re-open the edited `SKILL.md` from top to bottom with non-truncated output.
+- Re-open every directly referenced file used by the skill, plus lightweight metadata such as `agents/*.yaml` when present. Read files separately or paginate to EOF when a combined read would truncate; a tool result marked truncated is not evidence that those files were fully reread.
 - Search for old terminology, duplicate templates, conflicting startup order, stale examples, and widened trigger language.
 - Confirm the skill still has one clear owner, trigger, workflow, and "when not to use" boundary.
 - If the consistency pass finds drift, patch it immediately before reporting success.
+- Never report a complete coherence check until every required reread has reached EOF without truncation.
 
 ## Candidate Memory
 

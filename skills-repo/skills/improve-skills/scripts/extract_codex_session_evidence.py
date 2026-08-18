@@ -5,6 +5,7 @@ import argparse
 from collections import OrderedDict
 from itertools import islice
 import json
+import os
 from pathlib import Path
 import re
 import sys
@@ -17,6 +18,7 @@ HEARTBEAT_GROUP_LIMIT = 12
 SAFE_LABEL_CHAR_LIMIT = 120
 DEFAULT_MAX_TOTAL_CHARS = 20_000
 MIN_MAX_TOTAL_CHARS = 2_000
+BOUNDARY_LINE_LIMIT = 64
 FINAL_PHASES = {"final", "final_answer"}
 
 WRAPPER_PATTERNS = (
@@ -44,6 +46,7 @@ HEARTBEAT_OPEN_RE = re.compile(
 )
 HEARTBEAT_FIELDS = ("automation_id", "state", "decision", "status")
 SAFE_HEARTBEAT_LABEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$")
+WORKTREE_TAIL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
 
 class EvidenceError(Exception):
@@ -273,6 +276,80 @@ def advertised_lines(
     return
 
 
+def rollout_record(path: Path, line_number: int, raw_line: str) -> dict:
+    try:
+        record = json.loads(raw_line)
+    except json.JSONDecodeError as exc:
+        raise EvidenceError(
+            f"invalid rollout JSON at {path}:{line_number}: {exc.msg}"
+        ) from exc
+    if not isinstance(record, dict):
+        raise EvidenceError(
+            f"rollout record at {path}:{line_number} is not an object"
+        )
+    return record
+
+
+def bounded_line_numbers(values: List[int]) -> dict:
+    return {
+        "lines": values[:BOUNDARY_LINE_LIMIT],
+        "omitted": max(len(values) - BOUNDARY_LINE_LIMIT, 0),
+    }
+
+
+def clone_boundary_map(
+    path: Path,
+    start: int,
+    end: int,
+    session_id: str,
+    embedded: list,
+) -> dict:
+    embedded_ids = {
+        meta.get("id")
+        for meta in embedded
+        if isinstance(meta, dict) and isinstance(meta.get("id"), str)
+    }
+    lines: Dict[str, List[int]] = {
+        "outer_session_meta": [],
+        "embedded_session_meta": [],
+        "task_started": [],
+        "task_complete": [],
+        "substantive_user": [],
+        "assistant_final": [],
+    }
+    for line_number, raw_line in advertised_lines(path, start, end):
+        record = rollout_record(path, line_number, raw_line)
+        record_type = record.get("type")
+        raw_payload = record.get("payload", {})
+        if record_type == "session_meta" and isinstance(raw_payload, dict):
+            meta_id = raw_payload.get("id") or raw_payload.get("session_id")
+            if meta_id == session_id:
+                lines["outer_session_meta"].append(line_number)
+            elif meta_id in embedded_ids:
+                lines["embedded_session_meta"].append(line_number)
+            continue
+        if record_type == "event_msg" and isinstance(raw_payload, dict):
+            event_type = raw_payload.get("type")
+            if event_type == "task_started":
+                lines["task_started"].append(line_number)
+            elif event_type == "task_complete":
+                lines["task_complete"].append(line_number)
+            continue
+        if record_type != "response_item":
+            continue
+        payload = normalized_payload(record)
+        if payload.get("type") != "message":
+            continue
+        role = payload.get("role")
+        if role == "user":
+            cleaned = strip_injected_wrappers(message_text(payload))
+            if cleaned and not HEARTBEAT_START_RE.match(cleaned):
+                lines["substantive_user"].append(line_number)
+        elif role == "assistant" and payload.get("phase") in FINAL_PHASES:
+            lines["assistant_final"].append(line_number)
+    return {key: bounded_line_numbers(value) for key, value in lines.items()}
+
+
 def safe_session_identity(session: dict, index: int) -> Tuple[str, Optional[str]]:
     raw_id = session.get("id")
     if not isinstance(raw_id, str) or not raw_id.strip():
@@ -328,6 +405,8 @@ def extract_session(
     path: Path,
     start: int,
     end: int,
+    *,
+    embedded_history_excluded: bool = False,
 ) -> dict:
     session_id, thread_name = safe_session_identity(session, index)
     user_summary: Optional[str] = None
@@ -351,16 +430,7 @@ def extract_session(
 
     for line_number, raw_line in advertised_lines(path, start, end):
         counts["inspected_lines"] += 1
-        try:
-            record = json.loads(raw_line)
-        except json.JSONDecodeError as exc:
-            raise EvidenceError(
-                f"invalid rollout JSON at {path}:{line_number}: {exc.msg}"
-            ) from exc
-        if not isinstance(record, dict):
-            raise EvidenceError(
-                f"rollout record at {path}:{line_number} is not an object"
-            )
+        record = rollout_record(path, line_number, raw_line)
         if record.get("type") != "response_item":
             continue
         counts["response_items"] += 1
@@ -410,7 +480,7 @@ def extract_session(
         tool_names.extend(names[:remaining])
         counts["tool_names_omitted"] += max(len(names) - remaining, 0)
 
-    return {
+    projection = {
         "id": session_id,
         "thread_name": thread_name,
         "rollout_state": bounded_text(
@@ -426,6 +496,10 @@ def extract_session(
         "final_summary": last_final,
         "heartbeat_groups": list(heartbeat_groups.values()),
     }
+    if embedded_history_excluded:
+        projection["embedded_history_excluded"] = True
+        projection["selected_suffix_start"] = start
+    return projection
 
 
 def parse_max_total_chars(raw: str) -> int:
@@ -438,6 +512,116 @@ def parse_max_total_chars(raw: str) -> int:
             f"must be at least {MIN_MAX_TOTAL_CHARS}"
         )
     return value
+
+
+def parse_clone_suffix_starts(raw_values: List[str]) -> Dict[str, int]:
+    starts: Dict[str, int] = {}
+    for raw in raw_values:
+        session_id, separator, raw_line = raw.rpartition("=")
+        if not separator or not session_id or not raw_line:
+            raise EvidenceError(
+                "clone suffix starts must use <session-id>=<line>"
+            )
+        if session_id in starts:
+            raise EvidenceError(
+                f"duplicate clone suffix start for {session_id[:SAFE_LABEL_CHAR_LIMIT]}"
+            )
+        try:
+            line_number = int(raw_line)
+        except ValueError as exc:
+            raise EvidenceError(
+                f"clone suffix line for {session_id[:SAFE_LABEL_CHAR_LIMIT]} "
+                "must be an integer"
+            ) from exc
+        if line_number < 1:
+            raise EvidenceError(
+                f"clone suffix line for {session_id[:SAFE_LABEL_CHAR_LIMIT]} "
+                "must be positive"
+            )
+        starts[session_id] = line_number
+    return starts
+
+
+def path_is_within(path: Path, root: Path) -> bool:
+    try:
+        path.relative_to(root)
+    except ValueError:
+        return False
+    return True
+
+
+def parse_cwd_roots(raw_values: List[str]) -> List[Path]:
+    roots: List[Path] = []
+    home = Path.home()
+    for raw in raw_values:
+        candidate = Path(raw)
+        if not candidate.is_absolute():
+            raise EvidenceError("--cwd-root values must be absolute paths")
+        if ".." in candidate.parts:
+            raise EvidenceError("--cwd-root values must not contain '..'")
+        normalized = Path(os.path.normpath(raw))
+        filesystem_root = Path(normalized.anchor)
+        if (
+            normalized == filesystem_root
+            or len(normalized.parts) < 3
+            or path_is_within(home, normalized)
+        ):
+            raise EvidenceError(
+                "--cwd-root is too broad; use a concrete repository root"
+            )
+        git_marker = normalized / ".git"
+        if not git_marker.is_dir() and not git_marker.is_file():
+            raise EvidenceError(
+                "--cwd-root must name an existing repository root with .git"
+            )
+        if normalized not in roots:
+            roots.append(normalized)
+    return roots
+
+
+def parse_worktree_tails(raw_values: List[str]) -> List[str]:
+    tails: List[str] = []
+    for raw in raw_values:
+        if raw in {".", ".."} or not WORKTREE_TAIL_RE.fullmatch(raw):
+            raise EvidenceError(
+                "--worktree-tail values must be single repository names"
+            )
+        if raw not in tails:
+            tails.append(raw)
+    return tails
+
+
+def normalized_session_cwd(session: dict) -> Optional[Path]:
+    meta = session.get("meta")
+    if not isinstance(meta, dict):
+        return None
+    raw_cwd = meta.get("cwd")
+    if not isinstance(raw_cwd, str) or not raw_cwd:
+        return None
+    cwd = Path(raw_cwd)
+    if not cwd.is_absolute() or ".." in cwd.parts:
+        return None
+    return Path(os.path.normpath(raw_cwd))
+
+
+def matches_path_selectors(
+    session: dict,
+    cwd_roots: List[Path],
+    worktree_tails: List[str],
+) -> bool:
+    cwd = normalized_session_cwd(session)
+    if cwd is None:
+        return False
+    if any(path_is_within(cwd, root) for root in cwd_roots):
+        return True
+    if not worktree_tails:
+        return False
+    worktrees_root = Path.home() / ".codex" / "worktrees"
+    try:
+        relative = cwd.relative_to(worktrees_root)
+    except ValueError:
+        return False
+    return len(relative.parts) >= 2 and relative.parts[1] in worktree_tails
 
 
 def parse_args() -> argparse.Namespace:
@@ -458,9 +642,48 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--cwd-root",
+        action="append",
+        default=[],
+        metavar="ABS_PATH",
+        help=(
+            "Select sessions whose manifest meta.cwd equals this existing "
+            "absolute repository root (with .git) or is its descendant; "
+            "may be repeated."
+        ),
+    )
+    parser.add_argument(
+        "--worktree-tail",
+        action="append",
+        default=[],
+        metavar="REPO_TAIL",
+        help=(
+            "Select sessions under ~/.codex/worktrees/<slot>/REPO_TAIL or "
+            "its descendants; may be repeated."
+        ),
+    )
+    parser.add_argument(
         "--max-total-chars",
         type=parse_max_total_chars,
         default=DEFAULT_MAX_TOTAL_CHARS,
+    )
+    parser.add_argument(
+        "--list-clone-boundaries",
+        action="store_true",
+        help=(
+            "For embedded-history sessions, emit only bounded line-number "
+            "maps for manual suffix selection; no message text is summarized."
+        ),
+    )
+    parser.add_argument(
+        "--clone-suffix-start",
+        action="append",
+        default=[],
+        metavar="SESSION_ID=LINE",
+        help=(
+            "Extract an already-reviewed embedded-history suffix starting at "
+            "the exact inclusive line; may be repeated."
+        ),
     )
     parser.add_argument(
         "--pretty",
@@ -584,13 +807,46 @@ def run(args: argparse.Namespace) -> str:
     requested_ids = list(dict.fromkeys(args.session_id))
     if any(not isinstance(value, str) or not value for value in requested_ids):
         raise EvidenceError("requested session ids must be non-empty strings")
+    cwd_roots = parse_cwd_roots(args.cwd_root)
+    worktree_tails = parse_worktree_tails(args.worktree_tail)
+    has_path_selectors = bool(cwd_roots or worktree_tails)
+    clone_suffix_starts = parse_clone_suffix_starts(args.clone_suffix_start)
+    if has_path_selectors and (
+        requested_ids or args.list_clone_boundaries or clone_suffix_starts
+    ):
+        raise EvidenceError(
+            "path selectors cannot be combined with exact --session-id or "
+            "clone modes"
+        )
+    if args.list_clone_boundaries and clone_suffix_starts:
+        raise EvidenceError(
+            "--list-clone-boundaries and --clone-suffix-start are separate steps"
+        )
+    if (args.list_clone_boundaries or clone_suffix_starts) and not requested_ids:
+        raise EvidenceError(
+            "clone boundary/suffix modes require exact --session-id filters"
+        )
+    suffix_ids_not_selected = [
+        session_id
+        for session_id in clone_suffix_starts
+        if session_id not in requested_ids
+    ]
+    if suffix_ids_not_selected:
+        rendered_ids = ", ".join(
+            value[:SAFE_LABEL_CHAR_LIMIT]
+            for value in suffix_ids_not_selected[:8]
+        )
+        raise EvidenceError(
+            f"clone suffix session id(s) missing matching --session-id: {rendered_ids}"
+        )
+
+    indexes_by_id: Dict[str, List[int]] = {}
+    for index, session in enumerate(sessions):
+        session_id = session.get("id")
+        if isinstance(session_id, str):
+            indexes_by_id.setdefault(session_id, []).append(index)
     selected_indexes: Optional[set] = None
     if requested_ids:
-        indexes_by_id: Dict[str, List[int]] = {}
-        for index, session in enumerate(sessions):
-            session_id = session.get("id")
-            if isinstance(session_id, str):
-                indexes_by_id.setdefault(session_id, []).append(index)
         unknown_ids = [
             session_id
             for session_id in requested_ids
@@ -635,6 +891,12 @@ def run(args: argparse.Namespace) -> str:
             raise EvidenceError(
                 f"requested session id(s) are not resolved: {rendered_ids}"
             )
+    elif has_path_selectors:
+        selected_indexes = {
+            index
+            for index, session in enumerate(sessions)
+            if matches_path_selectors(session, cwd_roots, worktree_tails)
+        }
 
     projections: List[dict] = []
     skipped_unresolved_count = 0
@@ -646,7 +908,49 @@ def run(args: argparse.Namespace) -> str:
             continue
         start, end, embedded = session_range(session, index)
         path = rollout_path(session, index, manifest_path.parent)
+        session_id, _thread_name = safe_session_identity(session, index)
         if embedded:
+            if args.list_clone_boundaries:
+                projection = manual_projection(
+                    session, index, start, end, embedded
+                )
+                projection["clone_boundary_map"] = clone_boundary_map(
+                    path, start, end, session_id, embedded
+                )
+                projections.append(projection)
+                continue
+            if session_id in clone_suffix_starts:
+                suffix_start = clone_suffix_starts[session_id]
+                if suffix_start < start or suffix_start > end:
+                    raise EvidenceError(
+                        f"clone suffix start {suffix_start} for "
+                        f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} is outside "
+                        f"advertised range {start}:{end}"
+                    )
+                projection = extract_session(
+                    session,
+                    index,
+                    path,
+                    suffix_start,
+                    end,
+                    embedded_history_excluded=True,
+                )
+                if projection["counts"]["substantive_user_messages"] == 0:
+                    raise EvidenceError(
+                        f"clone suffix for {session_id[:SAFE_LABEL_CHAR_LIMIT]} "
+                        "contains no substantive user message"
+                    )
+                projection["embedded_session_ids"] = [
+                    meta_id
+                    for meta_id in (
+                        bounded_text(meta.get("id"), SAFE_LABEL_CHAR_LIMIT)
+                        for meta in embedded
+                        if isinstance(meta, dict)
+                    )
+                    if meta_id
+                ][:8]
+                projections.append(projection)
+                continue
             # Validate the path/range, but do not parse or summarize a rollout
             # whose imported-history boundary still needs human selection.
             for _line_number, _line in advertised_lines(path, start, end):
@@ -655,6 +959,16 @@ def run(args: argparse.Namespace) -> str:
                 manual_projection(session, index, start, end, embedded)
             )
             continue
+        if args.list_clone_boundaries:
+            raise EvidenceError(
+                f"selected session {session_id[:SAFE_LABEL_CHAR_LIMIT]} "
+                "has no embedded history"
+            )
+        if session_id in clone_suffix_starts:
+            raise EvidenceError(
+                f"selected session {session_id[:SAFE_LABEL_CHAR_LIMIT]} "
+                "has no embedded history for a clone suffix"
+            )
         projections.append(
             extract_session(session, index, path, start, end)
         )

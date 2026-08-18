@@ -35,6 +35,8 @@ qmd status
 qmd collection list
 ```
 
+Treat any nonzero `qmd status` as QMD unavailable for the rest of that run, including database, native-extension, runtime, and permission failures. Do not continue with `qmd collection list`, `qmd search`, or `qmd query` and repeat the same initialization failure. Record the blocker once, fall back to targeted `rg`, and state that retrieval is lexical rather than QMD-ranked.
+
 If the listed collections are unrelated to the target repo, do not run `qmd query` as a broad semantic fallback; it can spend time reranking the wrong corpus. Use `qmd search` only for exact terms that may exist in indexed shared docs, then fall back to targeted `rg` in the repo.
 
 ## Scheduled Index Maintenance

@@ -65,6 +65,8 @@ Default scope:
 5. When using `--scope all`, filter/de-prioritize generated artifact paths (for example `/.rag/`, `/.git/`, `/node_modules/`) in the final source shortlist.
 6. For exact env vars, secret names, route fragments, endpoint paths, certificate files, or other literal identifiers, do at most one structured pass and one hybrid/semantic pass before switching to `qmd search` or `rg`.
 7. If both RAG scope support and QMD collection coverage exclude the target repo, stop retrieval iteration and use targeted repo reads (`rg`, known docs folders, or repo-local indexes) with an explicit fallback label.
+8. Run retrieval and lexical fallback as separate stages. First project a small RAG shortlist, then validate every selected on-disk path before opening it. Resolve relative hits against `~/Documents/DanielsVault`; discard missing paths as stale index entries instead of passing the whole shortlist to `sed` or another reader.
+9. If one or more high-ranked hits are stale, note that once and switch to a targeted `rg` over the implicated repo/docs folder. Shortlist the resulting paths before reading bounded excerpts; do not widen immediately to a vault-wide file enumeration or concatenate many files into one output.
 
 Recommended commands:
 
@@ -96,6 +98,8 @@ Current JSON shapes:
 - `rag retrieve structured ... --format json` returns `facts[]`
 
 Do not assume a generic `results[]` key unless you already inspected the raw output for the installed runtime.
+
+For `hits[]`, project only the routing fields the current runtime exposes—normally `path`, `section_or_chunk`, `excerpt`, `score`, and `why_relevant`—and cap the shortlist before reading source files. A hit is not source evidence until its path exists and the cited section can be opened. If the runtime returns a different per-hit shape, inspect one hit, adjust one bounded projection, and continue; do not dump the complete response.
 
 Exact-term sequence:
 

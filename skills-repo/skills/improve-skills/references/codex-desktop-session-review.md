@@ -136,7 +136,7 @@ Use a temporary-directory template that ends in `XXXXXX`, and use a non-special 
 
 The canonical flow uses `--recent 0` because the visible bootstrap already displayed the recent index excerpt; suppressing that duplicate changes only the resolver's output payload. `--compact` keeps the persistence fields and the exact session path/line-range manifest while omitting file-wide counters that are not needed for routing. The resolver still captures the full index once, normalizes the prompt and structured-memory cutoffs, drives selection and watermarking from that snapshot, resolves selected rollout paths, and inspects only rollout records timestamped at or before the captured window end. Each resolved session gets a `rollout_window.state`; `open` means it has non-metadata records without a final after the most recent user message, including a session resumed after an older final, while `metadata_only` means it has only `session_meta` in the captured window. Malformed, unreadable, or checkpoint-truncated ranges are unsafe and must not advance the cursor. Records already appended after the window are counted but left for a later review. For a carried session, inspect only its advertised inclusive `review_line_start` to `review_line_end` delta; the full prefix is checkpoint context, not new evidence.
 
-If a selected rollout contains another `session_meta` whose id differs from the selected outer id, the resolver emits `embedded_session_history_detected` plus `rollout_window.embedded_session_metas`. This normally means a cloned or forked task imported an earlier task's history. Do not count file-wide tools, failures, finals, or skill reads as new evidence. Identify a substantive post-clone user turn that is not already present in the embedded task and review only that suffix. If there is no such turn, classify the selected row as `clone_only`, exclude it from session totals and candidate counters, and still consume its index timestamp in the cursor. The resolver reports provenance but does not guess the import boundary or silently discard the row.
+If a selected rollout contains another `session_meta` whose id differs from the selected outer id, the resolver emits `embedded_session_history_detected` plus `rollout_window.embedded_session_metas`. This normally means a cloned or forked task imported an earlier task's history. Do not count file-wide tools, failures, finals, or skill reads as new evidence. Use the evidence helper's clone-boundary mode, then explicitly select only a substantive post-clone suffix that is not already present in the embedded task. If there is no such turn, classify the selected row as `clone_only`, exclude it from session totals and candidate counters, and still consume its index timestamp in the cursor. The resolver reports provenance but does not guess the import boundary or silently discard the row.
 
 Treat `window.cursor_to_persist` and `window.carry_forward_to_persist` as one persistence bundle:
 
@@ -161,7 +161,7 @@ Do not assume the indexed id is the filename prefix. Codex Desktop rollout files
 
 Use the bundled resolver before opening raw rollout files or falling back to `rg` over session folders. It scans only day folders derived from the captured index rows, verifies `session_meta.payload.id`, uses an exact-id filename fallback for sessions created on a different day, and checks `archived_sessions` last. A missing or ambiguous selected rollout makes the cursor unsafe to persist.
 
-For automation worktree runs, match both configured `cwds` and worktree variants such as `~/.codex/worktrees/*/<repo-tail>`.
+For automation worktree runs, use the evidence helper's path selectors to match both configured repository roots and worktree variants. Do not derive an exact-id allowlist with an inline manifest parser.
 
 Exclude sibling automation fan-out runs unless they provide direct evidence of automation drift or the same repeated skill weakness. If sibling runs already prove the pattern, stop there instead of widening into unrelated sessions.
 
@@ -191,11 +191,45 @@ python3 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/impro
   --manifest "$RESOLVER_MANIFEST"
 ```
 
-For a project or privacy allowlist, pass each exact resolver-selected id with repeatable `--session-id <id>`. Unknown, duplicate, or unresolved requested ids fail closed; do not remove the filter and widen the read. The helper opens only resolved sessions and exact inclusive `review_line_start`/`review_line_end` ranges advertised by that manifest.
+For a repository/privacy allowlist, let the helper select from manifest `meta.cwd` values instead of writing an inline parser. `--cwd-root` accepts a repeatable absolute, existing repository root with a `.git` file or directory and matches that root or descendants. `--worktree-tail` accepts a repeatable single repository directory name and matches `~/.codex/worktrees/<slot>/<repo-tail>` or descendants. The two selector kinds use union semantics. Resolve the root from an explicit configured or prompt-provided repository candidate, never from an automation's incidental cwd:
 
-The helper emits at most one 240-character substantive user summary, 12 normalized tool names, and one 240-character final per session, with no tool arguments or outputs, and caps the combined JSON near 20,000 characters. It normalizes direct and nested payloads, unwraps custom-recorder tool names, strips injected wrappers, and aggregates repeated `<heartbeat>` control inputs by bounded automation/state/decision/status fields instead of rendering every heartbeat as a task. If the resolver reports embedded session metadata, the helper emits `manual_suffix_selection_required` without summarizing the imported content; identify the genuine post-clone suffix before counting evidence.
+```bash
+TARGET_REPO_CANDIDATE='<absolute configured repository path>'
+TARGET_REPO_ROOT="$(git -C "$TARGET_REPO_CANDIDATE" rev-parse --show-toplevel)"
+TARGET_REPO_TAIL="$(basename "$TARGET_REPO_ROOT")"
+python3 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/extract_codex_session_evidence.py \
+  --manifest "$RESOLVER_MANIFEST" \
+  --cwd-root "$TARGET_REPO_ROOT" \
+  --worktree-tail "$TARGET_REPO_TAIL"
+```
 
-Do not rerun the resolver merely because its stdout was not persisted for the helper. Fix the same invocation's persistence before future runs and inspect exact advertised lines only when a compact summary already identifies a finding that needs a precise failure, command, or result.
+Repeat either selector for multiple configured roots or repo tails. A valid zero-match result is a no-change result with `selected_sessions: 0` and an empty `sessions` array; do not widen the read. Relative, filesystem/home-wide, missing, or non-repository cwd roots and malformed tails fail closed. This intentionally excludes vanished historical roots whose scope can no longer be verified; use a valid `--worktree-tail` or trusted exact positive ids rather than relaxing the root to a parent directory. Path selectors cannot be combined with `--session-id`, `--list-clone-boundaries`, or `--clone-suffix-start`. Use repeatable exact `--session-id <id>` only when the task already supplies exact positive ids or when following up selected clone ids with the boundary/suffix modes below. Unknown, duplicate, or unresolved exact ids fail closed. In every mode, the helper opens only resolved selected sessions and the exact inclusive `review_line_start`/`review_line_end` ranges advertised by the manifest.
+
+The helper emits at most one 240-character substantive user summary, 12 normalized tool names, and one 240-character final per session, with no tool arguments or outputs, and caps the combined JSON near 20,000 characters. It normalizes direct and nested payloads, unwraps custom-recorder tool names, strips injected wrappers, and aggregates repeated `<heartbeat>` control inputs by bounded automation/state/decision/status fields instead of rendering every heartbeat as a task.
+
+For every exact-evidence check, never print raw JSONL records with `sed`, `head`, `tail`, or an equivalent whole-record reader. First emit a content-free typed structural projection limited to the resolver-advertised range: line number, record type, payload type, role, phase, bounded tool name, and session id. Omit message text, tool arguments and outputs, encrypted reasoning, and all other payload content. Only when that projection and the compact helper summary confirm that a finding truly needs command or result detail may a second deliberate projection emit the single required field; redact sensitive values and injected wrappers, cap each field and the total output, and do not include adjacent records.
+
+If the resolver reports embedded session metadata, the normal helper output emits `manual_suffix_selection_required` without summarizing imported content. Do not write an inline JSONL scanner. Rerun the same persisted manifest with exact allowlisted clone ids and `--list-clone-boundaries`; this emits only capped line-number maps for outer/embedded session metadata, task starts/completions, substantive user messages, and assistant finals:
+
+```bash
+python3 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/extract_codex_session_evidence.py \
+  --manifest "$RESOLVER_MANIFEST" \
+  --session-id <exact-clone-id> \
+  --list-clone-boundaries
+```
+
+When the boundary map shows an unambiguous task-start or outer-session marker leading to a substantive post-import user turn, choose the inclusive suffix start directly from that map. If the map is genuinely ambiguous, use only the content-free typed structural projection required above for the candidate lines. Then rerun the helper with the reviewed inclusive start line:
+
+```bash
+python3 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/extract_codex_session_evidence.py \
+  --manifest "$RESOLVER_MANIFEST" \
+  --session-id <exact-clone-id> \
+  --clone-suffix-start <exact-clone-id>=<inclusive-line>
+```
+
+Both modes require exact `--session-id` filters and fail closed on unknown, unresolved, non-clone, out-of-range, or empty suffix selections. If the boundary remains ambiguous, do not guess: leave it manual or classify it `clone_only` after verifying that no new substantive turn exists.
+
+Do not rerun the resolver merely because its stdout was not persisted for the helper. Fix the same invocation's persistence before future runs. Run an exact-evidence projection only when a compact summary already identifies a finding that needs a precise failure, command, or result, and follow the projection-then-redacted-field rule above instead of printing rollout records directly.
 
 ## Automation-Instruction Findings
 

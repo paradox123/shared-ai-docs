@@ -54,7 +54,28 @@ fi
 ```
 
 If `qmd` or its required runtime is unavailable, record the blocker in automation memory and stop. Do not force QMD through `bun` unless the installed `qmd` shim itself selects `bun`; npm-installed QMD native modules can fail under the wrong runtime.
-3. Run maintenance commands from `/` so QMD does not inherit a fragile project working directory:
+3. Preflight the QMD database location before maintenance. QMD uses `INDEX_PATH` when set; otherwise it stores the database under `${XDG_CACHE_HOME:-$HOME/.cache}/qmd/index.sqlite`. SQLite also needs the containing directory to be writable for journal or WAL files, so checking only the database file is insufficient:
+
+```bash
+if [ -n "${INDEX_PATH:-}" ]; then
+  QMD_DB_PATH="$INDEX_PATH"
+else
+  QMD_DB_PATH="${XDG_CACHE_HOME:-$HOME/.cache}/qmd/index.sqlite"
+fi
+QMD_DB_DIR="$(dirname "$QMD_DB_PATH")"
+QMD_DB_PARENT="$(dirname "$QMD_DB_DIR")"
+
+if [ -e "$QMD_DB_PATH" ] && [ ! -w "$QMD_DB_PATH" ]; then
+  echo "QMD blocker: index database is not writable: $QMD_DB_PATH"
+elif [ -d "$QMD_DB_DIR" ] && [ ! -w "$QMD_DB_DIR" ]; then
+  echo "QMD blocker: index directory is not writable: $QMD_DB_DIR"
+elif [ ! -d "$QMD_DB_DIR" ] && { [ ! -d "$QMD_DB_PARENT" ] || [ ! -w "$QMD_DB_PARENT" ]; }; then
+  echo "QMD blocker: index directory cannot be created under: $QMD_DB_PARENT"
+fi
+```
+
+Stop before `qmd update` when this preflight finds a blocker. In a sandboxed automation, a non-writable `~/.cache/qmd` is an execution-environment/write-root problem, not evidence that Homebrew SQLite is missing. If QMD still returns `SQLITE_CANTOPEN` after a clean preflight, report database-path access as the primary symptom and preserve the exact stderr for later diagnosis; do not promote QMD's generic `sqlite-vec`/Homebrew suggestion to the root cause until storage access has been ruled out.
+4. Run maintenance commands from `/` so QMD does not inherit a fragile project working directory:
 
 ```bash
 "$QMD_BIN" update
@@ -62,7 +83,7 @@ If `qmd` or its required runtime is unavailable, record the blocker in automatio
 "$QMD_BIN" status
 ```
 
-4. Run `qmd embed` only if `qmd update` succeeds.
-5. Capture run time with a portable command such as `date '+%Y-%m-%dT%H:%M:%S%z'`. Do not use GNU-only forms such as `date -Is`; macOS `date` rejects them.
-6. Update the automation memory with run time, command outcomes, indexed file count, vector count, collections touched, and blockers. Immediately before applying the patch, reread a small current header excerpt such as `sed -n '1,40p' "$MEMORY_PATH"` and anchor on the exact current title/header fields. Do not anchor a newest-first insertion on an older run body from the opening output. If the file changed concurrently, reread and retry once.
-7. Do not repair macOS privacy/TCC, QMD installation, runtime, or permission issues during a routine index run; record the blocker and stop.
+5. Run `qmd embed` only if `qmd update` succeeds.
+6. Capture run time with a portable command such as `date '+%Y-%m-%dT%H:%M:%S%z'`. Do not use GNU-only forms such as `date -Is`; macOS `date` rejects them.
+7. Update the automation memory with run time, command outcomes, indexed file count, vector count, collections touched, and blockers. Immediately before applying the patch, reread a small current header excerpt such as `sed -n '1,40p' "$MEMORY_PATH"` and anchor on the exact current title/header fields. Do not anchor a newest-first insertion on an older run body from the opening output. If the file changed concurrently, reread and retry once.
+8. Do not repair macOS privacy/TCC, QMD installation, runtime, or permission issues during a routine index run; record the blocker and stop.
