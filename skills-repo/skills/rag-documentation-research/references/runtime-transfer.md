@@ -1,35 +1,49 @@
-# RAG Runtime Transfer
+# QMD Runtime Transfer
 
-Use this reference only when the user asks to move, package, reinstall, or explain the local DanielsVault RAG setup itself, not just search documentation with it.
+Use this reference only when moving, packaging, reinstalling, or explaining the DanielsVault retrieval setup.
 
-Stable anchors:
+## Stable Anchors
 
-1. runtime: `~/Documents/DanielsVault/_shared/danielsvault-rag`
-2. deployment guide: `~/Documents/DanielsVault/_shared/danielsvault-rag/DEPLOYMENT.md`
-3. installer helper: `~/Documents/DanielsVault/_shared/danielsvault-rag/scripts/install-target.sh`
-4. supporting docs: `~/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/`
-5. Codex skills to include or reference: `rag-documentation-research` and `qmd`
+- Collection manifest: `~/Documents/DanielsVault/_shared/danielsvault-rag/qmd-collections.json`
+- Reconciliation helper: `~/Documents/DanielsVault/_shared/danielsvault-rag/scripts/sync-qmd-collections.py`
+- Compatibility CLI: `~/Documents/DanielsVault/_shared/danielsvault-rag`
+- Operating guidance: `~/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/`
+- QMD database: `${INDEX_PATH:-${XDG_CACHE_HOME:-$HOME/.cache}/qmd/index.sqlite}`
 
-First-pass inventory:
+## Target Requirements
+
+- Node.js supported by the installed QMD release.
+- QMD installed globally: `npm install -g @tobilu/qmd`.
+- A DanielsVault checkout containing every manifest path that should be enabled.
+- Python 3.9+ only when the compatibility CLI or reconciliation helper is required.
+
+## Installation and Reconciliation
 
 ```bash
+npm install -g @tobilu/qmd
 cd ~/Documents/DanielsVault/_shared/danielsvault-rag
-sed -n '1,220p' README.md
-sed -n '1,260p' DEPLOYMENT.md
-sed -n '1,180p' scripts/install-target.sh
-rg -n "embedding|embedding-model|model|RAG_STORE_DIR|DANIELSVAULT_ROOT" README.md DEPLOYMENT.md pyproject.toml setup.py src scripts
+python3 scripts/sync-qmd-collections.py --apply
+qmd update
+qmd embed
+qmd status
 ```
 
-Packaging rules:
+Set `DANIELSVAULT_ROOT` when the vault lives elsewhere. The manifest uses vault-relative paths.
 
-1. Prefer the existing `DEPLOYMENT.md` instructions instead of rediscovering install steps from scratch.
-2. Include the runtime, `.rag/store/` if the user wants the current generated store, `DEPLOYMENT.md`, `scripts/install-target.sh`, `shared-ai-docs/docs/rag/`, and the RAG/QMD skill files.
-3. Treat `.rag/store/` as sensitive local data because it can contain private-scope chunks.
-4. Exclude secrets, credentials, virtualenvs, caches, build outputs, `.git/`, and unrelated generated artifacts.
-5. Before creating an archive, run a bounded secret-name inventory and report blockers instead of silently packaging them:
+## Packaging Rules
+
+- Package the manifest, helper, compatibility source, OpenSpec change/specs, operating docs, and relevant Codex skills.
+- Do not package `.venv`, caches, `.git`, build outputs, secrets, or historical `.rag/store` files as the active index.
+- Treat the QMD SQLite database as sensitive local data because it can contain embeddings and text-derived index data from the private collection.
+- Prefer rebuilding the QMD database from the manifest on the target machine instead of transferring it.
+
+## Verification
 
 ```bash
-find . -maxdepth 4 \( -name '.env*' -o -name '*secret*' -o -name '*token*' -o -name '*key*' -o -name '*credential*' \) -print
+python3 scripts/sync-qmd-collections.py
+qmd status
+qmd search "documentation retrieval" -c shared-ai-docs -n 3 --json
+rag runtime health
 ```
 
-Embedding/model questions are exact runtime-configuration questions. Check CLI/source arguments and deployment docs first with the `rg` command above; do not inspect every repository in the vault unless those anchors fail to answer.
+The reconciliation check must report no missing collections or conflicts. The compatibility health command must identify QMD as its engine.

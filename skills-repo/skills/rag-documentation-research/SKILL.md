@@ -1,132 +1,101 @@
 ---
 name: rag-documentation-research
-description: RAG-first documentation research for DanielsVault. USE WHEN users ask to find, research, or narrow documentation sources before planning or implementation. MUST trigger on phrases like "durchsuche die dokumentation", "durchsuche docs", "research the documentation", "search the documentation", "find relevant docs", "welche dokumente sind relevant", and for `research-for-review` or `spec-closeout` source discovery. Prefer `rag` as default runtime and use `qmd` only as optional discovery add-on.
-compatibility: Requires local `rag` runtime at `~/Documents/DanielsVault/_shared/danielsvault-rag`; optional `qmd` add-on.
+description: QMD-first documentation research for DanielsVault. Use when users ask to find, research, search, or narrow documentation sources before planning or implementation, including "durchsuche die dokumentation", "search the documentation", "find relevant docs", research-for-review, and spec-closeout source discovery. Use targeted rg only when QMD is unavailable or for final literal verification.
 ---
 
-# RAG Documentation Research
+# QMD Documentation Research
 
-Use this skill whenever documentation retrieval is the first bottleneck.
-
-## Operating Rule
-
-1. `rag` is the default retrieval path.
-2. `qmd` is optional for broader discovery.
-3. Source-backed output is mandatory.
+Use QMD as the single DanielsVault indexing and ranked-retrieval engine. The skill keeps its legacy name so existing prompts continue to trigger it; it does not use the historical `.rag/store` indexes.
 
 ## Automation Session Guard
 
-When this skill is loaded only as a support skill inside a session-review automation, do not run RAG preflight or documentation retrieval first. Defer startup order to the primary review skill, such as `improve-skills` and its Codex Desktop session-review reference, then use RAG only for docs, repos, services, or identifiers the bounded session evidence actually implicates.
-
-## Trigger Phrases
-
-Trigger immediately when users say or imply:
-
-1. "durchsuche die dokumentation"
-2. "durchsuche docs"
-3. "research the documentation"
-4. "search the documentation"
-5. "find relevant docs"
-6. "welche dokumente sind relevant"
-7. "welche quellen sind relevant"
-
-Also trigger for source discovery before:
-
-1. `research-for-review`
-2. `spec-closeout`
+When this skill supports a session-review automation, follow that automation's state bootstrap before QMD preflight or documentation retrieval. Search only the repositories, services, or identifiers implicated by the bounded session evidence.
 
 ## Preflight
 
+Run one coverage check:
+
 ```bash
-cd ~/Documents/DanielsVault/_shared/danielsvault-rag
-export PATH="$PWD/.venv/bin:$PATH"
-command -v rag
-rag --version
-rag runtime health
+qmd status
+qmd collection list
+```
+
+If `qmd status` exits non-zero, treat QMD as unavailable for the remainder of the task. State the blocker once and use targeted `rg`; do not repeat QMD initialization through multiple commands.
+
+## Collection Routing
+
+Prefer the narrowest collection set that covers the question:
+
+- Shared AI workflows, skills, prompts, and OpenSpec: `shared-ai-docs`
+- SpecOps entities and dashboards: `shared-specops`
+- NCG repository Markdown: `ncg-docs`
+- KI repository Markdown: `ki-fuer-kmu-docs`
+- Probare CRM repository Markdown: `probare-crm-docs`
+- Meeting Assistant repository Markdown: `meeting-assistant-docs`
+- QMD-excluded repository Markdown when relevant: `meeting-assistant-agents`, `shared-ai-codex`, `shared-ai-github`, `shared-ai-vendor`, `shared-ai-vendor-council-github`, `shared-ai-vendor-mattpocock-agents`, `ki-fuer-kmu-agents`, `ki-fuer-kmu-codex`, `ki-fuer-kmu-github`, `ncg-agents`
+- Meeting and project context: `vault-meetings`, `vault-projects`
+- RAG/QMD compatibility workspace and its OpenSpec: `danielsvault-rag`
+- Private knowledge: `private`, only when the user or task explicitly selects private scope
+- Standalone notes: `sparkle`
+
+Do not query the private collection as part of a generic broad search.
+Repository collections cover complete repository roots, including Markdown outside `docs` and `adr`. Add the matching supplementary collection when the question concerns `.agents`, `.codex`, `.github`, or tracked vendor skills, because QMD intentionally excludes hidden directories and directories named `vendor` during parent-root traversal.
+
+## Retrieval Flow
+
+For exact identifiers, filenames, environment variables, route fragments, or titles, start lexically:
+
+```bash
+qmd search "<exact term>" -c <collection> -n 20 --json
+```
+
+For natural-language questions where document vocabulary is unknown, use ranked hybrid retrieval:
+
+```bash
+qmd query "<specific question>" -c <collection> -n 7 --json
+```
+
+For questions spanning a known set of domains, repeat `-c` only for those collections. Do not search every collection by default.
+
+Use this bounded sequence:
+
+1. Run one QMD search or query against the narrowest relevant collection set.
+2. Project at most seven results: `file`, `title`, `snippet`, `score`, and `docid`.
+3. Resolve the selected `qmd://<collection>/<path>` source through `qmd get` or the collection root shown by `qmd collection show <collection>`.
+4. Open only the selected on-disk sections and verify claims against source text.
+5. If exact QMD search misses an obvious literal, run targeted `rg -n -F` in the implicated documentation root.
+
+Do not treat a QMD snippet as final evidence until the source document and relevant section are opened.
+
+## Compatibility Workflows
+
+The local `rag` command at `~/Documents/DanielsVault/_shared/danielsvault-rag` is a QMD-backed compatibility interface for callers that require the historical `hits[]`, `facts[]`, `research-for-review`, or `spec-closeout` JSON envelopes. It does not own an index.
+
+Prefer native QMD for ordinary research. Use compatibility commands only when their stable envelope is useful:
+
+```bash
+rag workflow research-for-review --scope <scope> --query "<question>" --top-k 7 --format json
+rag workflow spec-closeout --scope <scope> --change "<change>" --top-k 7 --format json
 ```
 
 ## Local Runtime Transfer Mode
 
-Use [runtime-transfer.md](references/runtime-transfer.md) when the user asks to move, package, reinstall, or explain the local DanielsVault RAG setup itself. Do not load that reference for ordinary documentation retrieval.
-
-Default scope:
-
-1. Start with `ncg/ncg-docs`.
-2. Add broader scope only if the question requires it.
-3. For workflow/skill/prompt governance questions (for example `doc-workflow`, `spec-change-delivery`, `spec-closeout`, `skills-repo`, `_prompts`), run with `--scope all` directly.
-4. Do not assume the current working directory or an arbitrary repo path is a valid RAG scope. If the task concerns a repo outside the configured RAG scopes, run at most one scope check such as `rag inspect chunks --scope <candidate> --limit 5`; when it reports `unsupported scope`, state that RAG is unavailable for that repo and move to the fallback path.
-
-## Retrieval Flow
-
-1. Run semantic retrieval for document questions.
-2. Run structured retrieval for exact fact/setting/id questions.
-3. Run workflow commands for delivery-oriented source sets.
-4. Use `qmd` only when discovery looks too narrow or wording is too fuzzy.
-5. When using `--scope all`, filter/de-prioritize generated artifact paths (for example `/.rag/`, `/.git/`, `/node_modules/`) in the final source shortlist.
-6. For exact env vars, secret names, route fragments, endpoint paths, certificate files, or other literal identifiers, do at most one structured pass and one hybrid/semantic pass before switching to `qmd search` or `rg`.
-7. If both RAG scope support and QMD collection coverage exclude the target repo, stop retrieval iteration and use targeted repo reads (`rg`, known docs folders, or repo-local indexes) with an explicit fallback label.
-8. Run retrieval and lexical fallback as separate stages. First project a small RAG shortlist, then validate every selected on-disk path before opening it. Resolve relative hits against `~/Documents/DanielsVault`; discard missing paths as stale index entries instead of passing the whole shortlist to `sed` or another reader.
-9. If one or more high-ranked hits are stale, note that once and switch to a targeted `rg` over the implicated repo/docs folder. Shortlist the resulting paths before reading bounded excerpts; do not widen immediately to a vault-wide file enumeration or concatenate many files into one output.
-
-Recommended commands:
-
-```bash
-rag retrieve semantic --scope ncg/ncg-docs --query "<question>" --top-k 5 --format json
-rag retrieve structured --scope ncg/ncg-docs --record-type ci_setting_fact --filter "setting_name=<EXACT_TERM>"
-rag retrieve structured --scope ncg/ncg-docs --record-type ci_setting_fact --filter "setting_name~term1|term2|term3"
-rag retrieve hybrid --scope ncg/ncg-docs --record-type ci_setting_fact --query "<question>" --top-k 5 --format json
-rag workflow research-for-review --scope ncg/ncg-docs --query "<question>" --top-k 5 --format json
-rag workflow spec-closeout --scope ncg/ncg-docs --change "<change>" --top-k 5 --format json
-```
-
-Broader governance/docs sweep when needed:
-
-```bash
-rag retrieve semantic --scope all --query "<question>" --top-k 7 --format json
-```
-
-Optional discovery add-on:
-
-```bash
-qmd query "<question>" -c shared-ai-docs
-```
-
-Current JSON shapes:
-
-- `rag retrieve semantic ... --format json` returns `hits[]`
-- `rag retrieve hybrid ... --format json` returns `hits[]`
-- `rag retrieve structured ... --format json` returns `facts[]`
-
-Do not assume a generic `results[]` key unless you already inspected the raw output for the installed runtime.
-
-For `hits[]`, project only the routing fields the current runtime exposes—normally `path`, `section_or_chunk`, `excerpt`, `score`, and `why_relevant`—and cap the shortlist before reading source files. A hit is not source evidence until its path exists and the cited section can be opened. If the runtime returns a different per-hit shape, inspect one hit, adjust one bounded projection, and continue; do not dump the complete response.
-
-Exact-term sequence:
-
-```bash
-rag retrieve structured --scope ncg/ncg-docs --record-type ci_setting_fact --filter "setting_name=<EXACT_TERM>" --top-k 10 --format json
-rag retrieve hybrid --scope ncg/ncg-docs --record-type ci_setting_fact --query "<EXACT_TERM> <repo/service/context>" --top-k 7 --format json
-qmd search "<EXACT_TERM>" -c ncg-docs -n 20 --files
-rg -n -F "<EXACT_TERM>" ~/Documents/DanielsVault/ncg/ncg-docs/docs
-```
-
-If `rag retrieve structured` reports `unsupported filter expression`, rewrite once into `field=value` or `field~a|b` form and move on.
-If `rag retrieve hybrid` errors because `--record-type` is missing, add it once and continue; do not iterate on multiple hybrid shapes first.
-If the chunk store looks stale or schema-mismatched for the current runtime, fall back to `qmd` or `rg` instead of spending a routine documentation task debugging or mutating the shared RAG runtime/store.
+Read [runtime-transfer.md](references/runtime-transfer.md) only when the user asks to move, package, reinstall, or explain the DanielsVault retrieval setup.
 
 ## Output Contract
 
-Always return:
+Return:
 
-1. prioritized source paths
-2. section/chunk reference when available
-3. short why-relevant rationale
-4. explicit note whether results came from `rag`, `qmd`, or both
-5. generated artifacts removed from shortlist (or explicitly marked as filtered)
+1. Prioritized source paths.
+2. Section or heading when available.
+3. A short why-relevant rationale.
+4. The collection and retrieval method used (`qmd search`, `qmd query`, compatibility workflow, or `rg` fallback).
+5. Gaps, stale paths, or low-confidence findings.
 
 ## Guardrails
 
-1. Do not claim functional/system validation from retrieval alone.
-2. Do not replace exact structured lookups with fuzzy-only search when structured path is available.
-3. If `rag` preflight fails, report blocker and only then fall back to `qmd`/`rg` with explicit label.
-4. Treat RAG store refresh, re-ingest, or schema repair as separate maintenance work unless the user explicitly asked to repair the retrieval runtime itself.
+- Keep private retrieval explicitly scoped.
+- Do not claim runtime or system validation from documentation retrieval alone.
+- Do not mutate QMD collections or embeddings during ordinary research.
+- Do not inspect or repair historical `.rag/store` files; collection/index maintenance belongs to the daily QMD automation or an explicit maintenance task.
+- If documentation conflicts with code or OpenSpec, report the conflict instead of silently choosing one.

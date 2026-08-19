@@ -50,11 +50,13 @@ Record the choice in `docs/agents/issue-tracker.md`. The GitHub and GitLab templ
 
 **Section B — Triage label vocabulary.** Skip this section entirely if the `triage` skill isn't installed (exploration told you) — an uninstalled skill needs no labels.
 
-If it is installed, ask exactly one question:
+If it is installed, ask exactly one vocabulary question (the later approval gate for creating missing remote labels is separate):
 
 > Do you want to keep the default triage labels? (recommended: **yes**)
 
 The defaults are the five canonical roles, each label string equal to its name: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. On **yes**, write them as-is. Only if the user says no — usually because their tracker already uses other names (e.g. `bug:triage` for `needs-triage`) — collect the overrides so `triage` applies existing labels instead of creating duplicates.
+
+After the mapping is chosen, audit the selected live tracker before declaring setup complete. For GitHub, list names read-only with `gh label list --limit 200 --json name --jq '.[].name'` and compare exact configured strings. Show the user only the missing mapped labels and get explicit confirmation before creating them. Create only confirmed missing labels with `gh label create`; never pass `--force`, rename, delete, recolor, or otherwise reconcile unrelated existing labels. Re-run the same read-only inventory to verify. If the user requested an audit only, stop after reporting the gap. For GitLab or another remote tracker, use its equivalent read-only inventory and create-only-missing flow when the configured tracker guidance establishes those commands; otherwise record the mapping and report that live reconciliation was not verified rather than guessing. Local-markdown trackers need only the mapping file.
 
 **Section C — Domain docs.** Default to **single-context** — one `CONTEXT.md` + `docs/adr/` at the repo root. This fits almost every repo; write it without asking.
 
