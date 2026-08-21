@@ -1,3 +1,5 @@
+> Archive reconciliation: these checkboxes record the original implementation. A later cleanup commit intentionally removed the dedicated Agent Delivery docs, skills, testsuite, cleanup validator, and prose-budget validator. The final maintained surface is `ValidateActiveOpenSpecScope.cs`; the reconciled delta specs describe that end state.
+
 ## 1. Canonical Workflow Simplification
 
 - [x] 1.1 Update `docs/doc-workflow.md` so Agent Delivery defaults to one narrow active OpenSpec change as the implementation context.

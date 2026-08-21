@@ -69,12 +69,11 @@ Affected Skill MDs should answer: when to use the skill, what source is canonica
 
 Enforceable rules move into small tools. A Skill MD may name a command and explain in one or two lines when to run it, but the detailed rule lives in the tool implementation and its tests. This prevents the replacement workflow from becoming another wall of instructions that agents skim or ignore.
 
-Initial command surface:
+Maintained command surface:
 
 - `dotnet run skills-repo/tools/ValidateActiveOpenSpecScope.cs -- --change <change-name> [--parent <path>]`
-- `dotnet run skills-repo/tools/ValidateAgentDeliveryCleanup.cs -- --manifest <path> --root <repo-root>`
 
-The exact implementation language may change if the repository standard changes, but the command surface must remain small, deterministic, and scriptable.
+The cleanup and prose-budget validators were one-time migration tools and were intentionally removed by a later cleanup commit together with the dedicated Agent Delivery testsuite. The maintained command surface remains small, deterministic, and scriptable.
 
 ### Decision 5: Validation shifts from session proof to active-scope proof
 

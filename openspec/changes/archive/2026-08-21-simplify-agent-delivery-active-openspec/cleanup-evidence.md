@@ -2,6 +2,8 @@
 
 Status: applied.
 
+Archive reconciliation: a later cleanup commit removed the temporary retained migration stack. The lists below reflect the final repository state at archive time.
+
 The authoritative cleanup classification is `cleanup-manifest.json`.
 
 ## Deleted Paths
@@ -56,22 +58,21 @@ The authoritative cleanup classification is `cleanup-manifest.json`.
 - `openspec/changes/archive/2026-05-11-agent-delivery-visible-app-launcher-adapter`
 - `openspec/changes/archive/2026-05-11-agent-delivery-visible-session-closeout-archive`
 - `openspec/changes/archive/2026-05-11-agent-delivery-visible-session-controller-mvp`
+- `docs/doc-workflow.md`
+- `tests/docworkflow-agent-delivery/active-scope`
+- `tests/docworkflow-agent-delivery/e2e/active-openspec`
+- `tests/docworkflow-agent-delivery/scripts/run-active-openspec-e2e-checks.sh`
+- `tests/docworkflow-agent-delivery/scripts/run-simplified-agent-delivery-checks.sh`
+- `skills-repo/tools/ValidateAgentDeliveryCleanup.cs`
+- `skills-repo/tools/ValidateSkillProseBudget.cs`
 
 ## Retained Paths
 
-- `docs/doc-workflow.md`: canonical workflow document.
-- `openspec/changes/simplify-agent-delivery-active-openspec`: active change and cleanup evidence.
-- `tests/docworkflow-agent-delivery/active-scope`: simplified validation fixtures.
-- `tests/docworkflow-agent-delivery/e2e/active-openspec`: deterministic Active OpenSpec E2E.
-- `tests/docworkflow-agent-delivery/scripts/run-active-openspec-e2e-checks.sh`: Active OpenSpec E2E entrypoint.
-- `tests/docworkflow-agent-delivery/scripts/run-simplified-agent-delivery-checks.sh`: simplified validation entrypoint.
 - `skills-repo/tools/ValidateActiveOpenSpecScope.cs`: active-scope validator.
-- `skills-repo/tools/ValidateAgentDeliveryCleanup.cs`: cleanup validator.
-- `skills-repo/tools/ValidateSkillProseBudget.cs`: prose-budget validator.
 
 ## Archive-Reference Paths
 
-None.
+- `openspec/changes/archive/2026-08-21-simplify-agent-delivery-active-openspec`: completed change and historical cleanup record.
 
 ## Unresolved Cleanup Decisions
 

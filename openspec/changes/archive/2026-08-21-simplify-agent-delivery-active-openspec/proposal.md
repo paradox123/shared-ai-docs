@@ -40,3 +40,7 @@ This change simplifies Agent Delivery around a smaller rule: the active implemen
 - Legacy Agent Delivery tests, fixtures, generated evidence, and session-workflow data under `tests/docworkflow-agent-delivery/`
 - Active and archived OpenSpec changes that exist only to validate the discarded session-orchestration workflow
 - Any child-session handoff, launch evidence, run-profile, visible-session, or archive artifacts that are no longer referenced by the simplified workflow
+
+## Archive Reconciliation
+
+A later cleanup commit intentionally removed the dedicated Agent Delivery documentation, skills, fixtures, E2E runner, cleanup validator, and prose-budget validator. Archive sync therefore records the maintained end state: narrow OpenSpec scope plus `ValidateActiveOpenSpecScope.cs`. The deleted one-time migration stack remains historical evidence and is not restored as an active requirement.

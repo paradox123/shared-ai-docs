@@ -114,7 +114,7 @@
       "path": "tests/docworkflow-agent-delivery/scripts/run-contract-checks.sh",
       "action": "delete",
       "category": "obsolete-scripts",
-      "reason": "Old aggregate contract check is replaced by run-simplified-agent-delivery-checks.sh."
+      "reason": "Old aggregate contract check and its temporary replacement were both retired by later cleanup."
     },
     {
       "path": "tests/docworkflow-agent-delivery/scripts/setup-fixture.sh",
@@ -304,39 +304,39 @@
     },
     {
       "path": "docs/doc-workflow.md",
-      "action": "retain",
-      "category": "canonical-docs",
-      "reason": "Canonical workflow document updated with Active OpenSpec Scope."
+      "action": "delete",
+      "category": "superseded-workflow-doc",
+      "reason": "Later cleanup removed the dedicated Agent Delivery workflow document."
     },
     {
-      "path": "openspec/changes/simplify-agent-delivery-active-openspec",
-      "action": "retain",
-      "category": "active-change",
-      "reason": "Current active implementation contract and cleanup evidence home."
+      "path": "openspec/changes/archive/2026-08-21-simplify-agent-delivery-active-openspec",
+      "action": "archive-reference",
+      "category": "completed-change",
+      "reason": "Archived implementation contract and cleanup evidence for the retired migration."
     },
     {
       "path": "tests/docworkflow-agent-delivery/active-scope",
-      "action": "retain",
-      "category": "simplified-regression",
-      "reason": "New active-scope fixtures for simplified workflow validation."
+      "action": "delete",
+      "category": "retired-regression",
+      "reason": "Later cleanup removed the dedicated active-scope fixtures."
     },
     {
       "path": "tests/docworkflow-agent-delivery/e2e/active-openspec",
-      "action": "retain",
-      "category": "simplified-regression",
-      "reason": "New deterministic E2E proving large parent specs are delivered through five active OpenSpec slices."
+      "action": "delete",
+      "category": "retired-regression",
+      "reason": "Later cleanup removed the dedicated Active OpenSpec E2E."
     },
     {
       "path": "tests/docworkflow-agent-delivery/scripts/run-active-openspec-e2e-checks.sh",
-      "action": "retain",
-      "category": "simplified-regression",
-      "reason": "New Active OpenSpec E2E entrypoint."
+      "action": "delete",
+      "category": "retired-regression",
+      "reason": "Later cleanup removed the dedicated Active OpenSpec E2E entrypoint."
     },
     {
       "path": "tests/docworkflow-agent-delivery/scripts/run-simplified-agent-delivery-checks.sh",
-      "action": "retain",
-      "category": "simplified-regression",
-      "reason": "New simplified validation entrypoint."
+      "action": "delete",
+      "category": "retired-regression",
+      "reason": "Later cleanup removed the aggregate Agent Delivery validation entrypoint."
     },
     {
       "path": "skills-repo/tools/ValidateActiveOpenSpecScope.cs",
@@ -346,15 +346,15 @@
     },
     {
       "path": "skills-repo/tools/ValidateAgentDeliveryCleanup.cs",
-      "action": "retain",
-      "category": "simplified-validator",
-      "reason": "New cleanup manifest validator."
+      "action": "delete",
+      "category": "completed-migration-tool",
+      "reason": "Later cleanup removed the one-time cleanup manifest validator after migration."
     },
     {
       "path": "skills-repo/tools/ValidateSkillProseBudget.cs",
-      "action": "retain",
-      "category": "simplified-validator",
-      "reason": "New Skill-MD prose budget validator."
+      "action": "delete",
+      "category": "completed-migration-tool",
+      "reason": "Later cleanup removed the prose-budget validator with the retired Agent Delivery skills."
     }
   ]
 }

@@ -51,7 +51,17 @@ Before archiving any OpenSpec change, perform a refactoring pass over the code, 
 2. SOLID issues: mixed responsibilities, hard-to-test boundaries, or abstractions that are difficult to replace.
 3. KISS issues: accidental complexity, unclear names, needless branching, or structure larger than the current spec requires.
 
-Preserve behavior during this pass and rerun the relevant tests or checks afterward. If end-to-end verification is not possible, state exactly why and what lower-level verification was performed.
+Preserve behavior during this pass and rerun the relevant tests or checks afterward. 
+
+For langgraph-github-issue-pilot, prefer verification through:
+- local application endpoints
+- behavior tests
+- application logs proving the end-to-end flow
+- screenshots of UIs
+- GitHub Issues you created to show end-to-end behavior
+
+If end-to-end verification is not possible, state exactly why and what lower-level verification was performed instead.
+If end-to-end verification is not possible, state exactly why and what lower-level verification was performed.
 
 ## Implementation Notes
 - `skills-repo/skills` contains reusable Codex skills. Keep skill instructions concise, task-focused, and backed by referenced docs or scripts when details are too large for `SKILL.md`.
