@@ -7,7 +7,16 @@ import re
 import sys
 from pathlib import Path
 
-import yaml
+try:
+    import yaml
+except ModuleNotFoundError:
+    print(
+        "PyYAML is unavailable. Follow the manual validation fallback in "
+        "skill-creator Step 5; do not install it into the target project "
+        "solely for this check.",
+        file=sys.stderr,
+    )
+    sys.exit(2)
 
 MAX_SKILL_NAME_LENGTH = 64
 
@@ -37,7 +46,14 @@ def validate_skill(skill_path):
     except yaml.YAMLError as e:
         return False, f"Invalid YAML in frontmatter: {e}"
 
-    allowed_properties = {"name", "description", "license", "allowed-tools", "metadata"}
+    allowed_properties = {
+        "name",
+        "description",
+        "license",
+        "compatibility",
+        "allowed-tools",
+        "metadata",
+    }
 
     unexpected_keys = set(frontmatter.keys()) - allowed_properties
     if unexpected_keys:

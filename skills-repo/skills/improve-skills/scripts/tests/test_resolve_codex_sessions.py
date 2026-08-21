@@ -10,6 +10,19 @@ SCRIPT = Path(__file__).parents[1] / "resolve_codex_sessions.py"
 
 
 class ResolveCodexSessionsCliTests(unittest.TestCase):
+    def test_help_distinguishes_recent_output_from_review_cutoff(self):
+        result = subprocess.run(
+            [sys.executable, str(SCRIPT), "--help"],
+            capture_output=True,
+            text=True,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(
+            "this does not establish a review cutoff", result.stdout
+        )
+        self.assertIn("Explicit trusted review cutoff", result.stdout)
+
     def test_returns_one_consistent_window_from_newest_structured_cutoff(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

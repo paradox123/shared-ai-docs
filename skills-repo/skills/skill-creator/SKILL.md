@@ -74,7 +74,7 @@ skill-name/
 
 Every SKILL.md consists of:
 
-- **Frontmatter** (YAML): Contains `name` and `description` fields. These are the only fields that Codex reads to determine when the skill gets used, thus it is very important to be clear and comprehensive in describing what the skill is, and when it should be used.
+- **Frontmatter** (YAML): Requires `name` and `description`; supported optional fields include `license`, `compatibility`, `allowed-tools`, and `metadata`. Name and description drive skill selection, so keep them clear and comprehensive. Preserve supported optional fields when updating an imported or existing skill.
 - **Body** (Markdown): Instructions and guidance for using the skill. Only loaded AFTER the skill triggers (if at all).
 
 #### Agents metadata (recommended)
@@ -343,7 +343,7 @@ If you used `--examples`, delete any placeholder files that are not needed for t
 
 ##### Frontmatter
 
-Write the YAML frontmatter with `name` and `description`:
+Write the YAML frontmatter with required `name` and `description`:
 
 - `name`: The skill name
 - `description`: This is the primary triggering mechanism for your skill, and helps Codex understand when to use the skill.
@@ -351,7 +351,7 @@ Write the YAML frontmatter with `name` and `description`:
   - Include all "when to use" information here - Not in the body. The body is only loaded after triggering, so "When to Use This Skill" sections in the body are not helpful to Codex.
   - Example description for a `docx` skill: "Comprehensive document creation, editing, and analysis with support for tracked changes, comments, formatting preservation, and text extraction. Use when Codex needs to work with professional documents (.docx files) for: (1) Creating new documents, (2) Modifying or editing content, (3) Working with tracked changes, (4) Adding comments, or any other document tasks"
 
-Do not include any other fields in YAML frontmatter.
+For a new skill, add optional frontmatter only when it serves a concrete packaging or runtime need. When updating an existing skill, preserve supported `license`, `compatibility`, `allowed-tools`, and `metadata` fields unless the user explicitly asks to remove them.
 
 ##### Body
 
@@ -369,7 +369,7 @@ The validation script checks YAML frontmatter format, required fields, and namin
 
 1. Do a lightweight manual validation instead:
    - confirm the file starts with YAML frontmatter delimited by `---`
-   - confirm frontmatter contains only `name` and `description`
+   - confirm frontmatter contains required `name` and `description`, plus only supported optional `license`, `compatibility`, `allowed-tools`, or `metadata` fields
    - confirm the folder name matches the skill name
 2. State clearly in your handoff that `quick_validate.py` was skipped due to missing `PyYAML`.
 3. Only spend more time fixing the validator environment when the user asked for validator/tooling work specifically.

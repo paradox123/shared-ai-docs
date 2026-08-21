@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Extract bounded, argument-free routing evidence from a resolver manifest."""
+"""Extract bounded, argument-free session evidence from a resolver manifest."""
 
 import argparse
 from collections import OrderedDict
@@ -47,6 +47,7 @@ HEARTBEAT_OPEN_RE = re.compile(
 HEARTBEAT_FIELDS = ("automation_id", "state", "decision", "status")
 SAFE_HEARTBEAT_LABEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$")
 WORKTREE_TAIL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+STRUCTURAL_LABEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:/-]*$")
 
 
 class EvidenceError(Exception):
@@ -203,6 +204,42 @@ def normalized_tool_names(payload: dict) -> List[str]:
         return [name[:SAFE_LABEL_CHAR_LIMIT] for name in nested]
     recorder = bounded_text(payload.get("name"), SAFE_LABEL_CHAR_LIMIT)
     return [f"recorder:{recorder or 'unknown'}"]
+
+
+def structural_label(value: object) -> Optional[str]:
+    """Return one bounded machine label without rendering arbitrary content."""
+    if not isinstance(value, str):
+        return None
+    label = value.strip()[:SAFE_LABEL_CHAR_LIMIT]
+    if not label:
+        return None
+    return label if STRUCTURAL_LABEL_RE.fullmatch(label) else "[redacted]"
+
+
+def structural_record(record: dict, line_number: int) -> dict:
+    """Project one rollout record without reading content-bearing fields."""
+    raw_payload = record.get("payload")
+    payload = normalized_payload(record)
+    payload_type = payload.get("type")
+    tool_name = None
+    if payload_type in {"function_call", "custom_tool_call"}:
+        tool_name = structural_label(payload.get("name"))
+
+    record_session_id = None
+    if record.get("type") == "session_meta" and isinstance(raw_payload, dict):
+        record_session_id = structural_label(
+            raw_payload.get("id") or raw_payload.get("session_id")
+        )
+
+    return {
+        "line_number": line_number,
+        "record_type": structural_label(record.get("type")),
+        "payload_type": structural_label(payload_type),
+        "role": structural_label(payload.get("role")),
+        "phase": structural_label(payload.get("phase")),
+        "tool_name": tool_name,
+        "session_id": record_session_id,
+    }
 
 
 def valid_integer(value: object) -> bool:
@@ -502,6 +539,28 @@ def extract_session(
     return projection
 
 
+def extract_structural_session(
+    session: dict,
+    index: int,
+    path: Path,
+    start: int,
+    end: int,
+) -> dict:
+    session_id, _thread_name = safe_session_identity(session, index)
+    records = [
+        structural_record(
+            rollout_record(path, line_number, raw_line), line_number
+        )
+        for line_number, raw_line in advertised_lines(path, start, end)
+    ]
+    return {
+        "id": structural_label(session_id),
+        "review_line_start": start,
+        "review_line_end": end,
+        "records": records,
+    }
+
+
 def parse_max_total_chars(raw: str) -> int:
     try:
         value = int(raw)
@@ -676,6 +735,14 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--structural-projection",
+        action="store_true",
+        help=(
+            "For exact --session-id selections, emit only content-free "
+            "record structure from resolver-advertised ranges."
+        ),
+    )
+    parser.add_argument(
         "--clone-suffix-start",
         action="append",
         default=[],
@@ -777,6 +844,99 @@ def fit_output(
     return rendered
 
 
+def structural_output_document(
+    projections: List[dict],
+    emitted_counts: List[int],
+    manifest_session_count: int,
+    selected_session_count: int,
+    filtered_out_session_count: int,
+) -> dict:
+    sessions = []
+    inspected_records = 0
+    emitted_records = 0
+    for projection, emitted_count in zip(projections, emitted_counts):
+        records = projection["records"]
+        inspected_count = len(records)
+        inspected_records += inspected_count
+        emitted_records += emitted_count
+        sessions.append(
+            {
+                "id": projection["id"],
+                "review_line_start": projection["review_line_start"],
+                "review_line_end": projection["review_line_end"],
+                "counts": {
+                    "advertised_lines": max(
+                        projection["review_line_end"]
+                        - projection["review_line_start"]
+                        + 1,
+                        0,
+                    ),
+                    "inspected_lines": inspected_count,
+                    "emitted_records": emitted_count,
+                    "omitted_records": inspected_count - emitted_count,
+                },
+                "records": records[:emitted_count],
+            }
+        )
+    return {
+        "schema_version": 1,
+        "mode": "structural_projection",
+        "counts": {
+            "manifest_sessions": manifest_session_count,
+            "selected_sessions": selected_session_count,
+            "filtered_out_sessions": filtered_out_session_count,
+            "resolved_sessions": len(projections),
+            "inspected_records": inspected_records,
+            "emitted_records": emitted_records,
+            "omitted_records": inspected_records - emitted_records,
+        },
+        "sessions": sessions,
+    }
+
+
+def fit_structural_output(
+    projections: List[dict],
+    manifest_session_count: int,
+    selected_session_count: int,
+    filtered_out_session_count: int,
+    max_total_chars: int,
+    pretty: bool,
+) -> str:
+    emitted_counts = [0] * len(projections)
+
+    def rendered_document() -> str:
+        return serialize(
+            structural_output_document(
+                projections,
+                emitted_counts,
+                manifest_session_count,
+                selected_session_count,
+                filtered_out_session_count,
+            ),
+            pretty,
+        )
+
+    rendered = rendered_document()
+    if len(rendered) > max_total_chars:
+        raise EvidenceError(
+            "max-total-chars is too small for the structural output envelope"
+        )
+
+    output_full = False
+    for projection_index, projection in enumerate(projections):
+        for _record in projection["records"]:
+            emitted_counts[projection_index] += 1
+            candidate = rendered_document()
+            if len(candidate) > max_total_chars:
+                emitted_counts[projection_index] -= 1
+                output_full = True
+                break
+            rendered = candidate
+        if output_full:
+            break
+    return rendered_document()
+
+
 def load_manifest(path: Path) -> dict:
     if not path.is_file():
         raise EvidenceError(f"manifest is not a readable file: {path}")
@@ -811,6 +971,20 @@ def run(args: argparse.Namespace) -> str:
     worktree_tails = parse_worktree_tails(args.worktree_tail)
     has_path_selectors = bool(cwd_roots or worktree_tails)
     clone_suffix_starts = parse_clone_suffix_starts(args.clone_suffix_start)
+    if args.structural_projection and not requested_ids:
+        raise EvidenceError(
+            "--structural-projection requires exact --session-id filters"
+        )
+    if args.structural_projection and has_path_selectors:
+        raise EvidenceError(
+            "--structural-projection cannot be combined with path selectors"
+        )
+    if args.structural_projection and (
+        args.list_clone_boundaries or clone_suffix_starts
+    ):
+        raise EvidenceError(
+            "--structural-projection cannot be combined with clone modes"
+        )
     if has_path_selectors and (
         requested_ids or args.list_clone_boundaries or clone_suffix_starts
     ):
@@ -897,6 +1071,25 @@ def run(args: argparse.Namespace) -> str:
             for index, session in enumerate(sessions)
             if matches_path_selectors(session, cwd_roots, worktree_tails)
         }
+
+    if args.structural_projection:
+        structural_projections: List[dict] = []
+        for index, session in enumerate(sessions, start=1):
+            if index - 1 not in selected_indexes:
+                continue
+            start, end, _embedded = session_range(session, index)
+            path = rollout_path(session, index, manifest_path.parent)
+            structural_projections.append(
+                extract_structural_session(session, index, path, start, end)
+            )
+        return fit_structural_output(
+            structural_projections,
+            len(sessions),
+            len(selected_indexes),
+            len(sessions) - len(selected_indexes),
+            args.max_total_chars,
+            args.pretty,
+        )
 
     projections: List[dict] = []
     skipped_unresolved_count = 0

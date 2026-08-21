@@ -172,6 +172,314 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
                 ],
             )
 
+    def test_structural_projection_emits_only_advertised_typed_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "structure.jsonl"
+            long_tool_name = "tool_" + "x" * 200
+            records = [
+                response_item(message("user", "OUTSIDE_PRIVATE_CONTENT")),
+                {
+                    "type": "session_meta",
+                    "payload": {
+                        "id": "session-structure",
+                        "cwd": "/PRIVATE/CWD",
+                    },
+                },
+                response_item(message("user", "MESSAGE_SECRET")),
+                response_item(
+                    {
+                        "type": "reasoning",
+                        "summary": "REASONING_SECRET",
+                    }
+                ),
+                response_item(
+                    {
+                        "type": "function_call",
+                        "name": long_tool_name,
+                        "arguments": '{"secret":"ARGUMENT_SECRET"}',
+                    },
+                    nested=True,
+                ),
+                response_item(
+                    {
+                        "type": "custom_tool_call",
+                        "name": "exec",
+                        "input": "await tools.exec_command('INPUT_SECRET')",
+                    }
+                ),
+                response_item(
+                    {
+                        "type": "custom_tool_call_output",
+                        "output": "OUTPUT_SECRET",
+                    }
+                ),
+                response_item(message("user", "OUTSIDE_AFTER_PRIVATE")),
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "session-structure",
+                        "thread_name": "PRIVATE THREAD NAME",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "state": "complete",
+                            "review_line_start": 2,
+                            "review_line_end": 7,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            result = self.run_script(
+                manifest,
+                "--session-id",
+                "session-structure",
+                "--structural-projection",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertNotIn("\n", result.stdout.strip())
+            for secret in (
+                "PRIVATE",
+                "SECRET",
+                "OUTSIDE",
+                "tools.exec_command",
+            ):
+                self.assertNotIn(secret, result.stdout)
+            output = json.loads(result.stdout)
+            self.assertEqual(output["mode"], "structural_projection")
+            session = output["sessions"][0]
+            self.assertNotIn("thread_name", session)
+            self.assertEqual(session["review_line_start"], 2)
+            self.assertEqual(session["review_line_end"], 7)
+            self.assertEqual(
+                session["counts"],
+                {
+                    "advertised_lines": 6,
+                    "inspected_lines": 6,
+                    "emitted_records": 6,
+                    "omitted_records": 0,
+                },
+            )
+            expected_keys = {
+                "line_number",
+                "record_type",
+                "payload_type",
+                "role",
+                "phase",
+                "tool_name",
+                "session_id",
+            }
+            self.assertTrue(session["records"])
+            self.assertTrue(
+                all(set(record) == expected_keys for record in session["records"])
+            )
+            self.assertEqual(
+                [record["line_number"] for record in session["records"]],
+                [2, 3, 4, 5, 6, 7],
+            )
+            self.assertEqual(session["records"][0]["session_id"], "session-structure")
+            self.assertEqual(session["records"][1]["payload_type"], "message")
+            self.assertEqual(session["records"][1]["role"], "user")
+            self.assertEqual(session["records"][2]["payload_type"], "reasoning")
+            self.assertIsNone(session["records"][2]["tool_name"])
+            self.assertEqual(len(session["records"][3]["tool_name"]), 120)
+            self.assertEqual(session["records"][4]["tool_name"], "exec")
+            self.assertIsNone(session["records"][5]["tool_name"])
+
+    def test_structural_projection_requires_exact_resolved_ids_and_its_own_mode(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo_root = root / "repo"
+            (repo_root / ".git").mkdir(parents=True)
+            rollout = root / "session.jsonl"
+            rollout.write_text("{}\n")
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "resolved-session",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "review_line_start": 1,
+                            "review_line_end": 1,
+                            "embedded_session_metas": [],
+                        },
+                    },
+                    {
+                        "id": "unresolved-session",
+                        "status": "missing",
+                    },
+                ],
+            )
+
+            invocations = (
+                (("--structural-projection",), "requires exact --session-id"),
+                (
+                    (
+                        "--session-id",
+                        "missing-session",
+                        "--structural-projection",
+                    ),
+                    "unknown requested session",
+                ),
+                (
+                    (
+                        "--session-id",
+                        "unresolved-session",
+                        "--structural-projection",
+                    ),
+                    "not resolved",
+                ),
+                (
+                    (
+                        "--session-id",
+                        "resolved-session",
+                        "--structural-projection",
+                        "--cwd-root",
+                        str(repo_root),
+                    ),
+                    "cannot be combined",
+                ),
+                (
+                    (
+                        "--session-id",
+                        "resolved-session",
+                        "--structural-projection",
+                        "--list-clone-boundaries",
+                    ),
+                    "cannot be combined",
+                ),
+                (
+                    (
+                        "--session-id",
+                        "resolved-session",
+                        "--structural-projection",
+                        "--clone-suffix-start",
+                        "resolved-session=1",
+                    ),
+                    "cannot be combined",
+                ),
+            )
+            for invocation, error_text in invocations:
+                with self.subTest(invocation=invocation):
+                    result = self.run_script(manifest, *invocation)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(error_text, result.stderr)
+                    self.assertEqual(result.stdout, "")
+
+    def test_structural_projection_honors_repeatable_exact_filters(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            sessions = []
+            for session_id in ("allowed-a", "blocked", "allowed-b"):
+                rollout = root / f"{session_id}.jsonl"
+                if session_id != "blocked":
+                    rollout.write_text(
+                        json.dumps(
+                            {
+                                "type": "session_meta",
+                                "payload": {"id": session_id},
+                            }
+                        )
+                        + "\n"
+                    )
+                sessions.append(
+                    {
+                        "id": session_id,
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "review_line_start": 1,
+                            "review_line_end": 1,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                )
+            manifest = self.write_manifest(root, sessions)
+
+            result = self.run_script(
+                manifest,
+                "--session-id",
+                "allowed-a",
+                "--session-id",
+                "allowed-b",
+                "--structural-projection",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertEqual(
+                [session["id"] for session in output["sessions"]],
+                ["allowed-a", "allowed-b"],
+            )
+            self.assertEqual(output["counts"]["selected_sessions"], 2)
+            self.assertEqual(output["counts"]["filtered_out_sessions"], 1)
+
+    def test_structural_projection_caps_records_and_reports_omissions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "large.jsonl"
+            records = [
+                {
+                    "type": "event_msg",
+                    "payload": {"type": f"event_{number:03d}"},
+                }
+                for number in range(100)
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "large-session",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "review_line_start": 1,
+                            "review_line_end": 100,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            result = self.run_script(
+                manifest,
+                "--session-id",
+                "large-session",
+                "--structural-projection",
+                "--max-total-chars",
+                "2000",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertLessEqual(len(result.stdout.rstrip("\n")), 2000)
+            output = json.loads(result.stdout)
+            session = output["sessions"][0]
+            self.assertEqual(session["counts"]["inspected_lines"], 100)
+            self.assertGreater(session["counts"]["omitted_records"], 0)
+            self.assertEqual(
+                session["counts"]["emitted_records"]
+                + session["counts"]["omitted_records"],
+                100,
+            )
+            self.assertEqual(
+                output["counts"]["emitted_records"]
+                + output["counts"]["omitted_records"],
+                output["counts"]["inspected_records"],
+            )
+
     def test_embedded_history_requires_manual_suffix_without_summaries(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

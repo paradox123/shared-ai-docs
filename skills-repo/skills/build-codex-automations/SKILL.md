@@ -16,8 +16,8 @@ Default environment assumptions:
 - Codex automation definitions live under `~/.codex/automations/<automation-id>/automation.toml`.
 - Codex automation working memory should live under `~/.codex/automations/<automation-id>/memory.md` when the automation needs persisted run state.
 - Personal/shared skills live in `~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills`.
-- Prefer the Codex app `automation_update` tool for create, update, view, and delete operations when it is available.
-- Use direct TOML reads for inspection, explanation, and prompt extraction.
+- Prefer the Codex app `automation_update` tool for create, update, view, and delete operations when it is available. Before a view or update call, read [automation-update-payloads.md](references/automation-update-payloads.md) for the verified field shapes; do not guess between alternate key styles.
+- Use direct TOML reads for inspection, explanation, and prompt extraction; a canonical definition read does not require parsing TOML. When structured validation is genuinely needed, prefer `automation_update` view or a runtime whose TOML support was already verified. Do not assume the default macOS `python3` provides `tomllib`—it may be Python 3.9—and do not install a parser into an unrelated project environment merely to validate automation state.
 - Do not use Windows paths, `.lnk` shortcuts, PowerShell-specific snippets, Node-RED, Home Assistant, Traefik, or homelab assumptions unless the user explicitly introduces that stack.
 - If a prompt references `$CODEX_HOME` and it is unset, normalize to `~/.codex` instead of probing multiple candidate directories.
 
@@ -42,7 +42,7 @@ Use this branch for requests about automations that already exist.
 3. Read these fields when present: `id`, `kind`, `name`, `prompt`, `status`, `rrule`, `model`, `reasoning_effort`, `execution_environment`, `cwds`, `created_at`, and `updated_at`.
 4. If the user asks for the automation text or prompt, return the decoded `prompt` value.
 5. If the user asks for the file verbatim, return the TOML contents exactly enough to satisfy the request.
-6. For create/update/delete operations, prefer `automation_update` when available.
+6. For create/update/delete operations, prefer `automation_update` when available. Use the verified view/update contract in [automation-update-payloads.md](references/automation-update-payloads.md) instead of discovering the payload by retries.
 7. If editing TOML manually, create a timestamped backup in the automation folder first and change only the requested fields.
 
 Useful inspection commands:
@@ -111,7 +111,7 @@ Workflow:
 6. Keep macOS/zsh helpers portable:
    - use the shell builtin or `/bin/test`, not `/usr/bin/test`
    - never use zsh's special parameters such as the read-only `status` value or the `path` array as ordinary variables; prefer names such as `collector_rc` and `candidate_path`
-   - for a local ISO-8601 timestamp, use `date '+%Y-%m-%dT%H:%M:%S%z'` or Python's timezone-aware `datetime.now().astimezone().isoformat(timespec="seconds")`; macOS `date` does not support GNU `-Is` or the colonized `%:z` directive
+   - use `date '+%Y-%m-%dT%H:%M:%S%z'` only for display or consumers that explicitly accept an uncolonized offset such as `+0200`; for strict RFC 3339/ISO parser input, use Python's timezone-aware `datetime.now().astimezone().isoformat(timespec="seconds")`, which emits `+02:00`, and validate the required shape before invoking the collector; macOS `date` does not support GNU `-Is` or the colonized `%:z` directive
    - quote or explicitly guard optional globs so an empty match does not abort the command
    - create temporary work under `mktemp -d`, validate the exact task-owned directory before cleanup, and use a policy-compatible bounded deletion method
 7. Add or run a small verifier for:

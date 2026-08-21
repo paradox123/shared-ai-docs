@@ -575,8 +575,23 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--codex-home", required=True, type=Path)
     parser.add_argument("--memory", type=Path)
-    parser.add_argument("--prompt-last-run", default="")
-    parser.add_argument("--recent", type=int, default=120)
+    parser.add_argument(
+        "--prompt-last-run",
+        default="",
+        help=(
+            "Explicit trusted review cutoff; required when structured memory "
+            "does not provide Last review or Processed window end."
+        ),
+    )
+    parser.add_argument(
+        "--recent",
+        type=int,
+        default=120,
+        help=(
+            "Number of captured recent index rows to echo in the output; "
+            "this does not establish a review cutoff."
+        ),
+    )
     parser.add_argument("--max-sessions", type=int, default=100)
     parser.add_argument(
         "--compact",

@@ -160,10 +160,27 @@ Prefer this decision rule:
 - `qmd query "<question>" -c <collection>` for natural-language questions where you do not know the document vocabulary yet
 - If `qmd search` already finds the right files, do not escalate to `qmd query` unless you still need semantic ranking across many candidates
 
-## Setup
+## Collection Setup
+
+For ordinary collection setup:
 
 ```bash
 npm install -g @tobilu/qmd
-qmd collection add ~/notes --name notes
+qmd collection add ~/notes --name notes --mask '**/*.md'
+qmd update
 qmd embed
 ```
+
+Use an explicit Markdown mask. QMD exposes collection add, list, remove, rename, and show operations, but no collection update operation for changing a root or mask. When an existing collection's root or mask must change, inventory it first, remove only that exact collection, and re-add it with the intended configuration.
+
+### Complete Git-Repository Coverage
+
+Use this stricter flow only when the user asks for every tracked Markdown file, not for ordinary search setup:
+
+1. Resolve the exact Git root and record the baseline with `git -C "$repo_root" ls-files -- '*.md'`.
+2. Add the root collection with `--mask '**/*.md'`.
+3. Do not assume the recursive mask includes dot-prefixed or other default-excluded subtrees. When the Git baseline shows tracked gaps, add one supplementary collection at each stable missing subtree root, such as `.agents`, `.codex`, `.github`, or a tracked vendor-docs root.
+4. Run `qmd update`, then normalize and compare the combined `qmd ls <collection>` inventories with the Git baseline. `qmd status` totals alone do not prove coverage.
+5. Keep scope separate from freshness: first prove every intended tracked file belongs to a collection, then run update/embed and report index freshness.
+
+Prefer a few subtree collections over per-file collections. Do not index ignored build artifacts or dependency caches merely because they exist on disk; the Git inventory is the authority for a complete tracked-repository request.
