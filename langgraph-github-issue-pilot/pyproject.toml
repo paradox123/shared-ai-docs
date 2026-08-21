@@ -1,0 +1,31 @@
+[project]
+name = "danielsvault-github-issue-pilot"
+version = "0.1.0"
+description = "Local persistent LangGraph control plane for authorized GitHub issues"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.116,<1",
+  "httpx>=0.28,<1",
+  "langgraph>=1.0,<2",
+  "langgraph-checkpoint-sqlite>=3.0.1,<4",
+  "uvicorn>=0.35,<1",
+]
+
+[project.scripts]
+github-issue-pilot = "github_issue_pilot.__main__:main"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.4,<10",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/github_issue_pilot"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

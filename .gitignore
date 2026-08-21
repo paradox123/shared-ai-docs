@@ -1,3 +1,8 @@
 .DS_Store
 **/.DS_Store
 skills-repo/**/node_modules/
+langgraph-github-issue-pilot/*.db*
+langgraph-github-issue-pilot/.venv/
+langgraph-github-issue-pilot/.pytest_cache/
+langgraph-github-issue-pilot/.ruff_cache/
+langgraph-github-issue-pilot/**/__pycache__/
