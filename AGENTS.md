@@ -75,3 +75,17 @@ When changing a specific script, skill, or workflow, run its local verification 
 - Do update OpenSpec specs or active changes for durable behavior changes.
 - Don't commit local secrets, runtime databases, logs, or private payloads from n8n or automation runs.
 - Don't bulk-copy reference docs into AGENTS files; link to canonical docs instead.
+
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked as local Markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Triage uses the five default canonical label strings. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repository uses the single-context layout. See `docs/agents/domain.md`.
