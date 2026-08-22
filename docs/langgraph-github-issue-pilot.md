@@ -1,6 +1,6 @@
 # LangGraph GitHub Issue Implementation Pilot
 
-Status: Entscheidungsgrundlage abgeschlossen; bereit fuer Umsetzungsplanung
+Status: Entscheidungsgrundlage abgeschlossen; lokale Claim- und isolierte Implementierungs-Slices umgesetzt
 
 ## Ziel
 
@@ -221,6 +221,19 @@ LangGraph ist die persistente Control Plane; Codex CLI ist der Agent-Worker. Jed
 - Die vendorten Matt-Pocock-Skills sind ueber die vorhandenen globalen Symlinks auffindbar. Der Lauf zeichnet die verwendeten Skill-Versionen oder Content-Hashes auf.
 - Der Pilot nutzt weder den experimentellen Codex `app-server` noch `exec-server`.
 - LangGraph kapselt Codex CLI hinter einem Worker-Adapter, damit die Runtime spaeter austauschbar bleibt.
+
+### Umgesetzter lokaler Implementierungs-Slice
+
+Das Paket `langgraph-github-issue-pilot/` setzt den Worker-Vertrag inzwischen ausfuehrbar um:
+
+- Der bestehende persistente Claim-Lauf erstellt aus Issue, Checkbox-Anforderungen, explizit konfiguriertem Repository-Kontext, Evidence-Matrix und Findings einen schema-validierten Auftrag.
+- Ein Git-Adapter legt pro Run einen eigenen `codex/run-<run-id>`-Branch in einem disjunkten Worktree-Root an.
+- Die versionierte Node-Policy und das versionierte Skill-Routing waehlen Modell, Reasoning, Rechte und Matt-Pocock-Skills fail-closed; Skill-Inhalte werden per SHA-256 festgehalten.
+- Der austauschbare Worker-Port besitzt einen produktiven `codex exec`-Adapter mit `workspace-write`, explizitem Worktree, JSONL-Diagnose und JSON-Schema fuer das Endergebnis.
+- Auftrag, Worktree, Policy, Skills, Rechteprofil, Diagnose und valides Ergebnis oder redigierter Fehler bleiben in SQLite mit dem LangGraph-Run verbunden und sind ueber das bestehende Workflow-Read-Model beobachtbar.
+- Der Slice besitzt keine Pull-Request-Schreibschnittstelle. PR-Erzeugung und -Evidence bleiben Issue 03 vorbehalten.
+
+Die direkten Verhaltensnachweise verwenden die signierte HTTP-Schnittstelle mit realer SQLite-/LangGraph-Persistenz, einen echten temporaeren Git-Worktree-Vertrag und einen Fake-Prozess fuer den Codex-CLI-Vertrag. Dadurch beweisen die Tests den austauschbaren Adapter, ohne Codex-App- oder Server-Schnittstellen vorauszusetzen.
 
 ## Modell- und Reasoning-Policy
 
