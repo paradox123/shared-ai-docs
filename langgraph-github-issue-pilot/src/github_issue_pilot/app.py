@@ -13,6 +13,7 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
 from github_issue_pilot.github import GitHubPort
+from github_issue_pilot.implementation import ImplementationServices
 from github_issue_pilot.storage import Delivery, WorkflowStore
 from github_issue_pilot.workflow import WorkflowRuntime
 
@@ -87,9 +88,16 @@ def create_app(
     clock: Callable[[], datetime],
     max_request_bytes: int = 1_048_576,
     allowed_event_actions: AbstractSet[tuple[str, str]] | None = None,
+    implementation: ImplementationServices | None = None,
 ) -> FastAPI:
     store = WorkflowStore(database_path)
-    runtime = WorkflowRuntime(database_path=database_path, store=store, github=github, clock=clock)
+    runtime = WorkflowRuntime(
+        database_path=database_path,
+        store=store,
+        github=github,
+        clock=clock,
+        implementation=implementation,
+    )
     event_actions = {("issues", "labeled")} if allowed_event_actions is None else allowed_event_actions
 
     @asynccontextmanager

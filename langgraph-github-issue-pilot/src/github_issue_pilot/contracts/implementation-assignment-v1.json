@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:danielsvault:github-issue-pilot:implementation-assignment:1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "issue", "requirements", "repository_context", "evidence_matrix", "findings"],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "number", "title", "body", "type"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "number": {"type": "integer", "minimum": 1},
+        "title": {"type": "string", "minLength": 1},
+        "body": {"type": "string"},
+        "type": {"enum": ["feature", "bug"]}
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "repository_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_ref", "instructions"],
+      "properties": {
+        "base_ref": {"type": "string", "minLength": 1},
+        "instructions": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence_matrix": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["criterion", "public_observation_surface", "expected_result", "planned_proof"],
+        "properties": {
+          "criterion": {"type": "string", "minLength": 1},
+          "public_observation_surface": {"type": "string", "minLength": 1},
+          "expected_result": {"type": "string", "minLength": 1},
+          "planned_proof": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}
