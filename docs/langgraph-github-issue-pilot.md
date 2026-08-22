@@ -71,8 +71,8 @@ Ein Queue-Consumer stellt die Delivery ueber einen benannten Cloudflare Tunnel a
 Der lokale Receiver:
 
 1. akzeptiert nur den vorgesehenen `POST`-Pfad und begrenzt die Request-Groesse,
-2. validiert `X-Hub-Signature-256`, bevor das JSON interpretiert wird,
-3. erlaubt nur das konfigurierte Repository sowie explizit unterstuetzte Event-/Action-Kombinationen,
+2. validiert je nach exklusiv konfiguriertem Authentifizierungsmodus entweder `X-Hub-Signature-256` ueber dem unveraenderten Body oder `X-Pilot-Signature-256` ueber Delivery-ID, Event und unveraendertem Body, bevor das JSON interpretiert wird,
+3. akzeptiert nur einen registrierten, versionskompatiblen `RepositoryAdapter`; Repository, Labels sowie unterstuetzte Event-/Action-Kombinationen gehoeren dem Adapter,
 4. persistiert die Delivery atomar unter der eindeutigen `X-GitHub-Delivery`-ID,
 5. antwortet nach erfolgreicher Persistierung unmittelbar mit `2xx`,
 6. und laesst die eigentliche Verarbeitung asynchron durch den LangGraph-Dispatcher ausfuehren.

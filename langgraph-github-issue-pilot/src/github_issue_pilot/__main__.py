@@ -7,12 +7,36 @@ from pathlib import Path
 import uvicorn
 
 from github_issue_pilot.app import create_app
-from github_issue_pilot.github import GitHubHttpAdapter
+from github_issue_pilot.github import (
+    ConfiguredRepositoryAdapter,
+    GitHubHttpAdapter,
+    RepositorySettings,
+)
 from github_issue_pilot.implementation import (
     CodexCliWorker,
     GitWorktreeAdapter,
     ImplementationServices,
     RepositoryContext,
+)
+
+PROBARE_CRM_EVENTS = frozenset(
+    {
+        ("issues", "opened"),
+        ("issues", "edited"),
+        ("issues", "labeled"),
+        ("issues", "unlabeled"),
+        ("issues", "reopened"),
+        ("issues", "closed"),
+        ("pull_request", "opened"),
+        ("pull_request", "synchronize"),
+        ("pull_request", "closed"),
+        ("pull_request_review", "submitted"),
+        ("pull_request_review", "dismissed"),
+        ("pull_request_review_comment", "created"),
+        ("pull_request_review_comment", "edited"),
+        ("issue_comment", "created"),
+        ("issue_comment", "edited"),
+    }
 )
 
 
@@ -62,7 +86,22 @@ def main() -> None:
         for repository in _required_environment("PILOT_ALLOWED_REPOSITORIES").split(",")
         if repository.strip()
     }
-    github = GitHubHttpAdapter(_required_environment("GITHUB_TOKEN"))
+    if len(repositories) != 1:
+        raise RuntimeError("the pilot requires exactly one configured probare-crm repository")
+    repository = next(iter(repositories))
+    if repository.rsplit("/", maxsplit=1)[-1] != "probare-crm":
+        raise RuntimeError("the only live pilot repository must be named probare-crm")
+    github = GitHubHttpAdapter(
+        _required_environment("GITHUB_TOKEN"),
+        human_login=_required_environment("DANIEL_GITHUB_LOGIN"),
+    )
+    adapter = ConfiguredRepositoryAdapter(
+        github,
+        RepositorySettings(
+            repository=repository,
+            allowed_event_actions=PROBARE_CRM_EVENTS,
+        ),
+    )
     github_webhook_secret = os.environ.get("GITHUB_WEBHOOK_SECRET", "").strip()
     internal_webhook_secret = os.environ.get("PILOT_INTERNAL_WEBHOOK_SECRET", "").strip()
     try:
@@ -70,8 +109,7 @@ def main() -> None:
             database_path=Path(_required_environment("PILOT_DATABASE_PATH")),
             webhook_secret=github_webhook_secret.encode() if github_webhook_secret else None,
             internal_webhook_secret=internal_webhook_secret.encode() if internal_webhook_secret else None,
-            allowed_repositories=repositories,
-            github=github,
+            repository_adapters={repository: adapter},
             clock=lambda: datetime.now(UTC),
             max_request_bytes=int(os.environ.get("PILOT_MAX_REQUEST_BYTES", "1048576")),
             implementation=_implementation_services(repositories),

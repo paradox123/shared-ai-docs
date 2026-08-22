@@ -3,8 +3,7 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-from collections.abc import Callable
-from collections.abc import Set as AbstractSet
+from collections.abc import Callable, Mapping
 from contextlib import asynccontextmanager
 from datetime import datetime
 from pathlib import Path
@@ -12,7 +11,10 @@ from pathlib import Path
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
-from github_issue_pilot.github import GitHubPort
+from github_issue_pilot.github import (
+    REPOSITORY_ADAPTER_VERSION,
+    RepositoryAdapter,
+)
 from github_issue_pilot.implementation import ImplementationServices
 from github_issue_pilot.storage import Delivery, WorkflowStore
 from github_issue_pilot.workflow import WorkflowRuntime
@@ -45,8 +47,7 @@ def _delivery_from_request(
     *,
     body: bytes,
     request: Request,
-    allowed_repositories: AbstractSet[str],
-    allowed_event_actions: AbstractSet[tuple[str, str]],
+    repository_adapters: Mapping[str, RepositoryAdapter],
     now: datetime,
 ) -> Delivery:
     delivery_id = request.headers.get("x-github-delivery", "").strip()
@@ -57,14 +58,18 @@ def _delivery_from_request(
         payload = json.loads(body)
         action = payload["action"]
         repository = payload["repository"]["full_name"]
-        issue_number = payload["issue"]["number"]
+        subject = payload.get("issue") or payload.get("pull_request")
+        issue_number = subject["number"]
     except (json.JSONDecodeError, KeyError, TypeError) as exc:
         raise HTTPException(status_code=400, detail="invalid delivery payload") from exc
 
-    if not isinstance(action, str) or (event, action) not in allowed_event_actions:
-        raise HTTPException(status_code=403, detail="event action not allowed")
-    if not isinstance(repository, str) or repository not in allowed_repositories:
+    if not isinstance(repository, str) or repository not in repository_adapters:
         raise HTTPException(status_code=403, detail="repository not allowed")
+    adapter = repository_adapters[repository]
+    if adapter.repository != repository or adapter.contract_version != REPOSITORY_ADAPTER_VERSION:
+        raise HTTPException(status_code=403, detail="repository adapter not compatible")
+    if not isinstance(action, str) or (event, action) not in adapter.allowed_event_actions:
+        raise HTTPException(status_code=403, detail="event action not allowed")
     if not isinstance(issue_number, int) or isinstance(issue_number, bool) or issue_number <= 0:
         raise HTTPException(status_code=400, detail="invalid issue number")
 
@@ -83,12 +88,10 @@ def create_app(
     *,
     database_path: Path,
     webhook_secret: bytes | None,
-    allowed_repositories: AbstractSet[str],
-    github: GitHubPort,
     clock: Callable[[], datetime],
+    repository_adapters: Mapping[str, RepositoryAdapter],
     internal_webhook_secret: bytes | None = None,
     max_request_bytes: int = 1_048_576,
-    allowed_event_actions: AbstractSet[tuple[str, str]] | None = None,
     implementation: ImplementationServices | None = None,
 ) -> FastAPI:
     if (webhook_secret is None) == (internal_webhook_secret is None):
@@ -98,11 +101,10 @@ def create_app(
     runtime = WorkflowRuntime(
         database_path=database_path,
         store=store,
-        github=github,
+        repository_adapters=repository_adapters,
         clock=clock,
         implementation=implementation,
     )
-    event_actions = {("issues", "labeled")} if allowed_event_actions is None else allowed_event_actions
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
@@ -133,8 +135,7 @@ def create_app(
         delivery = _delivery_from_request(
             body=body,
             request=request,
-            allowed_repositories=allowed_repositories,
-            allowed_event_actions=event_actions,
+            repository_adapters=repository_adapters,
             now=clock(),
         )
         result = store.accept(delivery)

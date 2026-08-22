@@ -9,7 +9,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from github_issue_pilot.app import create_app
-from github_issue_pilot.github import IssueState
+from github_issue_pilot.github import BacklogIssue, IssueState
 
 INTERNAL_SECRET = b"internal-relay-test-secret"
 REPOSITORY = "daniel/probare-crm"
@@ -26,12 +26,26 @@ FIXED_RELAY_SIGNATURE = "sha256=ba8bc97e411592a16dc39e0677ca0ebb8e4348d8d33096f2
 
 
 class ControlledGitHub:
+    contract_version = "1"
+    repository = REPOSITORY
+    ready_label = "ready-for-agent"
+    running_label = "agent-running"
+    allowed_event_actions = frozenset({("issues", "labeled")})
+
     def __init__(self) -> None:
         self.labels = {"ready-for-agent"}
         self.label_writes: list[tuple[str, int, str]] = []
 
     def issue_state(self, repository: str, issue_number: int) -> IssueState:
-        return IssueState(open=True, labels=frozenset(self.labels), has_open_blockers=False)
+        return IssueState(open=True, labels=frozenset(self.labels))
+
+    def backlog(self, trigger_issue_number: int) -> tuple[BacklogIssue, ...]:
+        return (
+            BacklogIssue(
+                trigger_issue_number,
+                self.issue_state(REPOSITORY, trigger_issue_number),
+            ),
+        )
 
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None:
         if label not in self.labels:
@@ -64,8 +78,7 @@ def relay_app(tmp_path, github: ControlledGitHub):
         database_path=tmp_path / "pilot.db",
         webhook_secret=None,
         internal_webhook_secret=INTERNAL_SECRET,
-        allowed_repositories={REPOSITORY},
-        github=github,
+        repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
     )
 
@@ -151,7 +164,6 @@ def test_application_requires_exactly_one_authentication_mode(
             database_path=tmp_path / "pilot.db",
             webhook_secret=webhook_secret,
             internal_webhook_secret=internal_secret,
-            allowed_repositories={REPOSITORY},
-            github=ControlledGitHub(),
+            repository_adapters={REPOSITORY: ControlledGitHub()},
             clock=fixed_clock,
         )

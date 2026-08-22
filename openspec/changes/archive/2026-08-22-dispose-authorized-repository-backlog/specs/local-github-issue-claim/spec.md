@@ -1,34 +1,15 @@
-# local-github-issue-claim Specification
+## MODIFIED Requirements
 
-## Purpose
-
-Define authenticated local GitHub delivery acceptance, durable idempotent issue claiming, persistent LangGraph execution, and workflow-state observation for the `probare-crm` pilot.
-## Requirements
 ### Requirement: Authenticate and authorize local GitHub deliveries
-The local workflow interface MUST accept only bounded requests using its configured authentication mode: either a valid GitHub `X-Hub-Signature-256` over the unchanged raw body or a valid internal `X-Pilot-Signature-256` over the delivery ID, event, and unchanged raw body. It MUST require a non-empty `X-GitHub-Delivery`, a registered version-compatible `RepositoryAdapter`, and an event/action combination allowed by that adapter, and MUST verify the configured signature before parsing JSON. GitHub and internal relay secrets MUST be configured separately and an application instance MUST NOT accept both authentication modes simultaneously.
+The local workflow interface MUST accept only bounded requests with a valid `X-Hub-Signature-256`, a non-empty `X-GitHub-Delivery`, a registered version-compatible `RepositoryAdapter`, and an event/action combination allowed by that adapter. It MUST verify the signature over the unchanged raw body before parsing JSON.
 
-#### Scenario: Allowed directly signed delivery
-- **WHEN** a correctly GitHub-signed delivery uses an event/action allowed by the registered repository adapter and stays within the request-size limit in direct mode
+#### Scenario: Allowed signed delivery
+- **WHEN** a correctly signed delivery uses an event/action allowed by the registered repository adapter and stays within the request-size limit
 - **THEN** the interface accepts the delivery for durable repository scheduling
-
-#### Scenario: Allowed relay-signed delivery
-- **WHEN** a correctly internally signed `issues/labeled` delivery with bound delivery ID and event for the configured `probare-crm` repository arrives within the request-size limit in relay mode
-- **THEN** the same productive interface accepts the delivery for durable processing
 
 #### Scenario: Invalid or unauthorized delivery
 - **WHEN** a delivery has an invalid signature, exceeds the request-size limit, targets an unregistered repository, uses an adapter-incompatible contract version, or uses a non-allowed event/action combination
 - **THEN** the interface rejects it without an inbox record, a workflow run, or a GitHub write
-
-#### Scenario: Ambiguous authentication configuration
-- **WHEN** an application instance is configured with both GitHub and internal relay secrets or with neither secret
-- **THEN** application construction fails before serving requests
-
-### Requirement: Persist acceptance before acknowledgement
-The local workflow interface MUST atomically persist each accepted delivery under its `X-GitHub-Delivery` identity before sending a positive HTTP response. Persisted delivery data MUST exclude signatures, secrets, and fields not needed for workflow correlation.
-
-#### Scenario: Newly accepted delivery is durable
-- **WHEN** a valid allowed delivery is submitted
-- **THEN** the positive response is sent only after its delivery identity, body digest, repository, issue, event, action, and acceptance time are committed to the local inbox
 
 ### Requirement: Claim one eligible issue as one persistent run
 The dispatcher MUST create exactly one persistent LangGraph run for the first open, authorized, unblocked candidate in the registered adapter's deterministic repository frontier when no other active run exists. The run MUST use its persisted run identity as the LangGraph thread identity and MUST project the adapter's running label through that same adapter.
@@ -40,17 +21,6 @@ The dispatcher MUST create exactly one persistent LangGraph run for the first op
 #### Scenario: Ineligible issue is not claimed
 - **WHEN** an issue is closed, unauthorized, interrupted, blocked, or another issue already owns the repository's active run
 - **THEN** the delivery and disposition remain durable but no new run or running projection is created for that issue
-
-### Requirement: Deduplicate deliveries and claims
-The workflow MUST use `X-GitHub-Delivery` as the end-to-end idempotency key. Repeating an accepted delivery with the same body MUST be successful without dispatching, creating another run, or issuing another GitHub claim; reusing the delivery ID with a different body MUST be rejected as a conflict.
-
-#### Scenario: Identical delivery is repeated
-- **WHEN** the same signed body is delivered again with the same `X-GitHub-Delivery`
-- **THEN** the interface reports it as already accepted and the existing delivery, run, checkpoint, and GitHub claim counts remain unchanged
-
-#### Scenario: Delivery identity is reused for different content
-- **WHEN** a different signed body is submitted with an already persisted `X-GitHub-Delivery`
-- **THEN** the interface rejects the conflict without changing workflow or GitHub state
 
 ### Requirement: Expose durable workflow state across restart
 The productive workflow interface MUST expose the accepted delivery correlation, durable disposition and reason, run identity and status, adapter projection, and latest LangGraph checkpoint values for a repository issue. Reconstructing the application over the same database MUST expose the same state without creating a new run or projection.
