@@ -11,6 +11,10 @@ class IssueState:
     open: bool
     labels: frozenset[str]
     has_open_blockers: bool
+    title: str = ""
+    body: str = ""
+    issue_type: str = "feature"
+    findings: tuple[str, ...] = ()
 
 
 class GitHubPort(Protocol):
@@ -54,10 +58,18 @@ class GitHubHttpAdapter:
             label if isinstance(label, str) else label["name"]
             for label in issue.get("labels", [])
         )
+        issue_type_value = issue.get("type")
+        native_type = issue_type_value.get("name", "") if isinstance(issue_type_value, dict) else ""
+        is_bug = native_type.casefold() == "bug" or any(
+            label.casefold() in {"bug", "type: bug"} for label in labels
+        )
         return IssueState(
             open=issue.get("state") == "open",
             labels=labels,
             has_open_blockers=any(blocker.get("state") == "open" for blocker in blockers),
+            title=str(issue.get("title", "")),
+            body=str(issue.get("body") or ""),
+            issue_type="bug" if is_bug else "feature",
         )
 
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None:

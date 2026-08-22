@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "routes": {
+    "triage": ["triage"],
+    "slicing": ["to-tickets"],
+    "implementation:feature": ["implement", "tdd"],
+    "implementation:bug": ["diagnosing-bugs", "tdd"]
+  }
+}
