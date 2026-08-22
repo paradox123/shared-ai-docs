@@ -64,6 +64,18 @@ class WorkflowStore:
                     label TEXT NOT NULL,
                     projected_at TEXT NOT NULL
                 );
+
+                CREATE TABLE IF NOT EXISTS candidate_dispositions (
+                    repository TEXT NOT NULL,
+                    issue_number INTEGER NOT NULL,
+                    delivery_id TEXT NOT NULL REFERENCES inbox_deliveries(delivery_id),
+                    status TEXT NOT NULL
+                        CHECK (status IN ('queued', 'interrupted', 'selected', 'completed')),
+                    reason TEXT,
+                    issue_type TEXT NOT NULL,
+                    evaluated_at TEXT NOT NULL,
+                    PRIMARY KEY (repository, issue_number)
+                );
                 """
             )
 
@@ -106,14 +118,24 @@ class WorkflowStore:
         with self._lock:
             row = self._connection.execute(
                 """
-                SELECT delivery_id, status, accepted_at, event, action
-                FROM inbox_deliveries
-                WHERE repository = ? AND issue_number = ?
-                ORDER BY accepted_at DESC
-                LIMIT 1
+                SELECT d.delivery_id, d.status, d.accepted_at, d.event, d.action
+                FROM candidate_dispositions AS c
+                JOIN inbox_deliveries AS d ON d.delivery_id = c.delivery_id
+                WHERE c.repository = ? AND c.issue_number = ?
                 """,
                 (repository, issue_number),
             ).fetchone()
+            if row is None:
+                row = self._connection.execute(
+                    """
+                    SELECT delivery_id, status, accepted_at, event, action
+                    FROM inbox_deliveries
+                    WHERE repository = ? AND issue_number = ?
+                    ORDER BY accepted_at DESC
+                    LIMIT 1
+                    """,
+                    (repository, issue_number),
+                ).fetchone()
         if row is None:
             return None
         return {
@@ -124,7 +146,13 @@ class WorkflowStore:
             "action": row["action"],
         }
 
-    def claim_run(self, delivery: Delivery, *, created_at: str) -> dict[str, object] | None:
+    def claim_run(
+        self,
+        delivery: Delivery,
+        *,
+        issue_number: int,
+        created_at: str,
+    ) -> dict[str, object] | None:
         with self._lock:
             self._connection.execute("BEGIN IMMEDIATE")
             try:
@@ -134,7 +162,7 @@ class WorkflowStore:
                     FROM issue_runs
                     WHERE repository = ? AND issue_number = ?
                     """,
-                    (delivery.repository, delivery.issue_number),
+                    (delivery.repository, issue_number),
                 ).fetchone()
                 if existing is not None:
                     self._connection.commit()
@@ -158,7 +186,7 @@ class WorkflowStore:
                     (
                         run_id,
                         delivery.repository,
-                        delivery.issue_number,
+                        issue_number,
                         delivery.delivery_id,
                         created_at,
                     ),
@@ -227,6 +255,29 @@ class WorkflowStore:
         run.pop("created")
         return run
 
+    def active_run(self, repository: str) -> dict[str, object] | None:
+        with self._lock:
+            row = self._connection.execute(
+                """
+                SELECT run_id, repository, issue_number, status, created_at
+                FROM issue_runs
+                WHERE repository = ? AND status = 'running'
+                """,
+                (repository,),
+            ).fetchone()
+        if row is None:
+            return None
+        run = self._run_dict(row, created=False)
+        run.pop("created")
+        return run
+
+    def complete_run(self, run_id: str) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                "UPDATE issue_runs SET status = 'completed' WHERE run_id = ? AND status = 'running'",
+                (run_id,),
+            )
+
     def workflow_claim(self, run_id: str) -> dict[str, str] | None:
         with self._lock:
             row = self._connection.execute(
@@ -236,6 +287,60 @@ class WorkflowStore:
         if row is None:
             return None
         return {"label": row["label"], "projected_at": row["projected_at"]}
+
+    def record_disposition(
+        self,
+        delivery: Delivery,
+        *,
+        issue_number: int,
+        status: str,
+        reason: str | None,
+        issue_type: str,
+        evaluated_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                INSERT INTO candidate_dispositions (
+                    repository, issue_number, delivery_id, status, reason,
+                    issue_type, evaluated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(repository, issue_number) DO UPDATE SET
+                    delivery_id = excluded.delivery_id,
+                    status = excluded.status,
+                    reason = excluded.reason,
+                    issue_type = excluded.issue_type,
+                    evaluated_at = excluded.evaluated_at
+                """,
+                (
+                    delivery.repository,
+                    issue_number,
+                    delivery.delivery_id,
+                    status,
+                    reason,
+                    issue_type,
+                    evaluated_at,
+                ),
+            )
+
+    def workflow_disposition(self, repository: str, issue_number: int) -> dict[str, str | None] | None:
+        with self._lock:
+            row = self._connection.execute(
+                """
+                SELECT status, reason, issue_type, evaluated_at
+                FROM candidate_dispositions
+                WHERE repository = ? AND issue_number = ?
+                """,
+                (repository, issue_number),
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "status": row["status"],
+            "reason": row["reason"],
+            "issue_type": row["issue_type"],
+            "evaluated_at": row["evaluated_at"],
+        }
 
     def close(self) -> None:
         with self._lock:

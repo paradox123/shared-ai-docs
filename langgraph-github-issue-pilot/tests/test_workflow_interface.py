@@ -9,13 +9,19 @@ import pytest
 from fastapi.testclient import TestClient
 
 from github_issue_pilot.app import create_app
-from github_issue_pilot.github import IssueState
+from github_issue_pilot.github import BacklogIssue, BlockerState, IssueState
 
 SECRET = b"test-webhook-secret"
 REPOSITORY = "daniel/probare-crm"
 
 
 class ControlledGitHub:
+    contract_version = "1"
+    repository = REPOSITORY
+    ready_label = "ready-for-agent"
+    running_label = "agent-running"
+    allowed_event_actions = frozenset({("issues", "labeled")})
+
     def __init__(self) -> None:
         self.labels: set[str] = {"ready-for-agent"}
         self.open = True
@@ -26,7 +32,15 @@ class ControlledGitHub:
         return IssueState(
             open=self.open,
             labels=frozenset(self.labels),
-            has_open_blockers=self.open_blockers,
+            blockers=(BlockerState(40, False, False),) if self.open_blockers else (),
+        )
+
+    def backlog(self, trigger_issue_number: int) -> tuple[BacklogIssue, ...]:
+        return (
+            BacklogIssue(
+                trigger_issue_number,
+                self.issue_state(REPOSITORY, trigger_issue_number),
+            ),
         )
 
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None:
@@ -70,8 +84,7 @@ def test_signed_allowed_delivery_is_durable_before_acceptance(tmp_path) -> None:
     app = create_app(
         database_path=tmp_path / "pilot.db",
         webhook_secret=SECRET,
-        allowed_repositories={REPOSITORY},
-        github=ControlledGitHub(),
+        repository_adapters={REPOSITORY: ControlledGitHub()},
         clock=fixed_clock,
     )
     body = delivery_body()
@@ -97,8 +110,7 @@ def test_eligible_issue_gets_one_persistent_run_and_github_claim(tmp_path) -> No
     app = create_app(
         database_path=tmp_path / "pilot.db",
         webhook_secret=SECRET,
-        allowed_repositories={REPOSITORY},
-        github=github,
+        repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
     )
     body = delivery_body()
@@ -131,8 +143,7 @@ def test_repeated_delivery_keeps_the_same_run_checkpoint_and_claim(tmp_path) -> 
     app = create_app(
         database_path=tmp_path / "pilot.db",
         webhook_secret=SECRET,
-        allowed_repositories={REPOSITORY},
-        github=github,
+        repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
     )
     body = delivery_body()
@@ -157,8 +168,7 @@ def test_reused_delivery_id_with_different_body_is_rejected_without_effect(tmp_p
     app = create_app(
         database_path=tmp_path / "pilot.db",
         webhook_secret=SECRET,
-        allowed_repositories={REPOSITORY},
-        github=github,
+        repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
     )
     original = delivery_body()
@@ -183,8 +193,7 @@ def test_invalid_signature_is_rejected_before_invalid_json_is_parsed(tmp_path) -
     app = create_app(
         database_path=tmp_path / "pilot.db",
         webhook_secret=SECRET,
-        allowed_repositories={REPOSITORY},
-        github=github,
+        repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
     )
     body = b"not-json"
@@ -219,8 +228,7 @@ def test_unauthorized_deliveries_have_no_workflow_or_github_effect(
     app = create_app(
         database_path=tmp_path / "pilot.db",
         webhook_secret=SECRET,
-        allowed_repositories={REPOSITORY},
-        github=github,
+        repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
         **app_overrides,
     )
@@ -247,8 +255,7 @@ def test_ineligible_issue_is_accepted_without_a_run_or_claim(tmp_path, attribute
     app = create_app(
         database_path=tmp_path / "pilot.db",
         webhook_secret=SECRET,
-        allowed_repositories={REPOSITORY},
-        github=github,
+        repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
     )
     body = delivery_body()
@@ -269,8 +276,7 @@ def test_repository_with_a_running_issue_does_not_claim_a_second_issue(tmp_path)
     app = create_app(
         database_path=tmp_path / "pilot.db",
         webhook_secret=SECRET,
-        allowed_repositories={REPOSITORY},
-        github=github,
+        repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
     )
     first_body = delivery_body(issue_number=41)
@@ -300,8 +306,7 @@ def test_delivery_run_claim_and_checkpoint_remain_observable_after_restart(tmp_p
     first_app = create_app(
         database_path=database_path,
         webhook_secret=SECRET,
-        allowed_repositories={REPOSITORY},
-        github=github,
+        repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
     )
 
@@ -312,8 +317,7 @@ def test_delivery_run_claim_and_checkpoint_remain_observable_after_restart(tmp_p
     restarted_app = create_app(
         database_path=database_path,
         webhook_secret=SECRET,
-        allowed_repositories={REPOSITORY},
-        github=github,
+        repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
     )
     with TestClient(restarted_app) as client:
