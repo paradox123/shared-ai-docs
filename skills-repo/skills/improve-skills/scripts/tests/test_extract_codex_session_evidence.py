@@ -480,6 +480,351 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
                 output["counts"]["inspected_records"],
             )
 
+    def test_tool_call_projection_emits_only_bounded_sanitized_call_data(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "tool-calls.jsonl"
+            long_command = (
+                "API_TOKEN=custom-secret rg needle " + ("x" * 1000)
+            )
+            custom_input = (
+                "const r = await tools.exec_command({"
+                f"cmd: {json.dumps(long_command)}, "
+                f"workdir: {json.dumps(str(Path.home() / 'project'))}, "
+                "yield_time_ms: 10000}); text(r.output);"
+            )
+            records = [
+                {
+                    "type": "session_meta",
+                    "payload": {
+                        "id": "session-tools",
+                        "cwd": "/PRIVATE/MANIFEST/CWD",
+                    },
+                },
+                response_item(
+                    {
+                        "type": "custom_tool_call",
+                        "name": "exec",
+                        "call_id": "call-custom",
+                        "input": custom_input,
+                    }
+                ),
+                response_item(
+                    {
+                        "type": "custom_tool_call_output",
+                        "call_id": "call-custom",
+                        "output": json.dumps(
+                            {
+                                "status": "failed",
+                                "exit_code": 7,
+                                "output": "CUSTOM_OUTPUT_BODY_SECRET",
+                            }
+                        ),
+                    }
+                ),
+                response_item(
+                    {
+                        "type": "function_call",
+                        "name": "exec_command",
+                        "call_id": "call-direct",
+                        "arguments": json.dumps(
+                            {
+                                "cmd": "tool --token direct-secret check",
+                                "cwd": str(Path.home() / "legacy-project"),
+                            }
+                        ),
+                    },
+                    nested=True,
+                ),
+                response_item(
+                    {
+                        "type": "function_call_output",
+                        "call_id": "call-direct",
+                        "output": {
+                            "status": "completed",
+                            "exitCode": 0,
+                            "output": "DIRECT_OUTPUT_BODY_SECRET",
+                        },
+                    }
+                ),
+                response_item(
+                    {
+                        "type": "function_call",
+                        "name": "web__run",
+                        "call_id": "call-web",
+                        "arguments": '{"secret":"WEB_ARGUMENT_SECRET"}',
+                    }
+                ),
+                response_item(
+                    {
+                        "type": "function_call_output",
+                        "call_id": "call-web",
+                        "output": json.dumps(
+                            {
+                                "status": "completed",
+                                "output": "WEB_OUTPUT_BODY_SECRET",
+                            }
+                        ),
+                    }
+                ),
+                response_item(message("user", "OUTSIDE_PRIVATE_CONTENT")),
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "session-tools",
+                        "thread_name": "PRIVATE THREAD NAME",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "state": "complete",
+                            "review_line_start": 1,
+                            "review_line_end": 7,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            result = self.run_script(
+                manifest,
+                "--session-id",
+                "session-tools",
+                "--tool-call-projection",
+                "session-tools=2",
+                "--tool-call-projection",
+                "session-tools=4",
+                "--tool-call-projection",
+                "session-tools=6",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            for secret in (
+                "custom-secret",
+                "direct-secret",
+                "CUSTOM_OUTPUT_BODY_SECRET",
+                "DIRECT_OUTPUT_BODY_SECRET",
+                "WEB_ARGUMENT_SECRET",
+                "WEB_OUTPUT_BODY_SECRET",
+                "OUTSIDE_PRIVATE_CONTENT",
+                "PRIVATE THREAD NAME",
+                "/PRIVATE/MANIFEST/CWD",
+            ):
+                self.assertNotIn(secret, result.stdout)
+            output = json.loads(result.stdout)
+            self.assertEqual(output["mode"], "tool_call_projection")
+            self.assertEqual(output["counts"]["projected_tool_calls"], 3)
+            calls = output["tool_calls"]
+            self.assertEqual(
+                [(call["session_id"], call["line_number"]) for call in calls],
+                [
+                    ("session-tools", 2),
+                    ("session-tools", 4),
+                    ("session-tools", 6),
+                ],
+            )
+            self.assertEqual(
+                set(calls[0]),
+                {
+                    "session_id",
+                    "line_number",
+                    "tool_name",
+                    "command",
+                    "cwd",
+                    "paired_status",
+                    "paired_exit_code",
+                },
+            )
+            self.assertEqual(calls[0]["tool_name"], "exec_command")
+            self.assertIn("API_TOKEN=[redacted]", calls[0]["command"])
+            self.assertLessEqual(len(calls[0]["command"]), 600)
+            self.assertEqual(calls[0]["cwd"], "~/project")
+            self.assertEqual(calls[0]["paired_status"], "failed")
+            self.assertEqual(calls[0]["paired_exit_code"], 7)
+            self.assertEqual(calls[1]["tool_name"], "exec_command")
+            self.assertEqual(
+                calls[1]["command"], "tool --token [redacted] check"
+            )
+            self.assertEqual(calls[1]["cwd"], "~/legacy-project")
+            self.assertEqual(calls[1]["paired_status"], "completed")
+            self.assertEqual(calls[1]["paired_exit_code"], 0)
+            self.assertEqual(calls[2]["tool_name"], "web__run")
+            self.assertIsNone(calls[2]["command"])
+            self.assertIsNone(calls[2]["cwd"])
+            self.assertEqual(calls[2]["paired_status"], "completed")
+            self.assertIsNone(calls[2]["paired_exit_code"])
+
+    def test_tool_call_projection_requires_exact_ids_and_rejects_other_modes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            repo_root = root / "repo"
+            (repo_root / ".git").mkdir(parents=True)
+            rollout = root / "session.jsonl"
+            rollout.write_text(
+                json.dumps(
+                    response_item(
+                        {
+                            "type": "function_call",
+                            "name": "exec_command",
+                            "arguments": '{"cmd":"true"}',
+                        }
+                    )
+                )
+                + "\n"
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "resolved-session",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "review_line_start": 1,
+                            "review_line_end": 1,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            invocations = (
+                (
+                    ("--tool-call-projection", "resolved-session=1"),
+                    "requires exact --session-id",
+                ),
+                (
+                    (
+                        "--session-id",
+                        "resolved-session",
+                        "--tool-call-projection",
+                        "other-session=1",
+                    ),
+                    "missing matching --session-id",
+                ),
+                (
+                    (
+                        "--session-id",
+                        "resolved-session",
+                        "--tool-call-projection",
+                        "resolved-session=1",
+                        "--structural-projection",
+                    ),
+                    "cannot be combined",
+                ),
+                (
+                    (
+                        "--session-id",
+                        "resolved-session",
+                        "--tool-call-projection",
+                        "resolved-session=1",
+                        "--cwd-root",
+                        str(repo_root),
+                    ),
+                    "cannot be combined",
+                ),
+                (
+                    (
+                        "--session-id",
+                        "resolved-session",
+                        "--tool-call-projection",
+                        "resolved-session=1",
+                        "--list-clone-boundaries",
+                    ),
+                    "cannot be combined",
+                ),
+                (
+                    (
+                        "--session-id",
+                        "resolved-session",
+                        "--tool-call-projection",
+                        "resolved-session=1",
+                        "--clone-suffix-start",
+                        "resolved-session=1",
+                    ),
+                    "cannot be combined",
+                ),
+                (
+                    (
+                        "--session-id",
+                        "resolved-session",
+                        "--tool-call-projection",
+                        "invalid-value",
+                    ),
+                    "must use <session-id>=<line>",
+                ),
+            )
+            for invocation, error_text in invocations:
+                with self.subTest(invocation=invocation):
+                    result = self.run_script(manifest, *invocation)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(error_text, result.stderr)
+                    self.assertEqual(result.stdout, "")
+
+    def test_tool_call_projection_rejects_out_of_range_and_non_tool_lines(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "session.jsonl"
+            records = [
+                response_item(message("user", "OUTSIDE_BEFORE")),
+                response_item(message("user", "inside request")),
+                response_item(
+                    {
+                        "type": "function_call",
+                        "name": "exec_command",
+                        "arguments": '{"cmd":"true"}',
+                    }
+                ),
+                response_item(
+                    {
+                        "type": "function_call_output",
+                        "output": '{"exit_code":0}',
+                    }
+                ),
+                response_item(message("user", "OUTSIDE_AFTER")),
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "session",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "review_line_start": 2,
+                            "review_line_end": 4,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            invocations = (
+                ("session=1", "outside advertised range"),
+                ("session=5", "outside advertised range"),
+                ("session=2", "is not a tool call"),
+                ("session=4", "is not a tool call"),
+            )
+            for projection, error_text in invocations:
+                with self.subTest(projection=projection):
+                    result = self.run_script(
+                        manifest,
+                        "--session-id",
+                        "session",
+                        "--tool-call-projection",
+                        projection,
+                    )
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(error_text, result.stderr)
+                    self.assertEqual(result.stdout, "")
+
     def test_embedded_history_requires_manual_suffix_without_summaries(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

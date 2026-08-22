@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Extract bounded, argument-free session evidence from a resolver manifest."""
+"""Extract bounded session evidence from a resolver manifest."""
 
 import argparse
+import ast
 from collections import OrderedDict
 from itertools import islice
 import json
@@ -19,7 +20,21 @@ SAFE_LABEL_CHAR_LIMIT = 120
 DEFAULT_MAX_TOTAL_CHARS = 20_000
 MIN_MAX_TOTAL_CHARS = 2_000
 BOUNDARY_LINE_LIMIT = 64
+TOOL_COMMAND_CHAR_LIMIT = 600
+TOOL_CWD_CHAR_LIMIT = 240
+TOOL_RESULT_PARSE_CHAR_LIMIT = 4_000
 FINAL_PHASES = {"final", "final_answer"}
+SAFE_TOOL_STATUSES = {
+    "cancelled",
+    "completed",
+    "error",
+    "failed",
+    "interrupted",
+    "running",
+    "success",
+    "timed_out",
+    "timeout",
+}
 
 WRAPPER_PATTERNS = (
     re.compile(
@@ -39,6 +54,7 @@ WRAPPER_PATTERNS = (
 NESTED_TOOL_RE = re.compile(
     r"\btools\.([A-Za-z_][A-Za-z0-9_.-]*)\s*\("
 )
+NESTED_EXEC_COMMAND_RE = re.compile(r"\btools\.exec_command\s*\(")
 HEARTBEAT_START_RE = re.compile(r"^\s*<heartbeat\b", re.IGNORECASE)
 HEARTBEAT_OPEN_RE = re.compile(
     r"^\s*<heartbeat\b(?P<attributes>[^>]*)>",
@@ -48,6 +64,23 @@ HEARTBEAT_FIELDS = ("automation_id", "state", "decision", "status")
 SAFE_HEARTBEAT_LABEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:-]{0,119}$")
 WORKTREE_TAIL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 STRUCTURAL_LABEL_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:/-]*$")
+SENSITIVE_ASSIGNMENT_RE = re.compile(
+    r"\b(?P<key>[A-Za-z_][A-Za-z0-9_]*(?:token|secret|password|pass|"
+    r"api[_-]?key|authorization|auth|credential)[A-Za-z0-9_]*)"
+    r"\s*=\s*(?:\"(?:\\.|[^\"])*\"|'(?:\\.|[^'])*'|[^\s;&|]+)",
+    re.IGNORECASE,
+)
+SENSITIVE_FLAG_RE = re.compile(
+    r"(?P<flag>--(?:token|secret|password|pass|api[_-]?key|"
+    r"authorization|auth|credential))(?:\s*=\s*|\s+)"
+    r"(?:\"(?:\\.|[^\"])*\"|'(?:\\.|[^'])*'|[^\s;&|]+)",
+    re.IGNORECASE,
+)
+AUTHORIZATION_VALUE_RE = re.compile(
+    r"(?P<prefix>authorization\s*:\s*(?:bearer|basic)\s+)"
+    r"[^\s'\"]+",
+    re.IGNORECASE,
+)
 
 
 class EvidenceError(Exception):
@@ -240,6 +273,221 @@ def structural_record(record: dict, line_number: int) -> dict:
         "tool_name": tool_name,
         "session_id": record_session_id,
     }
+
+
+def normalize_home_path(text: str) -> str:
+    home = str(Path.home())
+    return re.sub(rf"{re.escape(home)}(?=/|$)", "~", text)
+
+
+def sanitized_command(value: object) -> Optional[str]:
+    if not isinstance(value, str):
+        return None
+    text = normalize_home_path(strip_injected_wrappers(value))
+    text = SENSITIVE_ASSIGNMENT_RE.sub(
+        lambda match: f"{match.group('key')}=[redacted]", text
+    )
+    text = SENSITIVE_FLAG_RE.sub(
+        lambda match: f"{match.group('flag')} [redacted]", text
+    )
+    text = AUTHORIZATION_VALUE_RE.sub(
+        lambda match: f"{match.group('prefix')}[redacted]", text
+    )
+    return bounded_text(text, TOOL_COMMAND_CHAR_LIMIT)
+
+
+def sanitized_cwd(value: object) -> Optional[str]:
+    if not isinstance(value, str):
+        return None
+    return bounded_text(
+        normalize_home_path(strip_injected_wrappers(value)),
+        TOOL_CWD_CHAR_LIMIT,
+    )
+
+
+def json_object(value: object) -> Optional[dict]:
+    if isinstance(value, dict):
+        return value
+    if not isinstance(value, str) or len(value) > TOOL_RESULT_PARSE_CHAR_LIMIT:
+        return None
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError:
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def js_string_literal(source: str, start: int) -> Tuple[Optional[str], int]:
+    if start >= len(source) or source[start] not in {'"', "'", "`"}:
+        return None, start
+    quote = source[start]
+    escaped = False
+    for index in range(start + 1, len(source)):
+        character = source[index]
+        if escaped:
+            escaped = False
+            continue
+        if character == "\\":
+            escaped = True
+            continue
+        if character != quote:
+            continue
+        raw = source[start : index + 1]
+        try:
+            if quote == '"':
+                value = json.loads(raw)
+            elif quote == "'":
+                value = ast.literal_eval(raw)
+            elif "${" not in raw:
+                value = raw[1:-1].replace("\\`", "`").replace("\\\\", "\\")
+            else:
+                value = None
+        except (ValueError, SyntaxError, json.JSONDecodeError):
+            value = None
+        return value if isinstance(value, str) else None, index + 1
+    return None, len(source)
+
+
+def skip_js_value(source: str, start: int) -> int:
+    pairs = {"{": "}", "[": "]", "(": ")"}
+    closing: List[str] = []
+    index = start
+    while index < len(source):
+        character = source[index]
+        if character in {'"', "'", "`"}:
+            _value, index = js_string_literal(source, index)
+            continue
+        if character in pairs:
+            closing.append(pairs[character])
+        elif closing and character == closing[-1]:
+            closing.pop()
+        elif not closing and character in {",", "}"}:
+            return index
+        index += 1
+    return index
+
+
+def js_object_string_fields(source: str, start: int) -> dict:
+    if start >= len(source) or source[start] != "{":
+        return {}
+    fields: Dict[str, str] = {}
+    index = start + 1
+    while index < len(source):
+        while index < len(source) and (
+            source[index].isspace() or source[index] == ","
+        ):
+            index += 1
+        if index >= len(source) or source[index] == "}":
+            break
+        if source[index] in {'"', "'"}:
+            key, index = js_string_literal(source, index)
+        else:
+            match = re.match(r"[A-Za-z_$][A-Za-z0-9_$]*", source[index:])
+            if not match:
+                return {}
+            key = match.group(0)
+            index += len(key)
+        while index < len(source) and source[index].isspace():
+            index += 1
+        if index >= len(source) or source[index] != ":":
+            return {}
+        index += 1
+        while index < len(source) and source[index].isspace():
+            index += 1
+        value = None
+        if index < len(source) and source[index] in {'"', "'", "`"}:
+            value, index = js_string_literal(source, index)
+        else:
+            index = skip_js_value(source, index)
+        if key in {"cmd", "cwd", "workdir"} and isinstance(value, str):
+            fields[key] = value
+    return fields
+
+
+def nested_exec_command_arguments(value: object) -> Optional[dict]:
+    if not isinstance(value, str):
+        return None
+    matches = list(NESTED_EXEC_COMMAND_RE.finditer(value))
+    if len(matches) != 1:
+        return None
+    index = matches[0].end()
+    while index < len(value) and value[index].isspace():
+        index += 1
+    if index >= len(value) or value[index] != "{":
+        return None
+    return js_object_string_fields(value, index)
+
+
+def call_identity(payload: dict) -> Optional[str]:
+    for key in ("call_id", "tool_call_id", "id"):
+        value = payload.get(key)
+        if isinstance(value, str) and 0 < len(value) <= 512:
+            return value
+    return None
+
+
+def safe_paired_result(payload: dict) -> Tuple[Optional[str], Optional[int]]:
+    candidates = [payload, json_object(payload.get("output"))]
+    status = None
+    exit_code = None
+    for candidate in candidates:
+        if not isinstance(candidate, dict):
+            continue
+        raw_status = candidate.get("status")
+        if isinstance(raw_status, str):
+            normalized_status = raw_status.strip().lower()
+            if normalized_status in SAFE_TOOL_STATUSES:
+                status = normalized_status
+        for key in ("exit_code", "exitCode"):
+            raw_exit_code = candidate.get(key)
+            if valid_integer(raw_exit_code):
+                exit_code = raw_exit_code
+                break
+    return status, exit_code
+
+
+def projected_tool_call(
+    record: dict, line_number: int, session_id: str
+) -> Tuple[dict, Optional[str]]:
+    payload = normalized_payload(record)
+    if record.get("type") != "response_item" or payload.get("type") not in {
+        "function_call",
+        "custom_tool_call",
+    }:
+        raise EvidenceError(
+            f"requested line {line_number} for "
+            f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} is not a tool call"
+        )
+    names = normalized_tool_names(payload)
+    if len(names) != 1:
+        raise EvidenceError(
+            f"requested line {line_number} for "
+            f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} does not identify exactly "
+            "one tool call"
+        )
+    tool_name = structural_label(names[0]) or "[redacted]"
+    arguments = None
+    if tool_name == "exec_command":
+        if payload.get("type") == "function_call":
+            arguments = json_object(payload.get("arguments"))
+        else:
+            arguments = nested_exec_command_arguments(payload.get("input"))
+    command = sanitized_command(arguments.get("cmd")) if arguments else None
+    cwd = None
+    if arguments:
+        cwd = sanitized_cwd(arguments.get("workdir") or arguments.get("cwd"))
+    return (
+        {
+            "session_id": structural_label(session_id),
+            "line_number": line_number,
+            "tool_name": tool_name,
+            "command": command,
+            "cwd": cwd,
+            "paired_status": None,
+            "paired_exit_code": None,
+        },
+        call_identity(payload),
+    )
 
 
 def valid_integer(value: object) -> bool:
@@ -601,6 +849,38 @@ def parse_clone_suffix_starts(raw_values: List[str]) -> Dict[str, int]:
     return starts
 
 
+def parse_tool_call_targets(raw_values: List[str]) -> List[Tuple[str, int]]:
+    targets: List[Tuple[str, int]] = []
+    seen = set()
+    for raw in raw_values:
+        session_id, separator, raw_line = raw.rpartition("=")
+        if not separator or not session_id or not raw_line:
+            raise EvidenceError(
+                "tool call projections must use <session-id>=<line>"
+            )
+        try:
+            line_number = int(raw_line)
+        except ValueError as exc:
+            raise EvidenceError(
+                f"tool call projection line for "
+                f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} must be an integer"
+            ) from exc
+        if line_number < 1:
+            raise EvidenceError(
+                f"tool call projection line for "
+                f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} must be positive"
+            )
+        target = (session_id, line_number)
+        if target in seen:
+            raise EvidenceError(
+                f"duplicate tool call projection for "
+                f"{session_id[:SAFE_LABEL_CHAR_LIMIT]}={line_number}"
+            )
+        seen.add(target)
+        targets.append(target)
+    return targets
+
+
 def path_is_within(path: Path, root: Path) -> bool:
     try:
         path.relative_to(root)
@@ -740,6 +1020,16 @@ def parse_args() -> argparse.Namespace:
         help=(
             "For exact --session-id selections, emit only content-free "
             "record structure from resolver-advertised ranges."
+        ),
+    )
+    parser.add_argument(
+        "--tool-call-projection",
+        action="append",
+        default=[],
+        metavar="SESSION_ID=LINE",
+        help=(
+            "Emit one bounded sanitized tool call from an exact advertised "
+            "line; may be repeated and requires matching --session-id filters."
         ),
     )
     parser.add_argument(
@@ -937,6 +1227,82 @@ def fit_structural_output(
     return rendered_document()
 
 
+def extract_tool_calls_for_session(
+    path: Path,
+    start: int,
+    end: int,
+    session_id: str,
+    target_lines: List[int],
+) -> Dict[int, dict]:
+    target_set = set(target_lines)
+    calls: Dict[int, Tuple[dict, Optional[str]]] = {}
+    paired_results: Dict[
+        str, List[Tuple[Optional[str], Optional[int]]]
+    ] = {}
+    for line_number, raw_line in advertised_lines(path, start, end):
+        record = rollout_record(path, line_number, raw_line)
+        if line_number in target_set:
+            calls[line_number] = projected_tool_call(
+                record, line_number, session_id
+            )
+        payload = normalized_payload(record)
+        if payload.get("type") not in {
+            "function_call_output",
+            "custom_tool_call_output",
+        }:
+            continue
+        output_call_id = call_identity(payload)
+        if output_call_id is None:
+            continue
+        paired_results.setdefault(output_call_id, []).append(
+            safe_paired_result(payload)
+        )
+
+    missing_lines = [line for line in target_lines if line not in calls]
+    if missing_lines:
+        raise EvidenceError(
+            f"tool call projection could not read requested line(s) for "
+            f"{session_id[:SAFE_LABEL_CHAR_LIMIT]}: "
+            + ", ".join(str(line) for line in missing_lines[:8])
+        )
+
+    projected: Dict[int, dict] = {}
+    for line_number in target_lines:
+        call, call_id = calls[line_number]
+        results = paired_results.get(call_id, []) if call_id else []
+        if len(results) == 1:
+            call["paired_status"], call["paired_exit_code"] = results[0]
+        projected[line_number] = call
+    return projected
+
+
+def fit_tool_call_output(
+    tool_calls: List[dict],
+    manifest_session_count: int,
+    selected_session_count: int,
+    filtered_out_session_count: int,
+    max_total_chars: int,
+    pretty: bool,
+) -> str:
+    document = {
+        "schema_version": 1,
+        "mode": "tool_call_projection",
+        "counts": {
+            "manifest_sessions": manifest_session_count,
+            "selected_sessions": selected_session_count,
+            "filtered_out_sessions": filtered_out_session_count,
+            "projected_tool_calls": len(tool_calls),
+        },
+        "tool_calls": tool_calls,
+    }
+    rendered = serialize(document, pretty)
+    if len(rendered) > max_total_chars:
+        raise EvidenceError(
+            "max-total-chars is too small for the bounded tool call projection"
+        )
+    return rendered
+
+
 def load_manifest(path: Path) -> dict:
     if not path.is_file():
         raise EvidenceError(f"manifest is not a readable file: {path}")
@@ -971,6 +1337,35 @@ def run(args: argparse.Namespace) -> str:
     worktree_tails = parse_worktree_tails(args.worktree_tail)
     has_path_selectors = bool(cwd_roots or worktree_tails)
     clone_suffix_starts = parse_clone_suffix_starts(args.clone_suffix_start)
+    tool_call_targets = parse_tool_call_targets(args.tool_call_projection)
+    if tool_call_targets and not requested_ids:
+        raise EvidenceError(
+            "--tool-call-projection requires exact --session-id filters"
+        )
+    if tool_call_targets and (
+        has_path_selectors
+        or args.structural_projection
+        or args.list_clone_boundaries
+        or clone_suffix_starts
+    ):
+        raise EvidenceError(
+            "--tool-call-projection cannot be combined with path, "
+            "structural, or clone modes"
+        )
+    tool_target_ids_not_selected = [
+        session_id
+        for session_id, _line_number in tool_call_targets
+        if session_id not in requested_ids
+    ]
+    if tool_target_ids_not_selected:
+        rendered_ids = ", ".join(
+            value[:SAFE_LABEL_CHAR_LIMIT]
+            for value in dict.fromkeys(tool_target_ids_not_selected)
+        )
+        raise EvidenceError(
+            "tool call projection session id(s) missing matching "
+            f"--session-id: {rendered_ids}"
+        )
     if args.structural_projection and not requested_ids:
         raise EvidenceError(
             "--structural-projection requires exact --session-id filters"
@@ -1071,6 +1466,58 @@ def run(args: argparse.Namespace) -> str:
             for index, session in enumerate(sessions)
             if matches_path_selectors(session, cwd_roots, worktree_tails)
         }
+
+    if tool_call_targets:
+        target_lines_by_session: Dict[str, List[int]] = {}
+        for session_id, line_number in tool_call_targets:
+            target_lines_by_session.setdefault(session_id, []).append(
+                line_number
+            )
+        calls_by_target: Dict[Tuple[str, int], dict] = {}
+        for index, session in enumerate(sessions, start=1):
+            raw_session_id = session.get("id")
+            if not isinstance(raw_session_id, str):
+                continue
+            if raw_session_id not in target_lines_by_session:
+                continue
+            start, end, _embedded = session_range(session, index)
+            target_lines = target_lines_by_session[raw_session_id]
+            outside_lines = [
+                line_number
+                for line_number in target_lines
+                if line_number < start or line_number > end
+            ]
+            if outside_lines:
+                rendered_lines = ", ".join(
+                    str(line_number) for line_number in outside_lines[:8]
+                )
+                raise EvidenceError(
+                    f"tool call projection line(s) {rendered_lines} for "
+                    f"{raw_session_id[:SAFE_LABEL_CHAR_LIMIT]} are outside "
+                    f"advertised range {start}:{end}"
+                )
+            path = rollout_path(session, index, manifest_path.parent)
+            projected = extract_tool_calls_for_session(
+                path,
+                start,
+                end,
+                raw_session_id,
+                target_lines,
+            )
+            for line_number, call in projected.items():
+                calls_by_target[(raw_session_id, line_number)] = call
+        ordered_calls = [
+            calls_by_target[target] for target in tool_call_targets
+        ]
+        selected_count = len(selected_indexes)
+        return fit_tool_call_output(
+            ordered_calls,
+            len(sessions),
+            selected_count,
+            len(sessions) - selected_count,
+            args.max_total_chars,
+            args.pretty,
+        )
 
     if args.structural_projection:
         structural_projections: List[dict] = []

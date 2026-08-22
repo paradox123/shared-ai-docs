@@ -6,7 +6,9 @@ disable-model-invocation: true
 
 This skill takes the current conversation context and codebase understanding and produces a spec. Do NOT interview the user; just synthesize what you already know.
 
-The issue tracker and triage label vocabulary should have been provided to you. If not, tell the user to run `/setup-matt-pocock-skills`.
+Before reading or publishing tracker items, load the repository's configured tracker and triage guidance, normally `docs/agents/issue-tracker.md` and `docs/agents/triage-labels.md`. Those files define both the tracker backend and how workflow states are represented. If that guidance is absent, tell the user to run `/setup-matt-pocock-skills` and stop before mutating any tracker.
+
+Do not assume `ready-for-agent` is a remote label. In a local Markdown tracker it may be document status or metadata; use the representation prescribed by the tracker guide. Do not inspect, create, rename, or recolor GitHub labels unless the configured tracker guidance explicitly selects GitHub and requires that mutation.
 
 ## Process
 
@@ -16,7 +18,7 @@ The issue tracker and triage label vocabulary should have been provided to you. 
 
 Check with the user that these seams match their expectations.
 
-3. Write the spec using the template below, then publish it to the project issue tracker. Apply the `ready-for-agent` triage label - no need for additional triage.
+3. Write the spec using the template below, then publish it through the configured project issue tracker. Set `ready-for-agent` using that tracker's documented representation; no additional triage is needed.
 
 <spec-template>
 
