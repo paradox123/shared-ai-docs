@@ -21,4 +21,4 @@
 
 ## Implementation Evidence
 
-Implemented through active OpenSpec change `implement-isolated-issue-worker`. Criterion-level evidence is recorded in `openspec/changes/implement-isolated-issue-worker/implementation-evidence.md`.
+Implemented through archived OpenSpec change `implement-isolated-issue-worker`. Criterion-level evidence is recorded in `openspec/changes/archive/2026-08-22-implement-isolated-issue-worker/implementation-evidence.md`.
