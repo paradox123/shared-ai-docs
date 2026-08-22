@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
   "fastapi>=0.116,<1",
   "httpx>=0.28,<1",
+  "jsonschema>=4.25,<5",
   "langgraph>=1.0,<2",
   "langgraph-checkpoint-sqlite>=3.0.1,<4",
   "uvicorn>=0.35,<1",

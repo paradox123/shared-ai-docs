@@ -15,6 +15,7 @@ from github_issue_pilot.github import (
     REPOSITORY_ADAPTER_VERSION,
     RepositoryAdapter,
 )
+from github_issue_pilot.implementation import ImplementationServices
 from github_issue_pilot.storage import Delivery, WorkflowStore
 from github_issue_pilot.workflow import WorkflowRuntime
 
@@ -36,8 +37,8 @@ async def _bounded_body(request: Request, maximum: int) -> bytes:
     return bytes(body)
 
 
-def _verify_signature(body: bytes, supplied: str | None, secret: bytes) -> None:
-    expected = "sha256=" + hmac.new(secret, body, hashlib.sha256).hexdigest()
+def _verify_signature(message: bytes, supplied: str | None, secret: bytes) -> None:
+    expected = "sha256=" + hmac.new(secret, message, hashlib.sha256).hexdigest()
     if supplied is None or not hmac.compare_digest(supplied, expected):
         raise HTTPException(status_code=401, detail="invalid signature")
 
@@ -86,17 +87,23 @@ def _delivery_from_request(
 def create_app(
     *,
     database_path: Path,
-    webhook_secret: bytes,
+    webhook_secret: bytes | None,
     clock: Callable[[], datetime],
     repository_adapters: Mapping[str, RepositoryAdapter],
+    internal_webhook_secret: bytes | None = None,
     max_request_bytes: int = 1_048_576,
+    implementation: ImplementationServices | None = None,
 ) -> FastAPI:
+    if (webhook_secret is None) == (internal_webhook_secret is None):
+        raise ValueError("exactly one webhook authentication mode must be configured")
+
     store = WorkflowStore(database_path)
     runtime = WorkflowRuntime(
         database_path=database_path,
         store=store,
         repository_adapters=repository_adapters,
         clock=clock,
+        implementation=implementation,
     )
 
     @asynccontextmanager
@@ -112,7 +119,19 @@ def create_app(
     @app.post("/webhooks/github")
     async def accept_github_delivery(request: Request, background_tasks: BackgroundTasks) -> JSONResponse:
         body = await _bounded_body(request, max_request_bytes)
-        _verify_signature(body, request.headers.get("x-hub-signature-256"), webhook_secret)
+        if webhook_secret is not None:
+            signed_message = body
+            supplied_signature = request.headers.get("x-hub-signature-256")
+            authentication_secret = webhook_secret
+        else:
+            delivery_id = request.headers.get("x-github-delivery", "").strip()
+            event = request.headers.get("x-github-event", "").strip()
+            signed_message = b"\n".join((delivery_id.encode(), event.encode(), body))
+            supplied_signature = request.headers.get("x-pilot-signature-256")
+            if internal_webhook_secret is None:  # Guarded during application construction.
+                raise RuntimeError("internal webhook secret is unavailable")
+            authentication_secret = internal_webhook_secret
+        _verify_signature(signed_message, supplied_signature, authentication_secret)
         delivery = _delivery_from_request(
             body=body,
             request=request,

@@ -32,6 +32,9 @@ class IssueState:
     authorization: AuthorizationEvidence = AuthorizationEvidence()
     blockers: tuple[BlockerState, ...] = ()
     implementation_pr_merged: bool = False
+    title: str = ""
+    body: str = ""
+    findings: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -160,6 +163,8 @@ class GitHubHttpAdapter:
                 repository,
                 issue_number,
             ),
+            title=str(issue.get("title", "")),
+            body=str(issue.get("body") or ""),
         )
 
     @staticmethod

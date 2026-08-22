@@ -4,12 +4,26 @@ import sqlite3
 from collections.abc import Callable, Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 
 from github_issue_pilot.github import AUTHORIZED_ORIGINS, IssueState, RepositoryAdapter
+from github_issue_pilot.implementation import (
+    ImplementationServices,
+    WorkerExecutionError,
+    WorkerInvocation,
+    Worktree,
+    build_assignment,
+    validate_worker_result,
+)
+from github_issue_pilot.policy import (
+    NodePolicy,
+    NodeSelection,
+    SkillProvenance,
+    SkillRouter,
+)
 from github_issue_pilot.storage import Delivery, WorkflowStore
 
 
@@ -19,6 +33,11 @@ class ClaimState(TypedDict):
     issue_number: int
     status: str
     claim_label: str
+    assignment: NotRequired[dict[str, object]]
+    worktree: NotRequired[dict[str, str]]
+    policy: NotRequired[dict[str, str]]
+    skills: NotRequired[list[dict[str, str]]]
+    access_profile: NotRequired[dict[str, object]]
 
 
 class WorkflowRuntime:
@@ -29,17 +48,26 @@ class WorkflowRuntime:
         store: WorkflowStore,
         repository_adapters: Mapping[str, RepositoryAdapter],
         clock: Callable[[], datetime],
+        implementation: ImplementationServices | None = None,
     ) -> None:
         self._store = store
         self._repository_adapters = repository_adapters
         self._clock = clock
+        self._implementation = implementation
         self._checkpoint_connection = sqlite3.connect(database_path, check_same_thread=False)
         self._checkpointer = SqliteSaver(self._checkpoint_connection)
 
         builder = StateGraph(ClaimState)
         builder.add_node("project_claim", self._project_claim)
         builder.add_edge(START, "project_claim")
-        builder.add_edge("project_claim", END)
+        if implementation is None:
+            builder.add_edge("project_claim", END)
+        else:
+            builder.add_node("prepare_implementation", self._prepare_implementation)
+            builder.add_node("execute_worker", self._execute_worker)
+            builder.add_edge("project_claim", "prepare_implementation")
+            builder.add_edge("prepare_implementation", "execute_worker")
+            builder.add_edge("execute_worker", END)
         self._graph = builder.compile(checkpointer=self._checkpointer)
 
     def _project_claim(self, state: ClaimState) -> dict[str, str]:
@@ -52,6 +80,131 @@ class WorkflowRuntime:
             projected_at=self._clock().isoformat(),
         )
         return {"status": "claimed", "claim_label": label}
+
+    def _prepare_implementation(self, state: ClaimState) -> dict[str, object]:
+        services = self._require_implementation()
+        repository = state["repository"]
+        context = services.repository_contexts[repository]
+        run_id = self._store.run_id_for_issue(repository, state["issue_number"])
+        current_issue = self._repository_adapters[repository].issue_state(
+            repository, state["issue_number"]
+        )
+        assignment = build_assignment(
+            repository=repository,
+            issue_number=state["issue_number"],
+            issue=current_issue,
+            repository_context=context,
+        )
+        selection = NodePolicy.packaged().select("implementation")
+        issue_type = (
+            "bug"
+            if current_issue.issue_type.casefold() == "bug"
+            or any(label.casefold() in {"bug", "type: bug"} for label in current_issue.labels)
+            else "feature"
+        )
+        skills = SkillRouter.packaged(services.skill_root).route(
+            "implementation", issue_type=issue_type
+        )
+        worktree = services.worktrees.create(
+            run_id=run_id,
+            repository=repository,
+            repository_root=services.repository_roots[repository],
+            base_ref=context.base_ref,
+        )
+        skill_records = [
+            {"name": skill.name, "content_sha256": skill.content_sha256} for skill in skills
+        ]
+        access_profile: dict[str, object] = {
+            "role": "implementer",
+            "sandbox": selection.sandbox,
+            "write_root": str(worktree.path),
+            "additional_write_roots": [],
+        }
+        if selection.model is None or selection.reasoning_effort is None:
+            raise RuntimeError("implementation policy must select a model and reasoning effort")
+        self._store.prepare_implementation(
+            run_id=run_id,
+            assignment=assignment,
+            worktree_path=str(worktree.path),
+            branch=worktree.branch,
+            base_ref=worktree.base_ref,
+            policy_version=selection.policy_version,
+            model=selection.model,
+            reasoning_effort=selection.reasoning_effort,
+            skills=skill_records,
+            access_profile=access_profile,
+            started_at=self._clock().isoformat(),
+        )
+        return {
+            "assignment": assignment,
+            "worktree": {
+                "path": str(worktree.path),
+                "branch": worktree.branch,
+                "base_ref": worktree.base_ref,
+            },
+            "policy": {
+                "version": selection.policy_version,
+                "task": selection.task,
+                "model": selection.model,
+                "reasoning_effort": selection.reasoning_effort,
+                "sandbox": selection.sandbox,
+            },
+            "skills": skill_records,
+            "access_profile": access_profile,
+        }
+
+    def _execute_worker(self, state: ClaimState) -> dict[str, str]:
+        services = self._require_implementation()
+        policy = state["policy"]
+        run_id = self._store.run_id_for_issue(state["repository"], state["issue_number"])
+        diagnostic_events: list[dict[str, object]] = []
+        try:
+            output = services.worker.run(
+                WorkerInvocation(
+                    assignment=state["assignment"],
+                    worktree=Worktree(
+                        path=Path(state["worktree"]["path"]),
+                        branch=state["worktree"]["branch"],
+                        base_ref=state["worktree"]["base_ref"],
+                    ),
+                    selection=NodeSelection(
+                        policy_version=policy["version"],
+                        task=policy["task"],
+                        model=policy["model"],
+                        reasoning_effort=policy["reasoning_effort"],
+                        sandbox=policy["sandbox"],
+                    ),
+                    skills=tuple(
+                        SkillProvenance(
+                            name=skill["name"], content_sha256=skill["content_sha256"]
+                        )
+                        for skill in state["skills"]
+                    ),
+                    access_profile=state["access_profile"],
+                )
+            )
+            diagnostic_events = list(output.diagnostic_events)
+            validate_worker_result(output.result)
+        except WorkerExecutionError as exc:
+            self._store.fail_implementation(
+                run_id=run_id,
+                error=f"{type(exc).__name__}: worker execution failed",
+                diagnostic_events=diagnostic_events,
+                completed_at=self._clock().isoformat(),
+            )
+            return {"status": "worker_failed"}
+        self._store.complete_implementation(
+            run_id=run_id,
+            result=output.result,
+            diagnostic_events=diagnostic_events,
+            completed_at=self._clock().isoformat(),
+        )
+        return {"status": "implemented"}
+
+    def _require_implementation(self) -> ImplementationServices:
+        if self._implementation is None:
+            raise RuntimeError("implementation services are not configured")
+        return self._implementation
 
     def dispatch(self, delivery: Delivery) -> None:
         adapter = self._repository_adapters[delivery.repository]
@@ -206,12 +359,16 @@ class WorkflowRuntime:
         claim = self._store.workflow_claim(str(run["id"])) if run is not None else None
         checkpoint = self.checkpoint(str(run["id"])) if run is not None else None
         disposition = self._store.workflow_disposition(repository, issue_number)
+        implementation = (
+            self._store.workflow_implementation(str(run["id"])) if run is not None else None
+        )
         return {
             "delivery": delivery,
             "disposition": disposition,
             "run": run,
             "claim": claim,
             "checkpoint": checkpoint,
+            "implementation": implementation,
         }
 
     def close(self) -> None:

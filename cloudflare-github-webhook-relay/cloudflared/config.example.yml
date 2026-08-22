@@ -1,0 +1,10 @@
+# Copy to a private cloudflared configuration location and replace placeholders.
+# Never commit the generated tunnel credentials JSON.
+tunnel: <TUNNEL-UUID>
+credentials-file: /absolute/private/path/<TUNNEL-UUID>.json
+
+ingress:
+  - hostname: github-pilot.example.com
+    path: ^/webhooks/github$
+    service: http://127.0.0.1:8788
+  - service: http_status:404

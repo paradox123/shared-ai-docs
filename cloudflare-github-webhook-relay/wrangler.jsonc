@@ -1,0 +1,46 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "danielsvault-github-webhook-relay",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-22",
+  "compatibility_flags": ["nodejs_compat"],
+  "secrets": {
+    "required": [
+      "GITHUB_WEBHOOK_SECRET",
+      "PILOT_INTERNAL_WEBHOOK_SECRET"
+    ]
+  },
+  "vars": {
+    "ALLOWED_REPOSITORIES": "daniel/probare-crm",
+    "ALLOWED_EVENT_ACTIONS": "issues:labeled",
+    "MAX_BODY_BYTES": "100000",
+    "LOCAL_RECEIVER_URL": "https://github-pilot.example.com/webhooks/github"
+  },
+  "queues": {
+    "producers": [
+      {
+        "binding": "DELIVERY_QUEUE",
+        "queue": "danielsvault-github-deliveries"
+      }
+    ],
+    "consumers": [
+      {
+        "queue": "danielsvault-github-deliveries",
+        "max_batch_size": 10,
+        "max_batch_timeout": 5,
+        "max_retries": 3,
+        "dead_letter_queue": "danielsvault-github-deliveries-dlq"
+      }
+    ]
+  },
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "head_sampling_rate": 1
+    },
+    "traces": {
+      "enabled": true,
+      "head_sampling_rate": 0.01
+    }
+  }
+}

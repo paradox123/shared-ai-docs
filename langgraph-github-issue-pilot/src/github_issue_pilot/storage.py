@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sqlite3
 import threading
 import uuid
@@ -75,6 +76,25 @@ class WorkflowStore:
                     issue_type TEXT NOT NULL,
                     evaluated_at TEXT NOT NULL,
                     PRIMARY KEY (repository, issue_number)
+                );
+
+                CREATE TABLE IF NOT EXISTS implementation_executions (
+                    run_id TEXT PRIMARY KEY REFERENCES issue_runs(run_id),
+                    status TEXT NOT NULL CHECK (status IN ('running', 'completed', 'failed')),
+                    assignment_json TEXT NOT NULL,
+                    worktree_path TEXT NOT NULL,
+                    branch TEXT NOT NULL,
+                    base_ref TEXT NOT NULL,
+                    policy_version TEXT NOT NULL,
+                    model TEXT NOT NULL,
+                    reasoning_effort TEXT NOT NULL,
+                    skills_json TEXT NOT NULL,
+                    access_profile_json TEXT NOT NULL,
+                    diagnostic_events_json TEXT,
+                    result_json TEXT,
+                    error TEXT,
+                    started_at TEXT NOT NULL,
+                    completed_at TEXT
                 );
                 """
             )
@@ -342,6 +362,133 @@ class WorkflowStore:
             "evaluated_at": row["evaluated_at"],
         }
 
+    def prepare_implementation(
+        self,
+        *,
+        run_id: str,
+        assignment: dict[str, object],
+        worktree_path: str,
+        branch: str,
+        base_ref: str,
+        policy_version: str,
+        model: str,
+        reasoning_effort: str,
+        skills: list[dict[str, str]],
+        access_profile: dict[str, object],
+        started_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                INSERT INTO implementation_executions (
+                    run_id, status, assignment_json, worktree_path, branch, base_ref,
+                    policy_version, model, reasoning_effort, skills_json,
+                    access_profile_json, started_at
+                ) VALUES (?, 'running', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(run_id) DO NOTHING
+                """,
+                (
+                    run_id,
+                    json.dumps(assignment, sort_keys=True),
+                    worktree_path,
+                    branch,
+                    base_ref,
+                    policy_version,
+                    model,
+                    reasoning_effort,
+                    json.dumps(skills, sort_keys=True),
+                    json.dumps(access_profile, sort_keys=True),
+                    started_at,
+                ),
+            )
+
+    def workflow_implementation(self, run_id: str) -> dict[str, object] | None:
+        with self._lock:
+            row = self._connection.execute(
+                """
+                SELECT status, assignment_json, worktree_path, branch, base_ref,
+                       policy_version, model, reasoning_effort, skills_json,
+                       access_profile_json, diagnostic_events_json, result_json,
+                       error, started_at, completed_at
+                FROM implementation_executions WHERE run_id = ?
+                """,
+                (run_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "status": row["status"],
+            "assignment": json.loads(row["assignment_json"]),
+            "worktree": {
+                "path": row["worktree_path"],
+                "branch": row["branch"],
+                "base_ref": row["base_ref"],
+            },
+            "policy": {
+                "version": row["policy_version"],
+                "model": row["model"],
+                "reasoning_effort": row["reasoning_effort"],
+            },
+            "skills": json.loads(row["skills_json"]),
+            "access_profile": json.loads(row["access_profile_json"]),
+            "diagnostic_events": (
+                json.loads(row["diagnostic_events_json"])
+                if row["diagnostic_events_json"] is not None
+                else []
+            ),
+            "result": json.loads(row["result_json"]) if row["result_json"] is not None else None,
+            "error": row["error"],
+            "started_at": row["started_at"],
+            "completed_at": row["completed_at"],
+        }
+
+    def complete_implementation(
+        self,
+        *,
+        run_id: str,
+        result: dict[str, object],
+        diagnostic_events: list[dict[str, object]],
+        completed_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE implementation_executions
+                SET status = 'completed', result_json = ?, diagnostic_events_json = ?,
+                    error = NULL, completed_at = ?
+                WHERE run_id = ? AND status = 'running'
+                """,
+                (
+                    json.dumps(result, sort_keys=True),
+                    json.dumps(diagnostic_events, sort_keys=True),
+                    completed_at,
+                    run_id,
+                ),
+            )
+
+    def fail_implementation(
+        self,
+        *,
+        run_id: str,
+        error: str,
+        diagnostic_events: list[dict[str, object]],
+        completed_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE implementation_executions
+                SET status = 'failed', result_json = NULL, diagnostic_events_json = ?,
+                    error = ?, completed_at = ?
+                WHERE run_id = ? AND status = 'running'
+                """,
+                (
+                    json.dumps(diagnostic_events, sort_keys=True),
+                    error,
+                    completed_at,
+                    run_id,
+                ),
+            )
     def close(self) -> None:
         with self._lock:
             self._connection.close()

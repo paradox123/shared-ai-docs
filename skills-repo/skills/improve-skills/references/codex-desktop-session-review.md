@@ -218,7 +218,18 @@ python3 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/impro
   --structural-projection
 ```
 
-Structural mode opens only resolved selected sessions and the exact inclusive ranges advertised by the persisted manifest. It emits only line number, record type, payload type, role, phase, bounded direct tool name, and session id; it never emits message text, tool arguments or outputs, encrypted reasoning, thread names, or other payload content. It fails closed without exact ids, for unknown or unresolved ids, and when combined with path selectors or clone boundary/suffix modes. The JSON is capped by `--max-total-chars`; check `omitted_records` before relying on an incomplete projection and raise the cap deliberately when more structural lines are required. Only when this projection and the compact helper summary confirm that a finding truly needs command or result detail may a second deliberate projection emit the single required field; redact sensitive values and injected wrappers, cap each field and the total output, and do not include adjacent records.
+Structural mode opens only resolved selected sessions and the exact inclusive ranges advertised by the persisted manifest. It emits only line number, record type, payload type, role, phase, bounded direct tool name, and session id; it never emits message text, tool arguments or outputs, encrypted reasoning, thread names, or other payload content. It fails closed without exact ids, for unknown or unresolved ids, and when combined with path selectors or clone boundary/suffix modes. The JSON is capped by `--max-total-chars`; check `omitted_records` before relying on an incomplete projection and raise the cap deliberately when more structural lines are required.
+
+Only when the structural projection and compact summary show that a finding genuinely needs one concrete tool call, rerun the same persisted manifest with the exact structural line. Repeat both flags when several positively identified calls are required:
+
+```bash
+python3 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/extract_codex_session_evidence.py \
+  --manifest "$RESOLVER_MANIFEST" \
+  --session-id <exact-session-id> \
+  --tool-call-projection <exact-session-id>=<exact-tool-call-line>
+```
+
+Tool-call projection requires matching exact `--session-id` filters, stays inside each resolver-advertised range, and fails closed for unknown, unresolved, out-of-range, duplicate, or non-tool lines. It cannot be combined with path selectors, structural projection, or clone boundary/suffix modes. It emits only the normalized tool name plus a sanitized, capped command and cwd for `exec_command`; home paths become `~/...`, common credential assignments and flags are redacted, and arbitrary arguments for other tools are never rendered. A uniquely call-id-paired structured result may contribute only a fixed status label and integer exit code. Tool output/body, neighboring records, thread names, reasoning, and unselected payloads are never emitted. If the selected call cannot be parsed safely, its optional command, cwd, status, or exit-code field remains `null`; do not fall back to `jq`, raw JSONL readers, inline parsers, or `read_thread` for command detail.
 
 If the resolver reports embedded session metadata, the normal helper output emits `manual_suffix_selection_required` without summarizing imported content. Do not write an inline JSONL scanner. Rerun the same persisted manifest with exact allowlisted clone ids and `--list-clone-boundaries`; this emits only capped line-number maps for outer/embedded session metadata, task starts/completions, substantive user messages, and assistant finals:
 

@@ -5,6 +5,8 @@ This repository contains AI-related documentation, prompts, skills, hooks, and w
 ## Contents
 
 - **n8n/**: Workflow automation engine setup
+- **langgraph-github-issue-pilot/**: Local persistent GitHub issue workflow receiver
+- **cloudflare-github-webhook-relay/**: Signed Cloudflare Worker, Queue, DLQ, and Tunnel relay for the local pilot
 - (More sections to be added as the repository grows)
 
 ## Purpose
