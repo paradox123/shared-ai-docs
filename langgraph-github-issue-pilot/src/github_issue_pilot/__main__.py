@@ -24,15 +24,18 @@ def main() -> None:
         if repository.strip()
     }
     github = GitHubHttpAdapter(_required_environment("GITHUB_TOKEN"))
-    app = create_app(
-        database_path=Path(_required_environment("PILOT_DATABASE_PATH")),
-        webhook_secret=_required_environment("GITHUB_WEBHOOK_SECRET").encode(),
-        allowed_repositories=repositories,
-        github=github,
-        clock=lambda: datetime.now(UTC),
-        max_request_bytes=int(os.environ.get("PILOT_MAX_REQUEST_BYTES", "1048576")),
-    )
+    github_webhook_secret = os.environ.get("GITHUB_WEBHOOK_SECRET", "").strip()
+    internal_webhook_secret = os.environ.get("PILOT_INTERNAL_WEBHOOK_SECRET", "").strip()
     try:
+        app = create_app(
+            database_path=Path(_required_environment("PILOT_DATABASE_PATH")),
+            webhook_secret=github_webhook_secret.encode() if github_webhook_secret else None,
+            internal_webhook_secret=internal_webhook_secret.encode() if internal_webhook_secret else None,
+            allowed_repositories=repositories,
+            github=github,
+            clock=lambda: datetime.now(UTC),
+            max_request_bytes=int(os.environ.get("PILOT_MAX_REQUEST_BYTES", "1048576")),
+        )
         uvicorn.run(
             app,
             host=os.environ.get("PILOT_HOST", "127.0.0.1"),
