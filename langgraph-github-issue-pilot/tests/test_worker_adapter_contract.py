@@ -47,7 +47,7 @@ def valid_assignment() -> dict[str, object]:
 
 def valid_result() -> dict[str, object]:
     return {
-        "schema_version": "1",
+        "schema_version": "2",
         "outcome": "completed",
         "summary": "Implemented export",
         "red_green_slices": [
@@ -59,7 +59,32 @@ def valid_result() -> dict[str, object]:
         ],
         "changed_files": ["src/export.py"],
         "verification": [{"command": "pytest", "observed": "passed"}],
-        "evidence": [{"criterion": "Customer can export CSV", "proof": "HTTP 200 with CSV body"}],
+        "evidence": [
+            {
+                "criterion": "Customer can export CSV",
+                "verdict": "pass",
+                "kind": "rest",
+                "observed_interface": "HTTP API",
+                "expected_result": "CSV is returned",
+                "observations": [
+                    {
+                        "phase": "request",
+                        "description": "Requested export",
+                        "artifact": "POST /exports",
+                    },
+                    {
+                        "phase": "response",
+                        "description": "Export resource created",
+                        "artifact": "201 export_id=41",
+                    },
+                    {
+                        "phase": "read_back",
+                        "description": "CSV contains customer row",
+                        "artifact": "GET /exports/41 -> customer_id",
+                    },
+                ],
+            }
+        ],
         "findings": [],
     }
 
@@ -115,7 +140,7 @@ print(json.dumps({"type": "turn.completed"}))
     assert 'approval_policy="never"' in args
     assert args[args.index("--sandbox") + 1] == "workspace-write"
     assert args[args.index("--cd") + 1] == str(worktree)
-    assert Path(args[args.index("--output-schema") + 1]).name == "worker-result-v1.json"
+    assert Path(args[args.index("--output-schema") + 1]).name == "worker-result-v2.json"
     assert "--json" in args
     assert args[-1] == "-"
     assert "$implement" in prompt and "$tdd" in prompt

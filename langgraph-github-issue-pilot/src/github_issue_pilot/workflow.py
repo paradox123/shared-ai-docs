@@ -9,7 +9,19 @@ from typing import NotRequired, TypedDict
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 
-from github_issue_pilot.github import AUTHORIZED_ORIGINS, IssueState, RepositoryAdapter
+from github_issue_pilot.evidence import (
+    EvidenceRejected,
+    qualify_evidence,
+    redact_payload,
+    redact_text,
+    render_pull_request_body,
+)
+from github_issue_pilot.github import (
+    AUTHORIZED_ORIGINS,
+    DraftPullRequestError,
+    IssueState,
+    RepositoryAdapter,
+)
 from github_issue_pilot.implementation import (
     ImplementationServices,
     WorkerExecutionError,
@@ -24,6 +36,7 @@ from github_issue_pilot.policy import (
     SkillProvenance,
     SkillRouter,
 )
+from github_issue_pilot.publication import SourcePublicationError
 from github_issue_pilot.storage import Delivery, WorkflowStore
 
 
@@ -67,7 +80,12 @@ class WorkflowRuntime:
             builder.add_node("execute_worker", self._execute_worker)
             builder.add_edge("project_claim", "prepare_implementation")
             builder.add_edge("prepare_implementation", "execute_worker")
-            builder.add_edge("execute_worker", END)
+            if implementation.source_control is None:
+                builder.add_edge("execute_worker", END)
+            else:
+                builder.add_node("publish_draft_pr", self._publish_draft_pr)
+                builder.add_edge("execute_worker", "publish_draft_pr")
+                builder.add_edge("publish_draft_pr", END)
         self._graph = builder.compile(checkpointer=self._checkpointer)
 
     def _project_claim(self, state: ClaimState) -> dict[str, str]:
@@ -183,9 +201,18 @@ class WorkflowRuntime:
                     access_profile=state["access_profile"],
                 )
             )
-            diagnostic_events = list(output.diagnostic_events)
-            validate_worker_result(output.result)
-        except WorkerExecutionError as exc:
+            redacted_diagnostics = redact_payload(
+                list(output.diagnostic_events),
+                services.sensitive_values,
+            )
+            redacted_result = redact_payload(output.result, services.sensitive_values)
+            if not isinstance(redacted_diagnostics, list) or not isinstance(
+                redacted_result, dict
+            ):
+                raise TypeError("redaction changed structured worker output shape")
+            diagnostic_events = redacted_diagnostics
+            validate_worker_result(redacted_result)
+        except (WorkerExecutionError, TypeError) as exc:
             self._store.fail_implementation(
                 run_id=run_id,
                 error=f"{type(exc).__name__}: worker execution failed",
@@ -195,11 +222,104 @@ class WorkflowRuntime:
             return {"status": "worker_failed"}
         self._store.complete_implementation(
             run_id=run_id,
-            result=output.result,
+            result=redacted_result,
             diagnostic_events=diagnostic_events,
             completed_at=self._clock().isoformat(),
         )
         return {"status": "implemented"}
+
+    def _publish_draft_pr(self, state: ClaimState) -> dict[str, str]:
+        services = self._require_implementation()
+        source_control = services.source_control
+        if source_control is None:
+            raise RuntimeError("source control is not configured")
+        run_id = self._store.run_id_for_issue(state["repository"], state["issue_number"])
+        implementation = self._store.workflow_implementation(run_id)
+        if implementation is None or implementation["result"] is None:
+            return {"status": "worker_failed"}
+        assignment = implementation["assignment"]
+        result = implementation["result"]
+        now = self._clock().isoformat()
+        try:
+            qualified = qualify_evidence(
+                assignment["requirements"],
+                result,
+                sensitive_values=services.sensitive_values,
+            )
+            render_pull_request_body(
+                issue_number=state["issue_number"],
+                head_sha="0" * 40,
+                evidence=qualified,
+            )
+        except EvidenceRejected as exc:
+            self._store.reject_publication(
+                run_id=run_id,
+                reason=str(exc),
+                rejected_at=now,
+            )
+            return {"status": "evidence_rejected"}
+
+        worktree = Worktree(
+            path=Path(implementation["worktree"]["path"]),
+            branch=implementation["worktree"]["branch"],
+            base_ref=implementation["worktree"]["base_ref"],
+        )
+        self._store.begin_publication(
+            run_id=run_id,
+            evidence=qualified,
+            branch=worktree.branch,
+            started_at=now,
+        )
+        try:
+            published = source_control.publish(
+                worktree,
+                issue_number=state["issue_number"],
+                sensitive_values=services.sensitive_values,
+            )
+            body = render_pull_request_body(
+                issue_number=state["issue_number"],
+                head_sha=published.head_sha,
+                evidence=qualified,
+            )
+            issue = assignment["issue"]
+            pull_request = self._repository_adapters[state["repository"]].ensure_draft_pull_request(
+                state["repository"],
+                issue_number=state["issue_number"],
+                branch=published.branch,
+                title=redact_text(
+                    f"Implement #{state['issue_number']}: {issue['title']}",
+                    services.sensitive_values,
+                ),
+                body=body,
+                head_sha=published.head_sha,
+            )
+            if pull_request.body != body:
+                raise RuntimeError("pull request body does not match qualified evidence")
+        except (
+            DraftPullRequestError,
+            EvidenceRejected,
+            OSError,
+            RuntimeError,
+            SourcePublicationError,
+            TypeError,
+            ValueError,
+        ):
+            self._store.reject_publication(
+                run_id=run_id,
+                reason="publication_failed",
+                rejected_at=self._clock().isoformat(),
+            )
+            return {"status": "publication_failed"}
+        self._store.complete_publication(
+            run_id=run_id,
+            branch=published.branch,
+            head_sha=published.head_sha,
+            body=body,
+            pull_request_number=pull_request.number,
+            pull_request_url=pull_request.url,
+            completed_at=self._clock().isoformat(),
+        )
+        return {"status": "draft_pr_published"}
 
     def _require_implementation(self) -> ImplementationServices:
         if self._implementation is None:
@@ -362,6 +482,9 @@ class WorkflowRuntime:
         implementation = (
             self._store.workflow_implementation(str(run["id"])) if run is not None else None
         )
+        draft_pull_request = (
+            self._store.workflow_publication(str(run["id"])) if run is not None else None
+        )
         return {
             "delivery": delivery,
             "disposition": disposition,
@@ -369,6 +492,7 @@ class WorkflowRuntime:
             "claim": claim,
             "checkpoint": checkpoint,
             "implementation": implementation,
+            "draft_pull_request": draft_pull_request,
         }
 
     def close(self) -> None:
