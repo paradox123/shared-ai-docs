@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 import os
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
 import uvicorn
 
+from github_issue_pilot.activation import run_cli
 from github_issue_pilot.app import create_app
 from github_issue_pilot.github import (
     ConfiguredRepositoryAdapter,
     GitHubHttpAdapter,
-    RepositorySettings,
 )
 from github_issue_pilot.implementation import (
     CodexCliWorker,
@@ -18,29 +19,10 @@ from github_issue_pilot.implementation import (
     ImplementationServices,
     RepositoryContext,
 )
+from github_issue_pilot.profiles import PROBARE_CRM_PROFILE
 from github_issue_pilot.publication import GitSourceControl
 from github_issue_pilot.review import CodexCliReviewWorker
 from github_issue_pilot.verification import CommandDeterministicVerifier
-
-PROBARE_CRM_EVENTS = frozenset(
-    {
-        ("issues", "opened"),
-        ("issues", "edited"),
-        ("issues", "labeled"),
-        ("issues", "unlabeled"),
-        ("issues", "reopened"),
-        ("issues", "closed"),
-        ("pull_request", "opened"),
-        ("pull_request", "synchronize"),
-        ("pull_request", "closed"),
-        ("pull_request_review", "submitted"),
-        ("pull_request_review", "dismissed"),
-        ("pull_request_review_comment", "created"),
-        ("pull_request_review_comment", "edited"),
-        ("issue_comment", "created"),
-        ("issue_comment", "edited"),
-    }
-)
 
 
 def _required_environment(name: str) -> str:
@@ -109,6 +91,8 @@ def _implementation_services(repositories: set[str]) -> ImplementationServices:
 
 
 def main() -> None:
+    if len(sys.argv) > 1:
+        raise SystemExit(run_cli(sys.argv[1:], environment=os.environ))
     repositories = {
         repository.strip()
         for repository in _required_environment("PILOT_ALLOWED_REPOSITORIES").split(",")
@@ -117,7 +101,7 @@ def main() -> None:
     if len(repositories) != 1:
         raise RuntimeError("the pilot requires exactly one configured probare-crm repository")
     repository = next(iter(repositories))
-    if repository.rsplit("/", maxsplit=1)[-1] != "probare-crm":
+    if repository.rsplit("/", maxsplit=1)[-1] != PROBARE_CRM_PROFILE.repository_name:
         raise RuntimeError("the only live pilot repository must be named probare-crm")
     github = GitHubHttpAdapter(
         _required_environment("GITHUB_TOKEN"),
@@ -125,10 +109,9 @@ def main() -> None:
     )
     adapter = ConfiguredRepositoryAdapter(
         github,
-        RepositorySettings(
-            repository=repository,
+        PROBARE_CRM_PROFILE.settings(
+            repository,
             base_ref=os.environ.get("PILOT_BASE_REF", "main").strip() or "main",
-            allowed_event_actions=PROBARE_CRM_EVENTS,
         ),
     )
     github_webhook_secret = os.environ.get("GITHUB_WEBHOOK_SECRET", "").strip()

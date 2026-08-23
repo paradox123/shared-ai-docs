@@ -11,11 +11,18 @@
     ]
   },
   "vars": {
-    "ALLOWED_REPOSITORIES": "daniel/probare-crm",
-    "ALLOWED_EVENT_ACTIONS": "issues:labeled,pull_request_review:submitted,pull_request_review_comment:created,pull_request:closed",
+    "ALLOWED_REPOSITORIES": "paradox123/probare-crm",
+    "ALLOWED_EVENT_ACTIONS": "issue_comment:created,issue_comment:edited,issues:closed,issues:edited,issues:labeled,issues:opened,issues:reopened,issues:unlabeled,pull_request:closed,pull_request:opened,pull_request:synchronize,pull_request_review:dismissed,pull_request_review:submitted,pull_request_review_comment:created,pull_request_review_comment:edited",
     "MAX_BODY_BYTES": "100000",
-    "LOCAL_RECEIVER_URL": "https://github-pilot.example.com/webhooks/github"
+    "LOCAL_RECEIVER_URL": "http://127.0.0.1:8788/webhooks/github"
   },
+  "vpc_services": [
+    {
+      "binding": "LOCAL_NETWORK",
+      "service_id": "01a02e8e-5e1d-70f1-90ef-83c0030fb326",
+      "remote": true
+    }
+  ],
   "queues": {
     "producers": [
       {

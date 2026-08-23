@@ -7,6 +7,46 @@ REPAIR_HEAD = "abcdef1234567890abcdef1234567890abcdef12"
 NOW = "2026-08-23T10:30:00+00:00"
 
 
+def test_restarted_publication_rehydrates_qualified_evidence_before_review(tmp_path) -> None:
+    store = WorkflowStore(tmp_path / "pilot.db")
+    delivery = Delivery(
+        delivery_id="delivery-001",
+        body_digest="digest",
+        repository="daniel/probare-crm",
+        issue_number=41,
+        event="issues",
+        action="labeled",
+        accepted_at=NOW,
+    )
+    store.accept(delivery)
+    run = store.claim_run(delivery, issue_number=41, created_at=NOW)
+    assert run is not None
+    run_id = str(run["id"])
+    branch = f"codex/run-{run_id}"
+    store.begin_publication(
+        run_id=run_id,
+        evidence=[],
+        branch=branch,
+        started_at=NOW,
+    )
+
+    qualified = [{"criterion": "Customer can export CSV", "verdict": "pass"}]
+    store.begin_publication(
+        run_id=run_id,
+        evidence=qualified,
+        branch=branch,
+        started_at=NOW,
+    )
+
+    publication = store.workflow_publication(run_id)
+    store.close()
+
+    assert publication is not None
+    assert publication["status"] == "publishing"
+    assert publication["evidence"] == qualified
+    assert publication["branch"] == branch
+
+
 def test_published_run_updates_same_draft_identity_to_repair_head_idempotently(tmp_path) -> None:
     store = WorkflowStore(tmp_path / "pilot.db")
     delivery = Delivery(

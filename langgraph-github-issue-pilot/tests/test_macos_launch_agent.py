@@ -19,6 +19,7 @@ import pytest
 
 PILOTCTL = Path(__file__).parents[1] / "ops" / "macos" / "pilotctl"
 SUPERVISOR = Path(__file__).parents[1] / "ops" / "macos" / "pilot-supervisor"
+BOOTSTRAP_LIVE_CONFIG = Path(__file__).parents[1] / "ops" / "macos" / "bootstrap-live-config"
 SECRET = "never-print-this-pilot-secret"
 
 
@@ -38,6 +39,11 @@ def valid_environment(tmp_path: Path, **overrides: str | None) -> Path:
     worktrees = tmp_path / "worktrees"
     skill_root = tmp_path / "skills"
     repository.mkdir()
+    subprocess.run(
+        ["git", "init", "-b", "main", str(repository)],
+        check=True,
+        capture_output=True,
+    )
     worktrees.mkdir()
     skill_root.mkdir()
     context = tmp_path / "CONTEXT.md"
@@ -48,6 +54,7 @@ def valid_environment(tmp_path: Path, **overrides: str | None) -> Path:
         "CLOUDFLARED_EXECUTABLE": str(cloudflared),
         "CLOUDFLARED_CONFIG": str(tunnel_config),
         "CLOUDFLARED_TUNNEL_NAME": "danielsvault-github-pilot",
+        "PILOT_GITHUB_WEBHOOK_URL": "https://relay.example.test/webhooks/github",
         "PILOT_PUBLIC_RECEIVER_URL": "https://pilot.example.test/webhooks/github",
         "PILOT_HOST": "127.0.0.1",
         "PILOT_PORT": "18788",
@@ -128,6 +135,111 @@ def test_private_loopback_named_tunnel_configuration_is_accepted(tmp_path: Path)
     assert result.returncode == 0
     assert result.stdout == "configuration_status=valid\n"
     assert result.stderr == ""
+    assert SECRET not in result.stdout + result.stderr
+
+
+def test_live_operator_commands_validate_private_config_and_delegate_to_pilot_cli(
+    tmp_path: Path,
+) -> None:
+    pilot = write_executable(
+        tmp_path / "github-issue-pilot-live",
+        """#!/bin/bash
+printf 'live_command=%s repository=%s\n' "$*" "$PILOT_ALLOWED_REPOSITORIES"
+""",
+    )
+    environment = valid_environment(tmp_path / "configuration", PILOT_EXECUTABLE=str(pilot))
+    evidence_path = tmp_path / "private" / "evidence.json"
+
+    readiness = run_pilotctl(["live-readiness", str(environment)])
+    labels = run_pilotctl(["ensure-live-labels", str(environment)])
+    evidence = run_pilotctl(
+        ["capture-live-evidence", str(environment), "17", str(evidence_path)]
+    )
+
+    assert readiness.returncode == labels.returncode == evidence.returncode == 0
+    assert readiness.stdout == "live_command=live-readiness repository=daniel/probare-crm\n"
+    assert labels.stdout == "live_command=ensure-live-labels repository=daniel/probare-crm\n"
+    assert evidence.stdout == (
+        "live_command=capture-live-evidence 17 "
+        f"{evidence_path} repository=daniel/probare-crm\n"
+    )
+    combined = "".join(
+        result.stdout + result.stderr for result in (readiness, labels, evidence)
+    )
+    assert SECRET not in combined
+
+
+def test_live_config_bootstrap_writes_only_private_runtime_files(tmp_path: Path) -> None:
+    private_root = tmp_path / "private"
+    repository = tmp_path / "repository"
+    worktrees = tmp_path / "worktrees"
+    skill_root = tmp_path / "skills"
+    repository.mkdir()
+    subprocess.run(
+        ["git", "init", "-b", "main", str(repository)],
+        check=True,
+        capture_output=True,
+    )
+    worktrees.mkdir()
+    skill_root.mkdir()
+    context = repository / "AGENTS.md"
+    context.write_text("Repository context\n", encoding="utf-8")
+    executable = write_executable(tmp_path / "pilot")
+    cloudflared = write_executable(tmp_path / "cloudflared")
+    codex = write_executable(tmp_path / "codex")
+    command_environment = os.environ.copy()
+    command_environment.update(
+        {
+            "LIVE_CLOUDFLARE_ACCOUNT_ID": "a" * 32,
+            "LIVE_TUNNEL_ID": "12345678-1234-1234-1234-123456789abc",
+            "LIVE_TUNNEL_SECRET": "c2VjcmV0LWJhc2U2NA==",
+            "LIVE_GITHUB_TOKEN": SECRET,
+            "LIVE_GIT_AUTHOR_NAME": "paradox123",
+            "LIVE_GIT_AUTHOR_EMAIL": "11044764+paradox123@users.noreply.github.com",
+            "LIVE_GITHUB_WEBHOOK_SECRET": "github-webhook-secret",
+            "LIVE_INTERNAL_WEBHOOK_SECRET": "internal-webhook-secret",
+            "LIVE_PILOT_EXECUTABLE": str(executable),
+            "LIVE_CLOUDFLARED_EXECUTABLE": str(cloudflared),
+            "LIVE_CODEX_EXECUTABLE": str(codex),
+            "LIVE_REPOSITORY_ROOT": str(repository),
+            "LIVE_WORKTREE_ROOT": str(worktrees),
+            "LIVE_REPOSITORY_CONTEXT_PATH": str(context),
+            "LIVE_SKILL_ROOT": str(skill_root),
+        }
+    )
+
+    result = subprocess.run(
+        ["/bin/bash", str(BOOTSTRAP_LIVE_CONFIG), str(private_root)],
+        check=False,
+        capture_output=True,
+        text=True,
+        env=command_environment,
+    )
+
+    assert result.returncode == 0
+    assert result.stdout == "live_configuration_status=written\n"
+    assert result.stderr == ""
+    environment = private_root / "pilot.env"
+    tunnel_config = private_root / "cloudflared.yml"
+    tunnel_credentials = private_root / "tunnel-credentials.json"
+    assert all(path.is_file() for path in (environment, tunnel_config, tunnel_credentials))
+    assert all(stat.S_IMODE(path.stat().st_mode) == 0o600 for path in (environment, tunnel_config, tunnel_credentials))
+    assert stat.S_IMODE(private_root.stat().st_mode) == 0o700
+    assert "paradox123/probare-crm" in environment.read_text(encoding="utf-8")
+    assert "danielsvault-github-webhook-relay" in environment.read_text(encoding="utf-8")
+    assert "github-pilot.ki-fuer-kmu.de" in tunnel_config.read_text(encoding="utf-8")
+    assert subprocess.run(
+        ["git", "-C", str(repository), "config", "--local", "user.name"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip() == "paradox123"
+    assert subprocess.run(
+        ["git", "-C", str(repository), "config", "--local", "user.email"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip() == "11044764+paradox123@users.noreply.github.com"
     assert SECRET not in result.stdout + result.stderr
 
 

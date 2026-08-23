@@ -5,14 +5,14 @@ This package receives GitHub webhooks at Cloudflare, verifies GitHub's raw-body 
 ## Trust and delivery boundaries
 
 1. GitHub sends `POST /webhooks/github` with `X-Hub-Signature-256`.
-2. The Worker verifies the unchanged bounded body before parsing, checks repository/event/action, and awaits one Queue `send()` before returning `202`.
+2. The Worker verifies the unchanged bounded body before parsing, checks repository/event/action, and awaits one Queue `send(..., { contentType: "v8" })` before returning `202`.
 3. The Queue consumer signs the UTF-8 delivery/event prefix followed by the exact authenticated raw-body bytes with `PILOT_INTERNAL_WEBHOOK_SECRET` and posts those unchanged bytes to the exact Tunnel URL.
 4. The local receiver verifies that independent signature and atomically accepts or deduplicates the delivery before replying.
 5. The consumer acknowledges only matching `202 accepted` or `200 already_accepted`; every other outcome is retried with bounded backoff.
 
 Queue envelopes and logs exclude both signatures, both secrets, and response/request bodies. `GITHUB_WEBHOOK_SECRET` and `PILOT_INTERNAL_WEBHOOK_SECRET` must be distinct.
 
-`MAX_BODY_BYTES` must be a positive integer no greater than `120000`. The hard ceiling leaves room below Cloudflare Queues' 128-KB message limit for envelope metadata. The Queue envelope stores the raw body as an `ArrayBuffer`, avoiding a lossy text round-trip. Oversized bodies are rejected while streaming rather than buffered in full.
+`MAX_BODY_BYTES` must be a positive integer no greater than `120000`. The hard ceiling leaves room below Cloudflare Queues' 128-KB message limit for envelope metadata. The Queue envelope stores the raw body as an `ArrayBuffer` and explicitly selects V8 structured-clone serialization, avoiding both a lossy text round-trip and JSON serialization of the buffer as an empty object. Oversized bodies are rejected while streaming rather than buffered in full.
 
 ## Accepted operating boundary
 
@@ -48,7 +48,7 @@ npx wrangler secret put PILOT_INTERNAL_WEBHOOK_SECRET
 npm run deploy
 ```
 
-Do not pipe secrets through shell history or add them to `wrangler.jsonc`, `.env`, evidence, or logs. Replace the example `LOCAL_RECEIVER_URL` hostname in `wrangler.jsonc` before deployment while keeping HTTPS and the exact `/webhooks/github` path.
+Do not pipe secrets through shell history or add them to `wrangler.jsonc`, `.env`, evidence, or logs. The production configuration binds only `paradox123/probare-crm`. Its Queue consumer uses a VPC Service bound to the named Tunnel and fixed to `127.0.0.1:8788`; Worker code additionally permits only `/webhooks/github`. The separately validated public Tunnel hostname remains `https://github-pilot.ki-fuer-kmu.de/webhooks/github` for direct route verification.
 
 ## Configure the named outbound Tunnel
 
@@ -57,14 +57,14 @@ Install `cloudflared`, authenticate, create a named tunnel, and route the chosen
 ```bash
 cloudflared tunnel login
 cloudflared tunnel create danielsvault-github-pilot
-cloudflared tunnel route dns danielsvault-github-pilot github-pilot.example.com
+cloudflared tunnel route dns danielsvault-github-pilot github-pilot.ki-fuer-kmu.de
 ```
 
 Copy [config.example.yml](cloudflared/config.example.yml) to a private configuration location, replace the tunnel UUID, credentials path, and hostname, then validate and run it:
 
 ```bash
 cloudflared tunnel --config /private/path/config.yml ingress validate
-cloudflared tunnel --config /private/path/config.yml ingress rule https://github-pilot.example.com/webhooks/github
+cloudflared tunnel --config /private/path/config.yml ingress rule https://github-pilot.ki-fuer-kmu.de/webhooks/github
 cloudflared tunnel --config /private/path/config.yml run danielsvault-github-pilot
 ```
 
@@ -84,7 +84,7 @@ unset GITHUB_WEBHOOK_SECRET
 export PILOT_INTERNAL_WEBHOOK_SECRET="..."
 cd ../langgraph-github-issue-pilot
 export PILOT_DATABASE_PATH="$PWD/pilot.db"
-export PILOT_ALLOWED_REPOSITORIES="daniel/probare-crm"
+export PILOT_ALLOWED_REPOSITORIES="paradox123/probare-crm"
 export GITHUB_TOKEN="..."
 uv run github-issue-pilot
 ```

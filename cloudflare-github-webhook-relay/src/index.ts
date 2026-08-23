@@ -15,6 +15,30 @@ interface GitHubPayload {
 
 const encoder = new TextEncoder();
 const MAXIMUM_CONFIGURED_BODY_BYTES = 120_000;
+const VPC_ERROR_CODES = new Set([
+  "connection_refused",
+  "connection_terminated",
+  "connection_timeout",
+  "connection_limit_reached",
+  "destination_unavailable",
+  "destination_not_found",
+  "destination_ip_prohibited",
+  "destination_ip_unroutable",
+  "proxy_loop_detected",
+  "dns_error",
+  "dns_timeout",
+  "tls_protocol_error",
+  "tls_certificate_error",
+  "http_request_error",
+  "http_upgrade_failed",
+  "http_request_denied",
+  "http_protocol_error",
+  "http_response_incomplete",
+  "connection_read_timeout",
+  "connection_write_timeout",
+  "rate_limited",
+  "proxy_internal_error",
+]);
 
 function jsonResponse(body: object, status: number): Response {
   return Response.json(body, { status });
@@ -193,6 +217,25 @@ function logDelivery(fields: Record<string, string | number>): void {
   console.log(JSON.stringify(fields));
 }
 
+function vpcErrorCode(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return "unknown";
+  }
+  const match = /\b([a-z]+(?:_[a-z]+)+)\b/.exec(error.message);
+  const code = match?.[1];
+  return code !== undefined && VPC_ERROR_CODES.has(code) ? code : "unknown";
+}
+
+function errorStructure(error: unknown): { error_name: string; error_fields: string } {
+  if (typeof error !== "object" || error === null) {
+    return { error_name: typeof error, error_fields: "none" };
+  }
+  const record = error as Record<string, unknown>;
+  const name = typeof record.name === "string" && /^[A-Za-z]{1,32}$/.test(record.name) ? record.name : "unknown";
+  const fields = ["name", "message", "code", "cause"].filter((field) => Object.hasOwn(error, field));
+  return { error_name: name, error_fields: fields.length > 0 ? fields.join(",") : "none" };
+}
+
 function safeReceiverUrl(configured: string): URL | undefined {
   let url: URL;
   try {
@@ -201,7 +244,9 @@ function safeReceiverUrl(configured: string): URL | undefined {
     return undefined;
   }
   if (
-    url.protocol !== "https:" ||
+    url.protocol !== "http:" ||
+    url.hostname !== "127.0.0.1" ||
+    url.port !== "8788" ||
     url.username !== "" ||
     url.password !== "" ||
     url.pathname !== "/webhooks/github" ||
@@ -239,9 +284,11 @@ async function deliverMessage(message: Message<DeliveryEnvelope>, env: Env): Pro
   }
   let response: Response;
   let result: unknown;
+  let stage = "signing";
   try {
     const signature = await internalSignature(message.body, env.PILOT_INTERNAL_WEBHOOK_SECRET);
-    response = await fetch(receiverUrl, {
+    stage = "fetch";
+    response = await env.LOCAL_NETWORK.fetch(receiverUrl.href, {
       method: "POST",
       headers: {
         "content-type": message.body.content_type,
@@ -250,15 +297,19 @@ async function deliverMessage(message: Message<DeliveryEnvelope>, env: Env): Pro
         "x-pilot-signature-256": signature,
       },
       body: message.body.raw_body,
-      signal: AbortSignal.timeout(10_000),
     });
+    stage = "response";
     result = await smallJson(response);
-  } catch {
+  } catch (error) {
     message.retry({ delaySeconds });
+    const structure = errorStructure(error);
     logDelivery({
       outcome: "delivery_retry",
       delivery_id: message.body.delivery_id,
       attempt: message.attempts,
+      error_code: vpcErrorCode(error),
+      ...structure,
+      stage,
       delay_seconds: delaySeconds,
     });
     return;
@@ -358,7 +409,7 @@ async function handleIngress(request: Request, env: Env): Promise<Response> {
     raw_body: body.slice().buffer,
   };
   try {
-    await env.DELIVERY_QUEUE.send(envelope);
+    await env.DELIVERY_QUEUE.send(envelope, { contentType: "v8" });
   } catch {
     console.error(JSON.stringify({ outcome: "queue_publish_failed", delivery_id: deliveryId }));
     return jsonResponse({ error: "queue unavailable" }, 503);

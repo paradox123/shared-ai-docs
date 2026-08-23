@@ -1050,7 +1050,10 @@ class WorkflowStore:
                 INSERT INTO draft_pr_publications (
                     run_id, status, evidence_json, branch, started_at
                 ) VALUES (?, 'publishing', ?, ?, ?)
-                ON CONFLICT(run_id) DO NOTHING
+                ON CONFLICT(run_id) DO UPDATE SET
+                    evidence_json = excluded.evidence_json,
+                    branch = excluded.branch
+                WHERE draft_pr_publications.status = 'publishing'
                 """,
                 (run_id, json.dumps(evidence, sort_keys=True), branch, started_at),
             )

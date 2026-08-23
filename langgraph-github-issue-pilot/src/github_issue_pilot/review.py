@@ -189,6 +189,8 @@ def validate_review_result(result: dict[str, object]) -> None:
         Draft202012Validator(load_contract("review-verdict-v1.json")).validate(result)
     except ValidationError as exc:
         raise InvalidReviewContract(f"review result does not match schema: {exc.message}") from exc
+    if result["verdict"] == "fail" and not result["findings"]:
+        raise InvalidReviewContract("failed review must include a finding")
     if result["axis"] == "requirements" and result["verdict"] == "not_applicable":
         raise InvalidReviewContract("requirements review must be applicable")
 

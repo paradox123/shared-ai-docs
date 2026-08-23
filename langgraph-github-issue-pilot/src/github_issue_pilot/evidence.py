@@ -20,6 +20,7 @@ _REQUIRED_PHASES = {
     "idempotency": frozenset({"repeat", "read_back"}),
     "negative_gate": frozenset({"rejection", "side_effect_read_back"}),
     "background": frozenset({"eventual_result"}),
+    "document": frozenset({"read_back"}),
 }
 _ARTIFACT_PHASES = frozenset(
     {"request", "response", "read_back", "screenshot", "side_effect_read_back", "eventual_result", "log"}
