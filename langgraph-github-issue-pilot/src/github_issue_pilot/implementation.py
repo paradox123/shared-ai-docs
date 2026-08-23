@@ -15,11 +15,13 @@ from jsonschema.validators import Draft202012Validator
 
 from github_issue_pilot.contracts import load_contract
 from github_issue_pilot.github import IssueState
-from github_issue_pilot.policy import NodeSelection, SkillProvenance
+from github_issue_pilot.policy import NodePolicy, NodeSelection, SkillProvenance
 from github_issue_pilot.publication import SourceControlPort
 
 if TYPE_CHECKING:
+    from github_issue_pilot.repair import RepairInvocation, RepairOutput
     from github_issue_pilot.review import ReviewWorkerPort
+    from github_issue_pilot.verification import DeterministicVerifierPort
 
 _ACCEPTANCE_CRITERION = re.compile(r"^\s*-\s*\[[ xX]\]\s+(.+?)\s*$")
 _SAFE_RUN_ID = re.compile(r"[A-Za-z0-9._-]+")
@@ -76,6 +78,8 @@ class WorktreePort(Protocol):
 
 class WorkerPort(Protocol):
     def run(self, invocation: WorkerInvocation) -> WorkerOutput: ...
+
+    def repair(self, invocation: RepairInvocation) -> RepairOutput: ...
 
 
 class GitWorktreeAdapter:
@@ -145,24 +149,113 @@ class CodexCliWorker:
             f"{json.dumps(invocation.assignment, sort_keys=True)}\n"
             "</implementation-assignment>"
         )
-        schema_resource = files("github_issue_pilot.contracts").joinpath("worker-result-v2.json")
+        output = self._execute_codex(
+            selection=invocation.selection,
+            worktree=invocation.worktree,
+            prompt=prompt,
+            schema_name="worker-result-v2.json",
+            temporary_prefix="github-issue-pilot-worker-",
+            result_filename="worker-result.json",
+            process_name="Codex",
+        )
+        validate_worker_result(output.result)
+        return output
+
+    def repair(self, invocation: RepairInvocation) -> RepairOutput:
+        from github_issue_pilot.repair import (
+            InvalidRepairContract,
+            RepairOutput,
+            validate_repair_assignment,
+            validate_repair_result,
+        )
+
+        validate_repair_assignment(invocation.assignment)
+        round_record = invocation.assignment["round"]
+        if not isinstance(round_record, dict):
+            raise InvalidRepairContract("repair assignment round is invalid")
+        round_number = int(round_record["number"])
+        expected_selection = NodePolicy.packaged().select_repair(
+            round_number=round_number,
+            escalation_reason=invocation.escalation_reason,
+        )
+        if invocation.selection != expected_selection:
+            raise WorkerExecutionError("repair policy does not match the packaged selection")
+        expected_access_profile = {
+            "role": "implementer",
+            "sandbox": invocation.selection.sandbox,
+            "write_root": str(invocation.worktree.path),
+            "additional_write_roots": [],
+        }
+        if invocation.access_profile != expected_access_profile:
+            raise WorkerExecutionError("repair access profile does not match assigned worktree")
+        if invocation.selection.model is None or invocation.selection.reasoning_effort is None:
+            raise WorkerExecutionError("repair worker requires a model and reasoning effort")
+
+        skill_instruction = " and ".join(f"${skill.name}" for skill in invocation.skills)
+        prompt = (
+            f"Use {skill_instruction}. Repair only the structured findings in the bounded "
+            "assignment below in observable Red-Green slices. Small reversible implementation "
+            "and presentation details may be decided autonomously. Warnings, consent, domain "
+            "actions, security meaning, and other semantic behavior are product decisions: do "
+            "not synthesize them. Return blocked or escalate when the assignment's decision "
+            "policy requires it. Do not expand scope and return the schema-constrained result.\n"
+            "<repair-assignment>\n"
+            f"{json.dumps(invocation.assignment, sort_keys=True)}\n"
+            "</repair-assignment>"
+        )
+        output = self._execute_codex(
+            selection=invocation.selection,
+            worktree=invocation.worktree,
+            prompt=prompt,
+            schema_name="repair-result-v1.json",
+            temporary_prefix="github-issue-pilot-repair-",
+            result_filename="repair-result.json",
+            process_name="repair",
+        )
+        validate_repair_result(output.result)
+        expected_identity = (
+            invocation.assignment["repair_batch_id"],
+            round_number,
+        )
+        actual_identity = (output.result["repair_batch_id"], output.result["round_number"])
+        if actual_identity != expected_identity:
+            raise InvalidRepairContract("repair result does not match its assignment")
+        return RepairOutput(
+            result=output.result,
+            diagnostic_events=output.diagnostic_events,
+        )
+
+    def _execute_codex(
+        self,
+        *,
+        selection: NodeSelection,
+        worktree: Worktree,
+        prompt: str,
+        schema_name: str,
+        temporary_prefix: str,
+        result_filename: str,
+        process_name: str,
+    ) -> WorkerOutput:
+        if selection.model is None or selection.reasoning_effort is None:
+            raise WorkerExecutionError(f"{process_name} requires a model and reasoning effort")
+        schema_resource = files("github_issue_pilot.contracts").joinpath(schema_name)
         with as_file(schema_resource) as schema_path, tempfile.TemporaryDirectory(
-            prefix="github-issue-pilot-worker-"
+            prefix=temporary_prefix
         ) as temporary_directory:
-            result_path = Path(temporary_directory) / "worker-result.json"
+            result_path = Path(temporary_directory) / result_filename
             command = [
                 self._executable,
                 "exec",
                 "--model",
-                invocation.selection.model,
+                selection.model,
                 "-c",
-                f'model_reasoning_effort="{invocation.selection.reasoning_effort}"',
+                f'model_reasoning_effort="{selection.reasoning_effort}"',
                 "-c",
                 'approval_policy="never"',
                 "--sandbox",
-                invocation.selection.sandbox,
+                selection.sandbox,
                 "--cd",
-                str(invocation.worktree.path),
+                str(worktree.path),
                 "--output-schema",
                 str(schema_path),
                 "--output-last-message",
@@ -180,27 +273,32 @@ class CodexCliWorker:
                     timeout=self._timeout_seconds,
                 )
             except (OSError, subprocess.TimeoutExpired) as exc:
-                raise WorkerExecutionError(f"Codex process could not complete: {exc}") from exc
+                raise WorkerExecutionError(
+                    f"{process_name} process could not complete: {exc}"
+                ) from exc
             if completed.returncode != 0:
                 detail = completed.stderr.strip()[-2000:] or "no diagnostic stderr"
                 raise WorkerExecutionError(
-                    f"Codex process exited with {completed.returncode}: {detail}"
+                    f"{process_name} process exited with {completed.returncode}: {detail}"
                 )
             if not result_path.is_file():
-                raise InvalidWorkerResult("Codex process did not write a final result")
+                raise InvalidWorkerResult(
+                    f"{process_name} process did not write a final result"
+                )
             try:
                 result = json.loads(result_path.read_text(encoding="utf-8"))
                 if not isinstance(result, dict):
-                    raise TypeError("worker result must be a JSON object")
+                    raise TypeError("structured result must be a JSON object")
                 diagnostic_events = tuple(
                     json.loads(line) for line in completed.stdout.splitlines() if line.strip()
                 )
                 if not all(isinstance(event, dict) for event in diagnostic_events):
                     raise TypeError("JSONL diagnostics must contain objects")
             except (json.JSONDecodeError, TypeError) as exc:
-                raise InvalidWorkerResult(f"Codex returned invalid structured output: {exc}") from exc
-            validate_worker_result(result)
-            return WorkerOutput(result=result, diagnostic_events=diagnostic_events)
+                raise InvalidWorkerResult(
+                    f"{process_name} returned invalid structured output: {exc}"
+                ) from exc
+        return WorkerOutput(result=result, diagnostic_events=diagnostic_events)
 
 
 def validate_worker_result(result: dict[str, object]) -> None:
@@ -219,6 +317,7 @@ class ImplementationServices:
     worker: WorkerPort
     source_control: SourceControlPort | None = None
     reviewer: ReviewWorkerPort | None = None
+    verifier: DeterministicVerifierPort | None = None
     sensitive_values: tuple[str, ...] = ()
 
 

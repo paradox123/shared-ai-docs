@@ -25,7 +25,9 @@ from github_issue_pilot.implementation import (
     Worktree,
 )
 from github_issue_pilot.publication import PublishedHead
+from github_issue_pilot.repair import RepairInvocation, RepairOutput
 from github_issue_pilot.review import ReviewInvocation, ReviewOutput
+from github_issue_pilot.verification import DeterministicVerification
 
 SECRET = b"test-webhook-secret"
 REPOSITORY = "daniel/probare-crm"
@@ -215,6 +217,65 @@ class ControlledWorker:
         }, diagnostic_events=({"type": "turn.completed", "thread_id": "thread-001"},))
 
 
+class ControlledRepairWorker(ControlledWorker):
+    def __init__(self, terminal_disposition: str | None = None) -> None:
+        super().__init__()
+        self.repair_invocations: list[RepairInvocation] = []
+        self.terminal_disposition = terminal_disposition
+
+    def repair(self, invocation: RepairInvocation) -> RepairOutput:
+        self.repair_invocations.append(invocation)
+        implementation = super().run(
+            WorkerInvocation(
+                assignment={
+                    "requirements": invocation.assignment["requirements"],
+                },
+                worktree=invocation.worktree,
+                selection=invocation.selection,
+                skills=invocation.skills,
+                access_profile=invocation.access_profile,
+            )
+        ).result
+        implementation["summary"] = "Repaired review findings"
+        return RepairOutput(
+            result={
+                "schema_version": "1",
+                "repair_batch_id": invocation.assignment["repair_batch_id"],
+                "round_number": invocation.assignment["round"]["number"],
+                "outcome": "completed",
+                "summary": "Repaired review findings",
+                "implementation_result": implementation,
+                "remaining_findings": [],
+                "blockage": None,
+                "escalation_reason": None,
+                "terminal_disposition": self.terminal_disposition,
+            },
+            diagnostic_events=({"type": "turn.completed", "thread_id": "repair-001"},),
+        )
+
+
+class EscalatingRepairWorker(ControlledRepairWorker):
+    def repair(self, invocation: RepairInvocation) -> RepairOutput:
+        if not self.repair_invocations:
+            self.repair_invocations.append(invocation)
+            return RepairOutput(
+                result={
+                    "schema_version": "1",
+                    "repair_batch_id": invocation.assignment["repair_batch_id"],
+                    "round_number": invocation.assignment["round"]["number"],
+                    "outcome": "escalate",
+                    "summary": "Security boundary needs material escalation",
+                    "implementation_result": None,
+                    "remaining_findings": [],
+                    "blockage": None,
+                    "escalation_reason": "security_boundary",
+                    "terminal_disposition": None,
+                },
+                diagnostic_events=({"type": "turn.completed", "thread_id": "repair-terra"},),
+            )
+        return super().repair(invocation)
+
+
 class ControlledReviewer:
     def __init__(self, verdicts: dict[str, str] | None = None) -> None:
         self.verdicts = verdicts or {}
@@ -243,6 +304,18 @@ class ControlledReviewer:
                 {"type": "turn.completed", "thread_id": f"fresh-{axis}"},
             ),
         )
+
+
+class InitiallyFailingReviewer(ControlledReviewer):
+    def __init__(self, failed_axes: frozenset[str]) -> None:
+        super().__init__()
+        self.failed_axes = failed_axes
+
+    def run(self, invocation: ReviewInvocation) -> ReviewOutput:
+        initial_batch = len(self.invocations) < 3
+        axis = str(invocation.assignment["axis"])
+        self.verdicts = {axis: "fail"} if initial_batch and axis in self.failed_axes else {}
+        return super().run(invocation)
 
 
 class FailingWorker(ControlledWorker):
@@ -330,6 +403,62 @@ class ControlledSourceControl:
         return PublishedHead(branch=worktree.branch, head_sha=self.head_sha)
 
 
+class SequencedSourceControl(ControlledSourceControl):
+    repair_head_sha = "abcdef1234567890abcdef1234567890abcdef12"
+
+    def publish(self, worktree, *, issue_number: int, sensitive_values=()) -> PublishedHead:
+        published = super().publish(
+            worktree,
+            issue_number=issue_number,
+            sensitive_values=sensitive_values,
+        )
+        head_sha = self.head_sha if len(self.calls) == 1 else self.repair_head_sha
+        return PublishedHead(branch=published.branch, head_sha=head_sha)
+
+
+class RoundHeadSourceControl(ControlledSourceControl):
+    heads = (
+        ControlledSourceControl.head_sha,
+        "1111111111111111111111111111111111111111",
+        "2222222222222222222222222222222222222222",
+        "3333333333333333333333333333333333333333",
+    )
+
+    def publish(self, worktree, *, issue_number: int, sensitive_values=()) -> PublishedHead:
+        published = super().publish(
+            worktree,
+            issue_number=issue_number,
+            sensitive_values=sensitive_values,
+        )
+        return PublishedHead(branch=published.branch, head_sha=self.heads[len(self.calls) - 1])
+
+
+class ControlledVerifier:
+    def __init__(self, passed: bool = True) -> None:
+        self.passed = passed
+        self.calls: list[dict[str, object]] = []
+
+    def verify(self, worktree, *, command: str, head_sha: str) -> DeterministicVerification:
+        self.calls.append({"worktree": worktree, "command": command, "head_sha": head_sha})
+        return DeterministicVerification(
+            command=command,
+            head_sha=head_sha,
+            passed=self.passed,
+            exit_code=0 if self.passed else 1,
+            observed="passed" if self.passed else "failed",
+        )
+
+
+class SequencedVerifier(ControlledVerifier):
+    def __init__(self, outcomes: list[bool]) -> None:
+        super().__init__()
+        self.outcomes = outcomes
+
+    def verify(self, worktree, *, command: str, head_sha: str) -> DeterministicVerification:
+        self.passed = self.outcomes[len(self.calls)]
+        return super().verify(worktree, command=command, head_sha=head_sha)
+
+
 def controlled_implementation_services(
     tmp_path,
     worktrees: ControlledWorktrees,
@@ -338,6 +467,7 @@ def controlled_implementation_services(
     repository_root=None,
     source_control=None,
     reviewer=None,
+    verifier=None,
     sensitive_values=(),
 ) -> ImplementationServices:
     return ImplementationServices(
@@ -355,6 +485,7 @@ def controlled_implementation_services(
         worker=worker,
         source_control=source_control,
         reviewer=reviewer,
+        verifier=verifier,
         sensitive_values=tuple(sensitive_values),
     )
 
@@ -892,6 +1023,318 @@ def test_one_failed_axis_blocks_verification_after_three_independent_reviews_thr
     assert github.labels == {"ready-for-agent", "agent-running"}
     assert len(source_control.calls) == 1
     assert len(github.pull_request_writes) == 1
+
+
+def test_multi_axis_review_failure_is_repaired_once_and_new_head_verifies_through_http_seam(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    source_control = SequencedSourceControl()
+    worker = ControlledRepairWorker()
+    reviewer = InitiallyFailingReviewer(frozenset({"requirements", "code"}))
+    verifier = ControlledVerifier()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+        reviewer=reviewer,
+        verifier=verifier,
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        accepted = client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert accepted.status_code == 202
+    assert state["review"]["status"] == "verified"
+    assert state["review"]["head_sha"] == source_control.repair_head_sha
+    repair = state["repair"]
+    assert repair["status"] == "verified"
+    assert repair["round_count"] == 1
+    assert repair["open_findings"] == []
+    attempt = repair["attempts"][0]
+    assert attempt["round"] == 1
+    assert attempt["status"] == "verified"
+    assert attempt["head_sha"] == source_control.repair_head_sha
+    assert attempt["deterministic_verification"] == {
+        "command": "pytest tests/test_export.py",
+        "head_sha": source_control.repair_head_sha,
+        "passed": True,
+        "exit_code": 0,
+        "observed": "passed",
+    }
+    assert {
+        finding["axis"] for finding in attempt["assignment"]["findings"]
+    } == {"requirements", "code"}
+    assert attempt["invocations"][0]["policy"]["model"] == "gpt-5.6-terra"
+    assert attempt["invocations"][0]["access_profile"]["write_root"] == str(
+        worktrees.root / state["run"]["id"]
+    )
+    assert len(worker.repair_invocations) == 1
+    assert worker.repair_invocations[0].worktree.path == worktrees.root / state["run"]["id"]
+    assert len(reviewer.invocations) == 6
+    assert {
+        invocation.assignment["pull_request"]["head_sha"]
+        for invocation in reviewer.invocations[:3]
+    } == {source_control.head_sha}
+    assert {
+        invocation.assignment["pull_request"]["head_sha"]
+        for invocation in reviewer.invocations[3:]
+    } == {source_control.repair_head_sha}
+    assert verifier.calls == [
+        {
+            "worktree": worker.repair_invocations[0].worktree,
+            "command": "pytest tests/test_export.py",
+            "head_sha": source_control.repair_head_sha,
+        }
+    ]
+    assert len(source_control.calls) == 2
+    assert len(github.pull_request_writes) >= 2
+    assert github.pull_request_writes[-1]["head_sha"] == source_control.repair_head_sha
+    assert "Repair Attempts" in github.pull_request_writes[-1]["body"]
+    assert github.labels == {"ready-for-agent", "verified", "awaiting-review"}
+
+
+def test_review_failures_stop_after_exactly_three_repair_rounds_without_a_fourth_invocation(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    source_control = RoundHeadSourceControl()
+    worker = ControlledRepairWorker()
+    reviewer = ControlledReviewer({"code": "fail"})
+    verifier = ControlledVerifier()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+        reviewer=reviewer,
+        verifier=verifier,
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    repair = state["repair"]
+    assert repair["status"] == "ready-for-human"
+    assert repair["round_limit"] == 3
+    assert repair["round_count"] == 3
+    assert [attempt["round"] for attempt in repair["attempts"]] == [1, 2, 3]
+    assert [attempt["status"] for attempt in repair["attempts"]] == [
+        "unsuccessful",
+        "unsuccessful",
+        "unsuccessful",
+    ]
+    assert [
+        attempt["invocations"][0]["policy"]["model"] for attempt in repair["attempts"]
+    ] == ["gpt-5.6-terra", "gpt-5.6-terra", "gpt-5.6-sol"]
+    assert repair["attempts"][2]["invocations"][0]["policy"][
+        "escalation_reason"
+    ] == "final_repair_round"
+    assert len(worker.repair_invocations) == 3
+    assert len(source_control.calls) == 4
+    assert len(verifier.calls) == 3
+    assert len(reviewer.invocations) == 12
+    assert {finding["axis"] for finding in repair["open_findings"]} == {"code"}
+    assert state["draft_pull_request"]["head_sha"] == source_control.heads[-1]
+    assert "Open Findings" in state["draft_pull_request"]["body"]
+    assert github.labels == {"ready-for-agent", "ready-for-human"}
+
+
+def test_failed_deterministic_check_still_runs_all_reviews_and_enters_next_round(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    source_control = RoundHeadSourceControl()
+    worker = ControlledRepairWorker()
+    reviewer = InitiallyFailingReviewer(frozenset({"code"}))
+    verifier = SequencedVerifier([False, True])
+    services = controlled_implementation_services(
+        tmp_path,
+        ControlledWorktrees(tmp_path / "worktrees"),
+        worker,
+        source_control=source_control,
+        reviewer=reviewer,
+        verifier=verifier,
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    attempts = state["repair"]["attempts"]
+    assert state["repair"]["status"] == "verified"
+    assert [attempt["status"] for attempt in attempts] == ["unsuccessful", "verified"]
+    assert attempts[0]["deterministic_verification"]["passed"] is False
+    assert attempts[0]["remaining_findings"] == [
+        {
+            "source": "deterministic_verification",
+            "axis": "deterministic_verification",
+            "location": "pytest tests/test_export.py",
+            "description": "failed",
+        }
+    ]
+    assert attempts[1]["assignment"]["findings"] == attempts[0]["remaining_findings"]
+    assert len(reviewer.invocations) == 9
+    assert {
+        invocation.assignment["pull_request"]["head_sha"]
+        for invocation in reviewer.invocations[3:6]
+    } == {source_control.heads[1]}
+    assert {
+        invocation.assignment["pull_request"]["head_sha"]
+        for invocation in reviewer.invocations[6:9]
+    } == {source_control.heads[2]}
+    assert len(worker.repair_invocations) == 2
+
+
+def test_structured_escalation_uses_sol_inside_same_numbered_round(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    source_control = SequencedSourceControl()
+    worker = EscalatingRepairWorker()
+    reviewer = InitiallyFailingReviewer(frozenset({"code"}))
+    services = controlled_implementation_services(
+        tmp_path,
+        ControlledWorktrees(tmp_path / "worktrees"),
+        worker,
+        source_control=source_control,
+        reviewer=reviewer,
+        verifier=ControlledVerifier(),
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    repair = state["repair"]
+    assert repair["status"] == "verified"
+    assert repair["round_count"] == 1
+    invocations = repair["attempts"][0]["invocations"]
+    assert [item["result"]["outcome"] for item in invocations] == [
+        "escalate",
+        "completed",
+    ]
+    assert [item["policy"]["model"] for item in invocations] == [
+        "gpt-5.6-terra",
+        "gpt-5.6-sol",
+    ]
+    assert invocations[1]["policy"]["escalation_reason"] == "security_boundary"
+    assert len(worker.repair_invocations) == 2
+
+
+@pytest.mark.parametrize(
+    ("terminal_disposition", "expected_status"),
+    [
+        ("needs-info", "needs-info"),
+        (None, "ready-for-human"),
+    ],
+    ids=["missing-requirements", "unresolvable-conflict"],
+)
+def test_exhausted_human_handoff_survives_restart_without_duplicate_effects(
+    tmp_path,
+    terminal_disposition: str | None,
+    expected_status: str,
+) -> None:
+    database_path = tmp_path / "pilot.db"
+    github = ControlledGitHub()
+    source_control = RoundHeadSourceControl()
+    worker = ControlledRepairWorker(terminal_disposition=terminal_disposition)
+    reviewer = ControlledReviewer({"code": "fail"})
+    verifier = ControlledVerifier()
+    services = controlled_implementation_services(
+        tmp_path,
+        ControlledWorktrees(tmp_path / "worktrees"),
+        worker,
+        source_control=source_control,
+        reviewer=reviewer,
+        verifier=verifier,
+    )
+    body = delivery_body()
+    first_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+
+    with TestClient(first_app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        before_restart = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    effect_counts = (
+        len(worker.repair_invocations),
+        len(reviewer.invocations),
+        len(source_control.calls),
+        len(verifier.calls),
+        len(github.pull_request_writes),
+        len(github.workflow_label_projections),
+    )
+    restarted_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    with TestClient(restarted_app) as client:
+        after_restart = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert after_restart["repair"] == before_restart["repair"]
+    assert after_restart["draft_pull_request"] == before_restart["draft_pull_request"]
+    assert after_restart["repair"]["status"] == expected_status
+    assert after_restart["repair"]["round_count"] == 3
+    assert after_restart["repair"]["open_findings"]
+    assert set(after_restart["repair"]["projected_labels"]) == {
+        expected_status,
+        "ready-for-agent",
+    }
+    assert github.labels == {"ready-for-agent", expected_status}
+    assert (
+        len(worker.repair_invocations),
+        len(reviewer.invocations),
+        len(source_control.calls),
+        len(verifier.calls),
+        len(github.pull_request_writes),
+        len(github.workflow_label_projections),
+    ) == effect_counts
 
 
 def test_all_applicable_axes_pass_and_project_verified_current_head_through_http_seam(

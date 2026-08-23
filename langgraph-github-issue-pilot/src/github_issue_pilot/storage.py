@@ -138,6 +138,49 @@ class WorkflowStore:
                     completed_at TEXT NOT NULL,
                     PRIMARY KEY (batch_id, axis)
                 );
+
+                CREATE TABLE IF NOT EXISTS repair_batches (
+                    repair_batch_id TEXT PRIMARY KEY,
+                    run_id TEXT NOT NULL REFERENCES issue_runs(run_id),
+                    initial_review_batch_id TEXT NOT NULL UNIQUE
+                        REFERENCES review_batches(batch_id),
+                    round_limit INTEGER NOT NULL DEFAULT 3 CHECK (round_limit = 3),
+                    status TEXT NOT NULL
+                        CHECK (status IN ('running', 'verified', 'needs-info', 'ready-for-human')),
+                    open_findings_json TEXT NOT NULL DEFAULT '[]',
+                    projected_labels_json TEXT,
+                    started_at TEXT NOT NULL,
+                    completed_at TEXT
+                );
+
+                CREATE TABLE IF NOT EXISTS repair_attempts (
+                    attempt_id TEXT PRIMARY KEY,
+                    repair_batch_id TEXT NOT NULL REFERENCES repair_batches(repair_batch_id),
+                    round_number INTEGER NOT NULL CHECK (round_number BETWEEN 1 AND 3),
+                    status TEXT NOT NULL
+                        CHECK (status IN ('running', 'unsuccessful', 'verified', 'blocked', 'failed')),
+                    assignment_json TEXT NOT NULL,
+                    head_sha TEXT,
+                    deterministic_verification_json TEXT,
+                    review_batch_id TEXT REFERENCES review_batches(batch_id),
+                    remaining_findings_json TEXT NOT NULL DEFAULT '[]',
+                    started_at TEXT NOT NULL,
+                    completed_at TEXT,
+                    UNIQUE (repair_batch_id, round_number)
+                );
+
+                CREATE TABLE IF NOT EXISTS repair_invocations (
+                    attempt_id TEXT NOT NULL REFERENCES repair_attempts(attempt_id),
+                    invocation_number INTEGER NOT NULL CHECK (invocation_number >= 1),
+                    policy_json TEXT NOT NULL,
+                    skills_json TEXT NOT NULL,
+                    access_profile_json TEXT NOT NULL,
+                    result_json TEXT NOT NULL,
+                    diagnostic_events_json TEXT NOT NULL,
+                    started_at TEXT NOT NULL,
+                    completed_at TEXT NOT NULL,
+                    PRIMARY KEY (attempt_id, invocation_number)
+                );
                 """
             )
 
@@ -597,6 +640,34 @@ class WorkflowStore:
                 ),
             )
 
+    def update_publication(
+        self,
+        *,
+        run_id: str,
+        evidence: list[dict[str, object]],
+        head_sha: str,
+        body: str,
+        completed_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            cursor = self._connection.execute(
+                """
+                UPDATE draft_pr_publications
+                SET evidence_json = ?, head_sha = ?, body = ?, reason = NULL,
+                    completed_at = ?
+                WHERE run_id = ? AND status = 'published'
+                """,
+                (
+                    json.dumps(evidence, sort_keys=True),
+                    head_sha,
+                    body,
+                    completed_at,
+                    run_id,
+                ),
+            )
+        if cursor.rowcount != 1:
+            raise RuntimeError("published draft pull request could not be updated")
+
     def workflow_publication(self, run_id: str) -> dict[str, object] | None:
         with self._lock:
             row = self._connection.execute(
@@ -732,7 +803,7 @@ class WorkflowStore:
                        projected_labels_json, started_at, completed_at
                 FROM review_batches
                 WHERE run_id = ?
-                ORDER BY started_at DESC, batch_id DESC
+                ORDER BY rowid DESC
                 LIMIT 1
                 """,
                 (run_id,),
@@ -780,6 +851,274 @@ class WorkflowStore:
                 else []
             ),
             "results": results,
+            "started_at": batch["started_at"],
+            "completed_at": batch["completed_at"],
+        }
+
+    def begin_repair_batch(
+        self,
+        *,
+        run_id: str,
+        initial_review_batch_id: str,
+        started_at: str,
+    ) -> str:
+        with self._lock, self._connection:
+            repair_batch_id = str(uuid.uuid4())
+            self._connection.execute(
+                """
+                INSERT INTO repair_batches (
+                    repair_batch_id, run_id, initial_review_batch_id, status, started_at
+                ) VALUES (?, ?, ?, 'running', ?)
+                ON CONFLICT(initial_review_batch_id) DO NOTHING
+                """,
+                (repair_batch_id, run_id, initial_review_batch_id, started_at),
+            )
+            row = self._connection.execute(
+                """
+                SELECT repair_batch_id FROM repair_batches
+                WHERE initial_review_batch_id = ?
+                """,
+                (initial_review_batch_id,),
+            ).fetchone()
+        if row is None:
+            raise RuntimeError("repair batch could not be created")
+        return str(row["repair_batch_id"])
+
+    def begin_repair_attempt(
+        self,
+        *,
+        repair_batch_id: str,
+        round_number: int,
+        assignment: dict[str, object],
+        started_at: str,
+    ) -> str:
+        if round_number not in {1, 2, 3}:
+            raise ValueError("repair round must be between one and three")
+        with self._lock, self._connection:
+            batch = self._connection.execute(
+                "SELECT status FROM repair_batches WHERE repair_batch_id = ?",
+                (repair_batch_id,),
+            ).fetchone()
+            if batch is None:
+                raise LookupError("repair batch not found")
+            if batch["status"] != "running":
+                raise RuntimeError("terminal repair batch cannot start another attempt")
+            attempt_id = str(uuid.uuid4())
+            self._connection.execute(
+                """
+                INSERT INTO repair_attempts (
+                    attempt_id, repair_batch_id, round_number, status,
+                    assignment_json, started_at
+                ) VALUES (?, ?, ?, 'running', ?, ?)
+                ON CONFLICT(repair_batch_id, round_number) DO NOTHING
+                """,
+                (
+                    attempt_id,
+                    repair_batch_id,
+                    round_number,
+                    json.dumps(assignment, sort_keys=True),
+                    started_at,
+                ),
+            )
+            row = self._connection.execute(
+                """
+                SELECT attempt_id FROM repair_attempts
+                WHERE repair_batch_id = ? AND round_number = ?
+                """,
+                (repair_batch_id, round_number),
+            ).fetchone()
+        if row is None:
+            raise RuntimeError("repair attempt could not be created")
+        return str(row["attempt_id"])
+
+    def record_repair_invocation(
+        self,
+        *,
+        attempt_id: str,
+        invocation_number: int,
+        policy: dict[str, object],
+        skills: list[dict[str, str]],
+        access_profile: dict[str, object],
+        result: dict[str, object],
+        diagnostic_events: list[dict[str, object]],
+        started_at: str,
+        completed_at: str,
+    ) -> None:
+        if invocation_number < 1:
+            raise ValueError("repair invocation number must be positive")
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                INSERT INTO repair_invocations (
+                    attempt_id, invocation_number, policy_json, skills_json,
+                    access_profile_json, result_json, diagnostic_events_json,
+                    started_at, completed_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(attempt_id, invocation_number) DO NOTHING
+                """,
+                (
+                    attempt_id,
+                    invocation_number,
+                    json.dumps(policy, sort_keys=True),
+                    json.dumps(skills, sort_keys=True),
+                    json.dumps(access_profile, sort_keys=True),
+                    json.dumps(result, sort_keys=True),
+                    json.dumps(diagnostic_events, sort_keys=True),
+                    started_at,
+                    completed_at,
+                ),
+            )
+
+    def complete_repair_attempt(
+        self,
+        *,
+        attempt_id: str,
+        status: str,
+        head_sha: str | None,
+        deterministic_verification: dict[str, object] | None,
+        review_batch_id: str | None,
+        remaining_findings: list[dict[str, object]],
+        completed_at: str,
+    ) -> None:
+        if status not in {"unsuccessful", "verified", "blocked", "failed"}:
+            raise ValueError("unsupported repair attempt status")
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE repair_attempts
+                SET status = ?, head_sha = ?, deterministic_verification_json = ?,
+                    review_batch_id = ?, remaining_findings_json = ?, completed_at = ?
+                WHERE attempt_id = ? AND status = 'running'
+                """,
+                (
+                    status,
+                    head_sha,
+                    (
+                        json.dumps(deterministic_verification, sort_keys=True)
+                        if deterministic_verification is not None
+                        else None
+                    ),
+                    review_batch_id,
+                    json.dumps(remaining_findings, sort_keys=True),
+                    completed_at,
+                    attempt_id,
+                ),
+            )
+
+    def complete_repair_batch(
+        self,
+        *,
+        repair_batch_id: str,
+        status: str,
+        open_findings: list[dict[str, object]],
+        projected_labels: frozenset[str],
+        completed_at: str,
+    ) -> None:
+        if status not in {"verified", "needs-info", "ready-for-human"}:
+            raise ValueError("unsupported terminal repair status")
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE repair_batches
+                SET status = ?, open_findings_json = ?, projected_labels_json = ?,
+                    completed_at = ?
+                WHERE repair_batch_id = ? AND status = 'running'
+                """,
+                (
+                    status,
+                    json.dumps(open_findings, sort_keys=True),
+                    json.dumps(sorted(projected_labels)),
+                    completed_at,
+                    repair_batch_id,
+                ),
+            )
+
+    def workflow_repair(self, run_id: str) -> dict[str, object] | None:
+        with self._lock:
+            batch = self._connection.execute(
+                """
+                SELECT repair_batch_id, initial_review_batch_id, round_limit, status,
+                       open_findings_json, projected_labels_json, started_at, completed_at
+                FROM repair_batches
+                WHERE run_id = ?
+                ORDER BY started_at DESC, repair_batch_id DESC
+                LIMIT 1
+                """,
+                (run_id,),
+            ).fetchone()
+            if batch is None:
+                return None
+            attempts = self._connection.execute(
+                """
+                SELECT attempt_id, round_number, status, assignment_json, head_sha,
+                       deterministic_verification_json, review_batch_id,
+                       remaining_findings_json, started_at, completed_at
+                FROM repair_attempts
+                WHERE repair_batch_id = ?
+                ORDER BY round_number
+                """,
+                (batch["repair_batch_id"],),
+            ).fetchall()
+            invocation_rows = self._connection.execute(
+                """
+                SELECT attempt_id, invocation_number, policy_json, skills_json,
+                       access_profile_json, result_json, diagnostic_events_json,
+                       started_at, completed_at
+                FROM repair_invocations
+                WHERE attempt_id IN (
+                    SELECT attempt_id FROM repair_attempts WHERE repair_batch_id = ?
+                )
+                ORDER BY attempt_id, invocation_number
+                """,
+                (batch["repair_batch_id"],),
+            ).fetchall()
+        invocations_by_attempt: dict[str, list[dict[str, object]]] = {}
+        for row in invocation_rows:
+            invocations_by_attempt.setdefault(str(row["attempt_id"]), []).append(
+                {
+                    "number": row["invocation_number"],
+                    "policy": json.loads(row["policy_json"]),
+                    "skills": json.loads(row["skills_json"]),
+                    "access_profile": json.loads(row["access_profile_json"]),
+                    "result": json.loads(row["result_json"]),
+                    "diagnostic_events": json.loads(row["diagnostic_events_json"]),
+                    "started_at": row["started_at"],
+                    "completed_at": row["completed_at"],
+                }
+            )
+        attempt_records = [
+            {
+                "id": row["attempt_id"],
+                "round": row["round_number"],
+                "status": row["status"],
+                "assignment": json.loads(row["assignment_json"]),
+                "head_sha": row["head_sha"],
+                "deterministic_verification": (
+                    json.loads(row["deterministic_verification_json"])
+                    if row["deterministic_verification_json"] is not None
+                    else None
+                ),
+                "review_batch_id": row["review_batch_id"],
+                "remaining_findings": json.loads(row["remaining_findings_json"]),
+                "invocations": invocations_by_attempt.get(str(row["attempt_id"]), []),
+                "started_at": row["started_at"],
+                "completed_at": row["completed_at"],
+            }
+            for row in attempts
+        ]
+        return {
+            "id": batch["repair_batch_id"],
+            "initial_review_batch_id": batch["initial_review_batch_id"],
+            "round_limit": batch["round_limit"],
+            "round_count": len(attempt_records),
+            "status": batch["status"],
+            "open_findings": json.loads(batch["open_findings_json"]),
+            "projected_labels": (
+                json.loads(batch["projected_labels_json"])
+                if batch["projected_labels_json"] is not None
+                else []
+            ),
+            "attempts": attempt_records,
             "started_at": batch["started_at"],
             "completed_at": batch["completed_at"],
         }

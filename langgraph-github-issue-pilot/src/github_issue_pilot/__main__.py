@@ -20,6 +20,7 @@ from github_issue_pilot.implementation import (
 )
 from github_issue_pilot.publication import GitSourceControl
 from github_issue_pilot.review import CodexCliReviewWorker
+from github_issue_pilot.verification import CommandDeterministicVerifier
 
 PROBARE_CRM_EVENTS = frozenset(
     {
@@ -98,6 +99,10 @@ def _implementation_services(repositories: set[str]) -> ImplementationServices:
             skill_root=skill_root,
             executable=codex_executable,
             timeout_seconds=codex_timeout,
+        ),
+        verifier=CommandDeterministicVerifier(
+            timeout_seconds=codex_timeout,
+            git_executable=os.environ.get("PILOT_GIT_EXECUTABLE", "git"),
         ),
         sensitive_values=sensitive_values,
     )

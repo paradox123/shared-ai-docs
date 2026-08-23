@@ -89,6 +89,8 @@ def render_pull_request_body(
     issue_number: int,
     head_sha: str,
     evidence: Sequence[dict[str, object]],
+    repair_attempts: Sequence[dict[str, object]] = (),
+    open_findings: Sequence[dict[str, object]] = (),
 ) -> str:
     if _HEAD_SHA_PATTERN.fullmatch(head_sha) is None:
         raise ValueError("head SHA must be a 40-character lowercase hexadecimal commit id")
@@ -143,6 +145,45 @@ def render_pull_request_body(
                 lines.extend(("", f"![Evidence: {criterion}]({artifact})"))
             elif artifact:
                 lines.extend(("", "```text", str(artifact), "```"))
+
+    if repair_attempts:
+        lines.extend(
+            (
+                "",
+                "## Repair Attempts",
+                "",
+                "| Round | Status | Head | Summary |",
+                "| --- | --- | --- | --- |",
+            )
+        )
+        for attempt in repair_attempts:
+            attempt_head = attempt.get("head_sha") or "not published"
+            head_cell = (
+                f"`{attempt_head}`"
+                if _HEAD_SHA_PATTERN.fullmatch(str(attempt_head))
+                else _table_text(str(attempt_head))
+            )
+            lines.append(
+                "| "
+                + " | ".join(
+                    (
+                        str(attempt.get("round", "?")),
+                        _table_text(str(attempt.get("status", "unknown"))),
+                        head_cell,
+                        _table_text(str(attempt.get("summary", "Repair attempt"))),
+                    )
+                )
+                + " |"
+            )
+    if open_findings:
+        lines.extend(("", "## Open Findings", ""))
+        for finding in open_findings:
+            lines.append(
+                "- "
+                f"**{finding.get('axis', 'repair')}** at "
+                f"`{finding.get('location', 'unspecified')}`: "
+                f"{finding.get('description', 'Unresolved finding')}"
+            )
 
     lines.extend(("", f"Closes #{issue_number}"))
     body = "\n".join(lines) + "\n"

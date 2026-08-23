@@ -84,6 +84,53 @@ def test_policy_rejects_an_undefined_sol_escalation() -> None:
 
 
 @pytest.mark.parametrize(
+    ("round_number", "reason", "model", "task"),
+    [
+        (1, None, "gpt-5.6-terra", "findings_repair"),
+        (2, None, "gpt-5.6-terra", "findings_repair"),
+        (1, "architecture_boundary", "gpt-5.6-sol", "findings_repair_escalated"),
+        (1, "persistence_boundary", "gpt-5.6-sol", "findings_repair_escalated"),
+        (1, "security_boundary", "gpt-5.6-sol", "findings_repair_escalated"),
+        (1, "data_migration", "gpt-5.6-sol", "findings_repair_escalated"),
+        (1, "worker_escalate", "gpt-5.6-sol", "findings_repair_escalated"),
+        (3, None, "gpt-5.6-sol", "findings_repair_escalated"),
+    ],
+)
+def test_repair_policy_selects_sol_only_for_material_escalation_or_final_round(
+    round_number: int,
+    reason: str | None,
+    model: str,
+    task: str,
+) -> None:
+    selection = NodePolicy.packaged().select_repair(
+        round_number=round_number,
+        escalation_reason=reason,
+    )
+
+    assert selection.task == task
+    assert (selection.model, selection.reasoning_effort, selection.sandbox) == (
+        model,
+        "xhigh",
+        "workspace-write",
+    )
+
+
+@pytest.mark.parametrize(
+    ("round_number", "reason"),
+    [(0, None), (4, None), (1, "expensive_task"), (2, "final_repair_round")],
+)
+def test_repair_policy_rejects_out_of_range_or_unsupported_escalation(
+    round_number: int,
+    reason: str | None,
+) -> None:
+    with pytest.raises(PolicyViolation):
+        NodePolicy.packaged().select_repair(
+            round_number=round_number,
+            escalation_reason=reason,
+        )
+
+
+@pytest.mark.parametrize(
     ("task", "issue_type", "expected_names"),
     [
         ("triage", None, ["triage"]),

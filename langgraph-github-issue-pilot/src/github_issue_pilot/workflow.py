@@ -37,6 +37,7 @@ from github_issue_pilot.policy import (
     SkillRouter,
 )
 from github_issue_pilot.publication import SourcePublicationError
+from github_issue_pilot.repair import RepairBatchInput, ReviewRepairCoordinator
 from github_issue_pilot.review import ReviewBatchInput, ReviewCoordinator
 from github_issue_pilot.storage import Delivery, WorkflowStore
 
@@ -91,7 +92,12 @@ class WorkflowRuntime:
                 else:
                     builder.add_node("review_draft_pr", self._review_draft_pr)
                     builder.add_edge("publish_draft_pr", "review_draft_pr")
-                    builder.add_edge("review_draft_pr", END)
+                    if implementation.verifier is None:
+                        builder.add_edge("review_draft_pr", END)
+                    else:
+                        builder.add_node("repair_failed_review", self._repair_failed_review)
+                        builder.add_edge("review_draft_pr", "repair_failed_review")
+                        builder.add_edge("repair_failed_review", END)
         self._graph = builder.compile(checkpointer=self._checkpointer)
 
     def _project_claim(self, state: ClaimState) -> dict[str, str]:
@@ -363,6 +369,37 @@ class WorkflowRuntime:
         )
         return {"status": status}
 
+    def _repair_failed_review(self, state: ClaimState) -> dict[str, str]:
+        services = self._require_implementation()
+        if services.verifier is None or services.reviewer is None:
+            return {"status": state["status"]}
+        run_id = self._store.run_id_for_issue(state["repository"], state["issue_number"])
+        initial_review = self._store.workflow_review(run_id)
+        implementation = self._store.workflow_implementation(run_id)
+        publication = self._store.workflow_publication(run_id)
+        if (
+            initial_review is None
+            or implementation is None
+            or publication is None
+            or initial_review["status"] != "blocked"
+        ):
+            return {"status": state["status"]}
+        status = ReviewRepairCoordinator(
+            store=self._store,
+            adapter=self._repository_adapters[state["repository"]],
+            services=services,
+            clock=self._clock,
+        ).execute(
+            RepairBatchInput(
+                run_id=run_id,
+                repository=state["repository"],
+                issue_number=state["issue_number"],
+                initial_review=initial_review,
+                implementation=implementation,
+            )
+        )
+        return {"status": status}
+
     def _require_implementation(self) -> ImplementationServices:
         if self._implementation is None:
             raise RuntimeError("implementation services are not configured")
@@ -528,6 +565,7 @@ class WorkflowRuntime:
             self._store.workflow_publication(str(run["id"])) if run is not None else None
         )
         review = self._store.workflow_review(str(run["id"])) if run is not None else None
+        repair = self._store.workflow_repair(str(run["id"])) if run is not None else None
         return {
             "delivery": delivery,
             "disposition": disposition,
@@ -537,6 +575,7 @@ class WorkflowRuntime:
             "implementation": implementation,
             "draft_pull_request": draft_pull_request,
             "review": review,
+            "repair": repair,
         }
 
     def close(self) -> None:

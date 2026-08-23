@@ -253,6 +253,7 @@ class ReviewBatchInput:
     issue_number: int
     implementation: dict[str, object]
     publication: dict[str, object]
+    allow_verification_projection: bool = True
 
 
 class ReviewCoordinator:
@@ -319,6 +320,8 @@ class ReviewCoordinator:
             return self._block(batch_id, "review_execution_failed:" + ",".join(failures))
         if any(result["verdict"] == "fail" for result in results):
             return self._block(batch_id, "review_failed")
+        if not review_input.allow_verification_projection:
+            return self._block(batch_id, "deterministic_verification_failed")
         return self._project(review_input, batch_id, head_sha, int(pull_request["number"]))
 
     def _execute_axis(

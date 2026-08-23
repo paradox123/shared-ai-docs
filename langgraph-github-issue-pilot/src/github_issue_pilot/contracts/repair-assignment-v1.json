@@ -1,0 +1,129 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:danielsvault:github-issue-pilot:repair-assignment:1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repair_batch_id",
+    "initial_review",
+    "round",
+    "issue",
+    "requirements",
+    "repository_context",
+    "findings",
+    "prior_attempts",
+    "decision_policy"
+  ],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "repair_batch_id": {"type": "string", "minLength": 1},
+    "initial_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["batch_id", "head_sha"],
+      "properties": {
+        "batch_id": {"type": "string", "minLength": 1},
+        "head_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"}
+      }
+    },
+    "round": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["number", "limit"],
+      "properties": {
+        "number": {"type": "integer", "minimum": 1, "maximum": 3},
+        "limit": {"const": 3}
+      }
+    },
+    "issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "number", "title", "body", "type"],
+      "properties": {
+        "repository": {"type": "string", "minLength": 1},
+        "number": {"type": "integer", "minimum": 1},
+        "title": {"type": "string"},
+        "body": {"type": "string"},
+        "type": {"type": "string", "minLength": 1}
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "repository_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["base_ref", "instructions", "verification_command"],
+      "properties": {
+        "base_ref": {"type": "string", "minLength": 1},
+        "instructions": {"type": "string", "minLength": 1},
+        "verification_command": {"type": "string", "minLength": 1}
+      }
+    },
+    "findings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/finding"}
+    },
+    "prior_attempts": {
+      "type": "array",
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["round", "head_sha", "summary", "remaining_findings"],
+        "properties": {
+          "round": {"type": "integer", "minimum": 1, "maximum": 2},
+          "head_sha": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"},
+          "summary": {"type": "string", "minLength": 1},
+          "remaining_findings": {
+            "type": "array",
+            "items": {"$ref": "#/$defs/finding"}
+          }
+        }
+      }
+    },
+    "decision_policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["autonomous", "product_decisions", "interruptions"],
+      "properties": {
+        "autonomous": {"type": "string", "minLength": 1},
+        "product_decisions": {"type": "string", "minLength": 1},
+        "interruptions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "product_decision",
+              "scope_expansion",
+              "missing_access",
+              "manual_evidence",
+              "requirements_missing_or_contradictory",
+              "unresolvable_conflict"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "axis", "location", "description"],
+      "properties": {
+        "source": {"enum": ["review", "deterministic_verification", "repair"]},
+        "axis": {
+          "enum": ["requirements", "code", "architecture", "deterministic_verification", "repair"]
+        },
+        "location": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

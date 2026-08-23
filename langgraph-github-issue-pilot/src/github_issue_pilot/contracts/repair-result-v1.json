@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:danielsvault:github-issue-pilot:repair-result:1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "repair_batch_id",
+    "round_number",
+    "outcome",
+    "summary",
+    "implementation_result",
+    "remaining_findings",
+    "blockage",
+    "escalation_reason",
+    "terminal_disposition"
+  ],
+  "properties": {
+    "schema_version": {"const": "1"},
+    "repair_batch_id": {"type": "string", "minLength": 1},
+    "round_number": {"type": "integer", "minimum": 1, "maximum": 3},
+    "outcome": {"enum": ["completed", "blocked", "escalate"]},
+    "summary": {"type": "string", "minLength": 1},
+    "implementation_result": {"type": ["object", "null"]},
+    "remaining_findings": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/finding"}
+    },
+    "blockage": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reason", "rationale"],
+          "properties": {
+            "reason": {
+              "enum": [
+                "product_decision",
+                "scope_expansion",
+                "missing_access",
+                "manual_evidence",
+                "requirements_missing_or_contradictory",
+                "unresolvable_conflict"
+              ]
+            },
+            "rationale": {"type": "string", "minLength": 1}
+          }
+        }
+      ]
+    },
+    "escalation_reason": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "architecture_boundary",
+        "persistence_boundary",
+        "security_boundary",
+        "data_migration",
+        "worker_escalate"
+      ]
+    },
+    "terminal_disposition": {
+      "type": ["string", "null"],
+      "enum": [null, "needs-info", "ready-for-human"]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"outcome": {"const": "completed"}}},
+      "then": {
+        "properties": {
+          "implementation_result": {"type": "object"},
+          "blockage": {"type": "null"},
+          "escalation_reason": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"outcome": {"const": "blocked"}}},
+      "then": {
+        "properties": {
+          "implementation_result": {"type": "null"},
+          "blockage": {"type": "object"},
+          "escalation_reason": {"type": "null"},
+          "terminal_disposition": {"enum": ["needs-info", "ready-for-human"]}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"outcome": {"const": "escalate"}}},
+      "then": {
+        "properties": {
+          "implementation_result": {"type": "null"},
+          "blockage": {"type": "null"},
+          "escalation_reason": {"type": "string"},
+          "terminal_disposition": {"type": "null"}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "axis", "location", "description"],
+      "properties": {
+        "source": {"enum": ["review", "deterministic_verification", "repair"]},
+        "axis": {
+          "enum": ["requirements", "code", "architecture", "deterministic_verification", "repair"]
+        },
+        "location": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

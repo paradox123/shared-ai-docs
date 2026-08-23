@@ -74,6 +74,23 @@ class NodePolicy:
             sandbox=selected["sandbox"],
         )
 
+    def select_repair(
+        self,
+        *,
+        round_number: int,
+        escalation_reason: str | None = None,
+    ) -> NodeSelection:
+        if round_number not in {1, 2, 3}:
+            raise PolicyViolation("repair round must be between one and three")
+        allowed = set(self._contract["allowed_escalations"])
+        if escalation_reason is not None and escalation_reason not in allowed:
+            raise PolicyViolation(f"{escalation_reason!r} is not an allowed repair escalation")
+        if escalation_reason == "final_repair_round" and round_number != 3:
+            raise PolicyViolation("final repair escalation is restricted to round three")
+
+        escalated = round_number == 3 or escalation_reason is not None
+        return self.select("findings_repair_escalated" if escalated else "findings_repair")
+
 
 class SkillRouter:
     def __init__(self, contract: dict[str, Any], skill_root: Path) -> None:
