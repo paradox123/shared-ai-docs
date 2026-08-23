@@ -20,7 +20,7 @@ export function testEnv(queue: Queue): Env {
   return {
     DELIVERY_QUEUE: queue,
     ALLOWED_REPOSITORIES: "daniel/probare-crm",
-    ALLOWED_EVENT_ACTIONS: "issues:labeled",
+    ALLOWED_EVENT_ACTIONS: "issues:labeled,pull_request_review:submitted,pull_request_review_comment:created,pull_request:closed",
     MAX_BODY_BYTES: "100000",
     LOCAL_RECEIVER_URL: "https://github-pilot.example.com/webhooks/github",
     GITHUB_WEBHOOK_SECRET: "github-edge-test-secret",

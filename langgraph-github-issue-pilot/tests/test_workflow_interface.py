@@ -46,7 +46,14 @@ class ControlledGitHub:
     repository = REPOSITORY
     ready_label = "ready-for-agent"
     running_label = "agent-running"
-    allowed_event_actions = frozenset({("issues", "labeled")})
+    allowed_event_actions = frozenset(
+        {
+            ("issues", "labeled"),
+            ("pull_request_review", "submitted"),
+            ("pull_request_review_comment", "created"),
+            ("pull_request", "closed"),
+        }
+    )
 
     def __init__(self) -> None:
         self.labels: set[str] = {"ready-for-agent"}
@@ -62,6 +69,7 @@ class ControlledGitHub:
         self.body = "- [ ] Customer can export CSV\n- [ ] Export includes active filters"
         self.issue_type = "feature"
         self.findings: tuple[str, ...] = ()
+        self.implementation_pr_merged = False
 
     def issue_state(self, repository: str, issue_number: int) -> IssueState:
         return IssueState(
@@ -72,7 +80,12 @@ class ControlledGitHub:
             body=self.body,
             issue_type=self.issue_type,
             findings=self.findings,
+            implementation_pr_merged=self.implementation_pr_merged,
         )
+
+    @staticmethod
+    def is_configured_human(login: str, user_type: str) -> bool:
+        return login.casefold() == "daniel" and user_type.casefold() == "user"
 
     def backlog(self, trigger_issue_number: int) -> tuple[BacklogIssue, ...]:
         return (
@@ -433,6 +446,16 @@ class RoundHeadSourceControl(ControlledSourceControl):
         return PublishedHead(branch=published.branch, head_sha=self.heads[len(self.calls) - 1])
 
 
+class GeneratedHeadSourceControl(ControlledSourceControl):
+    def publish(self, worktree, *, issue_number: int, sensitive_values=()) -> PublishedHead:
+        published = super().publish(
+            worktree,
+            issue_number=issue_number,
+            sensitive_values=sensitive_values,
+        )
+        return PublishedHead(branch=published.branch, head_sha=f"{len(self.calls):040x}")
+
+
 class ControlledVerifier:
     def __init__(self, passed: bool = True) -> None:
         self.passed = passed
@@ -506,6 +529,57 @@ def delivery_body(
             "repository": {"full_name": repository},
             "issue": {"number": issue_number},
             "label": {"name": "ready-for-agent"},
+        },
+        separators=(",", ":"),
+    ).encode()
+
+
+def feedback_body(
+    *,
+    pull_request_number: int = 77,
+    feedback: str = "Keep the CSV column order stable.",
+    login: str = "daniel",
+    user_type: str = "User",
+    review_state: str = "changes_requested",
+    head_sha: str = ControlledSourceControl.head_sha,
+) -> bytes:
+    return json.dumps(
+        {
+            "action": "submitted",
+            "repository": {"full_name": REPOSITORY},
+            "pull_request": {
+                "number": pull_request_number,
+                "head": {"sha": head_sha},
+            },
+            "review": {
+                "id": 901,
+                "state": review_state,
+                "body": feedback,
+                "user": {"login": login, "type": user_type},
+            },
+        },
+        separators=(",", ":"),
+    ).encode()
+
+
+def merge_body(
+    *,
+    pull_request_number: int = 77,
+    head_sha: str = ControlledSourceControl.head_sha,
+    merged: bool = True,
+    login: str = "daniel",
+    user_type: str = "User",
+) -> bytes:
+    return json.dumps(
+        {
+            "action": "closed",
+            "repository": {"full_name": REPOSITORY},
+            "pull_request": {
+                "number": pull_request_number,
+                "head": {"sha": head_sha},
+                "merged": merged,
+                "merged_by": {"login": login, "type": user_type},
+            },
         },
         separators=(",", ":"),
     ).encode()
@@ -1660,3 +1734,591 @@ def test_failed_worker_is_contained_and_duplicate_delivery_starts_nothing_else(
     assert len(worktrees.calls) == 1
     assert len(worker.invocations) == 1
     assert github.pull_request_writes == []
+
+
+def test_configured_human_feedback_is_correlated_and_persisted_on_the_existing_run(
+    tmp_path,
+) -> None:
+    database_path = tmp_path / "pilot.db"
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledRepairWorker()
+    source_control = SequencedSourceControl()
+    reviewer = ControlledReviewer()
+    verifier = ControlledVerifier()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+        reviewer=reviewer,
+        verifier=verifier,
+    )
+    first_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    issue = delivery_body()
+
+    with TestClient(first_app) as client:
+        client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
+        before = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    restarted_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+    )
+    feedback = feedback_body()
+    with TestClient(restarted_app) as client:
+        response = client.post(
+            "/webhooks/github",
+            content=feedback,
+            headers=signed_headers(
+                feedback,
+                delivery_id="feedback-001",
+                event="pull_request_review",
+            ),
+        )
+        after = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert response.status_code == 202
+    assert response.json() == {"delivery_id": "feedback-001", "status": "accepted"}
+    assert after["run"]["id"] == before["run"]["id"]
+    assert after["implementation"]["worktree"] == before["implementation"]["worktree"]
+    assert len(worktrees.calls) == 1
+    batch = after["human_feedback"]["batches"][0]
+    assert batch == {
+        "id": batch["id"],
+        "delivery_id": "feedback-001",
+        "pull_request_number": 77,
+        "starting_head_sha": ControlledSourceControl.head_sha,
+        "author": "daniel",
+        "feedback": ["Keep the CSV column order stable."],
+        "superseded": {
+            "head_sha": ControlledSourceControl.head_sha,
+            "evidence": before["draft_pull_request"]["evidence"],
+            "review_batch_id": before["review"]["id"],
+        },
+        "round_limit": 3,
+        "round_count": 0,
+        "status": "pending",
+        "projected_labels": [],
+        "attempts": [],
+        "created_at": "2026-08-21T10:30:00+00:00",
+        "completed_at": None,
+    }
+
+
+@pytest.mark.parametrize(
+    ("feedback_overrides", "expected_status"),
+    [
+        ({"review_state": "approved"}, 403),
+        ({"login": "dependabot", "user_type": "Bot"}, 403),
+        ({"login": "other-user"}, 403),
+        ({"feedback": "   "}, 403),
+        ({"pull_request_number": 78}, 202),
+    ],
+    ids=["approval", "bot", "other-user", "empty", "unrelated-pr"],
+)
+def test_non_feedback_pr_activity_has_no_continuation_effect(
+    tmp_path, feedback_overrides: dict[str, object], expected_status: int
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledRepairWorker()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=ControlledSourceControl(),
+        reviewer=ControlledReviewer(),
+        verifier=ControlledVerifier(),
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    issue = delivery_body()
+    feedback = feedback_body(**feedback_overrides)
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
+        response = client.post(
+            "/webhooks/github",
+            content=feedback,
+            headers=signed_headers(
+                feedback,
+                delivery_id="feedback-rejected",
+                event="pull_request_review",
+            ),
+        )
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert response.status_code == expected_status
+    assert state["human_feedback"]["batches"] == []
+    assert len(worktrees.calls) == 1
+    assert worker.repair_invocations == []
+
+
+def test_human_feedback_reuses_run_ownership_and_fully_verifies_a_new_head(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledRepairWorker()
+    source_control = SequencedSourceControl()
+    reviewer = ControlledReviewer()
+    verifier = ControlledVerifier()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+        reviewer=reviewer,
+        verifier=verifier,
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    issue = delivery_body()
+    feedback = feedback_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
+        before = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        response = client.post(
+            "/webhooks/github",
+            content=feedback,
+            headers=signed_headers(
+                feedback,
+                delivery_id="feedback-verified",
+                event="pull_request_review",
+            ),
+        )
+        after = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    batch = after["human_feedback"]["batches"][0]
+    attempt = batch["attempts"][0]
+    assignment = worker.repair_invocations[0].assignment
+    assert response.status_code == 202
+    assert after["run"]["id"] == before["run"]["id"]
+    assert after["implementation"]["worktree"] == before["implementation"]["worktree"]
+    assert len(worktrees.calls) == 1
+    assert source_control.calls[0]["worktree"] == source_control.calls[1]["worktree"]
+    assert github.pull_request_writes[0]["branch"] == github.pull_request_writes[1]["branch"]
+    assert assignment["issue"] == before["implementation"]["assignment"]["issue"]
+    assert assignment["requirements"] == before["implementation"]["assignment"]["requirements"]
+    assert assignment["findings"] == [
+        {
+            "source": "repair",
+            "axis": "repair",
+            "location": "pull-request-review:901",
+            "description": "Human feedback: Keep the CSV column order stable.",
+        }
+    ]
+    assert batch["status"] == "verified"
+    assert batch["round_count"] == 1
+    assert attempt["head_sha"] == SequencedSourceControl.repair_head_sha
+    assert {entry["criterion"] for entry in attempt["evidence"]} == {
+        "Customer can export CSV",
+        "Export includes active filters",
+    }
+    assert attempt["deterministic_verification"] == {
+        "command": "pytest tests/test_export.py",
+        "head_sha": SequencedSourceControl.repair_head_sha,
+        "passed": True,
+        "exit_code": 0,
+        "observed": "passed",
+    }
+    assert attempt["review_batch_id"] == after["review"]["id"]
+    assert attempt["invalidation_labels"] == ["agent-running", "ready-for-agent"]
+    assert batch["superseded"]["head_sha"] == ControlledSourceControl.head_sha
+    assert batch["superseded"]["review_batch_id"] == before["review"]["id"]
+    assert batch["superseded"]["evidence"] == before["draft_pull_request"]["evidence"]
+    assert after["review"]["head_sha"] == SequencedSourceControl.repair_head_sha
+    assert len(after["review"]["results"]) == 3
+    assert len(reviewer.invocations) == 6
+    assert github.workflow_label_projections[-2]["add"] == frozenset({"agent-running"})
+    assert github.workflow_label_projections[-2]["remove"] == frozenset(
+        {"verified", "awaiting-review", "needs-info", "ready-for-human"}
+    )
+    assert {"verified", "awaiting-review"}.issubset(github.labels)
+    assert "agent-running" not in github.labels
+    assert [entry["superseded"] for entry in after["review_history"]] == [True, False]
+
+
+def test_feedback_head_cannot_reuse_old_verification_and_runs_all_reviews_each_round(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledRepairWorker()
+    source_control = GeneratedHeadSourceControl()
+    reviewer = ControlledReviewer()
+    verifier = SequencedVerifier([False, True])
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+        reviewer=reviewer,
+        verifier=verifier,
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    issue = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
+        feedback = feedback_body(head_sha=f"{1:040x}")
+        client.post(
+            "/webhooks/github",
+            content=feedback,
+            headers=signed_headers(
+                feedback,
+                delivery_id="feedback-two-rounds",
+                event="pull_request_review",
+            ),
+        )
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    batch = state["human_feedback"]["batches"][0]
+    first, second = batch["attempts"]
+    assert batch["status"] == "verified"
+    assert first["status"] == "unsuccessful"
+    assert first["deterministic_verification"]["passed"] is False
+    assert first["review_batch_id"] == state["review_history"][1]["id"]
+    assert state["review_history"][1]["status"] == "blocked"
+    assert len(state["review_history"][1]["results"]) == 3
+    assert second["status"] == "verified"
+    assert second["deterministic_verification"]["passed"] is True
+    assert second["review_batch_id"] == state["review_history"][2]["id"]
+    assert state["review_history"][2]["status"] == "verified"
+    assert len(reviewer.invocations) == 9
+    assert [entry["superseded"] for entry in state["review_history"]] == [True, True, False]
+
+
+def test_feedback_gets_round_one_after_the_initial_repair_batch_exhausted_three_rounds(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledRepairWorker()
+    source_control = GeneratedHeadSourceControl()
+    reviewer = ControlledReviewer({"code": "fail"})
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+        reviewer=reviewer,
+        verifier=ControlledVerifier(),
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    issue = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
+        exhausted = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        reviewer.verdicts = {}
+        feedback = feedback_body(
+            feedback="Add an explicit CSV encoding assertion.",
+            head_sha=exhausted["draft_pull_request"]["head_sha"],
+        )
+        client.post(
+            "/webhooks/github",
+            content=feedback,
+            headers=signed_headers(
+                feedback,
+                delivery_id="feedback-after-exhaustion",
+                event="pull_request_review",
+            ),
+        )
+        continued = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert exhausted["repair"]["round_count"] == 3
+    assert exhausted["repair"]["status"] == "ready-for-human"
+    batch = continued["human_feedback"]["batches"][0]
+    assert batch["round_count"] == 1
+    assert batch["attempts"][0]["round"] == 1
+    assert batch["status"] == "verified"
+    assert len(worker.repair_invocations) == 4
+    assert "ready-for-human" not in github.labels
+
+
+def test_each_later_human_feedback_batch_starts_with_its_own_counter_and_context(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledRepairWorker()
+    source_control = GeneratedHeadSourceControl()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+        reviewer=ControlledReviewer(),
+        verifier=ControlledVerifier(),
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    issue = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
+        first = feedback_body(
+            feedback="Keep the first feedback isolated.",
+            head_sha=f"{1:040x}",
+        )
+        client.post(
+            "/webhooks/github",
+            content=first,
+            headers=signed_headers(first, delivery_id="feedback-one", event="pull_request_review"),
+        )
+        second = feedback_body(
+            feedback="Only apply the second feedback now.",
+            head_sha=f"{2:040x}",
+        )
+        client.post(
+            "/webhooks/github",
+            content=second,
+            headers=signed_headers(second, delivery_id="feedback-two", event="pull_request_review"),
+        )
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    batches = state["human_feedback"]["batches"]
+    assert [(batch["round_count"], batch["status"]) for batch in batches] == [
+        (1, "verified"),
+        (1, "verified"),
+    ]
+    first_assignment, second_assignment = [
+        invocation.assignment for invocation in worker.repair_invocations
+    ]
+    assert first_assignment["findings"][0]["description"] == (
+        "Human feedback: Keep the first feedback isolated."
+    )
+    assert second_assignment["findings"][0]["description"] == (
+        "Human feedback: Only apply the second feedback now."
+    )
+    assert "first feedback" not in json.dumps(second_assignment)
+
+
+def test_one_human_feedback_batch_stops_after_exactly_three_attempts(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledRepairWorker()
+    source_control = GeneratedHeadSourceControl()
+    reviewer = ControlledReviewer()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+        reviewer=reviewer,
+        verifier=ControlledVerifier(),
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    issue = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
+        reviewer.verdicts = {"code": "fail"}
+        feedback = feedback_body(head_sha=f"{1:040x}")
+        client.post(
+            "/webhooks/github",
+            content=feedback,
+            headers=signed_headers(
+                feedback,
+                delivery_id="feedback-exhausted",
+                event="pull_request_review",
+            ),
+        )
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    batch = state["human_feedback"]["batches"][0]
+    assert batch["status"] == "ready-for-human"
+    assert batch["round_count"] == 3
+    assert "ready-for-human" in batch["projected_labels"]
+    assert [attempt["round"] for attempt in batch["attempts"]] == [1, 2, 3]
+    assert len(worker.repair_invocations) == 3
+    assert len(source_control.calls) == 4
+    assert "ready-for-human" in github.labels
+    assert not {"agent-running", "verified", "awaiting-review"}.intersection(github.labels)
+
+
+def test_authorized_human_merge_completes_the_same_run_and_checkpoint_after_restart(
+    tmp_path,
+) -> None:
+    database_path = tmp_path / "pilot.db"
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledRepairWorker()
+    source_control = SequencedSourceControl()
+    reviewer = ControlledReviewer()
+    verifier = ControlledVerifier()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+        reviewer=reviewer,
+        verifier=verifier,
+    )
+    first_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    issue = delivery_body()
+    feedback = feedback_body()
+
+    with TestClient(first_app) as client:
+        client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
+        client.post(
+            "/webhooks/github",
+            content=feedback,
+            headers=signed_headers(
+                feedback,
+                delivery_id="feedback-before-merge",
+                event="pull_request_review",
+            ),
+        )
+        before = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    effect_counts = (
+        len(worktrees.calls),
+        len(worker.repair_invocations),
+        len(source_control.calls),
+        len(reviewer.invocations),
+    )
+    github.open = False
+    github.implementation_pr_merged = True
+    restarted_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    merge = merge_body(head_sha=SequencedSourceControl.repair_head_sha)
+
+    with TestClient(restarted_app) as client:
+        response = client.post(
+            "/webhooks/github",
+            content=merge,
+            headers=signed_headers(merge, delivery_id="merge-001", event="pull_request"),
+        )
+        completed = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert response.status_code == 202
+    assert completed["run"]["id"] == before["run"]["id"]
+    assert completed["run"]["status"] == "completed"
+    assert completed["checkpoint"]["values"]["status"] == "completed"
+    assert completed["completion"] == {
+        "reason": "human-merged",
+        "delivery_id": "merge-001",
+        "pull_request_number": 77,
+        "head_sha": SequencedSourceControl.repair_head_sha,
+        "actor": "daniel",
+        "completed_at": "2026-08-21T10:30:00+00:00",
+    }
+    assert completed["human_feedback"] == before["human_feedback"]
+    assert completed["review_history"] == before["review_history"]
+    assert (
+        len(worktrees.calls),
+        len(worker.repair_invocations),
+        len(source_control.calls),
+        len(reviewer.invocations),
+    ) == effect_counts
+
+
+@pytest.mark.parametrize(
+    "merge_overrides",
+    [
+        {"merged": False},
+        {"login": "other-user"},
+        {"user_type": "Bot"},
+        {"pull_request_number": 78},
+        {"head_sha": "ffffffffffffffffffffffffffffffffffffffff"},
+    ],
+    ids=["not-merged", "other-user", "bot", "unrelated-pr", "wrong-head"],
+)
+def test_pr_close_without_the_correlated_human_merge_does_not_complete_the_run(
+    tmp_path, merge_overrides: dict[str, object]
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledWorker()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=ControlledSourceControl(),
+        reviewer=ControlledReviewer(),
+        verifier=ControlledVerifier(),
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    issue = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
+        github.open = False
+        github.implementation_pr_merged = True
+        merge = merge_body(**merge_overrides)
+        response = client.post(
+            "/webhooks/github",
+            content=merge,
+            headers=signed_headers(merge, delivery_id="merge-ignored", event="pull_request"),
+        )
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert response.status_code == 202
+    assert state["run"]["status"] == "running"
+    assert state["completion"] is None
+    assert len(worktrees.calls) == 1
+    assert len(worker.invocations) == 1

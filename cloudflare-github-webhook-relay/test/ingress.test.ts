@@ -107,6 +107,35 @@ it("accepts a valid GitHub delivery only after one durable Queue publication", a
   });
 });
 
+it.each([
+  { event: "pull_request_review", action: "submitted" },
+  { event: "pull_request_review_comment", action: "created" },
+  { event: "pull_request", action: "closed" },
+])("allows the configured lifecycle delivery $event:$action", async ({ event, action }) => {
+  const queue = new ImmediateQueue();
+  const body = JSON.stringify({
+    action,
+    repository: { full_name: "daniel/probare-crm" },
+  });
+  const signature = await githubSignature(body);
+  const request = new Request("https://relay.example.com/webhooks/github", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-github-delivery": `delivery-${event}`,
+      "x-github-event": event,
+      "x-hub-signature-256": signature,
+    },
+    body,
+  });
+
+  const response = await worker.fetch(request, testEnv(queue), createExecutionContext());
+
+  expect(response.status).toBe(202);
+  expect(queue.messages).toHaveLength(1);
+  expect(queue.messages[0]).toMatchObject({ event, action });
+});
+
 it("preserves the exact authenticated JSON bytes in the Queue envelope", async () => {
   const queue = new ImmediateQueue();
   const json = BODY.replace('"ready-for-agent"', '"bereit-✓"');
