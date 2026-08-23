@@ -37,6 +37,11 @@ from github_issue_pilot.policy import (
     SkillRouter,
 )
 from github_issue_pilot.publication import SourcePublicationError
+from github_issue_pilot.reconciliation import (
+    ReconciliationCommand,
+    human_merge_command,
+    ready_issue_command,
+)
 from github_issue_pilot.repair import RepairBatchInput, ReviewRepairCoordinator
 from github_issue_pilot.review import ReviewBatchInput, ReviewCoordinator
 from github_issue_pilot.storage import Delivery, WorkflowStore
@@ -597,6 +602,97 @@ class WorkflowRuntime:
         if self._implementation is not None and self._implementation.transition_probe is not None:
             self._implementation.transition_probe(phase, operation_key)
 
+    def reconcile_current_state(self, boot_id: str) -> dict[str, int]:
+        commands: list[ReconciliationCommand] = []
+        for repository, adapter in self._repository_adapters.items():
+            commands.extend(self._current_reconciliation_commands(repository, adapter))
+
+        accepted = 0
+        deduplicated = 0
+        for command in commands:
+            delivery = command.delivery(
+                boot_id=boot_id,
+                accepted_at=self._clock().isoformat(),
+            )
+            result = self._store.accept(delivery)
+            if result == "accepted":
+                accepted += 1
+                self.dispatch(delivery)
+            else:
+                deduplicated += 1
+        return {
+            "discovered_commands": len(commands),
+            "accepted_commands": accepted,
+            "deduplicated_commands": deduplicated,
+        }
+
+    def _current_reconciliation_commands(
+        self,
+        repository: str,
+        adapter: RepositoryAdapter,
+    ) -> list[ReconciliationCommand]:
+        commands: list[ReconciliationCommand] = []
+        active_merge = self._active_merge_command(repository, adapter)
+        if active_merge is not None:
+            commands.append(active_merge)
+        for candidate in sorted(adapter.backlog(0), key=lambda item: item.issue_number):
+            state = candidate.state
+            authorized = (
+                adapter.ready_label in state.labels
+                or (
+                    state.authorization.origin in AUTHORIZED_ORIGINS
+                    and state.authorization.within_inherited_scope
+                )
+            )
+            if state.open and authorized:
+                commands.append(
+                    ready_issue_command(
+                        repository=repository,
+                        issue_number=candidate.issue_number,
+                        ready_label=adapter.ready_label,
+                    )
+                )
+        return commands
+
+    def _active_merge_command(
+        self,
+        repository: str,
+        adapter: RepositoryAdapter,
+    ) -> ReconciliationCommand | None:
+        active = self._store.active_run(repository)
+        if active is None:
+            return None
+        publication = self._store.workflow_publication(str(active["id"]))
+        pull_request = publication.get("pull_request") if publication else None
+        if (
+            publication is None
+            or publication["status"] != "published"
+            or not isinstance(pull_request, dict)
+            or not publication["head_sha"]
+        ):
+            return None
+        pull_request_number = int(pull_request["number"])
+        pull_state = adapter.pull_request_state(repository, pull_request_number)
+        issue_number = int(active["issue_number"])
+        issue_state = adapter.issue_state(repository, issue_number)
+        if (
+            not pull_state.merged
+            or pull_state.head_sha != publication["head_sha"]
+            or not adapter.is_configured_human(
+                pull_state.actor_login, pull_state.actor_type
+            )
+            or issue_state.open
+            or not issue_state.implementation_pr_merged
+        ):
+            return None
+        return human_merge_command(
+            repository=repository,
+            issue_number=issue_number,
+            pull_request_number=pull_request_number,
+            head_sha=pull_state.head_sha,
+            actor_login=pull_state.actor_login,
+        )
+
     def dispatch(self, delivery: Delivery) -> None:
         if delivery.kind == "human_feedback":
             self._accept_human_feedback(delivery)
@@ -924,6 +1020,7 @@ class WorkflowRuntime:
             "human_feedback": human_feedback,
             "completion": completion,
             "recovery": recovery,
+            "reconciliation": self._store.latest_startup_reconciliation(),
         }
 
     def close(self) -> None:
