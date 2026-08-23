@@ -165,7 +165,9 @@ class CodexCliWorker:
         skill_instruction = " and ".join(f"${skill.name}" for skill in invocation.skills)
         prompt = (
             f"Use {skill_instruction}. Implement only the bounded assignment below in observable "
-            "Red-Green slices. Return the schema-constrained result and do not expand scope.\n"
+            "Red-Green slices. Every evidence observation must embed a non-empty artifact containing "
+            "the decisive compact proof or a repository-relative artifact path; never return a null "
+            "artifact. Return the schema-constrained result and do not expand scope.\n"
             "<implementation-assignment>\n"
             f"{json.dumps(invocation.assignment, sort_keys=True)}\n"
             "</implementation-assignment>"

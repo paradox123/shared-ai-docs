@@ -391,7 +391,7 @@ class InsufficientEvidenceWorker(ControlledWorker):
                     {
                         "phase": "rejection",
                         "description": "Export was blocked by authorization policy",
-                        "artifact": None,
+                        "artifact": "403 export blocked by authorization policy",
                         "correlation_id": None,
                     }
                 ],

@@ -148,6 +148,7 @@ print(json.dumps({"type": "turn.completed"}))
     assert "--json" in args
     assert args[-1] == "-"
     assert "$implement" in prompt and "$tdd" in prompt
+    assert "Every evidence observation must embed a non-empty artifact" in prompt
     assert json.dumps(valid_assignment(), sort_keys=True) in prompt
     assert "app-server" not in prompt and "exec-server" not in prompt
     assert output.result == valid_result()
@@ -182,6 +183,13 @@ def test_worker_output_schema_requires_every_object_property_for_codex_strict_mo
                 assert_strict_objects(nested)
 
     assert_strict_objects(schema)
+
+
+def test_worker_output_schema_requires_an_embedded_artifact_for_every_observation() -> None:
+    schema = load_contract("worker-result-v2.json")
+    artifact = schema["$defs"]["evidence_observation"]["properties"]["artifact"]
+
+    assert artifact == {"type": "string", "minLength": 1}
 
 
 def test_codex_cli_adapter_rejects_a_write_profile_outside_the_assigned_worktree(tmp_path) -> None:

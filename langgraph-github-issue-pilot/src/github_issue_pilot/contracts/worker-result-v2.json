@@ -116,7 +116,7 @@
           ]
         },
         "description": {"type": "string", "minLength": 1},
-        "artifact": {"type": ["string", "null"]},
+        "artifact": {"type": "string", "minLength": 1},
         "correlation_id": {"type": ["string", "null"]}
       }
     }
