@@ -4,7 +4,7 @@ import sqlite3
 from collections.abc import Callable, Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import NotRequired, TypedDict
+from typing import TypedDict
 
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
@@ -48,11 +48,6 @@ class ClaimState(TypedDict):
     issue_number: int
     status: str
     claim_label: str
-    assignment: NotRequired[dict[str, object]]
-    worktree: NotRequired[dict[str, str]]
-    policy: NotRequired[dict[str, str]]
-    skills: NotRequired[list[dict[str, str]]]
-    access_profile: NotRequired[dict[str, object]]
 
 
 class WorkflowRuntime:
@@ -101,21 +96,29 @@ class WorkflowRuntime:
         self._graph = builder.compile(checkpointer=self._checkpointer)
 
     def _project_claim(self, state: ClaimState) -> dict[str, str]:
+        run_id = self._store.run_id_for_issue(state["repository"], state["issue_number"])
+        existing = self._store.workflow_claim(run_id)
+        if existing is not None:
+            return {"status": "claimed", "claim_label": str(existing["label"])}
         adapter = self._repository_adapters[state["repository"]]
         label = adapter.running_label
         adapter.ensure_label(state["repository"], state["issue_number"], label)
         self._store.record_claim(
-            run_id=self._store.run_id_for_issue(state["repository"], state["issue_number"]),
+            run_id=run_id,
             label=label,
             projected_at=self._clock().isoformat(),
         )
+        self._probe("claim", f"{run_id}:claim")
         return {"status": "claimed", "claim_label": label}
 
-    def _prepare_implementation(self, state: ClaimState) -> dict[str, object]:
+    def _prepare_implementation(self, state: ClaimState) -> dict[str, str]:
         services = self._require_implementation()
         repository = state["repository"]
-        context = services.repository_contexts[repository]
         run_id = self._store.run_id_for_issue(repository, state["issue_number"])
+        existing = self._store.workflow_implementation(run_id)
+        if existing is not None:
+            return {"status": "implementation_prepared"}
+        context = services.repository_contexts[repository]
         current_issue = self._repository_adapters[repository].issue_state(
             repository, state["issue_number"]
         )
@@ -165,37 +168,30 @@ class WorkflowRuntime:
             access_profile=access_profile,
             started_at=self._clock().isoformat(),
         )
-        return {
-            "assignment": assignment,
-            "worktree": {
-                "path": str(worktree.path),
-                "branch": worktree.branch,
-                "base_ref": worktree.base_ref,
-            },
-            "policy": {
-                "version": selection.policy_version,
-                "task": selection.task,
-                "model": selection.model,
-                "reasoning_effort": selection.reasoning_effort,
-                "sandbox": selection.sandbox,
-            },
-            "skills": skill_records,
-            "access_profile": access_profile,
-        }
+        self._probe("implementation_prepared", f"{run_id}:prepare")
+        return {"status": "implementation_prepared"}
 
     def _execute_worker(self, state: ClaimState) -> dict[str, str]:
         services = self._require_implementation()
-        policy = state["policy"]
         run_id = self._store.run_id_for_issue(state["repository"], state["issue_number"])
+        existing = self._store.workflow_implementation(run_id)
+        if existing is not None and existing["status"] != "running":
+            return {
+                "status": "implemented" if existing["status"] == "completed" else "worker_failed"
+            }
+        if existing is None:
+            raise RuntimeError("implementation was not prepared")
+        durable_state = self._implementation_state(existing)
+        policy = durable_state["policy"]
         diagnostic_events: list[dict[str, object]] = []
         try:
             output = services.worker.run(
                 WorkerInvocation(
-                    assignment=state["assignment"],
+                    assignment=durable_state["assignment"],
                     worktree=Worktree(
-                        path=Path(state["worktree"]["path"]),
-                        branch=state["worktree"]["branch"],
-                        base_ref=state["worktree"]["base_ref"],
+                        path=Path(durable_state["worktree"]["path"]),
+                        branch=durable_state["worktree"]["branch"],
+                        base_ref=durable_state["worktree"]["base_ref"],
                     ),
                     selection=NodeSelection(
                         policy_version=policy["version"],
@@ -208,9 +204,9 @@ class WorkflowRuntime:
                         SkillProvenance(
                             name=skill["name"], content_sha256=skill["content_sha256"]
                         )
-                        for skill in state["skills"]
+                        for skill in durable_state["skills"]
                     ),
-                    access_profile=state["access_profile"],
+                    access_profile=durable_state["access_profile"],
                 )
             )
             redacted_diagnostics = redact_payload(
@@ -238,6 +234,7 @@ class WorkflowRuntime:
             diagnostic_events=diagnostic_events,
             completed_at=self._clock().isoformat(),
         )
+        self._probe("implementation_completed", f"{run_id}:worker")
         return {"status": "implemented"}
 
     def _publish_draft_pr(self, state: ClaimState) -> dict[str, str]:
@@ -246,6 +243,12 @@ class WorkflowRuntime:
         if source_control is None:
             raise RuntimeError("source control is not configured")
         run_id = self._store.run_id_for_issue(state["repository"], state["issue_number"])
+        existing_publication = self._store.workflow_publication(run_id)
+        if existing_publication is not None:
+            if existing_publication["status"] == "published":
+                return {"status": "draft_pr_published"}
+            if existing_publication["status"] == "rejected":
+                return {"status": str(existing_publication["reason"] or "publication_failed")}
         implementation = self._store.workflow_implementation(run_id)
         if implementation is None or implementation["result"] is None:
             return {"status": "worker_failed"}
@@ -331,6 +334,7 @@ class WorkflowRuntime:
             pull_request_url=pull_request.url,
             completed_at=self._clock().isoformat(),
         )
+        self._probe("publication_completed", f"{run_id}:{published.head_sha}")
         return {"status": "draft_pr_published"}
 
     def _review_draft_pr(self, state: ClaimState) -> dict[str, str]:
@@ -341,6 +345,18 @@ class WorkflowRuntime:
         run_id = self._store.run_id_for_issue(state["repository"], state["issue_number"])
         implementation = self._store.workflow_implementation(run_id)
         publication = self._store.workflow_publication(run_id)
+        existing_review = self._store.workflow_review(run_id)
+        if (
+            existing_review is not None
+            and publication is not None
+            and existing_review["head_sha"] == publication["head_sha"]
+            and existing_review["status"] != "running"
+        ):
+            return {
+                "status": (
+                    "verified" if existing_review["status"] == "verified" else "review_blocked"
+                )
+            }
         if (
             implementation is None
             or implementation["result"] is None
@@ -357,6 +373,7 @@ class WorkflowRuntime:
             skill_root=services.skill_root,
             sensitive_values=services.sensitive_values,
             clock=self._clock,
+            transition_probe=services.transition_probe,
         )
         status = coordinator.execute(
             ReviewBatchInput(
@@ -377,6 +394,9 @@ class WorkflowRuntime:
         initial_review = self._store.workflow_review(run_id)
         implementation = self._store.workflow_implementation(run_id)
         publication = self._store.workflow_publication(run_id)
+        existing_repair = self._store.workflow_repair(run_id)
+        if existing_repair is not None and existing_repair["status"] != "running":
+            return {"status": str(existing_repair["status"])}
         if (
             initial_review is None
             or implementation is None
@@ -404,6 +424,178 @@ class WorkflowRuntime:
         if self._implementation is None:
             raise RuntimeError("implementation services are not configured")
         return self._implementation
+
+    @staticmethod
+    def _implementation_state(implementation: dict[str, object]) -> dict[str, object]:
+        policy = implementation["policy"]
+        access_profile = implementation["access_profile"]
+        return {
+            "assignment": implementation["assignment"],
+            "worktree": implementation["worktree"],
+            "policy": {
+                "version": policy["version"],
+                "task": "implementation",
+                "model": policy["model"],
+                "reasoning_effort": policy["reasoning_effort"],
+                "sandbox": access_profile["sandbox"],
+            },
+            "skills": implementation["skills"],
+            "access_profile": access_profile,
+        }
+
+    def recover(self) -> None:
+        if self._implementation is None:
+            return
+        for run in self._store.active_runs():
+            try:
+                self._recover_run(run)
+            except (KeyError, LookupError, OSError, RuntimeError, TypeError, ValueError, sqlite3.Error):
+                self._record_recovery(
+                    str(run["id"]),
+                    "waiting",
+                    f"{run['id']}:startup",
+                    "failed",
+                )
+
+    def _recover_run(self, run: dict[str, object]) -> None:
+        run_id = str(run["id"])
+        repository = str(run["repository"])
+        issue_number = int(run["issue_number"])
+        checkpoint = self.checkpoint(run_id)
+        values = dict(checkpoint["values"]) if checkpoint is not None else {}
+        state: ClaimState = {
+            "delivery_id": str(values.get("delivery_id", "recovery")),
+            "repository": repository,
+            "issue_number": issue_number,
+            "status": str(values.get("status", "accepted")),
+            "claim_label": str(values.get("claim_label", "")),
+        }
+
+        if self._store.workflow_claim(run_id) is None:
+            state.update(self._project_claim(state))
+            self._record_recovery(run_id, "claim", f"{run_id}:claim", "retried")
+        else:
+            self._record_recovery(run_id, "claim", f"{run_id}:claim", "reused")
+
+        implementation = self._store.workflow_implementation(run_id)
+        if implementation is None:
+            state.update(self._prepare_implementation(state))
+            self._record_recovery(
+                run_id, "implementation", f"{run_id}:prepare", "retried"
+            )
+            implementation = self._store.workflow_implementation(run_id)
+        elif implementation["status"] == "running":
+            state.update(self._implementation_state(implementation))
+            self._record_recovery(
+                run_id, "implementation", f"{run_id}:prepare", "reused"
+            )
+        else:
+            state.update(self._implementation_state(implementation))
+            self._record_recovery(
+                run_id, "implementation", f"{run_id}:worker", "reused"
+            )
+
+        if implementation is None:
+            return
+        if implementation["status"] == "running":
+            state.update(self._execute_worker(state))
+            self._record_recovery(
+                run_id, "implementation", f"{run_id}:worker", "retried"
+            )
+            implementation = self._store.workflow_implementation(run_id)
+        if implementation is None or implementation["status"] != "completed":
+            return
+
+        services = self._require_implementation()
+        if services.source_control is None:
+            return
+        publication = self._store.workflow_publication(run_id)
+        if publication is None or publication["status"] == "publishing":
+            state.update(self._publish_draft_pr(state))
+            self._record_recovery(
+                run_id, "publication", f"{run_id}:publication", "retried"
+            )
+            publication = self._store.workflow_publication(run_id)
+        elif publication["status"] == "published":
+            self._record_recovery(
+                run_id, "publication", f"{run_id}:publication", "reused"
+            )
+        if publication is None or publication["status"] != "published":
+            return
+
+        feedback_batches = self._store.recoverable_feedback_batches(run_id)
+        if feedback_batches:
+            from github_issue_pilot.feedback import (
+                HumanFeedbackCoordinator,
+                HumanFeedbackInput,
+            )
+
+            for batch in feedback_batches:
+                HumanFeedbackCoordinator(
+                    store=self._store,
+                    adapter=self._repository_adapters[repository],
+                    services=services,
+                    clock=self._clock,
+                ).execute(
+                    HumanFeedbackInput(
+                        run_id=run_id,
+                        repository=repository,
+                        issue_number=issue_number,
+                        feedback_batch_id=str(batch["id"]),
+                        pull_request_number=int(batch["pull_request_number"]),
+                        starting_head_sha=str(batch["starting_head_sha"]),
+                        source_id=str(batch["source_id"]),
+                        feedback=tuple(batch["feedback"]),
+                        implementation=implementation,
+                    )
+                )
+                self._record_recovery(
+                    run_id,
+                    "human_feedback",
+                    f"{run_id}:{batch['id']}",
+                    "retried" if batch["status"] == "running" else "completed",
+                )
+            return
+
+        if services.reviewer is None:
+            self._record_recovery(run_id, "waiting", f"{run_id}:human", "waiting")
+            return
+        review = self._store.workflow_review(run_id)
+        if review is None or (
+            review["head_sha"] == publication["head_sha"] and review["status"] == "running"
+        ):
+            state.update(self._review_draft_pr(state))
+            self._record_recovery(
+                run_id,
+                "review",
+                f"{run_id}:{publication['head_sha']}",
+                "retried",
+            )
+            review = self._store.workflow_review(run_id)
+        if review is None:
+            return
+        if review["status"] == "blocked" and services.verifier is not None:
+            state.update(self._repair_failed_review(state))
+            self._record_recovery(
+                run_id, "repair", f"{run_id}:{review['id']}", "retried"
+            )
+        else:
+            self._record_recovery(run_id, "waiting", f"{run_id}:human", "waiting")
+
+    def _record_recovery(
+        self, run_id: str, phase: str, operation_key: str, outcome: str
+    ) -> None:
+        self._store.record_recovery_event(
+            run_id=run_id,
+            phase=phase,
+            operation_key=operation_key,
+            outcome=outcome,
+            recorded_at=self._clock().isoformat(),
+        )
+
+    def _probe(self, phase: str, operation_key: str) -> None:
+        if self._implementation is not None and self._implementation.transition_probe is not None:
+            self._implementation.transition_probe(phase, operation_key)
 
     def dispatch(self, delivery: Delivery) -> None:
         if delivery.kind == "human_feedback":
@@ -708,6 +900,7 @@ class WorkflowRuntime:
         completion = (
             self._store.workflow_completion(str(run["id"])) if run is not None else None
         )
+        recovery = self._store.workflow_recovery(str(run["id"])) if run is not None else None
         return {
             "delivery": delivery,
             "disposition": disposition,
@@ -730,6 +923,7 @@ class WorkflowRuntime:
             "repair": repair,
             "human_feedback": human_feedback,
             "completion": completion,
+            "recovery": recovery,
         }
 
     def close(self) -> None:

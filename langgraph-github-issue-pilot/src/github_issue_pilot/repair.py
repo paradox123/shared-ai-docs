@@ -133,15 +133,64 @@ class ReviewRepairCoordinator:
         )
         previous_head = str(initial_review["head_sha"])
         terminal_disposition: str | None = None
+        repair_state = self._store.workflow_repair(repair_input.run_id)
+        if repair_state is not None and repair_state["status"] != "running":
+            return str(repair_state["status"])
 
-        for round_number in range(1, self.ROUND_LIMIT + 1):
+        start_round = 1
+        if repair_state is not None:
+            for attempt in repair_state["attempts"]:
+                status = str(attempt["status"])
+                invocations = attempt["invocations"]
+                last_result = invocations[-1]["result"] if invocations else {}
+                if isinstance(last_result, dict) and last_result.get("terminal_disposition"):
+                    terminal_disposition = str(last_result["terminal_disposition"])
+                if status == "verified":
+                    review = self._store.workflow_review(repair_input.run_id)
+                    projected = frozenset(review["projected_labels"]) if review else frozenset()
+                    self._store.complete_repair_batch(
+                        repair_batch_id=repair_batch_id,
+                        status="verified",
+                        open_findings=[],
+                        projected_labels=projected,
+                        completed_at=self._now(),
+                    )
+                    self._refresh_pull_request(repair_input, open_findings=[])
+                    return "verified"
+                if status == "blocked":
+                    findings = list(attempt["remaining_findings"])
+                    return self._handoff(
+                        repair_input,
+                        repair_batch_id,
+                        terminal_disposition or "ready-for-human",
+                        findings,
+                    )
+                if status in {"unsuccessful", "failed"}:
+                    findings = list(attempt["remaining_findings"])
+                    if attempt["head_sha"]:
+                        previous_head = str(attempt["head_sha"])
+                    start_round = int(attempt["round"]) + 1
+
+        for round_number in range(start_round, self.ROUND_LIMIT + 1):
             repair_state = self._store.workflow_repair(repair_input.run_id)
-            assignment = self._build_assignment(
-                repair_input=repair_input,
-                repair_batch_id=repair_batch_id,
-                round_number=round_number,
-                findings=findings,
-                repair_state=repair_state,
+            existing_attempt = next(
+                (
+                    attempt
+                    for attempt in (repair_state or {}).get("attempts", [])
+                    if int(attempt["round"]) == round_number
+                ),
+                None,
+            )
+            assignment = (
+                dict(existing_attempt["assignment"])
+                if existing_attempt is not None
+                else self._build_assignment(
+                    repair_input=repair_input,
+                    repair_batch_id=repair_batch_id,
+                    round_number=round_number,
+                    findings=findings,
+                    repair_state=repair_state,
+                )
             )
             attempt_id = self._store.begin_repair_attempt(
                 repair_batch_id=repair_batch_id,
@@ -149,25 +198,33 @@ class ReviewRepairCoordinator:
                 assignment=assignment,
                 started_at=self._now(),
             )
-            result = self._run_repair_invocation(
-                repair_input=repair_input,
-                attempt_id=attempt_id,
-                invocation_number=1,
-                assignment=assignment,
-                round_number=round_number,
-                escalation_reason=(
-                    "final_repair_round" if round_number == self.ROUND_LIMIT else None
-                ),
-            )
-            if result is not None and result["outcome"] == "escalate":
+            invocations = existing_attempt["invocations"] if existing_attempt else []
+            result = dict(invocations[-1]["result"]) if invocations else None
+            if result is not None and result.get("outcome") == "failed":
+                result = None
+            if result is None and not invocations:
                 result = self._run_repair_invocation(
                     repair_input=repair_input,
                     attempt_id=attempt_id,
-                    invocation_number=2,
+                    invocation_number=1,
                     assignment=assignment,
                     round_number=round_number,
-                    escalation_reason=str(result["escalation_reason"]),
+                    escalation_reason=(
+                        "final_repair_round" if round_number == self.ROUND_LIMIT else None
+                    ),
                 )
+            if result is not None and result["outcome"] == "escalate":
+                if len(invocations) >= 2:
+                    result = dict(invocations[-1]["result"])
+                else:
+                    result = self._run_repair_invocation(
+                        repair_input=repair_input,
+                        attempt_id=attempt_id,
+                        invocation_number=2,
+                        assignment=assignment,
+                        round_number=round_number,
+                        escalation_reason=str(result["escalation_reason"]),
+                    )
             if result is None or result.get("outcome") == "escalate":
                 findings = [self._repair_failure("repair worker did not complete the assignment")]
                 self._store.complete_repair_attempt(
@@ -210,12 +267,19 @@ class ReviewRepairCoordinator:
             implementation_result = result["implementation_result"]
             if not isinstance(implementation_result, dict):
                 raise InvalidRepairContract("completed repair has no implementation result")
-            publication = self._publish_repair(
-                repair_input=repair_input,
-                round_number=round_number,
-                result=result,
-                implementation_result=implementation_result,
-                previous_head=previous_head,
+            current_publication = self._store.workflow_publication(repair_input.run_id)
+            publication = (
+                current_publication
+                if current_publication is not None
+                and current_publication["status"] == "published"
+                and current_publication["head_sha"] != previous_head
+                else self._publish_repair(
+                    repair_input=repair_input,
+                    round_number=round_number,
+                    result=result,
+                    implementation_result=implementation_result,
+                    previous_head=previous_head,
+                )
             )
             if publication is None:
                 findings = [self._repair_failure("repair did not produce a safe new head")]
@@ -251,6 +315,7 @@ class ReviewRepairCoordinator:
                 skill_root=self._services.skill_root,
                 sensitive_values=self._services.sensitive_values,
                 clock=self._clock,
+                transition_probe=self._services.transition_probe,
             ).execute(
                 ReviewBatchInput(
                     run_id=repair_input.run_id,
@@ -451,6 +516,10 @@ class ReviewRepairCoordinator:
             started_at=started_at,
             completed_at=self._now(),
         )
+        if self._services.transition_probe is not None:
+            self._services.transition_probe(
+                "repair_invocation_completed", f"{attempt_id}:{invocation_number}"
+            )
         return result if result.get("outcome") != "failed" else None
 
     def _publish_repair(

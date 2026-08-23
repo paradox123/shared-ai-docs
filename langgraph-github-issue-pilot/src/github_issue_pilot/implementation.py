@@ -4,7 +4,7 @@ import json
 import re
 import subprocess
 import tempfile
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from importlib.resources import as_file, files
 from pathlib import Path
@@ -101,7 +101,28 @@ class GitWorktreeAdapter:
         branch = f"codex/run-{run_id}"
         target = self._worktree_root / repository_segment / run_id
         if target.exists():
-            raise FileExistsError(f"worktree path already exists: {target}")
+            try:
+                actual_root = subprocess.run(
+                    [self._git_executable, "-C", str(target), "rev-parse", "--show-toplevel"],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                ).stdout.strip()
+                actual_branch = subprocess.run(
+                    [self._git_executable, "-C", str(target), "branch", "--show-current"],
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                ).stdout.strip()
+            except (OSError, subprocess.CalledProcessError) as exc:
+                raise FileExistsError(
+                    f"run worktree path exists but is not recoverable: {target}"
+                ) from exc
+            if Path(actual_root).resolve() != target.resolve() or actual_branch != branch:
+                raise FileExistsError(
+                    f"run worktree path does not match its durable identity: {target}"
+                )
+            return Worktree(path=target, branch=branch, base_ref=base_ref)
         target.parent.mkdir(parents=True, exist_ok=True)
         subprocess.run(
             [
@@ -319,6 +340,7 @@ class ImplementationServices:
     reviewer: ReviewWorkerPort | None = None
     verifier: DeterministicVerifierPort | None = None
     sensitive_values: tuple[str, ...] = ()
+    transition_probe: Callable[[str, str], None] | None = None
 
 
 def build_assignment(

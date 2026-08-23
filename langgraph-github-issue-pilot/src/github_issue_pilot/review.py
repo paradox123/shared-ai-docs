@@ -274,6 +274,7 @@ class ReviewCoordinator:
         skill_root: Path,
         sensitive_values: tuple[str, ...],
         clock: Callable[[], datetime],
+        transition_probe: Callable[[str, str], None] | None = None,
     ) -> None:
         self._store = store
         self._adapter = adapter
@@ -281,6 +282,7 @@ class ReviewCoordinator:
         self._skill_root = skill_root
         self._sensitive_values = sensitive_values
         self._clock = clock
+        self._transition_probe = transition_probe
 
     def execute(self, review_input: ReviewBatchInput) -> str:
         publication = review_input.publication
@@ -294,9 +296,23 @@ class ReviewCoordinator:
             pull_request_number=int(pull_request["number"]),
             started_at=self._clock().isoformat(),
         )
-        results: list[dict[str, object]] = []
+        persisted = next(
+            batch
+            for batch in self._store.workflow_review_history(review_input.run_id)
+            if batch["id"] == batch_id
+        )
+        if persisted["status"] == "verified":
+            return "verified"
+        if persisted["status"] == "blocked":
+            return "review_blocked"
+        persisted_results = {
+            str(record["axis"]): record["verdict"] for record in persisted["results"]
+        }
+        results: list[dict[str, object]] = list(persisted_results.values())
         failures: list[str] = []
         for axis, task in self._AXES:
+            if axis in persisted_results:
+                continue
             try:
                 result = self._execute_axis(
                     review_input=review_input,
@@ -399,6 +415,8 @@ class ReviewCoordinator:
             diagnostic_events=diagnostics,
             completed_at=self._clock().isoformat(),
         )
+        if self._transition_probe is not None:
+            self._transition_probe(f"review_{axis}_completed", invocation_id)
         return result
 
     def _project(

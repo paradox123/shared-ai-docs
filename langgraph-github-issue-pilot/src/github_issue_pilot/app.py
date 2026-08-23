@@ -181,6 +181,7 @@ def create_app(
     @asynccontextmanager
     async def lifespan(_: FastAPI):
         try:
+            runtime.recover()
             yield
         finally:
             runtime.close()
