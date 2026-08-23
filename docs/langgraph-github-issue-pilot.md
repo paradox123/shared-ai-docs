@@ -1,6 +1,6 @@
 # LangGraph GitHub Issue Implementation Pilot
 
-Status: Entscheidungsgrundlage abgeschlossen; lokale Claim- und isolierte Implementierungs-Slices umgesetzt
+Status: Entscheidungsgrundlage abgeschlossen; lokale Claim-, Implementierungs-, Draft-PR- und unabhaengige Review-Slices umgesetzt
 
 ## Ziel
 
@@ -153,20 +153,20 @@ Damit automatisch eingebettete Screenshots dauerhaft und commit-genau rendern ko
 
 ## Review-Architektur
 
-Die drei Review-Perspektiven laufen nach Implementierung und deterministischer Verifikation unabhaengig. Ein Aggregator fuehrt ihre strukturierten Ergebnisse zusammen. Nur der Implementierungsagent darf den Branch veraendern; Reviewer liefern Findings.
+Die drei Review-Perspektiven laufen nach Implementierung, deterministischer Verifikation und commit-genauer Draft-PR-Publikation unabhaengig gegen denselben Head. Ein Aggregator fuehrt ihre strukturierten Ergebnisse zusammen. Nur der Implementierungsagent darf den Branch veraendern; Reviewer liefern Findings.
 
 ```mermaid
 flowchart TD
     I["Implementieren"] --> V["Deterministisch verifizieren"]
-    V --> RR["Requirements Review"]
-    V --> CR["Code Review"]
-    V --> AR["Architektur Review"]
+    V --> PR["Draft-PR commit-genau publizieren"]
+    PR --> RR["Requirements Review"]
+    PR --> CR["Code Review"]
+    PR --> AR["Architektur Review"]
     RR --> A["Findings aggregieren"]
     CR --> A
     AR --> A
     A -->|"blockierende Findings"| I
-    A -->|"Review bestanden"| PR["Pull Request erstellen oder aktualisieren"]
-    PR --> H["awaiting-review"]
+    A -->|"Review bestanden"| H["verified + awaiting-review"]
     H -->|"Aenderungen angefordert"| I
     H -->|"menschlich gemerged"| C["Issue schliessen und Lauf abschliessen"]
 ```
@@ -222,7 +222,7 @@ LangGraph ist die persistente Control Plane; Codex CLI ist der Agent-Worker. Jed
 - Der Pilot nutzt weder den experimentellen Codex `app-server` noch `exec-server`.
 - LangGraph kapselt Codex CLI hinter einem Worker-Adapter, damit die Runtime spaeter austauschbar bleibt.
 
-### Umgesetzter lokaler Implementierungs-Slice
+### Umgesetzte lokale Delivery-Slices
 
 Das Paket `langgraph-github-issue-pilot/` setzt den Worker-Vertrag inzwischen ausfuehrbar um:
 
@@ -231,9 +231,12 @@ Das Paket `langgraph-github-issue-pilot/` setzt den Worker-Vertrag inzwischen au
 - Die versionierte Node-Policy und das versionierte Skill-Routing waehlen Modell, Reasoning, Rechte und Matt-Pocock-Skills fail-closed; Skill-Inhalte werden per SHA-256 festgehalten.
 - Der austauschbare Worker-Port besitzt einen produktiven `codex exec`-Adapter mit `workspace-write`, explizitem Worktree, JSONL-Diagnose und JSON-Schema fuer das Endergebnis.
 - Auftrag, Worktree, Policy, Skills, Rechteprofil, Diagnose und valides Ergebnis oder redigierter Fehler bleiben in SQLite mit dem LangGraph-Run verbunden und sind ueber das bestehende Workflow-Read-Model beobachtbar.
-- Der Slice besitzt keine Pull-Request-Schreibschnittstelle. PR-Erzeugung und -Evidence bleiben Issue 03 vorbehalten.
+- Qualifizierte criterion-level Evidence wird an einen gepushten Commit gebunden und als kanonischer Body genau eines Draft-PR veroeffentlicht; unzureichende oder sensible Evidence scheitert vor verbotenen Source-/PR-Wirkungen.
+- Requirements-, Code- und Architekturreview starten danach als drei frische `codex exec`-Prozesse mit `read-only`, Terra/`xhigh`, getrennten Skill-Achsen und demselben PR-Head.
+- Jeder Verdict wird schema-validiert und mit Achse, Begruendung, Findings, Modell-, Reasoning- und Skill-Provenance separat persistiert. Requirements ist immer anwendbar.
+- Ein `fail`, ein ungueltiges oder fehlendes Ergebnis oder ein inzwischen veraenderter PR-Head blockiert fail-closed. Nur alle erfolgreichen anwendbaren Achsen projizieren `verified` und `awaiting-review` und entfernen `agent-running`.
 
-Die direkten Verhaltensnachweise verwenden die signierte HTTP-Schnittstelle mit realer SQLite-/LangGraph-Persistenz, einen echten temporaeren Git-Worktree-Vertrag und einen Fake-Prozess fuer den Codex-CLI-Vertrag. Dadurch beweisen die Tests den austauschbaren Adapter, ohne Codex-App- oder Server-Schnittstellen vorauszusetzen.
+Die direkten Verhaltensnachweise verwenden die signierte HTTP-Schnittstelle mit realer SQLite-/LangGraph-Persistenz, einen echten temporaeren Git-Worktree-Vertrag, separate Fake-Prozesse fuer Implementierung und Reviews sowie einen kontrollierten GitHub-Transport. Dadurch beweisen die Tests Fail-Closed-Aggregation, Head-Bindung, Labelprojektion und Restart-Read-back, ohne Codex-App- oder Server-Schnittstellen vorauszusetzen.
 
 ## Modell- und Reasoning-Policy
 

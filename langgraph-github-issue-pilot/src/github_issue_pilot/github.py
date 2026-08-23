@@ -56,10 +56,25 @@ class DraftPullRequestError(RuntimeError):
     pass
 
 
+class VerificationProjectionError(RuntimeError):
+    pass
+
+
 class GitHubPort(Protocol):
     def issue_state(self, repository: str, issue_number: int) -> IssueState: ...
 
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None: ...
+
+    def current_pull_request_head(self, repository: str, pull_request_number: int) -> str: ...
+
+    def project_workflow_labels(
+        self,
+        repository: str,
+        issue_number: int,
+        *,
+        add: frozenset[str],
+        remove: frozenset[str],
+    ) -> frozenset[str]: ...
 
     def ensure_draft_pull_request(
         self,
@@ -90,6 +105,17 @@ class RepositoryAdapter(Protocol):
     def backlog(self, trigger_issue_number: int) -> tuple[BacklogIssue, ...]: ...
 
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None: ...
+
+    def current_pull_request_head(self, repository: str, pull_request_number: int) -> str: ...
+
+    def project_workflow_labels(
+        self,
+        repository: str,
+        issue_number: int,
+        *,
+        add: frozenset[str],
+        remove: frozenset[str],
+    ) -> frozenset[str]: ...
 
     def ensure_draft_pull_request(
         self,
@@ -131,6 +157,24 @@ class ConfiguredRepositoryAdapter:
 
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None:
         self._github.ensure_label(repository, issue_number, label)
+
+    def current_pull_request_head(self, repository: str, pull_request_number: int) -> str:
+        return self._github.current_pull_request_head(repository, pull_request_number)
+
+    def project_workflow_labels(
+        self,
+        repository: str,
+        issue_number: int,
+        *,
+        add: frozenset[str],
+        remove: frozenset[str],
+    ) -> frozenset[str]:
+        return self._github.project_workflow_labels(
+            repository,
+            issue_number,
+            add=add,
+            remove=remove,
+        )
 
     def ensure_draft_pull_request(
         self,
@@ -358,6 +402,61 @@ class GitHubHttpAdapter:
             json={"labels": [label]},
         )
         response.raise_for_status()
+
+    def current_pull_request_head(self, repository: str, pull_request_number: int) -> str:
+        try:
+            response = self._client.get(f"/repos/{repository}/pulls/{pull_request_number}")
+            response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise VerificationProjectionError("GitHub head read failed") from exc
+        payload = response.json()
+        head = payload.get("head") if isinstance(payload, dict) else None
+        head_sha = str(head.get("sha", "")) if isinstance(head, dict) else ""
+        if re.fullmatch(r"[0-9a-f]{40}", head_sha) is None:
+            raise RuntimeError("GitHub pull request has no valid current head")
+        return head_sha
+
+    def project_workflow_labels(
+        self,
+        repository: str,
+        issue_number: int,
+        *,
+        add: frozenset[str],
+        remove: frozenset[str],
+    ) -> frozenset[str]:
+        try:
+            response = self._client.get(f"/repos/{repository}/issues/{issue_number}/labels")
+            response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise VerificationProjectionError("GitHub label read failed") from exc
+        payload = response.json()
+        if not isinstance(payload, list):
+            raise TypeError("GitHub labels endpoint returned non-list payload")
+        current = {
+            str(label.get("name", ""))
+            for label in payload
+            if isinstance(label, dict) and label.get("name")
+        }
+        projected = frozenset((current | set(add)) - set(remove))
+        try:
+            update = self._client.put(
+                f"/repos/{repository}/issues/{issue_number}/labels",
+                json={"labels": sorted(projected)},
+            )
+            update.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise VerificationProjectionError("GitHub label projection failed") from exc
+        response_labels = update.json()
+        if not isinstance(response_labels, list):
+            raise TypeError("GitHub label projection returned non-list payload")
+        observed = frozenset(
+            str(label.get("name", ""))
+            for label in response_labels
+            if isinstance(label, dict) and label.get("name")
+        )
+        if observed != projected:
+            raise VerificationProjectionError("GitHub label projection did not converge")
+        return projected
 
     def ensure_draft_pull_request(
         self,

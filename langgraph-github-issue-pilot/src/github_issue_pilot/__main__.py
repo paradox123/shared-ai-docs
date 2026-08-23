@@ -19,6 +19,7 @@ from github_issue_pilot.implementation import (
     RepositoryContext,
 )
 from github_issue_pilot.publication import GitSourceControl
+from github_issue_pilot.review import CodexCliReviewWorker
 
 PROBARE_CRM_EVENTS = frozenset(
     {
@@ -69,6 +70,9 @@ def _implementation_services(repositories: set[str]) -> ImplementationServices:
         )
         if (value := os.environ.get(name, "").strip())
     )
+    skill_root = Path(_required_environment("PILOT_SKILL_ROOT")).expanduser().resolve()
+    codex_executable = os.environ.get("PILOT_CODEX_EXECUTABLE", "codex")
+    codex_timeout = float(os.environ.get("PILOT_CODEX_TIMEOUT_SECONDS", "3600"))
     return ImplementationServices(
         repository_roots={repository: repository_root},
         repository_contexts={
@@ -81,14 +85,19 @@ def _implementation_services(repositories: set[str]) -> ImplementationServices:
                 verification_command=_required_environment("PILOT_VERIFICATION_COMMAND"),
             )
         },
-        skill_root=Path(_required_environment("PILOT_SKILL_ROOT")).expanduser().resolve(),
+        skill_root=skill_root,
         worktrees=GitWorktreeAdapter(worktree_root),
         worker=CodexCliWorker(
-            executable=os.environ.get("PILOT_CODEX_EXECUTABLE", "codex"),
-            timeout_seconds=float(os.environ.get("PILOT_CODEX_TIMEOUT_SECONDS", "3600")),
+            executable=codex_executable,
+            timeout_seconds=codex_timeout,
         ),
         source_control=GitSourceControl(
             git_executable=os.environ.get("PILOT_GIT_EXECUTABLE", "git"),
+        ),
+        reviewer=CodexCliReviewWorker(
+            skill_root=skill_root,
+            executable=codex_executable,
+            timeout_seconds=codex_timeout,
         ),
         sensitive_values=sensitive_values,
     )
