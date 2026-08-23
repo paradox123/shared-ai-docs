@@ -5,7 +5,14 @@ import sqlite3
 import threading
 import uuid
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+
+_STARTUP_RECONCILIATION_COLUMNS = """
+    boot_id, status, outcome, previous_last_alive_at,
+    started_at, completed_at, offline_seconds,
+    discovered_commands, accepted_commands, deduplicated_commands
+"""
 
 
 @dataclass(frozen=True)
@@ -24,6 +31,7 @@ class Delivery:
     head_sha: str | None = None
     merged: bool = False
     source_id: str | None = None
+    command_key: str | None = None
 
 
 class WorkflowStore:
@@ -50,6 +58,39 @@ class WorkflowStore:
                     accepted_at TEXT NOT NULL,
                     status TEXT NOT NULL DEFAULT 'accepted'
                         CHECK (status IN ('accepted', 'dispatched', 'ignored', 'failed'))
+                );
+
+                CREATE TABLE IF NOT EXISTS inbox_commands (
+                    command_key TEXT PRIMARY KEY,
+                    first_delivery_id TEXT NOT NULL UNIQUE
+                        REFERENCES inbox_deliveries(delivery_id),
+                    repository TEXT NOT NULL,
+                    issue_number INTEGER NOT NULL,
+                    kind TEXT NOT NULL,
+                    accepted_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS runtime_liveness (
+                    singleton INTEGER PRIMARY KEY CHECK (singleton = 1),
+                    last_alive_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS startup_reconciliations (
+                    boot_id TEXT PRIMARY KEY,
+                    status TEXT NOT NULL CHECK (status IN ('running', 'completed', 'not_required')),
+                    outcome TEXT NOT NULL CHECK (
+                        outcome IN (
+                            'first_start', 'below_threshold', 'clock_before_last_alive',
+                            'threshold_reached'
+                        )
+                    ),
+                    previous_last_alive_at TEXT,
+                    started_at TEXT NOT NULL,
+                    completed_at TEXT,
+                    offline_seconds INTEGER,
+                    discovered_commands INTEGER NOT NULL DEFAULT 0,
+                    accepted_commands INTEGER NOT NULL DEFAULT 0,
+                    deduplicated_commands INTEGER NOT NULL DEFAULT 0
                 );
 
                 CREATE TABLE IF NOT EXISTS issue_runs (
@@ -261,6 +302,160 @@ class WorkflowStore:
                 """
             )
 
+    def begin_startup_reconciliation(
+        self,
+        *,
+        boot_id: str,
+        now: datetime,
+        threshold_seconds: int,
+    ) -> tuple[dict[str, object], bool]:
+        if not boot_id or len(boot_id) > 200:
+            raise ValueError("boot session id must contain 1 to 200 characters")
+        now_text = now.isoformat()
+        with self._lock:
+            self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                existing = self._startup_reconciliation_row(boot_id)
+                if existing is not None:
+                    self._write_liveness(now_text)
+                    self._connection.commit()
+                    return self._reconciliation_dict(existing), existing["status"] == "running"
+
+                liveness = self._connection.execute(
+                    "SELECT last_alive_at FROM runtime_liveness WHERE singleton = 1"
+                ).fetchone()
+                previous = str(liveness["last_alive_at"]) if liveness is not None else None
+                outcome, status, offline_seconds = self._classify_startup(
+                    previous=previous,
+                    now=now,
+                    threshold_seconds=threshold_seconds,
+                )
+                completed_at = now_text if status == "not_required" else None
+                self._connection.execute(
+                    """
+                    INSERT INTO startup_reconciliations (
+                        boot_id, status, outcome, previous_last_alive_at,
+                        started_at, completed_at, offline_seconds
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        boot_id,
+                        status,
+                        outcome,
+                        previous,
+                        now_text,
+                        completed_at,
+                        offline_seconds,
+                    ),
+                )
+                self._write_liveness(now_text)
+                row = self._startup_reconciliation_row(boot_id)
+                self._connection.commit()
+                return self._reconciliation_dict(row), status == "running"
+            except Exception:
+                self._connection.rollback()
+                raise
+
+    def complete_startup_reconciliation(
+        self,
+        *,
+        boot_id: str,
+        completed_at: str,
+        discovered_commands: int = 0,
+        accepted_commands: int = 0,
+        deduplicated_commands: int = 0,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE startup_reconciliations
+                SET status = 'completed', completed_at = ?,
+                    discovered_commands = ?, accepted_commands = ?,
+                    deduplicated_commands = ?
+                WHERE boot_id = ? AND status = 'running'
+                """,
+                (
+                    completed_at,
+                    discovered_commands,
+                    accepted_commands,
+                    deduplicated_commands,
+                    boot_id,
+                ),
+            )
+
+    def touch_liveness(self, alive_at: str) -> None:
+        with self._lock, self._connection:
+            self._write_liveness(alive_at)
+
+    def latest_startup_reconciliation(self) -> dict[str, object] | None:
+        with self._lock:
+            row = self._connection.execute(
+                f"""
+                SELECT {_STARTUP_RECONCILIATION_COLUMNS}
+                FROM startup_reconciliations ORDER BY rowid DESC LIMIT 1
+                """
+            ).fetchone()
+            liveness = self._connection.execute(
+                "SELECT last_alive_at FROM runtime_liveness WHERE singleton = 1"
+            ).fetchone()
+        if row is None:
+            return None
+        result = self._reconciliation_dict(row)
+        result["last_alive_at"] = (
+            str(liveness["last_alive_at"]) if liveness is not None else None
+        )
+        return result
+
+    def _startup_reconciliation_row(self, boot_id: str) -> sqlite3.Row | None:
+        return self._connection.execute(
+            f"""
+            SELECT {_STARTUP_RECONCILIATION_COLUMNS}
+            FROM startup_reconciliations WHERE boot_id = ?
+            """,
+            (boot_id,),
+        ).fetchone()
+
+    def _write_liveness(self, alive_at: str) -> None:
+        self._connection.execute(
+            """
+            INSERT INTO runtime_liveness (singleton, last_alive_at)
+            VALUES (1, ?)
+            ON CONFLICT(singleton) DO UPDATE SET last_alive_at = excluded.last_alive_at
+            """,
+            (alive_at,),
+        )
+
+    @staticmethod
+    def _classify_startup(
+        *,
+        previous: str | None,
+        now: datetime,
+        threshold_seconds: int,
+    ) -> tuple[str, str, int | None]:
+        if previous is None:
+            return "first_start", "not_required", None
+        offline_seconds = int((now - datetime.fromisoformat(previous)).total_seconds())
+        if offline_seconds < 0:
+            return "clock_before_last_alive", "not_required", offline_seconds
+        if offline_seconds < threshold_seconds:
+            return "below_threshold", "not_required", offline_seconds
+        return "threshold_reached", "running", offline_seconds
+
+    @staticmethod
+    def _reconciliation_dict(row: sqlite3.Row) -> dict[str, object]:
+        return {
+            "boot_id": row["boot_id"],
+            "status": row["status"],
+            "outcome": row["outcome"],
+            "previous_last_alive_at": row["previous_last_alive_at"],
+            "started_at": row["started_at"],
+            "completed_at": row["completed_at"],
+            "offline_seconds": row["offline_seconds"],
+            "discovered_commands": row["discovered_commands"],
+            "accepted_commands": row["accepted_commands"],
+            "deduplicated_commands": row["deduplicated_commands"],
+        }
+
     def accept(self, delivery: Delivery) -> str:
         with self._lock:
             self._connection.execute("BEGIN IMMEDIATE")
@@ -287,6 +482,34 @@ class WorkflowStore:
                         delivery.issue_number,
                         delivery.event,
                         delivery.action,
+                        delivery.accepted_at,
+                    ),
+                )
+                command_key = delivery.command_key or f"delivery:{delivery.delivery_id}"
+                existing_command = self._connection.execute(
+                    "SELECT 1 FROM inbox_commands WHERE command_key = ?",
+                    (command_key,),
+                ).fetchone()
+                if existing_command is not None:
+                    self._connection.execute(
+                        "UPDATE inbox_deliveries SET status = 'ignored' WHERE delivery_id = ?",
+                        (delivery.delivery_id,),
+                    )
+                    self._connection.commit()
+                    return "command_duplicate"
+                self._connection.execute(
+                    """
+                    INSERT INTO inbox_commands (
+                        command_key, first_delivery_id, repository,
+                        issue_number, kind, accepted_at
+                    ) VALUES (?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        command_key,
+                        delivery.delivery_id,
+                        delivery.repository,
+                        delivery.issue_number,
+                        delivery.kind,
                         delivery.accepted_at,
                     ),
                 )

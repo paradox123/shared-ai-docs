@@ -6,7 +6,7 @@ import json
 import multiprocessing
 import os
 from dataclasses import replace
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -18,6 +18,7 @@ from github_issue_pilot.github import (
     BlockerState,
     DraftPullRequest,
     IssueState,
+    PullRequestState,
 )
 from github_issue_pilot.implementation import (
     ImplementationServices,
@@ -73,8 +74,12 @@ class ControlledGitHub:
         self.issue_type = "feature"
         self.findings: tuple[str, ...] = ()
         self.implementation_pr_merged = False
+        self.pull_request_merged = False
+        self.issue_states: dict[int, IssueState] = {}
 
     def issue_state(self, repository: str, issue_number: int) -> IssueState:
+        if issue_number in self.issue_states:
+            return self.issue_states[issue_number]
         return IssueState(
             open=self.open,
             labels=frozenset(self.labels),
@@ -91,6 +96,12 @@ class ControlledGitHub:
         return login.casefold() == "daniel" and user_type.casefold() == "user"
 
     def backlog(self, trigger_issue_number: int) -> tuple[BacklogIssue, ...]:
+        if self.issue_states:
+            return tuple(
+                BacklogIssue(issue_number, state)
+                for issue_number, state in sorted(self.issue_states.items())
+                if state.open
+            )
         return (
             BacklogIssue(
                 trigger_issue_number,
@@ -134,6 +145,18 @@ class ControlledGitHub:
     def current_pull_request_head(self, repository: str, pull_request_number: int) -> str:
         self.head_reads.append((repository, pull_request_number))
         return self.reported_head_override or self.pull_request_head
+
+    def pull_request_state(
+        self, repository: str, pull_request_number: int
+    ) -> PullRequestState:
+        del repository
+        return PullRequestState(
+            number=pull_request_number,
+            head_sha=self.reported_head_override or self.pull_request_head,
+            merged=self.pull_request_merged,
+            actor_login="daniel",
+            actor_type="user",
+        )
 
     def project_workflow_labels(
         self,
@@ -2860,6 +2883,127 @@ def test_authorized_human_merge_completes_the_same_run_and_checkpoint_after_rest
         len(source_control.calls),
         len(reviewer.invocations),
     ) == effect_counts
+
+
+def test_qualifying_boot_reconciles_the_active_human_merged_pull_request(
+    tmp_path,
+) -> None:
+    database_path = tmp_path / "pilot.db"
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledWorker()
+    source_control = ControlledSourceControl()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+    )
+    first_seen = fixed_clock()
+    first_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=lambda: first_seen,
+        boot_session_id=lambda: "boot-a",
+        implementation=services,
+    )
+    issue = delivery_body()
+
+    with TestClient(first_app) as client:
+        client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
+        before = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    github.open = False
+    github.implementation_pr_merged = True
+    github.pull_request_merged = True
+    restarted_at = first_seen + timedelta(hours=25)
+    restarted_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=lambda: restarted_at,
+        boot_session_id=lambda: "boot-b",
+        implementation=services,
+    )
+
+    with TestClient(restarted_app) as client:
+        completed = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert completed["run"]["id"] == before["run"]["id"]
+    assert completed["run"]["status"] == "completed"
+    assert completed["checkpoint"]["values"]["status"] == "completed"
+    assert completed["completion"]["reason"] == "human-merged"
+    assert completed["completion"]["pull_request_number"] == 77
+    assert completed["completion"]["head_sha"] == source_control.head_sha
+    assert completed["completion"]["delivery_id"].startswith("reconcile-")
+    assert completed["reconciliation"]["discovered_commands"] == 1
+    assert completed["reconciliation"]["accepted_commands"] == 1
+
+
+def test_startup_reconciliation_completes_active_merge_before_ready_successor(
+    tmp_path,
+) -> None:
+    database_path = tmp_path / "pilot.db"
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledWorker()
+    source_control = ControlledSourceControl()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+    )
+    first_seen = fixed_clock()
+    first_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=lambda: first_seen,
+        boot_session_id=lambda: "boot-a",
+        implementation=services,
+    )
+    issue = delivery_body()
+
+    with TestClient(first_app) as client:
+        client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
+
+    github.issue_states = {
+        41: IssueState(
+            open=False,
+            labels=frozenset(),
+            implementation_pr_merged=True,
+        ),
+        52: IssueState(
+            open=True,
+            labels=frozenset({"ready-for-agent"}),
+            title="Add a ready successor",
+            body="- [ ] Successor runs after merged active work",
+            issue_type="feature",
+        ),
+    }
+    github.pull_request_merged = True
+    restarted_at = first_seen + timedelta(hours=25)
+    restarted_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=lambda: restarted_at,
+        boot_session_id=lambda: "boot-b",
+        implementation=services,
+    )
+
+    with TestClient(restarted_app) as client:
+        completed = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        successor = client.get("/workflows/daniel/probare-crm/issues/52").json()
+
+    assert completed["run"]["status"] == "completed"
+    assert completed["completion"]["reason"] == "human-merged"
+    assert successor["run"]["status"] == "running"
+    assert successor["disposition"]["status"] == "selected"
+    assert successor["reconciliation"]["discovered_commands"] == 2
+    assert successor["reconciliation"]["accepted_commands"] == 2
 
 
 @pytest.mark.parametrize(

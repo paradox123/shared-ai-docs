@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import hmac
 import json
 from collections.abc import Callable, Mapping
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, suppress
 from datetime import datetime
 from pathlib import Path
 
@@ -17,6 +18,7 @@ from github_issue_pilot.github import (
     RepositoryAdapter,
 )
 from github_issue_pilot.implementation import ImplementationServices
+from github_issue_pilot.reconciliation import system_boot_session_id
 from github_issue_pilot.storage import Delivery, WorkflowStore
 from github_issue_pilot.workflow import WorkflowRuntime
 
@@ -138,6 +140,31 @@ def _delivery_from_request(
     ):
         raise HTTPException(status_code=400, detail="invalid pull request number")
 
+    command_key = f"delivery:{delivery_id}"
+    if event == "issues" and action == "labeled":
+        label_payload = payload.get("label")
+        label_name = (
+            str(label_payload.get("name", "")).strip().casefold()
+            if isinstance(label_payload, dict)
+            else ""
+        )
+        if label_name:
+            command_key = f"issue-label:{repository}:{issue_number}:{label_name}"
+    elif kind == "human_merge" and pull_request_number is not None and head_sha is not None:
+        command_key = (
+            f"pull-merged:{repository}:{pull_request_number}:{head_sha.casefold()}"
+        )
+    elif (
+        kind == "human_feedback"
+        and pull_request_number is not None
+        and source_id is not None
+        and head_sha is not None
+    ):
+        command_key = (
+            f"pull-feedback:{repository}:{pull_request_number}:"
+            f"{source_id}:{head_sha.casefold()}"
+        )
+
     return Delivery(
         delivery_id=delivery_id,
         body_digest=hashlib.sha256(body).hexdigest(),
@@ -153,6 +180,7 @@ def _delivery_from_request(
         head_sha=head_sha,
         merged=merged,
         source_id=source_id,
+        command_key=command_key,
     )
 
 
@@ -165,9 +193,13 @@ def create_app(
     internal_webhook_secret: bytes | None = None,
     max_request_bytes: int = 1_048_576,
     implementation: ImplementationServices | None = None,
+    boot_session_id: Callable[[], str] = system_boot_session_id,
+    heartbeat_interval_seconds: float = 60.0,
 ) -> FastAPI:
     if (webhook_secret is None) == (internal_webhook_secret is None):
         raise ValueError("exactly one webhook authentication mode must be configured")
+    if heartbeat_interval_seconds <= 0:
+        raise ValueError("heartbeat interval must be positive")
 
     store = WorkflowStore(database_path)
     runtime = WorkflowRuntime(
@@ -180,10 +212,36 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(_: FastAPI):
+        heartbeat_task: asyncio.Task[None] | None = None
+
+        async def heartbeat() -> None:
+            while True:
+                await asyncio.sleep(heartbeat_interval_seconds)
+                store.touch_liveness(clock().isoformat())
+
         try:
+            boot_id = boot_session_id()
+            _, reconciliation_required = store.begin_startup_reconciliation(
+                boot_id=boot_id,
+                now=clock(),
+                threshold_seconds=24 * 60 * 60,
+            )
+            if reconciliation_required:
+                counts = runtime.reconcile_current_state(boot_id)
+                store.complete_startup_reconciliation(
+                    boot_id=boot_id,
+                    completed_at=clock().isoformat(),
+                    **counts,
+                )
             runtime.recover()
+            heartbeat_task = asyncio.create_task(heartbeat())
             yield
         finally:
+            if heartbeat_task is not None:
+                heartbeat_task.cancel()
+                with suppress(asyncio.CancelledError):
+                    await heartbeat_task
+            store.touch_liveness(clock().isoformat())
             runtime.close()
             store.close()
 
@@ -218,7 +276,11 @@ def create_app(
         if result == "accepted":
             background_tasks.add_task(runtime.dispatch, delivery)
         status_code = 202 if result == "accepted" else 200
-        response_status = "already_accepted" if result == "duplicate" else result
+        response_status = (
+            "already_accepted"
+            if result in {"duplicate", "command_duplicate"}
+            else result
+        )
         return JSONResponse(
             status_code=status_code,
             content={"delivery_id": delivery.delivery_id, "status": response_status},

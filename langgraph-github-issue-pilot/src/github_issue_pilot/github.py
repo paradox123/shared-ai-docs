@@ -52,6 +52,15 @@ class DraftPullRequest:
     body: str
 
 
+@dataclass(frozen=True)
+class PullRequestState:
+    number: int
+    head_sha: str
+    merged: bool
+    actor_login: str
+    actor_type: str
+
+
 class DraftPullRequestError(RuntimeError):
     pass
 
@@ -68,6 +77,10 @@ class GitHubPort(Protocol):
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None: ...
 
     def current_pull_request_head(self, repository: str, pull_request_number: int) -> str: ...
+
+    def pull_request_state(
+        self, repository: str, pull_request_number: int
+    ) -> PullRequestState: ...
 
     def project_workflow_labels(
         self,
@@ -111,6 +124,10 @@ class RepositoryAdapter(Protocol):
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None: ...
 
     def current_pull_request_head(self, repository: str, pull_request_number: int) -> str: ...
+
+    def pull_request_state(
+        self, repository: str, pull_request_number: int
+    ) -> PullRequestState: ...
 
     def project_workflow_labels(
         self,
@@ -174,6 +191,11 @@ class ConfiguredRepositoryAdapter:
 
     def current_pull_request_head(self, repository: str, pull_request_number: int) -> str:
         return self._github.current_pull_request_head(repository, pull_request_number)
+
+    def pull_request_state(
+        self, repository: str, pull_request_number: int
+    ) -> PullRequestState:
+        return self._github.pull_request_state(repository, pull_request_number)
 
     def project_workflow_labels(
         self,
@@ -436,6 +458,27 @@ class GitHubHttpAdapter:
         if re.fullmatch(r"[0-9a-f]{40}", head_sha) is None:
             raise RuntimeError("GitHub pull request has no valid current head")
         return head_sha
+
+    def pull_request_state(
+        self, repository: str, pull_request_number: int
+    ) -> PullRequestState:
+        response = self._client.get(f"/repos/{repository}/pulls/{pull_request_number}")
+        response.raise_for_status()
+        payload = response.json()
+        if not isinstance(payload, dict):
+            raise TypeError("GitHub pull request endpoint returned non-object payload")
+        head = payload.get("head")
+        head_sha = str(head.get("sha", "")) if isinstance(head, dict) else ""
+        merged_by = payload.get("merged_by")
+        actor_login = self._login(merged_by)
+        actor_type = self._login_type(merged_by)
+        return PullRequestState(
+            number=int(payload["number"]),
+            head_sha=head_sha,
+            merged=bool(payload.get("merged_at")) and payload.get("merged") is True,
+            actor_login=actor_login,
+            actor_type=actor_type,
+        )
 
     def project_workflow_labels(
         self,

@@ -17,6 +17,35 @@ def pull_payload() -> dict[str, object]:
     }
 
 
+def test_github_adapter_reads_bounded_human_merge_state_for_reconciliation() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        assert request.method == "GET"
+        assert request.url.path == "/repos/daniel/probare-crm/pulls/77"
+        return httpx.Response(
+            200,
+            json={
+                **pull_payload(),
+                "merged": True,
+                "merged_at": "2026-08-23T08:00:00Z",
+                "merged_by": {"login": "Daniel", "type": "User"},
+            },
+        )
+
+    adapter = GitHubHttpAdapter(
+        "test-token",
+        human_login="daniel",
+        transport=httpx.MockTransport(handler),
+    )
+
+    state = adapter.pull_request_state("daniel/probare-crm", 77)
+
+    assert state.number == 77
+    assert state.head_sha == HEAD_SHA
+    assert state.merged is True
+    assert state.actor_login == "daniel"
+    assert state.actor_type == "user"
+
+
 def test_github_adapter_creates_one_draft_pull_request_for_the_run_branch() -> None:
     requests: list[httpx.Request] = []
 
