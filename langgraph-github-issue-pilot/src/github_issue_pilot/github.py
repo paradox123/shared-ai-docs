@@ -61,6 +61,8 @@ class VerificationProjectionError(RuntimeError):
 
 
 class GitHubPort(Protocol):
+    def is_configured_human(self, login: str, user_type: str) -> bool: ...
+
     def issue_state(self, repository: str, issue_number: int) -> IssueState: ...
 
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None: ...
@@ -100,6 +102,8 @@ class RepositoryAdapter(Protocol):
     running_label: str
     allowed_event_actions: AbstractSet[tuple[str, str]]
 
+    def is_configured_human(self, login: str, user_type: str) -> bool: ...
+
     def issue_state(self, repository: str, issue_number: int) -> IssueState: ...
 
     def backlog(self, trigger_issue_number: int) -> tuple[BacklogIssue, ...]: ...
@@ -135,7 +139,14 @@ class RepositorySettings:
     ready_label: str = "ready-for-agent"
     running_label: str = "agent-running"
     base_ref: str = "main"
-    allowed_event_actions: AbstractSet[tuple[str, str]] = frozenset({("issues", "labeled")})
+    allowed_event_actions: AbstractSet[tuple[str, str]] = frozenset(
+        {
+            ("issues", "labeled"),
+            ("pull_request_review", "submitted"),
+            ("pull_request_review_comment", "created"),
+            ("pull_request", "closed"),
+        }
+    )
 
 
 class ConfiguredRepositoryAdapter:
@@ -151,6 +162,9 @@ class ConfiguredRepositoryAdapter:
 
     def issue_state(self, repository: str, issue_number: int) -> IssueState:
         return self._github.issue_state(repository, issue_number)
+
+    def is_configured_human(self, login: str, user_type: str) -> bool:
+        return self._github.is_configured_human(login, user_type)
 
     def backlog(self, trigger_issue_number: int) -> tuple[BacklogIssue, ...]:
         return tuple(self._github.backlog(self.repository, trigger_issue_number))
@@ -218,6 +232,13 @@ class GitHubHttpAdapter:
                 "X-GitHub-Api-Version": api_version,
             },
             transport=transport,
+        )
+
+    def is_configured_human(self, login: str, user_type: str) -> bool:
+        return (
+            bool(self._human_login)
+            and login.casefold() == self._human_login
+            and user_type.casefold() == "user"
         )
 
     def issue_state(self, repository: str, issue_number: int) -> IssueState:

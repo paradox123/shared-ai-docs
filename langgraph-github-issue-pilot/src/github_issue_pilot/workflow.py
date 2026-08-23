@@ -406,11 +406,144 @@ class WorkflowRuntime:
         return self._implementation
 
     def dispatch(self, delivery: Delivery) -> None:
+        if delivery.kind == "human_feedback":
+            self._accept_human_feedback(delivery)
+            return
+        if delivery.kind == "human_merge":
+            self._complete_human_merge(delivery)
+            return
+        if delivery.kind == "pull_request_activity":
+            return
         adapter = self._repository_adapters[delivery.repository]
         self._complete_finished_run(delivery, adapter)
         candidates = sorted(adapter.backlog(delivery.issue_number), key=lambda item: item.issue_number)
         for candidate in candidates:
             self._dispatch_candidate(delivery, adapter, candidate.issue_number, candidate.state)
+
+    def _complete_human_merge(self, delivery: Delivery) -> None:
+        if (
+            delivery.pull_request_number is None
+            or delivery.actor_login is None
+            or delivery.head_sha is None
+            or not delivery.merged
+        ):
+            return
+        run = self._store.run_for_pull_request(
+            delivery.repository, delivery.pull_request_number
+        )
+        if run is None or run["status"] != "running":
+            return
+        publication = self._store.workflow_publication(str(run["id"]))
+        adapter = self._repository_adapters[delivery.repository]
+        if (
+            publication is None
+            or publication["head_sha"] != delivery.head_sha
+            or adapter.current_pull_request_head(
+                delivery.repository, delivery.pull_request_number
+            )
+            != delivery.head_sha
+        ):
+            return
+        issue_state = adapter.issue_state(delivery.repository, int(run["issue_number"]))
+        if issue_state.open or not issue_state.implementation_pr_merged:
+            return
+        self._store.complete_human_merge(
+            run_id=str(run["id"]),
+            delivery_id=delivery.delivery_id,
+            pull_request_number=delivery.pull_request_number,
+            head_sha=delivery.head_sha,
+            actor=delivery.actor_login,
+            completed_at=delivery.accepted_at,
+        )
+        self._record_disposition(
+            delivery,
+            issue_number=int(run["issue_number"]),
+            status="completed",
+            reason="human-merged",
+            state=issue_state,
+        )
+        self._graph.update_state(
+            {"configurable": {"thread_id": str(run["id"])}},
+            {"status": "completed"},
+        )
+
+    def _accept_human_feedback(self, delivery: Delivery) -> None:
+        if (
+            delivery.pull_request_number is None
+            or delivery.actor_login is None
+            or not delivery.feedback
+            or delivery.head_sha is None
+            or delivery.source_id is None
+        ):
+            return
+        run = self._store.run_for_pull_request(
+            delivery.repository, delivery.pull_request_number
+        )
+        if run is None or run["status"] != "running":
+            return
+        publication = self._store.workflow_publication(str(run["id"]))
+        if (
+            publication is None
+            or publication["status"] != "published"
+            or publication["head_sha"] != delivery.head_sha
+        ):
+            return
+        prior_review = self._store.workflow_review(str(run["id"]))
+        feedback_batch_id = self._store.begin_feedback_batch(
+            run_id=str(run["id"]),
+            delivery_id=delivery.delivery_id,
+            pull_request_number=delivery.pull_request_number,
+            starting_head_sha=delivery.head_sha,
+            author=delivery.actor_login,
+            source_id=delivery.source_id,
+            feedback=delivery.feedback,
+            superseded_evidence=list(publication["evidence"]),
+            superseded_review_batch_id=(
+                str(prior_review["id"]) if prior_review is not None else None
+            ),
+            created_at=delivery.accepted_at,
+        )
+        self._execute_human_feedback(
+            delivery=delivery,
+            run=run,
+            feedback_batch_id=feedback_batch_id,
+        )
+
+    def _execute_human_feedback(
+        self,
+        *,
+        delivery: Delivery,
+        run: dict[str, object],
+        feedback_batch_id: str,
+    ) -> None:
+        from github_issue_pilot.feedback import (
+            HumanFeedbackCoordinator,
+            HumanFeedbackInput,
+        )
+
+        if self._implementation is None or delivery.pull_request_number is None:
+            return
+        implementation = self._store.workflow_implementation(str(run["id"]))
+        if implementation is None:
+            return
+        HumanFeedbackCoordinator(
+            store=self._store,
+            adapter=self._repository_adapters[delivery.repository],
+            services=self._implementation,
+            clock=self._clock,
+        ).execute(
+            HumanFeedbackInput(
+                run_id=str(run["id"]),
+                repository=delivery.repository,
+                issue_number=int(run["issue_number"]),
+                feedback_batch_id=feedback_batch_id,
+                pull_request_number=delivery.pull_request_number,
+                starting_head_sha=str(delivery.head_sha),
+                source_id=str(delivery.source_id),
+                feedback=delivery.feedback,
+                implementation=implementation,
+            )
+        )
 
     def _complete_finished_run(
         self,
@@ -565,7 +698,16 @@ class WorkflowRuntime:
             self._store.workflow_publication(str(run["id"])) if run is not None else None
         )
         review = self._store.workflow_review(str(run["id"])) if run is not None else None
+        review_history = (
+            self._store.workflow_review_history(str(run["id"])) if run is not None else []
+        )
         repair = self._store.workflow_repair(str(run["id"])) if run is not None else None
+        human_feedback = (
+            self._store.workflow_feedback(str(run["id"])) if run is not None else None
+        )
+        completion = (
+            self._store.workflow_completion(str(run["id"])) if run is not None else None
+        )
         return {
             "delivery": delivery,
             "disposition": disposition,
@@ -575,7 +717,19 @@ class WorkflowRuntime:
             "implementation": implementation,
             "draft_pull_request": draft_pull_request,
             "review": review,
+            "review_history": [
+                {
+                    **batch,
+                    "superseded": (
+                        draft_pull_request is not None
+                        and batch["head_sha"] != draft_pull_request["head_sha"]
+                    ),
+                }
+                for batch in review_history
+            ],
             "repair": repair,
+            "human_feedback": human_feedback,
+            "completion": completion,
         }
 
     def close(self) -> None:

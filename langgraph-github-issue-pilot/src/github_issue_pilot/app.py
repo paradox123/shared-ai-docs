@@ -11,6 +11,7 @@ from pathlib import Path
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
 
+from github_issue_pilot.evidence import redact_text
 from github_issue_pilot.github import (
     REPOSITORY_ADAPTER_VERSION,
     RepositoryAdapter,
@@ -49,6 +50,7 @@ def _delivery_from_request(
     request: Request,
     repository_adapters: Mapping[str, RepositoryAdapter],
     now: datetime,
+    sensitive_values: tuple[str, ...] = (),
 ) -> Delivery:
     delivery_id = request.headers.get("x-github-delivery", "").strip()
     event = request.headers.get("x-github-event", "").strip()
@@ -58,8 +60,6 @@ def _delivery_from_request(
         payload = json.loads(body)
         action = payload["action"]
         repository = payload["repository"]["full_name"]
-        subject = payload.get("issue") or payload.get("pull_request")
-        issue_number = subject["number"]
     except (json.JSONDecodeError, KeyError, TypeError) as exc:
         raise HTTPException(status_code=400, detail="invalid delivery payload") from exc
 
@@ -70,8 +70,73 @@ def _delivery_from_request(
         raise HTTPException(status_code=403, detail="repository adapter not compatible")
     if not isinstance(action, str) or (event, action) not in adapter.allowed_event_actions:
         raise HTTPException(status_code=403, detail="event action not allowed")
+
+    kind = "issue"
+    actor_login: str | None = None
+    feedback: tuple[str, ...] = ()
+    head_sha: str | None = None
+    merged = False
+    pull_request_number: int | None = None
+    source_id: str | None = None
+    try:
+        if event == "issues":
+            issue_number = payload["issue"]["number"]
+        elif event in {"pull_request_review", "pull_request_review_comment"}:
+            pull_request = payload["pull_request"]
+            pull_request_number = pull_request["number"]
+            head_sha = pull_request["head"]["sha"]
+            source = payload["review"] if event == "pull_request_review" else payload["comment"]
+            source_id = str(source["id"])
+            user = source["user"]
+            actor_login = str(user["login"])
+            actor_type = str(user["type"])
+            text = str(source.get("body") or "").strip()
+            if event == "pull_request_review" and str(source.get("state", "")).casefold() != (
+                "changes_requested"
+            ):
+                raise HTTPException(status_code=403, detail="review is not a change request")
+            if not adapter.is_configured_human(actor_login, actor_type):
+                raise HTTPException(status_code=403, detail="feedback author is not configured human")
+            if not text:
+                raise HTTPException(status_code=403, detail="feedback is empty")
+            feedback = (redact_text(text, sensitive_values),)
+            issue_number = pull_request_number
+            kind = "human_feedback"
+        elif event == "pull_request":
+            pull_request = payload["pull_request"]
+            pull_request_number = pull_request["number"]
+            head = pull_request.get("head")
+            head_sha = str(head.get("sha")) if isinstance(head, dict) and head.get("sha") else None
+            merged = pull_request.get("merged") is True
+            merger = pull_request.get("merged_by")
+            actor_login = str(merger.get("login", "")) if isinstance(merger, dict) else ""
+            actor_type = str(merger.get("type", "")) if isinstance(merger, dict) else ""
+            issue_number = pull_request_number
+            if (
+                merged
+                and actor_login
+                and adapter.is_configured_human(actor_login, actor_type)
+            ):
+                kind = "human_merge"
+            elif head_sha is None and not isinstance(merger, dict):
+                kind = "repository_activity"
+            else:
+                kind = "pull_request_activity"
+        else:
+            raise HTTPException(status_code=403, detail="event not supported")
+    except HTTPException:
+        raise
+    except (KeyError, TypeError) as exc:
+        raise HTTPException(status_code=400, detail="invalid delivery payload") from exc
+
     if not isinstance(issue_number, int) or isinstance(issue_number, bool) or issue_number <= 0:
         raise HTTPException(status_code=400, detail="invalid issue number")
+    if pull_request_number is not None and (
+        not isinstance(pull_request_number, int)
+        or isinstance(pull_request_number, bool)
+        or pull_request_number <= 0
+    ):
+        raise HTTPException(status_code=400, detail="invalid pull request number")
 
     return Delivery(
         delivery_id=delivery_id,
@@ -81,6 +146,13 @@ def _delivery_from_request(
         event=event,
         action=action,
         accepted_at=now.isoformat(),
+        kind=kind,
+        pull_request_number=pull_request_number,
+        actor_login=actor_login,
+        feedback=feedback,
+        head_sha=head_sha,
+        merged=merged,
+        source_id=source_id,
     )
 
 
@@ -137,6 +209,7 @@ def create_app(
             request=request,
             repository_adapters=repository_adapters,
             now=clock(),
+            sensitive_values=implementation.sensitive_values if implementation else (),
         )
         result = store.accept(delivery)
         if result == "conflict":

@@ -17,6 +17,13 @@ class Delivery:
     event: str
     action: str
     accepted_at: str
+    kind: str = "issue"
+    pull_request_number: int | None = None
+    actor_login: str | None = None
+    feedback: tuple[str, ...] = ()
+    head_sha: str | None = None
+    merged: bool = False
+    source_id: str | None = None
 
 
 class WorkflowStore:
@@ -180,6 +187,59 @@ class WorkflowStore:
                     started_at TEXT NOT NULL,
                     completed_at TEXT NOT NULL,
                     PRIMARY KEY (attempt_id, invocation_number)
+                );
+
+                CREATE TABLE IF NOT EXISTS human_feedback_batches (
+                    feedback_batch_id TEXT PRIMARY KEY,
+                    run_id TEXT NOT NULL REFERENCES issue_runs(run_id),
+                    delivery_id TEXT NOT NULL UNIQUE REFERENCES inbox_deliveries(delivery_id),
+                    pull_request_number INTEGER NOT NULL,
+                    starting_head_sha TEXT NOT NULL,
+                    author TEXT NOT NULL,
+                    source_id TEXT NOT NULL,
+                    feedback_json TEXT NOT NULL,
+                    superseded_evidence_json TEXT NOT NULL DEFAULT '[]',
+                    superseded_review_batch_id TEXT,
+                    round_limit INTEGER NOT NULL DEFAULT 3 CHECK (round_limit = 3),
+                    status TEXT NOT NULL DEFAULT 'pending'
+                        CHECK (status IN ('pending', 'running', 'verified', 'needs-info', 'ready-for-human')),
+                    projected_labels_json TEXT,
+                    created_at TEXT NOT NULL,
+                    completed_at TEXT
+                );
+
+                CREATE TABLE IF NOT EXISTS human_feedback_attempts (
+                    attempt_id TEXT PRIMARY KEY,
+                    feedback_batch_id TEXT NOT NULL
+                        REFERENCES human_feedback_batches(feedback_batch_id),
+                    round_number INTEGER NOT NULL CHECK (round_number BETWEEN 1 AND 3),
+                    status TEXT NOT NULL
+                        CHECK (status IN ('running', 'unsuccessful', 'verified', 'blocked', 'failed')),
+                    assignment_json TEXT NOT NULL,
+                    result_json TEXT,
+                    head_sha TEXT,
+                    evidence_json TEXT,
+                    deterministic_verification_json TEXT,
+                    review_batch_id TEXT REFERENCES review_batches(batch_id),
+                    projected_labels_json TEXT,
+                    invalidation_labels_json TEXT,
+                    policy_json TEXT,
+                    skills_json TEXT,
+                    access_profile_json TEXT,
+                    diagnostic_events_json TEXT,
+                    started_at TEXT NOT NULL,
+                    completed_at TEXT,
+                    UNIQUE (feedback_batch_id, round_number)
+                );
+
+                CREATE TABLE IF NOT EXISTS run_completions (
+                    run_id TEXT PRIMARY KEY REFERENCES issue_runs(run_id),
+                    delivery_id TEXT NOT NULL UNIQUE REFERENCES inbox_deliveries(delivery_id),
+                    reason TEXT NOT NULL CHECK (reason = 'human-merged'),
+                    pull_request_number INTEGER NOT NULL,
+                    head_sha TEXT NOT NULL,
+                    actor TEXT NOT NULL,
+                    completed_at TEXT NOT NULL
                 );
                 """
             )
@@ -376,12 +436,84 @@ class WorkflowStore:
         run.pop("created")
         return run
 
+    def run_for_pull_request(
+        self, repository: str, pull_request_number: int
+    ) -> dict[str, object] | None:
+        with self._lock:
+            row = self._connection.execute(
+                """
+                SELECT r.run_id, r.repository, r.issue_number, r.status, r.created_at
+                FROM issue_runs AS r
+                JOIN draft_pr_publications AS p ON p.run_id = r.run_id
+                WHERE r.repository = ? AND p.pull_request_number = ?
+                """,
+                (repository, pull_request_number),
+            ).fetchone()
+        if row is None:
+            return None
+        run = self._run_dict(row, created=False)
+        run.pop("created")
+        return run
+
     def complete_run(self, run_id: str) -> None:
         with self._lock, self._connection:
             self._connection.execute(
                 "UPDATE issue_runs SET status = 'completed' WHERE run_id = ? AND status = 'running'",
                 (run_id,),
             )
+
+    def complete_human_merge(
+        self,
+        *,
+        run_id: str,
+        delivery_id: str,
+        pull_request_number: int,
+        head_sha: str,
+        actor: str,
+        completed_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                "UPDATE issue_runs SET status = 'completed' WHERE run_id = ? AND status = 'running'",
+                (run_id,),
+            )
+            self._connection.execute(
+                """
+                INSERT INTO run_completions (
+                    run_id, delivery_id, reason, pull_request_number,
+                    head_sha, actor, completed_at
+                ) VALUES (?, ?, 'human-merged', ?, ?, ?, ?)
+                ON CONFLICT(run_id) DO NOTHING
+                """,
+                (
+                    run_id,
+                    delivery_id,
+                    pull_request_number,
+                    head_sha,
+                    actor,
+                    completed_at,
+                ),
+            )
+
+    def workflow_completion(self, run_id: str) -> dict[str, object] | None:
+        with self._lock:
+            row = self._connection.execute(
+                """
+                SELECT delivery_id, reason, pull_request_number, head_sha, actor, completed_at
+                FROM run_completions WHERE run_id = ?
+                """,
+                (run_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "reason": row["reason"],
+            "delivery_id": row["delivery_id"],
+            "pull_request_number": row["pull_request_number"],
+            "head_sha": row["head_sha"],
+            "actor": row["actor"],
+            "completed_at": row["completed_at"],
+        }
 
     def workflow_claim(self, run_id: str) -> dict[str, str] | None:
         with self._lock:
@@ -796,64 +928,69 @@ class WorkflowStore:
             )
 
     def workflow_review(self, run_id: str) -> dict[str, object] | None:
+        history = self.workflow_review_history(run_id)
+        return history[-1] if history else None
+
+    def workflow_review_history(self, run_id: str) -> list[dict[str, object]]:
         with self._lock:
-            batch = self._connection.execute(
+            batches = self._connection.execute(
                 """
                 SELECT batch_id, status, head_sha, pull_request_number, reason,
                        projected_labels_json, started_at, completed_at
                 FROM review_batches
                 WHERE run_id = ?
-                ORDER BY rowid DESC
-                LIMIT 1
+                ORDER BY rowid
                 """,
                 (run_id,),
-            ).fetchone()
-            if batch is None:
-                return None
-            rows = self._connection.execute(
+            ).fetchall()
+            results = self._connection.execute(
                 """
-                SELECT axis, assignment_json, result_json, policy_json, route_axis,
-                       skills_json, access_profile_json, diagnostic_events_json,
-                       completed_at
+                SELECT batch_id, axis, assignment_json, result_json, policy_json,
+                       route_axis, skills_json, access_profile_json,
+                       diagnostic_events_json, completed_at
                 FROM review_results
-                WHERE batch_id = ?
-                ORDER BY CASE axis
+                WHERE batch_id IN (SELECT batch_id FROM review_batches WHERE run_id = ?)
+                ORDER BY batch_id, CASE axis
                     WHEN 'requirements' THEN 1
                     WHEN 'code' THEN 2
                     WHEN 'architecture' THEN 3
                 END
                 """,
-                (batch["batch_id"],),
+                (run_id,),
             ).fetchall()
-        results = [
+        results_by_batch: dict[str, list[dict[str, object]]] = {}
+        for row in results:
+            results_by_batch.setdefault(str(row["batch_id"]), []).append(
+                {
+                    "axis": row["axis"],
+                    "assignment": json.loads(row["assignment_json"]),
+                    "verdict": json.loads(row["result_json"]),
+                    "policy": json.loads(row["policy_json"]),
+                    "route_axis": row["route_axis"],
+                    "skills": json.loads(row["skills_json"]),
+                    "access_profile": json.loads(row["access_profile_json"]),
+                    "diagnostic_events": json.loads(row["diagnostic_events_json"]),
+                    "completed_at": row["completed_at"],
+                }
+            )
+        return [
             {
-                "axis": row["axis"],
-                "assignment": json.loads(row["assignment_json"]),
-                "verdict": json.loads(row["result_json"]),
-                "policy": json.loads(row["policy_json"]),
-                "route_axis": row["route_axis"],
-                "skills": json.loads(row["skills_json"]),
-                "access_profile": json.loads(row["access_profile_json"]),
-                "diagnostic_events": json.loads(row["diagnostic_events_json"]),
-                "completed_at": row["completed_at"],
+                "id": batch["batch_id"],
+                "status": batch["status"],
+                "head_sha": batch["head_sha"],
+                "pull_request_number": batch["pull_request_number"],
+                "reason": batch["reason"],
+                "projected_labels": (
+                    json.loads(batch["projected_labels_json"])
+                    if batch["projected_labels_json"] is not None
+                    else []
+                ),
+                "results": results_by_batch.get(str(batch["batch_id"]), []),
+                "started_at": batch["started_at"],
+                "completed_at": batch["completed_at"],
             }
-            for row in rows
+            for batch in batches
         ]
-        return {
-            "id": batch["batch_id"],
-            "status": batch["status"],
-            "head_sha": batch["head_sha"],
-            "pull_request_number": batch["pull_request_number"],
-            "reason": batch["reason"],
-            "projected_labels": (
-                json.loads(batch["projected_labels_json"])
-                if batch["projected_labels_json"] is not None
-                else []
-            ),
-            "results": results,
-            "started_at": batch["started_at"],
-            "completed_at": batch["completed_at"],
-        }
 
     def begin_repair_batch(
         self,
@@ -1122,6 +1259,291 @@ class WorkflowStore:
             "started_at": batch["started_at"],
             "completed_at": batch["completed_at"],
         }
+
+    def begin_feedback_batch(
+        self,
+        *,
+        run_id: str,
+        delivery_id: str,
+        pull_request_number: int,
+        starting_head_sha: str,
+        author: str,
+        source_id: str,
+        feedback: tuple[str, ...],
+        superseded_evidence: list[dict[str, object]],
+        superseded_review_batch_id: str | None,
+        created_at: str,
+    ) -> str:
+        with self._lock, self._connection:
+            feedback_batch_id = str(uuid.uuid4())
+            self._connection.execute(
+                """
+                INSERT INTO human_feedback_batches (
+                    feedback_batch_id, run_id, delivery_id, pull_request_number,
+                    starting_head_sha, author, source_id, feedback_json,
+                    superseded_evidence_json, superseded_review_batch_id, created_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(delivery_id) DO NOTHING
+                """,
+                (
+                    feedback_batch_id,
+                    run_id,
+                    delivery_id,
+                    pull_request_number,
+                    starting_head_sha,
+                    author,
+                    source_id,
+                    json.dumps(list(feedback), sort_keys=True),
+                    json.dumps(superseded_evidence, sort_keys=True),
+                    superseded_review_batch_id,
+                    created_at,
+                ),
+            )
+            row = self._connection.execute(
+                """
+                SELECT feedback_batch_id FROM human_feedback_batches
+                WHERE delivery_id = ?
+                """,
+                (delivery_id,),
+            ).fetchone()
+        if row is None:
+            raise RuntimeError("human feedback batch could not be created")
+        return str(row["feedback_batch_id"])
+
+    def workflow_feedback(self, run_id: str) -> dict[str, object]:
+        with self._lock:
+            batches = self._connection.execute(
+                """
+                SELECT feedback_batch_id, delivery_id, pull_request_number,
+                       starting_head_sha, author, source_id, feedback_json,
+                       superseded_evidence_json, superseded_review_batch_id, round_limit,
+                       status, projected_labels_json, created_at, completed_at
+                FROM human_feedback_batches
+                WHERE run_id = ?
+                ORDER BY rowid
+                """,
+                (run_id,),
+            ).fetchall()
+            attempts = self._connection.execute(
+                """
+                SELECT attempt_id, feedback_batch_id, round_number, status,
+                       assignment_json, result_json, head_sha, evidence_json,
+                       deterministic_verification_json, review_batch_id,
+                       projected_labels_json, invalidation_labels_json,
+                       policy_json, skills_json,
+                       access_profile_json, diagnostic_events_json,
+                       started_at, completed_at
+                FROM human_feedback_attempts
+                WHERE feedback_batch_id IN (
+                    SELECT feedback_batch_id FROM human_feedback_batches WHERE run_id = ?
+                )
+                ORDER BY feedback_batch_id, round_number
+                """,
+                (run_id,),
+            ).fetchall()
+        attempts_by_batch: dict[str, list[dict[str, object]]] = {}
+        for row in attempts:
+            attempts_by_batch.setdefault(str(row["feedback_batch_id"]), []).append(
+                {
+                    "id": row["attempt_id"],
+                    "round": row["round_number"],
+                    "status": row["status"],
+                    "assignment": json.loads(row["assignment_json"]),
+                    "result": json.loads(row["result_json"]) if row["result_json"] else None,
+                    "head_sha": row["head_sha"],
+                    "evidence": json.loads(row["evidence_json"]) if row["evidence_json"] else [],
+                    "deterministic_verification": (
+                        json.loads(row["deterministic_verification_json"])
+                        if row["deterministic_verification_json"]
+                        else None
+                    ),
+                    "review_batch_id": row["review_batch_id"],
+                    "projected_labels": (
+                        json.loads(row["projected_labels_json"])
+                        if row["projected_labels_json"]
+                        else []
+                    ),
+                    "invalidation_labels": (
+                        json.loads(row["invalidation_labels_json"])
+                        if row["invalidation_labels_json"]
+                        else []
+                    ),
+                    "policy": json.loads(row["policy_json"]) if row["policy_json"] else None,
+                    "skills": json.loads(row["skills_json"]) if row["skills_json"] else [],
+                    "access_profile": (
+                        json.loads(row["access_profile_json"])
+                        if row["access_profile_json"]
+                        else None
+                    ),
+                    "diagnostic_events": (
+                        json.loads(row["diagnostic_events_json"])
+                        if row["diagnostic_events_json"]
+                        else []
+                    ),
+                    "started_at": row["started_at"],
+                    "completed_at": row["completed_at"],
+                }
+            )
+        records = []
+        for row in batches:
+            batch_attempts = attempts_by_batch.get(str(row["feedback_batch_id"]), [])
+            records.append(
+                {
+                    "id": row["feedback_batch_id"],
+                    "delivery_id": row["delivery_id"],
+                    "pull_request_number": row["pull_request_number"],
+                    "starting_head_sha": row["starting_head_sha"],
+                    "author": row["author"],
+                    "feedback": json.loads(row["feedback_json"]),
+                    "superseded": {
+                        "head_sha": row["starting_head_sha"],
+                        "evidence": json.loads(row["superseded_evidence_json"]),
+                        "review_batch_id": row["superseded_review_batch_id"],
+                    },
+                    "round_limit": row["round_limit"],
+                    "round_count": len(batch_attempts),
+                    "status": row["status"],
+                    "projected_labels": (
+                        json.loads(row["projected_labels_json"])
+                        if row["projected_labels_json"]
+                        else []
+                    ),
+                    "attempts": batch_attempts,
+                    "created_at": row["created_at"],
+                    "completed_at": row["completed_at"],
+                }
+            )
+        return {"batches": records}
+
+    def begin_feedback_attempt(
+        self,
+        *,
+        feedback_batch_id: str,
+        round_number: int,
+        assignment: dict[str, object],
+        started_at: str,
+    ) -> str:
+        if round_number not in {1, 2, 3}:
+            raise ValueError("feedback round must be between one and three")
+        with self._lock, self._connection:
+            batch = self._connection.execute(
+                "SELECT status FROM human_feedback_batches WHERE feedback_batch_id = ?",
+                (feedback_batch_id,),
+            ).fetchone()
+            if batch is None or batch["status"] not in {"pending", "running"}:
+                raise RuntimeError("terminal feedback batch cannot start another attempt")
+            self._connection.execute(
+                """
+                UPDATE human_feedback_batches SET status = 'running'
+                WHERE feedback_batch_id = ? AND status = 'pending'
+                """,
+                (feedback_batch_id,),
+            )
+            attempt_id = str(uuid.uuid4())
+            self._connection.execute(
+                """
+                INSERT INTO human_feedback_attempts (
+                    attempt_id, feedback_batch_id, round_number, status,
+                    assignment_json, started_at
+                ) VALUES (?, ?, ?, 'running', ?, ?)
+                ON CONFLICT(feedback_batch_id, round_number) DO NOTHING
+                """,
+                (
+                    attempt_id,
+                    feedback_batch_id,
+                    round_number,
+                    json.dumps(assignment, sort_keys=True),
+                    started_at,
+                ),
+            )
+            row = self._connection.execute(
+                """
+                SELECT attempt_id FROM human_feedback_attempts
+                WHERE feedback_batch_id = ? AND round_number = ?
+                """,
+                (feedback_batch_id, round_number),
+            ).fetchone()
+        if row is None:
+            raise RuntimeError("human feedback attempt could not be created")
+        return str(row["attempt_id"])
+
+    def complete_feedback_attempt(
+        self,
+        *,
+        attempt_id: str,
+        status: str,
+        result: dict[str, object],
+        head_sha: str | None,
+        evidence: list[dict[str, object]],
+        deterministic_verification: dict[str, object] | None,
+        review_batch_id: str | None,
+        projected_labels: frozenset[str],
+        invalidation_labels: frozenset[str],
+        policy: dict[str, object],
+        skills: list[dict[str, str]],
+        access_profile: dict[str, object],
+        diagnostic_events: list[dict[str, object]],
+        completed_at: str,
+    ) -> None:
+        if status not in {"unsuccessful", "verified", "blocked", "failed"}:
+            raise ValueError("unsupported feedback attempt status")
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE human_feedback_attempts
+                SET status = ?, result_json = ?, head_sha = ?, evidence_json = ?,
+                    deterministic_verification_json = ?, review_batch_id = ?,
+                    projected_labels_json = ?, invalidation_labels_json = ?,
+                    policy_json = ?, skills_json = ?,
+                    access_profile_json = ?, diagnostic_events_json = ?, completed_at = ?
+                WHERE attempt_id = ? AND status = 'running'
+                """,
+                (
+                    status,
+                    json.dumps(result, sort_keys=True),
+                    head_sha,
+                    json.dumps(evidence, sort_keys=True),
+                    (
+                        json.dumps(deterministic_verification, sort_keys=True)
+                        if deterministic_verification is not None
+                        else None
+                    ),
+                    review_batch_id,
+                    json.dumps(sorted(projected_labels)),
+                    json.dumps(sorted(invalidation_labels)),
+                    json.dumps(policy, sort_keys=True),
+                    json.dumps(skills, sort_keys=True),
+                    json.dumps(access_profile, sort_keys=True),
+                    json.dumps(diagnostic_events, sort_keys=True),
+                    completed_at,
+                    attempt_id,
+                ),
+            )
+
+    def complete_feedback_batch(
+        self,
+        *,
+        feedback_batch_id: str,
+        status: str,
+        projected_labels: frozenset[str],
+        completed_at: str,
+    ) -> None:
+        if status not in {"verified", "needs-info", "ready-for-human"}:
+            raise ValueError("unsupported terminal feedback status")
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE human_feedback_batches
+                SET status = ?, projected_labels_json = ?, completed_at = ?
+                WHERE feedback_batch_id = ? AND status IN ('pending', 'running')
+                """,
+                (
+                    status,
+                    json.dumps(sorted(projected_labels)),
+                    completed_at,
+                    feedback_batch_id,
+                ),
+            )
 
     def close(self) -> None:
         with self._lock:
