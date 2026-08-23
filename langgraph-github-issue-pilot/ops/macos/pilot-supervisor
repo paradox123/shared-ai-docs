@@ -1,0 +1,159 @@
+#!/bin/bash
+
+set -u
+umask 077
+
+PILOT_SUPERVISOR_DIRECTORY="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=pilot-common.sh
+. "$PILOT_SUPERVISOR_DIRECTORY/pilot-common.sh"
+
+PILOT_SUPERVISOR_PILOT_PID=""
+PILOT_SUPERVISOR_TUNNEL_PID=""
+PILOT_SUPERVISOR_STOP_REQUESTED=0
+
+pilot_supervisor_timestamp() {
+    /bin/date -u '+%Y-%m-%dT%H:%M:%SZ'
+}
+
+pilot_supervisor_log() {
+    local event="$1"
+    shift
+    printf 'timestamp=%s generation=%s event=%s' \
+        "$(pilot_supervisor_timestamp)" "$PILOT_SUPERVISOR_GENERATION" "$event"
+    if [[ $# -gt 0 ]]; then
+        printf ' %s' "$@"
+    fi
+    printf '\n'
+}
+
+pilot_supervisor_state() {
+    local status="$1"
+    local failed_service="${2:-none}"
+    local exit_code="${3:-0}"
+    local temporary_state="$PILOT_SUPERVISOR_STATE.tmp.$$"
+
+    {
+        printf 'status=%s\n' "$status"
+        printf 'generation=%s\n' "$PILOT_SUPERVISOR_GENERATION"
+        printf 'supervisor_pid=%s\n' "$$"
+        printf 'pilot_pid=%s\n' "$PILOT_SUPERVISOR_PILOT_PID"
+        printf 'tunnel_pid=%s\n' "$PILOT_SUPERVISOR_TUNNEL_PID"
+        printf 'started_at=%s\n' "$PILOT_SUPERVISOR_STARTED_AT"
+        printf 'updated_at=%s\n' "$(pilot_supervisor_timestamp)"
+        printf 'failed_service=%s\n' "$failed_service"
+        printf 'exit_code=%s\n' "$exit_code"
+    } > "$temporary_state" || return 73
+    /bin/chmod 600 "$temporary_state"
+    /bin/mv -f "$temporary_state" "$PILOT_SUPERVISOR_STATE"
+}
+
+pilot_supervisor_stop_child() {
+    local pid="$1"
+    if [[ -n "$pid" ]] && pilot_process_running "$pid"; then
+        /bin/kill -TERM "$pid" 2>/dev/null || true
+    fi
+}
+
+pilot_supervisor_wait_child() {
+    local pid="$1"
+    if [[ -n "$pid" ]]; then
+        wait "$pid" 2>/dev/null || true
+    fi
+}
+
+pilot_supervisor_request_stop() {
+    PILOT_SUPERVISOR_STOP_REQUESTED=1
+}
+
+pilot_supervisor_run() {
+    local environment_file="$1"
+    local state_path="$2"
+    local failed_service exit_code
+
+    if [[ "$state_path" != /* ]]; then
+        printf 'supervisor_status=invalid category=invalid_state_path\n' >&2
+        return 64
+    fi
+    if ! pilot_validate_configuration "$environment_file"; then
+        # Static configuration failures need operator correction. A successful
+        # supervisor exit prevents KeepAlive from creating a restart loop.
+        return 0
+    fi
+    PILOT_SUPERVISOR_STATE="$state_path"
+    /bin/mkdir -p "$(dirname "$PILOT_SUPERVISOR_STATE")" || {
+        printf 'supervisor_status=invalid category=state_unavailable\n' >&2
+        return 73
+    }
+    /bin/chmod 700 "$(dirname "$PILOT_SUPERVISOR_STATE")" || return 73
+    PILOT_SUPERVISOR_STARTED_AT="$(pilot_supervisor_timestamp)"
+    PILOT_SUPERVISOR_GENERATION="$(/bin/date -u '+%Y%m%dT%H%M%SZ')-$$"
+    trap pilot_supervisor_request_stop TERM INT HUP
+    # Bash can emit asynchronous job-control diagnostics for signalled children;
+    # managed runtime errors are represented by the bounded lifecycle log instead.
+    exec 2>/dev/null
+
+    "$PILOT_EXECUTABLE" >/dev/null 2>&1 &
+    PILOT_SUPERVISOR_PILOT_PID=$!
+    "$CLOUDFLARED_EXECUTABLE" tunnel --config "$CLOUDFLARED_CONFIG" \
+        run "$CLOUDFLARED_TUNNEL_NAME" >/dev/null 2>&1 &
+    PILOT_SUPERVISOR_TUNNEL_PID=$!
+    pilot_supervisor_state running || return
+    pilot_supervisor_log stack_start \
+        "pilot_pid=$PILOT_SUPERVISOR_PILOT_PID" \
+        "tunnel_pid=$PILOT_SUPERVISOR_TUNNEL_PID" \
+        outcome=running
+
+    while [[ "$PILOT_SUPERVISOR_STOP_REQUESTED" -eq 0 ]]; do
+        if ! pilot_process_running "$PILOT_SUPERVISOR_PILOT_PID"; then
+            failed_service=pilot
+            wait "$PILOT_SUPERVISOR_PILOT_PID" 2>/dev/null
+            exit_code=$?
+            break
+        fi
+        if ! pilot_process_running "$PILOT_SUPERVISOR_TUNNEL_PID"; then
+            failed_service=tunnel
+            wait "$PILOT_SUPERVISOR_TUNNEL_PID" 2>/dev/null
+            exit_code=$?
+            break
+        fi
+        /bin/sleep 0.1
+    done
+
+    if [[ "$PILOT_SUPERVISOR_STOP_REQUESTED" -ne 0 ]]; then
+        pilot_supervisor_stop_child "$PILOT_SUPERVISOR_PILOT_PID"
+        pilot_supervisor_stop_child "$PILOT_SUPERVISOR_TUNNEL_PID"
+        pilot_supervisor_wait_child "$PILOT_SUPERVISOR_PILOT_PID"
+        pilot_supervisor_wait_child "$PILOT_SUPERVISOR_TUNNEL_PID"
+        pilot_supervisor_state stopped
+        pilot_supervisor_log stack_stop outcome=operator_signal
+        return 0
+    fi
+
+    if [[ "$failed_service" == pilot ]]; then
+        pilot_supervisor_stop_child "$PILOT_SUPERVISOR_TUNNEL_PID"
+        pilot_supervisor_wait_child "$PILOT_SUPERVISOR_TUNNEL_PID"
+    else
+        pilot_supervisor_stop_child "$PILOT_SUPERVISOR_PILOT_PID"
+        pilot_supervisor_wait_child "$PILOT_SUPERVISOR_PILOT_PID"
+    fi
+    pilot_supervisor_state restart_required "$failed_service" "$exit_code"
+    pilot_supervisor_log child_exit \
+        "service=$failed_service" \
+        "exit_code=$exit_code" \
+        outcome=restart_required
+    return 70
+}
+
+case "${1:-}" in
+    run)
+        if [[ $# -ne 3 ]]; then
+            printf 'usage: pilot-supervisor run ENVIRONMENT_FILE STATE_FILE\n' >&2
+            exit 64
+        fi
+        pilot_supervisor_run "$2" "$3" || exit $?
+        ;;
+    *)
+        printf 'usage: pilot-supervisor run ENVIRONMENT_FILE STATE_FILE\n' >&2
+        exit 64
+        ;;
+esac

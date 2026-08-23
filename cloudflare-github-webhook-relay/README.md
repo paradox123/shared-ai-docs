@@ -103,3 +103,5 @@ Safe retry procedure:
 4. Confirm `200 already_accepted` or `202 accepted` and public local workflow state before acknowledging the DLQ copy.
 
 Rollback restores the previous GitHub webhook target and stops the Worker consumer/tunnel. Queue and local database data are not deleted automatically.
+
+The local named Tunnel and receiver/worker can be owned after macOS login by the pilot's user LaunchAgent. Complete the private Tunnel configuration here first, then follow [`../langgraph-github-issue-pilot/ops/macos/README.md`](../langgraph-github-issue-pilot/ops/macos/README.md) for validation, install, status, crash-recovery proof, and uninstall. The LaunchAgent does not create Tunnel credentials, DNS, Queue/Worker bindings, GitHub webhooks, or router/firewall rules.
