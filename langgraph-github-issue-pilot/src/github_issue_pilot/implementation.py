@@ -8,7 +8,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from importlib.resources import as_file, files
 from pathlib import Path
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from jsonschema import ValidationError
 from jsonschema.validators import Draft202012Validator
@@ -17,6 +17,9 @@ from github_issue_pilot.contracts import load_contract
 from github_issue_pilot.github import IssueState
 from github_issue_pilot.policy import NodeSelection, SkillProvenance
 from github_issue_pilot.publication import SourceControlPort
+
+if TYPE_CHECKING:
+    from github_issue_pilot.review import ReviewWorkerPort
 
 _ACCEPTANCE_CRITERION = re.compile(r"^\s*-\s*\[[ xX]\]\s+(.+?)\s*$")
 _SAFE_RUN_ID = re.compile(r"[A-Za-z0-9._-]+")
@@ -215,6 +218,7 @@ class ImplementationServices:
     worktrees: WorktreePort
     worker: WorkerPort
     source_control: SourceControlPort | None = None
+    reviewer: ReviewWorkerPort | None = None
     sensitive_values: tuple[str, ...] = ()
 
 

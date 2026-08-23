@@ -109,3 +109,26 @@ def test_skill_routing_records_task_specific_matt_pocock_content_hashes(
 def test_skill_routing_fails_closed_for_an_unsupported_issue_type() -> None:
     with pytest.raises(PolicyViolation, match="unsupported skill route"):
         SkillRouter.packaged(SKILL_ROOT).route("implementation", issue_type="research")
+
+
+@pytest.mark.parametrize(
+    ("task", "axis", "expected_names"),
+    [
+        ("requirements_review", "spec", ["code-review"]),
+        ("code_review", "standards", ["code-review"]),
+        ("architecture_review", "architecture", ["codebase-design", "domain-modeling"]),
+    ],
+)
+def test_review_skill_routing_preserves_each_independent_axis_with_content_hashes(
+    task: str,
+    axis: str,
+    expected_names: list[str],
+) -> None:
+    route = SkillRouter.packaged(SKILL_ROOT).route_review(task)
+
+    assert route.axis == axis
+    assert [skill.name for skill in route.skills] == expected_names
+    assert [skill.content_sha256 for skill in route.skills] == [
+        hashlib.sha256((SKILL_ROOT / name / "SKILL.md").read_bytes()).hexdigest()
+        for name in expected_names
+    ]

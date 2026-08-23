@@ -27,6 +27,12 @@ class SkillProvenance:
     content_sha256: str
 
 
+@dataclass(frozen=True)
+class ReviewSkillRoute:
+    axis: str
+    skills: tuple[SkillProvenance, ...]
+
+
 class NodePolicy:
     def __init__(self, contract: dict[str, Any]) -> None:
         self._contract = contract
@@ -84,6 +90,15 @@ class SkillRouter:
         if names is None:
             raise PolicyViolation(f"unsupported skill route: {key}")
 
+        return self._resolve(names)
+
+    def route_review(self, task: str) -> ReviewSkillRoute:
+        route = self._contract["review_routes"].get(task)
+        if route is None:
+            raise PolicyViolation(f"unsupported review skill route: {task}")
+        return ReviewSkillRoute(axis=route["axis"], skills=self._resolve(route["skills"]))
+
+    def _resolve(self, names: list[str]) -> tuple[SkillProvenance, ...]:
         routed = []
         for name in names:
             skill_path = self._skill_root / name / "SKILL.md"

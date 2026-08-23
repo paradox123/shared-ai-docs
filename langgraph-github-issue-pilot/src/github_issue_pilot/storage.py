@@ -111,6 +111,33 @@ class WorkflowStore:
                     started_at TEXT NOT NULL,
                     completed_at TEXT
                 );
+
+                CREATE TABLE IF NOT EXISTS review_batches (
+                    batch_id TEXT PRIMARY KEY,
+                    run_id TEXT NOT NULL REFERENCES issue_runs(run_id),
+                    head_sha TEXT NOT NULL,
+                    pull_request_number INTEGER NOT NULL,
+                    status TEXT NOT NULL CHECK (status IN ('running', 'blocked', 'verified')),
+                    reason TEXT,
+                    projected_labels_json TEXT,
+                    started_at TEXT NOT NULL,
+                    completed_at TEXT,
+                    UNIQUE (run_id, head_sha)
+                );
+
+                CREATE TABLE IF NOT EXISTS review_results (
+                    batch_id TEXT NOT NULL REFERENCES review_batches(batch_id),
+                    axis TEXT NOT NULL CHECK (axis IN ('requirements', 'code', 'architecture')),
+                    assignment_json TEXT NOT NULL,
+                    result_json TEXT NOT NULL,
+                    policy_json TEXT NOT NULL,
+                    route_axis TEXT NOT NULL,
+                    skills_json TEXT NOT NULL,
+                    access_profile_json TEXT NOT NULL,
+                    diagnostic_events_json TEXT NOT NULL,
+                    completed_at TEXT NOT NULL,
+                    PRIMARY KEY (batch_id, axis)
+                );
                 """
             )
 
@@ -600,6 +627,161 @@ class WorkflowStore:
             "reason": row["reason"],
             "started_at": row["started_at"],
             "completed_at": row["completed_at"],
+        }
+
+    def begin_review_batch(
+        self,
+        *,
+        run_id: str,
+        head_sha: str,
+        pull_request_number: int,
+        started_at: str,
+    ) -> str:
+        with self._lock, self._connection:
+            batch_id = str(uuid.uuid4())
+            self._connection.execute(
+                """
+                INSERT INTO review_batches (
+                    batch_id, run_id, head_sha, pull_request_number, status, started_at
+                ) VALUES (?, ?, ?, ?, 'running', ?)
+                ON CONFLICT(run_id, head_sha) DO NOTHING
+                """,
+                (batch_id, run_id, head_sha, pull_request_number, started_at),
+            )
+            row = self._connection.execute(
+                "SELECT batch_id FROM review_batches WHERE run_id = ? AND head_sha = ?",
+                (run_id, head_sha),
+            ).fetchone()
+        if row is None:
+            raise RuntimeError("review batch could not be created")
+        return str(row["batch_id"])
+
+    def record_review_result(
+        self,
+        *,
+        batch_id: str,
+        axis: str,
+        assignment: dict[str, object],
+        result: dict[str, object],
+        policy: dict[str, object],
+        route_axis: str,
+        skills: list[dict[str, str]],
+        access_profile: dict[str, object],
+        diagnostic_events: list[dict[str, object]],
+        completed_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                INSERT INTO review_results (
+                    batch_id, axis, assignment_json, result_json, policy_json,
+                    route_axis, skills_json, access_profile_json,
+                    diagnostic_events_json, completed_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(batch_id, axis) DO NOTHING
+                """,
+                (
+                    batch_id,
+                    axis,
+                    json.dumps(assignment, sort_keys=True),
+                    json.dumps(result, sort_keys=True),
+                    json.dumps(policy, sort_keys=True),
+                    route_axis,
+                    json.dumps(skills, sort_keys=True),
+                    json.dumps(access_profile, sort_keys=True),
+                    json.dumps(diagnostic_events, sort_keys=True),
+                    completed_at,
+                ),
+            )
+
+    def block_review_batch(self, *, batch_id: str, reason: str, completed_at: str) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE review_batches
+                SET status = 'blocked', reason = ?, projected_labels_json = NULL,
+                    completed_at = ?
+                WHERE batch_id = ? AND status = 'running'
+                """,
+                (reason, completed_at, batch_id),
+            )
+
+    def complete_review_batch(
+        self,
+        *,
+        batch_id: str,
+        projected_labels: frozenset[str],
+        completed_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE review_batches
+                SET status = 'verified', reason = NULL, projected_labels_json = ?,
+                    completed_at = ?
+                WHERE batch_id = ? AND status = 'running'
+                """,
+                (json.dumps(sorted(projected_labels)), completed_at, batch_id),
+            )
+
+    def workflow_review(self, run_id: str) -> dict[str, object] | None:
+        with self._lock:
+            batch = self._connection.execute(
+                """
+                SELECT batch_id, status, head_sha, pull_request_number, reason,
+                       projected_labels_json, started_at, completed_at
+                FROM review_batches
+                WHERE run_id = ?
+                ORDER BY started_at DESC, batch_id DESC
+                LIMIT 1
+                """,
+                (run_id,),
+            ).fetchone()
+            if batch is None:
+                return None
+            rows = self._connection.execute(
+                """
+                SELECT axis, assignment_json, result_json, policy_json, route_axis,
+                       skills_json, access_profile_json, diagnostic_events_json,
+                       completed_at
+                FROM review_results
+                WHERE batch_id = ?
+                ORDER BY CASE axis
+                    WHEN 'requirements' THEN 1
+                    WHEN 'code' THEN 2
+                    WHEN 'architecture' THEN 3
+                END
+                """,
+                (batch["batch_id"],),
+            ).fetchall()
+        results = [
+            {
+                "axis": row["axis"],
+                "assignment": json.loads(row["assignment_json"]),
+                "verdict": json.loads(row["result_json"]),
+                "policy": json.loads(row["policy_json"]),
+                "route_axis": row["route_axis"],
+                "skills": json.loads(row["skills_json"]),
+                "access_profile": json.loads(row["access_profile_json"]),
+                "diagnostic_events": json.loads(row["diagnostic_events_json"]),
+                "completed_at": row["completed_at"],
+            }
+            for row in rows
+        ]
+        return {
+            "id": batch["batch_id"],
+            "status": batch["status"],
+            "head_sha": batch["head_sha"],
+            "pull_request_number": batch["pull_request_number"],
+            "reason": batch["reason"],
+            "projected_labels": (
+                json.loads(batch["projected_labels_json"])
+                if batch["projected_labels_json"] is not None
+                else []
+            ),
+            "results": results,
+            "started_at": batch["started_at"],
+            "completed_at": batch["completed_at"],
         }
 
     def close(self) -> None:

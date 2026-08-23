@@ -25,6 +25,7 @@ from github_issue_pilot.implementation import (
     Worktree,
 )
 from github_issue_pilot.publication import PublishedHead
+from github_issue_pilot.review import ReviewInvocation, ReviewOutput
 
 SECRET = b"test-webhook-secret"
 REPOSITORY = "daniel/probare-crm"
@@ -51,6 +52,10 @@ class ControlledGitHub:
         self.open_blockers = False
         self.label_writes: list[tuple[str, int, str]] = []
         self.pull_request_writes: list[object] = []
+        self.workflow_label_projections: list[dict[str, object]] = []
+        self.pull_request_head = ControlledSourceControl.head_sha
+        self.reported_head_override: str | None = None
+        self.head_reads: list[tuple[str, int]] = []
         self.title = "Add customer export"
         self.body = "- [ ] Customer can export CSV\n- [ ] Export includes active filters"
         self.issue_type = "feature"
@@ -99,6 +104,7 @@ class ControlledGitHub:
             "head_sha": head_sha,
         }
         self.pull_request_writes.append(write)
+        self.pull_request_head = head_sha
         return DraftPullRequest(
             number=77,
             url="https://github.example/daniel/probare-crm/pull/77",
@@ -106,6 +112,29 @@ class ControlledGitHub:
             draft=True,
             body=body,
         )
+
+    def current_pull_request_head(self, repository: str, pull_request_number: int) -> str:
+        self.head_reads.append((repository, pull_request_number))
+        return self.reported_head_override or self.pull_request_head
+
+    def project_workflow_labels(
+        self,
+        repository: str,
+        issue_number: int,
+        *,
+        add: frozenset[str],
+        remove: frozenset[str],
+    ) -> frozenset[str]:
+        self.workflow_label_projections.append(
+            {
+                "repository": repository,
+                "issue_number": issue_number,
+                "add": add,
+                "remove": remove,
+            }
+        )
+        self.labels = (self.labels | set(add)) - set(remove)
+        return frozenset(self.labels)
 
 
 class ControlledWorktrees:
@@ -184,6 +213,36 @@ class ControlledWorker:
             "evidence": evidence,
             "findings": [],
         }, diagnostic_events=({"type": "turn.completed", "thread_id": "thread-001"},))
+
+
+class ControlledReviewer:
+    def __init__(self, verdicts: dict[str, str] | None = None) -> None:
+        self.verdicts = verdicts or {}
+        self.invocations: list[ReviewInvocation] = []
+
+    def run(self, invocation: ReviewInvocation) -> ReviewOutput:
+        self.invocations.append(invocation)
+        axis = str(invocation.assignment["axis"])
+        verdict = self.verdicts.get(axis, "pass")
+        findings = (
+            [{"location": "src/export.py:1", "description": "Code quality regression"}]
+            if verdict == "fail"
+            else []
+        )
+        return ReviewOutput(
+            result={
+                "schema_version": "1",
+                "invocation_id": invocation.assignment["invocation_id"],
+                "axis": axis,
+                "head_sha": invocation.assignment["pull_request"]["head_sha"],
+                "verdict": verdict,
+                "rationale": f"{axis} review returned {verdict}",
+                "findings": findings,
+            },
+            diagnostic_events=(
+                {"type": "turn.completed", "thread_id": f"fresh-{axis}"},
+            ),
+        )
 
 
 class FailingWorker(ControlledWorker):
@@ -278,6 +337,7 @@ def controlled_implementation_services(
     *,
     repository_root=None,
     source_control=None,
+    reviewer=None,
     sensitive_values=(),
 ) -> ImplementationServices:
     return ImplementationServices(
@@ -294,6 +354,7 @@ def controlled_implementation_services(
         worktrees=worktrees,
         worker=worker,
         source_control=source_control,
+        reviewer=reviewer,
         sensitive_values=tuple(sensitive_values),
     )
 
@@ -749,6 +810,187 @@ def test_sufficient_evidence_publishes_one_commit_bound_draft_pr_through_http_se
     assert "Closes #41" in draft["body"]
     assert len(source_control.calls) == 1
     assert len(github.pull_request_writes) == 1
+
+
+def test_one_failed_axis_blocks_verification_after_three_independent_reviews_through_http_seam(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    source_control = ControlledSourceControl()
+    reviewer = ControlledReviewer({"code": "fail"})
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        ControlledWorker(),
+        source_control=source_control,
+        reviewer=reviewer,
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        accepted = client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    review = state["review"]
+    assert accepted.status_code == 202
+    assert review["status"] == "blocked"
+    assert review["reason"] == "review_failed"
+    assert review["head_sha"] == source_control.head_sha
+    assert [result["axis"] for result in review["results"]] == [
+        "requirements",
+        "code",
+        "architecture",
+    ]
+    assert [result["verdict"]["verdict"] for result in review["results"]] == [
+        "pass",
+        "fail",
+        "pass",
+    ]
+    assert [result["policy"]["task"] for result in review["results"]] == [
+        "requirements_review",
+        "code_review",
+        "architecture_review",
+    ]
+    assert {
+        (result["policy"]["model"], result["policy"]["reasoning_effort"])
+        for result in review["results"]
+    } == {("gpt-5.6-terra", "xhigh")}
+    assert [result["route_axis"] for result in review["results"]] == [
+        "spec",
+        "standards",
+        "architecture",
+    ]
+    assert [[skill["name"] for skill in result["skills"]] for result in review["results"]] == [
+        ["code-review"],
+        ["code-review"],
+        ["codebase-design", "domain-modeling"],
+    ]
+    assert all(
+        len(skill["content_sha256"]) == 64
+        for result in review["results"]
+        for skill in result["skills"]
+    )
+    assert "requirement" in review["results"][0]["assignment"]["scope"].casefold()
+    assert "code smells" in review["results"][1]["assignment"]["scope"].casefold()
+    assert "domain language" in review["results"][2]["assignment"]["scope"].casefold()
+    assert len(reviewer.invocations) == 3
+    assert len({item.assignment["invocation_id"] for item in reviewer.invocations}) == 3
+    assert {
+        item.assignment["pull_request"]["head_sha"] for item in reviewer.invocations
+    } == {source_control.head_sha}
+    assert all(item.access_profile["sandbox"] == "read-only" for item in reviewer.invocations)
+    assert all("peer_verdicts" not in item.assignment for item in reviewer.invocations)
+    assert github.workflow_label_projections == []
+    assert github.labels == {"ready-for-agent", "agent-running"}
+    assert len(source_control.calls) == 1
+    assert len(github.pull_request_writes) == 1
+
+
+def test_all_applicable_axes_pass_and_project_verified_current_head_through_http_seam(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    source_control = ControlledSourceControl()
+    reviewer = ControlledReviewer({"architecture": "not_applicable"})
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        ControlledWorker(),
+        source_control=source_control,
+        reviewer=reviewer,
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    review = state["review"]
+    assert review["status"] == "verified"
+    assert review["head_sha"] == source_control.head_sha
+    assert [result["verdict"]["verdict"] for result in review["results"]] == [
+        "pass",
+        "pass",
+        "not_applicable",
+    ]
+    assert review["projected_labels"] == [
+        "awaiting-review",
+        "ready-for-agent",
+        "verified",
+    ]
+    assert github.workflow_label_projections == [
+        {
+            "repository": REPOSITORY,
+            "issue_number": 41,
+            "add": frozenset({"verified", "awaiting-review"}),
+            "remove": frozenset({"agent-running"}),
+        }
+    ]
+    assert github.labels == {"ready-for-agent", "verified", "awaiting-review"}
+
+
+def test_changed_head_blocks_projection_and_review_batch_survives_restart_without_new_effects(
+    tmp_path,
+) -> None:
+    database_path = tmp_path / "pilot.db"
+    github = ControlledGitHub()
+    github.reported_head_override = "fedcba0987654321fedcba0987654321fedcba09"
+    reviewer = ControlledReviewer()
+    source_control = ControlledSourceControl()
+    services = controlled_implementation_services(
+        tmp_path,
+        ControlledWorktrees(tmp_path / "worktrees"),
+        ControlledWorker(),
+        source_control=source_control,
+        reviewer=reviewer,
+    )
+    body = delivery_body()
+    headers = signed_headers(body)
+    first_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+
+    with TestClient(first_app) as client:
+        client.post("/webhooks/github", content=body, headers=headers)
+        before_restart = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    restarted_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    with TestClient(restarted_app) as client:
+        after_restart = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert before_restart["review"]["status"] == "blocked"
+    assert before_restart["review"]["reason"] == "head_changed"
+    assert before_restart["review"]["head_sha"] == source_control.head_sha
+    assert after_restart["review"] == before_restart["review"]
+    assert len(reviewer.invocations) == 3
+    assert github.head_reads == [(REPOSITORY, 77)]
+    assert github.workflow_label_projections == []
 
 
 @pytest.mark.parametrize(

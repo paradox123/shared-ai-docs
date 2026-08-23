@@ -5,5 +5,13 @@
     "slicing": ["to-tickets"],
     "implementation:feature": ["implement", "tdd"],
     "implementation:bug": ["diagnosing-bugs", "tdd"]
+  },
+  "review_routes": {
+    "requirements_review": {"axis": "spec", "skills": ["code-review"]},
+    "code_review": {"axis": "standards", "skills": ["code-review"]},
+    "architecture_review": {
+      "axis": "architecture",
+      "skills": ["codebase-design", "domain-modeling"]
+    }
   }
 }
