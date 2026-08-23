@@ -1,114 +1,96 @@
 ---
 name: openspec-archive-change
-description: Archive a completed change in the experimental workflow. Use when the user wants to finalize and archive a change after implementation is complete.
+description: Archive a completed OpenSpec change with the OpenSpec CLI. Use when the user wants to finalize and archive a change after implementation is complete.
 license: MIT
-compatibility: Requires openspec CLI.
 metadata:
   author: openspec
   version: "1.0"
   generatedBy: "1.2.0"
 ---
 
-Archive a completed change in the experimental workflow.
+# Archive an OpenSpec Change
 
-**Input**: Optionally specify a change name. If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+Finalize one completed OpenSpec change, update canonical specs when appropriate, archive the change, and validate the resulting repository state.
 
-**Steps**
+This skill owns the OpenSpec status, spec-sync, archive, and validation steps. Repository issue status, labels, and closeout evidence remain separate. In this repository, follow `docs/agents/issue-tracker.md` and `docs/agents/triage-labels.md` for that work; do not infer issue transitions from the OpenSpec archive result.
 
-1. **If no change name provided, prompt for selection**
+## Resolve the Change
 
-   Run `openspec list --json` to get available changes. Use the **AskUserQuestion tool** to let the user select.
+Use the exact change name supplied by the user or established unambiguously in the current conversation. Otherwise run `openspec list --json`, show only active changes, and ask the user to select one. Never guess.
 
-   Show only active changes (not already archived).
-   Include the schema used for each change if available.
+In command examples below, set `CHANGE` to that exact name.
 
-   **IMPORTANT**: Do NOT guess or auto-select a change. Always let the user choose.
+## Completion Gates
 
-2. **Check artifact completion status**
-
-   Run `openspec status --change "<name>" --json` to check artifact completion.
-
-   Parse the JSON to understand:
-   - `schemaName`: The workflow being used
-   - `artifacts`: List of artifacts with their status (`done` or other)
-
-   **If any artifacts are not `done`:**
-   - Display warning listing incomplete artifacts
-   - Use **AskUserQuestion tool** to confirm user wants to proceed
-   - Proceed if user confirms
-
-3. **Check task completion status**
-
-   Read the tasks file (typically `tasks.md`) to check for incomplete tasks.
-
-   Count tasks marked with `- [ ]` (incomplete) vs `- [x]` (complete).
-
-   **If incomplete tasks found:**
-   - Display warning showing count of incomplete tasks
-   - Use **AskUserQuestion tool** to confirm user wants to proceed
-   - Proceed if user confirms
-
-   **If no tasks file exists:** Proceed without task-related warning.
-
-4. **Assess delta spec sync state**
-
-   Check for delta specs at `openspec/changes/<name>/specs/`. If none exist, proceed without sync prompt.
-
-   **If delta specs exist:**
-   - Compare each delta spec with its corresponding main spec at `openspec/specs/<capability>/spec.md`
-   - Determine what changes would be applied (adds, modifications, removals, renames)
-   - Show a combined summary before prompting
-
-   **Prompt options:**
-   - If changes needed: "Sync now (recommended)", "Archive without syncing"
-   - If already synced: "Archive now", "Sync anyway", "Cancel"
-
-   If user chooses sync, use Task tool (subagent_type: "general-purpose", prompt: "Use Skill tool to invoke openspec-sync-specs for change '<name>'. Delta spec analysis: <include the analyzed delta spec summary>"). Proceed to archive regardless of choice.
-
-5. **Perform the archive**
-
-   Create the archive directory if it doesn't exist:
-   ```bash
-   mkdir -p openspec/changes/archive
-   ```
-
-   Generate target name using current date: `YYYY-MM-DD-<change-name>`
-
-   **Check if target already exists:**
-   - If yes: Fail with error, suggest renaming existing archive or using different date
-   - If no: Move the change directory to archive
+1. Run `openspec status --change "$CHANGE" --json` and inspect `schemaName` plus every artifact status.
+2. Read `openspec/changes/$CHANGE/tasks.md` when present and count incomplete `- [ ]` tasks.
+3. If an artifact or task is incomplete, list it and obtain explicit confirmation before continuing. Warnings do not silently block an authorized archive.
+4. Run the pre-archive validation:
 
    ```bash
-   mv openspec/changes/<name> openspec/changes/archive/YYYY-MM-DD-<name>
+   openspec validate "$CHANGE" --strict --no-interactive
+   ```
+5. Resolve the dated target and fail before any mutation if it already exists:
+
+   ```bash
+   ARCHIVE_TARGET="openspec/changes/archive/$(date +%F)-$CHANGE"
+   test ! -e "$ARCHIVE_TARGET"
    ```
 
-6. **Display summary**
+## Choose One Archive Path
 
-   Show archive completion summary including:
-   - Change name
-   - Schema that was used
-   - Archive location
-   - Whether specs were synced (if applicable)
-   - Note about any warnings (incomplete artifacts/tasks)
+| Situation | Path | Canonical-spec owner |
+|---|---|---|
+| Delta specs should update the canonical specs | Standard, preferred | `openspec archive` |
+| The change is infrastructure/tooling/docs-only with no canonical spec update, or its delta was already merged and verified manually | Skip specs | The caller |
+| The CLI cannot represent the repository's archive layout or fails for a diagnosed non-validation reason | Manual fallback, exceptional | The caller |
 
-**Output On Success**
+### Standard path
 
-```
-## Archive Complete
+Let the CLI apply delta specs and archive the change:
 
-**Change:** <change-name>
-**Schema:** <schema-name>
-**Archived to:** openspec/changes/archive/YYYY-MM-DD-<name>/
-**Specs:** ✓ Synced to main specs (or "No delta specs" or "Sync skipped")
-
-All artifacts complete. All tasks complete.
+```bash
+openspec archive -y "$CHANGE"
 ```
 
-**Guardrails**
-- Always prompt for change selection if not provided
-- Use artifact graph (openspec status --json) for completion checking
-- Don't block archive on warnings - just inform and confirm
-- Preserve .openspec.yaml when moving to archive (it moves with the directory)
-- Show clear summary of what happened
-- If sync is requested, use openspec-sync-specs approach (agent-driven)
-- If delta specs exist, always run the sync assessment and show the combined summary before prompting
+Do not manually sync or move files first. If delta specs exist, summarize their intended canonical effect before executing when that decision has not already been accepted.
+
+### Skip-specs path
+
+Use this only after stating why no CLI-managed spec update is appropriate. If specs were merged manually, validate their final state before archiving:
+
+```bash
+openspec validate --specs --strict --no-interactive
+openspec archive -y --skip-specs "$CHANGE"
+```
+
+### Manual fallback
+
+Do not choose a raw move because the CLI syntax is uncertain; the standard commands are defined above. Use a manual move only after the CLI path is known to be unsuitable, record the reason, and own any required canonical-spec merge first.
+
+```bash
+openspec validate --specs --strict --no-interactive
+mkdir -p openspec/changes/archive
+mv "openspec/changes/$CHANGE" "$ARCHIVE_TARGET"
+```
+
+An existing target is a hard stop. Do not overwrite or rename it without user direction.
+
+## Verify and Report
+
+Run the repository-wide postcondition check:
+
+```bash
+openspec validate --all --strict --no-interactive
+```
+
+Confirm that the active change directory is gone and the dated archive target exists. Then report:
+
+- change name and schema
+- archive path
+- archive path chosen: standard, skip-specs, or manual fallback
+- whether canonical specs were updated, already verified, or intentionally skipped
+- any incomplete-artifact/task warning that the user accepted
+- the separate issue-closeout action taken, or that it remains outstanding
+
+Do not rediscover these normal commands with `openspec archive --help` or `openspec validate --help`. Consult help only if the installed CLI rejects a documented invocation, and report that version mismatch explicitly.
