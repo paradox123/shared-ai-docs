@@ -44,3 +44,33 @@ def test_git_adapter_creates_a_run_owned_branch_without_changing_other_worktrees
     assert (created.path / "marker.txt").read_text(encoding="utf-8") == "main checkout\n"
     assert (daniels_checkout / "marker.txt").read_text(encoding="utf-8") == "main checkout\n"
     assert (sibling / "marker.txt").read_text(encoding="utf-8") == "sibling change\n"
+
+
+def test_git_adapter_adopts_the_same_run_owned_worktree_after_restart(tmp_path) -> None:
+    repository = tmp_path / "daniels-checkout"
+    repository.mkdir()
+    git("init", "-b", "main", cwd=repository)
+    git("config", "user.name", "Contract Test", cwd=repository)
+    git("config", "user.email", "contract@example.invalid", cwd=repository)
+    (repository / "marker.txt").write_text("main checkout\n", encoding="utf-8")
+    git("add", "marker.txt", cwd=repository)
+    git("commit", "-m", "initial", cwd=repository)
+    adapter = GitWorktreeAdapter(tmp_path / "worker-worktrees")
+
+    first = adapter.create(
+        run_id="run-001",
+        repository="daniel/probare-crm",
+        repository_root=repository,
+        base_ref="main",
+    )
+    recovered = adapter.create(
+        run_id="run-001",
+        repository="daniel/probare-crm",
+        repository_root=repository,
+        base_ref="main",
+    )
+
+    assert recovered == first
+    assert git("worktree", "list", "--porcelain", cwd=repository).count(
+        f"worktree {first.path}"
+    ) == 1

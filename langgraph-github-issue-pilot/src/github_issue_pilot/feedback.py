@@ -60,21 +60,95 @@ class HumanFeedbackCoordinator:
         self._clock = clock
 
     def execute(self, feedback_input: HumanFeedbackInput) -> str:
+        feedback_state = self._store.workflow_feedback(feedback_input.run_id)
+        current_batch = next(
+            batch
+            for batch in feedback_state["batches"]
+            if batch["id"] == feedback_input.feedback_batch_id
+        )
+        if current_batch["status"] not in {"pending", "running"}:
+            return str(current_batch["status"])
+        completed_attempts = [
+            attempt for attempt in current_batch["attempts"] if attempt["status"] != "running"
+        ]
+        expected_head = (
+            str(completed_attempts[-1]["head_sha"])
+            if completed_attempts and completed_attempts[-1]["head_sha"]
+            else feedback_input.starting_head_sha
+        )
         if self._adapter.current_pull_request_head(
             feedback_input.repository, feedback_input.pull_request_number
-        ) != feedback_input.starting_head_sha:
+        ) != expected_head:
             return "feedback_head_mismatch"
         initial_review = self._store.workflow_review(feedback_input.run_id)
         initial_review_id = str(initial_review["id"]) if initial_review else "unreviewed-head"
         findings = self._human_findings(feedback_input)
-        previous_head = feedback_input.starting_head_sha
+        previous_head = expected_head
+        start_round = 1
+        for attempt in completed_attempts:
+            status = str(attempt["status"])
+            if status == "verified":
+                projected = frozenset(attempt["projected_labels"])
+                self._store.complete_feedback_batch(
+                    feedback_batch_id=feedback_input.feedback_batch_id,
+                    status="verified",
+                    projected_labels=projected,
+                    completed_at=self._now(),
+                )
+                return "verified"
+            if status == "blocked":
+                result = attempt["result"] or {}
+                disposition = str(result.get("terminal_disposition") or "ready-for-human")
+                terminal = "needs-info" if disposition == "needs-info" else "ready-for-human"
+                projected = frozenset(attempt["projected_labels"])
+                self._store.complete_feedback_batch(
+                    feedback_batch_id=feedback_input.feedback_batch_id,
+                    status=terminal,
+                    projected_labels=projected,
+                    completed_at=self._now(),
+                )
+                return terminal
+            if attempt["head_sha"]:
+                previous_head = str(attempt["head_sha"])
+            start_round = int(attempt["round"]) + 1
+            if status == "failed":
+                result = attempt["result"] or {}
+                findings = self._failure_findings(
+                    str(result.get("summary") or "Feedback attempt failed")
+                )
+            else:
+                findings = self._fresh_findings(
+                    self._store.workflow_review(feedback_input.run_id),
+                    bool(
+                        attempt["deterministic_verification"]
+                        and attempt["deterministic_verification"].get("passed")
+                    ),
+                )
 
-        for round_number in range(1, self.ROUND_LIMIT + 1):
-            assignment = self._build_assignment(
-                feedback_input=feedback_input,
-                initial_review_id=initial_review_id,
-                round_number=round_number,
-                findings=findings,
+        for round_number in range(start_round, self.ROUND_LIMIT + 1):
+            feedback_state = self._store.workflow_feedback(feedback_input.run_id)
+            current_batch = next(
+                batch
+                for batch in feedback_state["batches"]
+                if batch["id"] == feedback_input.feedback_batch_id
+            )
+            existing_attempt = next(
+                (
+                    attempt
+                    for attempt in current_batch["attempts"]
+                    if int(attempt["round"]) == round_number
+                ),
+                None,
+            )
+            assignment = (
+                dict(existing_attempt["assignment"])
+                if existing_attempt is not None
+                else self._build_assignment(
+                    feedback_input=feedback_input,
+                    initial_review_id=initial_review_id,
+                    round_number=round_number,
+                    findings=findings,
+                )
             )
             attempt_id = self._store.begin_feedback_attempt(
                 feedback_batch_id=feedback_input.feedback_batch_id,
@@ -108,16 +182,23 @@ class HumanFeedbackCoordinator:
                 return status
 
             implementation_result = result.get("implementation_result")
+            current_publication = self._store.workflow_publication(feedback_input.run_id)
             publication = (
-                self._publish(
-                    feedback_input=feedback_input,
-                    round_number=round_number,
-                    result=result,
-                    implementation_result=implementation_result,
-                    previous_head=previous_head,
+                current_publication
+                if current_publication is not None
+                and current_publication["status"] == "published"
+                and current_publication["head_sha"] != previous_head
+                else (
+                    self._publish(
+                        feedback_input=feedback_input,
+                        round_number=round_number,
+                        result=result,
+                        implementation_result=implementation_result,
+                        previous_head=previous_head,
+                    )
+                    if isinstance(implementation_result, dict)
+                    else None
                 )
-                if isinstance(implementation_result, dict)
-                else None
             )
             if publication is None:
                 self._complete_attempt(
@@ -170,6 +251,7 @@ class HumanFeedbackCoordinator:
                 skill_root=self._services.skill_root,
                 sensitive_values=self._services.sensitive_values,
                 clock=self._clock,
+                transition_probe=self._services.transition_probe,
             ).execute(
                 ReviewBatchInput(
                     run_id=feedback_input.run_id,
@@ -448,6 +530,8 @@ class HumanFeedbackCoordinator:
             diagnostic_events=invocation["diagnostic_events"],
             completed_at=self._now(),
         )
+        if self._services.transition_probe is not None:
+            self._services.transition_probe("feedback_attempt_completed", attempt_id)
 
     def _handoff(
         self, feedback_input: HumanFeedbackInput, status: str

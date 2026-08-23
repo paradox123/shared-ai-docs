@@ -241,6 +241,23 @@ class WorkflowStore:
                     actor TEXT NOT NULL,
                     completed_at TEXT NOT NULL
                 );
+
+                CREATE TABLE IF NOT EXISTS recovery_events (
+                    event_id TEXT PRIMARY KEY,
+                    run_id TEXT NOT NULL REFERENCES issue_runs(run_id),
+                    phase TEXT NOT NULL CHECK (
+                        phase IN (
+                            'claim', 'implementation', 'publication', 'review',
+                            'repair', 'human_feedback', 'waiting'
+                        )
+                    ),
+                    operation_key TEXT NOT NULL,
+                    outcome TEXT NOT NULL CHECK (
+                        outcome IN ('completed', 'reused', 'retried', 'waiting', 'failed')
+                    ),
+                    recorded_at TEXT NOT NULL,
+                    UNIQUE (run_id, phase, operation_key)
+                );
                 """
             )
 
@@ -435,6 +452,80 @@ class WorkflowStore:
         run = self._run_dict(row, created=False)
         run.pop("created")
         return run
+
+    def active_runs(self) -> list[dict[str, object]]:
+        with self._lock:
+            rows = self._connection.execute(
+                """
+                SELECT run_id, repository, issue_number, status, created_at
+                FROM issue_runs
+                WHERE status = 'running'
+                ORDER BY created_at, run_id
+                """
+            ).fetchall()
+        records: list[dict[str, object]] = []
+        for row in rows:
+            run = self._run_dict(row, created=False)
+            run.pop("created")
+            records.append(run)
+        return records
+
+    def record_recovery_event(
+        self,
+        *,
+        run_id: str,
+        phase: str,
+        operation_key: str,
+        outcome: str,
+        recorded_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                INSERT INTO recovery_events (
+                    event_id, run_id, phase, operation_key, outcome, recorded_at
+                ) VALUES (?, ?, ?, ?, ?, ?)
+                ON CONFLICT(run_id, phase, operation_key) DO NOTHING
+                """,
+                (
+                    str(uuid.uuid4()),
+                    run_id,
+                    phase,
+                    operation_key,
+                    outcome,
+                    recorded_at,
+                ),
+            )
+
+    def workflow_recovery(self, run_id: str) -> dict[str, object] | None:
+        with self._lock:
+            rows = self._connection.execute(
+                """
+                SELECT event_id, phase, operation_key, outcome, recorded_at
+                FROM recovery_events
+                WHERE run_id = ?
+                ORDER BY rowid
+                """,
+                (run_id,),
+            ).fetchall()
+        if not rows:
+            return None
+        events = [
+            {
+                "id": row["event_id"],
+                "phase": row["phase"],
+                "operation_key": row["operation_key"],
+                "outcome": row["outcome"],
+                "recorded_at": row["recorded_at"],
+            }
+            for row in rows
+        ]
+        return {
+            "status": (
+                "failed" if any(event["outcome"] == "failed" for event in events) else "completed"
+            ),
+            "events": events,
+        }
 
     def run_for_pull_request(
         self, repository: str, pull_request_number: int
@@ -1414,6 +1505,30 @@ class WorkflowStore:
                 }
             )
         return {"batches": records}
+
+    def recoverable_feedback_batches(self, run_id: str) -> list[dict[str, object]]:
+        with self._lock:
+            rows = self._connection.execute(
+                """
+                SELECT feedback_batch_id, pull_request_number, starting_head_sha,
+                       source_id, feedback_json, status
+                FROM human_feedback_batches
+                WHERE run_id = ? AND status IN ('pending', 'running')
+                ORDER BY rowid
+                """,
+                (run_id,),
+            ).fetchall()
+        return [
+            {
+                "id": row["feedback_batch_id"],
+                "pull_request_number": row["pull_request_number"],
+                "starting_head_sha": row["starting_head_sha"],
+                "source_id": row["source_id"],
+                "feedback": tuple(json.loads(row["feedback_json"])),
+                "status": row["status"],
+            }
+            for row in rows
+        ]
 
     def begin_feedback_attempt(
         self,

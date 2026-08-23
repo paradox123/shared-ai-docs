@@ -3,6 +3,9 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
+import multiprocessing
+import os
+from dataclasses import replace
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -482,6 +485,160 @@ class SequencedVerifier(ControlledVerifier):
         return super().verify(worktree, command=command, head_sha=head_sha)
 
 
+class ProcessControlledGitHub(ControlledGitHub):
+    def __init__(self, counts, shared_state) -> None:
+        super().__init__()
+        self._counts = counts
+        self._shared_state = shared_state
+
+    def ensure_label(self, repository: str, issue_number: int, label: str) -> None:
+        self._counts["claim"] = self._counts.get("claim", 0) + 1
+        super().ensure_label(repository, issue_number, label)
+
+    def ensure_draft_pull_request(self, *args, **kwargs) -> DraftPullRequest:
+        self._counts["pull_request"] = self._counts.get("pull_request", 0) + 1
+        pull_request = super().ensure_draft_pull_request(*args, **kwargs)
+        self._shared_state["head"] = pull_request.head_sha
+        return pull_request
+
+    def current_pull_request_head(self, repository: str, pull_request_number: int) -> str:
+        return str(self._shared_state.get("head", ControlledSourceControl.head_sha))
+
+
+class ProcessControlledWorktrees(ControlledWorktrees):
+    def __init__(self, root, counts) -> None:
+        super().__init__(root)
+        self._counts = counts
+
+    def create(self, **kwargs) -> Worktree:
+        self._counts["worktree"] = self._counts.get("worktree", 0) + 1
+        return super().create(**kwargs)
+
+
+class ProcessControlledWorker(ControlledRepairWorker):
+    def __init__(self, counts) -> None:
+        super().__init__()
+        self._counts = counts
+
+    def run(self, invocation: WorkerInvocation) -> WorkerOutput:
+        self._counts["worker"] = self._counts.get("worker", 0) + 1
+        return super().run(invocation)
+
+    def repair(self, invocation: RepairInvocation) -> RepairOutput:
+        self._counts["repair"] = self._counts.get("repair", 0) + 1
+        return super().repair(invocation)
+
+
+class ProcessControlledSourceControl(ControlledSourceControl):
+    def __init__(self, counts) -> None:
+        super().__init__()
+        self._counts = counts
+
+    def publish(self, worktree, *, issue_number: int, sensitive_values=()) -> PublishedHead:
+        self._counts["source"] = self._counts.get("source", 0) + 1
+        published = super().publish(
+            worktree,
+            issue_number=issue_number,
+            sensitive_values=sensitive_values,
+        )
+        sequence = int(self._counts["source"])
+        return PublishedHead(branch=published.branch, head_sha=f"{sequence:040x}")
+
+
+class ProcessControlledReviewer(ControlledReviewer):
+    def __init__(self, counts, *, fail_initial: bool = False) -> None:
+        super().__init__()
+        self._counts = counts
+        self._fail_initial = fail_initial
+
+    def run(self, invocation: ReviewInvocation) -> ReviewOutput:
+        axis = str(invocation.assignment["axis"])
+        key = f"review_{axis}"
+        self._counts[key] = self._counts.get(key, 0) + 1
+        self.verdicts = (
+            {"code": "fail"}
+            if self._fail_initial and axis == "code" and int(self._counts[key]) == 1
+            else {}
+        )
+        return super().run(invocation)
+
+
+class ProcessControlledVerifier(ControlledVerifier):
+    def __init__(self, counts) -> None:
+        super().__init__()
+        self._counts = counts
+
+    def verify(self, worktree, *, command: str, head_sha: str) -> DeterministicVerification:
+        self._counts["verification"] = self._counts.get("verification", 0) + 1
+        return super().verify(worktree, command=command, head_sha=head_sha)
+
+
+def run_recovery_process(
+    database_path: str,
+    worktree_root: str,
+    counts,
+    shared_state,
+    crash_phase: str | None,
+    result_path: str | None,
+    with_reviewer: bool = False,
+    with_repair: bool = False,
+    with_verifier: bool = False,
+) -> None:
+    github = ProcessControlledGitHub(counts, shared_state)
+
+    def transition_probe(phase: str, _operation_key: str) -> None:
+        if phase == crash_phase:
+            os._exit(86)
+
+    services = controlled_implementation_services(
+        Path(worktree_root).parent,
+        ProcessControlledWorktrees(Path(worktree_root), counts),
+        ProcessControlledWorker(counts),
+        source_control=ProcessControlledSourceControl(counts),
+        reviewer=(
+            ProcessControlledReviewer(counts, fail_initial=with_repair)
+            if with_reviewer or with_repair
+            else None
+        ),
+        verifier=(
+            ProcessControlledVerifier(counts) if with_repair or with_verifier else None
+        ),
+    )
+    services = replace(services, transition_probe=transition_probe)
+    app = create_app(
+        database_path=Path(database_path),
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    with TestClient(app) as client:
+        if crash_phase is not None:
+            if crash_phase == "waiting_process":
+                client.get("/workflows/daniel/probare-crm/issues/41")
+                os._exit(86)
+            elif crash_phase == "feedback_attempt_completed":
+                body = feedback_body(head_sha=str(shared_state["head"]))
+                client.post(
+                    "/webhooks/github",
+                    content=body,
+                    headers=signed_headers(
+                        body,
+                        delivery_id="feedback-delivery-001",
+                        event="pull_request_review",
+                    ),
+                )
+            else:
+                body = delivery_body()
+                client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        else:
+            observed = client.get("/workflows/daniel/probare-crm/issues/41")
+            if result_path is not None:
+                Path(result_path).write_text(
+                    json.dumps(observed.json(), sort_keys=True), encoding="utf-8"
+                )
+
+
 def controlled_implementation_services(
     tmp_path,
     worktrees: ControlledWorktrees,
@@ -848,6 +1005,403 @@ def test_delivery_run_claim_and_checkpoint_remain_observable_after_restart(tmp_p
     assert github.label_writes == [(REPOSITORY, 41, "agent-running")]
 
 
+def test_startup_recovery_continues_claimed_run_once_through_http_read_back(tmp_path) -> None:
+    database_path = tmp_path / "pilot.db"
+    github = ControlledGitHub()
+    body = delivery_body()
+    first_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+    )
+
+    with TestClient(first_app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        claimed = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledWorker()
+    source_control = ControlledSourceControl()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+    )
+    recovered_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    with TestClient(recovered_app) as client:
+        recovered = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    restarted_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    with TestClient(restarted_app) as client:
+        repeated = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert recovered["run"]["id"] == claimed["run"]["id"]
+    assert recovered["checkpoint"]["thread_id"] == claimed["checkpoint"]["thread_id"]
+    assert recovered["implementation"]["status"] == "completed"
+    assert recovered["draft_pull_request"]["status"] == "published"
+    assert recovered["recovery"]["status"] == "completed"
+    assert {event["phase"] for event in recovered["recovery"]["events"]} >= {
+        "implementation",
+        "publication",
+    }
+    assert repeated["recovery"] == recovered["recovery"]
+    assert len(worktrees.calls) == 1
+    assert len(worker.invocations) == 1
+    assert len(source_control.calls) == 1
+    assert len(github.pull_request_writes) == 1
+
+
+@pytest.mark.parametrize(
+    ("crash_phase", "expected_outcomes"),
+    [
+        (
+            "claim",
+            {
+                "claim": ["reused"],
+                "implementation": ["retried", "retried"],
+                "publication": ["retried"],
+                "waiting": ["waiting"],
+            },
+        ),
+        (
+            "implementation_completed",
+            {
+                "claim": ["reused"],
+                "implementation": ["reused"],
+                "publication": ["retried"],
+                "waiting": ["waiting"],
+            },
+        ),
+        (
+            "publication_completed",
+            {
+                "claim": ["reused"],
+                "implementation": ["reused"],
+                "publication": ["reused"],
+                "waiting": ["waiting"],
+            },
+        ),
+    ],
+    ids=["claim", "implementation", "publication"],
+)
+def test_real_process_exit_recovers_completed_effects_without_duplicates(
+    tmp_path, crash_phase: str, expected_outcomes: dict[str, list[str]]
+) -> None:
+    context = multiprocessing.get_context("spawn")
+    with context.Manager() as manager:
+        counts = manager.dict()
+        shared_state = manager.dict()
+        database_path = str(tmp_path / "pilot.db")
+        worktree_root = str(tmp_path / "worktrees")
+        recovered_path = str(tmp_path / "recovered.json")
+        repeated_path = str(tmp_path / "repeated.json")
+
+        crashed = context.Process(
+            target=run_recovery_process,
+            args=(
+                database_path,
+                worktree_root,
+                counts,
+                shared_state,
+                crash_phase,
+                None,
+            ),
+        )
+        crashed.start()
+        crashed.join(20)
+        assert crashed.exitcode == 86
+
+        recovered = context.Process(
+            target=run_recovery_process,
+            args=(
+                database_path,
+                worktree_root,
+                counts,
+                shared_state,
+                None,
+                recovered_path,
+            ),
+        )
+        recovered.start()
+        recovered.join(20)
+        assert recovered.exitcode == 0
+
+        repeated = context.Process(
+            target=run_recovery_process,
+            args=(
+                database_path,
+                worktree_root,
+                counts,
+                shared_state,
+                None,
+                repeated_path,
+            ),
+        )
+        repeated.start()
+        repeated.join(20)
+        assert repeated.exitcode == 0
+
+        first_state = json.loads(Path(recovered_path).read_text(encoding="utf-8"))
+        second_state = json.loads(Path(repeated_path).read_text(encoding="utf-8"))
+        assert first_state["implementation"]["status"] == "completed"
+        assert first_state["draft_pull_request"]["status"] == "published"
+        assert first_state["recovery"] == second_state["recovery"]
+        observed_outcomes: dict[str, list[str]] = {}
+        for event in first_state["recovery"]["events"]:
+            observed_outcomes.setdefault(event["phase"], []).append(event["outcome"])
+        assert observed_outcomes == expected_outcomes
+        assert dict(counts) == {
+            "claim": 1,
+            "worktree": 1,
+            "worker": 1,
+            "source": 1,
+            "pull_request": 1,
+        }
+
+
+def test_real_process_exit_resumes_only_missing_review_axes(tmp_path) -> None:
+    context = multiprocessing.get_context("spawn")
+    with context.Manager() as manager:
+        counts = manager.dict()
+        shared_state = manager.dict()
+        database_path = str(tmp_path / "pilot.db")
+        worktree_root = str(tmp_path / "worktrees")
+        recovered_path = str(tmp_path / "recovered.json")
+
+        crashed = context.Process(
+            target=run_recovery_process,
+            args=(
+                database_path,
+                worktree_root,
+                counts,
+                shared_state,
+                "review_requirements_completed",
+                None,
+                True,
+            ),
+        )
+        crashed.start()
+        crashed.join(20)
+        assert crashed.exitcode == 86
+
+        recovered = context.Process(
+            target=run_recovery_process,
+            args=(
+                database_path,
+                worktree_root,
+                counts,
+                shared_state,
+                None,
+                recovered_path,
+                True,
+            ),
+        )
+        recovered.start()
+        recovered.join(20)
+        assert recovered.exitcode == 0
+
+        state = json.loads(Path(recovered_path).read_text(encoding="utf-8"))
+        assert state["review"]["status"] == "verified"
+        assert [result["axis"] for result in state["review"]["results"]] == [
+            "requirements",
+            "code",
+            "architecture",
+        ]
+        assert dict(counts) == {
+            "claim": 1,
+            "worktree": 1,
+            "worker": 1,
+            "source": 1,
+            "pull_request": 1,
+            "review_requirements": 1,
+            "review_code": 1,
+            "review_architecture": 1,
+        }
+
+
+def test_real_process_exit_reuses_persisted_repair_invocation(tmp_path) -> None:
+    context = multiprocessing.get_context("spawn")
+    with context.Manager() as manager:
+        counts = manager.dict()
+        shared_state = manager.dict()
+        database_path = str(tmp_path / "pilot.db")
+        worktree_root = str(tmp_path / "worktrees")
+        recovered_path = str(tmp_path / "recovered.json")
+
+        crashed = context.Process(
+            target=run_recovery_process,
+            args=(
+                database_path,
+                worktree_root,
+                counts,
+                shared_state,
+                "repair_invocation_completed",
+                None,
+                False,
+                True,
+            ),
+        )
+        crashed.start()
+        crashed.join(20)
+        assert crashed.exitcode == 86
+
+        recovered = context.Process(
+            target=run_recovery_process,
+            args=(
+                database_path,
+                worktree_root,
+                counts,
+                shared_state,
+                None,
+                recovered_path,
+                False,
+                True,
+            ),
+        )
+        recovered.start()
+        recovered.join(20)
+        assert recovered.exitcode == 0
+
+        state = json.loads(Path(recovered_path).read_text(encoding="utf-8"))
+        assert state["repair"]["status"] == "verified"
+        assert state["repair"]["round_count"] == 1
+        assert len(state["repair"]["attempts"][0]["invocations"]) == 1
+        assert state["draft_pull_request"]["head_sha"] == f"{2:040x}"
+        assert dict(counts) == {
+            "claim": 1,
+            "worktree": 1,
+            "worker": 1,
+            "source": 2,
+            "pull_request": 3,
+            "review_requirements": 2,
+            "review_code": 2,
+            "review_architecture": 2,
+            "repair": 1,
+            "verification": 1,
+        }
+
+
+def test_real_process_exit_preserves_completed_feedback_attempt_and_batch_counter(
+    tmp_path,
+) -> None:
+    context = multiprocessing.get_context("spawn")
+    with context.Manager() as manager:
+        counts = manager.dict()
+        shared_state = manager.dict()
+        database_path = str(tmp_path / "pilot.db")
+        worktree_root = str(tmp_path / "worktrees")
+        recovered_path = str(tmp_path / "recovered.json")
+
+        seeded = context.Process(
+            target=run_recovery_process,
+            args=(
+                database_path,
+                worktree_root,
+                counts,
+                shared_state,
+                "seed",
+                None,
+                True,
+                False,
+                True,
+            ),
+        )
+        seeded.start()
+        seeded.join(20)
+        assert seeded.exitcode == 0
+
+        waiting_crash = context.Process(
+            target=run_recovery_process,
+            args=(
+                database_path,
+                worktree_root,
+                counts,
+                shared_state,
+                "waiting_process",
+                None,
+                True,
+                False,
+                True,
+            ),
+        )
+        waiting_crash.start()
+        waiting_crash.join(20)
+        assert waiting_crash.exitcode == 86
+
+        crashed = context.Process(
+            target=run_recovery_process,
+            args=(
+                database_path,
+                worktree_root,
+                counts,
+                shared_state,
+                "feedback_attempt_completed",
+                None,
+                True,
+                False,
+                True,
+            ),
+        )
+        crashed.start()
+        crashed.join(20)
+        assert crashed.exitcode == 86
+
+        recovered = context.Process(
+            target=run_recovery_process,
+            args=(
+                database_path,
+                worktree_root,
+                counts,
+                shared_state,
+                None,
+                recovered_path,
+                True,
+                False,
+                True,
+            ),
+        )
+        recovered.start()
+        recovered.join(20)
+        assert recovered.exitcode == 0
+
+        state = json.loads(Path(recovered_path).read_text(encoding="utf-8"))
+        batch = state["human_feedback"]["batches"][0]
+        assert batch["status"] == "verified"
+        assert batch["round_count"] == 1
+        assert batch["attempts"][0]["status"] == "verified"
+        assert any(
+            event["phase"] == "human_feedback"
+            and event["operation_key"].endswith(batch["id"])
+            for event in state["recovery"]["events"]
+        )
+        assert dict(counts) == {
+            "claim": 1,
+            "worktree": 1,
+            "worker": 1,
+            "source": 2,
+            "pull_request": 2,
+            "review_requirements": 2,
+            "review_code": 2,
+            "review_architecture": 2,
+            "repair": 1,
+            "verification": 1,
+        }
+
+
 def test_claimed_issue_persists_bounded_assignment_and_evidence_before_worker_invocation(tmp_path) -> None:
     github = ControlledGitHub()
     github.findings = ("Keep export authorization unchanged",)
@@ -964,7 +1518,10 @@ def test_valid_red_green_worker_result_is_persisted_and_observable_after_restart
         {"type": "turn.completed", "thread_id": "thread-001"}
     ]
     assert implementation["completed_at"] == "2026-08-21T10:30:00+00:00"
-    assert after_restart == before_restart
+    assert {key: value for key, value in after_restart.items() if key != "recovery"} == {
+        key: value for key, value in before_restart.items() if key != "recovery"
+    }
+    assert after_restart["recovery"]["status"] == "completed"
     assert len(worker.invocations) == 1
 
 
@@ -1657,8 +2214,9 @@ def test_sensitive_worker_evidence_and_diagnostics_are_redacted_before_read_back
         source_control=source_control,
         sensitive_values=("super-private-value",),
     )
+    database_path = tmp_path / "pilot.db"
     app = create_app(
-        database_path=tmp_path / "pilot.db",
+        database_path=database_path,
         webhook_secret=SECRET,
         repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
@@ -1668,6 +2226,14 @@ def test_sensitive_worker_evidence_and_diagnostics_are_redacted_before_read_back
 
     with TestClient(app) as client:
         client.post("/webhooks/github", content=body, headers=signed_headers(body))
+    restarted_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    with TestClient(restarted_app) as client:
         state = client.get("/workflows/daniel/probare-crm/issues/41").json()
 
     serialized = json.dumps(state, sort_keys=True)
@@ -1675,6 +2241,18 @@ def test_sensitive_worker_evidence_and_diagnostics_are_redacted_before_read_back
     assert "ghp_12345678901234567890" not in serialized
     assert "daniel@example.com" not in serialized
     assert serialized.count("[REDACTED]") >= 4
+    assert state["recovery"]["status"] == "completed"
+    assert all(
+        set(event) == {"id", "phase", "operation_key", "outcome", "recorded_at"}
+        for event in state["recovery"]["events"]
+    )
+    assert set(state["checkpoint"]["values"]) == {
+        "delivery_id",
+        "repository",
+        "issue_number",
+        "status",
+        "claim_label",
+    }
     assert source_control.calls[0]["sensitive_values"] == ("super-private-value",)
 
 
@@ -2249,6 +2827,18 @@ def test_authorized_human_merge_completes_the_same_run_and_checkpoint_after_rest
         )
         completed = client.get("/workflows/daniel/probare-crm/issues/41").json()
 
+    terminal_restart = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    with TestClient(terminal_restart) as client:
+        after_terminal_restart = client.get(
+            "/workflows/daniel/probare-crm/issues/41"
+        ).json()
+
     assert response.status_code == 202
     assert completed["run"]["id"] == before["run"]["id"]
     assert completed["run"]["status"] == "completed"
@@ -2263,6 +2853,7 @@ def test_authorized_human_merge_completes_the_same_run_and_checkpoint_after_rest
     }
     assert completed["human_feedback"] == before["human_feedback"]
     assert completed["review_history"] == before["review_history"]
+    assert after_terminal_restart == completed
     assert (
         len(worktrees.calls),
         len(worker.repair_invocations),
