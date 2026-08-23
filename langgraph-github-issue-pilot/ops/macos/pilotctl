@@ -1,0 +1,274 @@
+#!/bin/bash
+
+set -u
+
+PILOT_OPS_DIRECTORY="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=pilot-common.sh
+. "$PILOT_OPS_DIRECTORY/pilot-common.sh"
+
+pilotctl_paths() {
+    PILOT_OPS_LABEL="${PILOT_LAUNCH_AGENT_LABEL:-com.danielsvault.github-issue-pilot}"
+    PILOT_OPS_USER_ROOT="${PILOTCTL_USER_ROOT:-$HOME}"
+    PILOT_OPS_SUPPORT_DIRECTORY="$PILOT_OPS_USER_ROOT/Library/Application Support/DanielsVault GitHub Issue Pilot"
+    PILOT_OPS_SUPERVISOR="$PILOT_OPS_SUPPORT_DIRECTORY/bin/pilot-supervisor"
+    PILOT_OPS_STATE="$PILOT_OPS_SUPPORT_DIRECTORY/run/stack.state"
+    PILOT_OPS_LOG_DIRECTORY="$PILOT_OPS_USER_ROOT/Library/Logs/DanielsVault GitHub Issue Pilot"
+    PILOT_OPS_LOG="$PILOT_OPS_LOG_DIRECTORY/lifecycle.log"
+    PILOT_OPS_PLIST_DIRECTORY="$PILOT_OPS_USER_ROOT/Library/LaunchAgents"
+    PILOT_OPS_PLIST="$PILOT_OPS_PLIST_DIRECTORY/$PILOT_OPS_LABEL.plist"
+    PILOT_OPS_DOMAIN="gui/$(/usr/bin/id -u)"
+    PILOT_OPS_SERVICE="$PILOT_OPS_DOMAIN/$PILOT_OPS_LABEL"
+    PILOT_OPS_LAUNCHCTL="${PILOTCTL_LAUNCHCTL:-/bin/launchctl}"
+    PILOT_OPS_CURL="${PILOTCTL_CURL:-/usr/bin/curl}"
+}
+
+pilotctl_load_identity() {
+    local environment_file="$1"
+
+    pilot_load_environment "$environment_file" || return
+    pilotctl_paths
+    if [[ "$environment_file" != /* || "$PILOT_OPS_USER_ROOT" != /* ||
+        ! "$PILOT_OPS_LABEL" =~ ^[A-Za-z0-9.-]+$ ||
+        "$PILOT_OPS_LAUNCHCTL" != /* || ! -x "$PILOT_OPS_LAUNCHCTL" ]]; then
+        printf 'launch_agent_status=invalid category=invalid_launch_agent_value\n' >&2
+        return 64
+    fi
+}
+
+pilotctl_render_plist() {
+    local environment_file="$1"
+    local output="$2"
+
+    pilot_validate_configuration "$environment_file" || return
+    pilotctl_paths
+    if [[ "$environment_file" != /* || ! "$PILOT_OPS_LABEL" =~ ^[A-Za-z0-9.-]+$ ]]; then
+        printf 'plist_status=invalid category=invalid_launch_agent_value\n' >&2
+        return 64
+    fi
+    /usr/bin/plutil -create xml1 "$output" >/dev/null 2>&1 || {
+        printf 'plist_status=invalid category=write_failed\n' >&2
+        return 73
+    }
+    /usr/bin/plutil -insert Label -string "$PILOT_OPS_LABEL" "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert ProgramArguments -array "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert ProgramArguments.0 -string "$PILOT_OPS_SUPERVISOR" "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert ProgramArguments.1 -string run "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert ProgramArguments.2 -string "$environment_file" "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert ProgramArguments.3 -string "$PILOT_OPS_STATE" "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert RunAtLoad -bool true "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert KeepAlive -dictionary "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert KeepAlive.SuccessfulExit -bool false "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert ThrottleInterval -integer 10 "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert ProcessType -string Background "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert LimitLoadToSessionType -string Aqua "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert StandardOutPath -string "$PILOT_OPS_LOG" "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -insert StandardErrorPath -string "$PILOT_OPS_LOG" "$output" >/dev/null 2>&1 &&
+        /usr/bin/plutil -lint "$output" >/dev/null 2>&1 || {
+            printf 'plist_status=invalid category=render_failed\n' >&2
+            return 73
+        }
+    printf 'plist_status=valid output=%s\n' "$output"
+}
+
+pilotctl_install() {
+    local environment_file="$1"
+    local temporary_plist
+
+    pilot_validate_configuration "$environment_file" || return
+    pilotctl_paths
+    if [[ "$environment_file" != /* || ! "$PILOT_OPS_LABEL" =~ ^[A-Za-z0-9.-]+$ ]]; then
+        printf 'launch_agent_status=invalid category=invalid_launch_agent_value\n' >&2
+        return 64
+    fi
+    /bin/mkdir -p \
+        "$PILOT_OPS_SUPPORT_DIRECTORY/bin" \
+        "$PILOT_OPS_SUPPORT_DIRECTORY/run" \
+        "$PILOT_OPS_LOG_DIRECTORY" \
+        "$PILOT_OPS_PLIST_DIRECTORY" || {
+        printf 'launch_agent_status=invalid category=install_failed\n' >&2
+        return 73
+    }
+    /bin/chmod 700 \
+        "$PILOT_OPS_SUPPORT_DIRECTORY" \
+        "$PILOT_OPS_SUPPORT_DIRECTORY/bin" \
+        "$PILOT_OPS_SUPPORT_DIRECTORY/run" \
+        "$PILOT_OPS_LOG_DIRECTORY" || return 73
+    /usr/bin/touch "$PILOT_OPS_LOG" && /bin/chmod 600 "$PILOT_OPS_LOG" || {
+        printf 'launch_agent_status=invalid category=install_failed\n' >&2
+        return 73
+    }
+    /usr/bin/install -m 700 "$PILOT_OPS_DIRECTORY/pilot-supervisor" "$PILOT_OPS_SUPERVISOR" &&
+        /usr/bin/install -m 600 "$PILOT_OPS_DIRECTORY/pilot-common.sh" \
+            "$PILOT_OPS_SUPPORT_DIRECTORY/bin/pilot-common.sh" || {
+        printf 'launch_agent_status=invalid category=install_failed\n' >&2
+        return 73
+    }
+    temporary_plist="$(/usr/bin/mktemp "$PILOT_OPS_PLIST.XXXXXX")" || return 73
+    if ! pilotctl_render_plist "$environment_file" "$temporary_plist" >/dev/null; then
+        /bin/rm -f "$temporary_plist"
+        return 73
+    fi
+    /bin/chmod 600 "$temporary_plist"
+    "$PILOT_OPS_LAUNCHCTL" bootout "$PILOT_OPS_SERVICE" >/dev/null 2>&1 || true
+    /bin/mv -f "$temporary_plist" "$PILOT_OPS_PLIST"
+    if ! "$PILOT_OPS_LAUNCHCTL" bootstrap "$PILOT_OPS_DOMAIN" "$PILOT_OPS_PLIST" \
+        >/dev/null 2>&1; then
+        printf 'launch_agent_status=invalid category=bootstrap_failed\n' >&2
+        return 69
+    fi
+    printf 'launch_agent_status=installed label=%s\n' "$PILOT_OPS_LABEL"
+}
+
+pilotctl_status() {
+    local environment_file="$1"
+    local receiver=unready
+
+    pilotctl_load_identity "$environment_file" || return
+    if ! "$PILOT_OPS_LAUNCHCTL" print "$PILOT_OPS_SERVICE" >/dev/null 2>&1; then
+        printf 'launch_agent_status=not_loaded label=%s\n' "$PILOT_OPS_LABEL"
+        return
+    fi
+    if [[ "$PILOT_OPS_CURL" == /* && -x "$PILOT_OPS_CURL" ]] &&
+        "$PILOT_OPS_CURL" --silent --fail --max-time 1 \
+            "http://127.0.0.1:$PILOT_PORT/openapi.json" >/dev/null 2>&1; then
+        receiver=ready
+    fi
+    if pilotctl_read_current_state; then
+        printf 'launch_agent_status=loaded label=%s state=current generation=%s supervisor_pid=%s pilot_pid=%s tunnel_pid=%s receiver=%s\n' \
+            "$PILOT_OPS_LABEL" \
+            "$PILOT_OPS_STATE_GENERATION" \
+            "$PILOT_OPS_STATE_SUPERVISOR_PID" \
+            "$PILOT_OPS_STATE_PILOT_PID" \
+            "$PILOT_OPS_STATE_TUNNEL_PID" \
+            "$receiver"
+    else
+        printf 'launch_agent_status=loaded label=%s state=stale generation=unavailable supervisor_pid=unavailable pilot_pid=unavailable tunnel_pid=unavailable receiver=%s\n' \
+            "$PILOT_OPS_LABEL" "$receiver"
+    fi
+}
+
+pilotctl_read_current_state() {
+    local key value owner mode mode_value valid=1 fields=0 state_status=""
+    PILOT_OPS_STATE_GENERATION=""
+    PILOT_OPS_STATE_SUPERVISOR_PID=""
+    PILOT_OPS_STATE_PILOT_PID=""
+    PILOT_OPS_STATE_TUNNEL_PID=""
+
+    [[ -f "$PILOT_OPS_STATE" && ! -L "$PILOT_OPS_STATE" ]] || return 1
+    owner="$(/usr/bin/stat -f '%u' "$PILOT_OPS_STATE" 2>/dev/null)" || return 1
+    mode="$(/usr/bin/stat -f '%Lp' "$PILOT_OPS_STATE" 2>/dev/null)" || return 1
+    mode_value=$((8#$mode))
+    [[ "$owner" == "$(/usr/bin/id -u)" ]] && (( (mode_value & 077) == 0 )) || return 1
+    while IFS='=' read -r key value; do
+        fields=$((fields + 1))
+        case "$key" in
+            status) state_status="$value" ;;
+            generation) PILOT_OPS_STATE_GENERATION="$value" ;;
+            supervisor_pid) PILOT_OPS_STATE_SUPERVISOR_PID="$value" ;;
+            pilot_pid) PILOT_OPS_STATE_PILOT_PID="$value" ;;
+            tunnel_pid) PILOT_OPS_STATE_TUNNEL_PID="$value" ;;
+            started_at|updated_at|failed_service|exit_code) ;;
+            *) valid=0 ;;
+        esac
+    done < "$PILOT_OPS_STATE"
+    [[ "$valid" -eq 1 && "$fields" -eq 9 && "$state_status" == running ]] || return 1
+    [[ "$PILOT_OPS_STATE_GENERATION" =~ ^[0-9]{8}T[0-9]{6}Z-[0-9]+$ ]] || return 1
+    [[ "$PILOT_OPS_STATE_SUPERVISOR_PID" =~ ^[1-9][0-9]*$ ]] || return 1
+    [[ "$PILOT_OPS_STATE_PILOT_PID" =~ ^[1-9][0-9]*$ ]] || return 1
+    [[ "$PILOT_OPS_STATE_TUNNEL_PID" =~ ^[1-9][0-9]*$ ]] || return 1
+    pilot_process_running "$PILOT_OPS_STATE_SUPERVISOR_PID" &&
+        pilot_process_running "$PILOT_OPS_STATE_PILOT_PID" &&
+        pilot_process_running "$PILOT_OPS_STATE_TUNNEL_PID"
+}
+
+pilotctl_logs() {
+    local environment_file="$1"
+    local line
+
+    pilotctl_load_identity "$environment_file" || return
+    [[ -f "$PILOT_OPS_LOG" && ! -L "$PILOT_OPS_LOG" ]] || return 0
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^timestamp=[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z\ generation=[0-9]{8}T[0-9]{6}Z-[0-9]+\ event=stack_start\ pilot_pid=[1-9][0-9]*\ tunnel_pid=[1-9][0-9]*\ outcome=running$ ]] ||
+            [[ "$line" =~ ^timestamp=[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z\ generation=[0-9]{8}T[0-9]{6}Z-[0-9]+\ event=child_exit\ service=(pilot|tunnel)\ exit_code=[0-9]+\ outcome=restart_required$ ]] ||
+            [[ "$line" =~ ^timestamp=[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z\ generation=[0-9]{8}T[0-9]{6}Z-[0-9]+\ event=stack_stop\ outcome=operator_signal$ ]]; then
+            printf '%s\n' "$line"
+        fi
+    done < <(/usr/bin/tail -n 50 "$PILOT_OPS_LOG" 2>/dev/null)
+}
+
+pilotctl_start() {
+    local environment_file="$1"
+
+    pilotctl_load_identity "$environment_file" || return
+    if "$PILOT_OPS_LAUNCHCTL" print "$PILOT_OPS_SERVICE" >/dev/null 2>&1; then
+        printf 'launch_agent_status=started label=%s\n' "$PILOT_OPS_LABEL"
+        return
+    fi
+    if [[ ! -f "$PILOT_OPS_PLIST" ]] ||
+        ! "$PILOT_OPS_LAUNCHCTL" bootstrap "$PILOT_OPS_DOMAIN" "$PILOT_OPS_PLIST" \
+            >/dev/null 2>&1; then
+        printf 'launch_agent_status=invalid category=start_failed\n' >&2
+        return 69
+    fi
+    printf 'launch_agent_status=started label=%s\n' "$PILOT_OPS_LABEL"
+}
+
+pilotctl_stop() {
+    local environment_file="$1"
+
+    pilotctl_load_identity "$environment_file" || return
+    "$PILOT_OPS_LAUNCHCTL" bootout "$PILOT_OPS_SERVICE" >/dev/null 2>&1 || true
+    printf 'launch_agent_status=stopped label=%s\n' "$PILOT_OPS_LABEL"
+}
+
+pilotctl_restart() {
+    local environment_file="$1"
+
+    pilotctl_load_identity "$environment_file" || return
+    if ! "$PILOT_OPS_LAUNCHCTL" kickstart -k "$PILOT_OPS_SERVICE" >/dev/null 2>&1; then
+        printf 'launch_agent_status=invalid category=restart_failed\n' >&2
+        return 69
+    fi
+    printf 'launch_agent_status=restarted label=%s\n' "$PILOT_OPS_LABEL"
+}
+
+pilotctl_uninstall() {
+    local environment_file="$1"
+
+    pilotctl_load_identity "$environment_file" || return
+    "$PILOT_OPS_LAUNCHCTL" bootout "$PILOT_OPS_SERVICE" >/dev/null 2>&1 || true
+    /bin/rm -f \
+        "$PILOT_OPS_PLIST" \
+        "$PILOT_OPS_SUPERVISOR" \
+        "$PILOT_OPS_SUPPORT_DIRECTORY/bin/pilot-common.sh"
+    printf 'launch_agent_status=uninstalled label=%s\n' "$PILOT_OPS_LABEL"
+}
+
+case "${1:-}" in
+    verify-config)
+        if [[ $# -ne 2 ]]; then
+            printf 'usage: pilotctl verify-config ENVIRONMENT_FILE\n' >&2
+            exit 64
+        fi
+        pilot_validate_configuration "$2" || exit $?
+        printf 'configuration_status=valid\n'
+        ;;
+    render-plist)
+        if [[ $# -ne 3 ]]; then
+            printf 'usage: pilotctl render-plist ENVIRONMENT_FILE OUTPUT\n' >&2
+            exit 64
+        fi
+        pilotctl_render_plist "$2" "$3" || exit $?
+        ;;
+    install|start|stop|restart|status|logs|uninstall)
+        if [[ $# -ne 2 ]]; then
+            printf 'usage: pilotctl %s ENVIRONMENT_FILE\n' "$1" >&2
+            exit 64
+        fi
+        "pilotctl_$1" "$2" || exit $?
+        ;;
+    *)
+        printf 'usage: pilotctl {verify-config|render-plist|install|start|stop|restart|status|logs|uninstall} ...\n' >&2
+        exit 64
+        ;;
+esac

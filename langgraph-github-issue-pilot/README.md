@@ -82,6 +82,14 @@ Workflow read-back includes the durable assignment, planned evidence, worktree i
 
 Cloudflare Queue, retry, DLQ, and named Tunnel setup is documented in `../cloudflare-github-webhook-relay/README.md`.
 
+## Automatic macOS operation
+
+`ops/macos` contains the per-user LaunchAgent package for unattended login startup and bounded crash recovery. One supervisor owns the existing `github-issue-pilot` receiver/worker process and the named outbound `cloudflared` Tunnel. If either process exits unexpectedly, launchd replaces the complete generation; the persistent SQLite, LangGraph, command-idempotency, workflow-recovery, and once-per-boot reconciliation contracts make that restart convergent.
+
+Configuration remains in a mode-`600` user-owned file outside the repository. The plist contains no secrets or environment values, the receiver is forced to `127.0.0.1`, and Tunnel preflight requires the HTTPS `/webhooks/github` route. Child output is not captured; local status and logs expose only bounded launchd/generation/PID/readiness and lifecycle correlations.
+
+See [`ops/macos/README.md`](ops/macos/README.md) for private configuration, install/status/log/restart/uninstall commands, the direct signed-delivery start and recovery proof, the Free Queue's 24-hour boundary, startup reconciliation, diagnosis surfaces, rollback, and human steps that remain outside automation.
+
 ## Verify
 
 ```bash
