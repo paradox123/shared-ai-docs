@@ -94,9 +94,24 @@ def repair_result(round_number: int) -> dict[str, object]:
                     "observed_interface": "HTTP API",
                     "expected_result": criterion,
                     "observations": [
-                        {"phase": "request", "description": "POST /exports"},
-                        {"phase": "response", "description": "201 export_id=41"},
-                        {"phase": "read_back", "description": "CSV contains customer row"},
+                        {
+                            "phase": "request",
+                            "description": "POST /exports",
+                            "artifact": "POST /exports",
+                            "correlation_id": None,
+                        },
+                        {
+                            "phase": "response",
+                            "description": "201 export_id=41",
+                            "artifact": "201 export_id=41",
+                            "correlation_id": None,
+                        },
+                        {
+                            "phase": "read_back",
+                            "description": "CSV contains customer row",
+                            "artifact": "GET /exports/41 -> customer row",
+                            "correlation_id": None,
+                        },
                     ],
                 }
             ],

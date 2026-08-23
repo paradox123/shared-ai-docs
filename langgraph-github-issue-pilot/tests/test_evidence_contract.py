@@ -52,6 +52,7 @@ def complete_result() -> dict[str, object]:
             evidence_item("idempotency", ["repeat", "read_back"]),
             evidence_item("negative_gate", ["rejection", "side_effect_read_back"]),
             evidence_item("background", ["eventual_result", "log"]),
+            evidence_item("document", ["read_back", "log"]),
         ],
         "findings": [],
     }
@@ -90,8 +91,9 @@ def test_complete_direct_evidence_is_qualified_for_every_criterion() -> None:
         ("idempotency", "repeat"),
         ("negative_gate", "side_effect_read_back"),
         ("background", "eventual_result"),
+        ("document", "read_back"),
     ],
-    ids=["rest", "ui", "recovery", "idempotency", "negative-gate", "background"],
+    ids=["rest", "ui", "recovery", "idempotency", "negative-gate", "background", "document"],
 )
 def test_each_evidence_kind_requires_its_direct_observations(
     kind: str,
@@ -148,6 +150,7 @@ def test_operational_surrogate_alone_never_qualifies_as_background_result(
             "phase": "eventual_result",
             "description": surrogate,
             "artifact": surrogate,
+            "correlation_id": None,
         }
     ]
 
@@ -165,12 +168,15 @@ def test_operational_surrogate_alone_never_qualifies_as_background_result(
             "missing_direct_observation",
         ),
         (
-            lambda evidence: evidence[-1].update(
+            lambda evidence: next(
+                item for item in evidence if item["kind"] == "background"
+            ).update(
                 observations=[
                     {
                         "phase": "eventual_result",
                         "description": "queue accepted; process started",
                         "artifact": "healthcheck 200",
+                        "correlation_id": None,
                     }
                 ]
             ),

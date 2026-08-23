@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import sqlite3
 from collections.abc import Callable, Mapping
+from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 from typing import TypedDict
@@ -127,19 +128,19 @@ class WorkflowRuntime:
         current_issue = self._repository_adapters[repository].issue_state(
             repository, state["issue_number"]
         )
-        assignment = build_assignment(
-            repository=repository,
-            issue_number=state["issue_number"],
-            issue=current_issue,
-            repository_context=context,
-        )
-        selection = NodePolicy.packaged().select("implementation")
         issue_type = (
             "bug"
             if current_issue.issue_type.casefold() == "bug"
             or any(label.casefold() in {"bug", "type: bug"} for label in current_issue.labels)
             else "feature"
         )
+        assignment = build_assignment(
+            repository=repository,
+            issue_number=state["issue_number"],
+            issue=replace(current_issue, issue_type=issue_type),
+            repository_context=context,
+        )
+        selection = NodePolicy.packaged().select("implementation")
         skills = SkillRouter.packaged(services.skill_root).route(
             "implementation", issue_type=issue_type
         )

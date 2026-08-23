@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from github_issue_pilot.contracts import load_contract
 from github_issue_pilot.implementation import (
     CodexCliWorker,
     InvalidWorkerResult,
@@ -71,16 +72,19 @@ def valid_result() -> dict[str, object]:
                         "phase": "request",
                         "description": "Requested export",
                         "artifact": "POST /exports",
+                        "correlation_id": None,
                     },
                     {
                         "phase": "response",
                         "description": "Export resource created",
                         "artifact": "201 export_id=41",
+                        "correlation_id": None,
                     },
                     {
                         "phase": "read_back",
                         "description": "CSV contains customer row",
                         "artifact": "GET /exports/41 -> customer_id",
+                        "correlation_id": None,
                     },
                 ],
             }
@@ -159,6 +163,25 @@ def test_worker_result_schema_rejects_a_completed_result_without_red_green_evide
 
     with pytest.raises(InvalidWorkerResult, match="worker result does not match schema"):
         validate_worker_result(result)
+
+
+def test_worker_output_schema_requires_every_object_property_for_codex_strict_mode() -> None:
+    schema = load_contract("worker-result-v2.json")
+
+    def assert_strict_objects(value: object) -> None:
+        if isinstance(value, dict):
+            if value.get("type") == "object":
+                assert set(value.get("properties", {})) == set(value.get("required", []))
+                assert value.get("additionalProperties") is False
+            if "enum" in value or "const" in value:
+                assert "type" in value
+            for nested in value.values():
+                assert_strict_objects(nested)
+        elif isinstance(value, list):
+            for nested in value:
+                assert_strict_objects(nested)
+
+    assert_strict_objects(schema)
 
 
 def test_codex_cli_adapter_rejects_a_write_profile_outside_the_assigned_worktree(tmp_path) -> None:

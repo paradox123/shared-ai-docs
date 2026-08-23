@@ -244,6 +244,14 @@ pilotctl_uninstall() {
     printf 'launch_agent_status=uninstalled label=%s\n' "$PILOT_OPS_LABEL"
 }
 
+pilotctl_live_command() {
+    local environment_file="$1"
+    shift
+
+    pilot_validate_configuration "$environment_file" || return
+    "$PILOT_EXECUTABLE" "$@"
+}
+
 case "${1:-}" in
     verify-config)
         if [[ $# -ne 2 ]]; then
@@ -267,8 +275,22 @@ case "${1:-}" in
         fi
         "pilotctl_$1" "$2" || exit $?
         ;;
+    live-readiness|ensure-live-labels)
+        if [[ $# -ne 2 ]]; then
+            printf 'usage: pilotctl %s ENVIRONMENT_FILE\n' "$1" >&2
+            exit 64
+        fi
+        pilotctl_live_command "$2" "$1" || exit $?
+        ;;
+    capture-live-evidence)
+        if [[ $# -ne 4 ]]; then
+            printf 'usage: pilotctl capture-live-evidence ENVIRONMENT_FILE ISSUE_NUMBER OUTPUT\n' >&2
+            exit 64
+        fi
+        pilotctl_live_command "$2" "$1" "$3" "$4" || exit $?
+        ;;
     *)
-        printf 'usage: pilotctl {verify-config|render-plist|install|start|stop|restart|status|logs|uninstall} ...\n' >&2
+        printf 'usage: pilotctl {verify-config|live-readiness|ensure-live-labels|capture-live-evidence|render-plist|install|start|stop|restart|status|logs|uninstall} ...\n' >&2
         exit 64
         ;;
 esac

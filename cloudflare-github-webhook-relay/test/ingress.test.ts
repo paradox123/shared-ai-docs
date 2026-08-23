@@ -24,8 +24,9 @@ class RecordingQueue extends ImmediateQueue {
     });
   }
 
-  override async send(message: unknown): Promise<QueueSendResponse> {
+  override async send(message: unknown, options?: QueueSendOptions): Promise<QueueSendResponse> {
     this.messages.push(message);
+    this.sendOptions.push(options);
     this.markSendStarted?.();
     await new Promise<void>((resolve) => {
       this.releaseSend = resolve;
@@ -80,6 +81,7 @@ it("accepts a valid GitHub delivery only after one durable Queue publication", a
   await queue.waitForSend();
 
   expect(queue.messages).toHaveLength(1);
+  expect(queue.sendOptions).toEqual([{ contentType: "v8" }]);
   expect(queue.messages[0]).toEqual({
     schema_version: 1,
     delivery_id: "delivery-001",

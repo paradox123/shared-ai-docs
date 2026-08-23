@@ -1,0 +1,101 @@
+#!/bin/bash
+
+set -u
+umask 077
+
+live_config_error() {
+    printf 'live_configuration_status=invalid category=%s\n' "$1" >&2
+    exit 64
+}
+
+[[ $# -eq 1 && "$1" == /* ]] || live_config_error invalid_output_path
+LIVE_CONFIG_ROOT="$1"
+
+required=(
+    LIVE_CLOUDFLARE_ACCOUNT_ID LIVE_TUNNEL_ID LIVE_TUNNEL_SECRET
+    LIVE_GITHUB_TOKEN LIVE_GITHUB_WEBHOOK_SECRET LIVE_INTERNAL_WEBHOOK_SECRET
+    LIVE_GIT_AUTHOR_NAME LIVE_GIT_AUTHOR_EMAIL
+    LIVE_PILOT_EXECUTABLE LIVE_CLOUDFLARED_EXECUTABLE LIVE_CODEX_EXECUTABLE
+    LIVE_REPOSITORY_ROOT LIVE_WORKTREE_ROOT LIVE_REPOSITORY_CONTEXT_PATH
+    LIVE_SKILL_ROOT
+)
+for name in "${required[@]}"; do
+    [[ -n "${!name:-}" ]] || live_config_error missing_value
+    [[ "${!name}" != *$'\n'* && "${!name}" != *"'"* ]] || live_config_error unsafe_value
+done
+[[ "$LIVE_CLOUDFLARE_ACCOUNT_ID" =~ ^[0-9a-f]{32}$ ]] || live_config_error invalid_account
+[[ "$LIVE_TUNNEL_ID" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]] || live_config_error invalid_tunnel
+[[ "$LIVE_TUNNEL_SECRET" =~ ^[A-Za-z0-9+/]+={0,2}$ ]] || live_config_error invalid_tunnel_secret
+[[ "$LIVE_GITHUB_WEBHOOK_SECRET" != "$LIVE_INTERNAL_WEBHOOK_SECRET" ]] || live_config_error duplicate_secret
+[[ "$LIVE_GIT_AUTHOR_EMAIL" =~ ^[0-9]+\+paradox123@users\.noreply\.github\.com$ ]] || live_config_error invalid_git_identity
+
+for executable in "$LIVE_PILOT_EXECUTABLE" "$LIVE_CLOUDFLARED_EXECUTABLE" "$LIVE_CODEX_EXECUTABLE"; do
+    [[ "$executable" == /* && -x "$executable" ]] || live_config_error invalid_executable
+done
+for directory in "$LIVE_REPOSITORY_ROOT" "$LIVE_WORKTREE_ROOT" "$LIVE_SKILL_ROOT"; do
+    [[ "$directory" == /* && -d "$directory" ]] || live_config_error invalid_directory
+done
+[[ "$LIVE_REPOSITORY_CONTEXT_PATH" == /* && -f "$LIVE_REPOSITORY_CONTEXT_PATH" ]] || live_config_error invalid_context
+[[ "$(/usr/bin/git -C "$LIVE_REPOSITORY_ROOT" rev-parse --is-inside-work-tree 2>/dev/null)" == "true" ]] || live_config_error invalid_repository
+/usr/bin/git -C "$LIVE_REPOSITORY_ROOT" config --local user.name "$LIVE_GIT_AUTHOR_NAME" || live_config_error invalid_git_identity
+/usr/bin/git -C "$LIVE_REPOSITORY_ROOT" config --local user.email "$LIVE_GIT_AUTHOR_EMAIL" || live_config_error invalid_git_identity
+
+/bin/mkdir -p "$LIVE_CONFIG_ROOT" || live_config_error write_failed
+/bin/chmod 700 "$LIVE_CONFIG_ROOT" || live_config_error write_failed
+
+credentials="$LIVE_CONFIG_ROOT/tunnel-credentials.json"
+tunnel_config="$LIVE_CONFIG_ROOT/cloudflared.yml"
+pilot_environment="$LIVE_CONFIG_ROOT/pilot.env"
+credentials_tmp="$(/usr/bin/mktemp "$LIVE_CONFIG_ROOT/.credentials.XXXXXX")" || live_config_error write_failed
+tunnel_tmp="$(/usr/bin/mktemp "$LIVE_CONFIG_ROOT/.tunnel.XXXXXX")" || live_config_error write_failed
+environment_tmp="$(/usr/bin/mktemp "$LIVE_CONFIG_ROOT/.environment.XXXXXX")" || live_config_error write_failed
+trap '/bin/rm -f "$credentials_tmp" "$tunnel_tmp" "$environment_tmp"' EXIT
+
+printf '{"AccountTag":"%s","TunnelSecret":"%s","TunnelID":"%s"}\n' \
+    "$LIVE_CLOUDFLARE_ACCOUNT_ID" "$LIVE_TUNNEL_SECRET" "$LIVE_TUNNEL_ID" \
+    > "$credentials_tmp" || live_config_error write_failed
+
+printf '%s\n' \
+    "tunnel: $LIVE_TUNNEL_ID" \
+    "credentials-file: $credentials" \
+    'ingress:' \
+    '  - hostname: github-pilot.ki-fuer-kmu.de' \
+    '    path: ^/webhooks/github$' \
+    '    service: http://127.0.0.1:8788' \
+    '  - service: http_status:404' \
+    > "$tunnel_tmp" || live_config_error write_failed
+
+printf '%s\n' \
+    "PILOT_EXECUTABLE='$LIVE_PILOT_EXECUTABLE'" \
+    "CLOUDFLARED_EXECUTABLE='$LIVE_CLOUDFLARED_EXECUTABLE'" \
+    "CLOUDFLARED_CONFIG='$tunnel_config'" \
+    "CLOUDFLARED_TUNNEL_NAME='danielsvault-github-pilot'" \
+    "PILOT_GITHUB_WEBHOOK_URL='https://danielsvault-github-webhook-relay.d-hecht.workers.dev/webhooks/github'" \
+    "PILOT_PUBLIC_RECEIVER_URL='https://github-pilot.ki-fuer-kmu.de/webhooks/github'" \
+    "PILOT_HOST='127.0.0.1'" \
+    "PILOT_PORT='8788'" \
+    "PILOT_ALLOWED_REPOSITORIES='paradox123/probare-crm'" \
+    "GITHUB_TOKEN='$LIVE_GITHUB_TOKEN'" \
+    "DANIEL_GITHUB_LOGIN='paradox123'" \
+    "PILOT_REPOSITORY_ROOT='$LIVE_REPOSITORY_ROOT'" \
+    "PILOT_WORKTREE_ROOT='$LIVE_WORKTREE_ROOT'" \
+    "PILOT_REPOSITORY_CONTEXT_PATH='$LIVE_REPOSITORY_CONTEXT_PATH'" \
+    "PILOT_PUBLIC_OBSERVATION_SURFACE='GitHub-rendered Markdown, repository API read-back, and loopback HTTP/browser behavior'" \
+    "PILOT_VERIFICATION_COMMAND='git diff --check origin/main...HEAD'" \
+    "PILOT_SKILL_ROOT='$LIVE_SKILL_ROOT'" \
+    "PILOT_DATABASE_PATH='$LIVE_CONFIG_ROOT/pilot.db'" \
+    "PILOT_INTERNAL_WEBHOOK_SECRET='$LIVE_INTERNAL_WEBHOOK_SECRET'" \
+    "GITHUB_WEBHOOK_SECRET=''" \
+    "PILOT_BASE_REF='main'" \
+    "PILOT_CODEX_EXECUTABLE='$LIVE_CODEX_EXECUTABLE'" \
+    "PILOT_CODEX_TIMEOUT_SECONDS='3600'" \
+    "PILOT_GIT_EXECUTABLE='/usr/bin/git'" \
+    "PILOT_MAX_REQUEST_BYTES='1048576'" \
+    > "$environment_tmp" || live_config_error write_failed
+
+/bin/chmod 600 "$credentials_tmp" "$tunnel_tmp" "$environment_tmp" || live_config_error write_failed
+/bin/mv -f "$credentials_tmp" "$credentials"
+/bin/mv -f "$tunnel_tmp" "$tunnel_config"
+/bin/mv -f "$environment_tmp" "$pilot_environment"
+trap - EXIT
+printf 'live_configuration_status=written\n'

@@ -65,7 +65,7 @@ it.each([
 ])("acknowledges a matching durable local $outcome response", async ({ status, outcome }) => {
   let observedRequest: { headers: Headers; body: Uint8Array } | undefined;
   network.use(
-    http.post("https://github-pilot.example.com/webhooks/github", async ({ request }) => {
+    http.post("http://127.0.0.1:8788/webhooks/github", async ({ request }) => {
       observedRequest = {
         headers: new Headers(request.headers),
         body: new Uint8Array(await request.arrayBuffer()),
@@ -99,7 +99,7 @@ it("signs and forwards exact BOM and non-ASCII body bytes", async () => {
   let observedBody: Uint8Array | undefined;
   let observedSignature: string | null = null;
   network.use(
-    http.post("https://github-pilot.example.com/webhooks/github", async ({ request }) => {
+    http.post("http://127.0.0.1:8788/webhooks/github", async ({ request }) => {
       observedBody = new Uint8Array(await request.arrayBuffer());
       observedSignature = request.headers.get("x-pilot-signature-256");
       return HttpResponse.json({ delivery_id: "delivery-binary-001", status: "accepted" }, { status: 202 });
@@ -126,7 +126,7 @@ it.each([
   { name: "malformed response", response: new HttpResponse("not-json", { status: 202 }) },
   { name: "local rejection", response: HttpResponse.json({ detail: "invalid signature" }, { status: 401 }) },
 ])("retries a $name without acknowledging it", async ({ response }) => {
-  network.use(http.post("https://github-pilot.example.com/webhooks/github", () => response));
+  network.use(http.post("http://127.0.0.1:8788/webhooks/github", () => response));
   const message = new TestMessage();
 
   await worker.queue(batchFor(message), consumerEnv(), createExecutionContext());
@@ -142,7 +142,7 @@ it.each([
   { attempts: 7, expectedDelay: 300 },
   { attempts: 100, expectedDelay: 300 },
 ])("retries attempt $attempts with bounded backoff $expectedDelay seconds", async ({ attempts, expectedDelay }) => {
-  network.use(http.post("https://github-pilot.example.com/webhooks/github", () => HttpResponse.error()));
+  network.use(http.post("http://127.0.0.1:8788/webhooks/github", () => HttpResponse.error()));
   const message = new TestMessage(attempts);
 
   await worker.queue(batchFor(message), consumerEnv(), createExecutionContext());
@@ -159,7 +159,7 @@ it("retries with backoff when the local response stream fails", async () => {
   });
   network.use(
     http.post(
-      "https://github-pilot.example.com/webhooks/github",
+      "http://127.0.0.1:8788/webhooks/github",
       () => new HttpResponse(failingBody, { status: 202 }),
     ),
   );
@@ -172,10 +172,10 @@ it("retries with backoff when the local response stream fails", async () => {
 });
 
 it.each([
-  "http://github-pilot.example.com/webhooks/github",
-  "https://github-pilot.example.com/webhooks/other",
-  "https://github-pilot.example.com/webhooks/github?bypass=true",
-  "https://user:password@github-pilot.example.com/webhooks/github",
+  "http://localhost:8788/webhooks/github",
+  "http://127.0.0.1:8788/webhooks/other",
+  "http://127.0.0.1:8788/webhooks/github?bypass=true",
+  "http://user:password@127.0.0.1:8788/webhooks/github",
 ])("does not send to unsafe receiver URL %s", async (receiverUrl) => {
   let requests = 0;
   network.use(
@@ -215,7 +215,7 @@ it("does not deliver when the GitHub and internal hop secrets are equal", async 
 });
 
 it("keeps payloads, signatures, and secrets out of retry logs", async () => {
-  network.use(http.post("https://github-pilot.example.com/webhooks/github", () => HttpResponse.error()));
+  network.use(http.post("http://127.0.0.1:8788/webhooks/github", () => HttpResponse.error()));
   const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
   const message = new TestMessage();
 
@@ -227,5 +227,26 @@ it("keeps payloads, signatures, and secrets out of retry logs", async () => {
   expect(output).not.toContain(FIXED_RELAY_SIGNATURE);
   expect(output).not.toContain("internal-relay-test-secret");
   expect(output).not.toContain("github-edge-test-secret");
+  log.mockRestore();
+});
+
+it("logs only a documented VPC error code when delivery throws", async () => {
+  const env = consumerEnv();
+  Object.assign(env, {
+    LOCAL_NETWORK: {
+      fetch: () => Promise.reject(new Error("ProxyError: destination_ip_prohibited: do not log this detail")),
+    },
+  });
+  const log = vi.spyOn(console, "log").mockImplementation(() => undefined);
+  const message = new TestMessage();
+
+  await worker.queue(batchFor(message), env, createExecutionContext());
+
+  const output = log.mock.calls.flat().join("\n");
+  expect(output).toContain('"error_code":"destination_ip_prohibited"');
+  expect(output).toContain('"error_name":"Error"');
+  expect(output).toContain('"error_fields":"message"');
+  expect(output).toContain('"stage":"fetch"');
+  expect(output).not.toContain("do not log this detail");
   log.mockRestore();
 });

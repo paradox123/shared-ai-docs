@@ -391,6 +391,8 @@ class InsufficientEvidenceWorker(ControlledWorker):
                     {
                         "phase": "rejection",
                         "description": "Export was blocked by authorization policy",
+                        "artifact": None,
+                        "correlation_id": None,
                     }
                 ],
             )
@@ -402,6 +404,7 @@ class InsufficientEvidenceWorker(ControlledWorker):
                         "phase": "eventual_result",
                         "description": "queue accepted; process started",
                         "artifact": "healthcheck 200",
+                        "correlation_id": None,
                     }
                 ],
             )
@@ -1496,6 +1499,29 @@ def test_claimed_issue_persists_bounded_assignment_and_evidence_before_worker_in
     assert state["implementation"]["access_profile"]["sandbox"] == "workspace-write"
     assert len(worker.invocations) == 1
     assert worker.invocations[0].assignment == assignment
+
+
+def test_generic_github_issue_type_is_normalized_to_feature_before_assignment(tmp_path) -> None:
+    github = ControlledGitHub()
+    github.issue_type = "issue"
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledWorker()
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=controlled_implementation_services(tmp_path, worktrees, worker),
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        accepted = client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert accepted.status_code == 202
+    assert state["implementation"]["assignment"]["issue"]["type"] == "feature"
+    assert len(worker.invocations) == 1
 
 
 def test_valid_red_green_worker_result_is_persisted_and_observable_after_restart(tmp_path) -> None:

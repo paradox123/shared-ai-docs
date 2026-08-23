@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from github_issue_pilot.contracts import load_contract
 from github_issue_pilot.implementation import Worktree
 from github_issue_pilot.policy import (
     NodePolicy,
@@ -30,6 +31,26 @@ TASKS = {
     "code": "code_review",
     "architecture": "architecture_review",
 }
+
+
+def test_review_output_schema_is_accepted_by_codex_strict_mode() -> None:
+    schema = load_contract("review-verdict-v1.json")
+
+    def assert_strict_objects(value: object) -> None:
+        if isinstance(value, dict):
+            assert "allOf" not in value
+            if value.get("type") == "object":
+                assert set(value.get("properties", {})) == set(value.get("required", []))
+                assert value.get("additionalProperties") is False
+            if "enum" in value or "const" in value:
+                assert "type" in value
+            for nested in value.values():
+                assert_strict_objects(nested)
+        elif isinstance(value, list):
+            for nested in value:
+                assert_strict_objects(nested)
+
+    assert_strict_objects(schema)
 
 
 def review_assignment(axis: str) -> dict[str, object]:

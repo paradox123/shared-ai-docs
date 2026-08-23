@@ -99,6 +99,13 @@ def test_requirements_review_can_never_be_not_applicable() -> None:
         validate_review_result(result)
 
 
+def test_failed_review_requires_at_least_one_finding() -> None:
+    result = valid_review_result("code", "fail")
+
+    with pytest.raises(InvalidReviewContract, match="failed review must include a finding"):
+        validate_review_result(result)
+
+
 def test_review_assignment_rejects_unbounded_or_peer_review_context() -> None:
     assignment = valid_review_assignment()
     assignment["peer_verdicts"] = [{"axis": "code", "verdict": "pass"}]

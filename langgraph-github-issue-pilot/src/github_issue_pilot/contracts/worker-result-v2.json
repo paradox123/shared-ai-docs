@@ -14,8 +14,8 @@
     "findings"
   ],
   "properties": {
-    "schema_version": {"const": "2"},
-    "outcome": {"enum": ["completed", "blocked"]},
+    "schema_version": {"type": "string", "const": "2"},
+    "outcome": {"type": "string", "enum": ["completed", "blocked"]},
     "summary": {"type": "string", "minLength": 1},
     "red_green_slices": {
       "type": "array",
@@ -72,9 +72,18 @@
       ],
       "properties": {
         "criterion": {"type": "string", "minLength": 1},
-        "verdict": {"enum": ["pass", "fail"]},
+        "verdict": {"type": "string", "enum": ["pass", "fail"]},
         "kind": {
-          "enum": ["rest", "ui", "recovery", "idempotency", "negative_gate", "background"]
+          "type": "string",
+          "enum": [
+            "rest",
+            "ui",
+            "recovery",
+            "idempotency",
+            "negative_gate",
+            "background",
+            "document"
+          ]
         },
         "observed_interface": {"type": "string", "minLength": 1},
         "expected_result": {"type": "string", "minLength": 1},
@@ -88,9 +97,10 @@
     "evidence_observation": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["phase", "description"],
+      "required": ["phase", "description", "artifact", "correlation_id"],
       "properties": {
         "phase": {
+          "type": "string",
           "enum": [
             "request",
             "response",
@@ -106,8 +116,8 @@
           ]
         },
         "description": {"type": "string", "minLength": 1},
-        "artifact": {"type": "string", "minLength": 1},
-        "correlation_id": {"type": "string", "minLength": 1}
+        "artifact": {"type": ["string", "null"]},
+        "correlation_id": {"type": ["string", "null"]}
       }
     }
   }

@@ -8,7 +8,7 @@ The scripts deliberately do not install or authenticate external tools. Before i
 
 1. Install the pilot environment, Codex CLI, and `cloudflared`, and identify their absolute executable paths.
 2. Create/authenticate the named Cloudflare Tunnel, its DNS route, credentials file, exact-path ingress config, Worker, Queue, and DLQ as described in `../../../cloudflare-github-webhook-relay/README.md`.
-3. Configure the GitHub webhook, allowlisted repository/events, GitHub token, Daniel's GitHub login, and distinct internal Tunnel-hop secret.
+3. Configure the GitHub webhook, allowlisted repository/events, GitHub token, Daniel's GitHub login, repository-local Git author name plus GitHub noreply address, and distinct internal Tunnel-hop secret.
 4. Choose private, disjoint repository/worktree paths, the persistent SQLite path, repository context, skills root, public observation surface, and deterministic verification command.
 5. Perform the final live webhook and logout/login observation. Automation does not log the user out, create credentials, change DNS/router/firewall settings, merge pull requests, deploy, or release.
 
@@ -22,7 +22,7 @@ install -m 600 ops/macos/pilot.env.example \
   "$HOME/.config/danielsvault-github-issue-pilot/pilot.env"
 ```
 
-Edit the copy and replace every placeholder. Keep `PILOT_HOST='127.0.0.1'`, use an HTTPS `PILOT_PUBLIC_RECEIVER_URL` ending exactly in `/webhooks/github`, leave `GITHUB_WEBHOOK_SECRET` empty for this Tunnel path, and use the same `PILOT_INTERNAL_WEBHOOK_SECRET` as the Cloudflare Queue consumer. Do not commit the completed file.
+Edit the copy and replace every placeholder. Keep `PILOT_HOST='127.0.0.1'`. Set `PILOT_GITHUB_WEBHOOK_URL` to the HTTPS Cloudflare Worker ingress and `PILOT_PUBLIC_RECEIVER_URL` to the distinct HTTPS Tunnel ingress; both URLs end exactly in `/webhooks/github`. Leave `GITHUB_WEBHOOK_SECRET` empty for the Tunnel hop, and use the same `PILOT_INTERNAL_WEBHOOK_SECRET` as the Cloudflare Queue consumer. Do not commit the completed file.
 
 Validate the complete boundary before installation:
 
@@ -32,6 +32,49 @@ ops/macos/pilotctl verify-config \
 ```
 
 Validation checks permissions/ownership, required values, absolute executable and data paths, loopback host, bounded port, HTTPS exact path, internal authentication mode, `cloudflared tunnel ingress validate`, and the Tunnel rule selected for the public receiver URL. It never prints configured values or child command output.
+
+## Live activation gate
+
+Live activation is a separate operator decision after static configuration validation. Keep the activation OpenSpec change active and strictly valid before enabling ingress:
+
+```bash
+openspec validate activate-probare-crm-live-pilot --strict
+
+PILOT_ENV_FILE="$HOME/.config/danielsvault-github-issue-pilot/pilot.env"
+ops/macos/pilotctl live-readiness "$PILOT_ENV_FILE"
+```
+
+`live-readiness` is read-only. It verifies that the checkout origin and base branch match the single `probare-crm` adapter, the repository-local author uses Daniel's GitHub noreply identity, the token has repository read/write and hook-administration access, all six workflow labels exist, one active webhook uses the exact Worker ingress and all required event groups, the distinct Tunnel route exists for the relay's local hop, and the complete unfiltered open backlog is visible. Its JSON output contains only adapter/version facts, counts, and hashes—no repository content, paths, URLs, credentials, or webhook bodies.
+
+If readiness reports `workflow_labels_missing`, explicitly create only the missing repository label definitions and rerun the read-only gate:
+
+```bash
+ops/macos/pilotctl ensure-live-labels "$PILOT_ENV_FILE"
+ops/macos/pilotctl live-readiness "$PILOT_ENV_FILE"
+```
+
+Label bootstrap is idempotent. It does not change issue assignments or start a workflow. Other readiness failures require correcting the reported category; do not weaken the adapter, event allowlist, blockers, or one-active-run limit.
+
+After readiness passes, install or start the LaunchAgent and confirm the current generation:
+
+```bash
+ops/macos/pilotctl install "$PILOT_ENV_FILE"
+ops/macos/pilotctl status "$PILOT_ENV_FILE"
+```
+
+Use a normal allowed GitHub action—typically applying `ready-for-agent` to the deterministic eligible frontier issue—to produce the live delivery. Do not synthesize a local bypass event. Observe the GitHub delivery ID, Cloudflare Queue/consumer outcome, local workflow GET, exact draft-PR head, and review labels through their productive surfaces. A ready backlog remains authorized without an additional product signal; blockers and repository serialization remain authoritative.
+
+When the run reaches `verified` and `awaiting-review`, capture the bounded exact-head correlation manifest outside every repository and worktree:
+
+```bash
+LIVE_EVIDENCE="$HOME/Library/Application Support/DanielsVault GitHub Issue Pilot/evidence/issue-ISSUE_NUMBER.json"
+ops/macos/pilotctl capture-live-evidence \
+  "$PILOT_ENV_FILE" ISSUE_NUMBER "$LIVE_EVIDENCE"
+```
+
+Capture succeeds only when the local workflow, current draft PR, three independent reviews, criterion-appropriate direct evidence, current GitHub labels, and one 40-character head agree. UI criteria retain their screenshot requirement, REST criteria retain request/response/read-back, and document-only criteria retain rendered-document read-back; the manifest still correlates the signed delivery, run, checkpoint, worker, reviews, and current head. It writes an allowlisted mode-`600` JSON file. A new PR commit, missing review, insufficient evidence for its declared kind, `agent-running`, a merged PR, or sensitive output fails closed.
+
+For rollback, disable the GitHub webhook first so the Queue does not gain new work, then stop the LaunchAgent with `pilotctl stop`. Disable the Cloudflare consumer as needed. Preserve the private configuration, SQLite database, Queue/DLQ, worktrees, branches, draft PR, and evidence until diagnosis and retention decisions are complete. Rollback does not merge, deploy, release, delete, or rewrite live work.
 
 ## Install and operate
 
