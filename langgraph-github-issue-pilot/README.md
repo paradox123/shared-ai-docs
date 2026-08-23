@@ -1,6 +1,6 @@
 # LangGraph GitHub Issue Pilot
 
-This package implements the local repository control plane: it accepts authenticated direct or Cloudflare-relayed GitHub deliveries, persists them in SQLite, evaluates the complete authorized and unblocked backlog through a versioned repository adapter, serializes one persistent LangGraph implementation run per repository, and exposes durable workflow state. Claimed issues become bounded evidence-aware assignments executed by Codex CLI in isolated Git worktrees.
+This package implements the local repository control plane: it accepts authenticated direct or Cloudflare-relayed GitHub deliveries, persists them in SQLite, evaluates the complete authorized and unblocked backlog through a versioned repository adapter, serializes one persistent LangGraph implementation run per repository, and exposes durable workflow state. Claimed issues become bounded evidence-aware assignments executed by Codex CLI in isolated Git worktrees; a successful implementation is promoted only when criterion-level behavioral evidence qualifies, then committed, pushed, and projected as one draft pull request.
 
 The only live adapter is `probare-crm`. Repository-specific label names, accepted webhook events, provenance and parent/PRD relationships, issue dependencies, human-merge state, and GitHub label projections are contained behind `RepositoryAdapter` version `1`. The workflow core does not branch on a repository name. A second adapter is used only by the behavior contract tests.
 
@@ -46,20 +46,25 @@ Optional runtime settings are:
 - `PILOT_BASE_REF` (default `main`)
 - `PILOT_CODEX_EXECUTABLE` (default `codex`)
 - `PILOT_CODEX_TIMEOUT_SECONDS` (default `3600`)
+- `PILOT_GIT_EXECUTABLE` (default `git`)
 - `PILOT_HOST`, `PILOT_PORT`, and `PILOT_MAX_REQUEST_BYTES`
 
-The implementer runs non-interactively with the packaged node policy (`gpt-5.6-terra`, `xhigh`, `workspace-write`), a run-owned `codex/run-<run-id>` branch, issue-type skill hashes, and the packaged worker-result JSON Schema. Invalid or failed results remain attached to the run as failures and are not promoted to a pull request.
+The implementer runs non-interactively with the packaged node policy (`gpt-5.6-terra`, `xhigh`, `workspace-write`), a run-owned `codex/run-<run-id>` branch, issue-type skill hashes, and the packaged worker-result v2 JSON Schema. Invalid or failed results remain attached to the run as failures and are not promoted to a pull request.
+
+Publication requires exactly one passing evidence item per acceptance criterion. REST items require request, relevant response, and business read-back; UI items require executed interaction and a decisive screenshot reference; recovery and idempotency require restart/repetition plus public read-back; negative gates require rejection plus proof that the forbidden side effect is absent; background work requires the eventually observable business result. Builds, process/container starts, healthchecks, naked status codes, enqueue success, static starting screenshots, and log claims are rejected as sole evidence. Correlated logs remain supplemental.
+
+Before publication, worker evidence and diagnostics redact the configured GitHub/webhook secrets plus recognizable tokens, authorization values, credential fields, and email addresses. The outgoing diff is scanned for the same material and fails closed rather than rewriting source. The Git adapter uses the worktree's `origin`, creates `Implement issue #<number>` only when the worker left uncommitted changes, pushes the explicit run branch, and supplies the observed head SHA to the PR renderer. A branch with no implementation commit is not published.
 
 The receiver listens on `127.0.0.1:8788` by default. It exposes:
 
 - `POST /webhooks/github`
 - `GET /workflows/{owner}/{repository}/issues/{issue_number}`
 
-Exactly one repository must be configured and its name must be `probare-crm`. The GitHub token needs read/write issue access and pull-request read access because the adapter reads the complete issue backlog, parent/PRD provenance, dependencies, issue timelines, and human merge state, and idempotently adds `ready-for-agent` or `agent-running`. Do not commit the database, webhook secret, login, or token.
+Exactly one repository must be configured and its name must be `probare-crm`. The GitHub token needs read/write issue and pull-request access because the adapter reads the complete issue backlog, parent/PRD provenance, dependencies, issue timelines, and human merge state; idempotently adds `ready-for-agent` or `agent-running`; and creates or updates one draft pull request for the run branch. Do not commit the database, webhook secret, login, or token.
 
 Candidates are ordered by issue number. `ready-for-agent` is the only start authorization and applies to every issue type. Without that label, only a Daniel-authored issue, a linked Daniel-authored PRD, or a Daniel-rooted parent chain can inherit authorization. Every blocker requires both a human-merged implementation pull request and a closed blocker issue. A queued successor starts only after the active run satisfies the same two completion facts.
 
-Workflow read-back includes the durable assignment, planned evidence, worktree identity, policy selection, skill provenance, access profile, JSONL diagnostics, and the validated result or redacted failure.
+Workflow read-back includes the durable assignment, planned evidence, worktree identity, policy selection, skill provenance, access profile, redacted JSONL diagnostics, the validated result or redacted failure, and `draft_pull_request`. A published draft record includes its PR identity, branch, exact head SHA, complete redacted evidence package, canonical body, and timestamps. An insufficient package instead exposes a stable rejection reason and no source or PR identity.
 
 Cloudflare Queue, retry, DLQ, and named Tunnel setup is documented in `../cloudflare-github-webhook-relay/README.md`.
 
@@ -71,4 +76,4 @@ uvx ruff check .
 uv lock --check
 ```
 
-The suite drives orchestration through the signed HTTP interface with real SQLite and LangGraph persistence. Separate boundary contracts use a real temporary Git repository and a fake Codex executable.
+The suite drives sufficient and deliberately insufficient evidence packages through the signed HTTP interface with real SQLite and LangGraph persistence. Separate boundary contracts use a real temporary Git repository, a fake Codex executable, and a controlled GitHub HTTP transport.

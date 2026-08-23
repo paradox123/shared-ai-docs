@@ -18,6 +18,7 @@ from github_issue_pilot.implementation import (
     ImplementationServices,
     RepositoryContext,
 )
+from github_issue_pilot.publication import GitSourceControl
 
 PROBARE_CRM_EVENTS = frozenset(
     {
@@ -59,6 +60,15 @@ def _implementation_services(repositories: set[str]) -> ImplementationServices:
     instructions = context_path.read_text(encoding="utf-8").strip()
     if not instructions:
         raise RuntimeError("PILOT_REPOSITORY_CONTEXT_PATH is empty")
+    sensitive_values = tuple(
+        value
+        for name in (
+            "GITHUB_TOKEN",
+            "GITHUB_WEBHOOK_SECRET",
+            "PILOT_INTERNAL_WEBHOOK_SECRET",
+        )
+        if (value := os.environ.get(name, "").strip())
+    )
     return ImplementationServices(
         repository_roots={repository: repository_root},
         repository_contexts={
@@ -77,6 +87,10 @@ def _implementation_services(repositories: set[str]) -> ImplementationServices:
             executable=os.environ.get("PILOT_CODEX_EXECUTABLE", "codex"),
             timeout_seconds=float(os.environ.get("PILOT_CODEX_TIMEOUT_SECONDS", "3600")),
         ),
+        source_control=GitSourceControl(
+            git_executable=os.environ.get("PILOT_GIT_EXECUTABLE", "git"),
+        ),
+        sensitive_values=sensitive_values,
     )
 
 
@@ -99,6 +113,7 @@ def main() -> None:
         github,
         RepositorySettings(
             repository=repository,
+            base_ref=os.environ.get("PILOT_BASE_REF", "main").strip() or "main",
             allowed_event_actions=PROBARE_CRM_EVENTS,
         ),
     )

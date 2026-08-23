@@ -10,7 +10,12 @@ import pytest
 from fastapi.testclient import TestClient
 
 from github_issue_pilot.app import create_app
-from github_issue_pilot.github import BacklogIssue, BlockerState, IssueState
+from github_issue_pilot.github import (
+    BacklogIssue,
+    BlockerState,
+    DraftPullRequest,
+    IssueState,
+)
 from github_issue_pilot.implementation import (
     ImplementationServices,
     RepositoryContext,
@@ -19,6 +24,7 @@ from github_issue_pilot.implementation import (
     WorkerOutput,
     Worktree,
 )
+from github_issue_pilot.publication import PublishedHead
 
 SECRET = b"test-webhook-secret"
 REPOSITORY = "daniel/probare-crm"
@@ -74,6 +80,33 @@ class ControlledGitHub:
             self.labels.add(label)
             self.label_writes.append((repository, issue_number, label))
 
+    def ensure_draft_pull_request(
+        self,
+        repository: str,
+        *,
+        issue_number: int,
+        branch: str,
+        title: str,
+        body: str,
+        head_sha: str,
+    ) -> DraftPullRequest:
+        write = {
+            "repository": repository,
+            "issue_number": issue_number,
+            "branch": branch,
+            "title": title,
+            "body": body,
+            "head_sha": head_sha,
+        }
+        self.pull_request_writes.append(write)
+        return DraftPullRequest(
+            number=77,
+            url="https://github.example/daniel/probare-crm/pull/77",
+            head_sha=head_sha,
+            draft=True,
+            body=body,
+        )
+
 
 class ControlledWorktrees:
     def __init__(self, root) -> None:
@@ -92,14 +125,51 @@ class ControlledWorktrees:
         return Worktree(path=self.root / run_id, branch=f"codex/run-{run_id}", base_ref=base_ref)
 
 
+def _direct_evidence(criterion: str) -> dict[str, object]:
+    return {
+        "criterion": criterion,
+        "verdict": "pass",
+        "kind": "rest",
+        "observed_interface": "HTTP API",
+        "expected_result": criterion,
+        "observations": [
+            {
+                "phase": "request",
+                "description": "Submitted export request",
+                "artifact": "POST /exports with active filters",
+                "correlation_id": "run-41",
+            },
+            {
+                "phase": "response",
+                "description": "Export response contained a CSV resource",
+                "artifact": "201 {export_id: exp-41}",
+                "correlation_id": "run-41",
+            },
+            {
+                "phase": "read_back",
+                "description": "Downloaded export contains the expected customer rows",
+                "artifact": "GET /exports/exp-41 -> customer_id,status",
+                "correlation_id": "run-41",
+            },
+            {
+                "phase": "log",
+                "description": "Correlated export completion",
+                "artifact": "export_id=exp-41 status=completed",
+                "correlation_id": "run-41",
+            },
+        ],
+    }
+
+
 class ControlledWorker:
     def __init__(self) -> None:
         self.invocations: list[WorkerInvocation] = []
 
     def run(self, invocation: WorkerInvocation) -> WorkerOutput:
         self.invocations.append(invocation)
+        evidence = [_direct_evidence(criterion) for criterion in invocation.assignment["requirements"]]
         return WorkerOutput(result={
-            "schema_version": "1",
+            "schema_version": "2",
             "outcome": "completed",
             "summary": "Implemented customer export",
             "red_green_slices": [
@@ -111,7 +181,7 @@ class ControlledWorker:
             ],
             "changed_files": ["src/export.py"],
             "verification": [{"command": "pytest", "observed": "passed"}],
-            "evidence": [{"criterion": "Customer can export CSV", "proof": "HTTP read-back passed"}],
+            "evidence": evidence,
             "findings": [],
         }, diagnostic_events=({"type": "turn.completed", "thread_id": "thread-001"},))
 
@@ -133,12 +203,82 @@ class FailingWorker(ControlledWorker):
         return output
 
 
+class InsufficientEvidenceWorker(ControlledWorker):
+    def __init__(self, failure_mode: str) -> None:
+        super().__init__()
+        self.failure_mode = failure_mode
+
+    def run(self, invocation: WorkerInvocation) -> WorkerOutput:
+        output = super().run(invocation)
+        evidence = output.result["evidence"]
+        if self.failure_mode == "missing-criterion":
+            evidence.pop()
+        elif self.failure_mode == "negative-without-side-effect-read-back":
+            evidence[0].update(
+                kind="negative_gate",
+                observations=[
+                    {
+                        "phase": "rejection",
+                        "description": "Export was blocked by authorization policy",
+                    }
+                ],
+            )
+        elif self.failure_mode == "background-surrogate":
+            evidence[0].update(
+                kind="background",
+                observations=[
+                    {
+                        "phase": "eventual_result",
+                        "description": "queue accepted; process started",
+                        "artifact": "healthcheck 200",
+                    }
+                ],
+            )
+        return output
+
+
+class SensitiveEvidenceWorker(ControlledWorker):
+    def run(self, invocation: WorkerInvocation) -> WorkerOutput:
+        output = super().run(invocation)
+        output.result["evidence"][0]["observations"][1]["description"] = (
+            "Authorization: Bearer ghp_12345678901234567890 for daniel@example.com"
+        )
+        output.result["evidence"][0]["observations"][1]["artifact"] = (
+            "secret=super-private-value"
+        )
+        return WorkerOutput(
+            result=output.result,
+            diagnostic_events=(
+                {"type": "turn.completed", "message": "token=super-private-value"},
+            ),
+        )
+
+
+class ControlledSourceControl:
+    head_sha = "1234567890abcdef1234567890abcdef12345678"
+
+    def __init__(self) -> None:
+        self.calls: list[dict[str, object]] = []
+
+    def publish(self, worktree, *, issue_number: int, sensitive_values=()) -> PublishedHead:
+        self.calls.append(
+            {
+                "worktree": worktree,
+                "issue_number": issue_number,
+                "sensitive_values": tuple(sensitive_values),
+            }
+        )
+        return PublishedHead(branch=worktree.branch, head_sha=self.head_sha)
+
+
 def controlled_implementation_services(
     tmp_path,
     worktrees: ControlledWorktrees,
     worker: ControlledWorker,
     *,
     repository_root=None,
+    source_control=None,
+    sensitive_values=(),
 ) -> ImplementationServices:
     return ImplementationServices(
         repository_roots={REPOSITORY: repository_root or tmp_path / "daniels-checkout"},
@@ -153,6 +293,8 @@ def controlled_implementation_services(
         skill_root=MATT_POCOCK_SKILL_ROOT,
         worktrees=worktrees,
         worker=worker,
+        source_control=source_control,
+        sensitive_values=tuple(sensitive_values),
     )
 
 
@@ -558,6 +700,223 @@ def test_valid_red_green_worker_result_is_persisted_and_observable_after_restart
     assert implementation["completed_at"] == "2026-08-21T10:30:00+00:00"
     assert after_restart == before_restart
     assert len(worker.invocations) == 1
+
+
+def test_sufficient_evidence_publishes_one_commit_bound_draft_pr_through_http_seam(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledWorker()
+    source_control = ControlledSourceControl()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        accepted = client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    draft = state["draft_pull_request"]
+    assert accepted.status_code == 202
+    assert state["implementation"]["status"] == "completed"
+    assert draft["status"] == "published"
+    assert draft["head_sha"] == source_control.head_sha
+    assert draft["branch"].startswith("codex/run-")
+    assert draft["pull_request"] == {
+        "number": 77,
+        "url": "https://github.example/daniel/probare-crm/pull/77",
+        "draft": True,
+    }
+    assert [item["criterion"] for item in draft["evidence"]] == [
+        "Customer can export CSV",
+        "Export includes active filters",
+    ]
+    assert draft["body"].count(f"`{source_control.head_sha}`") >= 3
+    assert "POST /exports with active filters" in draft["body"]
+    assert "correlation `run-41`" in draft["body"]
+    assert "Closes #41" in draft["body"]
+    assert len(source_control.calls) == 1
+    assert len(github.pull_request_writes) == 1
+
+
+@pytest.mark.parametrize(
+    ("failure_mode", "expected_reason"),
+    [
+        ("missing-criterion", "criterion_coverage"),
+        ("negative-without-side-effect-read-back", "missing_direct_observation"),
+        ("background-surrogate", "infrastructure_surrogate"),
+    ],
+    ids=["missing-criterion", "negative-gate", "background-surrogate"],
+)
+def test_insufficient_evidence_is_durably_rejected_without_source_or_pr_effect(
+    tmp_path,
+    failure_mode: str,
+    expected_reason: str,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    source_control = ControlledSourceControl()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        InsufficientEvidenceWorker(failure_mode),
+        source_control=source_control,
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    rejection = state["draft_pull_request"]
+    assert state["implementation"]["status"] == "completed"
+    assert rejection == {
+        "status": "rejected",
+        "evidence": [],
+        "branch": None,
+        "head_sha": None,
+        "body": None,
+        "pull_request": None,
+        "reason": expected_reason,
+        "started_at": "2026-08-21T10:30:00+00:00",
+        "completed_at": "2026-08-21T10:30:00+00:00",
+    }
+    assert source_control.calls == []
+    assert github.pull_request_writes == []
+
+
+def test_duplicate_delivery_keeps_one_published_head_and_draft_pull_request(tmp_path) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledWorker()
+    source_control = ControlledSourceControl()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    body = delivery_body()
+    headers = signed_headers(body)
+
+    with TestClient(app) as client:
+        first = client.post("/webhooks/github", content=body, headers=headers)
+        before = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        repeated = client.post("/webhooks/github", content=body, headers=headers)
+        after = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert first.status_code == 202
+    assert repeated.json()["status"] == "already_accepted"
+    assert after["draft_pull_request"] == before["draft_pull_request"]
+    assert len(worker.invocations) == 1
+    assert len(source_control.calls) == 1
+    assert len(github.pull_request_writes) == 1
+
+
+def test_published_draft_pr_remains_observable_after_restart_without_another_write(
+    tmp_path,
+) -> None:
+    database_path = tmp_path / "pilot.db"
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledWorker()
+    source_control = ControlledSourceControl()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        worker,
+        source_control=source_control,
+    )
+    body = delivery_body()
+    headers = signed_headers(body)
+    first_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+
+    with TestClient(first_app) as client:
+        client.post("/webhooks/github", content=body, headers=headers)
+        before_restart = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    restarted_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    with TestClient(restarted_app) as client:
+        after_restart = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert after_restart["draft_pull_request"] == before_restart["draft_pull_request"]
+    assert after_restart["draft_pull_request"]["status"] == "published"
+    assert after_restart["draft_pull_request"]["head_sha"] == source_control.head_sha
+    assert len(worker.invocations) == 1
+    assert len(source_control.calls) == 1
+    assert len(github.pull_request_writes) == 1
+
+
+def test_sensitive_worker_evidence_and_diagnostics_are_redacted_before_read_back(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    source_control = ControlledSourceControl()
+    services = controlled_implementation_services(
+        tmp_path,
+        worktrees,
+        SensitiveEvidenceWorker(),
+        source_control=source_control,
+        sensitive_values=("super-private-value",),
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    serialized = json.dumps(state, sort_keys=True)
+    assert "super-private-value" not in serialized
+    assert "ghp_12345678901234567890" not in serialized
+    assert "daniel@example.com" not in serialized
+    assert serialized.count("[REDACTED]") >= 4
+    assert source_control.calls[0]["sensitive_values"] == ("super-private-value",)
 
 
 @pytest.mark.parametrize("failure_mode", ["invalid-result", "process"])

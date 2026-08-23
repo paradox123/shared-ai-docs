@@ -16,6 +16,7 @@ from jsonschema.validators import Draft202012Validator
 from github_issue_pilot.contracts import load_contract
 from github_issue_pilot.github import IssueState
 from github_issue_pilot.policy import NodeSelection, SkillProvenance
+from github_issue_pilot.publication import SourceControlPort
 
 _ACCEPTANCE_CRITERION = re.compile(r"^\s*-\s*\[[ xX]\]\s+(.+?)\s*$")
 _SAFE_RUN_ID = re.compile(r"[A-Za-z0-9._-]+")
@@ -141,7 +142,7 @@ class CodexCliWorker:
             f"{json.dumps(invocation.assignment, sort_keys=True)}\n"
             "</implementation-assignment>"
         )
-        schema_resource = files("github_issue_pilot.contracts").joinpath("worker-result-v1.json")
+        schema_resource = files("github_issue_pilot.contracts").joinpath("worker-result-v2.json")
         with as_file(schema_resource) as schema_path, tempfile.TemporaryDirectory(
             prefix="github-issue-pilot-worker-"
         ) as temporary_directory:
@@ -201,7 +202,7 @@ class CodexCliWorker:
 
 def validate_worker_result(result: dict[str, object]) -> None:
     try:
-        Draft202012Validator(load_contract("worker-result-v1.json")).validate(result)
+        Draft202012Validator(load_contract("worker-result-v2.json")).validate(result)
     except ValidationError as exc:
         raise InvalidWorkerResult(f"worker result does not match schema: {exc.message}") from exc
 
@@ -213,6 +214,8 @@ class ImplementationServices:
     skill_root: Path
     worktrees: WorktreePort
     worker: WorkerPort
+    source_control: SourceControlPort | None = None
+    sensitive_values: tuple[str, ...] = ()
 
 
 def build_assignment(

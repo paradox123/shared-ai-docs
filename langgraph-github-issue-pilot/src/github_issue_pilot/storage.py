@@ -96,6 +96,21 @@ class WorkflowStore:
                     started_at TEXT NOT NULL,
                     completed_at TEXT
                 );
+
+                CREATE TABLE IF NOT EXISTS draft_pr_publications (
+                    run_id TEXT PRIMARY KEY REFERENCES issue_runs(run_id),
+                    status TEXT NOT NULL CHECK (status IN ('publishing', 'published', 'rejected')),
+                    evidence_json TEXT,
+                    branch TEXT,
+                    head_sha TEXT,
+                    body TEXT,
+                    pull_request_number INTEGER,
+                    pull_request_url TEXT,
+                    is_draft INTEGER,
+                    reason TEXT,
+                    started_at TEXT NOT NULL,
+                    completed_at TEXT
+                );
                 """
             )
 
@@ -489,6 +504,104 @@ class WorkflowStore:
                     run_id,
                 ),
             )
+
+    def reject_publication(self, *, run_id: str, reason: str, rejected_at: str) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                INSERT INTO draft_pr_publications (
+                    run_id, status, reason, started_at, completed_at
+                ) VALUES (?, 'rejected', ?, ?, ?)
+                ON CONFLICT(run_id) DO UPDATE SET
+                    status = 'rejected', reason = excluded.reason,
+                    completed_at = excluded.completed_at
+                WHERE draft_pr_publications.status != 'published'
+                """,
+                (run_id, reason, rejected_at, rejected_at),
+            )
+
+    def begin_publication(
+        self,
+        *,
+        run_id: str,
+        evidence: list[dict[str, object]],
+        branch: str,
+        started_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                INSERT INTO draft_pr_publications (
+                    run_id, status, evidence_json, branch, started_at
+                ) VALUES (?, 'publishing', ?, ?, ?)
+                ON CONFLICT(run_id) DO NOTHING
+                """,
+                (run_id, json.dumps(evidence, sort_keys=True), branch, started_at),
+            )
+
+    def complete_publication(
+        self,
+        *,
+        run_id: str,
+        branch: str,
+        head_sha: str,
+        body: str,
+        pull_request_number: int,
+        pull_request_url: str,
+        completed_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE draft_pr_publications
+                SET status = 'published', branch = ?, head_sha = ?, body = ?,
+                    pull_request_number = ?, pull_request_url = ?, is_draft = 1,
+                    reason = NULL, completed_at = ?
+                WHERE run_id = ? AND status = 'publishing'
+                """,
+                (
+                    branch,
+                    head_sha,
+                    body,
+                    pull_request_number,
+                    pull_request_url,
+                    completed_at,
+                    run_id,
+                ),
+            )
+
+    def workflow_publication(self, run_id: str) -> dict[str, object] | None:
+        with self._lock:
+            row = self._connection.execute(
+                """
+                SELECT status, evidence_json, branch, head_sha, body,
+                       pull_request_number, pull_request_url, is_draft,
+                       reason, started_at, completed_at
+                FROM draft_pr_publications WHERE run_id = ?
+                """,
+                (run_id,),
+            ).fetchone()
+        if row is None:
+            return None
+        pull_request = None
+        if row["pull_request_number"] is not None:
+            pull_request = {
+                "number": row["pull_request_number"],
+                "url": row["pull_request_url"],
+                "draft": bool(row["is_draft"]),
+            }
+        return {
+            "status": row["status"],
+            "evidence": json.loads(row["evidence_json"]) if row["evidence_json"] else [],
+            "branch": row["branch"],
+            "head_sha": row["head_sha"],
+            "body": row["body"],
+            "pull_request": pull_request,
+            "reason": row["reason"],
+            "started_at": row["started_at"],
+            "completed_at": row["completed_at"],
+        }
+
     def close(self) -> None:
         with self._lock:
             self._connection.close()

@@ -43,10 +43,35 @@ class BacklogIssue:
     state: IssueState
 
 
+@dataclass(frozen=True)
+class DraftPullRequest:
+    number: int
+    url: str
+    head_sha: str
+    draft: bool
+    body: str
+
+
+class DraftPullRequestError(RuntimeError):
+    pass
+
+
 class GitHubPort(Protocol):
     def issue_state(self, repository: str, issue_number: int) -> IssueState: ...
 
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None: ...
+
+    def ensure_draft_pull_request(
+        self,
+        repository: str,
+        *,
+        issue_number: int,
+        branch: str,
+        base_ref: str,
+        title: str,
+        body: str,
+        head_sha: str,
+    ) -> DraftPullRequest: ...
 
 
 class RepositoryDataPort(GitHubPort, Protocol):
@@ -66,12 +91,24 @@ class RepositoryAdapter(Protocol):
 
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None: ...
 
+    def ensure_draft_pull_request(
+        self,
+        repository: str,
+        *,
+        issue_number: int,
+        branch: str,
+        title: str,
+        body: str,
+        head_sha: str,
+    ) -> DraftPullRequest: ...
+
 
 @dataclass(frozen=True)
 class RepositorySettings:
     repository: str
     ready_label: str = "ready-for-agent"
     running_label: str = "agent-running"
+    base_ref: str = "main"
     allowed_event_actions: AbstractSet[tuple[str, str]] = frozenset({("issues", "labeled")})
 
 
@@ -83,6 +120,7 @@ class ConfiguredRepositoryAdapter:
         self.repository = settings.repository
         self.ready_label = settings.ready_label
         self.running_label = settings.running_label
+        self.base_ref = settings.base_ref
         self.allowed_event_actions = settings.allowed_event_actions
 
     def issue_state(self, repository: str, issue_number: int) -> IssueState:
@@ -93,6 +131,26 @@ class ConfiguredRepositoryAdapter:
 
     def ensure_label(self, repository: str, issue_number: int, label: str) -> None:
         self._github.ensure_label(repository, issue_number, label)
+
+    def ensure_draft_pull_request(
+        self,
+        repository: str,
+        *,
+        issue_number: int,
+        branch: str,
+        title: str,
+        body: str,
+        head_sha: str,
+    ) -> DraftPullRequest:
+        return self._github.ensure_draft_pull_request(
+            repository,
+            issue_number=issue_number,
+            branch=branch,
+            base_ref=self.base_ref,
+            title=title,
+            body=body,
+            head_sha=head_sha,
+        )
 
 
 class GitHubHttpAdapter:
@@ -300,6 +358,84 @@ class GitHubHttpAdapter:
             json={"labels": [label]},
         )
         response.raise_for_status()
+
+    def ensure_draft_pull_request(
+        self,
+        repository: str,
+        *,
+        issue_number: int,
+        branch: str,
+        base_ref: str,
+        title: str,
+        body: str,
+        head_sha: str,
+    ) -> DraftPullRequest:
+        owner = repository.split("/", maxsplit=1)[0]
+        existing_response = self._client.get(
+            f"/repos/{repository}/pulls",
+            params={"state": "open", "head": f"{owner}:{branch}"},
+        )
+        self._raise_for_draft_pull_request_status(existing_response)
+        existing = existing_response.json()
+        if not isinstance(existing, list):
+            raise TypeError("GitHub pull request lookup returned non-list payload")
+        if len(existing) > 1:
+            raise RuntimeError("multiple pull requests exist for run branch")
+        if existing:
+            current = self._draft_pull_request(existing[0], expected_head_sha=head_sha)
+            if current.body == body:
+                return current
+            updated_response = self._client.patch(
+                f"/repos/{repository}/pulls/{current.number}",
+                json={"title": title, "body": body},
+            )
+            self._raise_for_draft_pull_request_status(updated_response)
+            return self._draft_pull_request(
+                updated_response.json(),
+                expected_head_sha=head_sha,
+            )
+
+        created_response = self._client.post(
+            f"/repos/{repository}/pulls",
+            json={
+                "title": title,
+                "head": branch,
+                "base": base_ref,
+                "body": body,
+                "draft": True,
+            },
+        )
+        self._raise_for_draft_pull_request_status(created_response)
+        return self._draft_pull_request(created_response.json(), expected_head_sha=head_sha)
+
+    @staticmethod
+    def _raise_for_draft_pull_request_status(response: httpx.Response) -> None:
+        try:
+            response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise DraftPullRequestError("GitHub draft pull request operation failed") from exc
+
+    @staticmethod
+    def _draft_pull_request(
+        payload: object,
+        *,
+        expected_head_sha: str,
+    ) -> DraftPullRequest:
+        if not isinstance(payload, dict):
+            raise TypeError("GitHub pull request payload is not an object")
+        head = payload.get("head")
+        actual_head_sha = str(head.get("sha", "")) if isinstance(head, dict) else ""
+        if actual_head_sha != expected_head_sha:
+            raise RuntimeError("pull request head does not match published commit")
+        if payload.get("draft") is not True:
+            raise RuntimeError("pull request for run branch is not a draft")
+        return DraftPullRequest(
+            number=int(payload["number"]),
+            url=str(payload["html_url"]),
+            head_sha=actual_head_sha,
+            draft=True,
+            body=str(payload.get("body") or ""),
+        )
 
     def close(self) -> None:
         self._client.close()
