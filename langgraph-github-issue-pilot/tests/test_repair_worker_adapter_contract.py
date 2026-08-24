@@ -184,7 +184,7 @@ def test_same_codex_writer_repairs_in_existing_worktree_with_bounded_policy_and_
     assert 'model_reasoning_effort="xhigh"' in args
     assert args[args.index("--sandbox") + 1] == "workspace-write"
     assert args[args.index("--cd") + 1] == str(worktree_path)
-    assert Path(args[args.index("--output-schema") + 1]).name == "repair-result-v1.json"
+    assert Path(args[args.index("--output-schema") + 1]).name == "repair-result-v2.json"
     assert "$implement" in prompt and "$tdd" in prompt
     assert "Small reversible" in prompt
     assert "Warnings, consent, domain actions, security meaning" in prompt

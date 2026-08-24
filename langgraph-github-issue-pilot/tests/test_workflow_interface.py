@@ -5,6 +5,8 @@ import hmac
 import json
 import multiprocessing
 import os
+import threading
+import time
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
@@ -28,9 +30,11 @@ from github_issue_pilot.implementation import (
     WorkerOutput,
     Worktree,
 )
+from github_issue_pilot.intervention import InterventionAnswer, InterventionSession
 from github_issue_pilot.publication import PublishedHead
 from github_issue_pilot.repair import RepairInvocation, RepairOutput
 from github_issue_pilot.review import ReviewInvocation, ReviewOutput
+from github_issue_pilot.storage import WorkflowStore
 from github_issue_pilot.verification import DeterministicVerification
 
 SECRET = b"test-webhook-secret"
@@ -256,6 +260,139 @@ class ControlledWorker:
         }, diagnostic_events=({"type": "turn.completed", "thread_id": "thread-001"},))
 
 
+class ControlledInterventionWorker(ControlledWorker):
+    def run(self, invocation: WorkerInvocation) -> WorkerOutput:
+        self.invocations.append(invocation)
+        if invocation.intervention_answer is not None:
+            evidence = [
+                _direct_evidence(criterion)
+                for criterion in invocation.assignment["requirements"]
+            ]
+            return WorkerOutput(
+                result={
+                    "schema_version": "3",
+                    "outcome": "completed",
+                    "summary": "Implemented the selected retention behavior.",
+                    "red_green_slices": [
+                        {
+                            "requirement": "Customer can export CSV",
+                            "red": {
+                                "command": "pytest retention",
+                                "observed": "failed: decision missing",
+                            },
+                            "green": {
+                                "command": "pytest retention",
+                                "observed": "passed",
+                            },
+                        }
+                    ],
+                    "changed_files": ["src/retention.py"],
+                    "verification": [{"command": "pytest", "observed": "passed"}],
+                    "evidence": evidence,
+                    "findings": [],
+                    "intervention": None,
+                },
+                diagnostic_events=(
+                    {"type": "turn.completed", "thread_id": "thread-continuation-001"},
+                ),
+            )
+        issue = invocation.assignment["issue"]
+        repository = issue["repository"]
+        run_id = invocation.worktree.branch.removeprefix("codex/run-")
+        return WorkerOutput(
+            result={
+                "schema_version": "3",
+                "outcome": "intervention",
+                "summary": "Implementation paused for a retention decision.",
+                "red_green_slices": [],
+                "changed_files": [],
+                "verification": [],
+                "evidence": [],
+                "findings": ["Retention requirements contradict each other."],
+                "intervention": {
+                    "schema_version": "1",
+                    "repository": {
+                        "full_name": repository,
+                        "issue_number": issue["number"],
+                    },
+                    "run": {
+                        "id": run_id,
+                        "phase": "implementation",
+                        "operation_key": f"{run_id}:implementation:worker",
+                    },
+                    "role": "implementer",
+                    "context": {
+                        "worktree_path": str(invocation.worktree.path),
+                        "branch": invocation.worktree.branch,
+                        "pull_request_number": None,
+                        "head_sha": None,
+                    },
+                    "classification": "product_decision",
+                    "problem": "The issue requires both immediate deletion and 30-day retention.",
+                    "required_action": "Choose the authoritative retention behavior.",
+                    "options": [
+                        {
+                            "label": "retain-30-days",
+                            "impact": "Deleted records remain recoverable for thirty days.",
+                        },
+                        {
+                            "label": "delete-immediately",
+                            "impact": "Deleted records cannot be recovered.",
+                        },
+                    ],
+                    "recommendation": {
+                        "option_label": "retain-30-days",
+                        "rationale": "It matches the existing audit requirement.",
+                    },
+                    "preserved": {
+                        "findings": ["Retention requirements contradict each other."],
+                        "results": ["No source changes followed the detected conflict."],
+                    },
+                },
+            },
+            diagnostic_events=({"type": "turn.completed", "thread_id": "thread-001"},),
+        )
+
+
+class TransientContinuationWorker(ControlledInterventionWorker):
+    def __init__(self) -> None:
+        super().__init__()
+        self.failed_once = False
+
+    def run(self, invocation: WorkerInvocation) -> WorkerOutput:
+        if invocation.intervention_answer is not None and not self.failed_once:
+            self.invocations.append(invocation)
+            self.failed_once = True
+            raise WorkerExecutionError("transient continuation failure")
+        return super().run(invocation)
+
+
+class ControlledInterventionSessions:
+    def __init__(self, answer: InterventionAnswer | None = None) -> None:
+        self.answer = answer
+        self.deliveries: list[dict[str, object]] = []
+        self.reads: list[InterventionSession] = []
+        self.archives: list[InterventionSession] = []
+        self.delivered = threading.Event()
+
+    def deliver(
+        self,
+        request: dict[str, object],
+        *,
+        worktree: Path,
+    ) -> InterventionSession:
+        self.deliveries.append({"request": request, "worktree": worktree})
+        self.delivered.set()
+        return InterventionSession(thread_id="intervention-thread-001", delivery_turn_id="turn-001")
+
+    def read_answer(self, session: InterventionSession) -> InterventionAnswer | None:
+        self.reads.append(session)
+        return self.answer
+
+    def archive(self, session: InterventionSession) -> None:
+        self.archives.append(session)
+
+
 class ControlledRepairWorker(ControlledWorker):
     def __init__(self, terminal_disposition: str | None = None) -> None:
         super().__init__()
@@ -290,6 +427,59 @@ class ControlledRepairWorker(ControlledWorker):
                 "terminal_disposition": self.terminal_disposition,
             },
             diagnostic_events=({"type": "turn.completed", "thread_id": "repair-001"},),
+        )
+
+
+class ControlledInterventionRepairWorker(ControlledRepairWorker):
+    def repair(self, invocation: RepairInvocation) -> RepairOutput:
+        if invocation.intervention_answer is not None:
+            output = super().repair(invocation)
+            output.result["schema_version"] = "2"
+            output.result["intervention"] = None
+            return output
+        self.repair_invocations.append(invocation)
+        context = invocation.intervention_context
+        assert context is not None
+        return RepairOutput(
+            result={
+                "schema_version": "2",
+                "repair_batch_id": invocation.assignment["repair_batch_id"],
+                "round_number": invocation.assignment["round"]["number"],
+                "outcome": "intervention",
+                "summary": "Repair paused for deletion semantics.",
+                "implementation_result": None,
+                "remaining_findings": invocation.assignment["findings"],
+                "blockage": None,
+                "escalation_reason": None,
+                "terminal_disposition": None,
+                "intervention": {
+                    "schema_version": "1",
+                    **context,
+                    "classification": "product_decision",
+                    "problem": "The finding permits two incompatible deletion semantics.",
+                    "required_action": "Choose the semantic behavior for this repair.",
+                    "options": [
+                        {
+                            "label": "retain-30-days",
+                            "impact": "The repair preserves recoverability.",
+                        }
+                    ],
+                    "recommendation": {
+                        "option_label": "retain-30-days",
+                        "rationale": "It preserves the existing audit contract.",
+                    },
+                    "preserved": {
+                        "findings": [
+                            str(finding["description"])
+                            for finding in invocation.assignment["findings"]
+                        ],
+                        "results": ["No repair changes followed the product conflict."],
+                    },
+                },
+            },
+            diagnostic_events=(
+                {"type": "turn.completed", "thread_id": "repair-intervention"},
+            ),
         )
 
 
@@ -355,6 +545,84 @@ class InitiallyFailingReviewer(ControlledReviewer):
         axis = str(invocation.assignment["axis"])
         self.verdicts = {axis: "fail"} if initial_batch and axis in self.failed_axes else {}
         return super().run(invocation)
+
+
+class ControlledInterventionReviewer(ControlledReviewer):
+    def run(self, invocation: ReviewInvocation) -> ReviewOutput:
+        axis = str(invocation.assignment["axis"])
+        self.invocations.append(invocation)
+        if axis != "code" or invocation.intervention_answer is not None:
+            return ReviewOutput(
+                result={
+                    "schema_version": "2",
+                    "invocation_id": invocation.assignment["invocation_id"],
+                    "axis": axis,
+                    "head_sha": invocation.assignment["pull_request"]["head_sha"],
+                    "verdict": "pass",
+                    "rationale": f"{axis} review passed",
+                    "findings": [],
+                    "intervention": None,
+                },
+                diagnostic_events=(
+                    {"type": "turn.completed", "thread_id": f"fresh-{axis}"},
+                ),
+            )
+        assignment = invocation.assignment
+        pull_request = assignment["pull_request"]
+        run_id = invocation.worktree.branch.removeprefix("codex/run-")
+        operation_key = str(assignment["invocation_id"])
+        return ReviewOutput(
+            result={
+                "schema_version": "2",
+                "invocation_id": operation_key,
+                "axis": axis,
+                "head_sha": pull_request["head_sha"],
+                "verdict": "intervention",
+                "rationale": "The required deletion semantics are contradictory.",
+                "findings": [
+                    {
+                        "location": "src/retention.py:20",
+                        "description": "Deletion behavior needs a product decision.",
+                    }
+                ],
+                "intervention": {
+                    "schema_version": "1",
+                    "repository": {"full_name": REPOSITORY, "issue_number": 41},
+                    "run": {
+                        "id": run_id,
+                        "phase": "review",
+                        "operation_key": operation_key,
+                    },
+                    "role": "code_reviewer",
+                    "context": {
+                        "worktree_path": str(invocation.worktree.path),
+                        "branch": invocation.worktree.branch,
+                        "pull_request_number": pull_request["number"],
+                        "head_sha": pull_request["head_sha"],
+                    },
+                    "classification": "product_decision",
+                    "problem": "Deletion semantics conflict with retention semantics.",
+                    "required_action": "Choose which semantic rule is authoritative.",
+                    "options": [
+                        {
+                            "label": "retain-30-days",
+                            "impact": "Deletion keeps a recoverable audit record.",
+                        }
+                    ],
+                    "recommendation": {
+                        "option_label": "retain-30-days",
+                        "rationale": "It preserves the documented audit behavior.",
+                    },
+                    "preserved": {
+                        "findings": ["Deletion behavior needs a product decision."],
+                        "results": ["Requirements review already passed this exact head."],
+                    },
+                },
+            },
+            diagnostic_events=(
+                {"type": "turn.completed", "thread_id": "code-intervention"},
+            ),
+        )
 
 
 class FailingWorker(ControlledWorker):
@@ -675,6 +943,7 @@ def controlled_implementation_services(
     reviewer=None,
     verifier=None,
     sensitive_values=(),
+    intervention_sessions=None,
 ) -> ImplementationServices:
     return ImplementationServices(
         repository_roots={REPOSITORY: repository_root or tmp_path / "daniels-checkout"},
@@ -693,6 +962,7 @@ def controlled_implementation_services(
         reviewer=reviewer,
         verifier=verifier,
         sensitive_values=tuple(sensitive_values),
+        interventions=intervention_sessions,
     )
 
 
@@ -834,6 +1104,414 @@ def test_eligible_issue_gets_one_persistent_run_and_github_claim(tmp_path) -> No
         "claim_label": "agent-running",
     }
     assert github.label_writes == [(REPOSITORY, 41, "agent-running")]
+
+
+def test_implementation_intervention_is_persisted_before_delivery_and_survives_restart(
+    tmp_path,
+) -> None:
+    database_path = tmp_path / "pilot.db"
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    first_worker = ControlledInterventionWorker()
+    first_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: ControlledGitHub()},
+        clock=fixed_clock,
+        implementation=controlled_implementation_services(
+            tmp_path,
+            worktrees,
+            first_worker,
+        ),
+    )
+    body = delivery_body()
+
+    with TestClient(first_app) as client:
+        accepted = client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        before = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    second_worker = ControlledInterventionWorker()
+    second_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: ControlledGitHub()},
+        clock=fixed_clock,
+        implementation=controlled_implementation_services(
+            tmp_path,
+            worktrees,
+            second_worker,
+        ),
+    )
+    with TestClient(second_app) as client:
+        after = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert accepted.status_code == 202
+    request = before["intervention"]["requests"][0]
+    assert request["status"] == "pending_delivery"
+    assert request["request"]["classification"] == "product_decision"
+    assert request["request"]["required_action"] == (
+        "Choose the authoritative retention behavior."
+    )
+    assert request["request"]["preserved"]["findings"] == [
+        "Retention requirements contradict each other."
+    ]
+    assert before["run"]["status"] == "running"
+    assert after["run"]["id"] == before["run"]["id"]
+    assert after["implementation"]["worktree"] == before["implementation"]["worktree"]
+    assert after["intervention"] == before["intervention"]
+    assert len(first_worker.invocations) == 1
+    assert second_worker.invocations == []
+
+
+def test_heartbeat_delivers_one_intervention_session_and_restart_only_reads_it(
+    tmp_path,
+) -> None:
+    database_path = tmp_path / "pilot.db"
+    sessions = ControlledInterventionSessions()
+    services = controlled_implementation_services(
+        tmp_path,
+        ControlledWorktrees(tmp_path / "worktrees"),
+        ControlledInterventionWorker(),
+        intervention_sessions=sessions,
+    )
+    app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: ControlledGitHub()},
+        clock=fixed_clock,
+        implementation=services,
+        heartbeat_interval_seconds=0.01,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        assert sessions.delivered.wait(timeout=2)
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        for _ in range(100):
+            if state["intervention"]["requests"][0]["status"] == "open":
+                break
+            time.sleep(0.01)
+            state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert len(sessions.deliveries) == 1
+    assert state["intervention"]["requests"][0]["session"] == {
+        "thread_id": "intervention-thread-001",
+        "delivery_turn_id": "turn-001",
+    }
+
+    restarted = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: ControlledGitHub()},
+        clock=fixed_clock,
+        implementation=services,
+        heartbeat_interval_seconds=0.01,
+    )
+    with TestClient(restarted) as client:
+        after = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert len(sessions.deliveries) == 1
+    assert sessions.reads
+    assert after["intervention"] == state["intervention"]
+
+
+def test_signed_implementation_intervention_answer_resumes_same_checkpoint(
+    tmp_path,
+) -> None:
+    database_path = tmp_path / "pilot.db"
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    worker = ControlledInterventionWorker()
+    sessions = ControlledInterventionSessions(
+        InterventionAnswer(turn_id="answer-turn-001", text="Retain records for 30 days.")
+    )
+    app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: ControlledGitHub()},
+        clock=fixed_clock,
+        implementation=controlled_implementation_services(
+            tmp_path,
+            worktrees,
+            worker,
+            intervention_sessions=sessions,
+        ),
+        heartbeat_interval_seconds=0.01,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        accepted = client.post(
+            "/webhooks/github", content=body, headers=signed_headers(body)
+        )
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        for _ in range(200):
+            requests = state["intervention"]["requests"]
+            if requests and requests[0]["status"] == "applied":
+                break
+            time.sleep(0.01)
+            state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert accepted.status_code == 202
+    assert len(worktrees.calls) == 1
+    assert len(worker.invocations) == 2
+    first, continuation = worker.invocations
+    assert continuation.worktree == first.worktree
+    assert continuation.intervention_answer == {
+        "intervention_id": state["intervention"]["requests"][0]["id"],
+        "answer_turn_id": "answer-turn-001",
+        "answer_text": "Retain records for 30 days.",
+    }
+    assert state["implementation"]["result"]["outcome"] == "completed"
+    assert state["checkpoint"]["thread_id"] == state["run"]["id"]
+    assert state["checkpoint"]["values"]["status"] == "implemented"
+    assert state["intervention"]["requests"][0]["status"] == "applied"
+
+
+def test_review_axis_intervention_preserves_peer_result_and_exact_head(tmp_path) -> None:
+    github = ControlledGitHub()
+    reviewer = ControlledInterventionReviewer()
+    source_control = ControlledSourceControl()
+    sessions = ControlledInterventionSessions(
+        InterventionAnswer(turn_id="review-answer-001", text="Retain records for 30 days.")
+    )
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=controlled_implementation_services(
+            tmp_path,
+            worktrees,
+            ControlledWorker(),
+            source_control=source_control,
+            reviewer=reviewer,
+            intervention_sessions=sessions,
+        ),
+        heartbeat_interval_seconds=0.01,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        for _ in range(200):
+            if (
+                state["intervention"]["requests"]
+                and state["intervention"]["requests"][0]["status"] == "applied"
+                and state["review"]["status"] == "verified"
+            ):
+                break
+            time.sleep(0.01)
+            state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    axes = [str(call.assignment["axis"]) for call in reviewer.invocations]
+    assert axes == ["requirements", "code", "code", "architecture"]
+    code_calls = [call for call in reviewer.invocations if call.assignment["axis"] == "code"]
+    assert code_calls[0].intervention_answer is None
+    assert code_calls[1].intervention_answer == {
+        "intervention_id": state["intervention"]["requests"][0]["id"],
+        "answer_turn_id": "review-answer-001",
+        "answer_text": "Retain records for 30 days.",
+    }
+    assert {
+        call.assignment["pull_request"]["head_sha"] for call in reviewer.invocations
+    } == {ControlledSourceControl.head_sha}
+    assert len(source_control.calls) == 1
+    assert len(worktrees.calls) == 1
+    assert state["review"]["status"] == "verified"
+    assert state["intervention"]["requests"][0]["status"] == "applied"
+
+
+def test_repair_intervention_resumes_inside_same_numbered_attempt_and_requalifies_head(
+    tmp_path,
+) -> None:
+    github = ControlledGitHub()
+    reviewer = InitiallyFailingReviewer(frozenset({"code"}))
+    worker = ControlledInterventionRepairWorker()
+    source_control = SequencedSourceControl()
+    verifier = ControlledVerifier()
+    sessions = ControlledInterventionSessions(
+        InterventionAnswer(turn_id="repair-answer-001", text="Retain records for 30 days.")
+    )
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=controlled_implementation_services(
+            tmp_path,
+            worktrees,
+            worker,
+            source_control=source_control,
+            reviewer=reviewer,
+            verifier=verifier,
+            intervention_sessions=sessions,
+        ),
+        heartbeat_interval_seconds=0.01,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        for _ in range(300):
+            if (
+                state["intervention"]["requests"]
+                and state["intervention"]["requests"][0]["status"] == "applied"
+                and state["repair"]["status"] == "verified"
+            ):
+                break
+            time.sleep(0.01)
+            state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    repair = state["repair"]
+    assert len(worktrees.calls) == 1
+    assert len(worker.repair_invocations) == 2
+    first, continuation = worker.repair_invocations
+    assert first.assignment["repair_batch_id"] == continuation.assignment["repair_batch_id"]
+    assert first.assignment["round"] == continuation.assignment["round"] == {
+        "number": 1,
+        "limit": 3,
+    }
+    assert continuation.worktree == first.worktree
+    assert continuation.intervention_answer == {
+        "intervention_id": state["intervention"]["requests"][0]["id"],
+        "answer_turn_id": "repair-answer-001",
+        "answer_text": "Retain records for 30 days.",
+    }
+    assert repair["round_count"] == 1
+    assert repair["attempts"][0]["round"] == 1
+    assert len(repair["attempts"][0]["invocations"]) == 1
+    assert repair["status"] == "verified"
+    assert [call["head_sha"] for call in verifier.calls] == [
+        SequencedSourceControl.repair_head_sha
+    ]
+    assert len(reviewer.invocations) == 6
+    assert {
+        call.assignment["pull_request"]["head_sha"]
+        for call in reviewer.invocations[3:]
+    } == {SequencedSourceControl.repair_head_sha}
+    assert len(source_control.calls) == 2
+
+
+def test_restart_reuses_applying_answer_run_worktree_branch_and_publication(tmp_path) -> None:
+    database_path = tmp_path / "pilot.db"
+    github = ControlledGitHub()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    source_control = ControlledSourceControl()
+    sessions = ControlledInterventionSessions()
+    first_worker = ControlledInterventionWorker()
+    first_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=controlled_implementation_services(
+            tmp_path,
+            worktrees,
+            first_worker,
+            source_control=source_control,
+            intervention_sessions=sessions,
+        ),
+        heartbeat_interval_seconds=0.01,
+    )
+    body = delivery_body()
+
+    with TestClient(first_app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        before = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        for _ in range(200):
+            if before["intervention"]["requests"][0]["status"] == "open":
+                break
+            time.sleep(0.01)
+            before = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    request = before["intervention"]["requests"][0]
+    store = WorkflowStore(database_path)
+    assert store.capture_intervention_answer(
+        intervention_id=request["id"],
+        answer_turn_id="restart-answer-001",
+        answer_text="Retain records for 30 days.",
+        answered_at=fixed_clock().isoformat(),
+    )
+    assert store.claim_intervention_application(request["id"])
+
+    continuation_worker = ControlledInterventionWorker()
+    restarted = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=controlled_implementation_services(
+            tmp_path,
+            worktrees,
+            continuation_worker,
+            source_control=source_control,
+            intervention_sessions=sessions,
+        ),
+        heartbeat_interval_seconds=0.01,
+    )
+    with TestClient(restarted) as client:
+        after = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert after["run"]["id"] == before["run"]["id"]
+    assert after["implementation"]["worktree"] == before["implementation"]["worktree"]
+    assert after["implementation"]["worktree"]["branch"] == before["implementation"][
+        "worktree"
+    ]["branch"]
+    assert after["intervention"]["requests"][0]["status"] == "applied"
+    assert len(worktrees.calls) == 1
+    assert len(first_worker.invocations) == 1
+    assert len(continuation_worker.invocations) == 1
+    assert len(source_control.calls) == 1
+    assert len(github.pull_request_writes) == 1
+
+
+def test_transient_continuation_failure_retries_same_applying_operation(tmp_path) -> None:
+    worker = TransientContinuationWorker()
+    worktrees = ControlledWorktrees(tmp_path / "worktrees")
+    source_control = ControlledSourceControl()
+    sessions = ControlledInterventionSessions(
+        InterventionAnswer(turn_id="retry-answer-001", text="Retain records for 30 days.")
+    )
+    app = create_app(
+        database_path=tmp_path / "pilot.db",
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: ControlledGitHub()},
+        clock=fixed_clock,
+        implementation=controlled_implementation_services(
+            tmp_path,
+            worktrees,
+            worker,
+            source_control=source_control,
+            intervention_sessions=sessions,
+        ),
+        heartbeat_interval_seconds=0.01,
+    )
+    body = delivery_body()
+
+    with TestClient(app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        for _ in range(300):
+            if (
+                state["intervention"]["requests"]
+                and state["intervention"]["requests"][0]["status"] == "applied"
+                and state["draft_pull_request"] is not None
+            ):
+                break
+            time.sleep(0.01)
+            state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    assert len(worker.invocations) == 3
+    assert worker.invocations[1].intervention_answer == worker.invocations[
+        2
+    ].intervention_answer
+    assert len(worktrees.calls) == 1
+    assert len(source_control.calls) == 1
+    assert state["intervention"]["requests"][0]["status"] == "applied"
 
 
 def test_repeated_delivery_keeps_the_same_run_checkpoint_and_claim(tmp_path) -> None:
@@ -1794,6 +2472,12 @@ def test_review_failures_stop_after_exactly_three_repair_rounds_without_a_fourth
     worker = ControlledRepairWorker()
     reviewer = ControlledReviewer({"code": "fail"})
     verifier = ControlledVerifier()
+    sessions = ControlledInterventionSessions(
+        InterventionAnswer(
+            turn_id="exhaustion-answer-001",
+            text="Acknowledge the bounded handoff; do not start another round.",
+        )
+    )
     services = controlled_implementation_services(
         tmp_path,
         worktrees,
@@ -1801,6 +2485,7 @@ def test_review_failures_stop_after_exactly_three_repair_rounds_without_a_fourth
         source_control=source_control,
         reviewer=reviewer,
         verifier=verifier,
+        intervention_sessions=sessions,
     )
     app = create_app(
         database_path=tmp_path / "pilot.db",
@@ -1808,12 +2493,23 @@ def test_review_failures_stop_after_exactly_three_repair_rounds_without_a_fourth
         repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
         implementation=services,
+        heartbeat_interval_seconds=0.01,
     )
     body = delivery_body()
 
     with TestClient(app) as client:
         client.post("/webhooks/github", content=body, headers=signed_headers(body))
         state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        for _ in range(300):
+            requests = state["intervention"]["requests"]
+            if (
+                requests
+                and requests[0]["status"] == "applied"
+                and state["repair"]["status"] == "ready-for-human"
+            ):
+                break
+            time.sleep(0.01)
+            state = client.get("/workflows/daniel/probare-crm/issues/41").json()
 
     repair = state["repair"]
     assert repair["status"] == "ready-for-human"
@@ -1835,6 +2531,10 @@ def test_review_failures_stop_after_exactly_three_repair_rounds_without_a_fourth
     assert len(source_control.calls) == 4
     assert len(verifier.calls) == 3
     assert len(reviewer.invocations) == 12
+    assert state["intervention"]["requests"][0]["request"]["classification"] == (
+        "repair_rounds_exhausted"
+    )
+    assert state["intervention"]["requests"][0]["status"] == "applied"
     assert {finding["axis"] for finding in repair["open_findings"]} == {"code"}
     assert state["draft_pull_request"]["head_sha"] == source_control.heads[-1]
     assert "Open Findings" in state["draft_pull_request"]["body"]
@@ -1958,6 +2658,12 @@ def test_exhausted_human_handoff_survives_restart_without_duplicate_effects(
     worker = ControlledRepairWorker(terminal_disposition=terminal_disposition)
     reviewer = ControlledReviewer({"code": "fail"})
     verifier = ControlledVerifier()
+    sessions = ControlledInterventionSessions(
+        InterventionAnswer(
+            turn_id=f"exhaustion-{expected_status}",
+            text="Acknowledge the bounded handoff without another automatic round.",
+        )
+    )
     services = controlled_implementation_services(
         tmp_path,
         ControlledWorktrees(tmp_path / "worktrees"),
@@ -1965,6 +2671,7 @@ def test_exhausted_human_handoff_survives_restart_without_duplicate_effects(
         source_control=source_control,
         reviewer=reviewer,
         verifier=verifier,
+        intervention_sessions=sessions,
     )
     body = delivery_body()
     first_app = create_app(
@@ -1973,11 +2680,23 @@ def test_exhausted_human_handoff_survives_restart_without_duplicate_effects(
         repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
         implementation=services,
+        heartbeat_interval_seconds=0.01,
     )
 
     with TestClient(first_app) as client:
         client.post("/webhooks/github", content=body, headers=signed_headers(body))
         before_restart = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        for _ in range(300):
+            if (
+                before_restart["intervention"]["requests"]
+                and before_restart["intervention"]["requests"][0]["status"] == "applied"
+                and before_restart["repair"]["status"] == expected_status
+            ):
+                break
+            time.sleep(0.01)
+            before_restart = client.get(
+                "/workflows/daniel/probare-crm/issues/41"
+            ).json()
 
     effect_counts = (
         len(worker.repair_invocations),
@@ -2650,6 +3369,12 @@ def test_feedback_gets_round_one_after_the_initial_repair_batch_exhausted_three_
     worker = ControlledRepairWorker()
     source_control = GeneratedHeadSourceControl()
     reviewer = ControlledReviewer({"code": "fail"})
+    sessions = ControlledInterventionSessions(
+        InterventionAnswer(
+            turn_id="feedback-exhaustion-answer",
+            text="Acknowledge the handoff without a fourth repair round.",
+        )
+    )
     services = controlled_implementation_services(
         tmp_path,
         worktrees,
@@ -2657,6 +3382,7 @@ def test_feedback_gets_round_one_after_the_initial_repair_batch_exhausted_three_
         source_control=source_control,
         reviewer=reviewer,
         verifier=ControlledVerifier(),
+        intervention_sessions=sessions,
     )
     app = create_app(
         database_path=tmp_path / "pilot.db",
@@ -2664,12 +3390,20 @@ def test_feedback_gets_round_one_after_the_initial_repair_batch_exhausted_three_
         repository_adapters={REPOSITORY: github},
         clock=fixed_clock,
         implementation=services,
+        heartbeat_interval_seconds=0.01,
     )
     issue = delivery_body()
 
     with TestClient(app) as client:
         client.post("/webhooks/github", content=issue, headers=signed_headers(issue))
         exhausted = client.get("/workflows/daniel/probare-crm/issues/41").json()
+        for _ in range(300):
+            if exhausted["repair"]["status"] == "ready-for-human":
+                break
+            time.sleep(0.01)
+            exhausted = client.get(
+                "/workflows/daniel/probare-crm/issues/41"
+            ).json()
         reviewer.verdicts = {}
         feedback = feedback_body(
             feedback="Add an explicit CSV encoding assertion.",

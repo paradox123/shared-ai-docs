@@ -217,6 +217,7 @@ def create_app(
         async def heartbeat() -> None:
             while True:
                 await asyncio.sleep(heartbeat_interval_seconds)
+                await asyncio.to_thread(runtime.reconcile_interventions)
                 store.touch_liveness(clock().isoformat())
 
         try:
@@ -233,6 +234,7 @@ def create_app(
                     completed_at=clock().isoformat(),
                     **counts,
                 )
+            runtime.reconcile_interventions()
             runtime.recover()
             heartbeat_task = asyncio.create_task(heartbeat())
             yield

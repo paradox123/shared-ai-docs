@@ -273,6 +273,36 @@ class WorkflowStore:
                     UNIQUE (feedback_batch_id, round_number)
                 );
 
+                CREATE TABLE IF NOT EXISTS interventions (
+                    intervention_id TEXT PRIMARY KEY,
+                    run_id TEXT NOT NULL REFERENCES issue_runs(run_id),
+                    phase TEXT NOT NULL CHECK (phase IN ('implementation', 'review', 'repair')),
+                    role TEXT NOT NULL CHECK (
+                        role IN (
+                            'implementer', 'requirements_reviewer', 'code_reviewer',
+                            'architecture_reviewer', 'repairer'
+                        )
+                    ),
+                    operation_key TEXT NOT NULL UNIQUE,
+                    status TEXT NOT NULL CHECK (
+                        status IN (
+                            'pending_delivery', 'open', 'delivery_blocked',
+                            'answered', 'applying', 'applied'
+                        )
+                    ),
+                    request_json TEXT NOT NULL,
+                    source_result_json TEXT NOT NULL,
+                    codex_thread_id TEXT UNIQUE,
+                    delivery_turn_id TEXT,
+                    answer_turn_id TEXT UNIQUE,
+                    answer_text TEXT,
+                    delivery_error TEXT,
+                    created_at TEXT NOT NULL,
+                    delivered_at TEXT,
+                    answered_at TEXT,
+                    applied_at TEXT
+                );
+
                 CREATE TABLE IF NOT EXISTS run_completions (
                     run_id TEXT PRIMARY KEY REFERENCES issue_runs(run_id),
                     delivery_id TEXT NOT NULL UNIQUE REFERENCES inbox_deliveries(delivery_id),
@@ -997,6 +1027,77 @@ class WorkflowStore:
                 ),
             )
 
+    def complete_implementation_with_intervention(
+        self,
+        *,
+        run_id: str,
+        result: dict[str, object],
+        diagnostic_events: list[dict[str, object]],
+        phase: str,
+        role: str,
+        operation_key: str,
+        request: dict[str, object],
+        completed_at: str,
+    ) -> str:
+        result_json = json.dumps(result, sort_keys=True)
+        diagnostics_json = json.dumps(diagnostic_events, sort_keys=True)
+        request_json = json.dumps(request, sort_keys=True)
+        with self._lock:
+            self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                self._connection.execute(
+                    """
+                    UPDATE implementation_executions
+                    SET status = 'completed', result_json = ?, diagnostic_events_json = ?,
+                        error = NULL, completed_at = ?
+                    WHERE run_id = ? AND status = 'running'
+                    """,
+                    (result_json, diagnostics_json, completed_at, run_id),
+                )
+                intervention_id = str(uuid.uuid4())
+                self._connection.execute(
+                    """
+                    INSERT INTO interventions (
+                        intervention_id, run_id, phase, role, operation_key, status,
+                        request_json, source_result_json, created_at
+                    ) VALUES (?, ?, ?, ?, ?, 'pending_delivery', ?, ?, ?)
+                    ON CONFLICT(operation_key) DO NOTHING
+                    """,
+                    (
+                        intervention_id,
+                        run_id,
+                        phase,
+                        role,
+                        operation_key,
+                        request_json,
+                        result_json,
+                        completed_at,
+                    ),
+                )
+                row = self._connection.execute(
+                    """
+                    SELECT intervention_id, run_id, phase, role, request_json,
+                           source_result_json
+                    FROM interventions WHERE operation_key = ?
+                    """,
+                    (operation_key,),
+                ).fetchone()
+                if row is None or (
+                    row["run_id"] != run_id
+                    or row["phase"] != phase
+                    or row["role"] != role
+                    or row["request_json"] != request_json
+                    or row["source_result_json"] != result_json
+                ):
+                    raise RuntimeError(
+                        "intervention operation identity was reused with different content"
+                    )
+                self._connection.commit()
+                return str(row["intervention_id"])
+            except Exception:
+                self._connection.rollback()
+                raise
+
     def fail_implementation(
         self,
         *,
@@ -1576,6 +1677,421 @@ class WorkflowStore:
             "started_at": batch["started_at"],
             "completed_at": batch["completed_at"],
         }
+
+    def begin_intervention(
+        self,
+        *,
+        run_id: str,
+        phase: str,
+        role: str,
+        operation_key: str,
+        request: dict[str, object],
+        source_result: dict[str, object],
+        created_at: str,
+    ) -> str:
+        request_json = json.dumps(request, sort_keys=True)
+        source_result_json = json.dumps(source_result, sort_keys=True)
+        with self._lock, self._connection:
+            intervention_id = str(uuid.uuid4())
+            self._connection.execute(
+                """
+                INSERT INTO interventions (
+                    intervention_id, run_id, phase, role, operation_key, status,
+                    request_json, source_result_json, created_at
+                ) VALUES (?, ?, ?, ?, ?, 'pending_delivery', ?, ?, ?)
+                ON CONFLICT(operation_key) DO NOTHING
+                """,
+                (
+                    intervention_id,
+                    run_id,
+                    phase,
+                    role,
+                    operation_key,
+                    request_json,
+                    source_result_json,
+                    created_at,
+                ),
+            )
+            row = self._connection.execute(
+                """
+                SELECT intervention_id, run_id, phase, role, request_json, source_result_json
+                FROM interventions WHERE operation_key = ?
+                """,
+                (operation_key,),
+            ).fetchone()
+        if row is None:
+            raise RuntimeError("intervention could not be persisted")
+        if (
+            row["run_id"] != run_id
+            or row["phase"] != phase
+            or row["role"] != role
+            or row["request_json"] != request_json
+            or row["source_result_json"] != source_result_json
+        ):
+            raise RuntimeError("intervention operation identity was reused with different content")
+        return str(row["intervention_id"])
+
+    def workflow_interventions(self, run_id: str) -> dict[str, object]:
+        with self._lock:
+            rows = self._connection.execute(
+                """
+                SELECT intervention_id, phase, role, operation_key, status,
+                       request_json, codex_thread_id, delivery_turn_id,
+                       answer_turn_id, answer_text, delivery_error,
+                       created_at, delivered_at, answered_at, applied_at
+                FROM interventions
+                WHERE run_id = ?
+                ORDER BY rowid
+                """,
+                (run_id,),
+            ).fetchall()
+        requests = [
+            {
+                "id": row["intervention_id"],
+                "phase": row["phase"],
+                "role": row["role"],
+                "operation_key": row["operation_key"],
+                "status": row["status"],
+                "request": json.loads(row["request_json"]),
+                "session": (
+                    {
+                        "thread_id": row["codex_thread_id"],
+                        "delivery_turn_id": row["delivery_turn_id"],
+                    }
+                    if row["codex_thread_id"] is not None
+                    else None
+                ),
+                "answer": (
+                    {
+                        "turn_id": row["answer_turn_id"],
+                        "text": row["answer_text"],
+                    }
+                    if row["answer_turn_id"] is not None
+                    else None
+                ),
+                "delivery_error": row["delivery_error"],
+                "created_at": row["created_at"],
+                "delivered_at": row["delivered_at"],
+                "answered_at": row["answered_at"],
+                "applied_at": row["applied_at"],
+            }
+            for row in rows
+        ]
+        return {
+            "status": (
+                "waiting"
+                if any(
+                    request["status"]
+                    in {"pending_delivery", "open", "answered", "applying"}
+                    for request in requests
+                )
+                else (
+                    "delivery_blocked"
+                    if any(request["status"] == "delivery_blocked" for request in requests)
+                    else "idle"
+                )
+            ),
+            "requests": requests,
+        }
+
+    def run_has_pending_intervention(self, run_id: str) -> bool:
+        with self._lock:
+            row = self._connection.execute(
+                """
+                SELECT 1 FROM interventions
+                WHERE run_id = ? AND status IN (
+                    'pending_delivery', 'open', 'answered', 'applying'
+                )
+                LIMIT 1
+                """,
+                (run_id,),
+            ).fetchone()
+        return row is not None
+
+    def complete_intervention_delivery(
+        self,
+        *,
+        intervention_id: str,
+        thread_id: str,
+        delivery_turn_id: str,
+        delivered_at: str,
+    ) -> None:
+        if not thread_id or not delivery_turn_id:
+            raise ValueError("intervention session identities must be non-empty")
+        with self._lock:
+            self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                row = self._connection.execute(
+                    """
+                    SELECT status, codex_thread_id, delivery_turn_id
+                    FROM interventions WHERE intervention_id = ?
+                    """,
+                    (intervention_id,),
+                ).fetchone()
+                if row is None:
+                    raise LookupError("intervention not found")
+                if row["codex_thread_id"] is not None:
+                    if (
+                        row["codex_thread_id"] != thread_id
+                        or row["delivery_turn_id"] != delivery_turn_id
+                    ):
+                        raise RuntimeError(
+                            "intervention delivery was already completed with a different session"
+                        )
+                    self._connection.commit()
+                    return
+                if row["status"] != "pending_delivery":
+                    raise RuntimeError("intervention is not pending delivery")
+                self._connection.execute(
+                    """
+                    UPDATE interventions
+                    SET status = 'open', codex_thread_id = ?, delivery_turn_id = ?,
+                        delivered_at = ?, delivery_error = NULL
+                    WHERE intervention_id = ? AND status = 'pending_delivery'
+                    """,
+                    (thread_id, delivery_turn_id, delivered_at, intervention_id),
+                )
+                self._connection.commit()
+            except Exception:
+                self._connection.rollback()
+                raise
+
+    def pending_intervention_deliveries(self) -> list[dict[str, object]]:
+        with self._lock:
+            rows = self._connection.execute(
+                """
+                SELECT intervention_id, run_id, request_json
+                FROM interventions
+                WHERE status = 'pending_delivery'
+                ORDER BY rowid
+                """
+            ).fetchall()
+        return [
+            {
+                "id": row["intervention_id"],
+                "run_id": row["run_id"],
+                "request": json.loads(row["request_json"]),
+            }
+            for row in rows
+        ]
+
+    def open_intervention_sessions(self) -> list[dict[str, str]]:
+        with self._lock:
+            rows = self._connection.execute(
+                """
+                SELECT intervention_id, codex_thread_id, delivery_turn_id
+                FROM interventions
+                WHERE status = 'open'
+                ORDER BY rowid
+                """
+            ).fetchall()
+        return [
+            {
+                "id": str(row["intervention_id"]),
+                "thread_id": str(row["codex_thread_id"]),
+                "delivery_turn_id": str(row["delivery_turn_id"]),
+            }
+            for row in rows
+        ]
+
+    def block_intervention_delivery(
+        self,
+        *,
+        intervention_id: str,
+        reason: str,
+    ) -> None:
+        if reason not in {
+            "stable_surface_unavailable",
+            "stable_surface_invalid_response",
+            "stable_surface_turn_failed",
+        }:
+            reason = "stable_surface_unavailable"
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE interventions
+                SET status = 'delivery_blocked', delivery_error = ?
+                WHERE intervention_id = ? AND status = 'pending_delivery'
+                """,
+                (reason, intervention_id),
+            )
+
+    def capture_intervention_answer(
+        self,
+        *,
+        intervention_id: str,
+        answer_turn_id: str,
+        answer_text: str,
+        answered_at: str,
+    ) -> bool:
+        if not answer_turn_id or not answer_text.strip():
+            raise ValueError("intervention answer identity and text must be non-empty")
+        with self._lock:
+            self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                row = self._connection.execute(
+                    """
+                    SELECT status, delivery_turn_id
+                    FROM interventions WHERE intervention_id = ?
+                    """,
+                    (intervention_id,),
+                ).fetchone()
+                if row is None:
+                    raise LookupError("intervention not found")
+                if row["status"] != "open" or row["delivery_turn_id"] == answer_turn_id:
+                    self._connection.commit()
+                    return False
+                updated = self._connection.execute(
+                    """
+                    UPDATE interventions
+                    SET status = 'answered', answer_turn_id = ?, answer_text = ?,
+                        answered_at = ?
+                    WHERE intervention_id = ? AND status = 'open'
+                    """,
+                    (answer_turn_id, answer_text.strip(), answered_at, intervention_id),
+                )
+                self._connection.commit()
+                return updated.rowcount == 1
+            except sqlite3.IntegrityError:
+                self._connection.rollback()
+                return False
+            except Exception:
+                self._connection.rollback()
+                raise
+
+    def claim_intervention_application(self, intervention_id: str) -> bool:
+        with self._lock, self._connection:
+            updated = self._connection.execute(
+                """
+                UPDATE interventions SET status = 'applying'
+                WHERE intervention_id = ? AND status = 'answered'
+                """,
+                (intervention_id,),
+            )
+        return updated.rowcount == 1
+
+    def intervention_application_for_operation(
+        self, operation_key: str
+    ) -> dict[str, object] | None:
+        with self._lock:
+            row = self._connection.execute(
+                """
+                SELECT intervention_id, run_id, status, answer_turn_id, answer_text
+                FROM interventions WHERE operation_key = ?
+                """,
+                (operation_key,),
+            ).fetchone()
+        if row is None:
+            return None
+        return {
+            "id": row["intervention_id"],
+            "run_id": row["run_id"],
+            "status": row["status"],
+            "answer_turn_id": row["answer_turn_id"],
+            "answer_text": row["answer_text"],
+        }
+
+    def interventions_for_application(self) -> list[dict[str, object]]:
+        with self._lock:
+            rows = self._connection.execute(
+                """
+                SELECT intervention_id, run_id, status, answer_turn_id, answer_text
+                FROM interventions
+                WHERE status IN ('answered', 'applying')
+                ORDER BY rowid
+                """
+            ).fetchall()
+        return [
+            {
+                "id": row["intervention_id"],
+                "run_id": row["run_id"],
+                "status": row["status"],
+                "answer_turn_id": row["answer_turn_id"],
+                "answer_text": row["answer_text"],
+            }
+            for row in rows
+        ]
+
+    def begin_implementation_continuation(
+        self,
+        *,
+        run_id: str,
+        intervention_id: str,
+    ) -> None:
+        with self._lock, self._connection:
+            updated = self._connection.execute(
+                """
+                UPDATE implementation_executions
+                SET status = 'running', completed_at = NULL
+                WHERE run_id = ? AND status = 'completed'
+                  AND EXISTS (
+                      SELECT 1 FROM interventions
+                      WHERE intervention_id = ? AND run_id = ?
+                        AND phase = 'implementation' AND status = 'applying'
+                  )
+                """,
+                (run_id, intervention_id, run_id),
+            )
+        if updated.rowcount != 1:
+            current = self.workflow_implementation(run_id)
+            if current is None or current["status"] != "running":
+                raise RuntimeError("implementation continuation could not start")
+
+    def complete_implementation_continuation(
+        self,
+        *,
+        run_id: str,
+        intervention_id: str,
+        result: dict[str, object],
+        diagnostic_events: list[dict[str, object]],
+        completed_at: str,
+    ) -> None:
+        with self._lock:
+            self._connection.execute("BEGIN IMMEDIATE")
+            try:
+                implementation = self._connection.execute(
+                    """
+                    UPDATE implementation_executions
+                    SET status = 'completed', result_json = ?, diagnostic_events_json = ?,
+                        error = NULL, completed_at = ?
+                    WHERE run_id = ? AND status = 'running'
+                    """,
+                    (
+                        json.dumps(result, sort_keys=True),
+                        json.dumps(diagnostic_events, sort_keys=True),
+                        completed_at,
+                        run_id,
+                    ),
+                )
+                intervention = self._connection.execute(
+                    """
+                    UPDATE interventions SET status = 'applied', applied_at = ?
+                    WHERE intervention_id = ? AND run_id = ? AND status = 'applying'
+                    """,
+                    (completed_at, intervention_id, run_id),
+                )
+                if implementation.rowcount != 1 or intervention.rowcount != 1:
+                    raise RuntimeError("implementation continuation could not complete atomically")
+                self._connection.commit()
+            except Exception:
+                self._connection.rollback()
+                raise
+
+    def complete_intervention_application(
+        self,
+        *,
+        intervention_id: str,
+        applied_at: str,
+    ) -> None:
+        with self._lock, self._connection:
+            self._connection.execute(
+                """
+                UPDATE interventions
+                SET status = 'applied', applied_at = ?
+                WHERE intervention_id = ? AND status = 'applying'
+                """,
+                (applied_at, intervention_id),
+            )
 
     def begin_feedback_batch(
         self,

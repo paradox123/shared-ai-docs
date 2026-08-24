@@ -9,6 +9,7 @@ from typing import TypedDict
 
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
+from langgraph.types import Command, interrupt
 
 from github_issue_pilot.evidence import (
     EvidenceRejected,
@@ -30,6 +31,12 @@ from github_issue_pilot.implementation import (
     Worktree,
     build_assignment,
     validate_worker_result,
+)
+from github_issue_pilot.intervention import (
+    InterventionContinuationError,
+    InterventionSession,
+    InterventionSessionError,
+    bounded_intervention_answer,
 )
 from github_issue_pilot.policy import (
     NodePolicy,
@@ -181,7 +188,48 @@ class WorkflowRuntime:
         services = self._require_implementation()
         run_id = self._store.run_id_for_issue(state["repository"], state["issue_number"])
         existing = self._store.workflow_implementation(run_id)
-        if existing is not None and existing["status"] != "running":
+        operation_key = f"{run_id}:implementation:worker"
+        application = self._store.intervention_application_for_operation(operation_key)
+        intervention_answer: dict[str, str] | None = None
+        if application is not None and application["status"] in {"answered", "applying"}:
+            resumed = interrupt(
+                {
+                    "intervention_id": application["id"],
+                    "phase": "implementation",
+                    "operation_key": operation_key,
+                }
+            )
+            intervention_answer = bounded_intervention_answer(
+                application,
+                resumed,
+                phase="implementation",
+            )
+            if application["status"] == "answered" and not self._store.claim_intervention_application(
+                str(application["id"])
+            ):
+                raise RuntimeError("intervention answer could not be claimed")
+            if existing is not None and existing["status"] == "completed":
+                self._store.begin_implementation_continuation(
+                    run_id=run_id,
+                    intervention_id=str(application["id"]),
+                )
+                existing = self._store.workflow_implementation(run_id)
+        elif existing is not None and existing["status"] != "running":
+            if (
+                existing["status"] == "completed"
+                and isinstance(existing.get("result"), dict)
+                and existing["result"].get("outcome") == "intervention"
+            ):
+                pending = self._store.intervention_application_for_operation(operation_key)
+                if pending is None:
+                    raise RuntimeError("implementation intervention was not persisted")
+                interrupt(
+                    {
+                        "intervention_id": pending["id"],
+                        "phase": "implementation",
+                        "operation_key": operation_key,
+                    }
+                )
             return {
                 "status": "implemented" if existing["status"] == "completed" else "worker_failed"
             }
@@ -213,6 +261,25 @@ class WorkflowRuntime:
                         for skill in durable_state["skills"]
                     ),
                     access_profile=durable_state["access_profile"],
+                    intervention_answer=intervention_answer,
+                    intervention_context={
+                        "repository": {
+                            "full_name": state["repository"],
+                            "issue_number": state["issue_number"],
+                        },
+                        "run": {
+                            "id": run_id,
+                            "phase": "implementation",
+                            "operation_key": operation_key,
+                        },
+                        "role": "implementer",
+                        "context": {
+                            "worktree_path": durable_state["worktree"]["path"],
+                            "branch": durable_state["worktree"]["branch"],
+                            "pull_request_number": None,
+                            "head_sha": None,
+                        },
+                    },
                 )
             )
             redacted_diagnostics = redact_payload(
@@ -227,6 +294,10 @@ class WorkflowRuntime:
             diagnostic_events = redacted_diagnostics
             validate_worker_result(redacted_result)
         except (WorkerExecutionError, TypeError) as exc:
+            if intervention_answer is not None:
+                raise InterventionContinuationError(
+                    "implementation continuation did not produce a valid result"
+                ) from exc
             self._store.fail_implementation(
                 run_id=run_id,
                 error=f"{type(exc).__name__}: worker execution failed",
@@ -234,14 +305,107 @@ class WorkflowRuntime:
                 completed_at=self._clock().isoformat(),
             )
             return {"status": "worker_failed"}
-        self._store.complete_implementation(
-            run_id=run_id,
-            result=redacted_result,
-            diagnostic_events=diagnostic_events,
-            completed_at=self._clock().isoformat(),
-        )
+        intervention = redacted_result.get("intervention")
+        if intervention_answer is not None and intervention is not None:
+            raise TypeError("implementation continuation requested another intervention")
+        if isinstance(intervention, dict):
+            try:
+                self._validate_implementation_intervention(
+                    run_id=run_id,
+                    repository=state["repository"],
+                    issue_number=state["issue_number"],
+                    implementation=existing,
+                    request=intervention,
+                )
+            except TypeError:
+                self._store.fail_implementation(
+                    run_id=run_id,
+                    error="InvalidWorkerResult: intervention identity mismatch",
+                    diagnostic_events=diagnostic_events,
+                    completed_at=self._clock().isoformat(),
+                )
+                return {"status": "worker_failed"}
+            intervention_id = self._store.complete_implementation_with_intervention(
+                run_id=run_id,
+                result=redacted_result,
+                diagnostic_events=diagnostic_events,
+                phase="implementation",
+                role="implementer",
+                operation_key=operation_key,
+                request=intervention,
+                completed_at=self._clock().isoformat(),
+            )
+            interrupt(
+                {
+                    "intervention_id": intervention_id,
+                    "phase": "implementation",
+                    "operation_key": operation_key,
+                }
+            )
+        elif intervention_answer is not None:
+            self._store.complete_implementation_continuation(
+                run_id=run_id,
+                intervention_id=intervention_answer["intervention_id"],
+                result=redacted_result,
+                diagnostic_events=diagnostic_events,
+                completed_at=self._clock().isoformat(),
+            )
+        else:
+            self._store.complete_implementation(
+                run_id=run_id,
+                result=redacted_result,
+                diagnostic_events=diagnostic_events,
+                completed_at=self._clock().isoformat(),
+            )
         self._probe("implementation_completed", f"{run_id}:worker")
-        return {"status": "implemented"}
+        return {
+            "status": "intervention_waiting" if intervention is not None else "implemented"
+        }
+
+    @staticmethod
+    def _validate_implementation_intervention(
+        *,
+        run_id: str,
+        repository: str,
+        issue_number: int,
+        implementation: dict[str, object],
+        request: dict[str, object],
+    ) -> None:
+        run = request["run"]
+        request_repository = request["repository"]
+        context = request["context"]
+        worktree = implementation["worktree"]
+        if not all(
+            isinstance(value, dict)
+            for value in (run, request_repository, context, worktree)
+        ):
+            raise TypeError("intervention identity is malformed")
+        expected = (
+            run_id,
+            "implementation",
+            f"{run_id}:implementation:worker",
+            repository,
+            issue_number,
+            "implementer",
+            worktree["path"],
+            worktree["branch"],
+            None,
+            None,
+        )
+        actual = (
+            run["id"],
+            run["phase"],
+            run["operation_key"],
+            request_repository["full_name"],
+            request_repository["issue_number"],
+            request["role"],
+            context["worktree_path"],
+            context["branch"],
+            context["pull_request_number"],
+            context["head_sha"],
+        )
+        if actual != expected:
+            raise TypeError("intervention does not match the active implementation operation")
 
     def _publish_draft_pr(self, state: ClaimState) -> dict[str, str]:
         services = self._require_implementation()
@@ -260,6 +424,8 @@ class WorkflowRuntime:
             return {"status": "worker_failed"}
         assignment = implementation["assignment"]
         result = implementation["result"]
+        if result.get("outcome") == "intervention":
+            return {"status": "intervention_waiting"}
         now = self._clock().isoformat()
         try:
             qualified = qualify_evidence(
@@ -403,6 +569,15 @@ class WorkflowRuntime:
         existing_repair = self._store.workflow_repair(run_id)
         if existing_repair is not None and existing_repair["status"] != "running":
             return {"status": str(existing_repair["status"])}
+        if existing_repair is not None:
+            initial_review = next(
+                (
+                    review
+                    for review in self._store.workflow_review_history(run_id)
+                    if review["id"] == existing_repair["initial_review_batch_id"]
+                ),
+                None,
+            )
         if (
             initial_review is None
             or implementation is None
@@ -502,6 +677,9 @@ class WorkflowRuntime:
             )
 
         if implementation is None:
+            return
+        if self._store.run_has_pending_intervention(run_id):
+            self._record_recovery(run_id, "waiting", f"{run_id}:intervention", "waiting")
             return
         if implementation["status"] == "running":
             state.update(self._execute_worker(state))
@@ -626,6 +804,89 @@ class WorkflowRuntime:
             "accepted_commands": accepted,
             "deduplicated_commands": deduplicated,
         }
+
+    def reconcile_interventions(self) -> None:
+        if self._implementation is None or self._implementation.interventions is None:
+            return
+        sessions = self._implementation.interventions
+        for record in self._store.pending_intervention_deliveries():
+            request = record["request"]
+            context = request.get("context") if isinstance(request, dict) else None
+            if not isinstance(context, dict) or not isinstance(
+                context.get("worktree_path"), str
+            ):
+                self._store.block_intervention_delivery(
+                    intervention_id=str(record["id"]),
+                    reason="stable_surface_invalid_response",
+                )
+                continue
+            try:
+                session = sessions.deliver(
+                    request,
+                    worktree=Path(str(context["worktree_path"])),
+                )
+                self._store.complete_intervention_delivery(
+                    intervention_id=str(record["id"]),
+                    thread_id=session.thread_id,
+                    delivery_turn_id=session.delivery_turn_id,
+                    delivered_at=self._clock().isoformat(),
+                )
+            except InterventionSessionError as exc:
+                self._store.block_intervention_delivery(
+                    intervention_id=str(record["id"]),
+                    reason=str(exc),
+                )
+
+        for record in self._store.open_intervention_sessions():
+            session = InterventionSession(
+                thread_id=record["thread_id"],
+                delivery_turn_id=record["delivery_turn_id"],
+            )
+            try:
+                answer = sessions.read_answer(session)
+            except InterventionSessionError:
+                continue
+            if answer is None:
+                continue
+            accepted = self._store.capture_intervention_answer(
+                intervention_id=record["id"],
+                answer_turn_id=answer.turn_id,
+                answer_text=redact_text(
+                    answer.text,
+                    self._implementation.sensitive_values,
+                ),
+                answered_at=self._clock().isoformat(),
+            )
+            if accepted:
+                try:
+                    sessions.archive(session)
+                except InterventionSessionError:
+                    pass
+
+        for record in self._store.interventions_for_application():
+            intervention_id = str(record["id"])
+            if record["status"] == "answered" and not self._store.claim_intervention_application(
+                intervention_id
+            ):
+                continue
+            envelope = {
+                "intervention_id": intervention_id,
+                "answer_turn_id": str(record["answer_turn_id"]),
+                "answer_text": str(record["answer_text"]),
+            }
+            try:
+                self._graph.invoke(
+                    Command(resume=envelope),
+                    {"configurable": {"thread_id": str(record["run_id"])}},
+                )
+            except (
+                InterventionContinuationError,
+                OSError,
+                RuntimeError,
+                TypeError,
+                ValueError,
+            ):
+                continue
 
     def _current_reconciliation_commands(
         self,
@@ -998,6 +1259,9 @@ class WorkflowRuntime:
             self._store.workflow_completion(str(run["id"])) if run is not None else None
         )
         recovery = self._store.workflow_recovery(str(run["id"])) if run is not None else None
+        intervention = (
+            self._store.workflow_interventions(str(run["id"])) if run is not None else None
+        )
         return {
             "delivery": delivery,
             "disposition": disposition,
@@ -1019,6 +1283,7 @@ class WorkflowRuntime:
             ],
             "repair": repair,
             "human_feedback": human_feedback,
+            "intervention": intervention,
             "completion": completion,
             "recovery": recovery,
             "reconciliation": self._store.latest_startup_reconciliation(),

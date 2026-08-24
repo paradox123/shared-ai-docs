@@ -70,6 +70,7 @@ def valid_environment(tmp_path: Path, **overrides: str | None) -> Path:
         "PILOT_DATABASE_PATH": str(tmp_path / "pilot.db"),
         "PILOT_INTERNAL_WEBHOOK_SECRET": SECRET,
         "GITHUB_WEBHOOK_SECRET": "",
+        "PILOT_CODEX_INTERVENTION_SURFACE": "stable-app-server",
     }
     values.update(overrides)
     environment = tmp_path / "pilot.env"
@@ -136,6 +137,20 @@ def test_private_loopback_named_tunnel_configuration_is_accepted(tmp_path: Path)
     assert result.stdout == "configuration_status=valid\n"
     assert result.stderr == ""
     assert SECRET not in result.stdout + result.stderr
+
+
+def test_experimental_codex_intervention_surface_is_rejected(tmp_path: Path) -> None:
+    environment = valid_environment(
+        tmp_path,
+        PILOT_CODEX_INTERVENTION_SURFACE="experimental-app-server",
+    )
+
+    result = verify(environment)
+
+    assert result.returncode == 64
+    assert result.stderr == (
+        "configuration_status=invalid category=unsupported_intervention_surface\n"
+    )
 
 
 def test_live_operator_commands_validate_private_config_and_delegate_to_pilot_cli(

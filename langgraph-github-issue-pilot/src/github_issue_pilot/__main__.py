@@ -19,6 +19,7 @@ from github_issue_pilot.implementation import (
     ImplementationServices,
     RepositoryContext,
 )
+from github_issue_pilot.intervention import CodexAppServerInterventionSessions
 from github_issue_pilot.profiles import PROBARE_CRM_PROFILE
 from github_issue_pilot.publication import GitSourceControl
 from github_issue_pilot.review import CodexCliReviewWorker
@@ -56,6 +57,11 @@ def _implementation_services(repositories: set[str]) -> ImplementationServices:
     skill_root = Path(_required_environment("PILOT_SKILL_ROOT")).expanduser().resolve()
     codex_executable = os.environ.get("PILOT_CODEX_EXECUTABLE", "codex")
     codex_timeout = float(os.environ.get("PILOT_CODEX_TIMEOUT_SECONDS", "3600"))
+    intervention_surface = _required_environment("PILOT_CODEX_INTERVENTION_SURFACE")
+    if intervention_surface != "stable-app-server":
+        raise RuntimeError(
+            "PILOT_CODEX_INTERVENTION_SURFACE must be stable-app-server"
+        )
     return ImplementationServices(
         repository_roots={repository: repository_root},
         repository_contexts={
@@ -87,6 +93,10 @@ def _implementation_services(repositories: set[str]) -> ImplementationServices:
             git_executable=os.environ.get("PILOT_GIT_EXECUTABLE", "git"),
         ),
         sensitive_values=sensitive_values,
+        interventions=CodexAppServerInterventionSessions(
+            executable=codex_executable,
+            timeout_seconds=codex_timeout,
+        ),
     )
 
 

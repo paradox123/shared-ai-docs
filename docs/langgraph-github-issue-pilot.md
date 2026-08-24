@@ -219,7 +219,7 @@ LangGraph ist die persistente Control Plane; Codex CLI ist der Agent-Worker. Jed
 - Node-Ergebnisse muessen einem festen JSON-Schema entsprechen; JSONL-Events werden fuer Diagnose und Laufprotokoll erfasst.
 - LangGraph uebergibt Issue-, Requirements-, Diff-, Evidence- und Finding-Kontext explizit. Der LangGraph-Checkpoint, Git und GitHub bleiben die dauerhaften Quellen; eine Codex-Session ist nicht die Workflow-Persistenz.
 - Die vendorten Matt-Pocock-Skills sind ueber die vorhandenen globalen Symlinks auffindbar. Der Lauf zeichnet die verwendeten Skill-Versionen oder Content-Hashes auf.
-- Der Pilot nutzt weder den experimentellen Codex `app-server` noch `exec-server`.
+- Normale Implementierungs-, Review- und Repair-Worker nutzen weiterhin `codex exec`. Ausschliesslich persistierte Interventionsanfragen werden ueber die dokumentierten stabilen stdio-Thread-Methoden des Codex `app-server` mit `experimentalApi: false` als beantwortbare App-Session dargestellt. Experimentelle Methoden oder Transporte, `exec-server` und private Codex-Speicher bleiben ausgeschlossen; fehlt die stabile Teilmenge, bleibt die Anfrage mit technischem `delivery_blocked`-Status im oeffentlichen Read-back stehen.
 - LangGraph kapselt Codex CLI hinter einem Worker-Adapter, damit die Runtime spaeter austauschbar bleibt.
 
 ### Umgesetzte lokale Delivery-Slices

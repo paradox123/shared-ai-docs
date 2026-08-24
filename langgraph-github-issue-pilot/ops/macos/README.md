@@ -9,7 +9,7 @@ The scripts deliberately do not install or authenticate external tools. Before i
 1. Install the pilot environment, Codex CLI, and `cloudflared`, and identify their absolute executable paths.
 2. Create/authenticate the named Cloudflare Tunnel, its DNS route, credentials file, exact-path ingress config, Worker, Queue, and DLQ as described in `../../../cloudflare-github-webhook-relay/README.md`.
 3. Configure the GitHub webhook, allowlisted repository/events, GitHub token, Daniel's GitHub login, repository-local Git author name plus GitHub noreply address, and distinct internal Tunnel-hop secret.
-4. Choose private, disjoint repository/worktree paths, the persistent SQLite path, repository context, skills root, public observation surface, and deterministic verification command.
+4. Choose private, disjoint repository/worktree paths, the persistent SQLite path, repository context, skills root, public observation surface, deterministic verification command, and the explicit `PILOT_CODEX_INTERVENTION_SURFACE='stable-app-server'` boundary.
 5. Perform the final live webhook and logout/login observation. Automation does not log the user out, create credentials, change DNS/router/firewall settings, merge pull requests, deploy, or release.
 
 ## Private configuration
@@ -31,7 +31,7 @@ ops/macos/pilotctl verify-config \
   "$HOME/.config/danielsvault-github-issue-pilot/pilot.env"
 ```
 
-Validation checks permissions/ownership, required values, absolute executable and data paths, loopback host, bounded port, HTTPS exact path, internal authentication mode, `cloudflared tunnel ingress validate`, and the Tunnel rule selected for the public receiver URL. It never prints configured values or child command output.
+Validation checks permissions/ownership, required values, absolute executable and data paths, loopback host, bounded port, HTTPS exact path, internal authentication mode, the exact stable Codex intervention surface, `cloudflared tunnel ingress validate`, and the Tunnel rule selected for the public receiver URL. Experimental Codex surfaces are rejected instead of silently enabled. Validation never prints configured values or child command output.
 
 ## Live activation gate
 
@@ -109,7 +109,7 @@ curl --fail --silent --show-error \
   "http://127.0.0.1:8788/workflows/OWNER/probare-crm/issues/ISSUE_NUMBER"
 ```
 
-This workflow GET, not a lifecycle log line, is the proof that the delivery produced or resumed the intended durable workflow.
+This workflow GET, not a lifecycle log line, is the proof that the delivery produced or resumed the intended durable workflow. Its `intervention` section exposes the persisted request, Codex task identity, first accepted answer, application state, and timestamps. An open request is answered in its uniquely named Codex App task; SQLite and lifecycle logs are not operator answer surfaces.
 
 ## Crash recovery behavior
 

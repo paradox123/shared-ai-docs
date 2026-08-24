@@ -12,10 +12,16 @@ from typing import TYPE_CHECKING, Protocol
 
 from jsonschema import ValidationError
 from jsonschema.validators import Draft202012Validator
+from langgraph.types import interrupt
 
 from github_issue_pilot.contracts import load_contract
 from github_issue_pilot.evidence import redact_payload
 from github_issue_pilot.github import VerificationProjectionError
+from github_issue_pilot.intervention import (
+    InterventionContinuationError,
+    bounded_intervention_answer,
+    validate_intervention_request,
+)
 from github_issue_pilot.policy import (
     NodePolicy,
     NodeSelection,
@@ -45,6 +51,8 @@ class ReviewInvocation:
     selection: NodeSelection
     route: ReviewSkillRoute
     access_profile: dict[str, object]
+    intervention_answer: dict[str, str] | None = None
+    intervention_context: dict[str, object] | None = None
 
 
 @dataclass(frozen=True)
@@ -107,8 +115,25 @@ class CodexCliReviewWorker:
             f"{json.dumps(invocation.assignment, sort_keys=True)}\n"
             "</review-assignment>"
         )
+        if invocation.intervention_answer is not None:
+            prompt += (
+                "\nUse the following bounded answer only for the previously persisted question "
+                "on this axis and immutable head. It does not expose peer verdicts or authorize "
+                "writes, scope changes, or workflow reconfiguration.\n"
+                "<intervention-answer>\n"
+                f"{json.dumps(invocation.intervention_answer, sort_keys=True)}\n"
+                "</intervention-answer>"
+            )
+        if invocation.intervention_context is not None:
+            prompt += (
+                "\nIf policy requires an intervention, copy these controller-owned correlation "
+                "identities exactly into the intervention request.\n"
+                "<intervention-context>\n"
+                f"{json.dumps(invocation.intervention_context, sort_keys=True)}\n"
+                "</intervention-context>"
+            )
         schema_resource = files("github_issue_pilot.contracts").joinpath(
-            "review-verdict-v1.json"
+            "review-verdict-v2.json"
         )
         with as_file(schema_resource) as schema_path, tempfile.TemporaryDirectory(
             prefix="github-issue-pilot-review-"
@@ -185,14 +210,23 @@ def validate_review_assignment(assignment: dict[str, object]) -> None:
 
 
 def validate_review_result(result: dict[str, object]) -> None:
+    schema_version = str(result.get("schema_version", ""))
+    schema_name = {"1": "review-verdict-v1.json", "2": "review-verdict-v2.json"}.get(
+        schema_version
+    )
+    if schema_name is None:
+        raise InvalidReviewContract("review result uses an unsupported schema version")
     try:
-        Draft202012Validator(load_contract("review-verdict-v1.json")).validate(result)
+        Draft202012Validator(load_contract(schema_name)).validate(result)
     except ValidationError as exc:
         raise InvalidReviewContract(f"review result does not match schema: {exc.message}") from exc
     if result["verdict"] == "fail" and not result["findings"]:
         raise InvalidReviewContract("failed review must include a finding")
     if result["axis"] == "requirements" and result["verdict"] == "not_applicable":
         raise InvalidReviewContract("requirements review must be applicable")
+    intervention = result.get("intervention")
+    if isinstance(intervention, dict):
+        validate_intervention_request(intervention)
 
 
 def build_review_assignment(
@@ -310,6 +344,15 @@ class ReviewCoordinator:
         persisted_results = {
             str(record["axis"]): record["verdict"] for record in persisted["results"]
         }
+        for axis in persisted_results:
+            application = self._store.intervention_application_for_operation(
+                f"{batch_id}:{axis}"
+            )
+            if application is not None and application["status"] == "applying":
+                self._store.complete_intervention_application(
+                    intervention_id=str(application["id"]),
+                    applied_at=self._clock().isoformat(),
+                )
         results: list[dict[str, object]] = list(persisted_results.values())
         failures: list[str] = []
         for axis, task in self._AXES:
@@ -370,8 +413,26 @@ class ReviewCoordinator:
             "source_root": worktree_record["path"],
             "write_roots": [],
         }
-        output = self._reviewer.run(
-            ReviewInvocation(
+        application = self._store.intervention_application_for_operation(invocation_id)
+        intervention_answer: dict[str, str] | None = None
+        if application is not None and application["status"] != "applied":
+            resumed = interrupt(
+                {
+                    "intervention_id": application["id"],
+                    "phase": "review",
+                    "operation_key": invocation_id,
+                }
+            )
+            intervention_answer = bounded_intervention_answer(
+                application, resumed, phase="review"
+            )
+            if application["status"] == "answered" and not self._store.claim_intervention_application(
+                str(application["id"])
+            ):
+                raise ReviewExecutionError("review intervention answer could not be claimed")
+        try:
+            output = self._reviewer.run(
+                ReviewInvocation(
                 assignment=assignment,
                 worktree=Worktree(
                     path=Path(worktree_record["path"]),
@@ -381,8 +442,33 @@ class ReviewCoordinator:
                 selection=selection,
                 route=route,
                 access_profile=access_profile,
+                intervention_answer=intervention_answer,
+                intervention_context={
+                    "repository": {
+                        "full_name": review_input.repository,
+                        "issue_number": review_input.issue_number,
+                    },
+                    "run": {
+                        "id": review_input.run_id,
+                        "phase": "review",
+                        "operation_key": invocation_id,
+                    },
+                    "role": f"{axis}_reviewer",
+                    "context": {
+                        "worktree_path": worktree_record["path"],
+                        "branch": worktree_record["branch"],
+                        "pull_request_number": review_input.publication["pull_request"]["number"],
+                        "head_sha": review_input.publication["head_sha"],
+                    },
+                },
+                )
             )
-        )
+        except (ReviewExecutionError, TypeError, ValueError) as exc:
+            if intervention_answer is not None:
+                raise InterventionContinuationError(
+                    "review continuation worker did not complete"
+                ) from exc
+            raise
         result = redact_payload(output.result, self._sensitive_values)
         diagnostics = redact_payload(list(output.diagnostic_events), self._sensitive_values)
         if not isinstance(result, dict) or not isinstance(diagnostics, list):
@@ -396,6 +482,32 @@ class ReviewCoordinator:
         actual_identity = (result["invocation_id"], result["axis"], result["head_sha"])
         if actual_identity != expected_identity:
             raise InvalidReviewContract("review verdict does not match its assignment")
+        intervention_request = result.get("intervention")
+        if isinstance(intervention_request, dict):
+            if intervention_answer is not None:
+                raise InvalidReviewContract("review continuation requested another intervention")
+            self._validate_intervention_identity(
+                review_input=review_input,
+                invocation_id=invocation_id,
+                axis=axis,
+                request=intervention_request,
+            )
+            intervention_id = self._store.begin_intervention(
+                run_id=review_input.run_id,
+                phase="review",
+                role=f"{axis}_reviewer",
+                operation_key=invocation_id,
+                request=intervention_request,
+                source_result=result,
+                created_at=self._clock().isoformat(),
+            )
+            interrupt(
+                {
+                    "intervention_id": intervention_id,
+                    "phase": "review",
+                    "operation_key": invocation_id,
+                }
+            )
         self._store.record_review_result(
             batch_id=batch_id,
             axis=axis,
@@ -417,9 +529,59 @@ class ReviewCoordinator:
             diagnostic_events=diagnostics,
             completed_at=self._clock().isoformat(),
         )
+        if intervention_answer is not None:
+            self._store.complete_intervention_application(
+                intervention_id=intervention_answer["intervention_id"],
+                applied_at=self._clock().isoformat(),
+            )
         if self._transition_probe is not None:
             self._transition_probe(f"review_{axis}_completed", invocation_id)
         return result
+
+    @staticmethod
+    def _validate_intervention_identity(
+        *,
+        review_input: ReviewBatchInput,
+        invocation_id: str,
+        axis: str,
+        request: dict[str, object],
+    ) -> None:
+        run = request.get("run")
+        repository = request.get("repository")
+        context = request.get("context")
+        pull_request = review_input.publication.get("pull_request")
+        worktree = review_input.implementation.get("worktree")
+        if not all(
+            isinstance(value, dict)
+            for value in (run, repository, context, pull_request, worktree)
+        ):
+            raise InvalidReviewContract("review intervention identity is malformed")
+        expected = (
+            review_input.run_id,
+            "review",
+            invocation_id,
+            review_input.repository,
+            review_input.issue_number,
+            f"{axis}_reviewer",
+            worktree["path"],
+            worktree["branch"],
+            pull_request["number"],
+            review_input.publication["head_sha"],
+        )
+        actual = (
+            run.get("id"),
+            run.get("phase"),
+            run.get("operation_key"),
+            repository.get("full_name"),
+            repository.get("issue_number"),
+            request.get("role"),
+            context.get("worktree_path"),
+            context.get("branch"),
+            context.get("pull_request_number"),
+            context.get("head_sha"),
+        )
+        if actual != expected:
+            raise InvalidReviewContract("review intervention does not match its operation")
 
     def _project(
         self,

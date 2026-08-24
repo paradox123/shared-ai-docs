@@ -36,6 +36,10 @@ _Avoid_: Endlosschleife, unbegrenztes Self-Review
 Eine Entscheidung, die fachliches Verhalten, Akzeptanzkriterien, Domaenenregeln, Datenlebenszyklus, Sicherheits- oder Datenschutzgrenzen oder irreversible externe Wirkungen veraendert. Rein interne, reversible Implementierungs- und Darstellungsdetails sind keine Produktentscheidungen.
 _Avoid_: Geschmacksfrage, beliebiges UI-Detail, interne Codeentscheidung
 
+**Interventionsanfrage**:
+Ein gezielter, beantwortbarer Hilferuf aus einem ansonsten automatischen Implementierungslauf, wenn dieser ohne menschliche Entscheidung oder Behebung nicht sicher fortfahren kann. Die Antwort setzt denselben Arbeitslauf fort und ist weder eine Workflow-Neukonfiguration noch ein neuer Implementierungsauftrag.
+_Avoid_: Manueller Neustart, Workflow-Override, dauerhafte Worker-Steuerung, allgemeiner Fortschrittsstatus
+
 **Darstellungsdetail**:
 Eine reversible visuelle oder textliche Ausgestaltung innerhalb bestehender Anforderungen, Domaenensprache, Barrierefreiheitsregeln und des vorhandenen Designsystems. Ein Detail, das fachliche Bedeutung, Gefahrenstufe, Einwilligung oder Aktionssemantik traegt, ist kein blosses Darstellungsdetail.
 _Avoid_: Produktentscheidung, wenn keine fachliche Wirkung vorliegt

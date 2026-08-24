@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:danielsvault:github-issue-pilot:review-verdict:2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "invocation_id",
+    "axis",
+    "head_sha",
+    "verdict",
+    "rationale",
+    "findings",
+    "intervention"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "const": "2"},
+    "invocation_id": {"type": "string", "minLength": 1},
+    "axis": {
+      "type": "string",
+      "enum": ["requirements", "code", "architecture"]
+    },
+    "head_sha": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "verdict": {
+      "type": "string",
+      "enum": ["pass", "fail", "not_applicable", "intervention"]
+    },
+    "rationale": {"type": "string", "minLength": 1},
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["location", "description"],
+        "properties": {
+          "location": {"type": "string", "minLength": 1},
+          "description": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "intervention": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/intervention_request"}
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"verdict": {"const": "intervention"}}},
+      "then": {"properties": {"intervention": {"$ref": "#/$defs/intervention_request"}}}
+    },
+    {
+      "if": {"properties": {"verdict": {"enum": ["pass", "fail", "not_applicable"]}}},
+      "then": {"properties": {"intervention": {"type": "null"}}}
+    }
+  ],
+  "$defs": {
+    "intervention_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "repository", "run", "role", "context", "classification", "problem", "required_action", "options", "recommendation", "preserved"],
+      "properties": {
+        "schema_version": {"type": "string", "const": "1"},
+        "repository": {"type": "object", "additionalProperties": false, "required": ["full_name", "issue_number"], "properties": {"full_name": {"type": "string", "minLength": 1}, "issue_number": {"type": "integer", "minimum": 1}}},
+        "run": {"type": "object", "additionalProperties": false, "required": ["id", "phase", "operation_key"], "properties": {"id": {"type": "string", "minLength": 1}, "phase": {"type": "string", "enum": ["implementation", "review", "repair"]}, "operation_key": {"type": "string", "minLength": 1}}},
+        "role": {"type": "string", "enum": ["implementer", "requirements_reviewer", "code_reviewer", "architecture_reviewer", "repairer"]},
+        "context": {"type": "object", "additionalProperties": false, "required": ["worktree_path", "branch", "pull_request_number", "head_sha"], "properties": {"worktree_path": {"type": ["string", "null"], "minLength": 1}, "branch": {"type": "string", "minLength": 1}, "pull_request_number": {"type": ["integer", "null"], "minimum": 1}, "head_sha": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"}}},
+        "classification": {"type": "string", "enum": ["product_decision", "scope_expansion", "missing_access", "manual_evidence", "requirements_missing_or_contradictory", "unresolvable_conflict", "repair_rounds_exhausted"]},
+        "problem": {"type": "string", "minLength": 1},
+        "required_action": {"type": "string", "minLength": 1},
+        "options": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["label", "impact"], "properties": {"label": {"type": "string", "minLength": 1}, "impact": {"type": "string", "minLength": 1}}}},
+        "recommendation": {"type": "object", "additionalProperties": false, "required": ["option_label", "rationale"], "properties": {"option_label": {"type": ["string", "null"], "minLength": 1}, "rationale": {"type": "string", "minLength": 1}}},
+        "preserved": {"type": "object", "additionalProperties": false, "required": ["findings", "results"], "properties": {"findings": {"type": "array", "items": {"type": "string", "minLength": 1}}, "results": {"type": "array", "items": {"type": "string", "minLength": 1}}}}
+      }
+    }
+  }
+}

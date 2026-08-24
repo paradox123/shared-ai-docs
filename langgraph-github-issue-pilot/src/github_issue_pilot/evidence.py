@@ -45,8 +45,14 @@ def qualify_evidence(
     *,
     sensitive_values: Sequence[str] = (),
 ) -> list[dict[str, object]]:
+    schema_name = {
+        "2": "worker-result-v2.json",
+        "3": "worker-result-v3.json",
+    }.get(str(result.get("schema_version", "")))
+    if schema_name is None:
+        raise EvidenceRejected("schema_invalid")
     try:
-        Draft202012Validator(load_contract("worker-result-v2.json")).validate(result)
+        Draft202012Validator(load_contract(schema_name)).validate(result)
     except ValidationError as exc:
         raise EvidenceRejected("schema_invalid") from exc
     if result["outcome"] != "completed":

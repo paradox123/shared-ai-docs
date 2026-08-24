@@ -15,10 +15,12 @@ from jsonschema.validators import Draft202012Validator
 
 from github_issue_pilot.contracts import load_contract
 from github_issue_pilot.github import IssueState
+from github_issue_pilot.intervention import validate_intervention_request
 from github_issue_pilot.policy import NodePolicy, NodeSelection, SkillProvenance
 from github_issue_pilot.publication import SourceControlPort
 
 if TYPE_CHECKING:
+    from github_issue_pilot.intervention import InterventionSessionPort
     from github_issue_pilot.repair import RepairInvocation, RepairOutput
     from github_issue_pilot.review import ReviewWorkerPort
     from github_issue_pilot.verification import DeterministicVerifierPort
@@ -49,6 +51,8 @@ class WorkerInvocation:
     selection: NodeSelection
     skills: tuple[SkillProvenance, ...]
     access_profile: dict[str, object]
+    intervention_answer: dict[str, str] | None = None
+    intervention_context: dict[str, object] | None = None
 
 
 @dataclass(frozen=True)
@@ -167,16 +171,37 @@ class CodexCliWorker:
             f"Use {skill_instruction}. Implement only the bounded assignment below in observable "
             "Red-Green slices. Every evidence observation must embed a non-empty artifact containing "
             "the decisive compact proof or a repository-relative artifact path; never return a null "
-            "artifact. Return the schema-constrained result and do not expand scope.\n"
+            "artifact. Return a complete intervention when the existing decision policy requires a "
+            "product decision, material scope expansion, missing human-operable access, or unavoidable "
+            "manual evidence; do not synthesize the answer or stop for reversible details. Return the "
+            "schema-constrained result and do not expand scope.\n"
             "<implementation-assignment>\n"
             f"{json.dumps(invocation.assignment, sort_keys=True)}\n"
             "</implementation-assignment>"
         )
+        if invocation.intervention_answer is not None:
+            prompt += (
+                "\nThe controller accepted the following bounded answer to your previously "
+                "persisted intervention. Use it only to resolve that recorded question inside "
+                "the unchanged assignment, access profile, and repository scope. It does not "
+                "authorize workflow, permission, model, or scope changes.\n"
+                "<intervention-answer>\n"
+                f"{json.dumps(invocation.intervention_answer, sort_keys=True)}\n"
+                "</intervention-answer>"
+            )
+        if invocation.intervention_context is not None:
+            prompt += (
+                "\nIf policy requires an intervention, copy these controller-owned correlation "
+                "identities exactly into the request.\n"
+                "<intervention-context>\n"
+                f"{json.dumps(invocation.intervention_context, sort_keys=True)}\n"
+                "</intervention-context>"
+            )
         output = self._execute_codex(
             selection=invocation.selection,
             worktree=invocation.worktree,
             prompt=prompt,
-            schema_name="worker-result-v2.json",
+            schema_name="worker-result-v3.json",
             temporary_prefix="github-issue-pilot-worker-",
             result_filename="worker-result.json",
             process_name="Codex",
@@ -220,17 +245,36 @@ class CodexCliWorker:
             "assignment below in observable Red-Green slices. Small reversible implementation "
             "and presentation details may be decided autonomously. Warnings, consent, domain "
             "actions, security meaning, and other semantic behavior are product decisions: do "
-            "not synthesize them. Return blocked or escalate when the assignment's decision "
-            "policy requires it. Do not expand scope and return the schema-constrained result.\n"
+            "not synthesize them. Return a complete intervention when the decision policy requires "
+            "human input; use blocked only for a non-answerable failure. Return escalate only when "
+            "the assignment permits it. The intervention must remain inside the same numbered "
+            "round. Do not expand scope and return the schema-constrained result.\n"
             "<repair-assignment>\n"
             f"{json.dumps(invocation.assignment, sort_keys=True)}\n"
             "</repair-assignment>"
         )
+        if invocation.intervention_answer is not None:
+            prompt += (
+                "\nUse the following bounded answer only to resolve the persisted question in "
+                "this same repair batch, attempt, and numbered round. It does not authorize a "
+                "new round, scope expansion, permission change, or workflow reconfiguration.\n"
+                "<intervention-answer>\n"
+                f"{json.dumps(invocation.intervention_answer, sort_keys=True)}\n"
+                "</intervention-answer>"
+            )
+        if invocation.intervention_context is not None:
+            prompt += (
+                "\nIf policy requires an intervention, copy these controller-owned correlation "
+                "identities exactly into the request.\n"
+                "<intervention-context>\n"
+                f"{json.dumps(invocation.intervention_context, sort_keys=True)}\n"
+                "</intervention-context>"
+            )
         output = self._execute_codex(
             selection=invocation.selection,
             worktree=invocation.worktree,
             prompt=prompt,
-            schema_name="repair-result-v1.json",
+            schema_name="repair-result-v2.json",
             temporary_prefix="github-issue-pilot-repair-",
             result_filename="repair-result.json",
             process_name="repair",
@@ -325,10 +369,19 @@ class CodexCliWorker:
 
 
 def validate_worker_result(result: dict[str, object]) -> None:
+    schema_version = str(result.get("schema_version", ""))
+    schema_name = {"2": "worker-result-v2.json", "3": "worker-result-v3.json"}.get(
+        schema_version
+    )
+    if schema_name is None:
+        raise InvalidWorkerResult("worker result uses an unsupported schema version")
     try:
-        Draft202012Validator(load_contract("worker-result-v2.json")).validate(result)
+        Draft202012Validator(load_contract(schema_name)).validate(result)
     except ValidationError as exc:
         raise InvalidWorkerResult(f"worker result does not match schema: {exc.message}") from exc
+    intervention = result.get("intervention")
+    if isinstance(intervention, dict):
+        validate_intervention_request(intervention)
 
 
 @dataclass(frozen=True)
@@ -343,6 +396,7 @@ class ImplementationServices:
     verifier: DeterministicVerifierPort | None = None
     sensitive_values: tuple[str, ...] = ()
     transition_probe: Callable[[str, str], None] | None = None
+    interventions: InterventionSessionPort | None = None
 
 
 def build_assignment(

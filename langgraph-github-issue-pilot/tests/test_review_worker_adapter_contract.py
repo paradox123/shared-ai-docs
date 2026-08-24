@@ -159,7 +159,7 @@ print(json.dumps({"type": "turn.completed"}))
         assert 'approval_policy="never"' in args
         assert args[args.index("--sandbox") + 1] == "read-only"
         assert args[args.index("--cd") + 1] == str(worktree_path)
-        assert Path(args[args.index("--output-schema") + 1]).name == "review-verdict-v1.json"
+        assert Path(args[args.index("--output-schema") + 1]).name == "review-verdict-v2.json"
         assert f'"axis": "{axis}"' in prompt
         assert "peer_verdicts" not in prompt
         assert "Do not start sub-agents or evaluate another review axis" in prompt

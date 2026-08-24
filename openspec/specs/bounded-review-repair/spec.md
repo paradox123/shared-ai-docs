@@ -87,3 +87,14 @@ Workflow-state read-back MUST expose the repair batch, initial review identity, 
 #### Scenario: System seam observes bounded terminal outcomes after restart
 - **WHEN** controlled reviewers keep failing through three rounds for missing requirements in one run and an unresolvable conflict in another, and each application is reconstructed against its database
 - **THEN** HTTP read-back preserves exactly three attempts, the draft PR and open findings, no fourth invocation, and respectively the `needs-info` and `ready-for-human` projection without repeated external effects
+
+### Requirement: Repair interruptions remain in the same bounded round
+A policy-authorized repair interruption MUST persist an answerable intervention instead of immediately completing the repair batch as a terminal handoff. Answer continuation MUST reuse the same repair batch, numbered round, attempt, writer, worktree, and open findings and MUST NOT allocate another automatic round merely because a human answered. Exhaustion after three unsuccessful automatic rounds remains an intervention boundary and MUST NOT start a fourth round.
+
+#### Scenario: Repair needs a product decision inside round one
+- **WHEN** the writing worker returns a valid product-decision intervention during repair round one
+- **THEN** the attempt waits with its findings and invocation identity preserved and resumes inside round one after the correlated answer
+
+#### Scenario: Three automatic rounds are exhausted
+- **WHEN** the third repaired head remains unsuccessful
+- **THEN** one exhaustion intervention is created with all attempts and findings and no fourth repair assignment starts before or after an answer

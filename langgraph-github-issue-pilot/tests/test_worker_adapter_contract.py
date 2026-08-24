@@ -144,7 +144,7 @@ print(json.dumps({"type": "turn.completed"}))
     assert 'approval_policy="never"' in args
     assert args[args.index("--sandbox") + 1] == "workspace-write"
     assert args[args.index("--cd") + 1] == str(worktree)
-    assert Path(args[args.index("--output-schema") + 1]).name == "worker-result-v2.json"
+    assert Path(args[args.index("--output-schema") + 1]).name == "worker-result-v3.json"
     assert "--json" in args
     assert args[-1] == "-"
     assert "$implement" in prompt and "$tdd" in prompt

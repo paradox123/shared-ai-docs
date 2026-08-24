@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from jsonschema import ValidationError
 from jsonschema.validators import Draft202012Validator
+from langgraph.types import interrupt
 
 from github_issue_pilot.contracts import load_contract
 from github_issue_pilot.evidence import (
@@ -23,6 +24,11 @@ from github_issue_pilot.implementation import (
     WorkerExecutionError,
     Worktree,
     validate_worker_result,
+)
+from github_issue_pilot.intervention import (
+    InterventionContinuationError,
+    bounded_intervention_answer,
+    validate_intervention_request,
 )
 from github_issue_pilot.policy import (
     NodePolicy,
@@ -50,6 +56,8 @@ class RepairInvocation:
     skills: tuple[SkillProvenance, ...]
     access_profile: dict[str, object]
     escalation_reason: str | None = None
+    intervention_answer: dict[str, str] | None = None
+    intervention_context: dict[str, object] | None = None
 
 
 @dataclass(frozen=True)
@@ -77,8 +85,14 @@ def validate_repair_assignment(assignment: dict[str, object]) -> None:
 
 
 def validate_repair_result(result: dict[str, object]) -> None:
+    schema_version = str(result.get("schema_version", ""))
+    schema_name = {"1": "repair-result-v1.json", "2": "repair-result-v2.json"}.get(
+        schema_version
+    )
+    if schema_name is None:
+        raise InvalidRepairContract("repair result uses an unsupported schema version")
     try:
-        Draft202012Validator(load_contract("repair-result-v1.json")).validate(result)
+        Draft202012Validator(load_contract(schema_name)).validate(result)
         implementation_result = result.get("implementation_result")
         if isinstance(implementation_result, dict):
             validate_worker_result(implementation_result)
@@ -103,6 +117,9 @@ def validate_repair_result(result: dict[str, object]) -> None:
                 if blockage["reason"] == "requirements_missing_or_contradictory"
                 else f"{blockage['reason']} requires {expected}"
             )
+    intervention = result.get("intervention")
+    if isinstance(intervention, dict):
+        validate_intervention_request(intervention)
 
 
 class ReviewRepairCoordinator:
@@ -170,6 +187,20 @@ class ReviewRepairCoordinator:
                     if attempt["head_sha"]:
                         previous_head = str(attempt["head_sha"])
                     start_round = int(attempt["round"]) + 1
+                for invocation in invocations:
+                    operation_key = f"{attempt['id']}:{invocation['number']}"
+                    application = self._store.intervention_application_for_operation(
+                        operation_key
+                    )
+                    if (
+                        application is not None
+                        and application["status"] == "applying"
+                        and invocation["result"].get("outcome") != "intervention"
+                    ):
+                        self._store.complete_intervention_application(
+                            intervention_id=str(application["id"]),
+                            applied_at=self._now(),
+                        )
 
         for round_number in range(start_round, self.ROUND_LIMIT + 1):
             repair_state = self._store.workflow_repair(repair_input.run_id)
@@ -362,11 +393,11 @@ class ReviewRepairCoordinator:
                 return "verified"
             previous_head = head_sha
 
-        return self._handoff(
-            repair_input,
-            repair_batch_id,
-            terminal_disposition or "ready-for-human",
-            findings,
+        return self._interrupt_exhausted_repair(
+            repair_input=repair_input,
+            repair_batch_id=repair_batch_id,
+            findings=findings,
+            terminal_disposition=terminal_disposition or "ready-for-human",
         )
 
     def _build_assignment(
@@ -460,6 +491,24 @@ class ReviewRepairCoordinator:
         }
         started_at = self._now()
         diagnostics: list[dict[str, object]] = []
+        operation_key = f"{attempt_id}:{invocation_number}"
+        application = self._store.intervention_application_for_operation(operation_key)
+        intervention_answer: dict[str, str] | None = None
+        if application is not None and application["status"] != "applied":
+            resumed = interrupt(
+                {
+                    "intervention_id": application["id"],
+                    "phase": "repair",
+                    "operation_key": operation_key,
+                }
+            )
+            intervention_answer = bounded_intervention_answer(
+                application, resumed, phase="repair"
+            )
+            if application["status"] == "answered" and not self._store.claim_intervention_application(
+                str(application["id"])
+            ):
+                raise InvalidRepairContract("repair intervention answer could not be claimed")
         try:
             output = self._services.worker.repair(
                 RepairInvocation(
@@ -469,6 +518,11 @@ class ReviewRepairCoordinator:
                     skills=skills,
                     access_profile=access_profile,
                     escalation_reason=escalation_reason,
+                    intervention_answer=intervention_answer,
+                    intervention_context=self._intervention_context(
+                        repair_input=repair_input,
+                        operation_key=operation_key,
+                    ),
                 )
             )
             redacted_result = redact_payload(output.result, self._services.sensitive_values)
@@ -487,7 +541,11 @@ class ReviewRepairCoordinator:
                 raise InvalidRepairContract("repair result does not match its assignment")
             result = redacted_result
             diagnostics = redacted_diagnostics
-        except (InvalidRepairContract, PolicyViolation, TypeError, WorkerExecutionError):
+        except (InvalidRepairContract, PolicyViolation, TypeError, WorkerExecutionError) as exc:
+            if intervention_answer is not None:
+                raise InterventionContinuationError(
+                    "repair continuation did not produce a valid result"
+                ) from exc
             result = {
                 "schema_version": "1",
                 "repair_batch_id": assignment["repair_batch_id"],
@@ -495,6 +553,31 @@ class ReviewRepairCoordinator:
                 "outcome": "failed",
                 "summary": "repair_execution_failed",
             }
+        intervention_request = result.get("intervention")
+        if isinstance(intervention_request, dict):
+            if intervention_answer is not None:
+                raise InvalidRepairContract("repair continuation requested another intervention")
+            self._validate_intervention_identity(
+                repair_input=repair_input,
+                operation_key=operation_key,
+                request=intervention_request,
+            )
+            intervention_id = self._store.begin_intervention(
+                run_id=repair_input.run_id,
+                phase="repair",
+                role="repairer",
+                operation_key=operation_key,
+                request=intervention_request,
+                source_result=result,
+                created_at=self._now(),
+            )
+            interrupt(
+                {
+                    "intervention_id": intervention_id,
+                    "phase": "repair",
+                    "operation_key": operation_key,
+                }
+            )
         self._store.record_repair_invocation(
             attempt_id=attempt_id,
             invocation_number=invocation_number,
@@ -516,11 +599,183 @@ class ReviewRepairCoordinator:
             started_at=started_at,
             completed_at=self._now(),
         )
+        if intervention_answer is not None:
+            self._store.complete_intervention_application(
+                intervention_id=intervention_answer["intervention_id"],
+                applied_at=self._now(),
+            )
         if self._services.transition_probe is not None:
             self._services.transition_probe(
                 "repair_invocation_completed", f"{attempt_id}:{invocation_number}"
             )
         return result if result.get("outcome") != "failed" else None
+
+    def _intervention_context(
+        self,
+        *,
+        repair_input: RepairBatchInput,
+        operation_key: str,
+    ) -> dict[str, object]:
+        publication = self._store.workflow_publication(repair_input.run_id)
+        pull_request = publication.get("pull_request") if publication else None
+        worktree = repair_input.implementation["worktree"]
+        if not isinstance(publication, dict) or not isinstance(pull_request, dict):
+            raise InvalidRepairContract("repair intervention context is unavailable")
+        return {
+            "repository": {
+                "full_name": repair_input.repository,
+                "issue_number": repair_input.issue_number,
+            },
+            "run": {
+                "id": repair_input.run_id,
+                "phase": "repair",
+                "operation_key": operation_key,
+            },
+            "role": "repairer",
+            "context": {
+                "worktree_path": worktree["path"],
+                "branch": worktree["branch"],
+                "pull_request_number": pull_request["number"],
+                "head_sha": publication["head_sha"],
+            },
+        }
+
+    def _validate_intervention_identity(
+        self,
+        *,
+        repair_input: RepairBatchInput,
+        operation_key: str,
+        request: dict[str, object],
+    ) -> None:
+        run = request.get("run")
+        repository = request.get("repository")
+        context = request.get("context")
+        publication = self._store.workflow_publication(repair_input.run_id)
+        pull_request = publication.get("pull_request") if publication else None
+        worktree = repair_input.implementation.get("worktree")
+        if not all(
+            isinstance(value, dict)
+            for value in (run, repository, context, publication, pull_request, worktree)
+        ):
+            raise InvalidRepairContract("repair intervention identity is malformed")
+        expected = (
+            repair_input.run_id,
+            "repair",
+            operation_key,
+            repair_input.repository,
+            repair_input.issue_number,
+            "repairer",
+            worktree["path"],
+            worktree["branch"],
+            pull_request["number"],
+            publication["head_sha"],
+        )
+        actual = (
+            run.get("id"),
+            run.get("phase"),
+            run.get("operation_key"),
+            repository.get("full_name"),
+            repository.get("issue_number"),
+            request.get("role"),
+            context.get("worktree_path"),
+            context.get("branch"),
+            context.get("pull_request_number"),
+            context.get("head_sha"),
+        )
+        if actual != expected:
+            raise InvalidRepairContract("repair intervention does not match its operation")
+
+    def _interrupt_exhausted_repair(
+        self,
+        *,
+        repair_input: RepairBatchInput,
+        repair_batch_id: str,
+        findings: list[dict[str, object]],
+        terminal_disposition: str,
+    ) -> str:
+        operation_key = f"{repair_batch_id}:rounds-exhausted"
+        application = self._store.intervention_application_for_operation(operation_key)
+        if application is None:
+            publication = self._store.workflow_publication(repair_input.run_id)
+            pull_request = publication.get("pull_request") if publication else None
+            worktree = repair_input.implementation["worktree"]
+            if not isinstance(publication, dict) or not isinstance(pull_request, dict):
+                return self._handoff(
+                    repair_input, repair_batch_id, terminal_disposition, findings
+                )
+            request = {
+                "schema_version": "1",
+                "repository": {
+                    "full_name": repair_input.repository,
+                    "issue_number": repair_input.issue_number,
+                },
+                "run": {
+                    "id": repair_input.run_id,
+                    "phase": "repair",
+                    "operation_key": operation_key,
+                },
+                "role": "repairer",
+                "context": {
+                    "worktree_path": worktree["path"],
+                    "branch": worktree["branch"],
+                    "pull_request_number": pull_request["number"],
+                    "head_sha": publication["head_sha"],
+                },
+                "classification": "repair_rounds_exhausted",
+                "problem": "Three bounded automatic repair rounds were exhausted.",
+                "required_action": "Review the preserved attempts and decide the human follow-up.",
+                "options": [
+                    {
+                        "label": terminal_disposition,
+                        "impact": "No fourth automatic repair round will be started.",
+                    }
+                ],
+                "recommendation": {
+                    "option_label": terminal_disposition,
+                    "rationale": "The configured automatic repair budget is exhausted.",
+                },
+                "preserved": {
+                    "findings": [str(finding["description"]) for finding in findings],
+                    "results": ["Automatic repair rounds completed: 3"],
+                },
+            }
+            validate_intervention_request(request)
+            intervention_id = self._store.begin_intervention(
+                run_id=repair_input.run_id,
+                phase="repair",
+                role="repairer",
+                operation_key=operation_key,
+                request=request,
+                source_result={"attempts": 3, "findings": findings},
+                created_at=self._now(),
+            )
+            interrupt(
+                {
+                    "intervention_id": intervention_id,
+                    "phase": "repair",
+                    "operation_key": operation_key,
+                }
+            )
+        if application is not None and application["status"] != "applied":
+            resumed = interrupt(
+                {
+                    "intervention_id": application["id"],
+                    "phase": "repair",
+                    "operation_key": operation_key,
+                }
+            )
+            bounded_intervention_answer(application, resumed, phase="repair exhaustion")
+            if application["status"] == "answered" and not self._store.claim_intervention_application(
+                str(application["id"])
+            ):
+                raise InvalidRepairContract("exhaustion answer could not be claimed")
+            self._store.complete_intervention_application(
+                intervention_id=str(application["id"]),
+                applied_at=self._now(),
+            )
+        return self._handoff(
+            repair_input, repair_batch_id, terminal_disposition, findings
+        )
 
     def _publish_repair(
         self,
