@@ -15,15 +15,15 @@ The pilot MUST recover every non-terminal run during application startup from th
 - **THEN** it converges on the same workflow status without creating another run, worktree, branch, batch, attempt, or checkpoint thread
 
 ### Requirement: Make external transitions idempotent across uncertain crash boundaries
-Every claim, implementation, draft-publication, review, repair, and human-feedback external transition MUST have a stable durable operation identity. A transition with a durably completed result MUST NOT execute externally again. A transition whose effect is uncertain after a crash MUST reconcile deterministic worktree, Git, GitHub, head, and label state and MAY retry an opaque worker only under the same operation, batch, and round identity.
+Every claim, implementation, draft-publication, review, repair, and human-feedback external transition MUST have a stable durable operation identity. A transition with a durably completed schema-valid result MUST NOT execute externally again, including when diagnostic JSONL beside that result was malformed. A transition whose effect is uncertain after a crash MUST reconcile deterministic worktree, immutable base SHA, Git, GitHub, head, and label state and MAY retry an opaque worker only under the same operation, batch, and round identity.
 
-#### Scenario: Crash follows an external effect but precedes the next checkpoint
-- **WHEN** an external claim, worker result, push, draft PR update, review result, repair result, feedback result, or label projection completed durably before the process terminated but LangGraph had not written its next checkpoint
-- **THEN** recovery reuses that result and does not execute the completed external transition again
+#### Scenario: Crash follows a valid result with degraded diagnostics
+- **WHEN** a schema-valid final worker result is available but one diagnostic line is malformed before the next checkpoint
+- **THEN** recovery reuses the retained result and bounded diagnostic-parse event instead of invoking the worker again
 
-#### Scenario: Crash leaves an opaque worker outcome uncertain
-- **WHEN** the process terminates while a worker invocation has a durable operation identity but no durable valid result
-- **THEN** recovery continues that same operation in the same worktree and round without allocating a second workflow identity or publishing duplicate work
+#### Scenario: Crash follows worktree creation before implementation persistence
+- **WHEN** a run-owned worktree was created from a fetched base SHA but the process stopped before the implementation row was persisted
+- **THEN** recovery adopts the same branch, worktree, and original base SHA without creating a second worktree or moving the branch
 
 ### Requirement: Resume every supported workflow phase without duplicate publication
 Recovery MUST handle interruption during claim, initial implementation, draft PR creation or update, independent review, bounded repair, and human-feedback waiting or execution. At most one draft pull request MAY exist for the run branch, and every resumed review or repair MUST remain bound to the current persisted pull-request head.
