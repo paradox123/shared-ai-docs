@@ -1,11 +1,13 @@
 ---
 name: build-codex-automations
-description: Design, create, inspect, update, or troubleshoot Codex automations and local scheduled workflows in Daniel's macOS environment. USE WHEN the user asks for recurring tasks, reminders, monitors, scheduled Codex runs, automation prompts/configs, helper scripts for automations, or deciding whether automation should be direct Codex, scripted, or hybrid. Do not use as the primary skill for Learn-style retrospective session reviews or skill-gap audits; use improve-skills first and open this only after the canonical automation/session bootstrap shows a concrete automation-definition issue.
+description: Design, create, inspect, update, or troubleshoot Codex automations and local scheduled workflows in Daniel's macOS environment. USE WHEN the user asks to create or change recurring tasks, reminders, monitors, scheduled Codex runs, automation prompts/configs, or their helper scripts, or to inspect or troubleshoot an automation definition. Do not use merely to execute an already-defined automation or heartbeat whose prompt contains the operational workflow. Do not use as the primary skill for Learn-style retrospective session reviews or skill-gap audits; use improve-skills first and open this only after the canonical automation/session bootstrap shows a concrete automation-definition issue.
 ---
 
 # Build Codex Automations
 
 Use this skill to design and implement automations in Daniel's environment.
+
+Routine automation execution is outside this skill's scope. When an existing heartbeat or cron task already provides a self-contained operational workflow, follow that prompt and the task-domain skills without loading this skill. Load it only when the current turn creates, changes, inspects, or troubleshoots the definition, scheduling, execution environment, or helper design.
 
 Do not use this skill as the primary workflow for retrospective session-review tasks such as `Learn`, skill-gap audits, or "review sessions since last run" requests. Use `improve-skills` first for those reviews, and only come back here after the bounded evidence pass confirms a concrete automation prompt/config change or helper-design question.
 For Learn-style Codex Desktop reviews, the earliest acceptable point to open this skill is after the canonical `automation.toml`, normalized automation memory, and `session_index.jsonl` bootstrap reads are already on screen.
@@ -24,6 +26,8 @@ Default environment assumptions:
 ## Decision Tree
 
 First classify the request:
+
+Before choosing direct versus hybrid, count the stable deterministic probes repeated on every run. Use a hybrid helper that emits one compact validated JSON snapshot when a recurring monitor needs more than two such probes, or when any deterministic result gates an external mutation. Keep direct automations for workflows that do not need that collector contract.
 
 1. Existing Codex automation: show, inspect, explain, update, pause, resume, delete, or extract the prompt/config.
 2. New direct Codex automation: the task can be expressed as an agent prompt using existing tools and workspace context.

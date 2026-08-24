@@ -23,6 +23,7 @@ from github_issue_pilot.github import (
     PullRequestState,
 )
 from github_issue_pilot.implementation import (
+    CodexCliWorker,
     ImplementationServices,
     RepositoryContext,
     WorkerExecutionError,
@@ -637,7 +638,18 @@ class FailingWorker(ControlledWorker):
             "assigned worktree only\n", encoding="utf-8"
         )
         if self.failure_mode == "process":
-            raise WorkerExecutionError("simulated Codex exit 1")
+            raise WorkerExecutionError(
+                "simulated Codex exit 1 for daniel@example.com",
+                failure_code="process_nonzero_exit",
+                diagnostic_events=(
+                    {"type": "thread.started", "thread_id": "failed-thread"},
+                    {
+                        "type": "pilot.diagnostic_parse_failed",
+                        "code": "invalid_json",
+                        "line_number": 4,
+                    },
+                ),
+            )
         output.result["red_green_slices"] = []
         return output
 
@@ -2252,6 +2264,89 @@ def test_valid_red_green_worker_result_is_persisted_and_observable_after_restart
     assert len(worker.invocations) == 1
 
 
+def test_blocked_final_result_survives_malformed_jsonl_and_is_observable_after_restart(
+    tmp_path,
+) -> None:
+    result = {
+        "schema_version": "2",
+        "outcome": "blocked",
+        "summary": "Six workflow checks passed; two prerequisites remain unavailable.",
+        "red_green_slices": [
+            {
+                "requirement": "Customer can export CSV",
+                "red": {"command": "pytest export", "observed": "failed: export missing"},
+                "green": {"command": "pytest export", "observed": "passed"},
+            }
+        ],
+        "changed_files": ["src/export.py"],
+        "verification": [{"command": "pytest workflow", "observed": "six checks passed"}],
+        "evidence": [_direct_evidence("Customer can export CSV")],
+        "findings": [
+            "A read-only mailbox protocol is not specified.",
+            "React dependencies are unavailable in the offline cache.",
+        ],
+    }
+    executable = tmp_path / "fake-codex"
+    executable.write_text(
+        """#!/usr/bin/env python3
+import json
+import pathlib
+import sys
+
+args = sys.argv[1:]
+pathlib.Path(args[args.index("--output-last-message") + 1]).write_text(
+    '''RESULT_JSON''', encoding="utf-8"
+)
+print(json.dumps({"type": "thread.started", "thread_id": "f91d72ad"}))
+print("malformed-jsonl-diagnostic")
+print(json.dumps({"type": "task_complete"}))
+""".replace("RESULT_JSON", json.dumps(result)),
+        encoding="utf-8",
+    )
+    os.chmod(executable, 0o755)
+    database_path = tmp_path / "pilot.db"
+    github = ControlledGitHub()
+    services = controlled_implementation_services(
+        tmp_path,
+        ControlledWorktrees(tmp_path / "worktrees"),
+        CodexCliWorker(executable=str(executable)),
+    )
+    body = delivery_body()
+    first_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+
+    with TestClient(first_app) as client:
+        client.post("/webhooks/github", content=body, headers=signed_headers(body))
+    restarted_app = create_app(
+        database_path=database_path,
+        webhook_secret=SECRET,
+        repository_adapters={REPOSITORY: github},
+        clock=fixed_clock,
+        implementation=services,
+    )
+    with TestClient(restarted_app) as client:
+        state = client.get("/workflows/daniel/probare-crm/issues/41").json()
+
+    implementation = state["implementation"]
+    assert implementation["status"] == "completed"
+    assert implementation["result"] == result
+    assert implementation["error"] is None
+    assert implementation["diagnostic_events"] == [
+        {"type": "thread.started", "thread_id": "f91d72ad"},
+        {
+            "type": "pilot.diagnostic_parse_failed",
+            "code": "invalid_json",
+            "line_number": 2,
+        },
+        {"type": "task_complete"},
+    ]
+
+
 def test_sufficient_evidence_publishes_one_commit_bound_draft_pr_through_http_seam(
     tmp_path,
 ) -> None:
@@ -3063,8 +3158,22 @@ def test_failed_worker_is_contained_and_duplicate_delivery_starts_nothing_else(
     assert repeated.json()["status"] == "already_accepted"
     assert implementation["status"] == "failed"
     assert implementation["result"] is None
-    assert implementation["error"].startswith(
-        "InvalidWorkerResult:" if failure_mode == "invalid-result" else "WorkerExecutionError:"
+    assert implementation["error"] == (
+        "InvalidWorkerResult: schema_validation_failed"
+        if failure_mode == "invalid-result"
+        else "WorkerExecutionError: process_nonzero_exit"
+    )
+    assert implementation["diagnostic_events"] == (
+        [{"type": "turn.completed", "thread_id": "thread-001"}]
+        if failure_mode == "invalid-result"
+        else [
+            {"type": "thread.started", "thread_id": "failed-thread"},
+            {
+                "type": "pilot.diagnostic_parse_failed",
+                "code": "invalid_json",
+                "line_number": 4,
+            },
+        ]
     )
     assert implementation["access_profile"] == {
         "role": "implementer",

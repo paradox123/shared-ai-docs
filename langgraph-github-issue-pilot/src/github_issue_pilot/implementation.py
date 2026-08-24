@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import subprocess
@@ -62,11 +63,31 @@ class WorkerOutput:
 
 
 class WorkerExecutionError(RuntimeError):
-    pass
+    def __init__(
+        self,
+        message: str,
+        *,
+        failure_code: str = "worker_execution_failed",
+        diagnostic_events: tuple[dict[str, object], ...] = (),
+    ) -> None:
+        super().__init__(message)
+        self.failure_code = failure_code
+        self.diagnostic_events = diagnostic_events
 
 
 class InvalidWorkerResult(WorkerExecutionError):
-    pass
+    def __init__(
+        self,
+        message: str,
+        *,
+        failure_code: str = "invalid_worker_result",
+        diagnostic_events: tuple[dict[str, object], ...] = (),
+    ) -> None:
+        super().__init__(
+            message,
+            failure_code=failure_code,
+            diagnostic_events=diagnostic_events,
+        )
 
 
 class WorktreePort(Protocol):
@@ -103,21 +124,20 @@ class GitWorktreeAdapter:
             raise ValueError("run id contains unsupported worktree characters")
         repository_segment = re.sub(r"[^A-Za-z0-9._-]", "-", repository)
         branch = f"codex/run-{run_id}"
+        base_identity_ref = (
+            "refs/github-issue-pilot/bases/"
+            f"{hashlib.sha256(run_id.encode('utf-8')).hexdigest()}"
+        )
         target = self._worktree_root / repository_segment / run_id
         if target.exists():
             try:
-                actual_root = subprocess.run(
-                    [self._git_executable, "-C", str(target), "rev-parse", "--show-toplevel"],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                ).stdout.strip()
-                actual_branch = subprocess.run(
-                    [self._git_executable, "-C", str(target), "branch", "--show-current"],
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                ).stdout.strip()
+                actual_root = self._git(target, "rev-parse", "--show-toplevel")
+                actual_branch = self._git(target, "branch", "--show-current")
+                base_sha = self._git(
+                    repository_root,
+                    "rev-parse",
+                    f"{base_identity_ref}^{{commit}}",
+                )
             except (OSError, subprocess.CalledProcessError) as exc:
                 raise FileExistsError(
                     f"run worktree path exists but is not recoverable: {target}"
@@ -126,25 +146,39 @@ class GitWorktreeAdapter:
                 raise FileExistsError(
                     f"run worktree path does not match its durable identity: {target}"
                 )
-            return Worktree(path=target, branch=branch, base_ref=base_ref)
+            return Worktree(path=target, branch=branch, base_ref=base_sha)
+        self._git(
+            repository_root,
+            "fetch",
+            "--no-tags",
+            "origin",
+            f"+refs/heads/{base_ref}:refs/remotes/origin/{base_ref}",
+        )
+        base_sha = self._git(
+            repository_root,
+            "rev-parse",
+            f"refs/remotes/origin/{base_ref}^{{commit}}",
+        )
+        self._git(repository_root, "update-ref", base_identity_ref, base_sha)
         target.parent.mkdir(parents=True, exist_ok=True)
-        subprocess.run(
-            [
-                self._git_executable,
-                "-C",
-                str(repository_root),
-                "worktree",
-                "add",
-                "-b",
-                branch,
-                str(target),
-                base_ref,
-            ],
+        self._git(
+            repository_root,
+            "worktree",
+            "add",
+            "-b",
+            branch,
+            str(target),
+            base_sha,
+        )
+        return Worktree(path=target, branch=branch, base_ref=base_sha)
+
+    def _git(self, repository_root: Path, *args: str) -> str:
+        return subprocess.run(
+            [self._git_executable, "-C", str(repository_root), *args],
             check=True,
             capture_output=True,
             text=True,
-        )
-        return Worktree(path=target, branch=branch, base_ref=base_ref)
+        ).stdout.strip()
 
 
 class CodexCliWorker:
@@ -174,7 +208,10 @@ class CodexCliWorker:
             "artifact. Return a complete intervention when the existing decision policy requires a "
             "product decision, material scope expansion, missing human-operable access, or unavoidable "
             "manual evidence; do not synthesize the answer or stop for reversible details. Return the "
-            "schema-constrained result and do not expand scope.\n"
+            "schema-constrained result and do not expand scope. The controller-owned publisher stages "
+            "and commits the worktree after a completed result; inability to write linked-worktree Git "
+            "metadata from the worker sandbox must not be reported as an implementation blocker. "
+            "Do not run git add or git commit.\n"
             "<implementation-assignment>\n"
             f"{json.dumps(invocation.assignment, sort_keys=True)}\n"
             "</implementation-assignment>"
@@ -206,7 +243,14 @@ class CodexCliWorker:
             result_filename="worker-result.json",
             process_name="Codex",
         )
-        validate_worker_result(output.result)
+        try:
+            validate_worker_result(output.result)
+        except InvalidWorkerResult as exc:
+            raise InvalidWorkerResult(
+                str(exc),
+                failure_code=exc.failure_code,
+                diagnostic_events=output.diagnostic_events,
+            ) from exc
         return output
 
     def repair(self, invocation: RepairInvocation) -> RepairOutput:
@@ -340,30 +384,46 @@ class CodexCliWorker:
                     timeout=self._timeout_seconds,
                 )
             except (OSError, subprocess.TimeoutExpired) as exc:
+                diagnostic_events = _parse_diagnostic_events(
+                    getattr(exc, "stdout", None)
+                )
                 raise WorkerExecutionError(
-                    f"{process_name} process could not complete: {exc}"
+                    f"{process_name} process could not complete",
+                    failure_code=(
+                        "process_timeout"
+                        if isinstance(exc, subprocess.TimeoutExpired)
+                        else "process_start_failed"
+                    ),
+                    diagnostic_events=diagnostic_events,
                 ) from exc
+            diagnostic_events = _parse_diagnostic_events(completed.stdout)
             if completed.returncode != 0:
-                detail = completed.stderr.strip()[-2000:] or "no diagnostic stderr"
                 raise WorkerExecutionError(
-                    f"{process_name} process exited with {completed.returncode}: {detail}"
+                    f"{process_name} process exited unsuccessfully",
+                    failure_code="process_nonzero_exit",
+                    diagnostic_events=diagnostic_events,
                 )
             if not result_path.is_file():
                 raise InvalidWorkerResult(
-                    f"{process_name} process did not write a final result"
+                    f"{process_name} process did not write a final result",
+                    failure_code="final_result_missing",
+                    diagnostic_events=diagnostic_events,
                 )
             try:
                 result = json.loads(result_path.read_text(encoding="utf-8"))
                 if not isinstance(result, dict):
                     raise TypeError("structured result must be a JSON object")
-                diagnostic_events = tuple(
-                    json.loads(line) for line in completed.stdout.splitlines() if line.strip()
-                )
-                if not all(isinstance(event, dict) for event in diagnostic_events):
-                    raise TypeError("JSONL diagnostics must contain objects")
-            except (json.JSONDecodeError, TypeError) as exc:
+            except json.JSONDecodeError as exc:
                 raise InvalidWorkerResult(
-                    f"{process_name} returned invalid structured output: {exc}"
+                    f"{process_name} returned invalid final-result JSON",
+                    failure_code="final_result_invalid_json",
+                    diagnostic_events=diagnostic_events,
+                ) from exc
+            except TypeError as exc:
+                raise InvalidWorkerResult(
+                    f"{process_name} final result was not an object",
+                    failure_code="final_result_non_object",
+                    diagnostic_events=diagnostic_events,
                 ) from exc
         return WorkerOutput(result=result, diagnostic_events=diagnostic_events)
 
@@ -374,14 +434,53 @@ def validate_worker_result(result: dict[str, object]) -> None:
         schema_version
     )
     if schema_name is None:
-        raise InvalidWorkerResult("worker result uses an unsupported schema version")
+        raise InvalidWorkerResult(
+            "worker result uses an unsupported schema version",
+            failure_code="unsupported_schema_version",
+        )
     try:
         Draft202012Validator(load_contract(schema_name)).validate(result)
     except ValidationError as exc:
-        raise InvalidWorkerResult(f"worker result does not match schema: {exc.message}") from exc
+        raise InvalidWorkerResult(
+            f"worker result does not match schema: {exc.message}",
+            failure_code="schema_validation_failed",
+        ) from exc
     intervention = result.get("intervention")
     if isinstance(intervention, dict):
         validate_intervention_request(intervention)
+
+
+def _parse_diagnostic_events(stdout: str | bytes | None) -> tuple[dict[str, object], ...]:
+    if stdout is None:
+        return ()
+    if isinstance(stdout, bytes):
+        stdout = stdout.decode("utf-8", errors="replace")
+    events: list[dict[str, object]] = []
+    for line_number, line in enumerate(stdout.splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError:
+            events.append(
+                {
+                    "type": "pilot.diagnostic_parse_failed",
+                    "code": "invalid_json",
+                    "line_number": line_number,
+                }
+            )
+            continue
+        if not isinstance(event, dict):
+            events.append(
+                {
+                    "type": "pilot.diagnostic_parse_failed",
+                    "code": "non_object",
+                    "line_number": line_number,
+                }
+            )
+            continue
+        events.append(event)
+    return tuple(events)
 
 
 @dataclass(frozen=True)

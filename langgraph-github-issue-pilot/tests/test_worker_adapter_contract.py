@@ -149,12 +149,118 @@ print(json.dumps({"type": "turn.completed"}))
     assert args[-1] == "-"
     assert "$implement" in prompt and "$tdd" in prompt
     assert "Every evidence observation must embed a non-empty artifact" in prompt
+    assert "The controller-owned publisher stages and commits the worktree" in prompt
+    assert "must not be reported as an implementation blocker" in prompt
     assert json.dumps(valid_assignment(), sort_keys=True) in prompt
     assert "app-server" not in prompt and "exec-server" not in prompt
     assert output.result == valid_result()
     assert output.diagnostic_events == (
         {"type": "thread.started", "thread_id": "thread-001"},
         {"type": "turn.completed"},
+    )
+
+
+def test_codex_cli_adapter_retains_a_valid_blocked_result_when_one_jsonl_line_is_malformed(
+    tmp_path,
+) -> None:
+    result = valid_result()
+    result["outcome"] = "blocked"
+    result["summary"] = "Six checks passed; two prerequisites are unavailable."
+    result["findings"] = [
+        "A read-only mailbox protocol is not specified.",
+        "React dependencies are unavailable in the offline cache.",
+    ]
+    executable = tmp_path / "fake-codex"
+    executable.write_text(
+        """#!/usr/bin/env python3
+import json
+import pathlib
+import sys
+
+args = sys.argv[1:]
+pathlib.Path(args[args.index("--output-last-message") + 1]).write_text(
+    '''RESULT_JSON''', encoding="utf-8"
+)
+print(json.dumps({"type": "thread.started", "thread_id": "f91d72ad"}))
+print("not-json-from-a-degraded-diagnostic")
+print(json.dumps({"type": "task_complete"}))
+""".replace("RESULT_JSON", json.dumps(result)),
+        encoding="utf-8",
+    )
+    os.chmod(executable, 0o755)
+    worktree = tmp_path / "worker-worktree"
+    worktree.mkdir()
+    selection = NodePolicy.packaged().select("implementation")
+
+    output = CodexCliWorker(executable=str(executable)).run(
+        WorkerInvocation(
+            assignment=valid_assignment(),
+            worktree=Worktree(path=worktree, branch="codex/run-001", base_ref="main"),
+            selection=selection,
+            skills=SkillRouter.packaged(SKILL_ROOT).route(
+                "implementation", issue_type="feature"
+            ),
+            access_profile={
+                "role": "implementer",
+                "sandbox": "workspace-write",
+                "write_root": str(worktree),
+                "additional_write_roots": [],
+            },
+        )
+    )
+
+    assert output.result == result
+    assert output.diagnostic_events == (
+        {"type": "thread.started", "thread_id": "f91d72ad"},
+        {
+            "type": "pilot.diagnostic_parse_failed",
+            "code": "invalid_json",
+            "line_number": 2,
+        },
+        {"type": "task_complete"},
+    )
+
+
+def test_codex_cli_adapter_retains_diagnostics_when_the_final_result_file_is_missing(
+    tmp_path,
+) -> None:
+    executable = tmp_path / "fake-codex"
+    executable.write_text(
+        """#!/usr/bin/env python3
+import json
+
+print(json.dumps({"type": "thread.started", "thread_id": "missing-result"}))
+print(json.dumps({"type": "task_complete"}))
+""",
+        encoding="utf-8",
+    )
+    os.chmod(executable, 0o755)
+    worktree = tmp_path / "worker-worktree"
+    worktree.mkdir()
+    selection = NodePolicy.packaged().select("implementation")
+
+    with pytest.raises(InvalidWorkerResult) as captured:
+        CodexCliWorker(executable=str(executable)).run(
+            WorkerInvocation(
+                assignment=valid_assignment(),
+                worktree=Worktree(path=worktree, branch="codex/run-001", base_ref="main"),
+                selection=selection,
+                skills=SkillRouter.packaged(SKILL_ROOT).route(
+                    "implementation", issue_type="feature"
+                ),
+                access_profile={
+                    "role": "implementer",
+                    "sandbox": "workspace-write",
+                    "write_root": str(worktree),
+                    "additional_write_roots": [],
+                },
+            )
+        )
+
+    assert captured.value.failure_code == "final_result_missing"
+    assert captured.value.diagnostic_events == (
+        {"type": "thread.started", "thread_id": "missing-result"},
+        {"type": "task_complete"},
     )
 
 

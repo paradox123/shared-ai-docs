@@ -298,9 +298,21 @@ class WorkflowRuntime:
                 raise InterventionContinuationError(
                     "implementation continuation did not produce a valid result"
                 ) from exc
+            if isinstance(exc, WorkerExecutionError) and exc.diagnostic_events:
+                redacted_failure_diagnostics = redact_payload(
+                    list(exc.diagnostic_events),
+                    services.sensitive_values,
+                )
+                if isinstance(redacted_failure_diagnostics, list):
+                    diagnostic_events = redacted_failure_diagnostics
+            failure_code = (
+                exc.failure_code
+                if isinstance(exc, WorkerExecutionError)
+                else "worker_output_shape_invalid"
+            )
             self._store.fail_implementation(
                 run_id=run_id,
-                error=f"{type(exc).__name__}: worker execution failed",
+                error=f"{type(exc).__name__}: {failure_code}",
                 diagnostic_events=diagnostic_events,
                 completed_at=self._clock().isoformat(),
             )

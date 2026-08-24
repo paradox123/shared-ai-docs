@@ -78,9 +78,18 @@ An existing target is a hard stop. Do not overwrite or rename it without user di
 
 ## Verify and Report
 
-Run the repository-wide postcondition check:
+Before commit handoff, inspect every CLI-updated canonical spec in the diff:
 
 ```bash
+git diff -- openspec/specs
+```
+
+If a changed `spec.md` lacks a final newline, normalize that formatting once and keep the fix in the same change set. This is post-archive formatting normalization, not a failed archive and not a reason to switch to the manual fallback.
+
+Then run both repository-wide postcondition checks:
+
+```bash
+git diff --check
 openspec validate --all --strict --no-interactive
 ```
 
