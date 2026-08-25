@@ -7,14 +7,13 @@ import subprocess
 import tempfile
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from importlib.resources import as_file, files
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 from jsonschema import ValidationError
 from jsonschema.validators import Draft202012Validator
 
-from github_issue_pilot.contracts import load_contract
+from github_issue_pilot.contracts import load_codex_output_contract, load_contract
 from github_issue_pilot.github import IssueState
 from github_issue_pilot.intervention import validate_intervention_request
 from github_issue_pilot.policy import NodePolicy, NodeSelection, SkillProvenance
@@ -349,10 +348,12 @@ class CodexCliWorker:
     ) -> WorkerOutput:
         if selection.model is None or selection.reasoning_effort is None:
             raise WorkerExecutionError(f"{process_name} requires a model and reasoning effort")
-        schema_resource = files("github_issue_pilot.contracts").joinpath(schema_name)
-        with as_file(schema_resource) as schema_path, tempfile.TemporaryDirectory(
-            prefix=temporary_prefix
-        ) as temporary_directory:
+        with tempfile.TemporaryDirectory(prefix=temporary_prefix) as temporary_directory:
+            schema_path = Path(temporary_directory) / schema_name
+            schema_path.write_text(
+                json.dumps(load_codex_output_contract(schema_name), sort_keys=True),
+                encoding="utf-8",
+            )
             result_path = Path(temporary_directory) / result_filename
             command = [
                 self._executable,

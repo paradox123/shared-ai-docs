@@ -134,6 +134,21 @@ import sys
 
 args = sys.argv[1:]
 prompt = sys.stdin.read()
+schema = json.loads(
+    pathlib.Path(args[args.index("--output-schema") + 1]).read_text(encoding="utf-8")
+)
+
+def contains_unsupported_composition(value):
+    if isinstance(value, dict):
+        if "allOf" in value or "oneOf" in value:
+            return True
+        return any(contains_unsupported_composition(item) for item in value.values())
+    if isinstance(value, list):
+        return any(contains_unsupported_composition(item) for item in value)
+    return False
+
+if contains_unsupported_composition(schema):
+    raise SystemExit(42)
 pathlib.Path(__file__).with_suffix(".args.json").write_text(json.dumps(args), encoding="utf-8")
 pathlib.Path(__file__).with_suffix(".stdin.txt").write_text(prompt, encoding="utf-8")
 output = pathlib.Path(args[args.index("--output-last-message") + 1])

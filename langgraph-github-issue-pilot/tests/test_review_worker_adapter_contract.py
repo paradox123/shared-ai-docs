@@ -90,6 +90,21 @@ import sys
 args = sys.argv[1:]
 prompt = sys.stdin.read()
 assignment = json.loads(prompt.split("<review-assignment>\\n", 1)[1].split("\\n</review-assignment>", 1)[0])
+schema = json.loads(
+    pathlib.Path(args[args.index("--output-schema") + 1]).read_text(encoding="utf-8")
+)
+
+def contains_unsupported_composition(value):
+    if isinstance(value, dict):
+        if "allOf" in value or "oneOf" in value:
+            return True
+        return any(contains_unsupported_composition(item) for item in value.values())
+    if isinstance(value, list):
+        return any(contains_unsupported_composition(item) for item in value)
+    return False
+
+if contains_unsupported_composition(schema):
+    raise SystemExit(42)
 capture = pathlib.Path(__file__).with_suffix(".calls.jsonl")
 with capture.open("a", encoding="utf-8") as stream:
     stream.write(json.dumps({"args": args, "prompt": prompt}) + "\\n")

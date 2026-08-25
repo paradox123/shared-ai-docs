@@ -107,6 +107,22 @@ args = sys.argv[1:]
 base = pathlib.Path(__file__).with_name("fake-codex")
 base.with_suffix(".args.json").write_text(json.dumps(args), encoding="utf-8")
 base.with_suffix(".stdin.txt").write_text(sys.stdin.read(), encoding="utf-8")
+schema = json.loads(
+    pathlib.Path(args[args.index("--output-schema") + 1]).read_text(encoding="utf-8")
+)
+
+def contains_unsupported_composition(value):
+    if isinstance(value, dict):
+        if "allOf" in value or "oneOf" in value:
+            return True
+        return any(contains_unsupported_composition(item) for item in value.values())
+    if isinstance(value, list):
+        return any(contains_unsupported_composition(item) for item in value)
+    return False
+
+if contains_unsupported_composition(schema):
+    print(json.dumps({"type": "error", "code": "invalid_json_schema"}))
+    raise SystemExit(42)
 output = pathlib.Path(args[args.index("--output-last-message") + 1])
 output.write_text('''RESULT_JSON''', encoding="utf-8")
 print(json.dumps({"type": "thread.started", "thread_id": "thread-001"}))

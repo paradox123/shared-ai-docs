@@ -6,7 +6,6 @@ import tempfile
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from importlib.resources import as_file, files
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
@@ -14,7 +13,7 @@ from jsonschema import ValidationError
 from jsonschema.validators import Draft202012Validator
 from langgraph.types import interrupt
 
-from github_issue_pilot.contracts import load_contract
+from github_issue_pilot.contracts import load_codex_output_contract, load_contract
 from github_issue_pilot.evidence import redact_payload
 from github_issue_pilot.github import VerificationProjectionError
 from github_issue_pilot.intervention import (
@@ -132,12 +131,15 @@ class CodexCliReviewWorker:
                 f"{json.dumps(invocation.intervention_context, sort_keys=True)}\n"
                 "</intervention-context>"
             )
-        schema_resource = files("github_issue_pilot.contracts").joinpath(
-            "review-verdict-v2.json"
-        )
-        with as_file(schema_resource) as schema_path, tempfile.TemporaryDirectory(
+        schema_name = "review-verdict-v2.json"
+        with tempfile.TemporaryDirectory(
             prefix="github-issue-pilot-review-"
         ) as temporary_directory:
+            schema_path = Path(temporary_directory) / schema_name
+            schema_path.write_text(
+                json.dumps(load_codex_output_contract(schema_name), sort_keys=True),
+                encoding="utf-8",
+            )
             result_path = Path(temporary_directory) / "review-verdict.json"
             command = [
                 self._executable,
