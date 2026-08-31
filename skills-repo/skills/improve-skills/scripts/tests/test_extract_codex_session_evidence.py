@@ -632,6 +632,7 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
                 {
                     "session_id",
                     "line_number",
+                    "nested_call_index",
                     "tool_name",
                     "command",
                     "cwd",
@@ -639,6 +640,7 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
                     "paired_exit_code",
                 },
             )
+            self.assertEqual(calls[0]["nested_call_index"], 1)
             self.assertEqual(calls[0]["tool_name"], "exec_command")
             self.assertIn("API_TOKEN=[redacted]", calls[0]["command"])
             self.assertLessEqual(len(calls[0]["command"]), 600)
@@ -646,6 +648,7 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
             self.assertEqual(calls[0]["paired_status"], "failed")
             self.assertEqual(calls[0]["paired_exit_code"], 7)
             self.assertEqual(calls[1]["tool_name"], "exec_command")
+            self.assertIsNone(calls[1]["nested_call_index"])
             self.assertEqual(
                 calls[1]["command"], "tool --token [redacted] check"
             )
@@ -653,10 +656,458 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
             self.assertEqual(calls[1]["paired_status"], "completed")
             self.assertEqual(calls[1]["paired_exit_code"], 0)
             self.assertEqual(calls[2]["tool_name"], "web__run")
+            self.assertIsNone(calls[2]["nested_call_index"])
             self.assertIsNone(calls[2]["command"])
             self.assertIsNone(calls[2]["cwd"])
             self.assertEqual(calls[2]["paired_status"], "completed")
             self.assertIsNone(calls[2]["paired_exit_code"])
+
+    def test_tool_call_projection_selects_indexed_calls_from_batched_exec(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "batched-tool-calls.jsonl"
+            first_command = (
+                "API_TOKEN=first-secret rg 'tools.fake_call(' first"
+            )
+            custom_input = (
+                "const results = await Promise.all(["
+                "tools.exec_command({"
+                f"cmd: {json.dumps(first_command)}, "
+                f"workdir: {json.dumps(str(Path.home() / 'first-project'))}"
+                "}), "
+                "/* tools.comment_call({secret: 'COMMENT SECRET'}) */"
+                "tools.web__run({search_query: [{q: 'PRIVATE QUERY'}]}), "
+                "tools.exec_command({"
+                "cmd: 'tool --token second-secret check', "
+                f"cwd: {json.dumps(str(Path.home() / 'second-project'))}"
+                "})"
+                "]);"
+            )
+            records = [
+                response_item(
+                    {
+                        "type": "custom_tool_call",
+                        "name": "exec",
+                        "call_id": "call-batch",
+                        "input": custom_input,
+                    }
+                ),
+                response_item(
+                    {
+                        "type": "custom_tool_call_output",
+                        "call_id": "call-batch",
+                        "output": json.dumps(
+                            {
+                                "status": "completed",
+                                "exit_code": 0,
+                                "output": "PRIVATE OUTPUT BODY",
+                            }
+                        ),
+                    }
+                ),
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "session-batch",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "review_line_start": 1,
+                            "review_line_end": 2,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            result = self.run_script(
+                manifest,
+                "--session-id",
+                "session-batch",
+                "--tool-call-projection",
+                "session-batch=1#1",
+                "--tool-call-projection",
+                "session-batch=1#2",
+                "--tool-call-projection",
+                "session-batch=1#3",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            for secret in (
+                "first-secret",
+                "second-secret",
+                "COMMENT SECRET",
+                "PRIVATE QUERY",
+                "PRIVATE OUTPUT BODY",
+            ):
+                self.assertNotIn(secret, result.stdout)
+            output = json.loads(result.stdout)
+            calls = output["tool_calls"]
+            self.assertEqual(
+                [
+                    (
+                        call["line_number"],
+                        call["nested_call_index"],
+                        call["tool_name"],
+                    )
+                    for call in calls
+                ],
+                [
+                    (1, 1, "exec_command"),
+                    (1, 2, "web__run"),
+                    (1, 3, "exec_command"),
+                ],
+            )
+            self.assertEqual(
+                calls[0]["command"],
+                "API_TOKEN=[redacted] rg 'tools.fake_call(' first",
+            )
+            self.assertEqual(calls[0]["cwd"], "~/first-project")
+            self.assertIsNone(calls[1]["command"])
+            self.assertIsNone(calls[1]["cwd"])
+            self.assertEqual(
+                calls[2]["command"], "tool --token [redacted] check"
+            )
+            self.assertEqual(calls[2]["cwd"], "~/second-project")
+            self.assertTrue(
+                all(call["paired_status"] is None for call in calls)
+            )
+            self.assertTrue(
+                all(call["paired_exit_code"] is None for call in calls)
+            )
+
+            legacy = self.run_script(
+                manifest,
+                "--session-id",
+                "session-batch",
+                "--tool-call-projection",
+                "session-batch=1",
+            )
+            self.assertNotEqual(legacy.returncode, 0)
+            self.assertIn("requires an explicit nested index", legacy.stderr)
+            self.assertEqual(legacy.stdout, "")
+
+    def test_tool_call_projection_ignores_regex_literal_lookalikes(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "regex-lookalike.jsonl"
+            records = [
+                response_item(
+                    {
+                        "type": "custom_tool_call",
+                        "name": "exec",
+                        "call_id": "call-regex",
+                        "input": (
+                            "const pattern = "
+                            '/tools.exec_command({cmd:"REGEX_PRIVATE"})/; '
+                            "await tools.web__run({});"
+                        ),
+                    }
+                ),
+                response_item(
+                    {
+                        "type": "custom_tool_call_output",
+                        "call_id": "call-regex",
+                        "output": '{"status":"completed"}',
+                    }
+                ),
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "session-regex",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "review_line_start": 1,
+                            "review_line_end": 2,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            result = self.run_script(
+                manifest,
+                "--session-id",
+                "session-regex",
+                "--tool-call-projection",
+                "session-regex=1",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertNotIn("REGEX_PRIVATE", result.stdout)
+            call = json.loads(result.stdout)["tool_calls"][0]
+            self.assertEqual(call["tool_name"], "web__run")
+            self.assertEqual(call["nested_call_index"], 1)
+            self.assertEqual(call["paired_status"], "completed")
+
+    def test_tool_call_projection_does_not_treat_property_division_as_regex(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "property-division.jsonl"
+            rollout.write_text(
+                json.dumps(
+                    response_item(
+                        {
+                            "type": "custom_tool_call",
+                            "name": "exec",
+                            "input": (
+                                "const ratio = holder.return / "
+                                "tools.exec_command({cmd: 'real division'}) / 2; "
+                                "await tools.web__run({});"
+                            ),
+                        }
+                    )
+                )
+                + "\n"
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "session-division",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "review_line_start": 1,
+                            "review_line_end": 1,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            result = self.run_script(
+                manifest,
+                "--session-id",
+                "session-division",
+                "--tool-call-projection",
+                "session-division=1",
+            )
+
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("requires an explicit nested index", result.stderr)
+            self.assertEqual(result.stdout, "")
+
+    def test_tool_call_projection_scans_executable_template_expressions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "template-expression.jsonl"
+            records = [
+                response_item(
+                    {
+                        "type": "custom_tool_call",
+                        "name": "exec",
+                        "call_id": "call-template",
+                        "input": (
+                            "const label = `result:"
+                            "${await tools.exec_command({cmd: 'echo template'})}"
+                            "`; text(label); await tools.web__run({});"
+                        ),
+                    }
+                ),
+                response_item(
+                    {
+                        "type": "custom_tool_call_output",
+                        "call_id": "call-template",
+                        "output": '{"status":"completed","exit_code":0}',
+                    }
+                ),
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "session-template",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "review_line_start": 1,
+                            "review_line_end": 2,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            result = self.run_script(
+                manifest,
+                "--session-id",
+                "session-template",
+                "--tool-call-projection",
+                "session-template=1#1",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            call = json.loads(result.stdout)["tool_calls"][0]
+            self.assertEqual(call["tool_name"], "exec_command")
+            self.assertEqual(call["command"], "echo template")
+            self.assertEqual(call["nested_call_index"], 1)
+            self.assertIsNone(call["paired_status"])
+            self.assertIsNone(call["paired_exit_code"])
+
+            legacy = self.run_script(
+                manifest,
+                "--session-id",
+                "session-template",
+                "--tool-call-projection",
+                "session-template=1",
+            )
+            self.assertNotEqual(legacy.returncode, 0)
+            self.assertIn("requires an explicit nested index", legacy.stderr)
+            self.assertEqual(legacy.stdout, "")
+
+    def test_tool_call_projection_rejects_ambiguous_dynamic_tool_calls(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "ambiguous-tool-calls.jsonl"
+            sources = (
+                (
+                    "await tools?.exec_command({cmd: 'optional object'}); "
+                    "await tools.web__run({});"
+                ),
+                (
+                    "await tools.exec_command?.({cmd: 'optional call'}); "
+                    "await tools.web__run({});"
+                ),
+                (
+                    "await tools['exec_command']({cmd: 'bracket call'}); "
+                    "await tools.web__run({});"
+                ),
+                (
+                    "const nested = tools; "
+                    "await nested.exec_command({cmd: 'aliased call'}); "
+                    "await tools.web__run({});"
+                ),
+            )
+            records = [
+                response_item(
+                    {
+                        "type": "custom_tool_call",
+                        "name": "exec",
+                        "call_id": f"call-ambiguous-{index}",
+                        "input": source,
+                    }
+                )
+                for index, source in enumerate(sources, start=1)
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "session-ambiguous",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "review_line_start": 1,
+                            "review_line_end": len(records),
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            for line_number in range(1, len(records) + 1):
+                with self.subTest(line_number=line_number):
+                    result = self.run_script(
+                        manifest,
+                        "--session-id",
+                        "session-ambiguous",
+                        "--tool-call-projection",
+                        f"session-ambiguous={line_number}",
+                    )
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(
+                        "ambiguous nested tool syntax", result.stderr
+                    )
+                    self.assertEqual(result.stdout, "")
+
+    def test_tool_call_projection_rejects_invalid_or_ambiguous_nested_indices(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "nested-index-errors.jsonl"
+            records = [
+                response_item(
+                    {
+                        "type": "custom_tool_call",
+                        "name": "exec",
+                        "input": (
+                            "await tools.exec_command({cmd: 'first'}); "
+                            "await tools.web__run({});"
+                        ),
+                    }
+                ),
+                response_item(
+                    {
+                        "type": "function_call",
+                        "name": "exec_command",
+                        "arguments": '{"cmd":"direct"}',
+                    }
+                ),
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "session-index-errors",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "review_line_start": 1,
+                            "review_line_end": 2,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            invocations = (
+                ("session-index-errors=1#0", "nested index must be positive"),
+                (
+                    "session-index-errors=1#three",
+                    "nested index must be an integer",
+                ),
+                (
+                    "session-index-errors=1#1#2",
+                    "must use <session-id>=<line>#<nested-index>",
+                ),
+                ("session-index-errors=1#3", "nested index 3 is out of range"),
+                (
+                    "session-index-errors=2#1",
+                    "nested indices apply only to custom tool calls",
+                ),
+            )
+            for projection, error_text in invocations:
+                with self.subTest(projection=projection):
+                    result = self.run_script(
+                        manifest,
+                        "--session-id",
+                        "session-index-errors",
+                        "--tool-call-projection",
+                        projection,
+                    )
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(error_text, result.stderr)
+                    self.assertEqual(result.stdout, "")
 
     def test_tool_call_projection_requires_exact_ids_and_rejects_other_modes(self):
         with tempfile.TemporaryDirectory() as tmp:

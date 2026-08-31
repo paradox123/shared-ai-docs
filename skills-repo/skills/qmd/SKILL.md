@@ -2,9 +2,9 @@
 name: qmd
 description: Search, update, or maintain markdown knowledge-base indexes using QMD. USE WHEN users ask to search notes, find documents, look up information across markdown-heavy repos, update the local QMD index, refresh embeddings, or run scheduled QMD index maintenance. Prefer QMD for ranked retrieval; if QMD is unavailable, fall back to `rg` and state that fallback explicitly.
 license: MIT
-compatibility: Requires qmd CLI or MCP server. Install via `npm install -g @tobilu/qmd`.
 metadata:
   author: tobi
+  compatibility: "Requires qmd CLI or MCP server. Install via npm install -g @tobilu/qmd."
   imported_by: codex
   source_repo: https://github.com/tobi/qmd
   source_path: skills/qmd/SKILL.md
@@ -159,6 +159,8 @@ Prefer this decision rule:
 - `qmd search "<exact-term>" -c <collection> --files` for exact names, variables, filenames, route fragments, or identifier discovery
 - `qmd query "<question>" -c <collection>` for natural-language questions where you do not know the document vocabulary yet
 - If `qmd search` already finds the right files, do not escalate to `qmd query` unless you still need semantic ranking across many candidates
+
+Treat every CLI invocation as one owned execution. When `qmd query` returns a live execution or shell-session handle, retain and poll that same handle with the execution tool's continuation operation until it exits. Do not launch spelling, quoting, or structured-query variants while the original query is still running, and do not use `pgrep` to rediscover a process whose handle is already known. If cancellation is necessary, terminate the exact execution handle rather than a broad process-name match. After a genuine failure or timeout, retry once with a narrower query or fall back to `qmd search` for exact terms.
 
 ## Collection Setup
 

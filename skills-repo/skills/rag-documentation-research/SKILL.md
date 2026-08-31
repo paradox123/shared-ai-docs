@@ -1,11 +1,11 @@
 ---
 name: rag-documentation-research
-description: QMD-first documentation research for DanielsVault. Use when users ask to find, research, search, or narrow documentation sources before planning or implementation, including "durchsuche die dokumentation", "search the documentation", "find relevant docs", research-for-review, and spec-closeout source discovery. Use targeted rg only when QMD is unavailable or for final literal verification.
+description: QMD-first documentation research for DanielsVault. Use when users ask to find, research, search, or narrow documentation sources before planning or implementation, or when a requested plan, decision template, review, or other grounded artifact requires synthesizing several DanielsVault documents from one supplied starting path. This skill owns retrieval and source verification, not downstream artifact authoring. Use targeted rg only when QMD is unavailable or for final literal verification.
 ---
 
 # QMD Documentation Research
 
-Use QMD as the single DanielsVault indexing and ranked-retrieval engine. The skill keeps its legacy name so existing prompts continue to trigger it; it does not use the historical `.rag/store` indexes.
+Use QMD as the single DanielsVault indexing and ranked-retrieval engine. Use this either for a standalone source-finding request or as the bounded retrieval phase of a larger deliverable. In the latter case, build the evidence bundle here and then continue the parent task; do not replace the requested artifact with a source list. The skill keeps its legacy name so existing prompts continue to trigger it; it does not use the historical `.rag/store` indexes.
 
 ## Automation Session Guard
 
@@ -82,9 +82,9 @@ rag workflow spec-closeout --scope <scope> --change "<change>" --top-k 7 --forma
 
 Read [runtime-transfer.md](references/runtime-transfer.md) only when the user asks to move, package, reinstall, or explain the DanielsVault retrieval setup.
 
-## Output Contract
+## Output Or Handoff Contract
 
-Return:
+For a standalone research request, return the following. When supporting a downstream artifact, retain the same fields as the internal evidence handoff and then continue the parent workflow:
 
 1. Prioritized source paths.
 2. Section or heading when available.

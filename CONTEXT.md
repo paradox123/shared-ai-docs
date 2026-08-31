@@ -40,6 +40,50 @@ _Avoid_: Geschmacksfrage, beliebiges UI-Detail, interne Codeentscheidung
 Ein gezielter, beantwortbarer Hilferuf aus einem ansonsten automatischen Implementierungslauf, wenn dieser ohne menschliche Entscheidung oder Behebung nicht sicher fortfahren kann. Die Antwort setzt denselben Arbeitslauf fort und ist weder eine Workflow-Neukonfiguration noch ein neuer Implementierungsauftrag.
 _Avoid_: Manueller Neustart, Workflow-Override, dauerhafte Worker-Steuerung, allgemeiner Fortschrittsstatus
 
+**Control Command**:
+Eine vom steuernden Menschen initiierte Nachricht an die aktive Aktivitaet eines Implementierungslaufs. Die Control Plane routet sie zur zustaendigen Agentensession; sie wird entweder nach Abbruch der laufenden Operation als Naechstes bearbeitet oder bis zu deren Abschluss geordnet eingereiht.
+_Avoid_: Steuerungseingabe, Interventionsanfrage, unkorrelierter Chat-Prompt
+
+**Operator Client**:
+Eine menschliche Lese- und Steuerungsoberflaeche, die sich an einen zentralen Implementierungslauf anhaengt und dessen Run History darstellt. Sie ist selbst keine Agentensession und besitzt weder den Worker noch dessen Modellkontext.
+_Avoid_: Operator-Client, Supervisor-Agent, menschliche Agentensession
+
+**Run History**:
+Die dauerhaft geordnete, vollstaendig beobachtbare Ausfuehrung aller Aktivitaeten, Agentensessions, Werkzeugwirkungen und menschlichen Entscheidungen eines Implementierungslaufs. Sie ist weder ein Modellkontext noch eine einzelne Session-Historie.
+_Avoid_: Laufhistorie, Agenten-Memory, gemeinsamer Chat
+
+**Control Lease**:
+Das exklusive, sichtbar beanspruchte Recht genau eines Menschen, mutierende Kommandos an einen gesamten Implementierungslauf einschliesslich aller parallelen Aktivitaeten zu senden. Sie ist an die menschliche Identitaet und nicht an eine einzelne Clientverbindung gebunden; ein Verbindungsabbruch gibt sie nicht automatisch frei. Andere verbundene Menschen bleiben lesende Beobachter, bis die Control Lease freigegeben, uebertragen, per Forced Takeover uebernommen oder durch Entzug der erforderlichen Repository Authorization ungueltig wird.
+_Avoid_: Steuerungshoheit, gleichzeitige Co-Steuerung, impliziter Session-Besitz
+
+**Control Transfer**:
+Der atomare Wechsel der Control Lease fuer einen gesamten Implementierungslauf, nachdem ein lesender Beobachter die Uebernahme angefragt und der aktuelle Inhaber sie bewilligt hat. Anfrage und Bewilligung bleiben in der Run History sichtbar.
+_Avoid_: Steuerungsuebergabe, stille Uebernahme, Aktivitaetswechsel
+
+**Forced Takeover**:
+Der atomare Wechsel der Control Lease ohne Bewilligung des bisherigen Inhabers. Jeder fuer den Implementierungslauf zugriffsberechtigte Mensch darf ihn ausloesen; der erzwungene Verantwortungswechsel bleibt ausdruecklich in der Run History sichtbar.
+_Avoid_: Force-Uebernahme, Administrator-Override, stille Lease-Uebernahme
+
+**Agent Definition Repository**:
+Das versionierte GitHub-Repository eines Agenten oder einer Agentenrolle mit deren Prompts, Skills, Tools, Policies, Integrationen und Zugriffen. Es definiert die verfuegbaren Agentenfaehigkeiten, orchestriert aber keine Implementierungslaeufe.
+_Avoid_: Agent Platform, Einzelprompt, lokale Codex-Konfiguration
+
+**Work Package Control Plane**:
+Das zentrale System, das Implementierungslaeufe, Aktivitaeten, Agentensessions, Run History und menschliche Steuerung orchestriert. Es verwendet versionierte Agent Definition Repositories, besitzt aber deren Prompts, Skills und Tools nicht.
+_Avoid_: Workflow Platform, Agent Platform, Agent Definition Repository
+
+**Agent Evolution Loop**:
+Die wiederkehrende Auswertung abgeschlossener und unterbrochener Implementierungslaeufe, die menschlich freizugebende Aenderungen an Agent Definition Repositories ableiten und ausarbeiten darf. Interventionsanfragen, Control Commands und Forced Takeovers sind dafuer eigene auswertbare Signale.
+_Avoid_: Platform Learning Loop, Entwicklungs-Lernschleife, stille Selbstmodifikation
+
+**Agent Definition Approval**:
+Die durch geschuetzte Branches und ein menschliches Vier-Augen-Review im jeweiligen GitHub-, GitLab- oder Azure-DevOps-Repository qualifizierte Aenderung einer Agent Definition. Die Work Package Control Plane konsumiert nur das Ergebnis und besitzt keinen eigenen Approval-Prozess dafuer.
+_Avoid_: Control-Plane-Freigabe, Agenten-Selbstfreigabe, unreviewter Direkt-Push
+
+**Repository Authorization**:
+Die providerneutrale Ableitung erlaubter Operator-Aktionen aus den aktuell wirksamen Berechtigungen einer menschlichen Identitaet auf dem Repository, dem ein Implementierungslauf zugeordnet ist. Repository-Lesezugriff erlaubt die Beobachtung; Schreib- oder Contributor-Zugriff erlaubt grundsaetzlich mutierende Operator-Aktionen, die zusaetzlich eine gueltige Control Lease erfordern. Die Work Package Control Plane authentifiziert den Menschen ueber GitHub, GitLab oder Azure DevOps, verwaltet aber keine eigene Mitglieder- oder Zugriffsliste.
+_Avoid_: Control-Plane-Mitgliederverwaltung, duplizierte Repository-ACL, dauerhaft synchronisierte Benutzerrolle
+
 **Darstellungsdetail**:
 Eine reversible visuelle oder textliche Ausgestaltung innerhalb bestehender Anforderungen, Domaenensprache, Barrierefreiheitsregeln und des vorhandenen Designsystems. Ein Detail, das fachliche Bedeutung, Gefahrenstufe, Einwilligung oder Aktionssemantik traegt, ist kein blosses Darstellungsdetail.
 _Avoid_: Produktentscheidung, wenn keine fachliche Wirkung vorliegt

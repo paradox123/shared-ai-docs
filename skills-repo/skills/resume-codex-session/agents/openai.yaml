@@ -1,4 +1,4 @@
 interface:
   display_name: "Resume Codex Session"
-  short_description: "Recover compact context from a prior Codex task"
-  default_prompt: "Use $resume-codex-session to recover a prior Codex task and continue from its verified context."
+  short_description: "Recover context from a prior Codex task or run"
+  default_prompt: "Use $resume-codex-session to recover a prior Codex task or automation run and continue from its verified context."

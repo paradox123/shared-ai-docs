@@ -75,15 +75,25 @@ fi
 ```
 
 Stop before `qmd update` when this preflight finds a blocker. In a sandboxed automation, a non-writable `~/.cache/qmd` is an execution-environment/write-root problem, not evidence that Homebrew SQLite is missing. If QMD still returns `SQLITE_CANTOPEN` after a clean preflight, report database-path access as the primary symptom and preserve the exact stderr for later diagnosis; do not promote QMD's generic `sqlite-vec`/Homebrew suggestion to the root cause until storage access has been ruled out.
-4. Run maintenance commands from `/` so QMD does not inherit a fragile project working directory:
+4. After collection reconciliation, run update, conditional embedding, and status in one shell operation from `/` so QMD does not inherit a fragile project working directory. Shell variables do not persist across tool calls: if reconciliation happened in an earlier call, repeat Rule 2's Homebrew/QMD/Node resolution once at the start of this operation. Do not rebuild that environment separately before each maintenance command. Capture every command's outcome and still run status after an update or embed failure:
 
 ```bash
-"$QMD_BIN" update
-"$QMD_BIN" embed
-"$QMD_BIN" status
+cd /
+qmd_update_rc=0
+"$QMD_BIN" update || qmd_update_rc=$?
+
+qmd_embed_rc=
+if [ "$qmd_update_rc" -eq 0 ]; then
+  qmd_embed_rc=0
+  "$QMD_BIN" embed || qmd_embed_rc=$?
+fi
+
+qmd_status_rc=0
+"$QMD_BIN" status || qmd_status_rc=$?
+printf 'qmd_update_rc=%s\nqmd_embed_rc=%s\nqmd_status_rc=%s\n' \
+  "$qmd_update_rc" "${qmd_embed_rc:-skipped}" "$qmd_status_rc"
 ```
 
-5. Run `qmd embed` only if `qmd update` succeeds.
-6. Capture run time with a portable command such as `date '+%Y-%m-%dT%H:%M:%S%z'`. Do not use GNU-only forms such as `date -Is`; macOS `date` rejects them.
-7. Update the automation memory with run time, command outcomes, indexed file count, vector count, collections touched, and blockers. Immediately before applying the patch, reread a small current header excerpt such as `sed -n '1,40p' "$MEMORY_PATH"` and anchor on the exact current title/header fields. Do not anchor a newest-first insertion on an older run body from the opening output. If the file changed concurrently, reread and retry once.
-8. Do not repair macOS privacy/TCC, QMD installation, runtime, or permission issues during a routine index run; record the blocker and stop.
+5. Capture run time with a portable command such as `date '+%Y-%m-%dT%H:%M:%S%z'`. Do not use GNU-only forms such as `date -Is`; macOS `date` rejects them.
+6. Update the automation memory with run time, command outcomes, indexed file count, vector count, collections touched, and blockers. Immediately before applying the patch, reread a small current header excerpt such as `sed -n '1,40p' "$MEMORY_PATH"` and anchor on the exact current title/header fields. Do not anchor a newest-first insertion on an older run body from the opening output. If the file changed concurrently, reread and retry once.
+7. Do not repair macOS privacy/TCC, QMD installation, runtime, or permission issues during a routine index run; record the blocker and stop.

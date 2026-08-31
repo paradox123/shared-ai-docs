@@ -41,13 +41,16 @@ Execute only the matching branch unless the user asks for alternatives.
 
 Use this branch for requests about automations that already exist.
 
-1. Locate `~/.codex/automations/<automation-id>/automation.toml`.
-2. Treat `automation.toml` as the automation definition, and inspect `memory.md` beside it when the automation uses persisted run state.
-3. Read these fields when present: `id`, `kind`, `name`, `prompt`, `status`, `rrule`, `model`, `reasoning_effort`, `execution_environment`, `cwds`, `created_at`, and `updated_at`.
-4. If the user asks for the automation text or prompt, return the decoded `prompt` value.
-5. If the user asks for the file verbatim, return the TOML contents exactly enough to satisfy the request.
-6. For create/update/delete operations, prefer `automation_update` when available. Use the verified view/update contract in [automation-update-payloads.md](references/automation-update-payloads.md) instead of discovering the payload by retries.
-7. If editing TOML manually, create a timestamped backup in the automation folder first and change only the requested fields.
+1. Distinguish definition/configuration work from prior-run diagnosis.
+   - For “what happened in this run?”, “why did this automation do that?”, or a named previous execution, use `resume-codex-session` first. Resolve the task by exact ID or title with Codex thread-list/read tools and recover the run's actual actions and result before reading raw Codex state.
+   - Do not search `session_index.jsonl`, archived rollouts, or session folders to find a normal automation run. Use the bounded session-review tooling only when the user explicitly requests log forensics or thread tools genuinely cannot provide the required evidence.
+2. Locate `~/.codex/automations/<automation-id>/automation.toml` when the definition, schedule, or persisted state is relevant.
+3. Treat `automation.toml` as the automation definition, and inspect `memory.md` beside it when the automation uses persisted run state. These files support a run diagnosis but do not replace the task's execution record.
+4. Read these fields when present: `id`, `kind`, `name`, `prompt`, `status`, `rrule`, `model`, `reasoning_effort`, `execution_environment`, `cwds`, `created_at`, and `updated_at`.
+5. If the user asks for the automation text or prompt, return the decoded `prompt` value.
+6. If the user asks for the file verbatim, return the TOML contents exactly enough to satisfy the request.
+7. For create/update/delete operations, prefer `automation_update` when available. Use the verified view/update contract in [automation-update-payloads.md](references/automation-update-payloads.md) instead of discovering the payload by retries.
+8. If editing TOML manually, create a timestamped backup in the automation folder first and change only the requested fields.
 
 Useful inspection commands:
 

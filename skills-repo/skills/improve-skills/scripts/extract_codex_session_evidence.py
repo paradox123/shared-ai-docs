@@ -52,9 +52,11 @@ WRAPPER_PATTERNS = (
     ),
 )
 NESTED_TOOL_RE = re.compile(
-    r"\btools\.([A-Za-z_][A-Za-z0-9_.-]*)\s*\("
+    r"(?<![A-Za-z0-9_$?.])tools\.([A-Za-z_][A-Za-z0-9_.-]*)\s*\("
 )
-NESTED_EXEC_COMMAND_RE = re.compile(r"\btools\.exec_command\s*\(")
+TOOLS_IDENTIFIER_RE = re.compile(
+    r"(?<![A-Za-z0-9_$])tools(?![A-Za-z0-9_$])"
+)
 HEARTBEAT_START_RE = re.compile(r"^\s*<heartbeat\b", re.IGNORECASE)
 HEARTBEAT_OPEN_RE = re.compile(
     r"^\s*<heartbeat\b(?P<attributes>[^>]*)>",
@@ -220,6 +222,69 @@ def heartbeat_group(
     return group
 
 
+def nested_tool_scan(
+    value: object,
+) -> Tuple[List[Tuple[str, int]], bool]:
+    """Return canonical calls and flag any indirect `tools` reference."""
+    if not isinstance(value, str):
+        return [], False
+    occurrences: List[Tuple[str, int]] = []
+    ambiguous = False
+    index = 0
+    while index < len(value):
+        if value[index] == "`":
+            expression_ranges, next_index = js_template_expression_ranges(
+                value, index
+            )
+            for expression_start, expression_end in expression_ranges:
+                nested, nested_ambiguous = nested_tool_scan(
+                    value[expression_start:expression_end]
+                )
+                ambiguous = ambiguous or nested_ambiguous
+                for name, call_end in nested:
+                    occurrences.append(
+                        (name, expression_start + call_end)
+                    )
+            index = max(index + 1, next_index)
+            continue
+        if value[index] in {'"', "'"}:
+            _string_value, next_index = js_string_literal(value, index)
+            index = max(index + 1, next_index)
+            continue
+        if value.startswith("//", index):
+            newline = value.find("\n", index + 2)
+            index = len(value) if newline < 0 else newline + 1
+            continue
+        if value.startswith("/*", index):
+            comment_end = value.find("*/", index + 2)
+            index = len(value) if comment_end < 0 else comment_end + 2
+            continue
+        if value[index] == "/" and js_regex_can_start(value, index):
+            regex_end = js_regex_literal_end(value, index)
+            if regex_end is not None:
+                index = regex_end
+                continue
+        match = NESTED_TOOL_RE.match(value, index)
+        if match:
+            occurrences.append(
+                (match.group(1)[:SAFE_LABEL_CHAR_LIMIT], match.end())
+            )
+            index = match.end()
+            continue
+        reference = TOOLS_IDENTIFIER_RE.match(value, index)
+        if reference:
+            ambiguous = True
+            index = reference.end()
+            continue
+        index += 1
+    return occurrences, ambiguous
+
+
+def nested_tool_occurrences(value: object) -> List[Tuple[str, int]]:
+    occurrences, _ambiguous = nested_tool_scan(value)
+    return occurrences
+
+
 def normalized_tool_names(payload: dict) -> List[str]:
     item_type = payload.get("type")
     if item_type == "function_call":
@@ -227,14 +292,9 @@ def normalized_tool_names(payload: dict) -> List[str]:
         return [name] if name else ["unknown"]
     if item_type != "custom_tool_call":
         return []
-    recorder_input = payload.get("input")
-    nested = (
-        NESTED_TOOL_RE.findall(recorder_input)
-        if isinstance(recorder_input, str)
-        else []
-    )
+    nested = nested_tool_occurrences(payload.get("input"))
     if nested:
-        return [name[:SAFE_LABEL_CHAR_LIMIT] for name in nested]
+        return [name for name, _call_end in nested]
     recorder = bounded_text(payload.get("name"), SAFE_LABEL_CHAR_LIMIT)
     return [f"recorder:{recorder or 'unknown'}"]
 
@@ -348,6 +408,134 @@ def js_string_literal(source: str, start: int) -> Tuple[Optional[str], int]:
     return None, len(source)
 
 
+def js_regex_can_start(source: str, start: int) -> bool:
+    index = start - 1
+    while index >= 0 and source[index].isspace():
+        index -= 1
+    if index < 0:
+        return True
+    if source[index] in "([{:;,=!?&|+-*%^~<>":
+        return True
+    prefix = source[: index + 1]
+    match = re.search(r"([A-Za-z_$][A-Za-z0-9_$]*)$", prefix)
+    if not match or match.group(1) not in {
+        "await",
+        "case",
+        "delete",
+        "do",
+        "else",
+        "in",
+        "instanceof",
+        "new",
+        "of",
+        "return",
+        "throw",
+        "typeof",
+        "void",
+        "yield",
+    }:
+        return False
+    before_word = match.start(1) - 1
+    while before_word >= 0 and source[before_word].isspace():
+        before_word -= 1
+    return before_word < 0 or source[before_word] not in ".$?"
+
+
+def js_regex_literal_end(source: str, start: int) -> Optional[int]:
+    if start >= len(source) or source[start] != "/":
+        return None
+    escaped = False
+    in_character_class = False
+    for index in range(start + 1, len(source)):
+        character = source[index]
+        if character in "\r\n":
+            return None
+        if escaped:
+            escaped = False
+            continue
+        if character == "\\":
+            escaped = True
+            continue
+        if character == "[":
+            in_character_class = True
+            continue
+        if character == "]" and in_character_class:
+            in_character_class = False
+            continue
+        if character == "/" and not in_character_class:
+            next_index = index + 1
+            while next_index < len(source) and source[next_index].isalpha():
+                next_index += 1
+            return next_index
+    return None
+
+
+def js_template_expression_end(source: str, start: int) -> Optional[int]:
+    depth = 1
+    index = start
+    while index < len(source):
+        if source[index] in {'"', "'"}:
+            _value, index = js_string_literal(source, index)
+            continue
+        if source[index] == "`":
+            _ranges, next_index = js_template_expression_ranges(source, index)
+            if next_index <= index or next_index > len(source):
+                return None
+            index = next_index
+            continue
+        if source.startswith("//", index):
+            newline = source.find("\n", index + 2)
+            index = len(source) if newline < 0 else newline + 1
+            continue
+        if source.startswith("/*", index):
+            comment_end = source.find("*/", index + 2)
+            if comment_end < 0:
+                return None
+            index = comment_end + 2
+            continue
+        if source[index] == "/" and js_regex_can_start(source, index):
+            regex_end = js_regex_literal_end(source, index)
+            if regex_end is None:
+                return None
+            index = regex_end
+            continue
+        if source[index] == "{":
+            depth += 1
+        elif source[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return index
+        index += 1
+    return None
+
+
+def js_template_expression_ranges(
+    source: str, start: int
+) -> Tuple[List[Tuple[int, int]], int]:
+    if start >= len(source) or source[start] != "`":
+        return [], start
+    ranges: List[Tuple[int, int]] = []
+    index = start + 1
+    while index < len(source):
+        if source[index] == "\\":
+            index += 2
+            continue
+        if source[index] == "`":
+            return ranges, index + 1
+        if source.startswith("${", index):
+            expression_start = index + 2
+            expression_end = js_template_expression_end(
+                source, expression_start
+            )
+            if expression_end is None:
+                return [], len(source)
+            ranges.append((expression_start, expression_end))
+            index = expression_end + 1
+            continue
+        index += 1
+    return [], len(source)
+
+
 def skip_js_value(source: str, start: int) -> int:
     pairs = {"{": "}", "[": "]", "(": ")"}
     closing: List[str] = []
@@ -404,13 +592,14 @@ def js_object_string_fields(source: str, start: int) -> dict:
     return fields
 
 
-def nested_exec_command_arguments(value: object) -> Optional[dict]:
-    if not isinstance(value, str):
+def nested_exec_command_arguments(
+    value: object, call_end: Optional[int]
+) -> Optional[dict]:
+    if not isinstance(value, str) or call_end is None:
         return None
-    matches = list(NESTED_EXEC_COMMAND_RE.finditer(value))
-    if len(matches) != 1:
+    if call_end < 0 or call_end > len(value):
         return None
-    index = matches[0].end()
+    index = call_end
     while index < len(value) and value[index].isspace():
         index += 1
     if index >= len(value) or value[index] != "{":
@@ -447,7 +636,10 @@ def safe_paired_result(payload: dict) -> Tuple[Optional[str], Optional[int]]:
 
 
 def projected_tool_call(
-    record: dict, line_number: int, session_id: str
+    record: dict,
+    line_number: int,
+    session_id: str,
+    nested_call_index: Optional[int],
 ) -> Tuple[dict, Optional[str]]:
     payload = normalized_payload(record)
     if record.get("type") != "response_item" or payload.get("type") not in {
@@ -458,35 +650,89 @@ def projected_tool_call(
             f"requested line {line_number} for "
             f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} is not a tool call"
         )
-    names = normalized_tool_names(payload)
-    if len(names) != 1:
+    payload_type = payload.get("type")
+    recorder_input = payload.get("input")
+    occurrences, ambiguous_nested_syntax = (
+        nested_tool_scan(recorder_input)
+        if payload_type == "custom_tool_call"
+        else ([], False)
+    )
+    if ambiguous_nested_syntax:
         raise EvidenceError(
             f"requested line {line_number} for "
-            f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} does not identify exactly "
-            "one tool call"
+            f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} contains ambiguous nested "
+            "tool syntax"
         )
-    tool_name = structural_label(names[0]) or "[redacted]"
+    selected_call_end = None
+    selected_nested_index = None
+    if nested_call_index is not None:
+        if payload_type != "custom_tool_call":
+            raise EvidenceError(
+                f"requested line {line_number} for "
+                f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} uses a nested index, "
+                "but nested indices apply only to custom tool calls"
+            )
+        if not occurrences:
+            raise EvidenceError(
+                f"requested line {line_number} for "
+                f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} contains no nested "
+                "tool calls"
+            )
+        if nested_call_index > len(occurrences):
+            raise EvidenceError(
+                f"requested line {line_number} for "
+                f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} nested index "
+                f"{nested_call_index} is out of range 1..{len(occurrences)}"
+            )
+        selected_nested_index = nested_call_index
+        raw_tool_name, selected_call_end = occurrences[nested_call_index - 1]
+    elif payload_type == "custom_tool_call" and len(occurrences) > 1:
+        raise EvidenceError(
+            f"requested line {line_number} for "
+            f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} contains multiple nested "
+            "tool calls and requires an explicit nested index"
+        )
+    elif payload_type == "custom_tool_call" and occurrences:
+        selected_nested_index = 1
+        raw_tool_name, selected_call_end = occurrences[0]
+    else:
+        names = normalized_tool_names(payload)
+        if len(names) != 1:
+            raise EvidenceError(
+                f"requested line {line_number} for "
+                f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} does not identify "
+                "exactly one tool call"
+            )
+        raw_tool_name = names[0]
+
+    tool_name = structural_label(raw_tool_name) or "[redacted]"
     arguments = None
     if tool_name == "exec_command":
-        if payload.get("type") == "function_call":
+        if payload_type == "function_call":
             arguments = json_object(payload.get("arguments"))
         else:
-            arguments = nested_exec_command_arguments(payload.get("input"))
+            arguments = nested_exec_command_arguments(
+                recorder_input, selected_call_end
+            )
     command = sanitized_command(arguments.get("cmd")) if arguments else None
     cwd = None
     if arguments:
         cwd = sanitized_cwd(arguments.get("workdir") or arguments.get("cwd"))
+    paired_call_id = call_identity(payload)
+    if payload_type == "custom_tool_call" and len(occurrences) > 1:
+        paired_call_id = None
     return (
         {
             "session_id": structural_label(session_id),
             "line_number": line_number,
+            "nested_call_index": selected_nested_index,
             "tool_name": tool_name,
             "command": command,
             "cwd": cwd,
             "paired_status": None,
             "paired_exit_code": None,
         },
-        call_identity(payload),
+        paired_call_id,
     )
 
 
@@ -849,15 +1095,44 @@ def parse_clone_suffix_starts(raw_values: List[str]) -> Dict[str, int]:
     return starts
 
 
-def parse_tool_call_targets(raw_values: List[str]) -> List[Tuple[str, int]]:
-    targets: List[Tuple[str, int]] = []
+def parse_tool_call_targets(
+    raw_values: List[str],
+) -> List[Tuple[str, int, Optional[int]]]:
+    targets: List[Tuple[str, int, Optional[int]]] = []
     seen = set()
     for raw in raw_values:
-        session_id, separator, raw_line = raw.rpartition("=")
-        if not separator or not session_id or not raw_line:
+        session_id, separator, raw_selector = raw.rpartition("=")
+        if not separator or not session_id or not raw_selector:
             raise EvidenceError(
                 "tool call projections must use <session-id>=<line>"
             )
+        nested_call_index = None
+        if "#" in raw_selector:
+            if raw_selector.count("#") != 1:
+                raise EvidenceError(
+                    "indexed tool call projections must use "
+                    "<session-id>=<line>#<nested-index>"
+                )
+            raw_line, raw_nested_index = raw_selector.split("#", 1)
+            if not raw_line or not raw_nested_index:
+                raise EvidenceError(
+                    "indexed tool call projections must use "
+                    "<session-id>=<line>#<nested-index>"
+                )
+            try:
+                nested_call_index = int(raw_nested_index)
+            except ValueError as exc:
+                raise EvidenceError(
+                    "tool call projection nested index must be an integer for "
+                    f"{session_id[:SAFE_LABEL_CHAR_LIMIT]}"
+                ) from exc
+            if nested_call_index < 1:
+                raise EvidenceError(
+                    "tool call projection nested index must be positive for "
+                    f"{session_id[:SAFE_LABEL_CHAR_LIMIT]}"
+                )
+        else:
+            raw_line = raw_selector
         try:
             line_number = int(raw_line)
         except ValueError as exc:
@@ -870,11 +1145,13 @@ def parse_tool_call_targets(raw_values: List[str]) -> List[Tuple[str, int]]:
                 f"tool call projection line for "
                 f"{session_id[:SAFE_LABEL_CHAR_LIMIT]} must be positive"
             )
-        target = (session_id, line_number)
+        target = (session_id, line_number, nested_call_index)
         if target in seen:
+            rendered_target = f"{session_id[:SAFE_LABEL_CHAR_LIMIT]}={line_number}"
+            if nested_call_index is not None:
+                rendered_target += f"#{nested_call_index}"
             raise EvidenceError(
-                f"duplicate tool call projection for "
-                f"{session_id[:SAFE_LABEL_CHAR_LIMIT]}={line_number}"
+                f"duplicate tool call projection for {rendered_target}"
             )
         seen.add(target)
         targets.append(target)
@@ -1026,10 +1303,12 @@ def parse_args() -> argparse.Namespace:
         "--tool-call-projection",
         action="append",
         default=[],
-        metavar="SESSION_ID=LINE",
+        metavar="SESSION_ID=LINE[#NESTED_INDEX]",
         help=(
             "Emit one bounded sanitized tool call from an exact advertised "
-            "line; may be repeated and requires matching --session-id filters."
+            "line; append a one-based #NESTED_INDEX for a batched custom "
+            "exec wrapper. May be repeated and requires matching "
+            "--session-id filters."
         ),
     )
     parser.add_argument(
@@ -1232,18 +1511,25 @@ def extract_tool_calls_for_session(
     start: int,
     end: int,
     session_id: str,
-    target_lines: List[int],
-) -> Dict[int, dict]:
-    target_set = set(target_lines)
-    calls: Dict[int, Tuple[dict, Optional[str]]] = {}
+    target_selectors: List[Tuple[int, Optional[int]]],
+) -> Dict[Tuple[int, Optional[int]], dict]:
+    selectors_by_line: Dict[int, List[Optional[int]]] = {}
+    for line_number, nested_call_index in target_selectors:
+        selectors_by_line.setdefault(line_number, []).append(
+            nested_call_index
+        )
+    calls: Dict[
+        Tuple[int, Optional[int]], Tuple[dict, Optional[str]]
+    ] = {}
     paired_results: Dict[
         str, List[Tuple[Optional[str], Optional[int]]]
     ] = {}
     for line_number, raw_line in advertised_lines(path, start, end):
         record = rollout_record(path, line_number, raw_line)
-        if line_number in target_set:
-            calls[line_number] = projected_tool_call(
-                record, line_number, session_id
+        for nested_call_index in selectors_by_line.get(line_number, []):
+            selector = (line_number, nested_call_index)
+            calls[selector] = projected_tool_call(
+                record, line_number, session_id, nested_call_index
             )
         payload = normalized_payload(record)
         if payload.get("type") not in {
@@ -1258,21 +1544,29 @@ def extract_tool_calls_for_session(
             safe_paired_result(payload)
         )
 
-    missing_lines = [line for line in target_lines if line not in calls]
-    if missing_lines:
+    missing_selectors = [
+        selector for selector in target_selectors if selector not in calls
+    ]
+    if missing_selectors:
+        rendered_selectors = []
+        for line_number, nested_call_index in missing_selectors[:8]:
+            rendered = str(line_number)
+            if nested_call_index is not None:
+                rendered += f"#{nested_call_index}"
+            rendered_selectors.append(rendered)
         raise EvidenceError(
-            f"tool call projection could not read requested line(s) for "
+            f"tool call projection could not read requested selector(s) for "
             f"{session_id[:SAFE_LABEL_CHAR_LIMIT]}: "
-            + ", ".join(str(line) for line in missing_lines[:8])
+            + ", ".join(rendered_selectors)
         )
 
-    projected: Dict[int, dict] = {}
-    for line_number in target_lines:
-        call, call_id = calls[line_number]
+    projected: Dict[Tuple[int, Optional[int]], dict] = {}
+    for selector in target_selectors:
+        call, call_id = calls[selector]
         results = paired_results.get(call_id, []) if call_id else []
         if len(results) == 1:
             call["paired_status"], call["paired_exit_code"] = results[0]
-        projected[line_number] = call
+        projected[selector] = call
     return projected
 
 
@@ -1354,7 +1648,7 @@ def run(args: argparse.Namespace) -> str:
         )
     tool_target_ids_not_selected = [
         session_id
-        for session_id, _line_number in tool_call_targets
+        for session_id, _line_number, _nested_call_index in tool_call_targets
         if session_id not in requested_ids
     ]
     if tool_target_ids_not_selected:
@@ -1468,23 +1762,27 @@ def run(args: argparse.Namespace) -> str:
         }
 
     if tool_call_targets:
-        target_lines_by_session: Dict[str, List[int]] = {}
-        for session_id, line_number in tool_call_targets:
-            target_lines_by_session.setdefault(session_id, []).append(
-                line_number
+        target_selectors_by_session: Dict[
+            str, List[Tuple[int, Optional[int]]]
+        ] = {}
+        for session_id, line_number, nested_call_index in tool_call_targets:
+            target_selectors_by_session.setdefault(session_id, []).append(
+                (line_number, nested_call_index)
             )
-        calls_by_target: Dict[Tuple[str, int], dict] = {}
+        calls_by_target: Dict[
+            Tuple[str, int, Optional[int]], dict
+        ] = {}
         for index, session in enumerate(sessions, start=1):
             raw_session_id = session.get("id")
             if not isinstance(raw_session_id, str):
                 continue
-            if raw_session_id not in target_lines_by_session:
+            if raw_session_id not in target_selectors_by_session:
                 continue
             start, end, _embedded = session_range(session, index)
-            target_lines = target_lines_by_session[raw_session_id]
+            target_selectors = target_selectors_by_session[raw_session_id]
             outside_lines = [
                 line_number
-                for line_number in target_lines
+                for line_number, _nested_call_index in target_selectors
                 if line_number < start or line_number > end
             ]
             if outside_lines:
@@ -1502,10 +1800,13 @@ def run(args: argparse.Namespace) -> str:
                 start,
                 end,
                 raw_session_id,
-                target_lines,
+                target_selectors,
             )
-            for line_number, call in projected.items():
-                calls_by_target[(raw_session_id, line_number)] = call
+            for selector, call in projected.items():
+                line_number, nested_call_index = selector
+                calls_by_target[
+                    (raw_session_id, line_number, nested_call_index)
+                ] = call
         ordered_calls = [
             calls_by_target[target] for target in tool_call_targets
         ]

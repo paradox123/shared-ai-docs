@@ -1,0 +1,1610 @@
+<mxfile host='app.diagrams.net' modified='2026-08-26T00:00:00.000Z' agent='Codex'>
+  <diagram name='Agent Dev Process' id='2l7ANSkmw8W1vPNtIQIi'>
+    <mxGraphModel dx='1500' dy='2200' grid='1' gridSize='10' guides='1' tooltips='1' connect='1' arrows='1' fold='1' page='1' pageScale='1' pageWidth='1500' pageHeight='2200' math='0' shadow='0'>
+      <root>
+        <mxCell id='0'/>
+        <mxCell id='1' parent='0'/>
+        <mxCell id='title' value='LangGraph GitHub Issue Pilot — Overall Agent Development Process' style='text;html=1;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='40' y='20' width='1380' height='40' as='geometry'/>
+        </mxCell>
+        <mxCell id='subtitle' value='Sequence-style view of the implemented happy path, bounded repair loops, intervention handoff, and human-only merge boundary' style='text;html=1;align=center;verticalAlign=middle;fontSize=13;fontColor=#4B5563;' vertex='1' parent='1'>
+          <mxGeometry x='40' y='60' width='1380' height='30' as='geometry'/>
+        </mxCell>
+        <mxCell id='TKsWCTaSdVfAHEwTJB4E-1' value='HUMAN' style='swimlane;whiteSpace=wrap;html=1;horizontal=1;startSize=42;fillColor=#EAF3FF;swimlaneFillColor=#F8FBFF;strokeColor=#4C78A8;fontColor=#1F3A5F;fontSize=16;fontStyle=1;rounded=1;' vertex='1' parent='1'>
+          <mxGeometry x='40' y='100' width='520' height='2000' as='geometry'/>
+        </mxCell>
+        <mxCell id='TKsWCTaSdVfAHEwTJB4E-3' value='AGENT / PILOT CONTROL PLANE' style='swimlane;whiteSpace=wrap;html=1;horizontal=1;startSize=42;fillColor=#F1ECFA;swimlaneFillColor=#FCFAFF;strokeColor=#7A5AA6;fontColor=#493267;fontSize=16;fontStyle=1;rounded=1;' vertex='1' parent='1'>
+          <mxGeometry x='590' y='100' width='830' height='2000' as='geometry'/>
+        </mxCell>
+        <mxCell id='TKsWCTaSdVfAHEwTJB4E-4' value='Start' style='ellipse;whiteSpace=wrap;html=1;fillColor=#D9EAF7;strokeColor=#4C78A8;fontColor=#1F3A5F;fontStyle=1;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-1'>
+          <mxGeometry x='190' y='65' width='140' height='54' as='geometry'/>
+        </mxCell>
+        <mxCell id='TKsWCTaSdVfAHEwTJB4E-6' value='Feature Request' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAF7;strokeColor=#4C78A8;fontColor=#1F3A5F;fontStyle=1;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-1'>
+          <mxGeometry x='145' y='155' width='230' height='70' as='geometry'/>
+        </mxCell>
+        <mxCell id='human-issue' value='GitHub issue is refined and authorized&#xa;&lt;b&gt;ready-for-agent&lt;/b&gt; (or proven inherited mandate)' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAF7;strokeColor=#4C78A8;fontColor=#1F3A5F;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-1'>
+          <mxGeometry x='100' y='270' width='320' height='92' as='geometry'/>
+        </mxCell>
+        <mxCell id='human-answer' value='Answer intervention or clarify the handoff&#xa;&lt;font style=&quot;font-size:11px&quot;&gt;The answer changes only the recorded decision; it does not reset the run or round limit.&lt;/font&gt;' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6A700;fontColor=#5E4A00;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-1'>
+          <mxGeometry x='80' y='880' width='360' height='110' as='geometry'/>
+        </mxCell>
+        <mxCell id='human-review' value='Review the verified draft pull request&#xa;&lt;font style=&quot;font-size:11px&quot;&gt;The pilot never interprets PR activity as approval.&lt;/font&gt;' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAF7;strokeColor=#4C78A8;fontColor=#1F3A5F;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-1'>
+          <mxGeometry x='90' y='1530' width='340' height='96' as='geometry'/>
+        </mxCell>
+        <mxCell id='human-changes' value='Request changes / add a review comment' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6A700;fontColor=#5E4A00;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-1'>
+          <mxGeometry x='90' y='1680' width='340' height='74' as='geometry'/>
+        </mxCell>
+        <mxCell id='human-merge' value='Approve and merge the current exact PR head' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#5B9A57;fontColor=#244B22;fontStyle=1;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-1'>
+          <mxGeometry x='90' y='1830' width='340' height='78' as='geometry'/>
+        </mxCell>
+        <mxCell id='human-end' value='Issue delivered' style='ellipse;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#5B9A57;fontColor=#244B22;fontStyle=1;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-1'>
+          <mxGeometry x='180' y='1935' width='160' height='56' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-ingest' value='Authenticate and durably persist the webhook event&#xa;Evaluate the complete repository backlog in issue-number order' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#7A5AA6;fontColor=#493267;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='245' y='255' width='340' height='105' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-eligible' value='Eligible, unblocked,&#xa;and repository free?' style='rhombus;whiteSpace=wrap;html=1;fillColor=#FFE6B3;strokeColor=#D79B00;fontColor=#5E4300;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='320' y='405' width='190' height='105' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-queued' value='Queued durably&#xa;&lt;font style=&quot;font-size:11px&quot;&gt;blocked, interrupted, or repository busy&lt;/font&gt;' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#7F8C8D;fontColor=#45505A;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='35' y='415' width='210' height='86' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-claim' value='Claim one durable LangGraph run&#xa;Project &lt;b&gt;agent-running&lt;/b&gt;; create run branch + isolated worktree; prepare bounded assignment and evidence plan' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#7A5AA6;fontColor=#493267;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='225' y='555' width='380' height='115' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-implement' value='Writing implementer works test-first in the worktree&#xa;Return a structured result with criterion-level behavioral evidence' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#7A5AA6;fontColor=#493267;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='225' y='715' width='380' height='105' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-intervention-decision' value='Human decision or action required?' style='rhombus;whiteSpace=wrap;html=1;fillColor=#FFE6B3;strokeColor=#D79B00;fontColor=#5E4300;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='315' y='850' width='200' height='105' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-intervention' value='Persist intervention and pause the same checkpoint&#xa;Deliver one decision request through Codex App' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6A700;fontColor=#5E4A00;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='25' y='865' width='225' height='100' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-publish' value='Qualify evidence; redact and scan for secrets&#xa;Commit + push a safe new head; create or update the one draft PR' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#5B9A57;fontColor=#244B22;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='225' y='1020' width='380' height='112' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-review' value='Check the immutable current head&#xa;&lt;b&gt;3 fresh read-only reviews:&lt;/b&gt; requirements, code quality, architecture&#xa;&lt;font style=&quot;font-size:11px&quot;&gt;After repair or feedback: also run deterministic verification on that exact head.&lt;/font&gt;' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#4C78A8;fontColor=#1F3A5F;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='215' y='1175' width='400' height='125' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-qualified' value='Exact head fully qualified?' style='rhombus;whiteSpace=wrap;html=1;fillColor=#FFE6B3;strokeColor=#D79B00;fontColor=#5E4300;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='315' y='1340' width='200' height='105' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-handoff' value='Human handoff&#xa;&lt;b&gt;needs-info&lt;/b&gt; or &lt;b&gt;ready-for-human&lt;/b&gt;&#xa;&lt;font style=&quot;font-size:11px&quot;&gt;Preserve PR, findings, attempts, and round identity.&lt;/font&gt;' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='20' y='1335' width='230' height='116' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-repair' value='Aggregate actionable findings → same writing implementer repairs the existing branch&#xa;&lt;b&gt;Maximum 3 numbered rounds&lt;/b&gt; per failed review batch' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='575' y='1335' width='235' height='116' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-verified' value='Project &lt;b&gt;verified&lt;/b&gt; + &lt;b&gt;awaiting-review&lt;/b&gt;&#xa;Remove &lt;b&gt;agent-running&lt;/b&gt; for this exact head' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#5B9A57;fontColor=#244B22;fontStyle=1;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='225' y='1510' width='380' height='100' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-feedback' value='Accept only new feedback from the configured human&#xa;Resume the same run, worktree, branch, and PR; invalidate old-head qualification&#xa;&lt;b&gt;Separate maximum-3-attempt feedback batch&lt;/b&gt;' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#7A5AA6;fontColor=#493267;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='215' y='1660' width='400' height='125' as='geometry'/>
+        </mxCell>
+        <mxCell id='agent-complete' value='Reconcile the human merge&#xa;Close the durable run and advance the deterministic backlog frontier&#xa;&lt;font style=&quot;font-size:11px&quot;&gt;No agent merge, deployment, or release operation exists.&lt;/font&gt;' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#5B9A57;fontColor=#244B22;strokeWidth=2;' vertex='1' parent='TKsWCTaSdVfAHEwTJB4E-3'>
+          <mxGeometry x='215' y='1830' width='400' height='110' as='geometry'/>
+        </mxCell>
+        <mxCell id='TKsWCTaSdVfAHEwTJB4E-7' value='1. articulate the need' edge='1' parent='1' source='TKsWCTaSdVfAHEwTJB4E-4' target='TKsWCTaSdVfAHEwTJB4E-6' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#4C78A8;fontColor=#1F3A5F;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e2' value='2. create and refine the issue' edge='1' parent='1' source='TKsWCTaSdVfAHEwTJB4E-6' target='human-issue' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#4C78A8;fontColor=#1F3A5F;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e3' value='3. authorize; GitHub sends signed event' edge='1' parent='1' source='human-issue' target='agent-ingest' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#4C78A8;fontColor=#1F3A5F;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e4' value='4. persist before acknowledgement; schedule' edge='1' parent='1' source='agent-ingest' target='agent-eligible' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#7A5AA6;fontColor=#493267;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e5' value='5. no — retain disposition' edge='1' parent='1' source='agent-eligible' target='agent-queued' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#7F8C8D;fontColor=#45505A;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e6' value='6. later event / blocker completion wakes backlog' edge='1' parent='1' source='agent-queued' target='agent-eligible' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 4;strokeColor=#7F8C8D;fontColor=#45505A;strokeWidth=2;endArrow=block;endFill=1;exitX=0.5;exitY=1;entryX=0.5;entryY=1;'>
+          <mxGeometry relative='1' as='geometry'>
+            <Array as='points'>
+              <mxPoint x='730' y='630'/>
+              <mxPoint x='1005' y='630'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='e7' value='7. yes — select lowest eligible issue' edge='1' parent='1' source='agent-eligible' target='agent-claim' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#7A5AA6;fontColor=#493267;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e8' value='8. dispatch bounded assignment' edge='1' parent='1' source='agent-claim' target='agent-implement' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#7A5AA6;fontColor=#493267;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e9' value='9. return structured result' edge='1' parent='1' source='agent-implement' target='agent-intervention-decision' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#7A5AA6;fontColor=#493267;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e10' value='10. yes — pause safely' edge='1' parent='1' source='agent-intervention-decision' target='agent-intervention' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#D6A700;fontColor=#5E4A00;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e11' value='11. request one bounded decision' edge='1' parent='1' source='agent-intervention' target='human-answer' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#D6A700;fontColor=#5E4A00;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e12' value='12. answer; resume same checkpoint' edge='1' parent='1' source='human-answer' target='agent-implement' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 4;strokeColor=#D6A700;fontColor=#5E4A00;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.35;entryX=0;entryY=0.65;'>
+          <mxGeometry relative='1' as='geometry'>
+            <Array as='points'>
+              <mxPoint x='575' y='1018'/>
+              <mxPoint x='575' y='868'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='e13' value='13. no — completed implementation' edge='1' parent='1' source='agent-intervention-decision' target='agent-publish' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#5B9A57;fontColor=#244B22;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e14' value='14. publish exact head' edge='1' parent='1' source='agent-publish' target='agent-review' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#5B9A57;fontColor=#244B22;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e15' value='15. aggregate without compensation' edge='1' parent='1' source='agent-review' target='agent-qualified' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#4C78A8;fontColor=#1F3A5F;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e16' value='16. actionable failure' edge='1' parent='1' source='agent-qualified' target='agent-repair' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#B85450;fontColor=#6B2724;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e17' value='17. new repair head (round 1–3)' edge='1' parent='1' source='agent-repair' target='agent-publish' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 4;strokeColor=#B85450;fontColor=#6B2724;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.5;entryX=1;entryY=0.5;'>
+          <mxGeometry relative='1' as='geometry'>
+            <Array as='points'>
+              <mxPoint x='1390' y='1493'/>
+              <mxPoint x='1390' y='1176'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='e18' value='18. blocked or rounds exhausted' edge='1' parent='1' source='agent-qualified' target='agent-handoff' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#B85450;fontColor=#6B2724;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e19' value='19. expose findings and ask' edge='1' parent='1' source='agent-handoff' target='human-answer' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#B85450;fontColor=#6B2724;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'>
+            <Array as='points'>
+              <mxPoint x='575' y='1493'/>
+              <mxPoint x='575' y='1035'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='e20' value='20. answer; resume same repair round' edge='1' parent='1' source='human-answer' target='agent-repair' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 4;strokeColor=#D6A700;fontColor=#5E4A00;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.75;entryX=0;entryY=0.5;'>
+          <mxGeometry relative='1' as='geometry'>
+            <Array as='points'>
+              <mxPoint x='575' y='1063'/>
+              <mxPoint x='575' y='1493'/>
+              <mxPoint x='1165' y='1493'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='e21' value='21. all required checks pass' edge='1' parent='1' source='agent-qualified' target='agent-verified' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#5B9A57;fontColor=#244B22;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e22' value='22. hand off verified draft PR' edge='1' parent='1' source='agent-verified' target='human-review' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#5B9A57;fontColor=#244B22;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e23' value='23. changes requested' edge='1' parent='1' source='human-review' target='human-changes' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#D6A700;fontColor=#5E4A00;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e24' value='24. accept one new feedback batch' edge='1' parent='1' source='human-changes' target='agent-feedback' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#7A5AA6;fontColor=#493267;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e25' value='25. publish new feedback head; requalify fully' edge='1' parent='1' source='agent-feedback' target='agent-publish' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=8 4;strokeColor=#7A5AA6;fontColor=#493267;strokeWidth=2;endArrow=block;endFill=1;exitX=1;exitY=0.5;entryX=1;entryY=0.5;'>
+          <mxGeometry relative='1' as='geometry'>
+            <Array as='points'>
+              <mxPoint x='1370' y='1883'/>
+              <mxPoint x='1370' y='1176'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='e26' value='26. approve current exact head' edge='1' parent='1' source='human-review' target='human-merge' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#5B9A57;fontColor=#244B22;strokeWidth=2;endArrow=block;endFill=1;exitX=0.2;exitY=1;entryX=0.2;entryY=0;'>
+          <mxGeometry relative='1' as='geometry'>
+            <Array as='points'>
+              <mxPoint x='198' y='1870'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='e27' value='27. human merge + issue closure event' edge='1' parent='1' source='human-merge' target='agent-complete' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#5B9A57;fontColor=#244B22;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='e28' value='28. expose terminal completion' edge='1' parent='1' source='agent-complete' target='human-end' style='edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;labelBackgroundColor=#FFFFFF;strokeColor=#5B9A57;fontColor=#244B22;strokeWidth=2;endArrow=block;endFill=1;'>
+          <mxGeometry relative='1' as='geometry'/>
+        </mxCell>
+        <mxCell id='legend' value='&lt;b&gt;Color key:&lt;/b&gt; blue = human / independent review · purple = pilot or writer work · amber = decision / intervention · red = repair or handoff · green = qualified publication / verified completion · dashed arrow = loop or resume' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B8C1CC;fontColor=#4B5563;fontSize=12;' vertex='1' parent='1'>
+          <mxGeometry x='250' y='2120' width='960' height='48' as='geometry'/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name='Edge Cases' id='edge-cases-required-handling'>
+    <mxGraphModel dx='1800' dy='3000' grid='1' gridSize='10' guides='1' tooltips='1' connect='1' arrows='1' fold='1' page='1' pageScale='1' pageWidth='1800' pageHeight='3000' math='0' shadow='0'>
+      <root>
+        <mxCell id='0'/>
+        <mxCell id='1' parent='0'/>
+        <mxCell id='ec-title' value='LangGraph GitHub Issue Pilot — Edge Cases the Workflow Must Address' style='text;html=1;align=center;verticalAlign=middle;fontSize=24;fontStyle=1;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='20' width='1740' height='42' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec-principles' value='&lt;b&gt;Required design principles:&lt;/b&gt; fail closed · every non-terminal failure names an owner, recovery action, retry boundary, and exit condition · preserve one durable identity · qualify only the current exact head · ask humans for semantic decisions · never merge, deploy, or release autonomously' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#5B9A57;fontColor=#244B22;fontSize=13;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='90' y='78' width='1620' height='58' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec-h-id' value='ID' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#34495E;strokeColor=#263849;fontColor=#FFFFFF;fontStyle=1;fontSize=13;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='155' width='80' height='48' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec-h-phase' value='Phase' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#34495E;strokeColor=#263849;fontColor=#FFFFFF;fontStyle=1;fontSize=13;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='155' width='180' height='48' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec-h-case' value='Edge case / trigger' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#34495E;strokeColor=#263849;fontColor=#FFFFFF;fontStyle=1;fontSize=13;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='155' width='500' height='48' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec-h-handling' value='Recovery action / next transition' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#34495E;strokeColor=#263849;fontColor=#FFFFFF;fontStyle=1;fontSize=13;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='155' width='650' height='48' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec-h-outcome' value='Exit condition / resulting state' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#34495E;strokeColor=#263849;fontColor=#FFFFFF;fontStyle=1;fontSize=13;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='155' width='330' height='48' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec01-id' value='EC-01' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1F3A5F;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='203' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec01-phase' value='Intake' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1F3A5F;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='203' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec01-case' value='Invalid signature, oversized request, empty delivery ID, unsupported event/action, unregistered repository, incompatible adapter, or ambiguous auth configuration' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FBFF;strokeColor=#6C8EBF;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='203' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec01-handling' value='Action — The receiver rejects the request before parsing or dispatch and returns a bounded reason. The sender fixes the signature, headers, payload, repository, or event; an operator fixes ambiguous authentication configuration and restarts the service. Only a corrected delivery re-enters intake.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='203' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec01-outcome' value='Rejected safely → corrected delivery is authenticated from the beginning; otherwise no workflow state exists' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FBFF;strokeColor=#6C8EBF;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='203' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec02-id' value='EC-02' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1F3A5F;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='297' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec02-phase' value='Intake' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1F3A5F;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='297' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec02-case' value='A delivery ID is replayed with the same body—or reused with different content' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='297' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec02-handling' value='Action — For the same identity and digest, return the existing command status and let the original run continue without redispatch. For a different digest, reject the conflict; the sender must correct the source and submit it under a new unique delivery identity.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FBFF;strokeColor=#6C8EBF;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='297' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec02-outcome' value='Same body → original workflow continues; conflicting body → only a corrected new delivery can enter intake' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='297' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec03-id' value='EC-03' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#493267;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='391' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec03-phase' value='Authorization' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#493267;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='391' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec03-case' value='Issue has no ready label and provenance is missing—or inherited work materially expands the authorized mandate' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FCFAFF;strokeColor=#9673A6;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='391' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec03-handling' value='Action — Persist the missing-provenance or scope-decision reason and request human correction. Daniel explicitly adds ready-for-agent, links or repairs the authorized PRD or parent chain, or narrows or approves the expanded mandate. The resulting issue event triggers a fresh authorization evaluation.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='391' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec03-outcome' value='Interrupted → corrected authorization event returns the issue to scheduling; no correction means no run' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FCFAFF;strokeColor=#9673A6;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='391' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec04-id' value='EC-04' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#493267;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='485' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec04-phase' value='Scheduling' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#493267;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='485' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec04-case' value='A blocker is open, its implementation PR is not human-merged, or either completion fact is missing' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='485' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec04-handling' value='Action — Persist the exact incomplete blocker and keep the candidate queued. When a blocker PR is merged or its issue closes, consume that event, re-read both completion facts for every blocker, clear the reason only when all qualify, and immediately rerun repository scheduling.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FCFAFF;strokeColor=#9673A6;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='485' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec04-outcome' value='Queued → qualifying blocker event moves the issue to eligibility evaluation and possible claim' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='485' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec05-id' value='EC-05' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#493267;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='579' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec05-phase' value='Scheduling' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#493267;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='579' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec05-case' value='Several issues become ready together—or another issue already owns the repository' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FCFAFF;strokeColor=#9673A6;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='579' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec05-handling' value='Action — Claim only the lowest eligible issue and persist repository-busy for every successor. When the active run completes, is cancelled, or enters a lock-releasing human handoff, rescan the durable frontier and automatically claim the next lowest still-eligible issue.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='579' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec05-outcome' value='One active run → lock release automatically advances the next eligible queued issue' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FCFAFF;strokeColor=#9673A6;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='579' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec06-id' value='EC-06' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#5E4A00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='673' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec06-phase' value='Worker' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#5E4A00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='673' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec06-case' value='Worker timeout, missing final result, schema-invalid result, or malformed diagnostic JSONL beside a valid final result' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFDF5;strokeColor=#D6B656;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='673' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec06-handling' value='Action — Preserve and continue with a valid final result even when diagnostics are malformed. For timeout, missing, or schema-invalid final output, return the stable failure and contract errors to the same worker under the same operation identity for a bounded retry. After the retry budget, create a human handoff and release the repository lock.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#D6B656;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='673' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec06-outcome' value='Valid result → evidence qualification; corrected retry → evidence qualification; exhausted failure → visible handoff and unlocked repository' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFDF5;strokeColor=#D6B656;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='673' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec07-id' value='EC-07' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#5E4A00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='767' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec07-phase' value='Evidence' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#5E4A00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='767' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec07-case' value='Acceptance criterion lacks behavioral proof—or only logs, build success, healthchecks, enqueue success, or static starting screenshots are offered' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#D6B656;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='767' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec07-handling' value='Action — Persist the rejected criteria and missing evidence phases, then return them to the same writing worker in a bounded evidence-repair attempt. The worker fixes the verification setup if necessary, executes the required public behavior, captures a complete new evidence package, and resubmits it to qualification. If evidence requires unavailable human access, open an intervention instead of stopping.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFDF5;strokeColor=#D6B656;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='767' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec07-outcome' value='Qualified replacement package → commit/push/draft PR; bounded repair exhausted or manual proof required → human handoff and lock release' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#D6B656;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='767' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec08-id' value='EC-08' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#5E4A00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='861' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec08-phase' value='Security' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#5E4A00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='861' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec08-case' value='Secrets, tokens, authorization values, credentials, or email addresses appear in evidence, diagnostics, errors, or the outgoing source diff' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFDF5;strokeColor=#D6B656;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='861' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec08-handling' value='Action — Redact sensitive output fields and continue only with the safe copy. If source contains sensitive material, quarantine publication and return the exact affected paths to the writer to remove the value, replace it with a safe binding, rotate any exposed credential through the human owner, regenerate affected evidence, and run the source scan again.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#D6B656;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='861' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec08-outcome' value='Clean rescan → resume evidence/publication; cleanup or rotation cannot be proven → security handoff and no push' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFDF5;strokeColor=#D6B656;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='861' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec09-id' value='EC-09' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#5E4A00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='955' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec09-phase' value='Publication' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFF2CC;strokeColor=#D6B656;fontColor=#5E4A00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='955' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec09-case' value='No implementation commit, branch is not ahead, push/PR update fails, remote base advances, or recovery finds an existing run worktree' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#D6B656;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='955' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec09-handling' value='Action — Reconcile the worktree, local head, remote branch, and branch-owned PR before retrying. Adopt an existing valid worktree or PR under the same run identity. If no implementation commit exists, return to the writer for a real scoped change; retry transient push or PR writes idempotently; route base conflict or unrecoverable Git state to human resolution.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFDF5;strokeColor=#D6B656;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='955' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec09-outcome' value='Exact commit confirmed on one branch/PR → review; bounded reconciliation fails → handoff and lock release' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#D6B656;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='955' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec10-id' value='EC-10' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='1049' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec10-phase' value='Review' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='1049' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec10-case' value='Reviewer output is missing, malformed, wrong-axis, wrong-head, forbidden requirements not_applicable—or the PR head changes during review' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF8F7;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='1049' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec10-handling' value='Action — Retry only the missing or invalid reviewer with fresh context for the same unchanged head and a bounded technical retry. If the PR head changed, invalidate the whole batch and start fresh evidence, check, and review qualification for the new head. If a valid verdict fails, aggregate its findings and transition to EC-11 repair; persistent reviewer infrastructure failure becomes a human handoff.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='1049' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec10-outcome' value='Fresh passing batch on current head → verified; actionable fail → repair; repeated technical failure → handoff and unlock' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF8F7;strokeColor=#B85450;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='1049' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec11-id' value='EC-11' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='1143' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec11-phase' value='Repair' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='1143' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec11-case' value='Repair produces no new SHA, deterministic verification fails, or fresh reviews still fail' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='1143' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec11-handling' value='Action — Persist the deterministic-check failure and every fresh review finding, then build the next numbered repair assignment for the same writer and worktree. The writer must produce a new commit, regenerate affected evidence, and submit that exact head to deterministic verification and all three reviews. A no-new-head result consumes the attempt and returns the reason to the next round.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF8F7;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='1143' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec11-outcome' value='Fresh checks and reviews pass → verified; attempts remain and fail → next repair round; round three fails → EC-12' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='1143' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec12-id' value='EC-12' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='1237' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec12-phase' value='Repair' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='1237' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec12-case' value='Three numbered repair rounds remain unsuccessful—or the writer encounters a non-agentic product/scope conflict' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF8F7;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='1237' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec12-handling' value='Action — Stop automatic repair, preserve the PR and ordered attempts, remove agent-running, and open a human task containing the unresolved findings and exact decision needed. Daniel updates the issue requirements, answers the intervention, submits new PR feedback, or explicitly takes over or cancels the run; that explicit event starts a new bounded continuation rather than a fourth round.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='1237' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec12-outcome' value='Human clarification/feedback → new bounded continuation; takeover/cancel → terminal unlocked run; no response → visible handoff' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF8F7;strokeColor=#B85450;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='1237' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec13-id' value='EC-13' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FCE8B2;strokeColor=#D6A700;fontColor=#5E4A00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='1331' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec13-phase' value='Intervention' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FCE8B2;strokeColor=#D6A700;fontColor=#5E4A00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='1331' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec13-case' value='Intervention request is invalid, stable Codex delivery is unavailable, the pilot restarts while waiting, or the same answer is observed repeatedly' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFDF5;strokeColor=#D6A700;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='1331' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec13-handling' value='Action — Return a malformed request to its originating phase for bounded contract correction. For stable-surface failure, retain the request and retry delivery after the operator restores that surface. Once delivered, wait for the first correlated human answer, persist it once, and resume the exact interrupted phase, round, and head. If delivery cannot be restored, create an alternate visible human handoff and release serialization.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#D6A700;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='1331' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec13-outcome' value='Corrected/delivered request + answer → same phase resumes once; unrecoverable delivery → visible handoff and unlock' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFDF5;strokeColor=#D6A700;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='1331' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec14-id' value='EC-14' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#244B22;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='1425' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec14-phase' value='Human feedback' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#244B22;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='1425' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec14-case' value='Approval, generic PR activity, bot/other-user/empty feedback, unrelated PR, duplicate source, or feedback for a stale head' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FFF7;strokeColor=#82B366;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='1425' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec14-handling' value='Action — Ignore approvals, bots, unrelated PRs, empty text, and duplicate sources without mutating the run. For stale-head feedback, expose the current head and ask Daniel to re-submit or confirm the request against it. For valid current-head feedback, persist one batch and invoke the existing writer in the same worktree.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#82B366;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='1425' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec14-outcome' value='Valid current feedback → EC-15 continuation; stale feedback → explicit resubmission request; unsupported activity → wait' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FFF7;strokeColor=#82B366;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='1425' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec15-id' value='EC-15' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#244B22;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='1519' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec15-phase' value='Human feedback' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#244B22;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='1519' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec15-case' value='Valid feedback produces no new commit—or a new head lacks any fresh qualifying result' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#82B366;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='1519' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec15-handling' value='Action — Return no-new-head, evidence, deterministic-check, and review failures to the same feedback writer as the next numbered attempt. For every new head, first invalidate prior verification, then capture fresh criterion evidence, run the exact-head deterministic check, and run all three reviews. After three attempts, hand the remaining findings to Daniel and release the lock.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FFF7;strokeColor=#82B366;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='1519' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec15-outcome' value='Fresh package/check/reviews pass → verified current head; attempts remain → retry; limit reached → human handoff' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#82B366;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='1519' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec16-id' value='EC-16' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#244B22;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='1613' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec16-phase' value='Completion' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#244B22;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='1613' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec16-case' value='PR is merely closed, merged by another actor, targets another PR/SHA, or the linked issue remains open' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FFF7;strokeColor=#82B366;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='1613' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec16-handling' value='Action — Re-read the persisted PR, exact head, merger identity, merge flag, and linked issue state. A valid correlated human merge atomically records completion, updates the checkpoint, releases the repository lock, and schedules the next issue. For an unmerged close, ask Daniel to reopen the PR or explicitly cancel or take over; unrelated or unauthorized merges remain non-terminal.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#82B366;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='1613' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec16-outcome' value='Valid human merge → terminal + next issue; reopened PR → waiting; explicit cancel/takeover → unlocked handoff' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FFF7;strokeColor=#82B366;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='1613' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec17-id' value='EC-17' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#EDEDED;strokeColor=#7F8C8D;fontColor=#45505A;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='1707' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec17-phase' value='Crash recovery' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#EDEDED;strokeColor=#7F8C8D;fontColor=#45505A;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='1707' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec17-case' value='Process exits during claim, worktree creation, implementation, publication, review, repair, feedback, intervention, or while waiting for human action' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FAFAFA;strokeColor=#7F8C8D;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='1707' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec17-handling' value='Action — Before serving traffic, inspect each active run&apos;s durable phase record and reconcile its worktree, branch, PR, head, labels, worker result, review axes, repair round, feedback batch, and intervention. Adopt confirmed effects and execute only the missing transition under the same operation key. If identity or worktree corruption prevents convergence, create a human recovery task and release serialization safely.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#7F8C8D;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='1707' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec17-outcome' value='Reconciled effect → resume next missing phase; genuine wait/terminal → remain there; unrecoverable identity → handoff' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FAFAFA;strokeColor=#7F8C8D;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='1707' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec18-id' value='EC-18' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#EDEDED;strokeColor=#7F8C8D;fontColor=#45505A;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='1801' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec18-phase' value='Offline recovery' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#EDEDED;strokeColor=#7F8C8D;fontColor=#45505A;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='1801' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec18-case' value='First-ever start, same-boot restart, clock regression, offline interval below/exactly/above 24 hours, interrupted reconciliation, or delayed Queue delivery races synthetic discovery' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#7F8C8D;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='1801' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec18-handling' value='Action — On a qualifying new boot, fetch current ready issues and the active PR merge state, convert each missing fact into an ordinary semantic command, dispatch those commands in completion-before-backlog order, and persist counts. Resume an interrupted reconciliation under the same boot identity; below the threshold, skip GitHub polling and continue normal inbox/run recovery.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FAFAFA;strokeColor=#7F8C8D;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='1801' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec18-outcome' value='Missing fact dispatched → normal completion/scheduling; no missing fact → normal recovery; interrupted scan → same boot run resumes' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#7F8C8D;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='1801' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec19-id' value='EC-19' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='1895' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec19-phase' value='Evidence lifecycle' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='1895' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec19-case' value='The worker returns schema-valid output, but semantic evidence qualification rejects it—for example missing request, response, repeat, read-back, or screenshot phases' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF8F7;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='1895' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec19-handling' value='Action — Return the semantic validator&apos;s missing request, response, repeat, read-back, screenshot, or other phase list to the same worker under a bounded evidence-correction operation. The worker captures the missing public observations and submits a replacement package to the semantic gate; no source change is required when behavior is already correct. If capture needs unavailable manual access, open an intervention.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='1895' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec19-outcome' value='Corrected package passes → publication resumes; bounded correction fails/manual access required → handoff and lock release' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF8F7;strokeColor=#B85450;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='1895' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec20-id' value='EC-20' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1F3A5F;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='1989' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec20-phase' value='Inbox recovery' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontColor=#1F3A5F;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='1989' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec20-case' value='The process exits after durable webhook acceptance or the 202 response, but before the background dispatcher creates a run' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F7FAFF;strokeColor=#6C8EBF;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='1989' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec20-handling' value='Action — Persist a replayable normalized command or outbox state in the same transaction as acceptance. Track accepted, dispatching, dispatched, and terminal outcomes. On every startup, claim and replay each undispatched command under its original semantic identity; after a dispatch error, return it to pending with bounded attempts rather than waiting for the 24-hour GitHub reconciliation.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#6C8EBF;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='1989' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec20-outcome' value='Replay succeeds → normal scheduling/continuation; retry limit reached → visible terminal inbox failure and operator task' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F7FAFF;strokeColor=#6C8EBF;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='1989' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec21-id' value='EC-21' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='2083' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec21-phase' value='Failure lifecycle' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='2083' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec21-case' value='Worker, evidence, publication, invalid review, head mismatch, feedback continuation, or intervention delivery fails closed but leaves the run and repository lock active' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF8F7;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='2083' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec21-handling' value='Action — Map every failure code to a named recovery owner and next operation: retry transient infrastructure under the same identity, send correctable worker/evidence/review failures back to the responsible agent, and open a human task for semantic or exhausted failures. On any terminal path, remove agent-running, release serialization, preserve diagnostics, and trigger the next queued issue.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='2083' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec21-outcome' value='Correctable → owning phase retries; semantic/exhausted → human handoff; terminal → repository unlocks and queue advances' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF8F7;strokeColor=#B85450;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='2083' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec22-id' value='EC-22' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='2177' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec22-phase' value='PR integrity' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='2177' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec22-case' value='An external push, force-push, synchronize event, body/draft-state edit, or unmerged PR close changes GitHub truth after publication or verification' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF8F7;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='2177' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec22-handling' value='Action — On relevant PR activity, re-read the persisted PR identity, current head, canonical body, draft/closed state, and run status. For a changed head, remove verified and awaiting-review immediately, adopt only an authorized branch head, and start fresh evidence, deterministic check, and three-review qualification. For an unmerged close, ask Daniel to reopen, cancel, or take over and release the lock on terminal choice.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#B85450;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='2177' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec22-outcome' value='Authorized new head → fresh qualification; reopened PR → waiting; cancel/takeover → unlocked handoff; old head never remains verified' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF8F7;strokeColor=#B85450;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='2177' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec23-id' value='EC-23' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#244B22;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='2271' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec23-phase' value='Feedback concurrency' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#244B22;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='2271' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec23-case' value='Two valid feedback deliveries arrive while a feedback or repair writer is active—or the PR is merged while an agent mutation is still in flight' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FFF7;strokeColor=#82B366;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='2271' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec23-handling' value='Action — Acquire one durable per-run mutation lease before any writer starts. Queue later feedback batches in arrival order and start the next only after the active batch releases the lease and its expected head is revalidated. Compare-and-set run status and head again before commit, push, review, and labels. If a merge wins, cancel all queued and not-yet-applied machine effects.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#82B366;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='2271' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec23-outcome' value='Lease release → next current-head batch starts; merge → pending mutations cancel; head mismatch → batch returns to human' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FFF7;strokeColor=#82B366;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='2271' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec24-id' value='EC-24' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#4D2D5E;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='2365' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec24-phase' value='Active mandate' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#E1D5E7;strokeColor=#9673A6;fontColor=#4D2D5E;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='2365' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec24-case' value='The issue title, body, acceptance criteria, authorization, ready label, or open state changes after the implementation assignment was persisted' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FBF8FC;strokeColor=#9673A6;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='2365' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec24-handling' value='Action — Bind the assignment to a durable issue revision or digest. On edited, unlabeled, reopened, or closed activity, stop new external effects and compare current authority and requirements with the snapshot. A non-semantic correction may create a new bounded assignment revision; changed scope or revoked authorization asks Daniel to approve, narrow, cancel, or restore readiness before execution resumes.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#9673A6;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='2365' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec24-outcome' value='Approved new revision/restored readiness → new bounded assignment; revoked/closed → cancel and unlock; undecided → needs-info' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FBF8FC;strokeColor=#9673A6;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='2365' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec25-id' value='EC-25' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#6B4E00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='2459' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec25-phase' value='Assignment input' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#6B4E00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='2459' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec25-case' value='The issue has no parseable acceptance checklist, duplicate or ambiguous criteria, or an unsupported requirement format' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF9F0;strokeColor=#D79B00;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='2459' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec25-handling' value='Action — Validate and normalize the issue contract before claim, agent-running, or worktree creation. For missing, duplicate, ambiguous, or unsupported criteria, project needs-info with the exact formatting or decision required. Daniel corrects the issue; the resulting new revision event is parsed again and re-enters eligibility under a new semantic command.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#D79B00;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='2459' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec25-outcome' value='Corrected criteria → claim/assignment preparation; still invalid → needs-info without run, worktree, or lock' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF9F0;strokeColor=#D79B00;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='2459' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec26-id' value='EC-26' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#244B22;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='2553' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec26-phase' value='Completion integrity' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#D5E8D4;strokeColor=#82B366;fontColor=#244B22;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='2553' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec26-case' value='An unrelated closing PR or a merge by a non-configured user closes the issue, and ordinary issue activity observes only a generic implementation-merged flag' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FFF7;strokeColor=#82B366;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='2553' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec26-handling' value='Action — Resolve completion only through the persisted associated PR, exact stored head, configured human identity, and closed linked issue. If ordinary issue activity reports generic merged completion, look up and compare the concrete closing PR before acting. On a valid match, atomically persist completion history and checkpoint, release the lock, and run the next-issue scheduler; otherwise request human resolution.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#82B366;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='2553' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec26-outcome' value='Correlated merge → terminal + next issue; unrelated closure → no completion and explicit reopen/cancel/takeover action' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#F8FFF7;strokeColor=#82B366;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='2553' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec27-id' value='EC-27' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#6B4E00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='2647' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec27-phase' value='Structured redaction' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#6B4E00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='2647' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec27-case' value='Sensitive content appears as a value under credential-shaped keys—or inside issue/context text without matching the configured literal or current regex patterns' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF9F0;strokeColor=#D79B00;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='2647' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec27-handling' value='Action — Apply key-aware recursive redaction and field allowlists before persistence, prompting, checkpointing, or read-back. Redact safe-to-retain metadata and continue. If sensitive content exists in assignment or source, stop the phase, return affected fields or paths to the writer for cleanup, require human credential rotation when exposure is possible, then rebuild the safe assignment/evidence and scan again.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#D79B00;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='2647' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec27-outcome' value='Clean redacted rescan → originating phase resumes; cleanup/rotation unproven → security handoff and no publication' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF9F0;strokeColor=#D79B00;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='2647' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec28-id' value='EC-28' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#6B4E00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='30' y='2741' width='80' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec28-phase' value='Controller operations' style='rounded=0;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFE6CC;strokeColor=#D79B00;fontColor=#6B4E00;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='110' y='2741' width='180' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec28-case' value='Git fetch, worktree creation, commit hooks, push, GitHub API calls, or a corrupt/missing worktree hangs or fails outside the bounded Codex worker timeout' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF9F0;strokeColor=#D79B00;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='290' y='2741' width='500' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec28-handling' value='Action — Start every controller subprocess and remote call with an explicit timeout and non-interactive environment. On timeout, terminate the process, mark the operation uncertain, inspect Git/worktree/GitHub state, adopt a completed effect or retry the missing effect under the same identity. After bounded retries or confirmed corruption, open an operator task, release serialization, and preserve the worktree for diagnosis.' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#D79B00;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='790' y='2741' width='650' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec28-outcome' value='Effect confirmed/retry succeeds → next phase; retry exhausted/corrupt state → operator handoff, preserved evidence, unlocked repository' style='rounded=0;whiteSpace=wrap;html=1;align=left;spacingLeft=10;verticalAlign=middle;fillColor=#FFF9F0;strokeColor=#D79B00;fontColor=#1F2937;fontStyle=1;' vertex='1' parent='1'>
+          <mxGeometry x='1440' y='2741' width='330' height='94' as='geometry'/>
+        </mxCell>
+        <mxCell id='ec-footer' value='Color groups: blue = intake · purple = authorization/scheduling · amber = execution/publication · red = review/repair · green = human interaction/completion · gray = recovery' style='rounded=1;whiteSpace=wrap;html=1;align=center;verticalAlign=middle;fillColor=#FFFFFF;strokeColor=#B8C1CC;fontColor=#4B5563;fontSize=12;' vertex='1' parent='1'>
+          <mxGeometry x='250' y='2861' width='1300' height='48' as='geometry'/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram name='Complete Workflow + Edge Cases' id='complete-workflow-with-edge-cases'>
+    <mxGraphModel dx='4400' dy='12050' grid='1' gridSize='10' guides='1' tooltips='1' connect='1' arrows='1' fold='1' page='1' pageScale='1' pageWidth='4400' pageHeight='12050' math='0' shadow='0'>
+      <root>
+        <mxCell id='0'/>
+        <mxCell id='1' parent='0'/>
+        <mxCell id='cw-title' value='LangGraph GitHub Issue Pilot — Complete Workflow with Edge-Case Recovery' style='text;html=1;align=center;verticalAlign=middle;fontSize=30;fontStyle=1;fontColor=#1F2937;' vertex='1' parent='1'>
+          <mxGeometry x='40' y='24' width='4320' height='54' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-subtitle' value='Three-lane target sequence: Human decisions · Agent reasoning/execution · Langgraph-Workflow automation/orchestration. Includes required handling for EC-01 through EC-28.' style='text;html=1;align=center;verticalAlign=middle;fontSize=16;fontColor=#4B5563;' vertex='1' parent='1'>
+          <mxGeometry x='40' y='82' width='4320' height='38' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-human-lane' value='HUMAN' style='swimlane;whiteSpace=wrap;html=1;horizontal=1;startSize=58;fillColor=#EAF3FF;swimlaneFillColor=#F8FBFF;strokeColor=#4C78A8;fontColor=#1F3A5F;fontSize=20;fontStyle=1;rounded=1;' vertex='1' parent='1'>
+          <mxGeometry x='40' y='150' width='600' height='11680' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-agent-lane' value='AGENT' style='swimlane;whiteSpace=wrap;html=1;horizontal=1;startSize=58;fillColor=#F1ECFA;swimlaneFillColor=#FCFAFF;strokeColor=#7A5AA6;fontColor=#493267;fontSize=20;fontStyle=1;rounded=1;' vertex='1' parent='1'>
+          <mxGeometry x='680' y='150' width='1000' height='11680' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-workflow-lane' value='LANGGRAPH-WORKFLOW' style='swimlane;whiteSpace=wrap;html=1;horizontal=1;startSize=58;fillColor=#DDF3F4;swimlaneFillColor=#F8FEFE;strokeColor=#2A8C91;fontColor=#174B4E;fontSize=20;fontStyle=1;rounded=1;' vertex='1' parent='1'>
+          <mxGeometry x='1720' y='150' width='2640' height='11680' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-human-start' value='Start / articulate the need' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAF7;strokeColor=#4C78A8;fontColor=#1F3A5F;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='180' y='290' width='320' height='82' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-human-issue' value='Create and refine the GitHub issue&#xa;Authorize ready-for-agent or inherited mandate' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAF7;strokeColor=#4C78A8;fontColor=#1F3A5F;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='90' y='521' width='500' height='140' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-human-correct' value='Correct issue contract or authorization&#xa;Fix criteria, provenance, readiness, or scope' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6A700;fontColor=#5E4A00;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='90' y='1833' width='500' height='150' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-human-intervention' value='Answer one bounded intervention&#xa;Approve/narrow a changed mandate, provide access, resolve scope, or take over/cancel' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6A700;fontColor=#5E4A00;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='70' y='8169' width='540' height='190' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-human-review' value='Review the verified draft PR&#xa;Only the configured human can approve the exact head' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D9EAF7;strokeColor=#4C78A8;fontColor=#1F3A5F;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='90' y='8812' width='500' height='150' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-human-feedback' value='Request changes / submit one current-head feedback batch' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6A700;fontColor=#5E4A00;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='90' y='9307' width='500' height='125' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-human-merge' value='Approve and merge the current exact PR head' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#5B9A57;fontColor=#244B22;fontSize=16;fontStyle=1;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='90' y='10561' width='500' height='115' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-human-recovery' value='Operator recovery / terminal handoff&#xa;Resolve security, identity, Git, delivery, or exhausted-attempt failure; explicitly resume, take over, or cancel' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6A700;fontColor=#5E4A00;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='70' y='11221' width='540' height='190' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-human-end' value='Issue delivered' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#5B9A57;fontColor=#244B22;fontSize=16;fontStyle=1;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='180' y='11650' width='320' height='86' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ingest' value='INTAKE&#xa;Authenticate → validate envelope → durably persist before 202&#xa;Deduplicate by delivery identity and digest' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5F0F1;strokeColor=#2A8C91;fontColor=#174B4E;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='463' width='650' height='180' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-recover' value='RECOVERY GATE&#xa;Replay accepted-but-undispatched commands&#xa;Reconcile active runs and qualifying offline GitHub facts' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#7F8C8D;fontColor=#45505A;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='991' width='650' height='180' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-contract' value='AUTHORIZE + NORMALIZE CONTRACT&#xa;Prove ready mandate and parse unique acceptance criteria&#xa;Bind work to an issue revision/digest' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5F0F1;strokeColor=#2A8C91;fontColor=#174B4E;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='1684' width='650' height='190' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-schedule' value='SCHEDULE&#xa;Re-read blockers and repository lock&#xa;Select the lowest eligible issue; queue all successors' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5F0F1;strokeColor=#2A8C91;fontColor=#174B4E;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='2361' width='650' height='180' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-claim' value='CLAIM&#xa;Create one durable run, agent-running state, run branch, isolated worktree, bounded assignment, and evidence plan' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5F0F1;strokeColor=#2A8C91;fontColor=#174B4E;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='2922' width='650' height='200' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-worker' value='WRITING WORKER&#xa;Implement test-first in the same worktree&#xa;Return schema-valid criterion evidence and a scoped new head' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#7A5AA6;fontColor=#493267;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='920' y='3565' width='520' height='180' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-evidence' value='EVIDENCE + SECURITY GATE&#xa;Require direct public behavioral proof for every criterion&#xa;Redact recursively; scan evidence and outgoing source' style='rhombus;whiteSpace=wrap;html=1;fillColor=#FFE6B3;strokeColor=#D79B00;fontColor=#5E4300;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='4374' width='650' height='200' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-publish' value='PUBLISH EXACT HEAD&#xa;Reconcile Git effects → commit → push → create/update one draft PR&#xa;All effects are idempotent under the run identity' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#5B9A57;fontColor=#244B22;fontSize=16;fontStyle=1;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='5463' width='650' height='200' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-review' value='REVIEW ORCHESTRATION
+Freeze the exact current head and dispatch three independent, read-only review assignments
+Validate axis, schema, and head before aggregation' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5F0F1;strokeColor=#2A8C91;fontColor=#174B4E;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='6288' width='650' height='200' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-qualified' value='Exact current head fully qualified?' style='rhombus;whiteSpace=wrap;html=1;fillColor=#FFE6B3;strokeColor=#D79B00;fontColor=#5E4300;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2895' y='7047' width='420' height='180' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-repair' value='BOUNDED REPAIR LOOP&#xa;Aggregate actionable findings; same writer creates a new head&#xa;Fresh evidence/check/reviews; maximum 3 numbered rounds' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='920' y='7575' width='520' height='200' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-agent-intervention' value='INTERVENTION ORCHESTRATION
+Persist exact phase, head, attempts, and decision request
+Pause and resume the same checkpoint without resetting round identity' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#7F8C8D;fontColor=#45505A;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='8169' width='650' height='190' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-verified' value='VERIFIED + AWAITING REVIEW&#xa;Project status only for the immutable qualified head&#xa;Remove agent-running; preserve the draft PR' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#5B9A57;fontColor=#244B22;fontSize=16;fontStyle=1;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='8730' width='650' height='190' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-feedback' value='FEEDBACK WRITER
+Apply the one bounded current-head feedback assignment in the same worktree
+Create a scoped new head and fresh criterion evidence' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#F8CECC;strokeColor=#B85450;fontColor=#6B2724;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='920' y='9571' width='520' height='200' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-completion' value='COMPLETION INTEGRITY&#xa;Correlate persisted PR + exact head + configured human merge + closed issue&#xa;Atomically close run, release lock, advance checkpoint' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5E8D4;strokeColor=#5B9A57;fontColor=#244B22;fontSize=16;fontStyle=1;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='10495' width='650' height='205' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-next' value='Advance deterministic backlog frontier&#xa;Schedule the next lowest eligible queued issue' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#7F8C8D;fontColor=#45505A;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='11287' width='650' height='140' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-phase-1' value='01 · INTAKE / RECOVERY' style='text;html=1;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#64748B;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='265' width='650' height='45' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-phase-2' value='02 · AUTHORIZATION / SCHEDULING' style='text;html=1;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#64748B;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='1540' width='650' height='45' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-phase-3' value='03 · IMPLEMENTATION' style='text;html=1;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#64748B;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='2870' width='650' height='45' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-phase-4' value='04 · EVIDENCE / PUBLICATION' style='text;html=1;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#64748B;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='4180' width='650' height='45' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-phase-5' value='05 · REVIEW / REPAIR' style='text;html=1;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#64748B;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='6160' width='650' height='45' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-phase-6' value='06 · HUMAN REVIEW / FEEDBACK' style='text;html=1;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#64748B;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='8660' width='650' height='45' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-phase-7' value='07 · COMPLETION / QUEUE' style='text;html=1;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#64748B;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='10320' width='650' height='45' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec01' value='EC-01 — Invalid/ambiguous webhook input&#xa;Action: Reject before parse/dispatch; sender or operator corrects signature, envelope, repository, event, or auth config.&#xa;Exit: Corrected unique delivery restarts intake; otherwise no run.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='470' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec02' value='EC-02 — Duplicate or conflicting delivery ID&#xa;Action: Same digest returns existing status; different digest is rejected and must use a corrected new identity.&#xa;Exit: Original command continues or corrected delivery restarts intake.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='3670' y='470' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec20' value='EC-20 — 202 sent before background dispatch&#xa;Action: Replay the transactional outbox command on startup under the original semantic identity with bounded attempts.&#xa;Exit: Dispatch succeeds → recovery/scheduling; exhausted → operator task.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='1010' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec18' value='EC-18 — First boot / qualifying offline interval&#xa;Action: Scan ready issues and active merge facts; emit ordinary semantic commands completion-first, then backlog.&#xa;Exit: Missing facts enter normal recovery; interrupted scan resumes by boot ID.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='3670' y='1010' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec17' value='EC-17 — Crash during any active phase&#xa;Action: Reconcile durable phase, worktree, branch, PR, head, labels, results, reviews, rounds, feedback, and intervention; execute only the missing effect.&#xa;Exit: Resume exact phase; corrupt identity → operator handoff and safe unlock.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='1380' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec03' value='EC-03 — Missing ready label/provenance or expanded mandate&#xa;Action: Persist the reason and request explicit ready label, repaired provenance, narrowed scope, or human approval.&#xa;Exit: Corrected issue event re-enters contract authorization; no correction → no run.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='1710' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec24' value='EC-24 — Issue authority or requirements mutate mid-run&#xa;Action: Stop new effects; compare current issue revision with assignment; ask human to approve/narrow/cancel/restore readiness.&#xa;Exit: Approved revision creates bounded reassignment; revoked/closed cancels and unlocks.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='3670' y='3230' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec25' value='EC-25 — Acceptance checklist missing/ambiguous/unsupported&#xa;Action: Before claim, project needs-info with exact correction required; parse the corrected revision as a new command.&#xa;Exit: Valid contract → eligibility; invalid → no worktree or lock.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='2110' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec04' value='EC-04 — Blocker incomplete or completion fact missing&#xa;Action: Persist exact blocker; on merge/close event re-read every blocker fact and rerun scheduling.&#xa;Exit: All blockers qualify → eligibility; otherwise remain durably queued.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='2460' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec05' value='EC-05 — Concurrent ready issues / repository busy&#xa;Action: Claim only the lowest eligible issue; queue successors and rescan automatically whenever the lock releases.&#xa;Exit: Exactly one active run; next issue advances deterministically.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='3670' y='2460' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec06' value='EC-06 — Worker timeout or invalid/missing final result&#xa;Action: Keep a valid final result despite bad diagnostics; otherwise retry the same worker/operation with stable contract errors and bounded budget.&#xa;Exit: Corrected result → evidence; exhausted → visible handoff and unlock.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='710' y='3860' width='440' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec28' value='EC-28 — Git/API/controller operation hangs or worktree corrupts&#xa;Action: Timeout and terminate; inspect external truth; adopt completed effect or retry missing effect idempotently.&#xa;Exit: Confirmed/retried → phase resumes; exhausted/corrupt → preserved operator handoff.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='3670' y='3600' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec07' value='EC-07 — Criterion lacks behavioral proof&#xa;Action: Return rejected criteria and missing phases to the same writer; execute public behavior and capture a complete replacement evidence pack.&#xa;Exit: Qualified pack → publication; manual proof/exhaustion → intervention or handoff.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='710' y='4260' width='440' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec19' value='EC-19 — Schema-valid result fails semantic evidence gate&#xa;Action: Return missing request/response/repeat/read-back/screenshot phases for bounded evidence-only correction.&#xa;Exit: Replacement passes → publication; unavailable access → intervention.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1210' y='4260' width='440' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec08' value='EC-08 — Secret/PII appears in output or source&#xa;Action: Redact safe output; quarantine source, remove unsafe value, rotate exposed credential, regenerate evidence, and rescan.&#xa;Exit: Clean rescan → gate resumes; unproven cleanup → security handoff/no push.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='710' y='4660' width='440' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec27' value='EC-27 — Credential-shaped keys evade literal regexes&#xa;Action: Apply key-aware recursive redaction and field allowlists before persistence/prompting; clean source and rotate credentials if exposed.&#xa;Exit: Clean rebuilt input/evidence → resume; otherwise security handoff.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1210' y='4660' width='440' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec09' value='EC-09 — No commit / push, base, PR, or worktree mismatch&#xa;Action: Reconcile local/remote/worktree/PR truth; adopt valid effects; return no-change to writer; retry transient writes; hand off conflicts.&#xa;Exit: One exact branch-owned PR head → review; unrecoverable → unlock/handoff.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='5480' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec22' value='EC-22 — External push/edit/close changes verified PR truth&#xa;Action: Re-read PR identity/head/body/state; invalidate verified labels; authorize changed head and run fresh full qualification.&#xa;Exit: New head → evidence gate; reopen/cancel/takeover for unmerged close.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='3670' y='8580' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec10' value='EC-10 — Reviewer missing/malformed/wrong-axis/wrong-head&#xa;Action: Retry only invalid reviewer for unchanged head; changed head restarts all qualification; valid fail enters repair.&#xa;Exit: Fresh pass → verified; actionable fail → repair; repeated infra failure → handoff.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='6320' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec21' value='EC-21 — Fail-closed error leaves active lock/run&#xa;Action: Map each failure to agent retry, human decision, or terminal handoff; terminal paths remove agent-running, unlock, and schedule next.&#xa;Exit: Correctable → owner retries; exhausted/semantic → visible handoff.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='3670' y='7160' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec11' value='EC-11 — Repair has no new SHA or qualification still fails&#xa;Action: Persist failures; same writer creates next numbered head, fresh evidence, deterministic check, and all reviews; no-head consumes attempt.&#xa;Exit: Pass → verified; attempts remain → next round; round 3 → intervention.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='710' y='7890' width='440' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec12' value='EC-12 — Three repair rounds fail or product/scope conflict&#xa;Action: Stop automation; preserve PR/findings/attempts; remove active label and ask for exact human decision.&#xa;Exit: Clarification/feedback → new bounded continuation; takeover/cancel → terminal unlock.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='3670' y='7560' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec13' value='EC-13 — Intervention malformed, unavailable, restarted, or duplicated&#xa;Action: Correct contract; retain/retry delivery; persist first correlated answer once and resume exact phase/head/round.&#xa;Exit: Answer resumes once; unrecoverable delivery → alternate visible handoff/unlock.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='8150' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec14' value='EC-14 — Approval, bot, empty, duplicate, unrelated, or stale feedback&#xa;Action: Ignore unsupported activity; expose current head and request resubmission for stale feedback; persist valid current-head batch once.&#xa;Exit: Valid batch → feedback writer; stale → human resubmits; unsupported → wait.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='9050' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec15' value='EC-15 — Feedback yields no new head or fresh qualification&#xa;Action: Same feedback writer retries with evidence/check/reviews for every new head; invalidate prior verification; maximum three attempts.&#xa;Exit: Fresh pass → verified; attempts remain → retry; limit → human handoff.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='710' y='9920' width='440' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec23' value='EC-23 — Concurrent feedback writers or merge race&#xa;Action: Acquire durable per-run mutation lease; queue batches; CAS expected head before effects; merge cancels pending machine mutations.&#xa;Exit: Lease release → next current-head batch; merge → cancel; mismatch → human.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='9650' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec16' value='EC-16 — PR closed/unrelated/wrong actor/wrong SHA or issue open&#xa;Action: Re-read persisted PR/head/merger/merge flag/issue; ask human to reopen, cancel, or take over when not valid.&#xa;Exit: Correlated merge → terminal; reopened → review; cancel/takeover → unlock.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF4F3;strokeColor=#B85450;fontColor=#4A2523;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='10500' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-ec26' value='EC-26 — Generic issue closure could bypass canonical merge&#xa;Action: Resolve concrete closing PR and compare persisted PR, exact head, configured human, and closed issue before completing.&#xa;Exit: Correlated closure → terminal; unrelated → reopen/cancel/takeover decision.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFF9E8;strokeColor=#D79B00;fontColor=#4F3E12;fontSize=14;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='3670' y='10500' width='650' height='250' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-global-note' value='LANGGRAPH INVARIANTS
+One durable run identity · one mutation lease · qualify only the current exact head · every failure has an owner and bounded exit · no autonomous merge/deploy/release' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#F8FAFC;strokeColor=#94A3B8;fontColor=#334155;fontSize=14;dashed=1;' vertex='1' parent='1'>
+          <mxGeometry x='1760' y='11630' width='1590' height='130' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-legend' value='Lane key: blue = Human · purple = Agent reasoning/execution · teal = Langgraph automation · amber = gate/decision · red = repair · green = verified/completion · gray = recovery · dashed arrows = exception/recovery' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=14;fillColor=#FFFFFF;strokeColor=#B8C1CC;fontColor=#4B5563;fontSize=14;' vertex='1' parent='1'>
+          <mxGeometry x='710' y='11630' width='940' height='130' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-edge-1' value='1. articulate need' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#4C78A8;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-human-start' target='cw-human-issue'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-2' value='2. authorize issue; signed GitHub event' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#4C78A8;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-human-issue' target='cw-ingest'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-3' value='3. persisted command enters recovery gate' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#7A5AA6;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-ingest' target='cw-recover'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-4' value='4. recovered semantic command' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#7F8C8D;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-recover' target='cw-contract'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-5' value='5. authorized normalized contract' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#7A5AA6;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-contract' target='cw-schedule'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-6' value='6. lowest eligible issue selected' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#7A5AA6;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-schedule' target='cw-claim'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-7' value='7. bounded assignment dispatched' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#7A5AA6;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-claim' target='cw-worker'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-8' value='8. structured result + evidence' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#7A5AA6;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-worker' target='cw-evidence'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-9' value='9. evidence and security qualify' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-evidence' target='cw-publish'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-10' value='10. immutable current head published' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-publish' target='cw-review'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-12' value='12. fresh check and three verdicts' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#7A5AA6;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-reviewers' target='cw-qualified'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-13' value='13. yes — project exact-head verification' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-qualified' target='cw-verified'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-14' value='14. hand off verified draft PR' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#4C78A8;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-verified' target='cw-human-review'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-15' value='15. changes requested on current head' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#D6A700;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-human-review' target='cw-human-feedback'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-16' value='16. accept one feedback batch' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#D6A700;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-human-feedback' target='cw-feedback-gate'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-18' value='18. new feedback head; invalidate and requalify' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;' edge='1' parent='1' source='cw-feedback' target='cw-evidence'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-19' value='19. approve current exact head' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-human-review' target='cw-human-merge'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-20' value='20. human merge + issue event' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-human-merge' target='cw-completion'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-21' value='21. atomic completion releases lock' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-completion' target='cw-next'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-22' value='22. no more eligible work — delivered' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-next' target='cw-human-end'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-23' value='23. more eligible work — next issue' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#7F8C8D;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;' edge='1' parent='1' source='cw-next' target='cw-schedule'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-24' value='24. no — aggregate actionable findings' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-qualified' target='cw-repair'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-25' value='25. new repair head; re-run qualification' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;' edge='1' parent='1' source='cw-repair' target='cw-review'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-26' value='26. blocked/exhausted — ask one decision' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#D6A700;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-repair' target='cw-agent-intervention'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-27' value='27. deliver bounded decision request' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#D6A700;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-agent-intervention' target='cw-human-intervention'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-28' value='28. correlated answer' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#D6A700;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-human-intervention' target='cw-agent-intervention'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-29' value='29. resume exact repair checkpoint' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#D6A700;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;' edge='1' parent='1' source='cw-agent-intervention' target='cw-repair'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-30' value='30. corrected issue event' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#D6A700;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;' edge='1' parent='1' source='cw-human-correct' target='cw-contract'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-31' value='31. explicit resume/cancel releases serialization' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#7F8C8D;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;' edge='1' parent='1' source='cw-human-recovery' target='cw-next'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-32' value='32. reject safely (EC-01)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ingest' target='cw-ec01'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2595' y='553'/>
+              <mxPoint x='2595' y='400'/>
+              <mxPoint x='2085' y='400'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-33' value='33. correct source/config' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec01' target='cw-human-correct'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='790'/>
+              <mxPoint x='1700' y='790'/>
+              <mxPoint x='1700' y='1908'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-34' value='34. detect replay/conflict (EC-02)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ingest' target='cw-ec02'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3550' y='553'/>
+              <mxPoint x='3550' y='400'/>
+              <mxPoint x='3995' y='400'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-35' value='35. continue original or corrected command' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec02' target='cw-recover'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3995' y='790'/>
+              <mxPoint x='3550' y='790'/>
+              <mxPoint x='3550' y='1081'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-36' value='36. dispatch gap detected (EC-20)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ingest' target='cw-ec20'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2595' y='553'/>
+              <mxPoint x='2595' y='940'/>
+              <mxPoint x='2085' y='940'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-37' value='37. replay durable outbox' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec20' target='cw-recover'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='1330'/>
+              <mxPoint x='2595' y='1330'/>
+              <mxPoint x='2595' y='1081'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-38' value='38. offline facts missing (EC-18)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-recover' target='cw-ec18'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3550' y='1081'/>
+              <mxPoint x='3550' y='940'/>
+              <mxPoint x='3995' y='940'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-39' value='39. emit semantic commands' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec18' target='cw-schedule'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3995' y='1330'/>
+              <mxPoint x='3550' y='1330'/>
+              <mxPoint x='3550' y='2451'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-40' value='40. active phase incomplete (EC-17)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-recover' target='cw-ec17'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2595' y='1081'/>
+              <mxPoint x='2595' y='1310'/>
+              <mxPoint x='2085' y='1310'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-41' value='41. reconcile and resume exact phase' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec17' target='cw-recover'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='1700'/>
+              <mxPoint x='2595' y='1700'/>
+              <mxPoint x='2595' y='1081'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-42' value='42. authority not proven (EC-03)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-contract' target='cw-ec03'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2595' y='1779'/>
+              <mxPoint x='2595' y='1640'/>
+              <mxPoint x='2085' y='1640'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-43' value='43. request corrected mandate' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec03' target='cw-human-correct'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='2030'/>
+              <mxPoint x='1700' y='2030'/>
+              <mxPoint x='1700' y='1908'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-44' value='44. mandate revision changed (EC-24)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-worker' target='cw-ec24'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='1700' y='3655'/>
+              <mxPoint x='1700' y='3160'/>
+              <mxPoint x='3995' y='3160'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-45' value='45. pause and obtain human decision' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec24' target='cw-human-intervention'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3995' y='3550'/>
+              <mxPoint x='1700' y='3550'/>
+              <mxPoint x='1700' y='8264'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-46' value='46. contract invalid (EC-25)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-contract' target='cw-ec25'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2595' y='1779'/>
+              <mxPoint x='2595' y='2040'/>
+              <mxPoint x='2085' y='2040'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-47' value='47. request exact criteria correction' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec25' target='cw-human-correct'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='2430'/>
+              <mxPoint x='1700' y='2430'/>
+              <mxPoint x='1700' y='1908'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-48' value='48. blocker incomplete (EC-04)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-schedule' target='cw-ec04'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2595' y='2451'/>
+              <mxPoint x='2595' y='2390'/>
+              <mxPoint x='2085' y='2390'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-49' value='49. qualifying blocker event reschedules' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec04' target='cw-schedule'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='2780'/>
+              <mxPoint x='2595' y='2780'/>
+              <mxPoint x='2595' y='2451'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-50' value='50. repository busy (EC-05)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-schedule' target='cw-ec05'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3550' y='2451'/>
+              <mxPoint x='3550' y='2390'/>
+              <mxPoint x='3995' y='2390'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-51' value='51. lock release advances frontier' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec05' target='cw-schedule'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3995' y='2780'/>
+              <mxPoint x='3550' y='2780'/>
+              <mxPoint x='3550' y='2451'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-52' value='52. worker contract failure (EC-06)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-worker' target='cw-ec06'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='665' y='3655'/>
+              <mxPoint x='665' y='3790'/>
+              <mxPoint x='930' y='3790'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-53' value='53. bounded same-operation retry' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec06' target='cw-worker'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='930' y='4180'/>
+              <mxPoint x='665' y='4180'/>
+              <mxPoint x='665' y='3655'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-54' value='54. controller uncertain/hung (EC-28)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-claim' target='cw-ec28'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3550' y='3022'/>
+              <mxPoint x='3550' y='3530'/>
+              <mxPoint x='3995' y='3530'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-55' value='55. reconcile, retry, or operator handoff' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec28' target='cw-human-recovery'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3995' y='3920'/>
+              <mxPoint x='1700' y='3920'/>
+              <mxPoint x='1700' y='11316'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-56' value='56. behavioral proof rejected (EC-07)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-evidence' target='cw-ec07'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='1700' y='4474'/>
+              <mxPoint x='1700' y='4190'/>
+              <mxPoint x='930' y='4190'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-57' value='57. create replacement evidence pack' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec07' target='cw-worker'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='930' y='4580'/>
+              <mxPoint x='665' y='4580'/>
+              <mxPoint x='665' y='3655'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-58' value='58. semantic phases missing (EC-19)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-evidence' target='cw-ec19'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='1700' y='4474'/>
+              <mxPoint x='1700' y='4190'/>
+              <mxPoint x='1430' y='4190'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-59' value='59. bounded evidence-only correction' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec19' target='cw-worker'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='1430' y='4580'/>
+              <mxPoint x='1690' y='4580'/>
+              <mxPoint x='1690' y='3655'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-60' value='60. sensitive output/source (EC-08)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-evidence' target='cw-ec08'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='1700' y='4474'/>
+              <mxPoint x='1700' y='4590'/>
+              <mxPoint x='930' y='4590'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-61' value='61. clean, rotate, regenerate, rescan' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec08' target='cw-worker'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='930' y='4980'/>
+              <mxPoint x='665' y='4980'/>
+              <mxPoint x='665' y='3655'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-62' value='62. structured secret detected (EC-27)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-evidence' target='cw-ec27'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='1700' y='4474'/>
+              <mxPoint x='1700' y='4590'/>
+              <mxPoint x='1430' y='4590'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-63' value='63. key-aware cleanup and rebuild' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec27' target='cw-worker'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='1430' y='4980'/>
+              <mxPoint x='1690' y='4980'/>
+              <mxPoint x='1690' y='3655'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-64' value='64. Git/PR state mismatch (EC-09)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-publish' target='cw-ec09'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2595' y='5563'/>
+              <mxPoint x='2595' y='5410'/>
+              <mxPoint x='2085' y='5410'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-65' value='65. reconcile or create scoped head' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec09' target='cw-worker'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='5800'/>
+              <mxPoint x='1700' y='5800'/>
+              <mxPoint x='1700' y='3655'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-66' value='66. external PR truth changed (EC-22)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-verified' target='cw-ec22'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3550' y='8825'/>
+              <mxPoint x='3550' y='8510'/>
+              <mxPoint x='3995' y='8510'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-67' value='67. invalidate and fully requalify' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec22' target='cw-evidence'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3995' y='8900'/>
+              <mxPoint x='3550' y='8900'/>
+              <mxPoint x='3550' y='4474'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-68' value='68. review batch invalid/fails (EC-10)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-review' target='cw-ec10'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2595' y='6388'/>
+              <mxPoint x='2595' y='6250'/>
+              <mxPoint x='2085' y='6250'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-69' value='69. retry invalid axis or repair findings' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec10' target='cw-repair'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='6640'/>
+              <mxPoint x='1700' y='6640'/>
+              <mxPoint x='1700' y='7675'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-70' value='70. failure has no lifecycle exit (EC-21)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-repair' target='cw-ec21'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='1700' y='7675'/>
+              <mxPoint x='1700' y='7090'/>
+              <mxPoint x='3995' y='7090'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-71' value='71. assign owner, hand off, unlock' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec21' target='cw-human-recovery'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3995' y='7480'/>
+              <mxPoint x='1700' y='7480'/>
+              <mxPoint x='1700' y='11316'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-72' value='72. repair head still fails (EC-11)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-repair' target='cw-ec11'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='665' y='7675'/>
+              <mxPoint x='665' y='7820'/>
+              <mxPoint x='930' y='7820'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-73' value='73. next bounded head and fresh reviews' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec11' target='cw-review'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='930' y='8210'/>
+              <mxPoint x='1700' y='8210'/>
+              <mxPoint x='1700' y='6388'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-74' value='74. rounds exhausted/scope conflict (EC-12)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-repair' target='cw-ec12'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='1700' y='7675'/>
+              <mxPoint x='1700' y='7490'/>
+              <mxPoint x='3995' y='7490'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-75' value='75. preserve state and ask decision' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec12' target='cw-agent-intervention'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3995' y='7880'/>
+              <mxPoint x='3550' y='7880'/>
+              <mxPoint x='3550' y='8264'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-76' value='76. delivery/answer state invalid (EC-13)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-agent-intervention' target='cw-ec13'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2595' y='8264'/>
+              <mxPoint x='2595' y='8080'/>
+              <mxPoint x='2085' y='8080'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-77' value='77. repair delivery and resume once' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec13' target='cw-agent-intervention'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='8470'/>
+              <mxPoint x='2595' y='8470'/>
+              <mxPoint x='2595' y='8264'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-78' value='78. feedback unsupported/stale (EC-14)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-human-review' target='cw-ec14'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='1700' y='8887'/>
+              <mxPoint x='1700' y='8980'/>
+              <mxPoint x='2085' y='8980'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-79' value='79. ignore or request current-head resubmission' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec14' target='cw-human-review'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='9370'/>
+              <mxPoint x='1700' y='9370'/>
+              <mxPoint x='1700' y='8887'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-80' value='80. feedback head not qualified (EC-15)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-feedback' target='cw-ec15'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='665' y='9671'/>
+              <mxPoint x='665' y='9850'/>
+              <mxPoint x='930' y='9850'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-81' value='81. next bounded feedback attempt' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec15' target='cw-feedback'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='930' y='10240'/>
+              <mxPoint x='665' y='10240'/>
+              <mxPoint x='665' y='9671'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-82' value='82. concurrent mutation/merge (EC-23)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-feedback-gate' target='cw-ec23'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2595' y='9442'/>
+              <mxPoint x='2595' y='9580'/>
+              <mxPoint x='2085' y='9580'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-83' value='83. lease, queue, CAS, or cancel' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec23' target='cw-feedback-gate'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='9970'/>
+              <mxPoint x='2595' y='9970'/>
+              <mxPoint x='2595' y='9442'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-84' value='84. completion correlation fails (EC-16)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-completion' target='cw-ec16'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2595' y='10597'/>
+              <mxPoint x='2595' y='10430'/>
+              <mxPoint x='2085' y='10430'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-85' value='85. reopen, cancel, or take over' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec16' target='cw-human-review'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='2085' y='10820'/>
+              <mxPoint x='1700' y='10820'/>
+              <mxPoint x='1700' y='8887'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-86' value='86. generic closure is insufficient (EC-26)' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#B85450;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-completion' target='cw-ec26'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3550' y='10597'/>
+              <mxPoint x='3550' y='10430'/>
+              <mxPoint x='3995' y='10430'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-87' value='87. resolve concrete PR and decide' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#5B9A57;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;' edge='1' parent='1' source='cw-ec26' target='cw-human-intervention'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+            <Array as='points'>
+              <mxPoint x='3995' y='10820'/>
+              <mxPoint x='1700' y='10820'/>
+              <mxPoint x='1700' y='8264'/>
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-reviewers' value='READ-ONLY REVIEW AGENTS
+Requirements · code quality · architecture
+Return independent structured verdicts for the immutable head' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#E1D5E7;strokeColor=#7A5AA6;fontColor=#493267;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='920' y='6651' width='520' height='180' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-feedback-gate' value='FEEDBACK INTAKE + MUTATION LEASE
+Validate configured human, PR, current head, content, and dedupe key
+Queue one batch and dispatch only while holding the durable run lease' style='rounded=1;whiteSpace=wrap;html=1;fillColor=#D5F0F1;strokeColor=#2A8C91;fontColor=#174B4E;fontSize=16;strokeWidth=2;' vertex='1' parent='1'>
+          <mxGeometry x='2780' y='9340' width='650' height='205' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-agent-note' value='AGENT RESPONSIBILITY
+Bounded reasoning and repository work only. Langgraph owns persistence, routing, retries, qualification state, and external side effects.' style='rounded=1;whiteSpace=wrap;html=1;align=left;verticalAlign=middle;spacing=10;fillColor=#F8F4FC;strokeColor=#9673A6;fontColor=#493267;fontSize=14;dashed=1;' vertex='1' parent='1'>
+          <mxGeometry x='710' y='245' width='940' height='105' as='geometry'/>
+        </mxCell>
+        <mxCell id='cw-edge-11' value='11. dispatch three immutable-head review assignments' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#7A5AA6;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-review' target='cw-reviewers'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id='cw-edge-17' value='17. dispatch bounded feedback assignment under lease' style='edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=1;strokeWidth=2.5;strokeColor=#7A5AA6;fontColor=#1F2937;fontSize=14;labelBackgroundColor=#FFFFFF;' edge='1' parent='1' source='cw-feedback-gate' target='cw-feedback'>
+          <mxGeometry relative='1' as='geometry'>
+            <mxPoint as='offset' x='0' y='-18'/>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
