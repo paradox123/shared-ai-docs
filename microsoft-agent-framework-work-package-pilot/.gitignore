@@ -1,0 +1,11 @@
+.test-state/
+__pycache__/
+**/bin/
+**/obj/
+ManagedDurabilityProbe/bin/
+ManagedDurabilityProbe/obj/
+state/
+evidence/managed-gate-c6f55f18-bbf0-4398-9c11-3293ed48eb1a/
+evidence/managed-gate-be4469fa-1a53-4655-97a5-79bd2dc3e9fd/
+evidence/managed-gate-16502d10-5712-4f4d-841a-21a1e55ce206/
+evidence/managed-gate-e174f6b1-8904-4eb1-b777-03a84ab2ecfb/

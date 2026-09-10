@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://danielsvault.local/schemas/maf-managed-dts-evidence-v1.json",
+  "title": "Microsoft Agent Framework managed DTS pilot evidence",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schemaVersion", "decision", "failures", "configDigest", "observationDigest", "operatorApproval", "approvedAzure", "observation", "probe", "boundaries"],
+  "properties": {
+    "schemaVersion": { "const": "maf-managed-dts-evidence/v1" },
+    "decision": { "enum": ["go-managed-pilot", "no-go-managed-pilot"] },
+    "failures": { "type": "array", "items": { "type": "string" } },
+    "configDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "observationDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "operatorApproval": { "type": "object" },
+    "approvedAzure": { "type": "object" },
+    "observation": { "type": "object" },
+    "probe": {
+      "type": "object",
+      "required": ["started"],
+      "properties": { "started": { "type": "boolean" } }
+    },
+    "boundaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["before", "after", "changed", "unchanged"],
+      "properties": {
+        "before": { "type": "object" },
+        "after": { "type": "object" },
+        "changed": { "type": "array", "items": { "type": "string" } },
+        "unchanged": { "type": "boolean" }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "type": "object",
+        "properties": { "decision": { "const": "go-managed-pilot" } }
+      },
+      "then": {
+        "type": "object",
+        "properties": {
+          "operatorApproval": {
+            "type": "object",
+            "required": ["accepted", "acceptedAt", "scope"],
+            "properties": {
+              "accepted": { "const": true },
+              "scope": { "const": "isolated-agent-framework-pilot" }
+            }
+          },
+          "approvedAzure": {
+            "type": "object",
+            "required": ["subscriptionId", "tenantId", "schedulerName", "taskHubName", "endpoint", "authentication", "developerPrincipalObjectId", "budgetName", "budgetAmount", "ipAllowlist"],
+            "properties": { "authentication": { "const": "DefaultAzure" } }
+          },
+          "observation": {
+            "type": "object",
+            "required": ["subscription", "scheduler", "taskHub", "budget", "role", "principal", "provenance"]
+          },
+          "probe": {
+            "type": "object",
+            "required": ["started", "runId", "runStartCount", "workerPids", "workerOneExitCode", "workerTwoExitCode", "activityWorkers", "effects", "ledger", "build"],
+            "properties": {
+              "started": { "const": true },
+              "runId": { "type": "string", "minLength": 1 },
+              "runStartCount": { "const": 1 },
+              "workerPids": { "type": "object", "minProperties": 2 },
+              "activityWorkers": {
+                "const": {
+                  "checkpoint-one": ["managed-probe-worker-1"],
+                  "checkpoint-two": ["managed-probe-worker-1", "managed-probe-worker-2"]
+                }
+              },
+              "effects": {
+                "const": { "checkpoint-one": 1, "checkpoint-two": 1 }
+              },
+              "ledger": { "type": "array", "minItems": 2 },
+              "build": {
+                "type": "object",
+                "required": ["mode", "workerAssemblySha256"],
+                "properties": {
+                  "mode": { "const": "locked-dotnet-build" },
+                  "workerAssemblySha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+                }
+              }
+            }
+          },
+          "boundaries": {
+            "type": "object",
+            "properties": {
+              "before": { "type": "object", "minProperties": 8 },
+              "after": { "type": "object", "minProperties": 8 },
+              "changed": { "const": [] },
+              "unchanged": { "const": true }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

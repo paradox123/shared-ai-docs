@@ -1,0 +1,25 @@
+{
+  "fixtureVersion": "wpcp-postgres-test-fixture/v1",
+  "purpose": "Disposable PostgreSQL storage for WPCP black-box tests; never reuse the managed-durability gate state.",
+  "docker": {
+    "image": "postgres:17-alpine",
+    "containerNamePrefix": "wpcp-blackbox-postgres",
+    "hostPort": "dynamic",
+    "readiness": {
+      "command": "pg_isready -U wpcp_test -d wpcp_test",
+      "timeoutSeconds": 30
+    }
+  },
+  "database": {
+    "host": "127.0.0.1",
+    "port": "dynamic",
+    "name": "wpcp_test",
+    "username": "wpcp_test",
+    "password": "fixture-only-not-a-secret",
+    "connectionStringEnvironmentVariable": "WPCP_CONNECTION_STRING"
+  },
+  "cleanup": {
+    "removeContainer": true,
+    "removeVolumes": true
+  }
+}

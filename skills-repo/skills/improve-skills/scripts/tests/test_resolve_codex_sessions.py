@@ -178,6 +178,68 @@ class ResolveCodexSessionsCliTests(unittest.TestCase):
                 ],
             )
 
+    def test_prefers_canonical_rollout_over_compound_child_rollout(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            codex_home = root / ".codex"
+            sessions_day = codex_home / "sessions" / "2026" / "09" / "02"
+            sessions_day.mkdir(parents=True)
+            parent_id = "01a060ff-985e-7fc0-946b-dca5171350ba"
+            child_id = "01a06101-b195-7033-8300-ac14a1c78fe5"
+            row = {
+                "id": parent_id,
+                "thread_name": "Parent task",
+                "updated_at": "2026-09-02T07:23:15Z",
+            }
+            (codex_home / "session_index.jsonl").write_text(
+                json.dumps(row) + "\n"
+            )
+            parent_meta = {
+                "timestamp": "2026-09-02T07:22:38Z",
+                "type": "session_meta",
+                "payload": {
+                    "id": parent_id,
+                    "timestamp": "2026-09-02T07:22:38Z",
+                    "cwd": str(root / "project"),
+                },
+            }
+            canonical_rollout = (
+                sessions_day / f"rollout-2026-09-02T09-22-38-{parent_id}.jsonl"
+            )
+            canonical_rollout.write_text(json.dumps(parent_meta) + "\n")
+            compound_rollout = sessions_day / (
+                "rollout-2026-09-02T09-24-56-"
+                f"{parent_id}_{child_id}.jsonl"
+            )
+            compound_rollout.write_text(json.dumps(parent_meta) + "\n")
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--codex-home",
+                    str(codex_home),
+                    "--prompt-last-run",
+                    "2026-09-01T07:00:00Z",
+                ],
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertTrue(output["window"]["safe_to_persist"])
+            self.assertEqual(output["sessions"][0]["status"], "resolved")
+            self.assertEqual(
+                output["sessions"][0]["path"], str(canonical_rollout)
+            )
+            self.assertFalse(
+                any(
+                    item.get("code") == "ambiguous_rollout"
+                    for item in output["diagnostics"]
+                )
+            )
+
     def test_recent_zero_emits_no_visible_index_rows(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

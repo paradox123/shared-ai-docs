@@ -645,8 +645,8 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
             self.assertIn("API_TOKEN=[redacted]", calls[0]["command"])
             self.assertLessEqual(len(calls[0]["command"]), 600)
             self.assertEqual(calls[0]["cwd"], "~/project")
-            self.assertEqual(calls[0]["paired_status"], "failed")
-            self.assertEqual(calls[0]["paired_exit_code"], 7)
+            self.assertIsNone(calls[0]["paired_status"])
+            self.assertIsNone(calls[0]["paired_exit_code"])
             self.assertEqual(calls[1]["tool_name"], "exec_command")
             self.assertIsNone(calls[1]["nested_call_index"])
             self.assertEqual(
@@ -849,7 +849,8 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
             call = json.loads(result.stdout)["tool_calls"][0]
             self.assertEqual(call["tool_name"], "web__run")
             self.assertEqual(call["nested_call_index"], 1)
-            self.assertEqual(call["paired_status"], "completed")
+            self.assertIsNone(call["paired_status"])
+            self.assertIsNone(call["paired_exit_code"])
 
     def test_tool_call_projection_does_not_treat_property_division_as_regex(self):
         with tempfile.TemporaryDirectory() as tmp:

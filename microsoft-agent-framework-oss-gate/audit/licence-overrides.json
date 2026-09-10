@@ -1,0 +1,10 @@
+{
+  "System.Reactive.Compatibility/4.4.1": {
+    "spdx": "MIT",
+    "source": "https://github.com/dotnet/reactive/blob/v4.4.1/LICENSE"
+  },
+  "System.Security.Cryptography.ProtectedData/4.5.0": {
+    "spdx": "MIT",
+    "source": "https://github.com/dotnet/corefx/blob/v2.1.0/LICENSE.TXT"
+  }
+}

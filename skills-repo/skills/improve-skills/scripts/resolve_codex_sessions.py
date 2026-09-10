@@ -431,6 +431,15 @@ def resolve_rollouts(
     for row in rows:
         session_id = row["id"]
         matches = candidates.get(session_id, {})
+        terminal_matches = {
+            path: source
+            for path, source in matches.items()
+            if path.name.endswith(
+                (f"-{session_id}.jsonl", f"_{session_id}.jsonl")
+            )
+        }
+        if terminal_matches:
+            matches = terminal_matches
         item = {
             "id": session_id,
             "thread_name": row.get("thread_name"),

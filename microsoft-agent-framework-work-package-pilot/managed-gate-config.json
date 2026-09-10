@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "maf-managed-dts-gate/v1",
+  "operatorApproval": {
+    "accepted": true,
+    "acceptedAt": "2026-09-06",
+    "scope": "isolated-agent-framework-pilot"
+  },
+  "azure": {
+    "subscriptionId": "3c8f1707-52b9-43cc-9486-30faab0af3f0",
+    "tenantId": "3602223d-667f-4cff-a98a-6c4ecb75f18c",
+    "resourceGroup": "rg-agent-framework-pilot",
+    "schedulerName": "dh-agent-framework-pilot",
+    "taskHubName": "agent-framework-isolated-pilot-v1",
+    "endpoint": "https://dh-agent-framew-c2f7endt.northeurope.durabletask.io",
+    "authentication": "DefaultAzure",
+    "developerPrincipalObjectId": "9f604eb0-2adb-47a0-9e5d-382bf6897c40",
+    "budgetName": "agent-framework-pilot-5",
+    "budgetAmount": 5,
+    "ipAllowlist": ["92.211.110.7/32"],
+    "connectionEnvFile": "../.scratch/distributed-codex-work-package-control-plane/scripts/azure-dts-pilot.env"
+  },
+  "packages": {
+    "azureIdentity": "1.17.1",
+    "agentFrameworkDurableTask": "1.16.0-preview.260730.1",
+    "agentFrameworkWorkflows": "1.16.0",
+    "durableTask": "1.18.0"
+  },
+  "provenance": {
+    "sourceRevision": "b31fea73491294280d0a7615980da629a551ebac",
+    "dotnetSdk": "10.0.203",
+    "rid": "osx-arm64",
+    "packageLockPath": "ManagedDurabilityProbe/packages.lock.json",
+    "packageLockSha256": "fc558079f3b1947b020e10eeeef454700d4a6bcb2647cdc72da5d450fe60f4ef",
+    "pilotSourceSha256": "249c1a9d54f6ed34a7fccb875bc75748d97b64bb21cfdc7d99fd09acb6f30744",
+    "protectedBoundariesSha256": "a600ffc8be5733a75c777f191fc6cfdee4a674759f451f91e61958d5b9fe8909",
+    "contractVersion": "v1"
+  },
+  "probe": {
+    "command": ["dotnet", "run", "--no-build", "--project", "ManagedDurabilityProbe", "--"],
+    "expectedEffects": ["checkpoint-one", "checkpoint-two"],
+    "workerNames": ["managed-probe-worker-1", "managed-probe-worker-2"],
+    "entryTimeoutSeconds": 30,
+    "completionTimeoutSeconds": 120
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "maf-oss-gate-manifest/v1",
+  "source": {
+    "repository": "https://github.com/microsoft/agent-framework-durable-extension",
+    "revision": "522e1d98afff58c251c4402578cb4d1187f91a84",
+    "gateSourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "dirtyStateDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "runtime": { "dotnetSdk": "10.0.203", "rid": "osx-arm64" },
+  "configuration": { "path": "gate-config.json", "version": "v1", "contractVersion": "v1" },
+  "packageLock": {
+    "path": "audit/packages.lock.json",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "componentInventory": {
+    "path": "tests/fixtures/fixture-components.json",
+    "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "components": [
+    {
+      "name": "Microsoft.Agents.AI.DurableTask",
+      "kind": "workflow",
+      "version": "1.16.0-preview.260730.1",
+      "source": "https://github.com/microsoft/agent-framework-durable-extension",
+      "licence": { "spdx": "MIT", "source": "https://github.com/microsoft/agent-framework-durable-extension/blob/522e1d98afff58c251c4402578cb4d1187f91a84/LICENSE" },
+      "unavoidableServiceCost": { "amount": 0, "amountStatus": "zero", "currency": "EUR", "period": "none", "source": "https://github.com/microsoft/agent-framework-durable-extension" }
+    }
+  ],
+  "backend": {
+    "name": "Fixture OSS scheduler",
+    "type": "production",
+    "repository": "https://example.test/fixture-scheduler",
+    "revision": "fixture-v1",
+    "protocol": "durabletask-grpc-v1",
+    "productionCapable": true,
+    "selfManaged": true,
+    "openSource": true,
+    "compatibleWithTuple": true,
+    "compatibilityEvidence": ["https://example.test/fixture-scheduler/compatibility"],
+    "licence": { "spdx": "MIT", "source": "https://example.test/fixture-scheduler/license" },
+    "unavoidableServiceCost": { "amount": 0, "amountStatus": "zero", "currency": "EUR", "period": "none", "source": "https://example.test/fixture-scheduler/cost" },
+    "storageDependencies": ["Fixture DB v1 (MIT)"]
+  },
+  "forbiddenComponents": ["Temporal", "paid-managed-workflow-service"],
+  "probe": {
+    "command": ["python3", "tests/fixtures/durable-worker.py"],
+    "workerProcessNames": ["maf-oss-gate-worker-1", "maf-oss-gate-worker-2"],
+    "ports": [18080, 18082],
+    "statePaths": [".gate-state"],
+    "expectedEffects": ["before-worker-stop", "after-worker-stop"]
+  }
+}

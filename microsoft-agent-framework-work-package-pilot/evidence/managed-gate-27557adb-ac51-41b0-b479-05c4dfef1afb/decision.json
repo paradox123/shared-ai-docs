@@ -1,0 +1,243 @@
+{
+  "approvedAzure": {
+    "authentication": "DefaultAzure",
+    "budgetAmount": 5,
+    "budgetName": "agent-framework-pilot-5",
+    "developerPrincipalObjectId": "9f604eb0-2adb-47a0-9e5d-382bf6897c40",
+    "endpoint": "https://dh-agent-framew-c2f7endt.northeurope.durabletask.io",
+    "ipAllowlist": [
+      "92.211.110.7/32"
+    ],
+    "resourceGroup": "rg-agent-framework-pilot",
+    "schedulerName": "dh-agent-framework-pilot",
+    "subscriptionId": "3c8f1707-52b9-43cc-9486-30faab0af3f0",
+    "taskHubName": "agent-framework-isolated-pilot-v1",
+    "tenantId": "3602223d-667f-4cff-a98a-6c4ecb75f18c"
+  },
+  "boundaries": {
+    "after": {
+      "cloudflare-relay-source": "679d8b681c9a6b2075d44cea64fefd86a29926f9d3ef48f126d77ec57b6caa4a",
+      "github-repository-config": "cd50f79e9b455bfa00e67cec11a7bf544977d45e837308085e7575035bd06834",
+      "langgraph-launch-agent": "07ec25459b32754999dd2dff2392a8d4d681b378c2a29a04767183c4c3cb38ce",
+      "langgraph-managed-worktrees": "4404ddb036ce3a840dd23cdcf8c77f37824be59ccbf2b9afd93c4e6174713647",
+      "langgraph-runtime": "fabb4e78e571f7fc79f0d9cb14ca51ef41efba7b38d511d154b0925c7a1d32f8",
+      "langgraph-source": "9b71089dcdc77180a1fa51aa52d0865508a53884468c60749cbd5e3627400ca5",
+      "macos-operations-source": "8592f9c226b305b176c8226c8f5d3c7f177eab422312e4194ff9b0e3cca208a7",
+      "probara-crm": "d95d900c6520103ab023e8aa82028d5b73447f5d361c50cc261aa7bd8ba6d420"
+    },
+    "before": {
+      "cloudflare-relay-source": "679d8b681c9a6b2075d44cea64fefd86a29926f9d3ef48f126d77ec57b6caa4a",
+      "github-repository-config": "cd50f79e9b455bfa00e67cec11a7bf544977d45e837308085e7575035bd06834",
+      "langgraph-launch-agent": "07ec25459b32754999dd2dff2392a8d4d681b378c2a29a04767183c4c3cb38ce",
+      "langgraph-managed-worktrees": "4404ddb036ce3a840dd23cdcf8c77f37824be59ccbf2b9afd93c4e6174713647",
+      "langgraph-runtime": "fabb4e78e571f7fc79f0d9cb14ca51ef41efba7b38d511d154b0925c7a1d32f8",
+      "langgraph-source": "9b71089dcdc77180a1fa51aa52d0865508a53884468c60749cbd5e3627400ca5",
+      "macos-operations-source": "8592f9c226b305b176c8226c8f5d3c7f177eab422312e4194ff9b0e3cca208a7",
+      "probara-crm": "d95d900c6520103ab023e8aa82028d5b73447f5d361c50cc261aa7bd8ba6d420"
+    },
+    "changed": [],
+    "unchanged": true
+  },
+  "configDigest": "e9a692aa9e21f8032154f71500f09d97b18e178dbb138938f71df58990ff5aca",
+  "decision": "go-managed-pilot",
+  "evidenceDirectory": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/evidence/managed-gate-27557adb-ac51-41b0-b479-05c4dfef1afb",
+  "failures": [],
+  "observation": {
+    "budget": {
+      "amount": 5.0,
+      "name": "agent-framework-pilot-5",
+      "notificationThresholds": [
+        50.0,
+        80.0,
+        100.0
+      ],
+      "timeGrain": "Monthly"
+    },
+    "principal": {
+      "authenticationSource": "AzureCLI",
+      "objectId": "9f604eb0-2adb-47a0-9e5d-382bf6897c40",
+      "type": "user"
+    },
+    "provenance": {
+      "dotnetSdk": "10.0.203",
+      "packageLockSha256": "fc558079f3b1947b020e10eeeef454700d4a6bcb2647cdc72da5d450fe60f4ef",
+      "packages": {
+        "agentFrameworkDurableTask": "1.16.0-preview.260730.1",
+        "agentFrameworkWorkflows": "1.16.0",
+        "azureIdentity": "1.17.1",
+        "durableTaskClientAzureManaged": "1.18.0",
+        "durableTaskWorkerAzureManaged": "1.18.0"
+      },
+      "pilotSourceSha256": "249c1a9d54f6ed34a7fccb875bc75748d97b64bb21cfdc7d99fd09acb6f30744",
+      "rid": "osx-arm64",
+      "sourceRevision": "b31fea73491294280d0a7615980da629a551ebac"
+    },
+    "role": "Durable Task Data Contributor",
+    "scheduler": {
+      "endpoint": "https://dh-agent-framew-c2f7endt.northeurope.durabletask.io",
+      "ipAllowlist": [
+        "92.211.110.7/32"
+      ],
+      "name": "dh-agent-framework-pilot",
+      "publicNetworkAccess": "Enabled",
+      "resourceGroup": "rg-agent-framework-pilot",
+      "sku": "Consumption",
+      "state": "Succeeded"
+    },
+    "schemaVersion": "maf-managed-dts-observation/v1",
+    "subscription": {
+      "id": "3c8f1707-52b9-43cc-9486-30faab0af3f0",
+      "quotaId": "FreeTrial_2014-09-01",
+      "spendingLimit": "On",
+      "tenantId": "3602223d-667f-4cff-a98a-6c4ecb75f18c"
+    },
+    "taskHub": {
+      "id": "/subscriptions/3c8f1707-52b9-43cc-9486-30faab0af3f0/resourceGroups/rg-agent-framework-pilot/providers/Microsoft.DurableTask/schedulers/dh-agent-framework-pilot/taskHubs/agent-framework-isolated-pilot-v1",
+      "name": "agent-framework-isolated-pilot-v1",
+      "state": "Succeeded"
+    }
+  },
+  "observationDigest": "a2455e0acf211a66adfe5ab197ae2069d6770cbc0518ba6cc89c2758cbaddfc3",
+  "operatorApproval": {
+    "accepted": true,
+    "acceptedAt": "2026-09-06",
+    "scope": "isolated-agent-framework-pilot"
+  },
+  "probe": {
+    "activityWorkers": {
+      "checkpoint-one": [
+        "managed-probe-worker-1"
+      ],
+      "checkpoint-two": [
+        "managed-probe-worker-1",
+        "managed-probe-worker-2"
+      ]
+    },
+    "build": {
+      "commands": [
+        [
+          "dotnet",
+          "restore",
+          "--locked-mode",
+          "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/ManagedDurabilityProbe/ManagedDurabilityProbe.csproj"
+        ],
+        [
+          "dotnet",
+          "build",
+          "--no-restore",
+          "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/ManagedDurabilityProbe/ManagedDurabilityProbe.csproj"
+        ]
+      ],
+      "mode": "locked-dotnet-build",
+      "workerAssembly": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/ManagedDurabilityProbe/bin/Debug/net10.0/ManagedDurabilityProbe.dll",
+      "workerAssemblySha256": "5b8ae91ce66c1b202f0847d65a9e08ec3a106dff41eb57d61ee79b710e57d363"
+    },
+    "effects": {
+      "checkpoint-one": 1,
+      "checkpoint-two": 1
+    },
+    "ledger": [
+      {
+        "pid": 48056,
+        "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+        "timestampUtc": "2026-09-07T16:06:29.7192970+00:00",
+        "type": "worker-start",
+        "worker": "managed-probe-worker-1"
+      },
+      {
+        "pid": 48056,
+        "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+        "timestampUtc": "2026-09-07T16:06:30.4415250+00:00",
+        "type": "run-start",
+        "worker": "managed-probe-worker-1"
+      },
+      {
+        "activity": "checkpoint-one",
+        "pid": 48056,
+        "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+        "timestampUtc": "2026-09-07T16:06:30.5031900+00:00",
+        "type": "activity-enter",
+        "worker": "managed-probe-worker-1"
+      },
+      {
+        "effect": "checkpoint-one",
+        "pid": 48056,
+        "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+        "timestampUtc": "2026-09-07T16:06:30.5077580+00:00",
+        "type": "effect",
+        "worker": "managed-probe-worker-1"
+      },
+      {
+        "activity": "checkpoint-one",
+        "pid": 48056,
+        "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+        "timestampUtc": "2026-09-07T16:06:30.5113350+00:00",
+        "type": "activity-complete",
+        "worker": "managed-probe-worker-1"
+      },
+      {
+        "activity": "checkpoint-two",
+        "pid": 48056,
+        "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+        "timestampUtc": "2026-09-07T16:06:30.6416940+00:00",
+        "type": "activity-enter",
+        "worker": "managed-probe-worker-1"
+      },
+      {
+        "pid": 48128,
+        "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+        "timestampUtc": "2026-09-07T16:06:31.2179860+00:00",
+        "type": "worker-start",
+        "worker": "managed-probe-worker-2"
+      },
+      {
+        "activity": "checkpoint-two",
+        "pid": 48128,
+        "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+        "timestampUtc": "2026-09-07T16:06:31.7940650+00:00",
+        "type": "activity-enter",
+        "worker": "managed-probe-worker-2"
+      },
+      {
+        "effect": "checkpoint-two",
+        "pid": 48128,
+        "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+        "timestampUtc": "2026-09-07T16:06:31.8005230+00:00",
+        "type": "effect",
+        "worker": "managed-probe-worker-2"
+      },
+      {
+        "activity": "checkpoint-two",
+        "pid": 48128,
+        "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+        "timestampUtc": "2026-09-07T16:06:31.8049710+00:00",
+        "type": "activity-complete",
+        "worker": "managed-probe-worker-2"
+      },
+      {
+        "pid": 48128,
+        "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+        "timestampUtc": "2026-09-07T16:06:32.1995560+00:00",
+        "type": "run-complete",
+        "worker": "managed-probe-worker-2"
+      }
+    ],
+    "logs": {
+      "workerOneStderr": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/state/managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642/worker-1.stderr.log",
+      "workerOneStdout": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/state/managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642/worker-1.stdout.log",
+      "workerTwoStderr": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/state/managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642/worker-2.stderr.log",
+      "workerTwoStdout": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/state/managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642/worker-2.stdout.log"
+    },
+    "runId": "managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+    "runStartCount": 1,
+    "started": true,
+    "stateDirectory": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/state/managed-gate-71d21049-4f6b-4b4a-9a20-bff0f1ac2642",
+    "workerOneExitCode": -9,
+    "workerPids": {
+      "managed-probe-worker-1": 48056,
+      "managed-probe-worker-2": 48128
+    },
+    "workerTwoExitCode": 0
+  },
+  "schemaVersion": "maf-managed-dts-evidence/v1"
+}

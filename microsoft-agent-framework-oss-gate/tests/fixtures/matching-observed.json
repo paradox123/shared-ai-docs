@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "maf-oss-gate-observed/v1",
+  "sourceRevision": "522e1d98afff58c251c4402578cb4d1187f91a84",
+  "gateSourceDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "dirtyStateDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "dotnetSdk": "10.0.203",
+  "rid": "osx-arm64",
+  "configurationVersion": "v1",
+  "contractVersion": "v1",
+  "packageLockSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "componentInventorySha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+}

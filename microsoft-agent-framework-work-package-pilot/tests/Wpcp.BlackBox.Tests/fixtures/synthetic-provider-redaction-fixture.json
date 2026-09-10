@@ -1,0 +1,68 @@
+{
+  "fixtureVersion": "wpcp-synthetic-provider-redaction-fixture/v1",
+  "provider": {
+    "repositories": [
+      {
+        "repositoryId": "repo-1",
+        "issues": [
+          {
+            "issueId": "issue-41",
+            "issueNumber": 41,
+            "title": "Synthetic observable-run issue"
+          },
+          {
+            "issueId": "issue-42",
+            "issueNumber": 42,
+            "title": "Synthetic lifecycle-redaction issue"
+          }
+        ]
+      }
+    ],
+    "authorizations": [
+      {
+        "actorId": "actor-authorized",
+        "repositoryId": "repo-1",
+        "issueId": "issue-41",
+        "permissions": ["start", "read"]
+      },
+      {
+        "actorId": "actor-observer",
+        "repositoryId": "repo-1",
+        "issueId": "issue-41",
+        "permissions": ["read"]
+      },
+      {
+        "actorId": "actor-authorized",
+        "repositoryId": "repo-1",
+        "issueId": "issue-42",
+        "permissions": ["start", "read"]
+      },
+      {
+        "actorId": "actor-observer",
+        "repositoryId": "repo-1",
+        "issueId": "issue-42",
+        "permissions": ["read"]
+      },
+      {
+        "actorId": "actor-unauthorized",
+        "repositoryId": "repo-1",
+        "issueId": "issue-41",
+        "permissions": []
+      }
+    ]
+  },
+  "redactionPolicy": {
+    "version": "controlled-canary-v1",
+    "marker": "[REDACTED:CONTROLLED-CANARY]",
+    "controlledCanaries": [
+      {
+        "name": "secret",
+        "value": "wpcp-controlled-secret-canary-v1"
+      },
+      {
+        "name": "token",
+        "value": "wpcp-controlled-token-canary-v1"
+      }
+    ]
+  }
+}

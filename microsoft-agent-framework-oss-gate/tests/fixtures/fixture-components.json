@@ -1,0 +1,19 @@
+[
+    {
+      "name": "Microsoft.Agents.AI.DurableTask",
+      "kind": "workflow",
+      "version": "1.16.0-preview.260730.1",
+      "source": "https://github.com/microsoft/agent-framework-durable-extension",
+      "licence": {
+        "spdx": "MIT",
+        "source": "https://github.com/microsoft/agent-framework-durable-extension/blob/522e1d98afff58c251c4402578cb4d1187f91a84/LICENSE"
+      },
+      "unavoidableServiceCost": {
+        "amount": 0,
+        "amountStatus": "zero",
+        "currency": "EUR",
+        "period": "none",
+        "source": "https://github.com/microsoft/agent-framework-durable-extension"
+      }
+    }
+]

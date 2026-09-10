@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Wpcp.OperatorCli</AssemblyName>
+    <RootNamespace>Wpcp.OperatorCli</RootNamespace>
+  </PropertyGroup>
+</Project>

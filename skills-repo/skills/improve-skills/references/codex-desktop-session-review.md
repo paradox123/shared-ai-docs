@@ -163,6 +163,8 @@ Do not assume the indexed id is the filename prefix. Codex Desktop rollout files
 
 Use the bundled resolver before opening raw rollout files or falling back to `rg` over session folders. It scans only day folders derived from the captured index rows, verifies `session_meta.payload.id`, uses an exact-id filename fallback for sessions created on a different day, and checks `archived_sessions` last. A missing or ambiguous selected rollout makes the cursor unsafe to persist.
 
+When the day scan finds multiple files whose first `session_meta` advertises the selected id, the resolver prefers candidates whose filename terminates in that same id (`-<id>.jsonl` or `_<id>.jsonl`) before deciding ambiguity. This prevents a compound parent/child rollout with a copied parent prefix from shadowing the parent's canonical rollout. More than one terminal-id match remains ambiguous and keeps the cursor unsafe.
+
 For automation worktree runs, use the evidence helper's path selectors to match both configured repository roots and worktree variants. Do not derive an exact-id allowlist with an inline manifest parser.
 
 Exclude sibling automation fan-out runs unless they provide direct evidence of automation drift or the same repeated skill weakness. If sibling runs already prove the pattern, stop there instead of widening into unrelated sessions.

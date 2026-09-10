@@ -51,6 +51,7 @@ find ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills -mindept
 
 - Git checkout: update it through that checkout and preserve its repository boundary.
 - Pinned snapshot with a lock file: use the staged three-way update workflow below. Do not treat the snapshot directory as a Git checkout or overwrite local divergences with a blind copy.
+- Legacy copied snapshot without a lock file: bootstrap provenance with the fail-closed workflow below before updating any vendored content.
 
 5. Place external global vendor source under `skills-repo/vendor/<vendor-name>/`. Do not install external global vendor skills directly into `~/.codex/skills`, `~/.agents/skills`, `~/.claude/skills`, or `skills-repo/active-skills`.
 
@@ -75,6 +76,19 @@ Use a normal directory in `skills-repo/skills` only for Daniel-owned global skil
 ```bash
 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/install-git-hooks.sh
 ```
+
+## Bootstrapping A Legacy Copied Snapshot
+
+Use this branch when copied vendor content exists but no lock identifies its previous upstream base.
+
+1. Clone or fetch upstream into one task-owned temporary checkout and bind every history command with `git -C "$upstream_repo"`.
+2. Reconstruct exactly one previous upstream ref from multiple stable content anchors in the copied tree. Exclude known local-only files and likely overlays from the anchors; do not infer provenance from timestamps or one locally editable entrypoint.
+3. If no prior ref matches or more than one materially different ref remains plausible, stop without changing the snapshot and report the ambiguity.
+4. Diff the copied tree against the reconstructed ref to inventory local overlays. Use that ref as the merge base for the staged three-way update; never use the locally modified snapshot itself as the base.
+5. Create the initial lock in staging. Record the old base as `reconstructedPreviousRef`, record the selected new upstream commit as `sourceRef`, preserve canonical-upstream hash semantics, and inventory merged local content separately under the lock's overlay field.
+6. Continue with the pinned-snapshot workflow only after the reconstructed base, overlay inventory, staged lock, and target path all validate.
+
+The detailed provenance contract is maintained in `~/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md` under “Legacy-Kopie ohne Lockdatei bootstrapen”.
 
 ## Updating An Existing Pinned Snapshot
 

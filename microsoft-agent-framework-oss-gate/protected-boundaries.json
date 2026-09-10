@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "maf-oss-gate-boundaries/v1",
+  "boundaries": [
+    {
+      "name": "langgraph-source",
+      "path": "$REPO_ROOT/langgraph-github-issue-pilot",
+      "mode": "git-path"
+    },
+    {
+      "name": "cloudflare-relay-source",
+      "path": "$REPO_ROOT/cloudflare-github-webhook-relay",
+      "mode": "git-path"
+    },
+    {
+      "name": "macos-operations-source",
+      "path": "$REPO_ROOT/langgraph-github-issue-pilot/ops/macos",
+      "mode": "git-path"
+    },
+    {
+      "name": "langgraph-runtime",
+      "path": "$USER_HOME/Library/Application Support/DanielsVault GitHub Issue Pilot",
+      "mode": "metadata-and-content-hash"
+    },
+    {
+      "name": "langgraph-launch-agent",
+      "path": "$USER_HOME/Library/LaunchAgents/com.danielsvault.github-issue-pilot.plist",
+      "mode": "metadata-and-content-hash"
+    },
+    {
+      "name": "langgraph-managed-worktrees",
+      "path": "$USER_HOME/Documents/DanielsVault/.worktrees",
+      "mode": "metadata-and-content-hash"
+    },
+    {
+      "name": "probara-crm",
+      "path": "$USER_HOME/Documents/DanielsVault/probare-crm",
+      "mode": "git-repository"
+    }
+  ]
+}

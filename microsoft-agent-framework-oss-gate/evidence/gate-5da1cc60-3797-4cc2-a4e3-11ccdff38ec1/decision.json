@@ -1,0 +1,1270 @@
+{
+  "backend": {
+    "compatibilityEvidence": [
+      "https://learn.microsoft.com/en-us/azure/durable-task/common/choose-orchestration-framework",
+      "https://learn.microsoft.com/en-us/agent-framework/hosting/azure-functions",
+      "https://github.com/microsoft/agent-framework-durable-extension/blob/522e1d98afff58c251c4402578cb4d1187f91a84/dotnet/src/Microsoft.Agents.AI.DurableTask/Microsoft.Agents.AI.DurableTask.csproj",
+      "https://github.com/microsoft/agent-framework-durable-extension/blob/522e1d98afff58c251c4402578cb4d1187f91a84/dotnet/samples/DurableWorkflows/ConsoleApps/01_SequentialWorkflow/Program.cs"
+    ],
+    "compatibleWithTuple": true,
+    "licence": {
+      "source": "https://azure.microsoft.com/en-us/support/legal/",
+      "spdx": "LicenseRef-Proprietary-Azure-Managed-Service"
+    },
+    "name": "Azure Durable Task Scheduler",
+    "openSource": false,
+    "productionCapable": true,
+    "protocol": "Durable Task Scheduler gRPC via Microsoft.DurableTask.*.AzureManaged 1.18.0",
+    "repository": "https://learn.microsoft.com/en-us/azure/durable-task/common/choose-orchestration-framework",
+    "revision": "documentation-2026-05-05",
+    "selfManaged": false,
+    "storageDependencies": [
+      "Microsoft-operated Azure Durable Task Scheduler resource",
+      "Azure subscription"
+    ],
+    "type": "managed-service",
+    "unavoidableServiceCost": {
+      "amount": null,
+      "amountStatus": "variable-paid",
+      "currency": "EUR",
+      "period": "operation",
+      "source": "https://learn.microsoft.com/en-us/azure/durable-task/scheduler/durable-task-scheduler-billing"
+    }
+  },
+  "boundaries": {
+    "cloudflare-relay-source": {
+      "after": "679d8b681c9a6b2075d44cea64fefd86a29926f9d3ef48f126d77ec57b6caa4a",
+      "before": "679d8b681c9a6b2075d44cea64fefd86a29926f9d3ef48f126d77ec57b6caa4a",
+      "unchanged": true
+    },
+    "langgraph-launch-agent": {
+      "after": "07ec25459b32754999dd2dff2392a8d4d681b378c2a29a04767183c4c3cb38ce",
+      "before": "07ec25459b32754999dd2dff2392a8d4d681b378c2a29a04767183c4c3cb38ce",
+      "unchanged": true
+    },
+    "langgraph-managed-worktrees": {
+      "after": "4404ddb036ce3a840dd23cdcf8c77f37824be59ccbf2b9afd93c4e6174713647",
+      "before": "4404ddb036ce3a840dd23cdcf8c77f37824be59ccbf2b9afd93c4e6174713647",
+      "unchanged": true
+    },
+    "langgraph-runtime": {
+      "after": "fabb4e78e571f7fc79f0d9cb14ca51ef41efba7b38d511d154b0925c7a1d32f8",
+      "before": "fabb4e78e571f7fc79f0d9cb14ca51ef41efba7b38d511d154b0925c7a1d32f8",
+      "unchanged": true
+    },
+    "langgraph-source": {
+      "after": "9b71089dcdc77180a1fa51aa52d0865508a53884468c60749cbd5e3627400ca5",
+      "before": "9b71089dcdc77180a1fa51aa52d0865508a53884468c60749cbd5e3627400ca5",
+      "unchanged": true
+    },
+    "macos-operations-source": {
+      "after": "8592f9c226b305b176c8226c8f5d3c7f177eab422312e4194ff9b0e3cca208a7",
+      "before": "8592f9c226b305b176c8226c8f5d3c7f177eab422312e4194ff9b0e3cca208a7",
+      "unchanged": true
+    },
+    "probara-crm": {
+      "after": "d95d900c6520103ab023e8aa82028d5b73447f5d361c50cc261aa7bd8ba6d420",
+      "before": "d95d900c6520103ab023e8aa82028d5b73447f5d361c50cc261aa7bd8ba6d420",
+      "unchanged": true
+    }
+  },
+  "decision": "no-go",
+  "evidenceDirectory": "evidence/gate-5da1cc60-3797-4cc2-a4e3-11ccdff38ec1",
+  "failures": [
+    "backend.managed-service",
+    "backend.not-self-managed",
+    "backend.not-open-source",
+    "backend.unavoidable-service-cost"
+  ],
+  "manifest": {
+    "backend": {
+      "compatibilityEvidence": [
+        "https://learn.microsoft.com/en-us/azure/durable-task/common/choose-orchestration-framework",
+        "https://learn.microsoft.com/en-us/agent-framework/hosting/azure-functions",
+        "https://github.com/microsoft/agent-framework-durable-extension/blob/522e1d98afff58c251c4402578cb4d1187f91a84/dotnet/src/Microsoft.Agents.AI.DurableTask/Microsoft.Agents.AI.DurableTask.csproj",
+        "https://github.com/microsoft/agent-framework-durable-extension/blob/522e1d98afff58c251c4402578cb4d1187f91a84/dotnet/samples/DurableWorkflows/ConsoleApps/01_SequentialWorkflow/Program.cs"
+      ],
+      "compatibleWithTuple": true,
+      "licence": {
+        "source": "https://azure.microsoft.com/en-us/support/legal/",
+        "spdx": "LicenseRef-Proprietary-Azure-Managed-Service"
+      },
+      "name": "Azure Durable Task Scheduler",
+      "openSource": false,
+      "productionCapable": true,
+      "protocol": "Durable Task Scheduler gRPC via Microsoft.DurableTask.*.AzureManaged 1.18.0",
+      "repository": "https://learn.microsoft.com/en-us/azure/durable-task/common/choose-orchestration-framework",
+      "revision": "documentation-2026-05-05",
+      "selfManaged": false,
+      "storageDependencies": [
+        "Microsoft-operated Azure Durable Task Scheduler resource",
+        "Azure subscription"
+      ],
+      "type": "managed-service",
+      "unavoidableServiceCost": {
+        "amount": null,
+        "amountStatus": "variable-paid",
+        "currency": "EUR",
+        "period": "operation",
+        "source": "https://learn.microsoft.com/en-us/azure/durable-task/scheduler/durable-task-scheduler-billing"
+      }
+    },
+    "componentInventory": {
+      "path": "audit/components.json",
+      "sha256": "688fb89790c219cf539c90160d2f6b0f619f07a7f038201e53c4fd1386cbeef2"
+    },
+    "components": [
+      {
+        "contentHash": "GBNKZEhdIbTXxedvD3R7I/yDVFX9jJJEz02kCziFSJxspSQ5RMHc3GktulJ1s7+ffXaXD7kMgrtdQTaggyInLw==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Azure.Core/1.50.0",
+          "spdx": "MIT"
+        },
+        "name": "Azure.Core",
+        "repositoryRevision": "724366b17b92e657d2136d470077c769e89818c7",
+        "source": "https://www.nuget.org/packages/Azure.Core/1.50.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Azure.Core/1.50.0"
+        },
+        "version": "1.50.0"
+      },
+      {
+        "contentHash": "MSZkBrctcpiGxs9Cvr2VKKoN6qFLZlP3I6xuCWJ9iTgitI5Rgxtk5gfOSpXPZE3+CJmZ/mnqpQyGyjawFn5Vvg==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Azure.Identity/1.17.1",
+          "spdx": "MIT"
+        },
+        "name": "Azure.Identity",
+        "repositoryRevision": "f6aaf7f37262151b1df40b79d1a64dacc7c98021",
+        "source": "https://www.nuget.org/packages/Azure.Identity/1.17.1",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Azure.Identity/1.17.1"
+        },
+        "version": "1.17.1"
+      },
+      {
+        "contentHash": "edc8jjyXqzzy8jFdhs36FZdwmlDDTgqPb2Zy1Q5F/f2uAc88bu/VS/0Tpvgupmpl9zJOvOo5ZizVANb0ltN1NQ==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Castle.Core/5.0.0",
+          "spdx": "Apache-2.0"
+        },
+        "name": "Castle.Core",
+        "source": "https://www.nuget.org/packages/Castle.Core/5.0.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Castle.Core/5.0.0"
+        },
+        "version": "5.0.0"
+      },
+      {
+        "contentHash": "RztiFmX9aOWDwfhxFzx/nS4fjs4DX7ZC7/XBEBl56k15lPGBftvbSwZkeo1mMCJHrNp1kK5iQYrFXB4MqCmBCA==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Google.Protobuf/3.33.1",
+          "spdx": "BSD-3-Clause"
+        },
+        "name": "Google.Protobuf",
+        "repositoryRevision": "a8d85ffbc7158660b4247f732371d1b07780510e",
+        "source": "https://www.nuget.org/packages/Google.Protobuf/3.33.1",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Google.Protobuf/3.33.1"
+        },
+        "version": "3.33.1"
+      },
+      {
+        "contentHash": "cL1/2f8kc8lsAGNdfCU25deedXVehhLA6GXKLLN4hAWx16XN7BmjYn3gFU+FBpir5yJynvDTHEypr3Tl0j7x/Q==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Grpc.Core.Api/2.67.0",
+          "spdx": "Apache-2.0"
+        },
+        "name": "Grpc.Core.Api",
+        "repositoryRevision": "7c43ddb5d68008782dc0dba2d0feaa3ed91a9fb2",
+        "source": "https://www.nuget.org/packages/Grpc.Core.Api/2.67.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Grpc.Core.Api/2.67.0"
+        },
+        "version": "2.67.0"
+      },
+      {
+        "contentHash": "ofTjJQfegWkVlk5R4k/LlwpcucpsBzntygd4iAeuKd/eLMkmBWoXN+xcjYJ5IibAahRpIJU461jABZvT6E9dwA==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Grpc.Net.Client/2.67.0",
+          "spdx": "Apache-2.0"
+        },
+        "name": "Grpc.Net.Client",
+        "repositoryRevision": "7c43ddb5d68008782dc0dba2d0feaa3ed91a9fb2",
+        "source": "https://www.nuget.org/packages/Grpc.Net.Client/2.67.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Grpc.Net.Client/2.67.0"
+        },
+        "version": "2.67.0"
+      },
+      {
+        "contentHash": "gazn1cD2Eol0/W5ZJRV4PYbNrxJ9oMs8pGYux5S9E4MymClvl7aqYSmpqgmWAUWvziRqK9K+yt3cjCMfQ3x/5A==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Grpc.Net.Common/2.67.0",
+          "spdx": "Apache-2.0"
+        },
+        "name": "Grpc.Net.Common",
+        "repositoryRevision": "7c43ddb5d68008782dc0dba2d0feaa3ed91a9fb2",
+        "source": "https://www.nuget.org/packages/Grpc.Net.Common/2.67.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Grpc.Net.Common/2.67.0"
+        },
+        "version": "2.67.0"
+      },
+      {
+        "contentHash": "TTyxM/+gAaKWwadxzY2FqY/8baWBzuSWwwH9L9FgkQQ2awsG+yhZjzzIwBgqozAnTPLPTA59h+mDObG1miuINw==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Agents.AI/1.16.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Agents.AI",
+        "source": "https://www.nuget.org/packages/Microsoft.Agents.AI/1.16.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Agents.AI/1.16.0"
+        },
+        "version": "1.16.0"
+      },
+      {
+        "contentHash": "7PuWDH7rICvt1qjAQAZLFmWv6fUXQDL6zhGPFQh/hQRyM7wWKm84evpYKQBaBNJ2O6d+w6ceoFmXmddMoIgD8w==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Agents.AI.Abstractions/1.16.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Agents.AI.Abstractions",
+        "source": "https://www.nuget.org/packages/Microsoft.Agents.AI.Abstractions/1.16.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Agents.AI.Abstractions/1.16.0"
+        },
+        "version": "1.16.0"
+      },
+      {
+        "contentHash": "pL9l1AA9eVxk18l/KO1Spq5FqetXnOoQIl3CKRVtLB6jPsklhBiUXh+Xo+7txqwFwnf4rk0TYkmyJB+RtFXQiQ==",
+        "kind": "workflow",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Agents.AI.DurableTask/1.16.0-preview.260730.1",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Agents.AI.DurableTask",
+        "source": "https://www.nuget.org/packages/Microsoft.Agents.AI.DurableTask/1.16.0-preview.260730.1",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Agents.AI.DurableTask/1.16.0-preview.260730.1"
+        },
+        "version": "1.16.0-preview.260730.1"
+      },
+      {
+        "contentHash": "fNI6JjqARcdZqeuAXa18ucryjVO7c7haC9FLJVs9pjdjxdhTxCWMxbswddMQBwno/iv/6BKwBMBpbUQETcHrHg==",
+        "kind": "framework",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Agents.AI.Workflows/1.16.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Agents.AI.Workflows",
+        "source": "https://www.nuget.org/packages/Microsoft.Agents.AI.Workflows/1.16.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Agents.AI.Workflows/1.16.0"
+        },
+        "version": "1.16.0"
+      },
+      {
+        "contentHash": "sCCeZvC3nJvJ2vQj9SOmiXUXC+KZnrwtQqQHo4h5iojisleJL3+B6P/QTxyVrKUamWCd/rREyDb5gilaswFZeA==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Azure.DurableTask.Core/3.6.0",
+          "spdx": "Apache-2.0"
+        },
+        "name": "Microsoft.Azure.DurableTask.Core",
+        "repositoryRevision": "8576bc5777119c673857b87c1e85992a1111d437",
+        "source": "https://www.nuget.org/packages/Microsoft.Azure.DurableTask.Core/3.6.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Azure.DurableTask.Core/3.6.0"
+        },
+        "version": "3.6.0"
+      },
+      {
+        "contentHash": "Aq7M8lG6BrHeatqKqncVm9m55ec34k6nnfPRLe/PvGg+b/pAsRM2ejofeKmCLjTXMa+5NGXm382f8CG/D5WDow==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterfaces/10.0.9",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Bcl.AsyncInterfaces",
+        "repositoryRevision": "901ca941248413c79832d2fdbd709da0c4386353",
+        "source": "https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterfaces/10.0.9",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Bcl.AsyncInterfaces/10.0.9"
+        },
+        "version": "10.0.9"
+      },
+      {
+        "contentHash": "Onwmy2fuB2a14d7naiiNUZrUpZqnlzs//EDTVY+/MbDhqeGOF4JTJsi41RcjMq5yhY/fKBFOtxRGz2slIHGeVg==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Abstractions/1.18.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.DurableTask.Abstractions",
+        "repositoryRevision": "8781ec370eea5f669885f9f935294c2542de46b2",
+        "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Abstractions/1.18.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Abstractions/1.18.0"
+        },
+        "version": "1.18.0"
+      },
+      {
+        "contentHash": "Ow4NKgrTFldbCQYHTwXGs2HjslJQ9RYuH+XRMHzCVWXa92ej82RqzLMP6Dp5Pi3Qsw0J5FsTjmln8BfDIEnM9Q==",
+        "kind": "client",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Client/1.18.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.DurableTask.Client",
+        "repositoryRevision": "8781ec370eea5f669885f9f935294c2542de46b2",
+        "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Client/1.18.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Client/1.18.0"
+        },
+        "version": "1.18.0"
+      },
+      {
+        "contentHash": "WKjYGuPqO0S0ciGnUEJRjjzBDrxGjA10zZ9LwStybRWOJEzf5nl7aJy76V6ZyIVUHWtLX+dLLEY8rD0+c1/N0g==",
+        "kind": "client",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Client.AzureManaged/1.18.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.DurableTask.Client.AzureManaged",
+        "repositoryRevision": "8781ec370eea5f669885f9f935294c2542de46b2",
+        "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Client.AzureManaged/1.18.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Client.AzureManaged/1.18.0"
+        },
+        "version": "1.18.0"
+      },
+      {
+        "contentHash": "dyRuyyjxX1lfpmCpJPfdJKiAKbzPEDYTyf7tcg3eGDNUuEEhJtRFND08MWJq6Kd/ME7Uu31zQUxK24FW6cjEaA==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Client.Grpc/1.18.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.DurableTask.Client.Grpc",
+        "repositoryRevision": "8781ec370eea5f669885f9f935294c2542de46b2",
+        "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Client.Grpc/1.18.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Client.Grpc/1.18.0"
+        },
+        "version": "1.18.0"
+      },
+      {
+        "contentHash": "ZAAMD54Zst1+6VIZnkBpHcGVXbWMBBid10hUSt4F66JNKeFTbi4t5q7TTNUSsHATyR0t88U6m91oXlVs0U7UYw==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Grpc/1.18.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.DurableTask.Grpc",
+        "repositoryRevision": "8781ec370eea5f669885f9f935294c2542de46b2",
+        "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Grpc/1.18.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Grpc/1.18.0"
+        },
+        "version": "1.18.0"
+      },
+      {
+        "contentHash": "bQd432z851/BLOCsiIWigwvWMeI3gQHxe51s2/bflvg+EeUYHz1AzCGWPDbIKnG4zXl6qfLzk2fpv+ZOapQIKQ==",
+        "kind": "worker",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Worker/1.18.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.DurableTask.Worker",
+        "repositoryRevision": "8781ec370eea5f669885f9f935294c2542de46b2",
+        "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Worker/1.18.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Worker/1.18.0"
+        },
+        "version": "1.18.0"
+      },
+      {
+        "contentHash": "n1WD1bKPU3GLeKaaK5tRwDJ84/ezMb5uqSRAUD5Mhyq5+PILtA2aJbdee9Z67xBkMgMcuqRzee788a30hlikpA==",
+        "kind": "worker",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Worker.AzureManaged/1.18.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.DurableTask.Worker.AzureManaged",
+        "repositoryRevision": "8781ec370eea5f669885f9f935294c2542de46b2",
+        "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Worker.AzureManaged/1.18.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Worker.AzureManaged/1.18.0"
+        },
+        "version": "1.18.0"
+      },
+      {
+        "contentHash": "B1xJ9mBa46AuMDbQdKvaFZvPajxzpCn31FyoBKoejTITYb7V3b2nvSHMAUVYVaCAmoUdceWGb9M68pZnB/vT7Q==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Worker.Grpc/1.18.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.DurableTask.Worker.Grpc",
+        "repositoryRevision": "8781ec370eea5f669885f9f935294c2542de46b2",
+        "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Worker.Grpc/1.18.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.DurableTask.Worker.Grpc/1.18.0"
+        },
+        "version": "1.18.0"
+      },
+      {
+        "contentHash": "r8z4uyPq0kTk4+jH92/hPshf3HNUXKOQ9axJwp57QFz43G45BG4DNYpVE0vuSan1dI69LtWx9ttF0Z2ibnghNg==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.AI/10.7.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.AI",
+        "repositoryRevision": "fa0072f10f11eae347aaecaa3c3e81e701b0f79d",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.AI/10.7.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.AI/10.7.0"
+        },
+        "version": "10.7.0"
+      },
+      {
+        "contentHash": "Lf822igMm8NkTYHZhTp7kjoNYkLLEvJnX3SkG/LVBvsZHC0Y9choogHz8YtITBoy0TOylM3kVUZ6iaHf0my0ug==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.AI.Abstractions/10.7.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.AI.Abstractions",
+        "repositoryRevision": "fa0072f10f11eae347aaecaa3c3e81e701b0f79d",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.AI.Abstractions/10.7.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.AI.Abstractions/10.7.0"
+        },
+        "version": "10.7.0"
+      },
+      {
+        "contentHash": "BdbJNfhc/pb3RkD19Sm/XuLK3x5AdU+AB+0HC8Nlu7WZTrVLnA8lpqIx1BB4k+KIKy5ZSH5RVH5HHfT+gwL9yg==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.AI.Evaluation/10.7.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.AI.Evaluation",
+        "repositoryRevision": "fa0072f10f11eae347aaecaa3c3e81e701b0f79d",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.AI.Evaluation/10.7.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.AI.Evaluation/10.7.0"
+        },
+        "version": "10.7.0"
+      },
+      {
+        "contentHash": "5fGxcw2vuYp8s0wio9H1ECiuk4iKSdTIlNuigdLIrkhg+5XAwgFVDB/5Ots3pfN/QhABLYXutA79JFtnUKDSHA==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Caching.Abstractions/10.0.9",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.Caching.Abstractions",
+        "repositoryRevision": "901ca941248413c79832d2fdbd709da0c4386353",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.Caching.Abstractions/10.0.9",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Caching.Abstractions/10.0.9"
+        },
+        "version": "10.0.9"
+      },
+      {
+        "contentHash": "krK19MKp0BNiR9rpBDW7PKSrTMLVlifS9am3CVc4O1Jq6GWz0o4F+sw5OSL4L3mVd56W8l6JRgghUa2KB51vOw==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Caching.Memory/10.0.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.Caching.Memory",
+        "repositoryRevision": "b0f34d51fccc69fd334253924abd8d6853fad7aa",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.Caching.Memory/10.0.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Caching.Memory/10.0.0"
+        },
+        "version": "10.0.0"
+      },
+      {
+        "contentHash": "xbWZji13Vb2jDJNtwVrKpI09jd8x3n3fL+GzhiLK+8O5Wc2A+GyqCZalST2fV46Pf0QfCwkXf83y+3/rDkCd7A==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Compliance.Abstractions/10.5.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.Compliance.Abstractions",
+        "repositoryRevision": "958df529b628f62daa615dba271f42e2225d7a97",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.Compliance.Abstractions/10.5.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Compliance.Abstractions/10.5.0"
+        },
+        "version": "10.5.0"
+      },
+      {
+        "contentHash": "d2kDKnCsJvY7mBVhcjPSp9BkJk48DsaHPg5u+Oy4f8XaOqnEedRy/USyvnpHL92wpJ6DrTPy7htppUUzskbCXQ==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions/10.0.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.Configuration.Abstractions",
+        "repositoryRevision": "b0f34d51fccc69fd334253924abd8d6853fad7aa",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions/10.0.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Configuration.Abstractions/10.0.0"
+        },
+        "version": "10.0.0"
+      },
+      {
+        "contentHash": "g41l/30G3K4B/d/L8kjux0+30e27c8D0FVQ/PFCpbekgfDpj9mnDhieP67EqXWvl1EWNeZh2rpR4F5B/jcDOHA==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection.Abstractions/10.0.9",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "repositoryRevision": "901ca941248413c79832d2fdbd709da0c4386353",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection.Abstractions/10.0.9",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection.Abstractions/10.0.9"
+        },
+        "version": "10.0.9"
+      },
+      {
+        "contentHash": "SfK89ytD61S7DgzorFljSkUeluC1ncn6dtZgwc0ot39f/BEYWBl5jpgvodxduoYAs1d9HG8faCDRZxE95UMo2A==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Diagnostics.Abstractions/10.0.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.Diagnostics.Abstractions",
+        "repositoryRevision": "b0f34d51fccc69fd334253924abd8d6853fad7aa",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.Diagnostics.Abstractions/10.0.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Diagnostics.Abstractions/10.0.0"
+        },
+        "version": "10.0.0"
+      },
+      {
+        "contentHash": "/ppSdehKk3fuXjlqCDgSOtjRK/pSHU8eWgzSHfHdwVm5BP4Dgejehkw+PtxKG2j98qTDEHDst2Y99aNsmJldmw==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.FileProviders.Abstractions/10.0.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.FileProviders.Abstractions",
+        "repositoryRevision": "b0f34d51fccc69fd334253924abd8d6853fad7aa",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.FileProviders.Abstractions/10.0.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.FileProviders.Abstractions/10.0.0"
+        },
+        "version": "10.0.0"
+      },
+      {
+        "contentHash": "EG9GuYJlj1o1G8maSpKceZdj88OehKFRWaWp8BWUQWlvIJDWD8N0sIYDoRMGL/yX85H8KbVYPR9+dH/UjPEiKw==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.FileSystemGlobbing/10.0.6",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.FileSystemGlobbing",
+        "repositoryRevision": "47fb725acf5d7094af51aebbb5b7e5c44a3b2a77",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.FileSystemGlobbing/10.0.6",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.FileSystemGlobbing/10.0.6"
+        },
+        "version": "10.0.6"
+      },
+      {
+        "contentHash": "KrN6TGFwCwqOkLLk/idW/XtDQh+8In+CL9T4M1Dx+5ScsjTq4TlVbal8q532m82UYrMr6RiQJF2HvYCN0QwVsA==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Hosting.Abstractions/10.0.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.Hosting.Abstractions",
+        "repositoryRevision": "b0f34d51fccc69fd334253924abd8d6853fad7aa",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.Hosting.Abstractions/10.0.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Hosting.Abstractions/10.0.0"
+        },
+        "version": "10.0.0"
+      },
+      {
+        "contentHash": "9S/DFt4cohlMPpzIxjG6kk0L8MuN2vDm9pbMCulxtJzzk82oJHVLBd8vuQxaPskaYQwKqmFmbannf5eoChgjYg==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions/10.0.9",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.Logging.Abstractions",
+        "repositoryRevision": "901ca941248413c79832d2fdbd709da0c4386353",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions/10.0.9",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Logging.Abstractions/10.0.9"
+        },
+        "version": "10.0.9"
+      },
+      {
+        "contentHash": "2Jafd4fdxxiwiQ08mcF+Lf3vqikkQZusGVThOKZNSmPDceGk4IwkjeHL7OEb9Ov8q9ICY5wofL98CS153K5VvQ==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.ObjectPool/10.0.6",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.ObjectPool",
+        "repositoryRevision": "47fb725acf5d7094af51aebbb5b7e5c44a3b2a77",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.ObjectPool/10.0.6",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.ObjectPool/10.0.6"
+        },
+        "version": "10.0.6"
+      },
+      {
+        "contentHash": "8oCAgXOow5XDrY9HaXX1QmH3ORsyZO/ANVHBlhLyCeWTH5Sg4UuqZeOTWJi6484M+LqSx0RqQXDJtdYy2BNiLQ==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Options/10.0.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.Options",
+        "repositoryRevision": "b0f34d51fccc69fd334253924abd8d6853fad7aa",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.Options/10.0.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Options/10.0.0"
+        },
+        "version": "10.0.0"
+      },
+      {
+        "contentHash": "nwyF0pUubUWgzxw5y0g1Vsp2n/Psv4V7HekgUTlFK/pNlzZaQOBp56ww5GFeg4GpaMK8Lu+02XIEjqzoIcFJGw==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Options.DataAnnotations/10.0.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.Options.DataAnnotations",
+        "repositoryRevision": "b0f34d51fccc69fd334253924abd8d6853fad7aa",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.Options.DataAnnotations/10.0.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Options.DataAnnotations/10.0.0"
+        },
+        "version": "10.0.0"
+      },
+      {
+        "contentHash": "fmEbAUFsaIKirgLt/lYhuFRBwhcSJN31jjHgCdbQxJiWOum6EdLjkbgGuukSP9z/a+9LibaxII/kF+GwOXgC4g==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Primitives/10.0.9",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.Primitives",
+        "repositoryRevision": "901ca941248413c79832d2fdbd709da0c4386353",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.Primitives/10.0.9",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.Primitives/10.0.9"
+        },
+        "version": "10.0.9"
+      },
+      {
+        "contentHash": "eh0JLxoztc9Wz7TrFVRQyotMY9CBh2t22lMPvzy61yaBDDFBsrisrFOD4NId2z/ujwsHVKDtyfDb9tkXwSV5Vw==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.VectorData.Abstractions/10.7.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Extensions.VectorData.Abstractions",
+        "repositoryRevision": "fa0072f10f11eae347aaecaa3c3e81e701b0f79d",
+        "source": "https://www.nuget.org/packages/Microsoft.Extensions.VectorData.Abstractions/10.7.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Extensions.VectorData.Abstractions/10.7.0"
+        },
+        "version": "10.7.0"
+      },
+      {
+        "contentHash": "vZ50HE9INSN+Ew8pCgTm0t7wzxQTqozF9L4MAsl64etXz0Teo0dbUvjpVzqDHRs6m1Vn8mHF04fGaxXrIvGpsg==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Identity.Client/4.78.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Identity.Client",
+        "repositoryRevision": "d6f9310e2f1073ad2db8ca3bf39827b9bcf26e06",
+        "source": "https://www.nuget.org/packages/Microsoft.Identity.Client/4.78.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Identity.Client/4.78.0"
+        },
+        "version": "4.78.0"
+      },
+      {
+        "contentHash": "DYU9o+DrDQuyZxeq91GBA9eNqBvA3ZMkLzQpF7L9dTk6FcIBM1y1IHXWqiKXTvptPF7CZE59upbyUoa+FJ5eiA==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.Identity.Client.Extensions.Msal/4.78.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.Identity.Client.Extensions.Msal",
+        "repositoryRevision": "d6f9310e2f1073ad2db8ca3bf39827b9bcf26e06",
+        "source": "https://www.nuget.org/packages/Microsoft.Identity.Client.Extensions.Msal/4.78.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.Identity.Client.Extensions.Msal/4.78.0"
+        },
+        "version": "4.78.0"
+      },
+      {
+        "contentHash": "iwbCpSjD3ehfTwBhtSNEtKPK0ICun6ov7Ibx6ISNA9bfwIyzI2Siwyi9eJFCJBwxowK9xcA1mj+jBWiigeqgcQ==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.IdentityModel.Abstractions/8.14.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.IdentityModel.Abstractions",
+        "repositoryRevision": "c8f7d87bcda35557a68f6cb9c55856a2ee733856",
+        "source": "https://www.nuget.org/packages/Microsoft.IdentityModel.Abstractions/8.14.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.IdentityModel.Abstractions/8.14.0"
+        },
+        "version": "8.14.0"
+      },
+      {
+        "contentHash": "+b8lT4cLLO/sBR2hjvE/qG6qrZG15h7/PBvnIrzTh4xDaAxdHUY6449rC+1pHzQUsBiCHZVbj+VMn+xS0sL7TA==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Microsoft.ML.Tokenizers/2.0.0",
+          "spdx": "MIT"
+        },
+        "name": "Microsoft.ML.Tokenizers",
+        "repositoryRevision": "efefa92f4486a43047c5b47618885a71bf7f0967",
+        "source": "https://www.nuget.org/packages/Microsoft.ML.Tokenizers/2.0.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Microsoft.ML.Tokenizers/2.0.0"
+        },
+        "version": "2.0.0"
+      },
+      {
+        "contentHash": "pdgNNMai3zv51W5aq268sujXUyx7SNdE2bj1wZcWjAQrKMFZV260lbqYop1d2GM67JI1huLRwxo9ZqnfF/lC6A==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/Newtonsoft.Json/13.0.4",
+          "spdx": "MIT"
+        },
+        "name": "Newtonsoft.Json",
+        "repositoryRevision": "4e13299d4b0ec96bd4df9954ef646bd2d1b5bf2a",
+        "source": "https://www.nuget.org/packages/Newtonsoft.Json/13.0.4",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/Newtonsoft.Json/13.0.4"
+        },
+        "version": "13.0.4"
+      },
+      {
+        "contentHash": "fX+fkCysfPut+qCcT3bKqyX4QN9Saf4CgX8HLOHywEVD+Xr7sULtfuypITpoDysjx8R59dn/3mWhgimMH8cm/g==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/OpenTelemetry.Api/1.15.3",
+          "spdx": "Apache-2.0"
+        },
+        "name": "OpenTelemetry.Api",
+        "repositoryRevision": "d622e6c7c899527638b53a6b06919859f5752add",
+        "source": "https://www.nuget.org/packages/OpenTelemetry.Api/1.15.3",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/OpenTelemetry.Api/1.15.3"
+        },
+        "version": "1.15.3"
+      },
+      {
+        "contentHash": "AqRzhn0v29GGGLj/Z6gKq4lGNtvPHT4nHdG5PDJh9IfVjv/nYUVmX11hwwws1vDFeIAzrvmn0dPu8IjLtu6fAw==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/System.ClientModel/1.8.0",
+          "spdx": "MIT"
+        },
+        "name": "System.ClientModel",
+        "repositoryRevision": "033d7cea151a65b3c11037021403787d7e6e01a3",
+        "source": "https://www.nuget.org/packages/System.ClientModel/1.8.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.ClientModel/1.8.0"
+        },
+        "version": "1.8.0"
+      },
+      {
+        "contentHash": "lcyUiXTsETK2ALsZrX+nWuHSIQeazhqPphLfaRxzdGaG93+0kELqpgEHtwWOlQe7+jSFnKwaCAgL4kjeZCQJnw==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/System.Diagnostics.EventLog/6.0.0",
+          "spdx": "MIT"
+        },
+        "name": "System.Diagnostics.EventLog",
+        "repositoryRevision": "4822e3c3aa77eb82b2fb33c9321f923cf11ddde6",
+        "source": "https://www.nuget.org/packages/System.Diagnostics.EventLog/6.0.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.Diagnostics.EventLog/6.0.0"
+        },
+        "version": "6.0.0"
+      },
+      {
+        "contentHash": "BVYuec3jV23EMRDeR7Dr1/qhx7369dZzJ9IWy2xylvb4YfXsrUxspWc4UWYid/tj4zZK58uGZqn2WQiaDMhmAg==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/System.Memory.Data/8.0.1",
+          "spdx": "MIT"
+        },
+        "name": "System.Memory.Data",
+        "repositoryRevision": "81cabf2857a01351e5ab578947c7403a5b128ad1",
+        "source": "https://www.nuget.org/packages/System.Memory.Data/8.0.1",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.Memory.Data/8.0.1"
+        },
+        "version": "8.0.1"
+      },
+      {
+        "contentHash": "Rb71S3gggYVwEce9ugNw91vbr4vC4gThtx/imSJtLBW3AupEKujJPPQL6xF9q0DcNm6+z7hnYk7XqXaUpA4wDg==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/System.Numerics.Tensors/10.0.9",
+          "spdx": "MIT"
+        },
+        "name": "System.Numerics.Tensors",
+        "repositoryRevision": "901ca941248413c79832d2fdbd709da0c4386353",
+        "source": "https://www.nuget.org/packages/System.Numerics.Tensors/10.0.9",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.Numerics.Tensors/10.0.9"
+        },
+        "version": "10.0.9"
+      },
+      {
+        "contentHash": "iSTPeWR9HJhGoNV4WhVlvofuiTjpok1i4E3LPgMdbMqf3jKhFlT9HAlO32lb52NLppWC/4dZQFfUzTytvyXBmw==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/System.Reactive/4.4.1",
+          "spdx": "MIT"
+        },
+        "name": "System.Reactive",
+        "repositoryRevision": "7fe23fedde3d0c462ea3dd851debcf9ccb0f52f6",
+        "source": "https://www.nuget.org/packages/System.Reactive/4.4.1",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.Reactive/4.4.1"
+        },
+        "version": "4.4.1"
+      },
+      {
+        "contentHash": "Ad2/TBOBV0/45pzccpbQj2vo3S85uipF/PfqkbQUnH0vOtBqrXd1eqWtky5YTXq/WIRU1HF62HFSOdXiNC+E4A==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://github.com/dotnet/reactive/blob/v4.4.1/LICENSE",
+          "spdx": "MIT"
+        },
+        "name": "System.Reactive.Compatibility",
+        "source": "https://www.nuget.org/packages/System.Reactive.Compatibility/4.4.1",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.Reactive.Compatibility/4.4.1"
+        },
+        "version": "4.4.1"
+      },
+      {
+        "contentHash": "YQHJOt8hZvwFelIIfs19t8Jhz5P6NS1ZZccbVUuE1LFyoFZjaUecdYIYykgXzpyj5Rl40XC3xkyuuhHRaAln2w==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/System.Reactive.Core/4.4.1",
+          "spdx": "MIT"
+        },
+        "name": "System.Reactive.Core",
+        "repositoryRevision": "7fe23fedde3d0c462ea3dd851debcf9ccb0f52f6",
+        "source": "https://www.nuget.org/packages/System.Reactive.Core/4.4.1",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.Reactive.Core/4.4.1"
+        },
+        "version": "4.4.1"
+      },
+      {
+        "contentHash": "Pk++rL2lxe6yhBEzgc9eJWR57YxYxtAmcz9U0JdKyHEzTLqba3B7MhhYrpN2ToTPVRyJJzxMdPdLieIJvlsACg==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/System.Reactive.Interfaces/4.4.1",
+          "spdx": "MIT"
+        },
+        "name": "System.Reactive.Interfaces",
+        "repositoryRevision": "7fe23fedde3d0c462ea3dd851debcf9ccb0f52f6",
+        "source": "https://www.nuget.org/packages/System.Reactive.Interfaces/4.4.1",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.Reactive.Interfaces/4.4.1"
+        },
+        "version": "4.4.1"
+      },
+      {
+        "contentHash": "wyOVuUyHmPV667REPwcZjFjOlRLX6qSGVcXMye0qUqBAWFB3bu1RO1XLGWZTnf0d67DQHV69kw7tAtTh+4EYyQ==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/System.Reactive.Linq/4.4.1",
+          "spdx": "MIT"
+        },
+        "name": "System.Reactive.Linq",
+        "repositoryRevision": "7fe23fedde3d0c462ea3dd851debcf9ccb0f52f6",
+        "source": "https://www.nuget.org/packages/System.Reactive.Linq/4.4.1",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.Reactive.Linq/4.4.1"
+        },
+        "version": "4.4.1"
+      },
+      {
+        "contentHash": "jVF40bEwEES1DpDxI8pRcVEkH/TztFCOSToMYIK6TNE5QojsQljfvZd6jaDG4jRZ9hkoMYyUbkeSDYG/1ldPDg==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/System.Reactive.PlatformServices/4.4.1",
+          "spdx": "MIT"
+        },
+        "name": "System.Reactive.PlatformServices",
+        "repositoryRevision": "7fe23fedde3d0c462ea3dd851debcf9ccb0f52f6",
+        "source": "https://www.nuget.org/packages/System.Reactive.PlatformServices/4.4.1",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.Reactive.PlatformServices/4.4.1"
+        },
+        "version": "4.4.1"
+      },
+      {
+        "contentHash": "K9RDgMHsuceX8QTk5ALCgYpexA9qcMsIi4K97Eigqcz9hD6fa4Smrjy8F/m6YdVJZFsBGaZ3uwj+d0loAdMfbA==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://www.nuget.org/packages/System.Reactive.Providers/4.4.1",
+          "spdx": "MIT"
+        },
+        "name": "System.Reactive.Providers",
+        "repositoryRevision": "7fe23fedde3d0c462ea3dd851debcf9ccb0f52f6",
+        "source": "https://www.nuget.org/packages/System.Reactive.Providers/4.4.1",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.Reactive.Providers/4.4.1"
+        },
+        "version": "4.4.1"
+      },
+      {
+        "contentHash": "wLBKzFnDCxP12VL9ANydSYhk59fC4cvOr9ypYQLPnAj48NQIhqnjdD2yhP8yEKyBJEjERWS9DisKL7rX5eU25Q==",
+        "kind": "transitive",
+        "licence": {
+          "source": "https://github.com/dotnet/corefx/blob/v2.1.0/LICENSE.TXT",
+          "spdx": "MIT"
+        },
+        "name": "System.Security.Cryptography.ProtectedData",
+        "source": "https://www.nuget.org/packages/System.Security.Cryptography.ProtectedData/4.5.0",
+        "unavoidableServiceCost": {
+          "amount": 0,
+          "amountStatus": "zero",
+          "currency": "EUR",
+          "period": "none",
+          "source": "https://www.nuget.org/packages/System.Security.Cryptography.ProtectedData/4.5.0"
+        },
+        "version": "4.5.0"
+      }
+    ],
+    "configuration": {
+      "contractVersion": "v1",
+      "path": "gate-config.json",
+      "version": "v1"
+    },
+    "forbiddenComponents": [
+      "Temporal",
+      "paid-managed-workflow-service"
+    ],
+    "packageLock": {
+      "path": "audit/packages.lock.json",
+      "sha256": "4164a400b10eb8b8be7e4affe5e93d006333746fdb0765eecf2262afce96dadc"
+    },
+    "probe": {
+      "command": [
+        "python3",
+        "audit/probe-must-not-start.py"
+      ],
+      "expectedEffects": [
+        "before-worker-stop",
+        "after-worker-stop"
+      ],
+      "ports": [
+        19080,
+        19082
+      ],
+      "statePaths": [
+        ".gate-state"
+      ],
+      "workerProcessNames": [
+        "maf-oss-gate-worker-1",
+        "maf-oss-gate-worker-2"
+      ]
+    },
+    "runtime": {
+      "dotnetSdk": "10.0.203",
+      "rid": "osx-arm64"
+    },
+    "schemaVersion": "maf-oss-gate-manifest/v1",
+    "source": {
+      "dirtyStateDigest": "484d775e0f7a2af3b23b1a1bf30307eedcf104f2b1a37984544e76c18d6fb6eb",
+      "gateSourceDigest": "7611ea7f24e2a6014f1306a940b443f64114c47faf4c438ac7755281211b0f54",
+      "repository": "https://github.com/paradox123/shared-ai-docs.git",
+      "revision": "b31fea73491294280d0a7615980da629a551ebac"
+    }
+  },
+  "manifestDigest": "2d33ba1f78e7501bc2eeb85c299046775dccd21ef31a8a60a2b20b72737e4076",
+  "observedDigest": "d2dfd7e11e73cfa4ccf884246a184840c7e4163e512f12f7fc041e2b8031e4c8",
+  "probe": {
+    "started": false
+  },
+  "provenance": {
+    "componentInventorySha256": "688fb89790c219cf539c90160d2f6b0f619f07a7f038201e53c4fd1386cbeef2",
+    "configurationVersion": "v1",
+    "contractVersion": "v1",
+    "dirtyStateDigest": "484d775e0f7a2af3b23b1a1bf30307eedcf104f2b1a37984544e76c18d6fb6eb",
+    "dotnetSdk": "10.0.203",
+    "gateSourceDigest": "7611ea7f24e2a6014f1306a940b443f64114c47faf4c438ac7755281211b0f54",
+    "packageLockSha256": "4164a400b10eb8b8be7e4affe5e93d006333746fdb0765eecf2262afce96dadc",
+    "rid": "osx-arm64",
+    "schemaVersion": "maf-oss-gate-observed/v1",
+    "sourceRevision": "b31fea73491294280d0a7615980da629a551ebac"
+  },
+  "recordedObservedDigest": "d2dfd7e11e73cfa4ccf884246a184840c7e4163e512f12f7fc041e2b8031e4c8",
+  "recordedProvenance": {
+    "componentInventorySha256": "688fb89790c219cf539c90160d2f6b0f619f07a7f038201e53c4fd1386cbeef2",
+    "configurationVersion": "v1",
+    "contractVersion": "v1",
+    "dirtyStateDigest": "484d775e0f7a2af3b23b1a1bf30307eedcf104f2b1a37984544e76c18d6fb6eb",
+    "dotnetSdk": "10.0.203",
+    "gateSourceDigest": "7611ea7f24e2a6014f1306a940b443f64114c47faf4c438ac7755281211b0f54",
+    "packageLockSha256": "4164a400b10eb8b8be7e4affe5e93d006333746fdb0765eecf2262afce96dadc",
+    "rid": "osx-arm64",
+    "schemaVersion": "maf-oss-gate-observed/v1",
+    "sourceRevision": "b31fea73491294280d0a7615980da629a551ebac"
+  }
+}

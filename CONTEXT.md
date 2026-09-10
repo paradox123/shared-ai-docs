@@ -95,3 +95,7 @@ _Avoid_: Einmal verifizierter Branch, veraltete Reviewfreigabe
 **Verhaltensnachweis**:
 Ein reproduzierbarer Beleg, dass ein konkretes Akzeptanzkriterium ueber die direkteste oeffentliche Schnittstelle das erwartete fachliche Ergebnis erzeugt. Erfolgreicher Start, fehlende Fehlermeldungen, ein Health-Status oder ein HTTP-200 ohne pruefbaren fachlichen Inhalt sind lediglich Betriebsnachweise.
 _Avoid_: Startnachweis, Health-Check als Feature-Evidence, "keine Fehler gesehen"
+
+**Quellcode-Graph**:
+Ein lokaler, persistierter Strukturindex eines explizit freigegebenen Code-Workspaces fuer Symbol-, Aufruf- und Auswirkungsnavigation. Er ist weder eine Dokumentensuche noch eine globale Inhaltskopie.
+_Avoid_: Vollindex, Wiki-Index, RAG-Ersatz

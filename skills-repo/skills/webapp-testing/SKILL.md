@@ -1,22 +1,29 @@
 ---
 name: webapp-testing
-description: Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs.
+description: Toolkit for verifying and debugging local web applications, generated HTML previews (including email templates), and static pages with an available Browser tool or Playwright. Supports functional checks, rendered visual QA, screenshots, and browser-console inspection.
 license: Complete terms in LICENSE.txt
 ---
 
 # Web Application Testing
 
-To test local web applications, write native Playwright scripts. Prefer Python
-when the runtime already has `playwright`; otherwise switch directly to the
-Node/Browser fallback below instead of searching the filesystem or installing
-packages ad hoc.
+Start with the smallest route that produces rendered evidence:
+
+- Use a callable Browser tool first for a one-off navigation, DOM inspection,
+  interaction, or screenshot.
+- Use a native Playwright script when the Browser tool is unavailable or the
+  task needs repeatable assertions, console capture, multiple pages, or a
+  server-and-test command that should run as one process.
+- For a Playwright script, prefer Python only after the import preflight below
+  succeeds; otherwise switch directly to the Node fallback. Once one route is
+  viable, do not probe other runtimes or install packages ad hoc.
 
 **Helper Scripts Available**:
 - `scripts/with_server.py` - Manages server lifecycle (supports multiple servers)
 
 Use the helper scripts as black boxes. Start with the stable invocation patterns below and only fall back to `--help` when the known-good shape does not fit the task. Do not read the source unless the helper cannot express the workflow you need.
 
-For Codex Desktop sessions, prefer the bundled runtimes when you need Playwright quickly:
+For Codex Desktop sessions where a Playwright script is the right route, prefer
+the bundled runtimes:
 
 ```bash
 ~/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/bin/python3 \
@@ -33,10 +40,11 @@ Before choosing the Python form, verify the module is actually present:
   -c "import playwright"
 ```
 
-If that import fails, do not run `find /Users/...`, `npm ls -g`, or
+If that import fails, do not run `find ~/...`, `npm ls -g`, or
 `npm install` just to rediscover Playwright. Use one of these fallbacks:
 
-- If the Browser plugin/tool is available, use it for the rendered check.
+- If a Browser tool became available and the task does not require a reusable
+  script, use it for the rendered check.
 - If you need Node packages inside the Node REPL Playwright fallback, add the bundled module root once:
 
 ```text
@@ -60,10 +68,10 @@ Only ask to install browsers or npm packages when no local browser path works.
 ## Decision Tree: Choosing Your Approach
 
 ```
-User task → Is it static HTML?
-    ├─ Yes → Read HTML file directly to identify selectors
-    │         ├─ Success → Write Playwright script using selectors
-    │         └─ Fails/Incomplete → Treat as dynamic (below)
+User task → Is it static or generated HTML?
+    ├─ Yes → Read the HTML file directly to identify selectors
+    │         ├─ Self-contained → Open file:// with the chosen Browser/Playwright route
+    │         └─ Needs HTTP/assets → Serve it with the smallest existing repo command
     │
     └─ No (dynamic webapp) → Is the server already running?
         ├─ No → Use the known-good `with_server.py` pattern below
@@ -75,6 +83,13 @@ User task → Is it static HTML?
             3. Identify selectors from rendered state
             4. Execute actions with discovered selectors
 ```
+
+For generated HTML such as an email preview, use the application's production
+renderer or an existing repo fixture when practical, verify that it emitted a
+non-empty artifact, and then inspect that artifact through the static branch
+above. Do not recreate production markup solely to obtain a screenshot. This
+skill owns rendered verification; project-specific fixture generation and
+local-stack provisioning belong to the repository's helpers or playbook.
 
 ## Example: Using with_server.py
 
@@ -139,7 +154,9 @@ with sync_playwright() as p:
 ## Best Practices
 
 - **Use bundled scripts as black boxes** - To accomplish a task, consider whether one of the scripts available in `scripts/` can help. These scripts handle common, complex workflows reliably without cluttering the context window. Start from the stable examples in this skill and use `--help` only when those examples clearly do not fit.
-- For Codex Desktop local-app checks, assume `with_server.py` plus a minimal Playwright script is the default path when the Browser plugin does not expose a callable browser tool in the turn.
+- For Codex Desktop local-app checks, use a callable Browser tool for one-off
+  rendered inspection; otherwise use `with_server.py` plus the smallest
+  Playwright script that proves the task.
 - Use `sync_playwright()` for synchronous scripts
 - Always close the browser when done
 - Use descriptive selectors: `text=`, `role=`, CSS selectors, or IDs

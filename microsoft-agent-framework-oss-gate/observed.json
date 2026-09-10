@@ -1,0 +1,12 @@
+{
+  "componentInventorySha256": "688fb89790c219cf539c90160d2f6b0f619f07a7f038201e53c4fd1386cbeef2",
+  "configurationVersion": "v1",
+  "contractVersion": "v1",
+  "dirtyStateDigest": "484d775e0f7a2af3b23b1a1bf30307eedcf104f2b1a37984544e76c18d6fb6eb",
+  "dotnetSdk": "10.0.203",
+  "gateSourceDigest": "7611ea7f24e2a6014f1306a940b443f64114c47faf4c438ac7755281211b0f54",
+  "packageLockSha256": "4164a400b10eb8b8be7e4affe5e93d006333746fdb0765eecf2262afce96dadc",
+  "rid": "osx-arm64",
+  "schemaVersion": "maf-oss-gate-observed/v1",
+  "sourceRevision": "b31fea73491294280d0a7615980da629a551ebac"
+}

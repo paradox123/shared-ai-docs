@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://danielsvault.local/schemas/maf-oss-gate-manifest-v1.json",
+  "title": "Microsoft Agent Framework OSS durability gate manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "source",
+    "runtime",
+    "configuration",
+    "packageLock",
+    "componentInventory",
+    "components",
+    "backend",
+    "forbiddenComponents",
+    "probe"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "maf-oss-gate-manifest/v1" },
+    "source": { "$ref": "#/$defs/source" },
+    "runtime": { "$ref": "#/$defs/runtime" },
+    "configuration": { "$ref": "#/$defs/configuration" },
+    "packageLock": { "$ref": "#/$defs/packageLock" },
+    "componentInventory": { "$ref": "#/$defs/packageLock" },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/component" }
+    },
+    "backend": { "$ref": "#/$defs/backend" },
+    "forbiddenComponents": {
+      "type": "array",
+      "minItems": 2,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "probe": { "$ref": "#/$defs/probe" }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "revision", "gateSourceDigest", "dirtyStateDigest"],
+      "properties": {
+        "repository": { "type": "string", "format": "uri" },
+        "revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "gateSourceDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "dirtyStateDigest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dotnetSdk", "rid"],
+      "properties": {
+        "dotnetSdk": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "rid": { "type": "string", "minLength": 1 }
+      }
+    },
+    "configuration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "version", "contractVersion"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "pattern": "^v[0-9]+$" },
+        "contractVersion": { "type": "string", "pattern": "^v[0-9]+$" }
+      }
+    },
+    "packageLock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "licence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spdx", "source"],
+      "properties": {
+        "spdx": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "format": "uri" }
+      }
+    },
+    "cost": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "amountStatus", "currency", "period", "source"],
+      "properties": {
+        "amount": { "type": ["number", "null"], "minimum": 0 },
+        "amountStatus": { "enum": ["zero", "variable-paid", "fixed-paid"] },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "period": { "enum": ["none", "month", "operation", "infrastructure"] },
+        "source": { "type": "string", "format": "uri" }
+      }
+    },
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "kind", "version", "source", "licence", "unavoidableServiceCost"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["framework", "workflow", "client", "worker", "backend", "storage", "runtime", "transitive"] },
+        "version": { "type": "string", "minLength": 1 },
+        "contentHash": { "type": "string", "minLength": 1 },
+        "repositoryRevision": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "format": "uri" },
+        "licence": { "$ref": "#/$defs/licence" },
+        "unavoidableServiceCost": { "$ref": "#/$defs/cost" }
+      }
+    },
+    "backend": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "repository",
+        "revision",
+        "protocol",
+        "productionCapable",
+        "selfManaged",
+        "openSource",
+        "compatibleWithTuple",
+        "compatibilityEvidence",
+        "licence",
+        "unavoidableServiceCost",
+        "storageDependencies"
+      ],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["production", "development-emulator", "managed-service", "candidate-unavailable"] },
+        "repository": { "type": "string", "format": "uri" },
+        "revision": { "type": "string", "minLength": 1 },
+        "protocol": { "type": "string", "minLength": 1 },
+        "productionCapable": { "type": "boolean" },
+        "selfManaged": { "type": "boolean" },
+        "openSource": { "type": "boolean" },
+        "compatibleWithTuple": { "type": "boolean" },
+        "compatibilityEvidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "format": "uri" },
+          "uniqueItems": true
+        },
+        "licence": { "$ref": "#/$defs/licence" },
+        "unavoidableServiceCost": { "$ref": "#/$defs/cost" },
+        "storageDependencies": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "probe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "workerProcessNames", "ports", "statePaths", "expectedEffects"],
+      "properties": {
+        "command": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "workerProcessNames": { "type": "array", "minItems": 2, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "ports": { "type": "array", "minItems": 2, "items": { "type": "integer", "minimum": 1024, "maximum": 65535 }, "uniqueItems": true },
+        "statePaths": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "expectedEffects": { "type": "array", "minItems": 2, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      }
+    }
+  }
+}

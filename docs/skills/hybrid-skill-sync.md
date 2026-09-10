@@ -97,6 +97,16 @@ Der fruehere lokale Skill `diagnose` ist nicht mehr aktiv. Die aktive bug-diagno
 
 Der `council` Skill ist ebenfalls aktiv unter `skills-repo/skills/council`. Seine Dateien zeigen auf `vendor/custom/council-of-high-intelligence`; `SKILL.md` zeigt dabei bewusst auf die Codex-spezifische Vendor-Datei `SKILL.codex.md`.
 
+Council ist ein kopierter Snapshot aus [0xNyk/council-of-high-intelligence](https://github.com/0xNyk/council-of-high-intelligence), kein eigener Git-Checkout. `skills-repo/vendor/custom/council-of-high-intelligence/skills-lock.json` haelt den importierten Commit (`sourceRef`), dessen kanonischen Git-Tree (`sourceTree`) und den SHA-256 der unveraenderten Upstream-Datei `SKILL.codex.md` (`computedHash`) fest. `localOverlays` inventarisiert die lokal angepassten Dateien samt SHA-256 ihres zusammengefuehrten Inhalts. Die Lockdatei selbst gehoert nicht zu Upstream. `reconstructedPreviousRef` dokumentiert den aus Dateivergleichen rekonstruierten Stand vor Einfuehrung der Lockdatei.
+
+Die Council-Overlays erhalten den simulierten Codex-Standardmodus, explizit angeforderte Live-Subagents, sichere CLI-Promptuebergabe und Codex-passende Provider-Erkennung und Beispielkonfigurationen. Beim Update den Drei-Wege-Ablauf unten verwenden. Die Vercel-Skills-CLI kann die Quelle ohne Installation pruefen:
+
+```bash
+npx skills@latest add 0xNyk/council-of-high-intelligence --list
+```
+
+Den aktualisierten Snapshot unter `vendor/custom/council-of-high-intelligence` uebernehmen und danach `sync-codex-skill-links.sh` ausfuehren. Eine direkte globale CLI-Installation wuerde die bestehende Linkstruktur und den bewusst ausgewaehlten Codex-Einstiegspunkt umgehen.
+
 ## Keine `active-skills/`
 
 `skills-repo/active-skills` ist nicht Teil dieses Setups.
@@ -170,11 +180,22 @@ cmd /c mklink /J "$Copilot" "$RepoSkills"
 
 ### Globale Vendor-Skills aktualisieren
 
-1. Zuerst unterscheiden, ob `skills-repo/vendor/<source>` ein eigener Git-Checkout oder ein kopierter, ueber eine Lockdatei gepinnter Snapshot ist.
-2. Einen Git-Checkout innerhalb seiner eigenen Repo-Grenze aktualisieren. Einen gepinnten Snapshot nicht wie einen Checkout behandeln und nicht blind mit dem neuen Upstream-Stand ueberschreiben.
+1. Zuerst unterscheiden, ob `skills-repo/vendor/<source>` ein eigener Git-Checkout, ein ueber eine Lockdatei gepinnter Snapshot oder eine Legacy-Kopie ohne Lockdatei ist.
+2. Einen Git-Checkout innerhalb seiner eigenen Repo-Grenze aktualisieren. Einen gepinnten Snapshot nicht wie einen Checkout behandeln und nicht blind mit dem neuen Upstream-Stand ueberschreiben. Bei einer Legacy-Kopie zuerst den nachfolgenden Provenienz-Bootstrap abschliessen.
 3. Weil aktive globale Vendor-Skills in `skills-repo/skills` als Links auf Vendor-Quellen liegen, sieht der aktive Skill die neue Vendor-Version sofort.
 4. Nach einem Pull oder Branch-Wechsel aktualisieren die installierten Hooks die Codex-Links.
 5. Wenn neue aktive Skills hinzukommen, `sync-codex-skill-links.sh` ausfuehren oder die Hooks installieren.
+
+### Legacy-Kopie ohne Lockdatei bootstrapen
+
+Wenn kopierte Vendor-Dateien bereits existieren, aber keine Lockdatei ihren bisherigen Upstream-Stand belegt, gilt vor dem ersten Update:
+
+1. Upstream in einen aufgabeneigenen temporaeren Checkout klonen oder fetchen und alle Historienbefehle mit `git -C "$upstream_repo"` daran binden.
+2. Aus mehreren stabilen Dateien des kopierten Baums genau einen vorherigen Upstream-Ref rekonstruieren. Bekannte lokale Dateien und wahrscheinliche Overlays nicht als Anker verwenden; Zeitstempel oder ein einzelner lokal editierbarer Einstiegspunkt reichen nicht als Provenienz.
+3. Wenn kein Ref passt oder mehrere materiell verschiedene Refs plausibel bleiben, ohne Aenderung am Snapshot anhalten und die Unklarheit melden.
+4. Den aktuellen kopierten Baum gegen den rekonstruierten Ref vergleichen und alle lokalen Abweichungen als moegliche Overlays inventarisieren. Der rekonstruierte Ref ist die Merge-Basis; der lokal angepasste Snapshot darf nicht selbst zur Basis erklaert werden.
+5. Die erste Lockdatei im Staging erzeugen: `reconstructedPreviousRef` haelt die alte rekonstruierte Basis fest, `sourceRef` den ausgewaehlten neuen Upstream-Commit. Kanonische Upstream-Hashes und zusammengefuehrte lokale Overlays getrennt nach der dokumentierten Lock-Semantik erfassen.
+6. Erst danach mit dem Drei-Wege-Ablauf fuer gepinnte Snapshots fortfahren und den validierten Staging-Baum anwenden.
 
 ### Gepinnte Vendor-Snapshots sicher aktualisieren
 

@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "source": "https://github.com/0xNyk/council-of-high-intelligence",
+  "sourceRef": "aacf75a7f21344ad2f3db821ff94e257e83a6fc0",
+  "sourceTree": "0f2a758eb4adc9a2f7afce85a5853ddc498ba5d3",
+  "vendorPath": ".",
+  "reconstructedPreviousRef": "f996d386eb2c33601977915828f5f3ea383e9f49",
+  "skills": {
+    "council": {
+      "skillPath": "SKILL.codex.md",
+      "vendorPath": "SKILL.codex.md",
+      "computedHash": "e55c21f434313c0ce169b02a48852b2967021af1224401e6f76ae0de5bb67fd1"
+    }
+  },
+  "localOverlays": {
+    "SKILL.codex.md": {
+      "sha256": "8191239413c7e2d7c77a191a838731659fac6c548686c36acce823645f4fc094"
+    },
+    "configs/auto-route-defaults.yaml": {
+      "sha256": "2110a5d5f73252c103af8322d3a6cb7bbad9eb912e873d13feb0949cac0a118f"
+    },
+    "configs/provider-model-slots.cursor.example.yaml": {
+      "sha256": "f925e5bed649ba19280c0d9c39af330a7f5e0de9931b8dc3c9313d03c48702e9"
+    },
+    "configs/provider-model-slots.example.yaml": {
+      "sha256": "11d69466272128822259d580d3164e3ec8f7dff313433a4ccb5372458ef84394"
+    },
+    "configs/provider-model-slots.nim.example.yaml": {
+      "sha256": "b1c7aab4349fb38a51dc41b39ae355e6536764df9e82106b10a247130ea78f8a"
+    },
+    "scripts/detect-providers.sh": {
+      "sha256": "ecbc5b10f1ec708ce0529edac38e0f41ee1d1f77b5a3a9af430e10ff146b26cd"
+    }
+  }
+}

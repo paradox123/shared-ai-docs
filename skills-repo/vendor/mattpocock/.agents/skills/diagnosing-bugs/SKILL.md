@@ -1,11 +1,13 @@
 ---
 name: diagnosing-bugs
-description: Diagnosis loop for hard bugs and performance regressions. Use when the user says "diagnose"/"debug this", or reports something broken/throwing/failing/slow.
+description: Diagnose hard code, service, or application bugs and performance regressions with a tight feedback loop. Use when the user asks to debug a software defect or needs bounded production-incident analysis. Do not use for end-user OS settings, hardware/peripherals, or general tech support unless a code or service defect is in scope.
 ---
 
 # Diagnosing Bugs
 
-A discipline for hard bugs. Skip phases only when explicitly justified.
+A discipline for hard code and service bugs. Skip phases only when explicitly justified.
+
+Scope boundary: this skill owns software-defect diagnosis where a red-capable feedback loop or bounded incident query is possible. For end-user operating-system settings, hardware or peripheral behavior, and general tech support, use the relevant support or research workflow; do not force this phased debugging loop unless evidence points to a code or service defect.
 
 When exploring the codebase, read `CONTEXT.md` (if it exists) to get a clear mental model of the relevant modules, and check ADRs in the area you're touching.
 

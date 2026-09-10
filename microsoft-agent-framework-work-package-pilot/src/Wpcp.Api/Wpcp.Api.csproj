@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <AssemblyName>Wpcp.Api</AssemblyName>
+    <RootNamespace>Wpcp.Api</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Wpcp.Domain/Wpcp.Domain.csproj" />
+    <ProjectReference Include="../Wpcp.Storage.Postgres/Wpcp.Storage.Postgres.csproj" />
+  </ItemGroup>
+</Project>

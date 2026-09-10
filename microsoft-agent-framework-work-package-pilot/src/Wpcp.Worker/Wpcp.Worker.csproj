@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>Wpcp.Worker</AssemblyName>
+    <RootNamespace>Wpcp.Worker</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Wpcp.Domain/Wpcp.Domain.csproj" />
+    <ProjectReference Include="../Wpcp.Storage.Postgres/Wpcp.Storage.Postgres.csproj" />
+  </ItemGroup>
+</Project>

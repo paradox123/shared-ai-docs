@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.gate-state/
+.test-state/
+audit/bin/
+audit/obj/
