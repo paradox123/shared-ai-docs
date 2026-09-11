@@ -99,3 +99,24 @@ _Avoid_: Startnachweis, Health-Check als Feature-Evidence, "keine Fehler gesehen
 **Quellcode-Graph**:
 Ein lokaler, persistierter Strukturindex eines explizit freigegebenen Code-Workspaces fuer Symbol-, Aufruf- und Auswirkungsnavigation. Er ist weder eine Dokumentensuche noch eine globale Inhaltskopie.
 _Avoid_: Vollindex, Wiki-Index, RAG-Ersatz
+
+## LLM-Wiki
+
+**Fachquelle**:
+Ein Dokument in einem bestehenden Fachrepository, das als Beleg und Eingang fuer das LLM-Wiki dient. Es kann bereits kuratiertes Wissen enthalten; seine Rolle als Eingang macht es nicht zu unbearbeitetem Material.
+_Avoid_: Rohdaten im Sinne von ausschliesslich unbearbeiteten Inhalten
+
+**LLM-Wiki**:
+Die uebergeordnete Wissensschicht fuer Mensch und Agent, die Fachquellen aus dem jeweiligen Repo-Kontext erschliesst und gemeinsame Erkenntnisse dauerhaft nutzbar macht.
+_Avoid_: Eigenstaendiges Fachrepository, separates Wiki je Repo
+
+**Repo-Kontext**:
+Die fuer eine konkrete Wissenssicht einbezogene Menge von Repositories.
+
+**Repoübergreifende Synthese**:
+Eine aus Fachquellen mehrerer Repositories abgeleitete Erkenntnis oder ein Vergleich mit nachvollziehbaren Belegen und Geltungsgrenzen.
+_Avoid_: Blosse Quellensammlung, Kopie einer Fachseite
+
+**Quellenabhängigkeit**:
+Die Beziehung zwischen einer abgeleiteten Aussage und den Fachquellen oder weiteren abgeleiteten Aussagen, auf denen sie beruht. Sie macht sichtbar, welche Aussage bei einer Quellenaenderung erneut geprueft werden muss.
+_Avoid_: Beliebiger Querverweis, reine Themengleichheit

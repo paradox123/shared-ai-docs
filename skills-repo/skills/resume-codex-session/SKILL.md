@@ -7,6 +7,8 @@ description: Recover compact, verified context from an existing Codex task, thre
 
 Recover only the prior context needed for the current request. Keep working in the current task unless the user explicitly asks to open, fork, hand off, or create another task.
 
+This skill owns targeted retrieval of one or a few known tasks through Codex thread tools. For cutoff-based multi-session review, persisted resolver manifests, or carry-forward checkpoints across automation windows, load `~/.codex/skills/improve-skills/SKILL.md` and follow its Codex Desktop session-review reference instead.
+
 ## Workflow
 
 1. Identify what the user needs from the prior task: context, a decision, an artifact, a run diagnosis, or continuation. Treat an exact task title, automation name, or execution description as a valid reference even when the user did not supply a UUID.
@@ -36,7 +38,8 @@ Recover only the prior context needed for the current request. Keep working in t
 
 - On an invalid-argument error, retry once with only `threadId` before searching for another mechanism.
 - If an ID is not found or a title has multiple matches, use the Codex thread-listing tool once more with the narrowest available title/time context; do not guess between runs.
-- If thread tools remain unavailable, ask the user to reopen or quote the task. Do not search `~/.codex`, rollout JSONL, or archived session stores for an ordinary follow-up or prior-run diagnosis; that belongs only to an explicitly requested bounded session-forensics or automation-review workflow.
+- If thread tools remain unavailable, ask the user to reopen or quote the task. Do not search `~/.codex`, rollout JSONL, or archived session stores for an ordinary follow-up or prior-run diagnosis.
+- If the task is actually a bounded session-forensics or automation-window review, switch to `~/.codex/skills/improve-skills/SKILL.md`. Its Codex Desktop reference owns `resolve_codex_sessions.py` and `extract_codex_session_evidence.py`; do not look for those helpers under this skill or search `~/` to rediscover them.
 
 ## Boundaries
 

@@ -718,9 +718,13 @@ def projected_tool_call(
     cwd = None
     if arguments:
         cwd = sanitized_cwd(arguments.get("workdir") or arguments.get("cwd"))
-    paired_call_id = call_identity(payload)
-    if payload_type == "custom_tool_call" and len(occurrences) > 1:
-        paired_call_id = None
+    # A custom call id identifies the outer recorder wrapper, not any nested
+    # tools.* call found by static source scanning. Never attribute wrapper
+    # status or exit metadata to a nested call, even when only one occurrence
+    # is visible in the source.
+    paired_call_id = (
+        call_identity(payload) if payload_type == "function_call" else None
+    )
     return (
         {
             "session_id": structural_label(session_id),
