@@ -26,7 +26,9 @@ try
             options.DurableTaskOrchestrationId,
             options.DurableTaskTaskId,
             options.EvidenceNote));
-    if (options.FakeAgentOrigin is not null)
+    if (options.RepositoryPlanPath is not null)
+        await Wpcp.Worker.RepositoryWorkflow.ExecuteAsync(store, options.RunId, options.RepositoryPlanPath, options.PauseAt);
+    else if (options.FakeAgentOrigin is not null)
         await Wpcp.Worker.FakeAgentWorkflow.ExecuteAsync(store, options.RunId,
             options.FakeAgentOrigin, options.EvidenceNote ?? "controlled fake attempt",
             options.PauseAt, options.RejectBlocked, options.AgentTimeoutMilliseconds);
@@ -50,6 +52,11 @@ try
             processId,
             DateTimeOffset.UtcNow));
     Console.Out.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+}
+catch (RepositoryExecutionRequiredException)
+{
+    Console.Out.WriteLine(JsonSerializer.Serialize(new { code = "repository-execution-required" }, jsonOptions));
+    Environment.ExitCode = 2;
 }
 catch (AgentAssignmentConflictException)
 {
@@ -92,7 +99,8 @@ internal sealed record WorkerOptions(
     string? FakeAgentOrigin,
     string? PauseAt,
     bool RejectBlocked,
-    int AgentTimeoutMilliseconds)
+    int AgentTimeoutMilliseconds,
+    string? RepositoryPlanPath)
 {
     public static WorkerOptions Parse(IReadOnlyList<string> arguments)
     {
@@ -114,7 +122,7 @@ internal sealed record WorkerOptions(
         }
 
         var pauseAt = Value(values, "--pause-at");
-        if (pauseAt is not (null or "after-session-start" or "after-session-mapping" or "after-result-observed"))
+        if (pauseAt is not (null or "after-session-start" or "after-session-mapping" or "after-result-observed" or "after-git-effect" or "after-provider-effect" or "after-reconciled-effect" or "after-session-receipt"))
             throw new ArgumentException("Unknown fake fault boundary.");
         var rejectText = Value(values, "--reject-blocked");
         if (rejectText is not (null or "true" or "false"))
@@ -134,7 +142,8 @@ internal sealed record WorkerOptions(
             Value(values, "--fake-agent-origin"),
             pauseAt,
             rejectText == "true",
-            PositiveIntegerOrDefault(values, "--agent-timeout-ms", 10000));
+            PositiveIntegerOrDefault(values, "--agent-timeout-ms", 10000),
+            Value(values, "--repository-plan"));
     }
 
     private static Dictionary<string, string> ParseOptions(IReadOnlyList<string> arguments)

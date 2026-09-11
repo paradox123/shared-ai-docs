@@ -196,3 +196,71 @@ new graph into automatic managed DTS dispatch, prove real Codex capabilities,
 or exercise live repository writes. The existing managed durability gate and
 LangGraph pilot remain separate. See the
 [Ticket 04 evidence](../openspec/changes/archive/2026-09-11-recover-fake-codex-attempt/implementation-evidence.md).
+
+## Repository base and effect recovery (Ticket 05)
+
+A repository-managed delivery adds exact-base preflight and a durable repository
+owner around the fake Agent Framework graph. Its controlled effects are a local
+run branch, an external provider run marker, and the fake session. The public run
+projection includes `repositoryExecution`: base evidence, active ownership,
+stable operation IDs, receipts, queued recovery and concrete human decisions.
+
+Run the isolated proof:
+
+```bash
+python3 -m unittest tests.test_repository_reconciliation -v
+```
+
+The worker accepts `--repository-plan <json-file>` with this structure (use actual
+absolute paths and a real 40-character SHA from your disposable fixture):
+
+```json
+{
+  "repository": {"repositoryId": "repo-1", "fullName": "pilot/fixture", "providerRepositoryId": 9001},
+  "localPath": "/absolute/path/to/disposable/checkout",
+  "remoteName": "origin",
+  "baseBranch": "main",
+  "providerOrigin": "http://127.0.0.1:5092",
+  "agentOrigin": "http://127.0.0.1:5091",
+  "expectedBaseSha": "<40-character-commit-sha>",
+  "predecessorIssueNumber": null
+}
+```
+
+Plan configuration is pinned to the admitted repository; changing its path,
+branch, remote name or provider origins fails closed. Once registered, that
+repository requires managed delivery and cannot bypass preflight through the
+standalone `--fake-agent-origin` mode. The controlled repository provider in
+`tests/repository_provider_fixture.py` reads a separate bare Git repository and
+stores provider receipts independently. Its predecessor-completed fixture signal
+stands for merged and closed; no merge is performed by the worker.
+
+`retry`, `reconcile` and `retire` use the same required fence options as `claim`:
+`--run-id`, `--target-attempt-id`, `--expected-run-version`, `--expected-head-sha`
+and `--lease-epoch`. They require the current holder's fresh contributor access.
+`adopt` additionally requires `--operation-id` and `--receipt-id` from a publicly
+observed `adoptable` effect. Routes are `POST /api/v1/runs/{runId}/control/{action}`.
+Read fresh fences with `run` after every accepted decision.
+
+Commands persist a visible recovery request; deliver the same worker/run/plan to
+process it. Reconcile reads existing effects without creating missing ones; Adopt
+rereads the selected receipt and checks the immutable intent. Retry continues
+missing work with the same IDs; it is not a fresh conversation retry. Only before
+any effect intent exists may Retry refresh the recorded expected SHA from the
+provider. Synchronize the local Git base explicitly; the worker never resets it.
+A changed base after effect intent blocks new work while Reconcile/Retire can
+still settle the old effects. Conflicting or ambiguous receipts require correction
+of the external evidence and another reconciliation, not a forced adoption.
+
+Retire settles existing effects and retains history, then ends active attempts,
+clears the human lease and releases repository ownership. Uncertain effects keep
+the run blocked and owned. A normal settled fake `blocked` result is also terminal
+for this bounded slice and releases ownership; it does not qualify the result for
+publication. An in-flight worker must stop before recovery commands are accepted.
+
+Fault boundaries `after-git-effect`, `after-provider-effect`, `after-session-start`,
+`after-session-mapping` and `after-result-observed` emit a marker and wait for an
+external process kill. Restart with the same plan and without `--pause-at`.
+The API, CLI, worker, PostgreSQL and providers remain separate processes; explicit
+local delivery does not claim automatic DTS dispatch or live repository writes.
+See the [Ticket 05 proof](../openspec/changes/reconcile-repository-effects/implementation-evidence.md).

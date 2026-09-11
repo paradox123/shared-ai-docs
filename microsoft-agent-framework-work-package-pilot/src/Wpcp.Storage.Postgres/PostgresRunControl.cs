@@ -47,14 +47,14 @@ public sealed partial class PostgresImplementationRunStore
             code = "observed";
         else if (!access.CanContribute)
             code = "repository-contribution-required";
-        else if (action is not ("claim" or "release"))
+        else if (action is not ("claim" or "release" or "retry" or "reconcile" or "adopt" or "retire"))
             code = "invalid-control-action";
         else if (mutation is null || !Guid.TryParse(mutation.TargetAttemptId, out _) ||
             mutation.ExpectedRunVersion < 1 || mutation.LeaseEpoch < 0)
             code = "invalid-control-mutation";
         else if (action == "claim" && current.Holder is not null)
             code = "control-lease-held";
-        else if (action == "release" && current.Holder != access.Actor)
+        else if (action != "claim" && current.Holder != access.Actor)
             code = "control-lease-required";
         else if (mutation.TargetAttemptId != current.TargetAttemptId)
             code = "stale-target-attempt";
@@ -64,6 +64,12 @@ public sealed partial class PostgresImplementationRunStore
             code = "stale-head-sha";
         else if (mutation.LeaseEpoch != current.LeaseEpoch)
             code = "stale-lease-epoch";
+        else if (action is "retry" or "reconcile" or "adopt" or "retire")
+        {
+            code = await QueueRepositoryRecoveryAsync(connection, transaction, run, action, mutation, access.Actor!, cancellationToken);
+            var updated = await FindRunAsync(connection, transaction, runId, cancellationToken);
+            current = await ReadControlStateAsync(connection, transaction, updated!, cancellationToken);
+        }
         else
         {
             var next = current with
@@ -80,7 +86,7 @@ public sealed partial class PostgresImplementationRunStore
         }
         if (action is not null || code != "observed")
             await AppendAuditAsync(connection, transaction, runId,
-                action is "claim" or "release" ? action : action is null ? "observe" : "invalid",
+                action is "claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" ? action : action is null ? "observe" : "invalid",
                 code, access.Actor, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return new(code, access, access.CanRead ? current : null);

@@ -36,7 +36,7 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
     public async Task EnsureSchemaAsync(CancellationToken cancellationToken = default)
     {
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        await using var command = new NpgsqlCommand(Schema + AgentSchema, connection);
+        await using var command = new NpgsqlCommand(Schema + AgentSchema + RepositorySchema, connection);
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
@@ -174,7 +174,8 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
             run.Provenance,
             MergeRedaction(run.Redaction, lifecycleRedaction),
             run.LastPosition,
-            await ReadControlStateAsync(connection, transaction, run, cancellationToken));
+            await ReadControlStateAsync(connection, transaction, run, cancellationToken),
+            RepositoryExecution: await ReadRepositoryExecutionAsync(connection, transaction, runId, cancellationToken));
         await transaction.CommitAsync(cancellationToken);
         return projection;
     }

@@ -5,12 +5,13 @@ using Wpcp.Storage.Postgres;
 
 namespace Wpcp.Worker;
 
-internal sealed class FakeAgentSessionAdapter(HttpClient client) : IAgentSessionAdapter
+internal sealed class FakeAgentSessionAdapter(HttpClient client, bool readOnly = false) : IAgentSessionAdapter
 {
     public async Task<AgentAdapterResponse> StartOrReadAsync(string operationKey, string note, CancellationToken token)
     {
         using var body = new StringContent(JsonSerializer.Serialize(new { note }), System.Text.Encoding.UTF8, "application/json");
-        using var response = await client.PutAsync($"sessions/{operationKey}", body, token);
+        using var response = readOnly ? await client.GetAsync($"sessions/{operationKey}", token) :
+            await client.PutAsync($"sessions/{operationKey}", body, token);
         return new((int)response.StatusCode, await response.Content.ReadAsStringAsync(token));
     }
 }
@@ -20,17 +21,18 @@ internal static class FakeAgentWorkflow
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public static async Task ExecuteAsync(PostgresImplementationRunStore store, string runId,
-        string origin, string note, string? pauseAt, bool rejectBlocked, int timeoutMs)
+        string origin, string note, string? pauseAt, bool rejectBlocked, int timeoutMs, bool repositoryDelivery = false, bool readOnly = false)
     {
         if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri) || !uri.IsLoopback || uri.Scheme != "http" ||
             uri.AbsolutePath != "/" || !string.IsNullOrEmpty(uri.UserInfo) || !string.IsNullOrEmpty(uri.Query) ||
             !string.IsNullOrEmpty(uri.Fragment))
             throw new ArgumentException("The fake adapter requires a loopback HTTP origin.");
-        await using var delivery = await store.AcquireAgentDeliveryAsync(runId);
+        await using var delivery = repositoryDelivery ? null : await store.AcquireAgentDeliveryAsync(runId);
+        if (!repositoryDelivery) await store.EnsureStandaloneAgentAllowedAsync(runId);
         using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false })
             { BaseAddress = uri, Timeout = TimeSpan.FromMilliseconds(timeoutMs), MaxResponseContentBufferSize = 1024 * 1024 };
         var prepare = new PrepareExecutor(store, uri.AbsoluteUri, rejectBlocked);
-        var execute = new FakeExecutor(store, new FakeAgentSessionAdapter(client), note, pauseAt);
+        var execute = new FakeExecutor(store, new FakeAgentSessionAdapter(client, readOnly), note, pauseAt);
         var workflow = new WorkflowBuilder(prepare).WithName("FakeCodexAttemptV1")
             .AddEdge(prepare, execute).Build();
         await using var run = await InProcessExecution.RunAsync(workflow, runId);

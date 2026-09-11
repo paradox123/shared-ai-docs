@@ -89,7 +89,7 @@ internal static class OperatorCli
             "attempt" => ParseAttempt(baseUrl, fixtureAccessToken, options),
             "events" => ParseEvents(baseUrl, fixtureAccessToken, options),
             "audit" => ParseAudit(baseUrl, fixtureAccessToken, options),
-            "claim" or "release" => ParseControl(baseUrl, fixtureAccessToken, command, options),
+            "claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" => ParseControl(baseUrl, fixtureAccessToken, command, options),
             "--help" or "-h" => throw new ArgumentException("Help does not accept an API base URL."),
             _ => throw new ArgumentException("The command must be start, run, attempt, events, audit, claim, or release."),
         };
@@ -192,8 +192,8 @@ internal static class OperatorCli
     private static Invocation ParseControl(
         Uri baseUrl, string capability, string action, IReadOnlyDictionary<string, string> options)
     {
-        RequireOnly(options, "--run-id", "--target-attempt-id", "--expected-run-version",
-            "--expected-head-sha", "--lease-epoch");
+        string[] fences = ["--run-id", "--target-attempt-id", "--expected-run-version", "--expected-head-sha", "--lease-epoch"];
+        RequireOnly(options, action == "adopt" ? [..fences, "--operation-id", "--receipt-id"] : fences);
         if (!long.TryParse(Require(options, "--expected-run-version"), NumberStyles.None,
                 CultureInfo.InvariantCulture, out var version) || version < 1 ||
             !long.TryParse(Require(options, "--lease-epoch"), NumberStyles.None,
@@ -204,7 +204,8 @@ internal static class OperatorCli
         return new Invocation(baseUrl, HttpMethod.Post,
             $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/control/{action}",
             new { targetAttemptId = Require(options, "--target-attempt-id"), expectedRunVersion = version,
-                expectedHeadSha = head == "null" ? null : head, leaseEpoch = epoch }, capability);
+                expectedHeadSha = head == "null" ? null : head, leaseEpoch = epoch,
+                operationId = options.GetValueOrDefault("--operation-id"), receiptId = options.GetValueOrDefault("--receipt-id") }, capability);
     }
 
     private static Invocation ParseAudit(Uri baseUrl, string capability, IReadOnlyDictionary<string, string> options)
@@ -345,7 +346,7 @@ internal static class OperatorCli
 
     private static object Usage() => new
     {
-        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|attempt|events|audit|claim|release> [options]",
+        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|attempt|events|audit|claim|release|retry|reconcile|adopt|retire> [options]",
         requiredEnvironment = new[] { "WPCP_FIXTURE_ACCESS_TOKEN", "WPCP_PROVIDER_TOKEN" },
         commands = new
         {
@@ -358,6 +359,8 @@ internal static class OperatorCli
             audit = new[] { "--run-id" },
             control = new[] { "--run-id", "--target-attempt-id", "--expected-run-version",
                 "--expected-head-sha", "--lease-epoch" },
+            adopt = new[] { "control fences", "--operation-id", "--receipt-id" },
+            recovery = new[] { "retry", "reconcile", "adopt", "retire" },
             run = new[] { "--run-id" },
             events = new[] { "--run-id", "--after" },
         },

@@ -10,11 +10,11 @@ public sealed record ControlMutation(
     [property: JsonRequired] string TargetAttemptId,
     [property: JsonRequired] long ExpectedRunVersion,
     [property: JsonRequired] string? ExpectedHeadSha,
-    [property: JsonRequired] long LeaseEpoch);
+    [property: JsonRequired] long LeaseEpoch, string? OperationId = null, string? ReceiptId = null);
 
 public sealed record ControlDecision(string Code, RepositoryAccess Access, RunControlState? Current)
 {
-    public bool Accepted => Code is "control-lease-claimed" or "control-lease-released" or "observed";
+    public bool Accepted => Code is "control-lease-claimed" or "control-lease-released" or "observed" or "recovery-requested";
     public bool CanClaim => Access.IsHuman && Access.CanContribute && Current is { Holder: null };
     public bool CanRelease => Access.IsHuman && Access.CanContribute && Current?.Holder == Access.Actor;
 }

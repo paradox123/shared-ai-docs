@@ -26,6 +26,9 @@ def serve(port, database, scenario):
 
         def do_GET(self):
             with sqlite3.connect(database) as db:
+                if self.path.startswith('/sessions/'):
+                    row = db.execute('SELECT body FROM sessions WHERE operation=?', (self.path.split('/')[-1],)).fetchone()
+                    return self.reply(200, json.loads(row[0])) if row else self.reply(404, {'code': 'session-not-found'})
                 rows = db.execute('SELECT body FROM sessions').fetchall()
             self.reply(200, {'sessionCount': len(rows), 'sessions': [json.loads(r[0]) for r in rows]})
 
