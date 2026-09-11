@@ -14,4 +14,4 @@
 
 ## 4. Completion
 
-- [ ] 4.1 Run full pilot regression, build, OpenSpec strict validation and two-axis code review; simplify touched code and publish compact direct evidence.
+- [x] 4.1 Run full pilot regression, build, OpenSpec strict validation and two-axis code review; simplify touched code and publish compact direct evidence.

@@ -19,4 +19,10 @@ Delivery of this graph remains explicit/local. This does not establish automatic
 
 ## Validation
 
-Final command output and review verdicts are recorded here after the completion pass.
+- `dotnet build Wpcp.WorkPackageControlPlane.sln --no-restore`: passed, zero warnings/errors.
+- `python3 -m unittest discover -s tests -v`: **59/59 passed in 70.610 seconds**, including 17 Ticket 05 tests.
+- `openspec validate reconcile-repository-effects --strict`: passed.
+- `git diff --check`: passed.
+- Independent [Standards and Spec reviews](review.md): **0 open findings** after fixes; Spec reviewer independently repeated 5 regression tests.
+
+The completed [compact proof](../../../.scratch/distributed-codex-work-package-control-plane/evidence/ticket-05-proof-2026-09-11/proof.md) links the raw public snapshots, effect receipts, process exit codes and complete test output. Machine evidence was collected against implementation commit `c4147a4` on `main`. Each central Git/provider/session crash proof reports `adopted`, worker exit `-9`, and an independently observed operation count of exactly one.

@@ -1,0 +1,910 @@
+{
+  "test": "test_git_success_gap_adopts_the_existing_ref_once",
+  "crashes": [
+    {
+      "runId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+      "boundary": "after-git-effect",
+      "workerExitCode": -9
+    }
+  ],
+  "observedStates": [
+    {
+      "runId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+      "position": 5,
+      "state": "ready",
+      "execution": {
+        "state": "ready",
+        "blocker": null,
+        "base": {
+          "expectedSha": "7c13abd988c309983f068d5939638605b4c77275",
+          "providerSha": "7c13abd988c309983f068d5939638605b4c77275",
+          "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+          "predecessorCompleted": true
+        },
+        "effects": [
+          {
+            "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+            "kind": "git",
+            "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+            "state": "pending",
+            "receipt": null
+          }
+        ],
+        "terminal": false,
+        "active": true,
+        "ownerRunId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+        "requestedAction": null,
+        "selectedOperationId": null,
+        "selectedReceiptId": null,
+        "humanDecision": null
+      }
+    },
+    {
+      "runId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+      "position": 21,
+      "state": "blocked",
+      "execution": {
+        "state": "blocked",
+        "blocker": null,
+        "base": {
+          "expectedSha": "7c13abd988c309983f068d5939638605b4c77275",
+          "providerSha": "7c13abd988c309983f068d5939638605b4c77275",
+          "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+          "predecessorCompleted": true
+        },
+        "effects": [
+          {
+            "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+            "kind": "git",
+            "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+            "state": "adopted",
+            "receipt": {
+              "contractVersion": "RepositoryEffects/v1",
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+              "receiptId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+              "kind": "git",
+              "repository": {
+                "repositoryId": "repo-1",
+                "fullName": "pilot/fixture",
+                "providerRepositoryId": 9001
+              },
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c"
+            }
+          },
+          {
+            "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1",
+            "kind": "provider",
+            "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+            "state": "completed",
+            "receipt": {
+              "contractVersion": "RepositoryEffects/v1",
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1",
+              "receiptId": "a0dfdcaa-303b-4191-a189-d8ac1a270959",
+              "kind": "provider",
+              "repository": {
+                "repositoryId": "repo-1",
+                "fullName": "pilot/fixture",
+                "providerRepositoryId": 9001
+              },
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c"
+            }
+          },
+          {
+            "operationId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+            "kind": "session",
+            "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "target": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+            "state": "completed",
+            "receipt": {
+              "contractVersion": "RepositoryEffects/v1",
+              "operationId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+              "receiptId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+              "kind": "session",
+              "repository": {
+                "repositoryId": "repo-1",
+                "fullName": "pilot/fixture",
+                "providerRepositoryId": 9001
+              },
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "target": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc"
+            }
+          }
+        ],
+        "terminal": true,
+        "active": false,
+        "ownerRunId": null,
+        "requestedAction": null,
+        "selectedOperationId": null,
+        "selectedReceiptId": null,
+        "humanDecision": null
+      }
+    }
+  ],
+  "externalGitOperationCounts": {
+    "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1": 1
+  },
+  "externalProviderReceipts": [
+    {
+      "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1",
+      "kind": "provider",
+      "repository": {
+        "repositoryId": "repo-1",
+        "fullName": "pilot/fixture",
+        "providerRepositoryId": 9001
+      },
+      "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+      "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+      "receiptId": "a0dfdcaa-303b-4191-a189-d8ac1a270959",
+      "contractVersion": "RepositoryEffects/v1"
+    }
+  ],
+  "externalSessionReceipts": [
+    {
+      "contractVersion": "AgentSessionAdapter/v1",
+      "operationKey": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+      "sessionId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+      "events": [
+        {
+          "sequence": 1,
+          "type": "message",
+          "data": {
+            "text": "1: inspect Repository base 7c13abd988c309983f068d5939638605b4c77275"
+          }
+        },
+        {
+          "sequence": 2,
+          "type": "tool-call",
+          "data": {
+            "callId": "tool-1",
+            "name": "inspect",
+            "argument": "Repository base 7c13abd988c309983f068d5939638605b4c77275"
+          }
+        },
+        {
+          "sequence": 3,
+          "type": "tool-result",
+          "data": {
+            "callId": "tool-1",
+            "output": "Repository base 7c13abd988c309983f068d5939638605b4c77275"
+          }
+        },
+        {
+          "sequence": 4,
+          "type": "artifact",
+          "data": {
+            "uri": "fake://report",
+            "description": "Repository base 7c13abd988c309983f068d5939638605b4c77275"
+          }
+        },
+        {
+          "sequence": 5,
+          "type": "result",
+          "data": {
+            "schemaVersion": "fake-worker-result/v1",
+            "status": "blocked",
+            "reason": "Controlled blocker Repository base 7c13abd988c309983f068d5939638605b4c77275"
+          }
+        }
+      ]
+    }
+  ],
+  "canonicalHistory": {
+    "56aaaba2-8eb8-4073-b8d3-1792d30c298c": [
+      {
+        "position": 1,
+        "eventId": "b7425a68-9c69-4827-9ef4-3beb05cef0d5",
+        "type": "ImplementationRunStarted",
+        "payload": {
+          "note": "control proof",
+          "actor": {
+            "kind": "human",
+            "provider": "github",
+            "subjectId": "101"
+          },
+          "authorization": {
+            "source": "github",
+            "decision": "authorized"
+          }
+        }
+      },
+      {
+        "position": 2,
+        "eventId": "d1d66b77-1c1f-484c-8bf7-760ca2460fb3",
+        "type": "RepositoryExecutionBound",
+        "payload": {
+          "base": null,
+          "state": "preflight",
+          "active": false,
+          "blocker": null,
+          "effects": null,
+          "terminal": false,
+          "ownerRunId": null,
+          "humanDecision": null,
+          "requestedAction": null,
+          "selectedReceiptId": null,
+          "selectedOperationId": null
+        }
+      },
+      {
+        "position": 3,
+        "eventId": "27902487-d63a-4cbc-aeca-f5eae87ddbd4",
+        "type": "RepositoryBaseChecked",
+        "payload": {
+          "base": {
+            "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "expectedSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "providerSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "predecessorCompleted": true
+          },
+          "state": "ready",
+          "active": false,
+          "blocker": null,
+          "effects": null,
+          "terminal": false,
+          "ownerRunId": null,
+          "humanDecision": null,
+          "requestedAction": null,
+          "selectedReceiptId": null,
+          "selectedOperationId": null
+        }
+      },
+      {
+        "position": 4,
+        "eventId": "460fd487-d62a-48c4-a35d-9e45d270e61b",
+        "type": "RepositoryOwnershipChecked",
+        "payload": {
+          "base": {
+            "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "expectedSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "providerSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "predecessorCompleted": true
+          },
+          "state": "ready",
+          "active": true,
+          "blocker": null,
+          "effects": null,
+          "terminal": false,
+          "ownerRunId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+          "humanDecision": null,
+          "requestedAction": null,
+          "selectedReceiptId": null,
+          "selectedOperationId": null
+        }
+      },
+      {
+        "position": 5,
+        "eventId": "4bfe3096-0a31-4cc6-836d-b0b3c6971724",
+        "type": "RepositoryEffectRequested",
+        "payload": {
+          "base": {
+            "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "expectedSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "providerSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "predecessorCompleted": true
+          },
+          "state": "ready",
+          "active": true,
+          "blocker": null,
+          "effects": [
+            {
+              "kind": "git",
+              "state": "pending",
+              "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": null,
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1"
+            }
+          ],
+          "terminal": false,
+          "ownerRunId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+          "humanDecision": null,
+          "requestedAction": null,
+          "selectedReceiptId": null,
+          "selectedOperationId": null
+        }
+      },
+      {
+        "position": 6,
+        "eventId": "5624f81a-3421-4b07-a37e-2e96ff990cf5",
+        "type": "RepositoryEffectObserved",
+        "payload": {
+          "base": {
+            "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "expectedSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "providerSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "predecessorCompleted": true
+          },
+          "state": "ready",
+          "active": true,
+          "blocker": null,
+          "effects": [
+            {
+              "kind": "git",
+              "state": "adopted",
+              "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "git",
+                "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1"
+            }
+          ],
+          "terminal": false,
+          "ownerRunId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+          "humanDecision": null,
+          "requestedAction": null,
+          "selectedReceiptId": null,
+          "selectedOperationId": null
+        }
+      },
+      {
+        "position": 7,
+        "eventId": "75d85de0-58f4-4c6c-8c08-ea4986173f1b",
+        "type": "RepositoryEffectRequested",
+        "payload": {
+          "base": {
+            "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "expectedSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "providerSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "predecessorCompleted": true
+          },
+          "state": "ready",
+          "active": true,
+          "blocker": null,
+          "effects": [
+            {
+              "kind": "git",
+              "state": "adopted",
+              "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "git",
+                "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1"
+            },
+            {
+              "kind": "provider",
+              "state": "pending",
+              "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": null,
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1"
+            }
+          ],
+          "terminal": false,
+          "ownerRunId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+          "humanDecision": null,
+          "requestedAction": null,
+          "selectedReceiptId": null,
+          "selectedOperationId": null
+        }
+      },
+      {
+        "position": 8,
+        "eventId": "84d3ce81-1c1c-4ccd-a021-89100a53f25e",
+        "type": "RepositoryEffectObserved",
+        "payload": {
+          "base": {
+            "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "expectedSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "providerSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "predecessorCompleted": true
+          },
+          "state": "ready",
+          "active": true,
+          "blocker": null,
+          "effects": [
+            {
+              "kind": "git",
+              "state": "adopted",
+              "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "git",
+                "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1"
+            },
+            {
+              "kind": "provider",
+              "state": "completed",
+              "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "provider",
+                "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "a0dfdcaa-303b-4191-a189-d8ac1a270959",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1"
+            }
+          ],
+          "terminal": false,
+          "ownerRunId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+          "humanDecision": null,
+          "requestedAction": null,
+          "selectedReceiptId": null,
+          "selectedOperationId": null
+        }
+      },
+      {
+        "position": 9,
+        "eventId": "b2f77f8d-71e7-40d2-b430-c63435fd40bc",
+        "type": "AgentPreparationCompleted",
+        "payload": {
+          "executor": "deterministic",
+          "attemptId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "framework": "Microsoft.Agents.AI.Workflows/1.16.0",
+          "activityId": "3788feba-19bd-4c79-8a5b-784d03ce1a87"
+        }
+      },
+      {
+        "position": 10,
+        "eventId": "84050c29-80be-43e6-89c7-b01e368afdb8",
+        "type": "AgentSessionStartRequested",
+        "payload": {
+          "attemptId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "activityId": "3788feba-19bd-4c79-8a5b-784d03ce1a87",
+          "operationKey": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "contractVersion": "AgentSessionAdapter/v1"
+        }
+      },
+      {
+        "position": 11,
+        "eventId": "86dc2749-1360-4bbd-868f-e37980fcb3b7",
+        "type": "RepositoryEffectRequested",
+        "payload": {
+          "base": {
+            "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "expectedSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "providerSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "predecessorCompleted": true
+          },
+          "state": "ready",
+          "active": true,
+          "blocker": null,
+          "effects": [
+            {
+              "kind": "git",
+              "state": "adopted",
+              "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "git",
+                "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1"
+            },
+            {
+              "kind": "provider",
+              "state": "completed",
+              "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "provider",
+                "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "a0dfdcaa-303b-4191-a189-d8ac1a270959",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1"
+            },
+            {
+              "kind": "session",
+              "state": "pending",
+              "target": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": null,
+              "operationId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc"
+            }
+          ],
+          "terminal": false,
+          "ownerRunId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+          "humanDecision": null,
+          "requestedAction": null,
+          "selectedReceiptId": null,
+          "selectedOperationId": null
+        }
+      },
+      {
+        "position": 12,
+        "eventId": "04ce7120-a3f2-4226-9300-264808ad328a",
+        "type": "AgentAdapterResponseObserved",
+        "payload": {
+          "body": {
+            "events": [
+              {
+                "data": {
+                  "text": "1: inspect Repository base 7c13abd988c309983f068d5939638605b4c77275"
+                },
+                "type": "message",
+                "sequence": 1
+              },
+              {
+                "data": {
+                  "name": "inspect",
+                  "callId": "tool-1",
+                  "argument": "Repository base 7c13abd988c309983f068d5939638605b4c77275"
+                },
+                "type": "tool-call",
+                "sequence": 2
+              },
+              {
+                "data": {
+                  "callId": "tool-1",
+                  "output": "Repository base 7c13abd988c309983f068d5939638605b4c77275"
+                },
+                "type": "tool-result",
+                "sequence": 3
+              },
+              {
+                "data": {
+                  "uri": "fake://report",
+                  "description": "Repository base 7c13abd988c309983f068d5939638605b4c77275"
+                },
+                "type": "artifact",
+                "sequence": 4
+              },
+              {
+                "data": {
+                  "reason": "Controlled blocker Repository base 7c13abd988c309983f068d5939638605b4c77275",
+                  "status": "blocked",
+                  "schemaVersion": "fake-worker-result/v1"
+                },
+                "type": "result",
+                "sequence": 5
+              }
+            ],
+            "sessionId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+            "operationKey": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+            "contractVersion": "AgentSessionAdapter/v1"
+          },
+          "attemptId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "activityId": "3788feba-19bd-4c79-8a5b-784d03ce1a87",
+          "statusCode": 200
+        }
+      },
+      {
+        "position": 13,
+        "eventId": "86172506-f3bc-496f-ae73-8370b552d1fe",
+        "type": "AgentSessionStarted",
+        "payload": {
+          "attemptId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "sessionId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+          "activityId": "3788feba-19bd-4c79-8a5b-784d03ce1a87",
+          "openInCodex": {
+            "url": null,
+            "mode": "unsupported",
+            "reason": "fake-adapter-has-no-codex-app-session",
+            "sameSession": false,
+            "appTaskVisible": false
+          },
+          "operationKey": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "contractVersion": "AgentSessionAdapter/v1"
+        }
+      },
+      {
+        "position": 14,
+        "eventId": "a8bd56a4-7612-4723-8b5c-0a2a83cc7c45",
+        "type": "AgentObservationReceived",
+        "payload": {
+          "data": {
+            "text": "1: inspect Repository base 7c13abd988c309983f068d5939638605b4c77275"
+          },
+          "type": "message",
+          "attemptId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "sessionId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+          "activityId": "3788feba-19bd-4c79-8a5b-784d03ce1a87",
+          "sourceSequence": 1,
+          "causedByEventId": "86172506-f3bc-496f-ae73-8370b552d1fe"
+        }
+      },
+      {
+        "position": 15,
+        "eventId": "0e017f6e-d7a4-4ddb-9a6f-567890108cd1",
+        "type": "AgentObservationReceived",
+        "payload": {
+          "data": {
+            "name": "inspect",
+            "callId": "tool-1",
+            "argument": "Repository base 7c13abd988c309983f068d5939638605b4c77275"
+          },
+          "type": "tool-call",
+          "attemptId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "sessionId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+          "activityId": "3788feba-19bd-4c79-8a5b-784d03ce1a87",
+          "sourceSequence": 2,
+          "causedByEventId": "a8bd56a4-7612-4723-8b5c-0a2a83cc7c45"
+        }
+      },
+      {
+        "position": 16,
+        "eventId": "653eefe9-3c6c-4b70-a117-a4106dfe7a1c",
+        "type": "AgentObservationReceived",
+        "payload": {
+          "data": {
+            "callId": "tool-1",
+            "output": "Repository base 7c13abd988c309983f068d5939638605b4c77275"
+          },
+          "type": "tool-result",
+          "attemptId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "sessionId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+          "activityId": "3788feba-19bd-4c79-8a5b-784d03ce1a87",
+          "sourceSequence": 3,
+          "causedByEventId": "0e017f6e-d7a4-4ddb-9a6f-567890108cd1"
+        }
+      },
+      {
+        "position": 17,
+        "eventId": "9f06b5a0-9797-4889-b18f-fda02397849f",
+        "type": "AgentObservationReceived",
+        "payload": {
+          "data": {
+            "uri": "fake://report",
+            "description": "Repository base 7c13abd988c309983f068d5939638605b4c77275"
+          },
+          "type": "artifact",
+          "attemptId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "sessionId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+          "activityId": "3788feba-19bd-4c79-8a5b-784d03ce1a87",
+          "sourceSequence": 4,
+          "causedByEventId": "653eefe9-3c6c-4b70-a117-a4106dfe7a1c"
+        }
+      },
+      {
+        "position": 18,
+        "eventId": "aa9b07c7-f177-4764-a075-803acbee2713",
+        "type": "AgentResultObserved",
+        "payload": {
+          "data": {
+            "reason": "Controlled blocker Repository base 7c13abd988c309983f068d5939638605b4c77275",
+            "status": "blocked",
+            "schemaVersion": "fake-worker-result/v1"
+          },
+          "type": "result",
+          "attemptId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "sessionId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+          "activityId": "3788feba-19bd-4c79-8a5b-784d03ce1a87",
+          "sourceSequence": 5,
+          "causedByEventId": "9f06b5a0-9797-4889-b18f-fda02397849f"
+        }
+      },
+      {
+        "position": 19,
+        "eventId": "e978a946-6149-4e61-ba36-cdf1e2467887",
+        "type": "AgentAttemptCompleted",
+        "payload": {
+          "category": "blocked",
+          "attemptId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+          "sessionId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+          "activityId": "3788feba-19bd-4c79-8a5b-784d03ce1a87",
+          "originalResultEventId": "aa9b07c7-f177-4764-a075-803acbee2713"
+        }
+      },
+      {
+        "position": 20,
+        "eventId": "84617566-a7de-43a0-b393-cb1a90e55bc2",
+        "type": "RepositoryEffectObserved",
+        "payload": {
+          "base": {
+            "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "expectedSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "providerSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "predecessorCompleted": true
+          },
+          "state": "ready",
+          "active": true,
+          "blocker": null,
+          "effects": [
+            {
+              "kind": "git",
+              "state": "adopted",
+              "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "git",
+                "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1"
+            },
+            {
+              "kind": "provider",
+              "state": "completed",
+              "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "provider",
+                "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "a0dfdcaa-303b-4191-a189-d8ac1a270959",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1"
+            },
+            {
+              "kind": "session",
+              "state": "completed",
+              "target": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "session",
+                "target": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc"
+            }
+          ],
+          "terminal": false,
+          "ownerRunId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+          "humanDecision": null,
+          "requestedAction": null,
+          "selectedReceiptId": null,
+          "selectedOperationId": null
+        }
+      },
+      {
+        "position": 21,
+        "eventId": "71a43b2e-c5b3-46bc-a9d6-d3dd50eaa5cd",
+        "type": "RepositoryExecutionFinished",
+        "payload": {
+          "base": {
+            "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "expectedSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "providerSha": "7c13abd988c309983f068d5939638605b4c77275",
+            "predecessorCompleted": true
+          },
+          "state": "blocked",
+          "active": false,
+          "blocker": null,
+          "effects": [
+            {
+              "kind": "git",
+              "state": "adopted",
+              "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "git",
+                "target": "refs/heads/wpcp/56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1"
+            },
+            {
+              "kind": "provider",
+              "state": "completed",
+              "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "provider",
+                "target": "run-marker:56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "a0dfdcaa-303b-4191-a189-d8ac1a270959",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-provider-v1"
+            },
+            {
+              "kind": "session",
+              "state": "completed",
+              "target": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+              "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+              "receipt": {
+                "kind": "session",
+                "target": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+                "headSha": "7c13abd988c309983f068d5939638605b4c77275",
+                "receiptId": "893b44dc-eee4-4ed2-8797-4d3ec42eec3c",
+                "repository": {
+                  "fullName": "pilot/fixture",
+                  "repositoryId": "repo-1",
+                  "providerRepositoryId": 9001
+                },
+                "operationId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc",
+                "contractVersion": "RepositoryEffects/v1"
+              },
+              "operationId": "60ac09ad-fd2f-42a9-85e1-4af12ae0e9cc"
+            }
+          ],
+          "terminal": true,
+          "ownerRunId": null,
+          "humanDecision": null,
+          "requestedAction": null,
+          "selectedReceiptId": null,
+          "selectedOperationId": null
+        }
+      }
+    ]
+  }
+}

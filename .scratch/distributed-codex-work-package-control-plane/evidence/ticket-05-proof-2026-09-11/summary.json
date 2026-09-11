@@ -1,0 +1,63 @@
+{
+  "testedCommit": "c4147a4b8ba9b72e265330e236264fcdc04b6115",
+  "branch": "main",
+  "testsPassed": 59,
+  "testsFailed": 0,
+  "crashProofs": [
+    {
+      "kind": "git",
+      "runId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c",
+      "operationId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+      "receiptId": "56aaaba2-8eb8-4073-b8d3-1792d30c298c-git-v1",
+      "effectCount": 1,
+      "disposition": "adopted",
+      "workerExitCode": -9,
+      "source": "test_git_success_gap_adopts_the_existing_ref_once.json"
+    },
+    {
+      "kind": "provider",
+      "runId": "605db52a-8f38-464c-acec-1e9e40d2831c",
+      "operationId": "605db52a-8f38-464c-acec-1e9e40d2831c-provider-v1",
+      "receiptId": "32f49916-ee6d-43b2-bd70-c9193540a889",
+      "effectCount": 1,
+      "disposition": "adopted",
+      "workerExitCode": -9,
+      "source": "test_provider_success_gap_adopts_one_independent_receipt.json"
+    },
+    {
+      "kind": "session",
+      "runId": "ec455327-daee-447b-a39a-0044a6e477e3",
+      "operationId": "9fb64081-5279-4da5-8eef-6d800f65c3a0",
+      "receiptId": "d78a17d0-e567-4ac0-b4f9-166261f54719",
+      "effectCount": 1,
+      "disposition": "adopted",
+      "workerExitCode": -9,
+      "source": "test_session_success_gap_and_concurrent_replacement_keep_one_session.json"
+    }
+  ],
+  "staleBase": {
+    "before": {
+      "expectedSha": "55bf92abacb3e8b4429b9ed8102f2cb7bf213c9c",
+      "providerSha": "55bf92abacb3e8b4429b9ed8102f2cb7bf213c9c",
+      "localSha": "7c13abd988c309983f068d5939638605b4c77275",
+      "predecessorCompleted": true
+    },
+    "blocker": "local-base-stale",
+    "effectsBeforeStart": 0,
+    "after": {
+      "expectedSha": "55bf92abacb3e8b4429b9ed8102f2cb7bf213c9c",
+      "providerSha": "55bf92abacb3e8b4429b9ed8102f2cb7bf213c9c",
+      "localSha": "55bf92abacb3e8b4429b9ed8102f2cb7bf213c9c",
+      "predecessorCompleted": true
+    },
+    "source": "test_stale_local_base_blocks_before_any_agent_start.json"
+  },
+  "reviews": {
+    "standardsOpenFindings": 0,
+    "specOpenFindings": 0
+  },
+  "limits": [
+    "controlled provider and fake Codex",
+    "explicit local delivery, not automatic DTS dispatch"
+  ]
+}
