@@ -86,11 +86,12 @@ internal static class OperatorCli
         {
             "start" => ParseStart(baseUrl, fixtureAccessToken, options),
             "run" => ParseRun(baseUrl, fixtureAccessToken, options),
+            "attempt" => ParseAttempt(baseUrl, fixtureAccessToken, options),
             "events" => ParseEvents(baseUrl, fixtureAccessToken, options),
             "audit" => ParseAudit(baseUrl, fixtureAccessToken, options),
             "claim" or "release" => ParseControl(baseUrl, fixtureAccessToken, command, options),
             "--help" or "-h" => throw new ArgumentException("Help does not accept an API base URL."),
-            _ => throw new ArgumentException("The command must be start, run, events, audit, claim, or release."),
+            _ => throw new ArgumentException("The command must be start, run, attempt, events, audit, claim, or release."),
         };
     }
 
@@ -156,6 +157,15 @@ internal static class OperatorCli
             $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}",
             null,
             fixtureAccessToken);
+    }
+
+    private static Invocation ParseAttempt(Uri baseUrl, string fixtureAccessToken,
+        IReadOnlyDictionary<string, string> options)
+    {
+        RequireOnly(options, "--run-id", "--attempt-id");
+        return new Invocation(baseUrl, HttpMethod.Get,
+            $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/attempts/{Uri.EscapeDataString(Require(options, "--attempt-id"))}",
+            null, fixtureAccessToken);
     }
 
     private static Invocation ParseEvents(
@@ -335,7 +345,7 @@ internal static class OperatorCli
 
     private static object Usage() => new
     {
-        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|events|audit|claim|release> [options]",
+        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|attempt|events|audit|claim|release> [options]",
         requiredEnvironment = new[] { "WPCP_FIXTURE_ACCESS_TOKEN", "WPCP_PROVIDER_TOKEN" },
         commands = new
         {
@@ -344,6 +354,7 @@ internal static class OperatorCli
                 "--repository-id", "--issue-number", "--command-id", "--note",
                 "--source-revision", "--package-revision", "--configuration-revision", "--contract-revision",
             },
+            attempt = new[] { "--run-id", "--attempt-id" },
             audit = new[] { "--run-id" },
             control = new[] { "--run-id", "--target-attempt-id", "--expected-run-version",
                 "--expected-head-sha", "--lease-epoch" },

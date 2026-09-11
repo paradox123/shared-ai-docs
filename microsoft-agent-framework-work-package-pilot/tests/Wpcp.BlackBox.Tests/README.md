@@ -26,3 +26,21 @@ tests run two API processes against one database, and reconnect tests use a new
 CLI credential for the same provider subject after API replacement.
 
 Commands and public contracts are documented in the [pilot README](../../README.md).
+
+## Ticket 04 external fake attempt
+
+`tests/test_fake_codex_attempt.py` shares the process harness with Ticket 02/03.
+It launches `tests/fake_codex_provider.py` as a separate HTTP process with its own
+SQLite receipts, invokes real worker processes, and observes the product only
+through authenticated API/CLI calls. Provider session counts are read through
+its public fixture diagnostics endpoint; tests never query product tables.
+
+Coverage includes canonical message/tool/artifact/result order and canary
+redaction; SIGKILL before/after session mapping and after result capture;
+concurrent redelivery; unchanged original blocked result plus separate rejection;
+process/timeout/transport/contract/schema/infrastructure diagnostics; conflicting
+sequence/identity and null-event rejection; immutable adapter assignment; and
+independent attempt selection after API restart with truthful unavailable Codex
+opening capability. All database containers, provider processes and receipt
+files are disposable. This is explicit local delivery, not automatic DTS
+orchestration or real Codex app integration.

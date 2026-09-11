@@ -26,6 +26,10 @@ try
             options.DurableTaskOrchestrationId,
             options.DurableTaskTaskId,
             options.EvidenceNote));
+    if (options.FakeAgentOrigin is not null)
+        await Wpcp.Worker.FakeAgentWorkflow.ExecuteAsync(store, options.RunId,
+            options.FakeAgentOrigin, options.EvidenceNote ?? "controlled fake attempt",
+            options.PauseAt, options.RejectBlocked, options.AgentTimeoutMilliseconds);
     for (var heartbeat = 0; heartbeat < options.HeartbeatCount; heartbeat++)
     {
         await Task.Delay(TimeSpan.FromMilliseconds(options.HeartbeatIntervalMilliseconds));
@@ -47,6 +51,11 @@ try
             DateTimeOffset.UtcNow));
     Console.Out.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
 }
+catch (AgentAssignmentConflictException)
+{
+    Console.Out.WriteLine(JsonSerializer.Serialize(new { code = "agent-assignment-conflict", category = "contract-incompatible" }, jsonOptions));
+    Environment.ExitCode = 2;
+}
 catch (ArgumentException)
 {
     Console.Out.WriteLine(JsonSerializer.Serialize(new { code = "invalid-worker-observation" }, jsonOptions));
@@ -54,12 +63,17 @@ catch (ArgumentException)
 }
 catch (Npgsql.NpgsqlException)
 {
-    Console.Out.WriteLine(JsonSerializer.Serialize(new { code = "run-store-unavailable" }, jsonOptions));
+    Console.Out.WriteLine(JsonSerializer.Serialize(new { code = "run-store-unavailable", category = "infrastructure-failure" }, jsonOptions));
     Environment.ExitCode = 2;
 }
 catch (InvalidOperationException)
 {
     Console.Out.WriteLine(JsonSerializer.Serialize(new { code = "implementation-run-not-found" }, jsonOptions));
+    Environment.ExitCode = 2;
+}
+catch (Exception)
+{
+    Console.Out.WriteLine(JsonSerializer.Serialize(new { code = "worker-execution-failed", category = "infrastructure-failure" }, jsonOptions));
     Environment.ExitCode = 2;
 }
 
@@ -74,7 +88,11 @@ internal sealed record WorkerOptions(
     string? DurableTaskTaskId,
     string? EvidenceNote,
     int HeartbeatCount,
-    int HeartbeatIntervalMilliseconds)
+    int HeartbeatIntervalMilliseconds,
+    string? FakeAgentOrigin,
+    string? PauseAt,
+    bool RejectBlocked,
+    int AgentTimeoutMilliseconds)
 {
     public static WorkerOptions Parse(IReadOnlyList<string> arguments)
     {
@@ -95,6 +113,12 @@ internal sealed record WorkerOptions(
             throw new ArgumentException("Missing worker lifecycle options.");
         }
 
+        var pauseAt = Value(values, "--pause-at");
+        if (pauseAt is not (null or "after-session-start" or "after-session-mapping" or "after-result-observed"))
+            throw new ArgumentException("Unknown fake fault boundary.");
+        var rejectText = Value(values, "--reject-blocked");
+        if (rejectText is not (null or "true" or "false"))
+            throw new ArgumentException("--reject-blocked must be true or false.");
         return new WorkerOptions(
             connectionString,
             fixturePath,
@@ -106,7 +130,11 @@ internal sealed record WorkerOptions(
             Value(values, "--durable-task-task-id"),
             Value(values, "--evidence-note"),
             heartbeatCount,
-            heartbeatIntervalMilliseconds);
+            heartbeatIntervalMilliseconds,
+            Value(values, "--fake-agent-origin"),
+            pauseAt,
+            rejectText == "true",
+            PositiveIntegerOrDefault(values, "--agent-timeout-ms", 10000));
     }
 
     private static Dictionary<string, string> ParseOptions(IReadOnlyList<string> arguments)

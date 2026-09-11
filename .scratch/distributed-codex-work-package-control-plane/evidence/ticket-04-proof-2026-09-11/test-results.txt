@@ -1,0 +1,13 @@
+test_attempt_selection_is_authorized_and_open_capability_is_truthful (__main__.RecordedProof) ... ok
+test_blocked_original_survives_downstream_rejection_and_capture_crash (__main__.RecordedProof) ... ok
+test_external_attempt_has_ordered_redacted_transcript (__main__.RecordedProof) ... ok
+test_failure_categories_are_public_and_preserve_originals (__main__.RecordedProof) ... ok
+test_inconsistent_adapter_correlation_and_transcript_fail_closed (__main__.RecordedProof) ... ok
+test_redelivery_cannot_change_durable_adapter_assignment (__main__.RecordedProof) ... ok
+test_replacement_adopts_one_session_before_and_after_mapping (__main__.RecordedProof) ... ok
+test_unavailable_store_is_infrastructure_failure_without_fabricated_history (__main__.RecordedProof) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 17.201s
+
+OK

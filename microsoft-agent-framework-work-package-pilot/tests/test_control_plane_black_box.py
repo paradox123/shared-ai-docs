@@ -71,7 +71,7 @@ def command_output(
     )
 
 
-class ObservableRunBlackBoxTests(unittest.TestCase):
+class ControlPlaneProcessHarness:
     api: subprocess.Popen[str] | None
     postgres_name: str
     postgres_port: int
@@ -316,6 +316,24 @@ class ObservableRunBlackBoxTests(unittest.TestCase):
         )
         return completed.returncode, completed.stdout + completed.stderr
 
+    def new_run(self):
+        number = type(self).next_issue
+        type(self).next_issue += 1
+        status, result, _ = self.request("POST", f"/api/v1/issues/repo-1/{number}/runs", {
+            "commandId": str(uuid.uuid4()), "actorId": "actor-authorized", "note": "control proof",
+            "provenance": {"sourceRevision": "r1", "packageRevision": "r1",
+                           "configurationRevision": "r1", "contractRevision": "r1"},
+        })
+        self.assertEqual(201, status, result)
+        return result["runId"]
+
+    def read_run(self, run_id, actor="actor-authorized"):
+        status, result, _ = self.request("GET", f"/api/v1/runs/{run_id}", actor_id=actor)
+        self.assertEqual(200, status, result)
+        return result
+
+
+class ObservableRunBlackBoxTests(ControlPlaneProcessHarness, unittest.TestCase):
     def test_authorized_issue_is_one_redacted_observable_run_across_restarts(self) -> None:
         fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
         secret = fixture["redactionPolicy"]["controlledCanaries"][0]["value"]
@@ -641,22 +659,6 @@ class ObservableRunBlackBoxTests(unittest.TestCase):
         for surface in public_surfaces:
             self.assertNotIn(secret, surface)
             self.assertNotIn(worker_only_secret, surface)
-
-    def new_run(self):
-        number = type(self).next_issue
-        type(self).next_issue += 1
-        status, result, _ = self.request("POST", f"/api/v1/issues/repo-1/{number}/runs", {
-            "commandId": str(uuid.uuid4()), "actorId": "actor-authorized", "note": "control proof",
-            "provenance": {"sourceRevision": "r1", "packageRevision": "r1",
-                           "configurationRevision": "r1", "contractRevision": "r1"},
-        })
-        self.assertEqual(201, status, result)
-        return result["runId"]
-
-    def read_run(self, run_id, actor="actor-authorized"):
-        status, result, _ = self.request("GET", f"/api/v1/runs/{run_id}", actor_id=actor)
-        self.assertEqual(200, status, result)
-        return result
 
     def test_concurrent_claim_is_exclusive_and_release_requires_holder(self):
         run_id = self.new_run()

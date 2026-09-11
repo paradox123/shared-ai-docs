@@ -5,6 +5,7 @@
     <CentralPackageVersionOverrideEnabled>false</CentralPackageVersionOverrideEnabled>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Microsoft.Agents.AI.Workflows" Version="1.16.0" />
     <PackageVersion Include="Npgsql" Version="10.0.3" />
   </ItemGroup>
 </Project>

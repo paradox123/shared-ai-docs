@@ -5,6 +5,7 @@
     <RootNamespace>Wpcp.Worker</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.Agents.AI.Workflows" />
     <ProjectReference Include="../Wpcp.Domain/Wpcp.Domain.csproj" />
     <ProjectReference Include="../Wpcp.Storage.Postgres/Wpcp.Storage.Postgres.csproj" />
   </ItemGroup>

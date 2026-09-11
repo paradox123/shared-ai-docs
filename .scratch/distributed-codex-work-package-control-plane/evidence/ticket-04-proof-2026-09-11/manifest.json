@@ -1,0 +1,26 @@
+{
+  "timeUtc": "2026-09-11T15:27:30.392606+00:00",
+  "testsRun": 8,
+  "successful": true,
+  "failures": 0,
+  "errors": 0,
+  "sourceSha256": {
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Api/GitHubRepositoryAuthorization.cs": "7817a4624166adccb434a9845c10632119a573ff01af9b498c80d5613b3ede2d",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Api/Program.cs": "050d631937431ca8c5c7d4b6dc44c6dd16e337f5865de43df1638f64e48c9cf4",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Domain/AgentSessions.cs": "2ebf4d56abe991fe8e2d66876961b4b3691636cb3c982f3c4898b124dd9e8eb9",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Domain/ControlledRedactionPolicy.cs": "a27060b74b4014a8da21e090cb4eca6e6d1716c1f3c5781b7ab58c7180b1504f",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Domain/DomainAssemblyMarker.cs": "337abfd920f6b66556c6d9bce499fa907f3bb0e71f6985a4b9896732fea61fc4",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Domain/ImplementationRunContracts.cs": "41a50a750c97aa1511baec14979a57f62bb87114c0ed8e8fba8dac2764e6b6c0",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Domain/RepositoryAuthorization.cs": "b11469c5723b38be2c97e4507a2b6d4c3faf89f1a5932946274c208c5a6c9a5f",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Domain/RunControl.cs": "575c2c1cc9567d788ea9e171d117f2eae64dd02d21cab7eccc7a1088f2de1ae4",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Domain/SyntheticProviderFixture.cs": "212f3124c36f0d1e661de9ff7136fb223409a34173911a18c8718c5e4736d9b7",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.OperatorCli/Program.cs": "1b65522a041bc768f44b91f5b12449ab21d428bf6c718771c11f32116b3acfb7",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Storage.Postgres/PostgresAgentSessions.cs": "0ff02bea9052fdc61f24653d4811d275e21927a6c5a414062a1b57b3496a875e",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Storage.Postgres/PostgresImplementationRunStore.cs": "0c3510a735f33a1a210440e5cb928a70544307cffb964076c79efc3084e7d340",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Storage.Postgres/PostgresRunControl.cs": "4a16713cc81d62a4cb7da7e51c567e8da7ae87ba75edc44bbf1206b4aa81c239",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Storage.Postgres/PostgresStorageAssemblyMarker.cs": "edf5f3eda1def33edeec8a86fea56648d634815a38e9aec09bf765772ffee656",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Worker/FakeAgentWorkflow.cs": "85074c3abd1fee9371026d812839701a933df15feb25b9a39c82364200daf63f",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Worker/Program.cs": "f7d4bd72c72c7ee19f1af4cd220892d747161d7f35022e4d01662ca9d849565b"
+  },
+  "observationsSha256": "10921ced5569ec70026cc982135766ea283966656d43bfbc1c9ac573303ae686"
+}

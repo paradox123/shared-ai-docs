@@ -157,6 +157,22 @@ app.MapGet(
         return Results.Json(events, statusCode: StatusCodes.Status200OK);
     });
 
+app.MapGet("/api/v1/runs/{runId}/attempts/{attemptId}",
+    async (string runId, string attemptId, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        var decision = await store.DecideControlAsync(runId, null, null,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+        if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
+        var projection = await store.GetProjectionAsync(runId, token);
+        var attempt = projection!.Attempts.SingleOrDefault(a => a.AttemptId == attemptId);
+        if (attempt is null) return JsonError("attempt-not-found", 404);
+        var history = await store.GetEventsAfterAsync(runId, 0, token);
+        return Results.Json(new { runId, attempt, projection.Provenance,
+            events = history!.Events.Where(e => e.Position <= projection.LastPosition &&
+                e.Payload.TryGetProperty("attemptId", out var id) && id.GetString() == attemptId).ToArray() });
+    });
+
 app.MapGet("/api/v1/runs/{runId}/audit",
     async (string runId, HttpContext context, CancellationToken token) =>
     {

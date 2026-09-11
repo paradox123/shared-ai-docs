@@ -36,7 +36,7 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
     public async Task EnsureSchemaAsync(CancellationToken cancellationToken = default)
     {
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        await using var command = new NpgsqlCommand(Schema, connection);
+        await using var command = new NpgsqlCommand(Schema + AgentSchema, connection);
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
@@ -666,9 +666,10 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
     {
         const string sql = """
             SELECT attempt.attempt_id::text, attempt.activity_id::text, attempt.attempt_number,
-                   attempt.state, attempt.started_at, attempt.completed_at
+                   attempt.state, attempt.started_at, attempt.completed_at, session.receipt::text
               FROM wpcp_activity_attempts attempt
               JOIN wpcp_run_activities activity ON activity.activity_id = attempt.activity_id
+              LEFT JOIN wpcp_agent_sessions session ON session.attempt_id = attempt.attempt_id
              WHERE activity.run_id = @run_id
              ORDER BY attempt.started_at, attempt.attempt_id;
             """;
@@ -681,7 +682,8 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
             results.Add(new RunAttempt(
                 reader.GetString(0), reader.GetString(1), reader.GetInt32(2), reader.GetString(3),
                 reader.GetFieldValue<DateTimeOffset>(4),
-                reader.IsDBNull(5) ? null : reader.GetFieldValue<DateTimeOffset>(5)));
+                reader.IsDBNull(5) ? null : reader.GetFieldValue<DateTimeOffset>(5),
+                reader.IsDBNull(6) ? null : Deserialize<AgentAttemptReceipt>(reader.GetString(6)).Session));
         }
         return results;
     }

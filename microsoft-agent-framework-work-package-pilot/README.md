@@ -122,3 +122,77 @@ and a controlled external GitHub HTTP boundary. It tests the real GitHub adapter
 including permission revocation and provider errors, without live credentials or
 provider writes. Three real human accounts and live GitHub integration remain
 Ticket 14. See the [implementation evidence](../openspec/changes/archive/2026-09-11-enforce-repository-control-lease/implementation-evidence.md).
+
+## Recoverable external fake Codex attempt (Ticket 04)
+
+The worker now has an explicit fake-agent execution mode. A typed Agent Framework
+`FakeCodexAttemptV1` graph runs deterministic preparation followed by a regular
+executor calling the external `AgentSessionAdapter/v1` HTTP boundary. Neither
+executor is a model agent. The fake service owns an independent SQLite session
+receipt; PostgreSQL owns the product attempt, redacted response, ordered history
+and processing decision.
+
+Run the full isolated process proof, including real SIGKILL boundaries:
+
+```bash
+python3 -m unittest tests.test_fake_codex_attempt -v
+```
+
+For a manual local run, first start the controlled external service (choose a
+free loopback port and a disposable receipt file):
+
+```bash
+python3 tests/fake_codex_provider.py --port 5091 --database /tmp/wpcp-fake-session.sqlite
+```
+
+With an admitted run and `WPCP_CONNECTION_STRING` set for its pilot database:
+
+```bash
+dotnet src/Wpcp.Worker/bin/Debug/net10.0/Wpcp.Worker.dll \
+  --fixture tests/Wpcp.BlackBox.Tests/fixtures/synthetic-provider-redaction-fixture.json \
+  --run-id <run-id> --worker-id worker-one \
+  --fake-agent-origin http://127.0.0.1:5091 --reject-blocked true
+
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 attempt \
+  --run-id <run-id> --attempt-id <attempt-id>
+```
+
+Use `run` to find the `fake-codex` activity and its attempt. The authenticated
+`GET /api/v1/runs/{runId}/attempts/{attemptId}` returns that attempt, admission
+provenance and its canonical events. `session.originalResult` and
+`AgentResultObserved` retain the redacted blocked observation; configured
+`--reject-blocked true` creates a separate `AgentResultRejected` referencing it.
+The attempt then reports `semantic-rejection` while the external session remains
+`blocked`. Both the selected attempt and full run include `openInCodex` with
+`mode: unsupported`, `sameSession: false`, `appTaskVisible: false`, no URL and
+reason `fake-adapter-has-no-codex-app-session`. No Codex app task or fork is created.
+
+`--pause-at after-session-start`, `after-session-mapping`, or
+`after-result-observed` emits a JSON boundary marker and waits for the process to
+be killed. Launch a replacement worker against the **same database, run, fake
+origin and reject policy**, omitting the pause option. It adopts the saved
+operation/session or uses the captured response; concurrent deliveries serialize.
+Adapter origin and reject policy are bound to the original assignment, and a
+conflicting redelivery is rejected before it contacts another provider. This
+mode does not provide an implicit fresh retry. Keep the fake receipt file until
+recovery verification finishes.
+
+The fake service's `--scenario` can reproduce `process-failure` (a child exits
+17), `timeout`, `transport-failure`, `contract-incompatible`, `schema-failure`,
+`malformed-json`, and `infrastructure-failure`. `--agent-timeout-ms` configures the
+worker timeout (default 10000; use 500 for the controlled two-second timeout).
+Process, timeout, transport, contract, schema and infrastructure failures, plus
+`blocked` and `semantic-rejection`, remain distinct in public diagnostics;
+malformed JSON maps to `schema-failure`.
+An unavailable database produces an `infrastructure-failure` worker response,
+without pretending to have appended history to that database. A worker exit of
+zero means the delivery and its diagnostic outcome were persisted, including a
+controlled failure; inspect the attempt state for the agent outcome.
+
+This proof uses explicit local graph redelivery, independent API/CLI/worker and
+fake-provider processes, and real disposable PostgreSQL. It does not wire this
+new graph into automatic managed DTS dispatch, prove real Codex capabilities,
+or exercise live repository writes. The existing managed durability gate and
+LangGraph pilot remain separate. See the
+[Ticket 04 evidence](../openspec/changes/archive/2026-09-11-recover-fake-codex-attempt/implementation-evidence.md).

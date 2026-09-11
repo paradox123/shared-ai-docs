@@ -178,7 +178,8 @@ public sealed record RunAttempt(
     [property: JsonPropertyName("attemptNumber")] int AttemptNumber,
     [property: JsonPropertyName("state")] string State,
     [property: JsonPropertyName("startedAt")] DateTimeOffset StartedAt,
-    [property: JsonPropertyName("completedAt")] DateTimeOffset? CompletedAt);
+    [property: JsonPropertyName("completedAt")] DateTimeOffset? CompletedAt,
+    AgentSession? Session = null);
 
 /// <summary>Supplemental process lifecycle evidence, never a canonical run event.</summary>
 public sealed record ProcessObservation(
