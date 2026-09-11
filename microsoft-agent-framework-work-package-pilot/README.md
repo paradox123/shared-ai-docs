@@ -264,3 +264,16 @@ external process kill. Restart with the same plan and without `--pause-at`.
 The API, CLI, worker, PostgreSQL and providers remain separate processes; explicit
 local delivery does not claim automatic DTS dispatch or live repository writes.
 See the [Ticket 05 proof](../openspec/changes/reconcile-repository-effects/implementation-evidence.md).
+
+An already-started standalone session cannot be promoted into a managed run:
+its original base was not verified. First registration racing with an active
+standalone delivery returns `repository-registration-busy`; stop that delivery
+before registering. A settled recovery can finish after the provider advances:
+it validates existing receipts against their historical intent and processes the
+session read-only. Current-head equality is still mandatory before missing work.
+
+For machine-readable proof snapshots, set `WPCP_PROOF_DIR` when running the
+repository test module. It writes public state transitions, receipts, canonical
+history, external operation counts and killed-worker exit codes without database
+access or provider credentials. Additional crash hooks `after-reconciled-effect`
+and `after-session-receipt` prove idempotent local receipt processing/finalization.

@@ -55,6 +55,8 @@ class RepositoryReconciliationTests(harness.ControlPlaneProcessHarness, unittest
         raise AssertionError('controlled provider not ready')
 
     def setUp(self):
+        self.proof_states = []
+        self.proof_workers = []
         head = self.git('--git-dir', str(self.remote), 'rev-parse', 'main')
         self.git('-C', str(self.local), 'reset', '--hard', head)
         self.plan_path.write_text(json.dumps(dict(self.plan, expectedBaseSha=head)))
@@ -68,6 +70,7 @@ class RepositoryReconciliationTests(harness.ControlPlaneProcessHarness, unittest
         self.addCleanup(self.stop_process, process)
         for _ in range(200):
             if hook in log.read_text():
+                self.proof_workers.append((run_id, hook, process))
                 return process
             if process.poll() is not None:
                 self.fail('worker exited before crash boundary: ' + log.read_text() + json.dumps(self.read_run(run_id)))
@@ -316,7 +319,9 @@ class RepositoryReconciliationTests(harness.ControlPlaneProcessHarness, unittest
         self.assertEqual('provider-receipt-conflict', changed['blocker'])
         self.request('PUT', fault_path, {'mode': 'none'}, port=self.effect_port)
         self.decide('retire', run_id)
-        self.assertEqual('retired', self.deliver(run_id)['state'])
+        retired = self.deliver(run_id)
+        self.assertEqual('retired', retired['state'])
+        self.assertIsNone(retired['repositoryExecution']['humanDecision'])
         _, external, _ = self.request('GET', '/diagnostics', port=self.effect_port)
         self.assertEqual(1, sum(e['operationId'] == effect['operationId'] for e in external['effects']))
 
@@ -371,6 +376,55 @@ class RepositoryReconciliationTests(harness.ControlPlaneProcessHarness, unittest
         _, history, _ = self.request('GET', f'/api/v1/runs/{run_id}/events')
         self.assertEqual(3, sum(e['eventType'] == 'RepositoryEffectObserved' for e in history['events']))
 
+    def test_settled_recovery_releases_repository_after_provider_head_advances(self):
+        run_id = self.new_run()
+        worker = self.paused_worker(run_id, 'after-session-receipt')
+        before = self.read_run(run_id)['repositoryExecution']['effects']
+        os.killpg(worker.pid, signal.SIGKILL)
+        worker.wait(timeout=10)
+        self.git('-C', str(self.local), 'commit', '--allow-empty', '-m', 'independent provider advancement')
+        self.git('-C', str(self.local), 'push', 'origin', 'main')
+        after = self.deliver(run_id)['repositoryExecution']
+        self.assertTrue(after['terminal'])
+        self.assertFalse(after['active'])
+        self.assertEqual(before, after['effects'])
+
+    def read_run(self, run_id, actor="actor-authorized"):
+        run = super().read_run(run_id, actor)
+        execution = run.get('repositoryExecution')
+        if execution is not None and not any(s['runId'] == run_id and s['position'] == run['lastPosition'] for s in self.proof_states):
+            self.proof_states.append({'runId': run_id, 'position': run['lastPosition'], 'state': run['state'],
+                'execution': {key: value for key, value in execution.items() if key != 'plan'}})
+        return run
+
+    def tearDown(self):
+        destination = os.environ.get('WPCP_PROOF_DIR')
+        if not destination:
+            return
+        operations = {effect['operationId'] for state in self.proof_states for effect in state['execution'].get('effects') or []}
+        _, provider, _ = self.request('GET', '/diagnostics', port=self.effect_port)
+        _, agent, _ = self.request('GET', '/diagnostics', port=self.agent_port)
+        histories = {}
+        for run_id in dict.fromkeys(state['runId'] for state in self.proof_states):
+            _, history, _ = self.request('GET', f'/api/v1/runs/{run_id}/events')
+            histories[run_id] = [{'position': event['position'], 'eventId': event['eventId'], 'type': event['eventType'],
+                'payload': {key: value for key, value in event['payload'].items() if key != 'plan'}} for event in history['events']]
+        git_counts = {}
+        for state in self.proof_states:
+            for effect in state['execution'].get('effects') or []:
+                if effect['kind'] == 'git' and effect['operationId'] not in git_counts:
+                    entries = self.git('-C', str(self.local), 'reflog', 'show', '--format=%gs', effect['target']).splitlines()
+                    git_counts[effect['operationId']] = entries.count(effect['operationId'])
+        proof = {'test': self._testMethodName, 'crashes': [{'runId': run_id, 'boundary': hook, 'workerExitCode': process.poll()}
+            for run_id, hook, process in self.proof_workers], 'observedStates': self.proof_states,
+            'externalGitOperationCounts': git_counts,
+            'externalProviderReceipts': [e for e in provider['effects'] if e['operationId'] in operations],
+            'externalSessionReceipts': [e for e in agent['sessions'] if e['operationKey'] in operations],
+            'canonicalHistory': histories}
+        output = Path(destination)
+        output.mkdir(parents=True, exist_ok=True)
+        (output / (self._testMethodName + '.json')).write_text(json.dumps(proof, indent=2) + '\n')
+
     def worker_args(self, run_id, *extra):
         return ['dotnet', str(harness.WORKER_DLL), '--connection-string', self.connection_string,
             '--fixture', str(self.fixture_path), '--run-id', run_id, '--worker-id', 'repository-worker',
@@ -407,6 +461,70 @@ class RepositoryReconciliationTests(harness.ControlPlaneProcessHarness, unittest
         self.assertEqual(current, after['repositoryExecution']['base']['localSha'])
         self.assertEqual(current, after['repositoryExecution']['base']['expectedSha'])
         self.assertTrue(any(a.get('session') for a in after['attempts']))
+
+
+class RepositoryRegistrationTests(harness.ControlPlaneProcessHarness, unittest.TestCase):
+    def test_existing_standalone_session_cannot_gain_later_base_provenance(self):
+        run_id = self.new_run()
+        port = RepositoryReconciliationTests.start_external.__func__(type(self), 'fake_codex_provider.py')
+        result = harness.command_output(['dotnet', str(harness.WORKER_DLL), '--connection-string', self.connection_string,
+            '--fixture', str(self.fixture_path), '--run-id', run_id, '--worker-id', 'legacy-worker',
+            '--fake-agent-origin', f'http://127.0.0.1:{port}'])
+        self.assertEqual(0, result.returncode, result.stdout)
+        original = self.read_run(run_id)
+        local = Path(self.scratch.name) / 'legacy'
+        RepositoryReconciliationTests.git('init', '-b', 'main', str(local))
+        plan_path = Path(self.scratch.name) / 'legacy-plan.json'
+        plan_path.write_text(json.dumps({'repository': original['correlation']['repository'],
+            'localPath': str(local), 'remoteName': 'origin', 'baseBranch': 'main',
+            'providerOrigin': f'http://127.0.0.1:{port}', 'agentOrigin': f'http://127.0.0.1:{port}',
+            'expectedBaseSha': '1' * 40}))
+        promoted = harness.command_output(['dotnet', str(harness.WORKER_DLL), '--connection-string', self.connection_string,
+            '--fixture', str(self.fixture_path), '--run-id', run_id, '--worker-id', 'managed-worker',
+            '--repository-plan', str(plan_path)])
+        self.assertEqual(2, promoted.returncode, promoted.stdout)
+        self.assertEqual('agent-assignment-conflict', json.loads(promoted.stdout)['code'])
+        after = self.read_run(run_id)
+        self.assertIsNone(after['repositoryExecution'])
+        self.assertEqual(original['attempts'], after['attempts'])
+        self.assertEqual(original['lastPosition'], after['lastPosition'])
+
+    def test_registration_cannot_overlap_an_active_standalone_delivery(self):
+        legacy_run, managed_run = self.new_run(), self.new_run()
+        port = RepositoryReconciliationTests.start_external.__func__(type(self), 'fake_codex_provider.py')
+        log = Path(self.scratch.name) / 'legacy-active.log'
+        output = log.open('w')
+        self.addCleanup(output.close)
+        legacy = subprocess.Popen(['dotnet', str(harness.WORKER_DLL), '--connection-string', self.connection_string,
+            '--fixture', str(self.fixture_path), '--run-id', legacy_run, '--worker-id', 'legacy-worker',
+            '--fake-agent-origin', f'http://127.0.0.1:{port}', '--pause-at', 'after-session-start'],
+            stdout=output, stderr=output, start_new_session=True)
+        self.addCleanup(self.stop_process, legacy)
+        for _ in range(200):
+            if 'after-session-start' in log.read_text():
+                break
+            time.sleep(.05)
+        else:
+            self.fail(log.read_text())
+        local = Path(self.scratch.name) / 'registration'
+        RepositoryReconciliationTests.git('init', '-b', 'main', str(local))
+        plan = Path(self.scratch.name) / 'registration.json'
+        plan.write_text(json.dumps({'repository': self.read_run(managed_run)['correlation']['repository'],
+            'localPath': str(local), 'remoteName': 'origin', 'baseBranch': 'main',
+            'providerOrigin': f'http://127.0.0.1:{port}', 'agentOrigin': f'http://127.0.0.1:{port}',
+            'expectedBaseSha': '1' * 40}))
+        arguments = ['dotnet', str(harness.WORKER_DLL), '--connection-string', self.connection_string,
+            '--fixture', str(self.fixture_path), '--run-id', managed_run, '--worker-id', 'managed-worker',
+            '--repository-plan', str(plan)]
+        racing = harness.command_output(arguments, timeout=20)
+        self.assertEqual(2, racing.returncode, racing.stdout)
+        self.assertEqual('repository-registration-busy', json.loads(racing.stdout)['code'])
+        self.assertIsNone(self.read_run(managed_run)['repositoryExecution'])
+        os.killpg(legacy.pid, signal.SIGKILL)
+        legacy.wait(timeout=10)
+        replacement = harness.command_output(arguments, timeout=20)
+        self.assertEqual(0, replacement.returncode, replacement.stdout)
+        self.assertIsNotNone(self.read_run(managed_run)['repositoryExecution'])
 
 
 if __name__ == '__main__':

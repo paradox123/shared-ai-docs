@@ -6,15 +6,30 @@ namespace Wpcp.Storage.Postgres;
 
 public sealed partial class PostgresImplementationRunStore
 {
-    public async Task EnsureStandaloneAgentAllowedAsync(string runId, CancellationToken token = default)
+    // Shared for the complete standalone delivery; first managed registration takes
+    // the corresponding exclusive transaction lock before installing its guard.
+    public async Task<IAsyncDisposable> AcquireStandaloneAgentAsync(string runId, CancellationToken token = default)
     {
-        await using var connection = await _dataSource.OpenConnectionAsync(token);
-        await using var check = new NpgsqlCommand("""
-            SELECT EXISTS(SELECT 1 FROM wpcp_repository_owners owner
-                JOIN wpcp_implementation_runs run USING(repository_id) WHERE run.run_id=@id)
-            """, connection);
-        check.Parameters.AddWithValue("id", Guid.Parse(runId));
-        if (await check.ExecuteScalarAsync(token) is true) throw new RepositoryExecutionRequiredException();
+        var connection = await _dataSource.OpenConnectionAsync(token);
+        try
+        {
+            await using var read = new NpgsqlCommand("SELECT repository_id FROM wpcp_implementation_runs WHERE run_id=@id", connection);
+            read.Parameters.AddWithValue("id", Guid.Parse(runId));
+            var repositoryId = await read.ExecuteScalarAsync(token) as string
+                ?? throw new InvalidOperationException("Unknown run.");
+            await using var gate = new NpgsqlCommand("SELECT pg_advisory_lock_shared(hashtextextended(@key, 0))", connection);
+            gate.Parameters.AddWithValue("key", "repository-mode:" + repositoryId);
+            await gate.ExecuteNonQueryAsync(token);
+            await using var check = new NpgsqlCommand("SELECT EXISTS(SELECT 1 FROM wpcp_repository_owners WHERE repository_id=@repo)", connection);
+            check.Parameters.AddWithValue("repo", repositoryId);
+            if (await check.ExecuteScalarAsync(token) is true) throw new RepositoryExecutionRequiredException();
+            return new DeliveryLock(connection);
+        }
+        catch
+        {
+            await new DeliveryLock(connection).DisposeAsync();
+            throw;
+        }
     }
 
     private async Task<string> QueueRepositoryRecoveryAsync(NpgsqlConnection connection, NpgsqlTransaction transaction,
@@ -48,12 +63,18 @@ public sealed partial class PostgresImplementationRunStore
             SelectedOperationId = null, SelectedReceiptId = null, HumanDecision = null }, "RepositoryRecoveryProcessed", token);
 
     public Task<RepositoryExecution> BindRepositoryExecutionAsync(string runId, RepositoryPlan plan,
-        CancellationToken token = default) => ChangeRepositoryAsync(runId, (run, current) =>
+        CancellationToken token = default) => ChangeRepositoryAsync(runId, async (connection, transaction, run, current) =>
         {
             if (run.Correlation.Repository != plan.Repository ||
                 _redactionPolicy.ContainsControlledCanary(JsonSerializer.Serialize(plan, JsonOptions)))
                 throw new AgentAssignmentConflictException();
             if (current is not null && current.Plan != plan) throw new AgentAssignmentConflictException();
+            if (current is null)
+            {
+                await using var legacy = new NpgsqlCommand("SELECT EXISTS(SELECT 1 FROM wpcp_agent_sessions WHERE run_id=@id)", connection, transaction);
+                legacy.Parameters.AddWithValue("id", Guid.Parse(runId));
+                if (await legacy.ExecuteScalarAsync(token) is true) throw new AgentAssignmentConflictException();
+            }
             return current ?? new(plan);
         }, "RepositoryExecutionBound", token);
 
@@ -121,7 +142,8 @@ public sealed partial class PostgresImplementationRunStore
                 """, connection, transaction);
             release.Parameters.AddWithValue("id", Guid.Parse(runId));
             await release.ExecuteNonQueryAsync(token);
-            return current! with { State = state, Blocker = null, Terminal = true, Active = false, OwnerRunId = null, RequestedAction = null };
+            return current! with { State = state, Blocker = null, Terminal = true, Active = false, OwnerRunId = null, RequestedAction = null,
+                HumanDecision = null, SelectedOperationId = null, SelectedReceiptId = null };
         }, "RepositoryExecutionFinished", token);
 
     public Task<RepositoryExecution> BlockRepositoryAsync(string runId, string code,
@@ -152,6 +174,9 @@ public sealed partial class PostgresImplementationRunStore
         var next = await change(connection, transaction, run, previous);
         if (previous is null)
         {
+            await using var mode = new NpgsqlCommand("SELECT pg_try_advisory_xact_lock(hashtextextended(@key, 0))", connection, transaction);
+            mode.Parameters.AddWithValue("key", "repository-mode:" + next.Plan.Repository.RepositoryId);
+            if (await mode.ExecuteScalarAsync(token) is not true) throw new RepositoryRegistrationBusyException();
             var config = next.Plan with { ExpectedBaseSha = "", PredecessorIssueNumber = null };
             await using var register = new NpgsqlCommand("""
                 INSERT INTO wpcp_repository_owners(repository_id, configuration) VALUES (@repo, @config)

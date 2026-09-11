@@ -26,3 +26,5 @@ public sealed class RepositoryExecutionRequiredException : Exception;
 
 public sealed record RepositoryHumanDecision(string? OperationId, string Code, string? ExpectedHeadSha,
     string? ObservedHeadSha = null, IReadOnlyList<EffectReceipt>? Candidates = null);
+
+public sealed class RepositoryRegistrationBusyException : Exception;

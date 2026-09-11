@@ -53,6 +53,11 @@ try
             DateTimeOffset.UtcNow));
     Console.Out.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
 }
+catch (RepositoryRegistrationBusyException)
+{
+    Console.Out.WriteLine(JsonSerializer.Serialize(new { code = "repository-registration-busy" }, jsonOptions));
+    Environment.ExitCode = 2;
+}
 catch (RepositoryExecutionRequiredException)
 {
     Console.Out.WriteLine(JsonSerializer.Serialize(new { code = "repository-execution-required" }, jsonOptions));

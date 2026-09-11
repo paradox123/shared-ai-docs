@@ -27,6 +27,11 @@ internal static class RepositoryWorkflow
         var retry = execution.RequestedAction == "retry";
         if (!retry && execution.State is "human-decision" or "adoptable" or "reconciled") return;
         if (retry) execution = await store.RecordRecoveryStateAsync(runId, "ready");
+        if ((execution.Effects?.Count ?? 0) > 0)
+        {
+            if (await RecoverExistingAsync(store, runId, execution)) return;
+            execution = (await store.GetProjectionAsync(runId))!.RepositoryExecution!;
+        }
         execution = await PreflightAsync(store, runId, execution, retry && (execution.Effects?.Count ?? 0) == 0);
         if (execution.Blocker is not null) return;
         execution = await store.AcquireRepositoryOwnerAsync(runId);
@@ -50,7 +55,7 @@ internal static class RepositoryWorkflow
             if (execution.Blocker is not null) return;
             execution = await store.IntentRepositoryEffectAsync(runId, "provider", $"run-marker:{runId}");
             effect = execution.Effects!.Single(e => e.Kind == "provider");
-            using var client = Client(plan.ProviderOrigin);
+            using var client = ControlledHttp.Client(plan.ProviderOrigin, 5000);
             receipt = await ReadProviderReceiptAsync(client, plan, effect);
             adopted = receipt is not null;
             if (receipt is null)
@@ -67,15 +72,15 @@ internal static class RepositoryWorkflow
                 execution = await store.SetRepositoryEffectAsync(runId, effect.OperationId, adopted ? "adopted" : "completed", receipt);
             execution = await PreflightAsync(store, runId, execution);
             if (execution.Blocker is not null) return;
-            var attempt = await store.PrepareAgentAsync(runId, Origin(plan.AgentOrigin).AbsoluteUri, false);
+            var attempt = await store.PrepareAgentAsync(runId, ControlledHttp.Origin(plan.AgentOrigin).AbsoluteUri, false);
             execution = await store.IntentRepositoryEffectAsync(runId, "session", attempt.AttemptId, attempt.Session.OperationKey);
             effect = execution.Effects!.Single(e => e.Kind == "session");
-            using var agentClient = Client(plan.AgentOrigin);
+            using var agentClient = ControlledHttp.Client(plan.AgentOrigin, 5000);
             var existing = await ReadSessionReceiptAsync(agentClient, plan, effect);
             if (existing is null && attempt.Session.SessionId is not null)
                 throw new RepositoryEffectConflict("session-receipt-missing", effect);
             await FakeAgentWorkflow.ExecuteAsync(store, runId, plan.AgentOrigin,
-                $"Repository base {effect.HeadSha}", pauseAt, false, 10000, repositoryDelivery: true);
+                $"Repository base {effect.HeadSha}", pauseAt, false, 10000, repositoryDelivery: true, readOnly: existing is not null);
             var sessionReceipt = await ReadSessionReceiptAsync(agentClient, plan, effect)
                 ?? throw new RepositoryEffectConflict("session-receipt-missing", effect);
             var run = (await store.GetProjectionAsync(runId))!;
@@ -91,6 +96,38 @@ internal static class RepositoryWorkflow
         catch (RepositoryGitException) { await store.BlockRepositoryAsync(runId, "git-evidence-unavailable"); }
         catch (Exception error) when (error is HttpRequestException or TaskCanceledException or JsonException)
         { await store.BlockRepositoryAsync(runId, "provider-evidence-unavailable"); }
+    }
+
+    // Existing effects belong to their recorded historical base. Current-head preflight
+    // gates only missing work; it must not prevent settling a completed predecessor.
+    private static async Task<bool> RecoverExistingAsync(PostgresImplementationRunStore store,
+        string runId, RepositoryExecution execution)
+    {
+        try
+        {
+            foreach (var effect in execution.Effects!)
+            {
+                var receipt = await ReadEffectAsync(execution.Plan, effect);
+                if (receipt is not null && effect.State is not ("completed" or "adopted"))
+                    await store.SetRepositoryEffectAsync(runId, effect.OperationId, "adopted", receipt);
+            }
+            var updated = (await store.GetProjectionAsync(runId))!.RepositoryExecution!;
+            if (updated.Effects!.Count != 3 || updated.Effects.Any(e => e.Receipt is null)) return false;
+            var session = updated.Effects.Single(e => e.Kind == "session");
+            await FakeAgentWorkflow.ExecuteAsync(store, runId, execution.Plan.AgentOrigin,
+                $"Recover session at repository base {session.HeadSha}", null, false, 10000,
+                repositoryDelivery: true, readOnly: true);
+            var run = (await store.GetProjectionAsync(runId))!;
+            var result = run.Attempts.Single(a => a.AttemptId == session.Target);
+            if (result.Session?.SessionId != session.Receipt!.ReceiptId)
+                throw new RepositoryEffectConflict("session-receipt-conflict", session);
+            await store.FinishRepositoryAsync(runId, result.State);
+            return true;
+        }
+        catch (RepositoryEffectConflict error) { await store.BlockRepositoryAsync(runId, error.Code, error.Decision); }
+        catch (Exception error) when (error is RepositoryGitException or HttpRequestException or TaskCanceledException or JsonException)
+        { await store.BlockRepositoryAsync(runId, "effect-evidence-unavailable"); }
+        return true;
     }
 
     private static async Task ReconcileAsync(PostgresImplementationRunStore store, string runId, RepositoryExecution execution, string? pauseAt)
@@ -130,7 +167,7 @@ internal static class RepositoryWorkflow
     private static async Task<EffectReceipt?> ReadEffectAsync(RepositoryPlan plan, RepositoryEffect effect)
     {
         if (effect.Kind == "git") return await ReadGitReceiptAsync(plan, effect);
-        using var client = Client(effect.Kind == "session" ? plan.AgentOrigin : plan.ProviderOrigin);
+        using var client = ControlledHttp.Client(effect.Kind == "session" ? plan.AgentOrigin : plan.ProviderOrigin, 5000);
         return effect.Kind == "session" ? await ReadSessionReceiptAsync(client, plan, effect) :
             await ReadProviderReceiptAsync(client, plan, effect);
     }
@@ -207,16 +244,8 @@ internal static class RepositoryWorkflow
             !Regex.IsMatch(plan.BaseBranch, "^[a-zA-Z0-9_-]+$") || !IsSha(plan.ExpectedBaseSha) ||
             plan.PredecessorIssueNumber is <= 0)
             throw new ArgumentException("Invalid repository plan.");
-        _ = Origin(plan.ProviderOrigin);
-        _ = Origin(plan.AgentOrigin);
-    }
-
-    internal static Uri Origin(string origin)
-    {
-        if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri) || !uri.IsLoopback || uri.Scheme != "http" ||
-            uri.AbsolutePath != "/" || uri.UserInfo.Length != 0 || uri.Query.Length != 0 || uri.Fragment.Length != 0)
-            throw new ArgumentException("Controlled providers require loopback HTTP origins.");
-        return uri;
+        _ = ControlledHttp.Origin(plan.ProviderOrigin);
+        _ = ControlledHttp.Origin(plan.AgentOrigin);
     }
 
     private static bool IsSha(string? value) => value is not null && Regex.IsMatch(value, "^[0-9a-f]{40}$");
@@ -230,7 +259,7 @@ internal static class RepositoryWorkflow
         var predecessorCompleted = false;
         try
         {
-            using var client = Client(plan.ProviderOrigin);
+            using var client = ControlledHttp.Client(plan.ProviderOrigin, 5000);
             var provider = await client.GetFromJsonAsync<ProviderBaseRead>("base", JsonOptions);
             if (provider?.ContractVersion != "RepositoryEffects/v1" || provider.Repository != plan.Repository ||
                 !IsSha(provider.HeadSha) || provider.CompletedIssues is null)
@@ -254,9 +283,6 @@ internal static class RepositoryWorkflow
         return await store.RecordRepositoryBaseAsync(runId,
             new(expected, providerSha, localSha, predecessorCompleted), blocker);
     }
-
-    internal static HttpClient Client(string origin) => new(new HttpClientHandler { AllowAutoRedirect = false })
-        { BaseAddress = Origin(origin), Timeout = TimeSpan.FromSeconds(5), MaxResponseContentBufferSize = 1024 * 1024 };
 
     internal static async Task<string> GitAsync(string path, params string[] args)
     {

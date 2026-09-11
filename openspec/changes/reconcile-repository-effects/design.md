@@ -27,3 +27,9 @@ Non-goals: automatic DTS dispatch, real GitHub writes, PR creation/merge, resume
 ## Migration Plan
 
 Add repository ownership and execution-journal tables. Historical unconfigured runs remain readable. Opt into the repository plan for this bounded execution slice; once registered, the repository cannot run unfenced through the legacy fake invocation. Rollback stops repository deliveries and retains journals/history. No live database or repository migration is performed.
+
+## Review refinements
+
+- Existing standalone sessions cannot be promoted into repository execution: their original base was never verified. A shared advisory lock covers each standalone delivery, and first registration requires the corresponding exclusive transaction lock. A busy transition returns `repository-registration-busy` without partially registering the repository.
+- Recovery first reads and adopts existing effects against their immutable historical intent. When all effects exist, read-only session processing can finalize without requiring that historical SHA to remain the current provider head. Exact-base preflight still runs before every missing effect or new session.
+- Repeated receipt observations are idempotent, terminal receipts retain their original disposition, and terminal cleanup removes active human decisions while preserving their canonical history.

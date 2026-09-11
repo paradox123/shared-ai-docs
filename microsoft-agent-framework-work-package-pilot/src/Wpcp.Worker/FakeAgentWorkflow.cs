@@ -23,14 +23,10 @@ internal static class FakeAgentWorkflow
     public static async Task ExecuteAsync(PostgresImplementationRunStore store, string runId,
         string origin, string note, string? pauseAt, bool rejectBlocked, int timeoutMs, bool repositoryDelivery = false, bool readOnly = false)
     {
-        if (!Uri.TryCreate(origin, UriKind.Absolute, out var uri) || !uri.IsLoopback || uri.Scheme != "http" ||
-            uri.AbsolutePath != "/" || !string.IsNullOrEmpty(uri.UserInfo) || !string.IsNullOrEmpty(uri.Query) ||
-            !string.IsNullOrEmpty(uri.Fragment))
-            throw new ArgumentException("The fake adapter requires a loopback HTTP origin.");
+        var uri = ControlledHttp.Origin(origin);
         await using var delivery = repositoryDelivery ? null : await store.AcquireAgentDeliveryAsync(runId);
-        if (!repositoryDelivery) await store.EnsureStandaloneAgentAllowedAsync(runId);
-        using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false })
-            { BaseAddress = uri, Timeout = TimeSpan.FromMilliseconds(timeoutMs), MaxResponseContentBufferSize = 1024 * 1024 };
+        await using var standalone = repositoryDelivery ? null : await store.AcquireStandaloneAgentAsync(runId);
+        using var client = ControlledHttp.Client(origin, timeoutMs);
         var prepare = new PrepareExecutor(store, uri.AbsoluteUri, rejectBlocked);
         var execute = new FakeExecutor(store, new FakeAgentSessionAdapter(client, readOnly), note, pauseAt);
         var workflow = new WorkflowBuilder(prepare).WithName("FakeCodexAttemptV1")

@@ -42,3 +42,11 @@ At most one run SHALL own execution of a registered repository. Worker death SHA
 #### Scenario: Next run waits and retirement releases the repository
 - **WHEN** one run owns the repository and a second is delivered
 - **THEN** the second exposes the owning run and performs no effect until the first safely terminates or retires through the Operator surface
+
+#### Scenario: Existing standalone execution predates repository preflight
+- **WHEN** a run already has a standalone session or first repository registration races with another standalone delivery
+- **THEN** existing sessions cannot acquire fabricated later base provenance, and registration cannot overlap the active standalone delivery
+
+#### Scenario: Provider advances after all effects have succeeded
+- **WHEN** the worker dies before finalization and the provider head advances after the recorded effects succeeded
+- **THEN** replacement revalidates existing receipts against their historical immutable intent, completes result processing without creating a new effect, and releases ownership
