@@ -12,7 +12,8 @@ public sealed record RunCorrelation(
     [property: JsonPropertyName("repositoryId")] string RepositoryId,
     [property: JsonPropertyName("issueId")] string IssueId,
     [property: JsonPropertyName("issueNumber")] int IssueNumber,
-    [property: JsonPropertyName("commandId")] string CommandId);
+    [property: JsonPropertyName("commandId")] string CommandId,
+    RepositoryBinding? Repository = null);
 
 /// <summary>Versions of the product inputs captured at admission time.</summary>
 public sealed record RunProvenance(
@@ -55,7 +56,9 @@ public sealed record StartRunCommand(
     [property: JsonPropertyName("issueId")] string IssueId,
     [property: JsonPropertyName("issueNumber")] int IssueNumber,
     [property: JsonIgnore] string Note,
-    [property: JsonPropertyName("provenance")] RunProvenance Provenance)
+    [property: JsonPropertyName("provenance")] RunProvenance Provenance,
+    ActorIdentity? Actor = null,
+    RepositoryBinding? Repository = null)
 {
     public void Validate()
     {
@@ -182,7 +185,10 @@ public sealed record ProcessObservation(
     [property: JsonPropertyName("processId")] string ProcessId,
     [property: JsonPropertyName("processKind")] string ProcessKind,
     [property: JsonPropertyName("processStartedAt")] DateTimeOffset ProcessStartedAt,
-    [property: JsonPropertyName("processStoppedAt")] DateTimeOffset? ProcessStoppedAt);
+    [property: JsonPropertyName("processStoppedAt")] DateTimeOffset? ProcessStoppedAt)
+{
+    public ActorIdentity Actor => new("service", $"wpcp-{ProcessKind}", ProcessId);
+}
 
 /// <summary>Supplemental heartbeat evidence with its own time axis.</summary>
 public sealed record HeartbeatObservation(
@@ -203,7 +209,10 @@ public sealed record ExecutionEvidence(
     [property: JsonPropertyName("durableTaskTaskId")] string? DurableTaskTaskId,
     [property: JsonPropertyName("recordedAt")] DateTimeOffset RecordedAt,
     [property: JsonPropertyName("note")] string? Note,
-    [property: JsonPropertyName("redaction")] RedactionMetadata Redaction);
+    [property: JsonPropertyName("redaction")] RedactionMetadata Redaction)
+{
+    public ActorIdentity Actor => new("service", "wpcp-worker", ProcessId);
+}
 
 /// <summary>The independently observable read projection returned to an Operator client.</summary>
 public sealed record ImplementationRunProjection(
@@ -218,7 +227,9 @@ public sealed record ImplementationRunProjection(
     [property: JsonPropertyName("executionEvidence")] IReadOnlyList<ExecutionEvidence> ExecutionEvidence,
     [property: JsonPropertyName("provenance")] RunProvenance Provenance,
     [property: JsonPropertyName("redaction")] RedactionMetadata Redaction,
-    [property: JsonPropertyName("lastPosition")] long LastPosition);
+    [property: JsonPropertyName("lastPosition")] long LastPosition,
+    [property: JsonPropertyName("control")] RunControlState Control,
+    [property: JsonPropertyName("authorization")] ControlDecision? Authorization = null);
 
 /// <summary>A canonical-history page strictly after an acknowledged event position.</summary>
 public sealed record RunEventsPage(

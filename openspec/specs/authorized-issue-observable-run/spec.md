@@ -2,24 +2,20 @@
 
 ## Purpose
 Define the isolated local control-plane contract that turns a capability-bound,
-synthetically authorized issue command into exactly one durable and independently
+provider-authorized synthetic issue command into exactly one durable and independently
 observable `ImplementationRun`, with canonical product history and supplemental
 worker/framework evidence.
 ## Requirements
 ### Requirement: An authorized synthetic issue command creates one durable implementation run
-The pilot SHALL accept a start command only when its synthetic repository-provider fixture authorizes the identified actor for the addressed synthetic repository issue. The loopback-only pilot API SHALL require an ephemeral fixture-access capability outside the command payload before it evaluates that actor identity, and SHALL not persist or publicly serialize that capability. It SHALL transactionally create exactly one `ImplementationRun` with immutable repository, issue, command, and run correlation, an initial canonical event, an admission activity, and an admission attempt before returning a successful acceptance response.
+The pilot SHALL accept a synthetic issue start command only from a provider-authenticated human with current contributor permission on the pinned repository. The loopback-only pilot API SHALL additionally require its ephemeral fixture-access capability outside the payload and SHALL never persist or return credentials. Payload actor IDs SHALL NOT select the authenticated identity. It SHALL transactionally create exactly one ImplementationRun with immutable repository, issue, command, and run correlation, initial canonical event with typed human identity, admission activity and attempt before returning success.
 
 #### Scenario: Authorized issue is accepted
-- **WHEN** a fixture-authorized actor submits a well-formed start command for an authorized synthetic issue
-- **THEN** the public response identifies one new run and public run read-back exposes the same repository, issue, command, activity, attempt, and run identifiers
+- **WHEN** a provider-authenticated contributor submits a valid command for a configured synthetic issue
+- **THEN** exactly one durable run and its correlated admission history are publicly readable
 
-#### Scenario: Unauthorized synthetic actor is rejected
-- **WHEN** an actor absent from the fixture authorization for the addressed issue submits a start command
-- **THEN** the public endpoint rejects the command without creating a run, activity, attempt, or canonical event
-
-#### Scenario: Caller lacks the fixture-access capability
-- **WHEN** a caller submits an otherwise well-formed command without the harness-provided fixture-access capability
-- **THEN** the public endpoint rejects it before it evaluates the caller-supplied actor identity and creates no run, activity, attempt, or canonical event
+#### Scenario: Caller lacks permission or capability
+- **WHEN** the caller lacks current contribution permission, provider authentication, or the harness capability
+- **THEN** admission is denied without creating a run or an effect
 
 ### Requirement: Start-command delivery is idempotent and conflicting reuse is visible
 The pilot SHALL classify a start command by its command identity and redacted canonical payload digest. Repeating an identical command SHALL return the original run without adding a run, activity, attempt, canonical event, worker instruction, or external effect. Reusing that command identity with a different digest SHALL return a public conflict that identifies the original run correlation and SHALL add no state or external effect.

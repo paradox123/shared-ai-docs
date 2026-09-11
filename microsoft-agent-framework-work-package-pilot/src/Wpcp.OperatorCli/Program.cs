@@ -7,7 +7,6 @@ return await OperatorCli.RunAsync(args);
 
 internal static class OperatorCli
 {
-    private const string ActorHeaderName = "X-Wpcp-Actor-Id";
     private const string FixtureAccessHeaderName = "X-Wpcp-Fixture-Access";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
@@ -21,7 +20,7 @@ internal static class OperatorCli
         try
         {
             var invocation = ParseInvocation(arguments);
-            using var client = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+            using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { Timeout = TimeSpan.FromSeconds(30) };
             using var request = CreateRequest(invocation);
 
             return await SendAsync(client, request);
@@ -88,8 +87,10 @@ internal static class OperatorCli
             "start" => ParseStart(baseUrl, fixtureAccessToken, options),
             "run" => ParseRun(baseUrl, fixtureAccessToken, options),
             "events" => ParseEvents(baseUrl, fixtureAccessToken, options),
+            "audit" => ParseAudit(baseUrl, fixtureAccessToken, options),
+            "claim" or "release" => ParseControl(baseUrl, fixtureAccessToken, command, options),
             "--help" or "-h" => throw new ArgumentException("Help does not accept an API base URL."),
-            _ => throw new ArgumentException("The command must be start, run, or events."),
+            _ => throw new ArgumentException("The command must be start, run, events, audit, claim, or release."),
         };
     }
 
@@ -102,7 +103,6 @@ internal static class OperatorCli
             options,
             "--repository-id",
             "--issue-number",
-            "--actor-id",
             "--command-id",
             "--note",
             "--source-revision",
@@ -117,7 +117,6 @@ internal static class OperatorCli
             throw new ArgumentException("--issue-number must be a positive whole number.");
         }
 
-        var actorId = Require(options, "--actor-id");
         var commandId = Require(options, "--command-id");
         var note = Require(options, "--note");
         var sourceRevision = Require(options, "--source-revision");
@@ -132,7 +131,6 @@ internal static class OperatorCli
             new
             {
                 commandId,
-                actorId,
                 note,
                 provenance = new
                 {
@@ -142,7 +140,6 @@ internal static class OperatorCli
                     contractRevision,
                 },
             },
-            null,
             fixtureAccessToken);
     }
 
@@ -151,16 +148,13 @@ internal static class OperatorCli
         string fixtureAccessToken,
         IReadOnlyDictionary<string, string> options)
     {
-        RequireOnly(options, "--run-id", "--actor-id");
-        var actorId = Require(options, "--actor-id");
-        ValidateHeaderValue(actorId, "--actor-id");
+        RequireOnly(options, "--run-id");
 
         return new Invocation(
             baseUrl,
             HttpMethod.Get,
             $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}",
             null,
-            actorId,
             fixtureAccessToken);
     }
 
@@ -169,23 +163,45 @@ internal static class OperatorCli
         string fixtureAccessToken,
         IReadOnlyDictionary<string, string> options)
     {
-        RequireOnly(options, "--run-id", "--after", "--actor-id");
+        RequireOnly(options, "--run-id", "--after");
         var afterText = Require(options, "--after");
         if (!long.TryParse(afterText, NumberStyles.None, CultureInfo.InvariantCulture, out var after) || after < 0)
         {
             throw new ArgumentException("--after must be a non-negative whole number.");
         }
 
-        var actorId = Require(options, "--actor-id");
-        ValidateHeaderValue(actorId, "--actor-id");
 
         return new Invocation(
             baseUrl,
             HttpMethod.Get,
             $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/events?after={after.ToString(CultureInfo.InvariantCulture)}",
             null,
-            actorId,
             fixtureAccessToken);
+    }
+
+    private static Invocation ParseControl(
+        Uri baseUrl, string capability, string action, IReadOnlyDictionary<string, string> options)
+    {
+        RequireOnly(options, "--run-id", "--target-attempt-id", "--expected-run-version",
+            "--expected-head-sha", "--lease-epoch");
+        if (!long.TryParse(Require(options, "--expected-run-version"), NumberStyles.None,
+                CultureInfo.InvariantCulture, out var version) || version < 1 ||
+            !long.TryParse(Require(options, "--lease-epoch"), NumberStyles.None,
+                CultureInfo.InvariantCulture, out var epoch) || epoch < 0 ||
+            !Guid.TryParse(Require(options, "--target-attempt-id"), out _))
+            throw new ArgumentException("Control fences are required.");
+        var head = Require(options, "--expected-head-sha");
+        return new Invocation(baseUrl, HttpMethod.Post,
+            $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/control/{action}",
+            new { targetAttemptId = Require(options, "--target-attempt-id"), expectedRunVersion = version,
+                expectedHeadSha = head == "null" ? null : head, leaseEpoch = epoch }, capability);
+    }
+
+    private static Invocation ParseAudit(Uri baseUrl, string capability, IReadOnlyDictionary<string, string> options)
+    {
+        RequireOnly(options, "--run-id");
+        return new Invocation(baseUrl, HttpMethod.Get,
+            $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/audit", null, capability);
     }
 
     private static HttpRequestMessage CreateRequest(Invocation invocation)
@@ -193,11 +209,10 @@ internal static class OperatorCli
         var request = new HttpRequestMessage(invocation.Method, new Uri(invocation.BaseUrl, invocation.RelativePath));
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-        if (invocation.ActorId is not null)
-        {
-            request.Headers.Add(ActorHeaderName, invocation.ActorId);
-        }
         request.Headers.Add(FixtureAccessHeaderName, invocation.FixtureAccessToken);
+        var token = Environment.GetEnvironmentVariable("WPCP_PROVIDER_TOKEN");
+        if (string.IsNullOrWhiteSpace(token)) throw new ArgumentException("WPCP_PROVIDER_TOKEN is required.");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         if (invocation.Payload is not null)
         {
@@ -251,6 +266,9 @@ internal static class OperatorCli
                 throw new ArgumentException("Each command option must have a value.");
             }
 
+            // Ticket 02 clients may still send this legacy option; provider credentials
+            // are the only identity source and the value is never transported.
+            if (option == "--actor-id") continue;
             if (!values.TryAdd(option, enumerator.Current))
             {
                 throw new ArgumentException("Command options must not be repeated.");
@@ -317,17 +335,20 @@ internal static class OperatorCli
 
     private static object Usage() => new
     {
-        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|events> [options]",
-        requiredEnvironment = "WPCP_FIXTURE_ACCESS_TOKEN",
+        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|events|audit|claim|release> [options]",
+        requiredEnvironment = new[] { "WPCP_FIXTURE_ACCESS_TOKEN", "WPCP_PROVIDER_TOKEN" },
         commands = new
         {
             start = new[]
             {
-                "--repository-id", "--issue-number", "--actor-id", "--command-id", "--note",
+                "--repository-id", "--issue-number", "--command-id", "--note",
                 "--source-revision", "--package-revision", "--configuration-revision", "--contract-revision",
             },
-            run = new[] { "--run-id", "--actor-id" },
-            events = new[] { "--run-id", "--after", "--actor-id" },
+            audit = new[] { "--run-id" },
+            control = new[] { "--run-id", "--target-attempt-id", "--expected-run-version",
+                "--expected-head-sha", "--lease-epoch" },
+            run = new[] { "--run-id" },
+            events = new[] { "--run-id", "--after" },
         },
     };
 
@@ -342,6 +363,5 @@ internal static class OperatorCli
         HttpMethod Method,
         string RelativePath,
         object? Payload,
-        string? ActorId,
         string FixtureAccessToken);
 }

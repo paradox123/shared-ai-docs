@@ -1,0 +1,18 @@
+2026-09-11T14:36:42.555+00:00 BOUNDARY real API + Operator CLI + PostgreSQL; GitHub HTTP fixture
+2026-09-11T14:36:42.683+00:00 RUN 66343145-753e-438e-a2e7-ea5d30336070 HTTP=201
+2026-09-11T14:36:42.726+00:00 READER GET HTTP=200 canClaim=false
+2026-09-11T14:36:42.740+00:00 READER CLAIM HTTP=403 repository-contribution-required
+2026-09-11T14:36:43.106+00:00 API PROCESSES pid=88342,port=58453; pid=88368,port=58478
+2026-09-11T14:36:43.172+00:00 RACE actor-authorized HTTP=200 control-lease-claimed holder=github:101 epoch=1
+2026-09-11T14:36:43.172+00:00 RACE actor-contributor HTTP=409 control-lease-held holder=github:101 epoch=1
+2026-09-11T14:36:43.183+00:00 NON-HOLDER RELEASE HTTP=409 control-lease-required
+2026-09-11T14:36:43.195+00:00 FENCE HTTP=409 stale-target-attempt unchanged=true
+2026-09-11T14:36:43.204+00:00 FENCE HTTP=409 stale-run-version unchanged=true
+2026-09-11T14:36:43.213+00:00 FENCE HTTP=409 stale-head-sha unchanged=true
+2026-09-11T14:36:43.222+00:00 FENCE HTTP=409 stale-lease-epoch unchanged=true
+2026-09-11T14:36:43.262+00:00 HISTORY AFTER DENIALS positions=[1, 2] claimEvents=1 releaseEvents=0
+2026-09-11T14:36:43.933+00:00 RECONNECT CLI exit=0 newApiPid=88398 sameRun=true sameHolder=true epoch=1
+2026-09-11T14:36:43.957+00:00 REVOKED RELEASE HTTP=403 repository-contribution-required holder=null epoch=2
+2026-09-11T14:36:44.326+00:00 HISTORY 1:ImplementationRunStarted -> 2:ControlLeaseClaimed -> 3:ControlLeaseRevoked
+2026-09-11T14:36:44.343+00:00 IDENTITIES human=github:101 worker=service botClaim=403
+2026-09-11T14:36:44.343+00:00 PASS all assertions; raw HTTP/CLI responses saved without credentials

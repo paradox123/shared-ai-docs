@@ -2,11 +2,14 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Wpcp.Domain;
 using Wpcp.Storage.Postgres;
 
 var options = ApiOptions.Parse(args);
 var fixture = SyntheticProviderFixture.Load(options.FixturePath);
+using var providerClient = GitHubRepositoryAuthorization.CreateClient();
+IRepositoryAuthorization authorization = new GitHubRepositoryAuthorization(providerClient);
 await using var store = new PostgresImplementationRunStore(
     options.ConnectionString,
     fixture.RedactionPolicy);
@@ -18,6 +21,16 @@ builder.Logging.ClearProviders();
 builder.WebHost.UseUrls(options.Urls);
 
 var app = builder.Build();
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.CacheControl = "no-store";
+    try { await next(context); }
+    catch (Npgsql.NpgsqlException)
+    {
+        context.Response.StatusCode = 503;
+        await context.Response.WriteAsJsonAsync(new { code = "run-store-unavailable" });
+    }
+});
 app.MapGet("/healthz", () => Results.Text("Healthy"));
 
 app.MapPost(
@@ -39,15 +52,20 @@ app.MapPost(
             return JsonError("invalid-start-command", StatusCodes.Status400BadRequest);
         }
 
-        if (!fixture.CanStart(command.ActorId, repositoryId, issueNumber))
-        {
-            return JsonError("synthetic-authorization-denied", StatusCodes.Status403Forbidden);
-        }
+        var access = await authorization.EvaluateAsync(fixture.FindRepositoryBinding(repositoryId)!, Credential(context), cancellationToken);
+        if (!access.CanContribute || !access.IsHuman)
+            return AccessError(access, "repository-contribution-required");
+        command = command with { ActorId = $"{access.Actor!.Provider}:{access.Actor.SubjectId}", Actor = access.Actor,
+            Repository = fixture.FindRepositoryBinding(repositoryId) };
 
         StartRunResult result;
         try
         {
             result = await store.StartAsync(command, cancellationToken);
+        }
+        catch (RepositoryBindingConflictException)
+        {
+            return JsonError("repository-access-denied", StatusCodes.Status403Forbidden);
         }
         catch (ArgumentException)
         {
@@ -91,16 +109,9 @@ app.MapGet(
             return JsonError("synthetic-access-denied", StatusCodes.Status403Forbidden);
         }
 
-        var projection = await store.GetProjectionAsync(runId, cancellationToken);
-        if (projection is null)
-        {
-            return JsonError("implementation-run-not-found", StatusCodes.Status404NotFound);
-        }
-
-        if (!CanRead(fixture, context, projection.Correlation))
-        {
-            return JsonError("synthetic-authorization-denied", StatusCodes.Status403Forbidden);
-        }
+        var decision = await store.DecideControlAsync(runId, null, null,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), cancellationToken);
+        if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
 
         try
         {
@@ -111,8 +122,8 @@ app.MapGet(
             return JsonError("run-store-unavailable", StatusCodes.Status503ServiceUnavailable);
         }
 
-        projection = await store.GetProjectionAsync(runId, cancellationToken);
-        return Results.Json(projection, statusCode: StatusCodes.Status200OK);
+        var projection = await store.GetProjectionAsync(runId, cancellationToken);
+        return Results.Json(projection! with { Authorization = decision with { Current = projection.Control } }, statusCode: StatusCodes.Status200OK);
     });
 
 app.MapGet(
@@ -129,16 +140,9 @@ app.MapGet(
             return JsonError("invalid-event-position", StatusCodes.Status400BadRequest);
         }
 
-        var projection = await store.GetProjectionAsync(runId, cancellationToken);
-        if (projection is null)
-        {
-            return JsonError("implementation-run-not-found", StatusCodes.Status404NotFound);
-        }
-
-        if (!CanRead(fixture, context, projection.Correlation))
-        {
-            return JsonError("synthetic-authorization-denied", StatusCodes.Status403Forbidden);
-        }
+        var decision = await store.DecideControlAsync(runId, null, null,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), cancellationToken);
+        if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
 
         try
         {
@@ -152,6 +156,39 @@ app.MapGet(
         var events = await store.GetEventsAfterAsync(runId, after ?? 0, cancellationToken);
         return Results.Json(events, statusCode: StatusCodes.Status200OK);
     });
+
+app.MapGet("/api/v1/runs/{runId}/audit",
+    async (string runId, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        var decision = await store.DecideControlAsync(runId, null, null,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+        if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
+        return Results.Json(new { runId, entries = await store.GetAuditAsync(runId, token) });
+    });
+
+app.MapPost("/api/v1/runs/{runId}/control/{action}",
+    async (string runId, string action, JsonElement body, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        ControlMutation? mutation;
+        try { mutation = body.Deserialize<ControlMutation>(new JsonSerializerOptions(JsonSerializerDefaults.Web)); }
+        catch (JsonException) { mutation = null; }
+        var decision = await store.DecideControlAsync(runId, action, mutation,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+        return Results.Json(decision, statusCode: DecisionStatus(decision));
+    });
+
+static int DecisionStatus(ControlDecision decision) => decision.Code switch
+{
+    "repository-provider-unavailable" => 503,
+    "provider-authentication-required" => 401,
+    "implementation-run-not-found" => 404,
+    "invalid-control-action" or "invalid-control-mutation" => 400,
+    _ when decision.Accepted => 200,
+    _ when !decision.Access.CanContribute => 403,
+    _ => 409,
+};
 
 try
 {
@@ -182,7 +219,7 @@ static bool TryCreateCommand(
 {
     command = null!;
     if (request is null || string.IsNullOrWhiteSpace(request.CommandId) ||
-        string.IsNullOrWhiteSpace(request.ActorId) || string.IsNullOrWhiteSpace(request.Note) ||
+        string.IsNullOrWhiteSpace(request.Note) ||
         request.Provenance is null)
     {
         return false;
@@ -198,7 +235,7 @@ static bool TryCreateCommand(
     {
         command = new StartRunCommand(
             request.CommandId,
-            request.ActorId,
+            "provider-pending",
             repositoryId,
             issue.IssueId,
             issueNumber,
@@ -217,12 +254,16 @@ static bool TryCreateCommand(
     }
 }
 
-static bool CanRead(SyntheticProviderFixture fixture, HttpContext context, RunCorrelation correlation)
+static string? Credential(HttpContext context)
 {
-    var actorId = context.Request.Headers["X-Wpcp-Actor-Id"].ToString();
-    return !string.IsNullOrWhiteSpace(actorId) &&
-        fixture.CanRead(actorId, correlation.RepositoryId, correlation.IssueNumber);
+    var value = context.Request.Headers.Authorization.ToString();
+    return value.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) ? value[7..] : null;
 }
+
+static IResult AccessError(RepositoryAccess access, string fallback) =>
+    JsonError(access.FailureCode ?? fallback,
+        access.FailureCode == "repository-provider-unavailable" ? 503 :
+        access.FailureCode == "provider-authentication-required" ? 401 : 403);
 
 static bool HasFixtureAccess(HttpContext context, ApiOptions options)
 {
@@ -314,7 +355,6 @@ static IResult JsonError(string code, int statusCode) =>
 
 internal sealed record StartRunRequest(
     string? CommandId,
-    string? ActorId,
     string? Note,
     ProvenanceRequest? Provenance);
 

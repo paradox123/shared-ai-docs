@@ -3,23 +3,23 @@ using System.Text.Json;
 namespace Wpcp.Domain;
 
 /// <summary>
-/// Controlled fixture used only by the isolated pilot. It keeps fixture authorization
-/// separate from caller-supplied input and keeps controlled canaries inside the redactor.
+/// Controlled issue catalogue and provider repository bindings for the isolated pilot.
+/// It contains no membership list; controlled canaries stay inside the redactor.
 /// </summary>
 public sealed class SyntheticProviderFixture
 {
     private readonly IReadOnlyList<SyntheticRepository> _repositories;
-    private readonly IReadOnlyList<SyntheticAuthorization> _authorizations;
+    private readonly IReadOnlyList<RepositoryBinding> _bindings;
 
     private SyntheticProviderFixture(
         string fixtureVersion,
         IReadOnlyList<SyntheticRepository> repositories,
-        IReadOnlyList<SyntheticAuthorization> authorizations,
+        IReadOnlyList<RepositoryBinding> bindings,
         ControlledRedactionPolicy redactionPolicy)
     {
         FixtureVersion = fixtureVersion;
         _repositories = repositories;
-        _authorizations = authorizations;
+        _bindings = bindings;
         RedactionPolicy = redactionPolicy;
     }
 
@@ -52,16 +52,12 @@ public sealed class SyntheticProviderFixture
             .ToArray()
             ?? [];
 
-        var authorizations = document.Provider.Authorizations?
-            .Select(authorization => new SyntheticAuthorization(
-                Required(authorization.ActorId, "actorId"),
-                Required(authorization.RepositoryId, "repositoryId"),
-                Required(authorization.IssueId, "issueId"),
-                (authorization.Permissions ?? [])
-                    .Where(permission => !string.IsNullOrWhiteSpace(permission))
-                    .ToHashSet(StringComparer.Ordinal)))
-            .ToArray()
-            ?? [];
+        var bindings = (document.Provider.Repositories ?? []).Select(repository =>
+            new RepositoryBinding(Required(repository.RepositoryId, "repositoryId"),
+                Required(repository.FullName, "fullName"), repository.ProviderRepositoryId)).ToArray();
+        if (bindings.Any(binding => binding.ProviderRepositoryId <= 0 ||
+            binding.FullName.Split('/').Length != 2 || binding.FullName.Split('/').Any(string.IsNullOrWhiteSpace)))
+            throw new ArgumentException("Invalid repository provider binding.");
 
         var policy = new ControlledRedactionPolicy(
             Required(document.RedactionPolicy.Version, "redactionPolicy.version"),
@@ -70,7 +66,7 @@ public sealed class SyntheticProviderFixture
                 .Select(canary => Required(canary.Value, "redactionPolicy.controlledCanaries.value"))
                 .ToArray());
 
-        return new SyntheticProviderFixture(fixtureVersion, repositories, authorizations, policy);
+        return new SyntheticProviderFixture(fixtureVersion, repositories, bindings, policy);
     }
 
     public SyntheticIssue? FindIssue(string repositoryId, int issueNumber) =>
@@ -78,30 +74,8 @@ public sealed class SyntheticProviderFixture
             .FirstOrDefault(repository => string.Equals(repository.RepositoryId, repositoryId, StringComparison.Ordinal))
             ?.Issues.FirstOrDefault(issue => issue.IssueNumber == issueNumber);
 
-    public bool IsAuthorized(
-        string actorId,
-        string repositoryId,
-        int issueNumber,
-        string permission)
-    {
-        var issue = FindIssue(repositoryId, issueNumber);
-        if (issue is null)
-        {
-            return false;
-        }
-
-        return _authorizations.Any(authorization =>
-            string.Equals(authorization.ActorId, actorId, StringComparison.Ordinal) &&
-            string.Equals(authorization.RepositoryId, repositoryId, StringComparison.Ordinal) &&
-            string.Equals(authorization.IssueId, issue.IssueId, StringComparison.Ordinal) &&
-            authorization.Permissions.Contains(permission));
-    }
-
-    public bool CanStart(string actorId, string repositoryId, int issueNumber) =>
-        IsAuthorized(actorId, repositoryId, issueNumber, "start");
-
-    public bool CanRead(string actorId, string repositoryId, int issueNumber) =>
-        IsAuthorized(actorId, repositoryId, issueNumber, "read");
+    public RepositoryBinding? FindRepositoryBinding(string repositoryId) =>
+        _bindings.FirstOrDefault(binding => binding.RepositoryId == repositoryId);
 
     private static string Required(string? value, string name)
     {
@@ -137,12 +111,14 @@ public sealed class SyntheticProviderFixture
     {
         public List<RepositoryDocument>? Repositories { get; init; }
 
-        public List<AuthorizationDocument>? Authorizations { get; init; }
+
     }
 
     private sealed class RepositoryDocument
     {
         public string? RepositoryId { get; init; }
+        public string? FullName { get; init; }
+        public long ProviderRepositoryId { get; init; }
 
         public List<IssueDocument>? Issues { get; init; }
     }
@@ -154,17 +130,6 @@ public sealed class SyntheticProviderFixture
         public int IssueNumber { get; init; }
 
         public string? Title { get; init; }
-    }
-
-    private sealed class AuthorizationDocument
-    {
-        public string? ActorId { get; init; }
-
-        public string? RepositoryId { get; init; }
-
-        public string? IssueId { get; init; }
-
-        public List<string>? Permissions { get; init; }
     }
 
     private sealed class RedactionPolicyDocument
@@ -186,9 +151,3 @@ public sealed class SyntheticProviderFixture
 public sealed record SyntheticIssue(string IssueId, string RepositoryId, int IssueNumber, string Title);
 
 internal sealed record SyntheticRepository(string RepositoryId, IReadOnlyList<SyntheticIssue> Issues);
-
-internal sealed record SyntheticAuthorization(
-    string ActorId,
-    string RepositoryId,
-    string IssueId,
-    IReadOnlySet<string> Permissions);

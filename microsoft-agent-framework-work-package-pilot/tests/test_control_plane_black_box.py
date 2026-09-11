@@ -8,12 +8,15 @@ history; those implementation details must not become the product seam.
 from __future__ import annotations
 
 import http.client
+from tests.github_provider_fixture import GitHubProviderFixture
 import json
 import os
 import signal
 import socket
 import subprocess
 import time
+import tempfile
+from concurrent.futures import ThreadPoolExecutor
 import unittest
 import uuid
 from datetime import datetime
@@ -84,6 +87,17 @@ class ObservableRunBlackBoxTests(unittest.TestCase):
         cls.postgres_name = f"wpcp-blackbox-{uuid.uuid4().hex[:12]}"
         cls.fixture_access_token = uuid.uuid4().hex + uuid.uuid4().hex
         cls.api = None
+        cls.scratch = tempfile.TemporaryDirectory(prefix="wpcp-control-")
+        cls.addClassCleanup(cls.scratch.cleanup)
+        provider_input = json.loads(FIXTURE.read_text())
+        provider_input["provider"]["repositories"][0]["issues"] += [
+            {"issueId": f"issue-{n}", "issueNumber": n, "title": f"Control issue {n}"}
+            for n in range(43, 100)]
+        cls.fixture_path = Path(cls.scratch.name) / "fixture.json"
+        cls.fixture_path.write_text(json.dumps(provider_input))
+        cls.next_issue = 43
+        cls.provider = GitHubProviderFixture()
+        cls.addClassCleanup(cls.provider.close)
         cls.addClassCleanup(cls.cleanup_resources)
 
         build = command_output(
@@ -173,6 +187,7 @@ class ObservableRunBlackBoxTests(unittest.TestCase):
     def start_api(cls, *, excluded_ports: set[int] | None = None) -> None:
         environment = dict(os.environ)
         environment["WPCP_FIXTURE_ACCESS_TOKEN"] = cls.fixture_access_token
+        environment["WPCP_GITHUB_TEST_ORIGIN"] = cls.provider.origin
         for _ in range(5):
             api_port = free_port(excluded=excluded_ports)
             base_url = f"http://127.0.0.1:{api_port}"
@@ -183,7 +198,7 @@ class ObservableRunBlackBoxTests(unittest.TestCase):
                     "--connection-string",
                     cls.connection_string,
                     "--fixture",
-                    str(FIXTURE),
+                    str(cls.fixture_path),
                     "--urls",
                     base_url,
                 ],
@@ -239,6 +254,9 @@ class ObservableRunBlackBoxTests(unittest.TestCase):
             headers["Content-Type"] = "application/json"
         if actor_id is not None:
             headers["X-Wpcp-Actor-Id"] = actor_id
+        identity = actor_id or (payload or {}).get("actorId", "actor-authorized")
+        token = cls.provider.tokens.get(identity, "invalid-token")
+        headers["Authorization"] = f"Bearer {token}"
         if include_fixture_access:
             headers["X-Wpcp-Fixture-Access"] = cls.fixture_access_token
         connection = http.client.HTTPConnection("127.0.0.1", port or cls.api_port, timeout=15)
@@ -268,7 +286,10 @@ class ObservableRunBlackBoxTests(unittest.TestCase):
                 *arguments,
             ],
             timeout=60,
-            env={**os.environ, "WPCP_FIXTURE_ACCESS_TOKEN": cls.fixture_access_token},
+            env={**os.environ, "WPCP_FIXTURE_ACCESS_TOKEN": cls.fixture_access_token,
+                 "WPCP_PROVIDER_TOKEN": cls.provider.tokens[
+                     arguments[arguments.index("--actor-id") + 1] if "--actor-id" in arguments
+                     else "actor-authorized"]},
         )
         output = completed.stdout.strip()
         try:
@@ -328,7 +349,7 @@ class ObservableRunBlackBoxTests(unittest.TestCase):
             "POST", "/api/v1/issues/repo-1/41/runs", unauthorized_payload
         )
         self.assertEqual(403, denied_status)
-        self.assertEqual("synthetic-authorization-denied", denied["code"])
+        self.assertEqual("repository-access-denied", denied["code"])
 
         canary_correlation_payload = dict(start_payload)
         canary_correlation_payload["commandId"] = f"command-{secret}"
@@ -620,6 +641,267 @@ class ObservableRunBlackBoxTests(unittest.TestCase):
         for surface in public_surfaces:
             self.assertNotIn(secret, surface)
             self.assertNotIn(worker_only_secret, surface)
+
+    def new_run(self):
+        number = type(self).next_issue
+        type(self).next_issue += 1
+        status, result, _ = self.request("POST", f"/api/v1/issues/repo-1/{number}/runs", {
+            "commandId": str(uuid.uuid4()), "actorId": "actor-authorized", "note": "control proof",
+            "provenance": {"sourceRevision": "r1", "packageRevision": "r1",
+                           "configurationRevision": "r1", "contractRevision": "r1"},
+        })
+        self.assertEqual(201, status, result)
+        return result["runId"]
+
+    def read_run(self, run_id, actor="actor-authorized"):
+        status, result, _ = self.request("GET", f"/api/v1/runs/{run_id}", actor_id=actor)
+        self.assertEqual(200, status, result)
+        return result
+
+    def test_concurrent_claim_is_exclusive_and_release_requires_holder(self):
+        run_id = self.new_run()
+        projection = self.read_run(run_id, "actor-observer")
+        fence = {"targetAttemptId": projection["attempts"][0]["attemptId"],
+                 "expectedRunVersion": 1, "expectedHeadSha": None, "leaseEpoch": 0}
+        path = f"/api/v1/runs/{run_id}/control/claim"
+        # Two separate API processes share PostgreSQL; no in-process lock can satisfy this.
+        cls = type(self)
+        first_api, first_port = cls.api, cls.api_port
+        cls.start_api(excluded_ports={first_port})
+        self.addCleanup(cls.stop_process, first_api)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            jobs = [pool.submit(self.request, "POST", path, fence, actor,
+                                port=port) for actor, port in [
+                                    ("actor-authorized", first_port),
+                                    ("actor-contributor", cls.api_port)]]
+            outcomes = [job.result() for job in jobs]
+        self.assertEqual([200, 409], sorted(result[0] for result in outcomes), outcomes)
+        winner = "actor-authorized" if outcomes[0][0] == 200 else "actor-contributor"
+        loser = "actor-contributor" if winner == "actor-authorized" else "actor-authorized"
+        current = self.read_run(run_id)["control"]
+        self.assertEqual(1, current["leaseEpoch"])
+        self.assertEqual("human", current["holder"]["kind"])
+        fence.update(expectedRunVersion=current["runVersion"], leaseEpoch=current["leaseEpoch"])
+        rejected, decision, _ = self.request("POST", f"/api/v1/runs/{run_id}/control/release", fence, loser)
+        self.assertEqual(409, rejected, decision)
+        self.assertEqual("control-lease-required", decision["code"])
+        status, _, _ = self.request("POST", f"/api/v1/runs/{run_id}/control/release", fence, winner)
+        self.assertEqual(200, status)
+        status, events, _ = self.request("GET", f"/api/v1/runs/{run_id}/events", actor_id="actor-observer")
+        self.assertEqual(200, status)
+        self.assertEqual(["ImplementationRunStarted", "ControlLeaseClaimed", "ControlLeaseReleased"],
+                         [e["eventType"] for e in events["events"]])
+
+    @staticmethod
+    def fence(control):
+        return {"targetAttemptId": control["targetAttemptId"],
+                "expectedRunVersion": control["runVersion"],
+                "expectedHeadSha": control["headSha"], "leaseEpoch": control["leaseEpoch"]}
+
+    def test_each_stale_or_missing_fence_rejects_without_mutation(self):
+        run_id = self.new_run()
+        current = self.read_run(run_id)["control"]
+        path = f"/api/v1/runs/{run_id}/control/claim"
+        status, result, _ = self.request("POST", path, self.fence(current))
+        self.assertEqual(200, status, result)
+        current = result["current"]
+        valid = self.fence(current)
+        for field, value, code in [
+            ("targetAttemptId", str(uuid.uuid4()), "stale-target-attempt"),
+            ("expectedRunVersion", 1, "stale-run-version"),
+            ("expectedHeadSha", "a" * 40, "stale-head-sha"),
+            ("leaseEpoch", 0, "stale-lease-epoch"),
+        ]:
+            for missing in (False, True):
+                with self.subTest(field=field, missing=missing):
+                    request = dict(valid)
+                    if missing:
+                        request.pop(field)
+                    else:
+                        request[field] = value
+                    status, decision, _ = self.request(
+                        "POST", f"/api/v1/runs/{run_id}/control/release", request)
+                    self.assertEqual(400 if missing else 409, status, decision)
+                    self.assertEqual("invalid-control-mutation" if missing else code, decision["code"])
+                    self.assertEqual(current, decision["current"])
+                    self.assertEqual(current, self.read_run(run_id)["control"])
+        status, events, _ = self.request("GET", f"/api/v1/runs/{run_id}/events")
+        self.assertEqual(200, status)
+        self.assertEqual([1, 2], [event["position"] for event in events["events"]])
+
+    def test_revoked_permission_invalidates_lease_and_regrant_requires_new_claim(self):
+        for trigger, retain_read in [("read", True), ("mutation", True), ("read", False)]:
+            with self.subTest(trigger=trigger, retain_read=retain_read):
+                run_id = self.new_run()
+                status, claimed, _ = self.request("POST", f"/api/v1/runs/{run_id}/control/claim",
+                    self.fence(self.read_run(run_id)["control"]))
+                self.assertEqual(200, status)
+                old = claimed["current"]
+                identity = self.provider.identities["actor-authorized"]
+                identity.update(read=retain_read, push=False)
+                try:
+                    if trigger == "read":
+                        status, result, _ = self.request("GET", f"/api/v1/runs/{run_id}")
+                        self.assertEqual(200 if retain_read else 403, status, result)
+                    else:
+                        status, result, _ = self.request("POST", f"/api/v1/runs/{run_id}/control/release",
+                                                       self.fence(old))
+                        self.assertEqual(403, status, result)
+                    observed = self.read_run(run_id, "actor-observer")["control"]
+                    self.assertIsNone(observed["holder"])
+                    self.assertGreater(observed["leaseEpoch"], old["leaseEpoch"])
+                    self.assertEqual(old["runVersion"] + 1, observed["runVersion"])
+                finally:
+                    identity.update(read=True, push=True)
+                status, rejected, _ = self.request("POST", f"/api/v1/runs/{run_id}/control/claim", self.fence(old))
+                self.assertEqual(409, status, rejected)
+                status, events, _ = self.request("GET", f"/api/v1/runs/{run_id}/events")
+                self.assertEqual(["ImplementationRunStarted", "ControlLeaseClaimed", "ControlLeaseRevoked"],
+                                 [event["eventType"] for event in events["events"]])
+                status, reclaimed, _ = self.request("POST", f"/api/v1/runs/{run_id}/control/claim",
+                    self.fence(self.read_run(run_id)["control"]))
+                self.assertEqual(200, status, reclaimed)
+                self.assertGreater(reclaimed["current"]["leaseEpoch"], old["leaseEpoch"])
+
+    def control_cli(self, action, run_id, current, actor="actor-authorized"):
+        return self.operator_cli(action, "--run-id", run_id,
+            "--target-attempt-id", current["targetAttemptId"],
+            "--expected-run-version", str(current["runVersion"]),
+            "--expected-head-sha", current["headSha"] or "null",
+            "--lease-epoch", str(current["leaseEpoch"]), "--actor-id", actor)
+
+    def test_lease_survives_all_clients_and_api_restart_with_same_human_new_token(self):
+        run_id = self.new_run()
+        exit_code, claimed, _ = self.control_cli("claim", run_id, self.read_run(run_id)["control"])
+        self.assertEqual(0, exit_code, claimed)
+        current = claimed["current"]
+        # The CLI that claimed has already exited. Stop and replace the API, too.
+        cls = type(self)
+        cls.stop_process(cls.api)
+        cls.start_api(excluded_ports={cls.api_port})
+        exit_code, observed, _ = self.operator_cli("run", "--run-id", run_id,
+            "--actor-id", "same-human-other-client")
+        self.assertEqual(0, exit_code, observed)
+        self.assertEqual(current, observed["control"])
+        self.assertTrue(observed["authorization"]["canRelease"])
+        exit_code, rejected, _ = self.control_cli("claim", run_id, current, "actor-contributor")
+        self.assertEqual(1, exit_code, rejected)
+        self.assertEqual("control-lease-held", rejected["code"])
+        exit_code, released, _ = self.control_cli("release", run_id, current, "same-human-other-client")
+        self.assertEqual(0, exit_code, released)
+        self.assertIsNone(released["current"]["holder"])
+
+    def test_human_history_and_security_audit_are_distinct_from_worker_evidence(self):
+        run_id = self.new_run()
+        status, accepted, _ = self.request("POST", f"/api/v1/runs/{run_id}/control/claim",
+            self.fence(self.read_run(run_id)["control"]))
+        self.assertEqual(200, status)
+        status, denied, denied_raw = self.request("POST", f"/api/v1/runs/{run_id}/control/release",
+            self.fence(accepted["current"]), "worker-bot")
+        self.assertEqual(403, status)
+        self.assertIsNone(denied["current"])
+        exit_code, output = self.worker("--run-id", run_id, "--worker-id", "technical-worker",
+                                       "--evidence-note", "controlled service evidence")
+        self.assertEqual(0, exit_code, output)
+        _, events, events_raw = self.request("GET", f"/api/v1/runs/{run_id}/events")
+        self.assertEqual({"kind": "human", "provider": "github", "subjectId": "101"},
+                         events["events"][0]["payload"]["actor"])
+        self.assertEqual(events["events"][0]["payload"]["actor"],
+                         events["events"][1]["payload"]["actor"])
+        projection = self.read_run(run_id, "actor-observer")
+        worker = next(p for p in projection["processes"] if p["processKind"] == "worker")
+        self.assertEqual("service", worker["actor"]["kind"])
+        self.assertEqual("service", projection["executionEvidence"][0]["actor"]["kind"])
+        exit_code, audit, audit_raw = self.operator_cli("audit", "--run-id", run_id,
+                                                     "--actor-id", "actor-observer")
+        self.assertEqual(0, exit_code, audit)
+        self.assertEqual(["implementation-run-started", "control-lease-claimed", "human-identity-required"],
+                         [entry["code"] for entry in audit["entries"]])
+        self.assertEqual(["human", "human", "service"],
+                         [entry["actor"]["kind"] for entry in audit["entries"]])
+        for raw in (denied_raw, events_raw, audit_raw, json.dumps(projection), output):
+            for token in self.provider.tokens.values():
+                self.assertNotIn(token, raw)
+            self.assertNotIn(self.fixture_access_token, raw)
+
+    def test_read_and_control_permissions_fail_closed_at_each_provider_boundary(self):
+        run_id = self.new_run()
+        current = self.read_run(run_id)["control"]
+        for actor in ("actor-observer", "actor-unauthorized", "worker-bot", "unknown"):
+            with self.subTest(actor=actor):
+                for action in ("claim", "release"):
+                    status, decision, _ = self.request("POST", f"/api/v1/runs/{run_id}/control/{action}",
+                        self.fence(current), actor)
+                    self.assertEqual(401 if actor == "unknown" else 403, status, decision)
+                    self.assertFalse(decision["canClaim"])
+                    self.assertFalse(decision["canRelease"])
+                    self.assertEqual(current if actor == "actor-observer" else None, decision["current"])
+                for suffix in ("", "/events", "/audit"):
+                    status, result, _ = self.request("GET", f"/api/v1/runs/{run_id}{suffix}", actor_id=actor)
+                    self.assertEqual(200 if actor == "actor-observer" else 401 if actor == "unknown" else 403,
+                                     status, result)
+        self.assertEqual(current, self.read_run(run_id)["control"])
+        status, claimed, _ = self.request("POST", f"/api/v1/runs/{run_id}/control/claim", self.fence(current))
+        self.assertEqual(200, status)
+        current = claimed["current"]
+        for failure in (401, 403, 429, 500):
+            self.provider.failure = failure
+            try:
+                status, rejected, raw = self.request("POST", f"/api/v1/runs/{run_id}/control/release",
+                    self.fence(current))
+                self.assertEqual(401 if failure == 401 else 503, status, rejected)
+                self.assertIsNone(rejected["current"])
+                self.assertNotIn("controlled upstream failure", raw)
+            finally:
+                self.provider.failure = None
+            self.assertEqual(current, self.read_run(run_id)["control"])
+        self.provider.repository_id = 9999
+        try:
+            status, rejected, _ = self.request("POST", f"/api/v1/runs/{run_id}/control/release", self.fence(current))
+            self.assertEqual(403, status)
+            self.assertEqual("repository-identity-mismatch", rejected["code"])
+            self.assertIsNone(rejected["current"])
+        finally:
+            self.provider.repository_id = 9001
+        self.assertEqual(current, self.read_run(run_id)["control"])
+
+    def test_existing_run_cannot_follow_a_changed_repository_binding(self):
+        run_id = self.new_run()
+        issue_number = self.read_run(run_id)["correlation"]["issueNumber"]
+        original = self.fixture_path.read_text()
+        changed = json.loads(original)
+        changed["provider"]["repositories"][0]["providerRepositoryId"] = 9999
+        cls = type(self)
+        cls.stop_process(cls.api)
+        self.fixture_path.write_text(json.dumps(changed))
+        self.provider.repository_id = 9999
+        try:
+            cls.start_api(excluded_ports={cls.api_port})
+            status, result, _ = self.request("GET", f"/api/v1/runs/{run_id}")
+            self.assertEqual(403, status, result)
+            self.assertEqual("repository-identity-mismatch", result["code"])
+            self.assertIsNone(result["current"])
+            status, result, raw = self.request("POST", f"/api/v1/issues/repo-1/{issue_number}/runs", {
+                "commandId": str(uuid.uuid4()), "note": "rebound admission",
+                "provenance": {"sourceRevision": "r1", "packageRevision": "r1",
+                    "configurationRevision": "r1", "contractRevision": "r1"}})
+            self.assertEqual(403, status, result)
+            self.assertNotIn(run_id, raw)
+        finally:
+            cls.stop_process(cls.api)
+            self.fixture_path.write_text(original)
+            self.provider.repository_id = 9001
+            cls.start_api(excluded_ports={cls.api_port})
+        self.assertEqual(run_id, self.read_run(run_id)["runId"])
+
+    def test_reader_cannot_impersonate_contributor_in_start_payload(self):
+        status, result, _ = self.request("POST", "/api/v1/issues/repo-1/41/runs", {
+            "commandId": str(uuid.uuid4()), "actorId": "actor-authorized", "note": "spoof",
+            "provenance": {"sourceRevision": "r1", "packageRevision": "r1",
+                           "configurationRevision": "r1", "contractRevision": "r1"},
+        }, actor_id="actor-observer")
+        self.assertEqual(403, status, result)
+        self.assertEqual("repository-contribution-required", result["code"])
 
     @staticmethod
     def instant(value: str) -> datetime:

@@ -11,7 +11,7 @@ namespace Wpcp.Storage.Postgres;
 /// PostgreSQL implementation of the product-owned run record.  Agent Framework and
 /// Durable Task identifiers are deliberately stored only as lifecycle evidence.
 /// </summary>
-public sealed class PostgresImplementationRunStore : IImplementationRunStore, IAsyncDisposable
+public sealed partial class PostgresImplementationRunStore : IImplementationRunStore, IAsyncDisposable
 {
     private const string StartCommandKind = "start-implementation-run";
     private const string AdmissionActivity = "admission";
@@ -67,6 +67,8 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
             connection, transaction, command.CommandId, cancellationToken);
         if (existingCommand is not null)
         {
+            if (existingCommand.Correlation.Repository != command.Repository)
+                throw new RepositoryBindingConflictException();
             await transaction.CommitAsync(cancellationToken);
             var disposition = string.Equals(existingCommand.PayloadDigest, payloadDigest, StringComparison.Ordinal)
                 ? StartRunDisposition.Idempotent
@@ -82,6 +84,8 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
             cancellationToken);
         if (existingIssue is not null)
         {
+            if (existingIssue.Correlation.Repository != command.Repository)
+                throw new RepositoryBindingConflictException();
             await transaction.CommitAsync(cancellationToken);
             return new StartRunResult(StartRunDisposition.IssueAlreadyHasRun, existingIssue.Correlation);
         }
@@ -96,7 +100,8 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
             command.RepositoryId,
             command.IssueId,
             command.IssueNumber,
-            command.CommandId);
+            command.CommandId,
+            command.Repository);
 
         await InsertRunAsync(connection, transaction, correlation, now, safe, cancellationToken);
         await InsertCommandAsync(
@@ -125,6 +130,8 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
             safe,
             cancellationToken);
 
+        await AppendAuditAsync(connection, transaction, runId, "start", "implementation-run-started",
+            command.Actor, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
         return new StartRunResult(StartRunDisposition.Accepted, correlation);
     }
@@ -166,7 +173,8 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
             evidence,
             run.Provenance,
             MergeRedaction(run.Redaction, lifecycleRedaction),
-            run.LastPosition);
+            run.LastPosition,
+            await ReadControlStateAsync(connection, transaction, run, cancellationToken));
         await transaction.CommitAsync(cancellationToken);
         return projection;
     }
@@ -336,7 +344,7 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
         const string sql = """
             SELECT run_id::text, repository_id, issue_id, issue_number, command_id,
                    state, run_started_at, last_position, provenance::text,
-                   redaction_occurred, redaction_policy_version, redaction_marker
+                   redaction_occurred, redaction_policy_version, redaction_marker, repository_binding::text
               FROM wpcp_implementation_runs
              WHERE repository_id = @repository_id AND issue_number = @issue_number;
             """;
@@ -361,7 +369,7 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
         const string sql = """
             SELECT run_id::text, repository_id, issue_id, issue_number, command_id,
                    state, run_started_at, last_position, provenance::text,
-                   redaction_occurred, redaction_policy_version, redaction_marker
+                   redaction_occurred, redaction_policy_version, redaction_marker, repository_binding::text
               FROM wpcp_implementation_runs
              WHERE run_id = @run_id;
             """;
@@ -378,7 +386,8 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
             reader.GetString(1),
             reader.GetString(2),
             reader.GetInt32(3),
-            reader.GetString(4));
+            reader.GetString(4),
+            reader.IsDBNull(12) ? null : Deserialize<RepositoryBinding>(reader.GetString(12)));
         return new StoredRun(
             correlation,
             reader.GetString(5),
@@ -408,13 +417,14 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
             INSERT INTO wpcp_implementation_runs (
                 run_id, repository_id, issue_id, issue_number, command_id, state,
                 run_started_at, last_position, provenance, redaction_occurred,
-                redaction_policy_version, redaction_marker)
+                redaction_policy_version, redaction_marker, repository_binding)
             VALUES (
                 @run_id, @repository_id, @issue_id, @issue_number, @command_id, 'admitted',
                 @run_started_at, 1, @provenance, @redaction_occurred,
-                @redaction_policy_version, @redaction_marker);
+                @redaction_policy_version, @redaction_marker, @repository_binding);
             """;
         await using var command = new NpgsqlCommand(sql, connection, transaction);
+        AddJson(command, "repository_binding", correlation.Repository!);
         command.Parameters.Add(new NpgsqlParameter("run_id", NpgsqlDbType.Uuid) { Value = Guid.Parse(correlation.RunId) });
         command.Parameters.Add(new NpgsqlParameter("repository_id", NpgsqlDbType.Text) { Value = correlation.RepositoryId });
         command.Parameters.Add(new NpgsqlParameter("issue_id", NpgsqlDbType.Text) { Value = correlation.IssueId });
@@ -517,7 +527,8 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
         AddJson(command, "correlation", correlation);
         AddJson(command, "payload", new
         {
-            authorization = new { decision = "authorized", source = "synthetic-provider-fixture" },
+            actor = safe.Actor,
+            authorization = new { decision = "authorized", source = safe.Actor?.Provider ?? "synthetic-provider-fixture" },
             note = safe.Note,
         });
         AddJson(command, "provenance", safe.Provenance);
@@ -808,12 +819,13 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
             commandId = command.CommandId,
             actorId = command.ActorId,
             repositoryId = command.RepositoryId,
+            repository = command.Repository,
             issueId = command.IssueId,
             issueNumber = command.IssueNumber,
             note = note.Value,
             provenance,
         };
-        return new SafeStart(note.Value!, provenance, payload, _redactionPolicy.Metadata(occurred));
+        return new SafeStart(note.Value!, provenance, payload, _redactionPolicy.Metadata(occurred), command.Actor);
     }
 
     private void RejectControlledCanaryInCorrelation(StartRunCommand command)
@@ -896,7 +908,8 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
         string Note,
         RunProvenance Provenance,
         object Payload,
-        RedactionMetadata Redaction);
+        RedactionMetadata Redaction,
+        ActorIdentity? Actor);
 
     private sealed record SafeLifecycle(
         string ProcessKind,
@@ -925,6 +938,22 @@ public sealed class PostgresImplementationRunStore : IImplementationRunStore, IA
             redaction_marker text,
             UNIQUE (repository_id, issue_number)
         );
+
+        ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS repository_binding jsonb;
+        ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS lease_epoch bigint NOT NULL DEFAULT 0;
+        ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS lease_holder jsonb;
+        ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS lease_claimed_at timestamptz;
+        ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS head_sha text;
+
+        CREATE TABLE IF NOT EXISTS wpcp_security_audit (
+            position bigserial PRIMARY KEY,
+            run_id uuid NOT NULL REFERENCES wpcp_implementation_runs(run_id),
+            occurred_at timestamptz NOT NULL,
+            action text NOT NULL,
+            code text NOT NULL,
+            actor jsonb
+        );
+        CREATE INDEX IF NOT EXISTS wpcp_security_audit_run_idx ON wpcp_security_audit(run_id, position);
 
         CREATE TABLE IF NOT EXISTS wpcp_command_inbox (
             command_id text PRIMARY KEY,

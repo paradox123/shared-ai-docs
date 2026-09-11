@@ -1,19 +1,28 @@
 # WPCP black-box fixture boundary
 
-`fixtures/postgres-test-fixture.json` defines a disposable PostgreSQL 17 test
-resource with a Docker-assigned host port. It is isolated from the
-managed-durability probe and the test always removes its uniquely named
-container after the run.
+`fixtures/postgres-test-fixture.json` defines a disposable PostgreSQL 17 resource
+with a Docker-assigned loopback port. Tests remove their uniquely named container
+and all API processes afterward. No managed scheduler, live provider or existing
+pilot database is used.
 
-`fixtures/synthetic-provider-redaction-fixture.json` is the only synthetic
-repository-provider and controlled-redaction input for the first public-surface
-slice. Its canary strings are test data: later implementation must redact them
-before any durable write or operator-visible serialization.
+`fixtures/synthetic-provider-redaction-fixture.json` defines synthetic issues,
+pinned GitHub repository bindings and controlled canaries. It contains no member
+or permission list. The harness adds synthetic issues in a temporary fixture file.
 
-The public API exposes `GET /healthz`, `POST /api/v1/issues/{repositoryId}/
-{issueNumber}/runs`, `GET /api/v1/runs/{runId}`, and
-`GET /api/v1/runs/{runId}/events?after={position}`. The last three routes
-require the test harness's ephemeral `X-Wpcp-Fixture-Access` capability; the
-read routes also require the fixture-defined actor header. The separate
-`Wpcp.OperatorCli` is the intended public client and supplies the capability
-from `WPCP_FIXTURE_ACCESS_TOKEN` without persisting or printing it.
+`tests/github_provider_fixture.py` implements only the external GitHub HTTP test
+boundary, with separate ephemeral credentials for humans and a bot. Tests can
+change provider rights, simulate errors or replace credentials while the real
+application remains running. These test accounts are not persisted application
+members. `WPCP_GITHUB_TEST_ORIGIN` is restricted to an explicit loopback origin.
+
+All Operator routes require both the ephemeral `X-Wpcp-Fixture-Access` harness
+capability and a GitHub bearer credential. The CLI reads them from
+`WPCP_FIXTURE_ACCESS_TOKEN` and `WPCP_PROVIDER_TOKEN`. Caller-supplied actor labels
+are ignored. Only `/healthz` is unauthenticated.
+
+The tests observe API/CLI results and ordered history/audit; they do not query
+application tables or use database edits to establish behavior. Concurrent claim
+tests run two API processes against one database, and reconnect tests use a new
+CLI credential for the same provider subject after API replacement.
+
+Commands and public contracts are documented in the [pilot README](../../README.md).
