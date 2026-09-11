@@ -263,7 +263,7 @@ Fault boundaries `after-git-effect`, `after-provider-effect`, `after-session-sta
 external process kill. Restart with the same plan and without `--pause-at`.
 The API, CLI, worker, PostgreSQL and providers remain separate processes; explicit
 local delivery does not claim automatic DTS dispatch or live repository writes.
-See the [Ticket 05 proof](../openspec/changes/reconcile-repository-effects/implementation-evidence.md).
+See the [Ticket 05 proof](../openspec/changes/archive/2026-09-11-reconcile-repository-effects/implementation-evidence.md).
 
 An already-started standalone session cannot be promoted into a managed run:
 its original base was not verified. First registration racing with an active

@@ -12,6 +12,6 @@ Geprüfter Stand: `c4147a4` auf `main`. **59/59 Tests grün**, Build ohne Warnun
 
 **Operator:** Reconcile → API-Neustart → Adopt → Retry geprüft; Retire beendet aktive Versuche, löst die Lease und gibt das Repository frei. Konflikte und veraltete Commands werden abgewiesen. [Operator-Verlauf](test_operator_reconcile_adopt_retry_survive_api_restart.json) · [Retire-Verlauf](test_retire_settles_existing_effects_releases_owner_and_fences_late_worker.json)
 
-[Gesamtes Testprotokoll](test-output.txt) · [Maschinenlesbare Zusammenfassung](summary.json) · [Review](../../../../openspec/changes/reconcile-repository-effects/review.md)
+[Gesamtes Testprotokoll](test-output.txt) · [Maschinenlesbare Zusammenfassung](summary.json) · [Review](../../../../openspec/changes/archive/2026-09-11-reconcile-repository-effects/review.md)
 
 Grenze: echtes Git/PostgreSQL und getrennte Prozesse; kontrollierter Provider und Fake-Codex. Keine Behauptung über Live-GitHub-Schreibzugriffe oder automatischen DTS-Dispatch.

@@ -27,6 +27,10 @@ ProBara Issue #3 startete vom veralteten lokalen `main`; später waren SQLite-Ei
 Reale SIGKILLs nach Git-, Provider- und Sessionwirkung ergeben jeweils genau einen externen Effekt. Stale Base blockiert vor dem Agentenstart. Retry, Reconcile, Adopt und Retire sind über HTTP/CLI belegt; aktive Projektionen und Repository-Ownership werden sicher freigegeben. Historische Standalone-Sessions können keine spätere Base-Provenance erhalten.
 
 - [Kompakter Beweis mit Receipts und SHA-Verlauf](../../evidence/ticket-05-proof-2026-09-11/proof.md)
-- [OpenSpec-Evidence und Grenzen](../../../../openspec/changes/reconcile-repository-effects/implementation-evidence.md)
+- [OpenSpec-Evidence und Grenzen](../../../../openspec/changes/archive/2026-09-11-reconcile-repository-effects/implementation-evidence.md)
 
-Kontrollierter Provider/Fake-Codex, echtes Git/PostgreSQL und explizite lokale Worker-Zustellung. Der Change bleibt bis zur Abnahme unarchiviert.
+Kontrollierter Provider/Fake-Codex, echtes Git/PostgreSQL und explizite lokale Worker-Zustellung.
+
+## Acceptance
+
+2026-09-11: Vom Nutzer ausdrücklich akzeptiert. OpenSpec im Standardverfahren archiviert; alle fünf Anforderungen sind in der [kanonischen Spec](../../../../openspec/specs/repository-effect-reconciliation/spec.md) übernommen. Ticket und Change sind abgeschlossen.
