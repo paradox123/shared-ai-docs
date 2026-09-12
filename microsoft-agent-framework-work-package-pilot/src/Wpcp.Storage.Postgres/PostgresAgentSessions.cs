@@ -73,7 +73,8 @@ public sealed partial class PostgresImplementationRunStore
                 ResponseStatus = response.StatusCode, ResponseEventId = eventId } };
         }, token);
 
-    public Task<AgentAttemptReceipt> BindAgentSessionAsync(string runId, string sessionId, CancellationToken token = default) =>
+    public Task<AgentAttemptReceipt> BindAgentSessionAsync(string runId, string sessionId,
+        OpenInCodexCapability? openInCodex = null, CancellationToken token = default) =>
         ChangeAgentAsync(runId, async (connection, transaction, run, receipt) =>
         {
             ArgumentNullException.ThrowIfNull(receipt);
@@ -84,11 +85,18 @@ public sealed partial class PostgresImplementationRunStore
                 if (receipt.Session.SessionId != sessionId) throw new ArgumentException("Conflicting session identity.");
                 return receipt;
             }
+            var capability = openInCodex ?? receipt.Session.OpenInCodex;
+            var safeCapability = capability is null ? null :
+                RedactAgentValue(JsonSerializer.SerializeToElement(capability, JsonOptions)).Value
+                    .Deserialize<OpenInCodexCapability>(JsonOptions)
+                ?? throw new ArgumentException("Invalid Codex opening capability.");
             var eventId = await AppendAgentEventAsync(connection, transaction, run, "AgentSessionStarted",
                 new { receipt.ActivityId, receipt.AttemptId, sessionId, receipt.Session.OperationKey,
-                    receipt.Session.ContractVersion, receipt.Session.OpenInCodex }, token);
+                    receipt.Session.ContractVersion,
+                    openInCodex = capability }, token);
             return receipt with { Session = receipt.Session with { SessionId = sessionId, Status = "running",
-                StartedEventId = eventId, LastEventId = eventId } };
+                StartedEventId = eventId, LastEventId = eventId,
+                OpenInCodex = safeCapability } };
         }, token);
 
     public Task<AgentAttemptReceipt> ObserveAgentAsync(string runId, AgentSourceEvent observation,
@@ -142,9 +150,52 @@ public sealed partial class PostgresImplementationRunStore
                 category == "semantic-rejection" ? "AgentResultRejected" : "AgentAttemptCompleted",
                 new { receipt.ActivityId, receipt.AttemptId, receipt.Session.SessionId, category,
                     originalResultEventId = receipt.Session.OriginalResultEventId }, token);
-            return receipt with { State = category, Session = receipt.Session with {
-                Status = sessionStatus, FailureCategory = category } };
+            var session = receipt.Session with { Status = sessionStatus, FailureCategory = category };
+            if (category is "blocked" or "semantic-rejection" && session.HumanRequest is null &&
+                session.SessionId is not null)
+            {
+                var control = await ReadHumanRequestControlContextAsync(connection, transaction, run, token);
+                var request = new HumanRequest(
+                    Guid.NewGuid().ToString(), receipt.AttemptId, session.SessionId, "awaiting-human", control.HeadSha,
+                    HumanRequestProblem(session.OriginalResult),
+                    session.OriginalResultEventId is null ? [] : [session.OriginalResultEventId],
+                    HumanRequestAllowedActions(session.OpenInCodex),
+                    ExpectedRunVersion: run.LastPosition + 2, LeaseEpoch: control.LeaseEpoch);
+                var eventId = await AppendAgentEventAsync(connection, transaction, run, "HumanRequestCreated",
+                    new { request.RequestId, request.AttemptId, request.SessionId, request.Phase,
+                        request.ExpectedHeadSha, request.ExpectedRunVersion, request.LeaseEpoch,
+                        request.Problem, request.Evidence, request.AllowedActions }, token);
+                session = session with { HumanRequest = request with { CreatedEventId = eventId } };
+            }
+            return receipt with { State = category, Session = session };
         }, token);
+
+    private static string HumanRequestProblem(JsonElement? originalResult)
+    {
+        if (originalResult is { ValueKind: JsonValueKind.Object } result &&
+            result.TryGetProperty("reason", out var reason) && reason.ValueKind == JsonValueKind.String &&
+            !string.IsNullOrWhiteSpace(reason.GetString()))
+            return reason.GetString()!;
+        return "Agent attempt requires human direction.";
+    }
+
+    private static IReadOnlyList<string> HumanRequestAllowedActions(OpenInCodexCapability? capability)
+    {
+        var actions = new List<string> { "resume", "fork", "fresh-retry", "open", "write" };
+        if (capability?.Mode == "handoff-confirmation-required") actions.Add("handoff");
+        return actions;
+    }
+
+    private static async Task<(string? HeadSha, long LeaseEpoch)> ReadHumanRequestControlContextAsync(
+        NpgsqlConnection connection, NpgsqlTransaction transaction, StoredRun run, CancellationToken token)
+    {
+        await using var command = new NpgsqlCommand(
+            "SELECT head_sha, lease_epoch FROM wpcp_implementation_runs WHERE run_id=@run", connection, transaction);
+        command.Parameters.AddWithValue("run", Guid.Parse(run.Correlation.RunId));
+        await using var reader = await command.ExecuteReaderAsync(token);
+        if (!await reader.ReadAsync(token)) throw new InvalidOperationException("Unknown run.");
+        return (reader.IsDBNull(0) ? null : reader.GetString(0), reader.GetInt64(1));
+    }
 
     private async Task<AgentAttemptReceipt> ChangeAgentAsync(string runId,
         Func<NpgsqlConnection, NpgsqlTransaction, StoredRun, AgentAttemptReceipt?, Task<AgentAttemptReceipt>> change,
@@ -160,14 +211,22 @@ public sealed partial class PostgresImplementationRunStore
         }
         var run = await FindRunAsync(connection, transaction, runId, token)
             ?? throw new InvalidOperationException("Unknown run.");
-        await using var read = new NpgsqlCommand("SELECT receipt::text FROM wpcp_agent_sessions WHERE run_id=@id", connection, transaction);
+        await using var read = new NpgsqlCommand("""
+            SELECT session.receipt::text
+              FROM wpcp_agent_sessions session
+              JOIN wpcp_activity_attempts attempt ON attempt.attempt_id=session.attempt_id
+              JOIN wpcp_run_activities activity ON activity.activity_id=attempt.activity_id
+             WHERE session.run_id=@id AND activity.activity_type='fake-codex'
+             ORDER BY attempt.started_at, attempt.attempt_id
+             LIMIT 1
+            """, connection, transaction);
         read.Parameters.AddWithValue("id", Guid.Parse(runId));
         var raw = await read.ExecuteScalarAsync(token) as string;
         var receipt = await change(connection, transaction, run,
             raw is null ? null : Deserialize<AgentAttemptReceipt>(raw));
         await using var save = new NpgsqlCommand("""
-            INSERT INTO wpcp_agent_sessions VALUES (@run, @attempt, @receipt)
-            ON CONFLICT (run_id) DO UPDATE SET receipt=EXCLUDED.receipt;
+            INSERT INTO wpcp_agent_sessions (run_id, attempt_id, receipt) VALUES (@run, @attempt, @receipt)
+            ON CONFLICT (attempt_id) DO UPDATE SET receipt=EXCLUDED.receipt;
             UPDATE wpcp_implementation_runs SET state=@state WHERE run_id=@run;
             UPDATE wpcp_run_activities SET state=@state, completed_at=CASE WHEN @state='running' THEN NULL ELSE COALESCE(completed_at, @now) END
                 WHERE activity_id=@activity;

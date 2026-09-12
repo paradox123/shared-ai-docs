@@ -103,9 +103,10 @@ public sealed partial class PostgresImplementationRunStore
         string state, EffectReceipt? receipt, CancellationToken token = default) =>
         ChangeRepositoryAsync(runId, (_, current) =>
         {
-            var effect = current!.Effects!.Single(e => e.OperationId == operationId);
+            var effects = current!.Effects ?? [];
+            var effect = effects.Single(e => e.OperationId == operationId);
             if (effect.State == state && effect.Receipt == receipt) return current;
-            return current with { Effects = current.Effects.Select(e => e.OperationId == operationId
+            return current with { Effects = effects.Select(e => e.OperationId == operationId
                 ? e with { State = state, Receipt = receipt } : e).ToArray() };
         }, "RepositoryEffectObserved", token);
 

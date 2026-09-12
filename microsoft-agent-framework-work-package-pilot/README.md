@@ -197,6 +197,111 @@ or exercise live repository writes. The existing managed durability gate and
 LangGraph pilot remain separate. See the
 [Ticket 04 evidence](../openspec/changes/archive/2026-09-11-recover-fake-codex-attempt/implementation-evidence.md).
 
+## Human Request continuation in the controlled Codex session (Ticket 06)
+
+A blocked or semantic-rejected fake attempt now exposes a redacted
+`session.humanRequest` through `run` and `attempt`. It identifies the selected
+attempt and session, current phase, expected head, problem, evidence, permitted
+actions, and the current control context. It is durable product state: API or
+worker replacement does not require the original process, receipt file, or
+database-table access to inspect it.
+
+Read the target and its current fences first. Use fresh `control` values from
+`run` for every control command, because an accepted decision changes the run
+version.
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 attempt \
+  --run-id <run-id> --attempt-id <attempt-id>
+
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 claim --run-id <run-id> \
+  --target-attempt-id <attempt-id> --expected-run-version <version> \
+  --expected-head-sha null --lease-epoch <epoch>
+```
+
+The current Control Lease holder can make exactly one of these continuation
+decisions for an open request. Each requires the request and command UUIDs plus
+the same current target/version/head/epoch fences as `claim`:
+
+| Decision | Result |
+| --- | --- |
+| `resume` | Uses the selected, original session ID. |
+| `fork` | Creates a distinct session with `lineage.parentSessionId` and `lineage.origin: "fork"`. |
+| `fresh-retry` | Creates a distinct session with no parent or imported conversation. It is different from Ticket 05 repository-effect `retry`. |
+
+For example, substitute `fork` or `fresh-retry` only when that is the intended
+operator choice:
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 resume --run-id <run-id> \
+  --target-attempt-id <attempt-id> --expected-run-version <version> \
+  --expected-head-sha <head-or-null> --lease-epoch <epoch> \
+  --request-id <human-request-uuid> --command-id <new-command-uuid>
+```
+
+Repeating the exact command ID returns its durable logical outcome; reusing it
+with a different decision is rejected. Read the run again after completion to
+see the original and continuation attempts, lineage, correlated operation, and
+canonical events.
+
+Read the redacted durable adapter receipt independently with the same command
+identity:
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 continuation --run-id <run-id> \
+  --command-id <continuation-command-uuid>
+```
+
+`open` resolves only the explicitly selected attempt/session and needs a
+read-authorized caller, request ID, and command ID; it does not claim the lease
+or change phase, head, effects, or session identity.
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 open --run-id <run-id> \
+  --attempt-id <attempt-id> --request-id <human-request-uuid> \
+  --command-id <new-command-uuid>
+```
+
+Treat `session.openInCodex` as a capability disclosure, not a promise that this
+pilot has started a real Codex App task:
+
+| Capability mode | Operator result |
+| --- | --- |
+| `same-session` | The controlled adapter opens only that saved session. |
+| `handoff-confirmation-required` | `open` reports the limitation and creates nothing. The lease holder may later submit the separately fenced `handoff` decision, which creates one lineage-marked child session. |
+| `unsupported` | The reason is shown; there is no hidden fallback, fork, or new run. |
+
+After a selected same-session open, interactive `write` is a control action,
+not a read action. It requires fresh provider authorization, the current Control
+Lease, current fences, request/command IDs, and `--message`; its redacted
+message/tool/result observations are appended to the same run history.
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 write --run-id <run-id> \
+  --target-attempt-id <attempt-id> --expected-run-version <version> \
+  --expected-head-sha <head-or-null> --lease-epoch <epoch> \
+  --request-id <human-request-uuid> --command-id <new-command-uuid> \
+  --message "<operator instruction>"
+```
+
+Run the Ticket 06 black-box proof with the Ticket 04 suite:
+
+```bash
+python3 -m unittest tests.test_fake_codex_attempt -v
+```
+
+It uses disposable PostgreSQL, separate API/CLI/worker/fake-provider processes,
+and public HTTP/CLI read-back only. It proves restart-stable Human Requests;
+Resume/Fork/Fresh Retry lineage; truthful open/handoff behavior; lease/fence and
+duplicate-write rejection; and adoption of continuation/write success gaps
+without a duplicate provider session or interaction.
+
 ## Repository base and effect recovery (Ticket 05)
 
 A repository-managed delivery adds exact-base preflight and a durable repository

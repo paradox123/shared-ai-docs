@@ -41,6 +41,17 @@ concurrent redelivery; unchanged original blocked result plus separate rejection
 process/timeout/transport/contract/schema/infrastructure diagnostics; conflicting
 sequence/identity and null-event rejection; immutable adapter assignment; and
 independent attempt selection after API restart with truthful unavailable Codex
-opening capability. All database containers, provider processes and receipt
-files are disposable. This is explicit local delivery, not automatic DTS
-orchestration or real Codex app integration.
+opening capability.
+
+Ticket 06 extends the same public proof with durable `humanRequest` read-back,
+exactly-once Resume/Fork/Fresh Retry lineage, selected-session open versus
+explicit handoff, lease/fence-protected write-back, and API-replacement recovery
+after a provider-side continuation or interaction success gap. It also rejects
+misbound adapter receipts, preserves the original fake attempt on redelivery
+after a fork, proves redacted-message command replay, rejects substituted
+write messages and incompatible completion contracts, and proves that an
+adapter capability canary is redacted in API/CLI read-back across API
+replacement. It reads only HTTP/CLI state plus the fake provider's public
+diagnostics; it never inspects product tables. All database containers,
+provider processes and receipt files are disposable. This is explicit local
+delivery, not automatic DTS orchestration or real Codex app integration.

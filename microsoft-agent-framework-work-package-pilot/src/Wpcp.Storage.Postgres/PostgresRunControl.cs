@@ -6,6 +6,56 @@ namespace Wpcp.Storage.Postgres;
 
 public sealed partial class PostgresImplementationRunStore
 {
+    /// <summary>
+    /// A visible-session open is read-authorized, but its durable adapter intent
+    /// must be accepted in the same serialized decision as that authorization.
+    /// </summary>
+    public async Task<ControlDecision> DecideSessionOpenAsync(
+        string runId,
+        string attemptId,
+        SessionOpenCommand command,
+        Func<RepositoryBinding, CancellationToken, Task<RepositoryAccess>> authorize,
+        CancellationToken cancellationToken = default)
+    {
+        if (!Guid.TryParse(runId, out var parsed) || !Guid.TryParse(attemptId, out _) ||
+            !Guid.TryParse(command.RequestId, out _) || !Guid.TryParse(command.CommandId, out _))
+            return new("invalid-session-open-command", new(null, false, false), null);
+
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        await using (var rowLock = new NpgsqlCommand(
+            "SELECT run_id FROM wpcp_implementation_runs WHERE run_id = @id FOR UPDATE", connection, transaction))
+        {
+            rowLock.Parameters.AddWithValue("id", parsed);
+            await rowLock.ExecuteScalarAsync(cancellationToken);
+        }
+        var run = await FindRunAsync(connection, transaction, runId, cancellationToken);
+        if (run is null) return new("implementation-run-not-found", new(null, false, false), null);
+        var (current, access) = await RevalidateControlAccessAsync(connection, transaction, run, authorize,
+            cancellationToken);
+
+        ContinuationOperation? continuation = null;
+        string code;
+        if (!access.CanRead || !access.IsHuman)
+        {
+            code = access.FailureCode ?? "repository-access-denied";
+        }
+        else
+        {
+            continuation = await QueueSessionOpenUnderLockAsync(connection, transaction, run, attemptId, command,
+                cancellationToken);
+            code = continuation is null ? "human-request-not-open" : "continuation-requested";
+            if (continuation is not null)
+            {
+                var updated = await FindRunAsync(connection, transaction, runId, cancellationToken);
+                current = await ReadControlStateAsync(connection, transaction, updated!, cancellationToken);
+            }
+        }
+        await AppendAuditAsync(connection, transaction, runId, "open", code, access.Actor, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return new(code, access, access.CanRead ? current : null, continuation);
+    }
+
     /// <summary>The row lock covers provider revalidation and the complete decision across hosts.</summary>
     public async Task<ControlDecision> DecideControlAsync(
         string runId, string? action, ControlMutation? mutation,
@@ -24,34 +74,50 @@ public sealed partial class PostgresImplementationRunStore
         }
         var run = await FindRunAsync(connection, transaction, runId, cancellationToken);
         if (run is null) return new("implementation-run-not-found", new(null, false, false), null);
-        var current = await ReadControlStateAsync(connection, transaction, run, cancellationToken);
-        var access = run.Correlation.Repository is { } binding
-            ? await authorize(binding, cancellationToken)
-            : new RepositoryAccess(null, false, false, "repository-binding-required");
-        // Revocation is a separate security transition, never the requested action.
-        if (current.Holder is not null && current.Holder == access.Actor && !access.CanContribute &&
-            access.FailureCode is null or "repository-access-denied")
-        {
-            var revoked = current with { RunVersion = current.RunVersion + 1,
-                LeaseEpoch = current.LeaseEpoch + 1, Holder = null, ClaimedAt = null };
-            await WriteControlTransitionAsync(connection, transaction, run, current, revoked,
-                "ControlLeaseRevoked", access.Actor!, cancellationToken);
-            current = revoked;
-            await AppendAuditAsync(connection, transaction, runId, "revalidate", "control-lease-revoked",
-                access.Actor, cancellationToken);
-        }
+        var (current, access) = await RevalidateControlAccessAsync(connection, transaction, run, authorize,
+            cancellationToken);
         string code;
+        ContinuationOperation? continuation = null;
         if (!access.CanRead || !access.IsHuman)
             code = access.FailureCode ?? "repository-access-denied";
         else if (action is null)
             code = "observed";
         else if (!access.CanContribute)
             code = "repository-contribution-required";
-        else if (action is not ("claim" or "release" or "retry" or "reconcile" or "adopt" or "retire"))
+        else if (action is not ("claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" or
+            "resume" or "fork" or "fresh-retry" or "handoff" or "write"))
             code = "invalid-control-action";
         else if (mutation is null || !Guid.TryParse(mutation.TargetAttemptId, out _) ||
             mutation.ExpectedRunVersion < 1 || mutation.LeaseEpoch < 0)
             code = "invalid-control-mutation";
+        else if (action == "write" && string.IsNullOrWhiteSpace(mutation.Message))
+            code = "invalid-control-mutation";
+        else if (action is "resume" or "fork" or "fresh-retry" or "handoff" or "write")
+        {
+            (code, continuation) = await ReplayHumanRequestActionAsync(connection, transaction, run, action,
+                mutation, cancellationToken);
+            // An applied command is a read-only replay. A pending command can
+            // reach the adapter only through a still-current lease/fence; host
+            // replacement separately adopts pending intents at startup.
+            if (code is not ("continuation-applied" or "continuation-command-conflict" or "invalid-control-mutation"))
+            {
+                if (current.Holder != access.Actor)
+                    code = "control-lease-required";
+                else if (mutation.TargetAttemptId != current.TargetAttemptId)
+                    code = "stale-target-attempt";
+                else if (mutation.ExpectedRunVersion != current.RunVersion)
+                    code = "stale-run-version";
+                else if (mutation.ExpectedHeadSha != current.HeadSha)
+                    code = "stale-head-sha";
+                else if (mutation.LeaseEpoch != current.LeaseEpoch)
+                    code = "stale-lease-epoch";
+                else if (code == "continuation-command-not-found")
+                    (code, continuation) = await QueueHumanRequestActionAsync(connection, transaction, run, action,
+                        mutation, cancellationToken);
+                var updated = await FindRunAsync(connection, transaction, runId, cancellationToken);
+                current = await ReadControlStateAsync(connection, transaction, updated!, cancellationToken);
+            }
+        }
         else if (action == "claim" && current.Holder is not null)
             code = "control-lease-held";
         else if (action != "claim" && current.Holder != access.Actor)
@@ -86,10 +152,11 @@ public sealed partial class PostgresImplementationRunStore
         }
         if (action is not null || code != "observed")
             await AppendAuditAsync(connection, transaction, runId,
-                action is "claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" ? action : action is null ? "observe" : "invalid",
+                action is "claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" or
+                    "resume" or "fork" or "fresh-retry" or "handoff" or "write" ? action : action is null ? "observe" : "invalid",
                 code, access.Actor, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return new(code, access, access.CanRead ? current : null);
+        return new(code, access, access.CanRead ? current : null, continuation);
     }
 
     private static async Task AppendAuditAsync(
@@ -144,6 +211,33 @@ public sealed partial class PostgresImplementationRunStore
         return new(run.LastPosition, reader.GetString(4), reader.IsDBNull(3) ? null : reader.GetString(3),
             reader.GetInt64(0), reader.IsDBNull(1) ? null : Deserialize<ActorIdentity>(reader.GetString(1)),
             reader.IsDBNull(2) ? null : reader.GetFieldValue<DateTimeOffset>(2));
+    }
+
+    /// <summary>Provider revalidation and any lease revocation share the locked run decision.</summary>
+    private async Task<(RunControlState Current, RepositoryAccess Access)> RevalidateControlAccessAsync(
+        NpgsqlConnection connection,
+        NpgsqlTransaction transaction,
+        StoredRun run,
+        Func<RepositoryBinding, CancellationToken, Task<RepositoryAccess>> authorize,
+        CancellationToken token)
+    {
+        var current = await ReadControlStateAsync(connection, transaction, run, token);
+        var access = run.Correlation.Repository is { } binding
+            ? await authorize(binding, token)
+            : new RepositoryAccess(null, false, false, "repository-binding-required");
+        // Revocation is a separate security transition, never the requested action.
+        if (current.Holder is not null && current.Holder == access.Actor && !access.CanContribute &&
+            (access.FailureCode is null or "repository-access-denied"))
+        {
+            var revoked = current with { RunVersion = current.RunVersion + 1,
+                LeaseEpoch = current.LeaseEpoch + 1, Holder = null, ClaimedAt = null };
+            await WriteControlTransitionAsync(connection, transaction, run, current, revoked,
+                "ControlLeaseRevoked", access.Actor!, token);
+            current = revoked;
+            await AppendAuditAsync(connection, transaction, run.Correlation.RunId, "revalidate", "control-lease-revoked",
+                access.Actor, token);
+        }
+        return (current, access);
     }
 
     private async Task WriteControlTransitionAsync(

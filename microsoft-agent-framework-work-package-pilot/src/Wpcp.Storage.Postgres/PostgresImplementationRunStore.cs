@@ -36,8 +36,16 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
     public async Task EnsureSchemaAsync(CancellationToken cancellationToken = default)
     {
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        await using var command = new NpgsqlCommand(Schema + AgentSchema + RepositorySchema, connection);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        await using (var schemaLock = new NpgsqlCommand(
+            "SELECT pg_advisory_xact_lock(hashtextextended('wpcp-schema-evolution', 0))", connection, transaction))
+        {
+            await schemaLock.ExecuteNonQueryAsync(cancellationToken);
+        }
+        await using var command = new NpgsqlCommand(Schema + AgentSchema + ContinuationSchema + RepositorySchema,
+            connection, transaction);
         await command.ExecuteNonQueryAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task<StartRunResult> StartAsync(
