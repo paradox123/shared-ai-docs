@@ -25,10 +25,10 @@ real local Git repositories. Product state is read through HTTP/CLI only.
 | Accepted external effect survives | A write succeeds externally but loses its reply. Takeover first adopts that exact receipt and asks for fresh fences; the next decision changes ownership without another interaction. | `test_takeover_reconciles_accepted_write_before_preserving_it` |
 | Invalid receipts fail closed | Malformed external interaction events cannot append a partial canonical transcript during reconciliation, and ownership stays unchanged. | `test_invalid_external_reconciliation_does_not_append_partial_history` |
 
-Tests: [control transfer suite](../../../microsoft-agent-framework-work-package-pilot/tests/test_control_transfer.py),
-[repository tests](../../../microsoft-agent-framework-work-package-pilot/tests/test_repository_reconciliation.py).
+Tests: [control transfer suite](../../../../microsoft-agent-framework-work-package-pilot/tests/test_control_transfer.py),
+[repository tests](../../../../microsoft-agent-framework-work-package-pilot/tests/test_repository_reconciliation.py).
 Public observations and test output:
-[Ticket 08 proof directory](../../../.scratch/distributed-codex-work-package-control-plane/evidence/ticket-08-proof-2026-09-12/).
+[Ticket 08 proof directory](../../../../.scratch/distributed-codex-work-package-control-plane/evidence/ticket-08-proof-2026-09-12/).
 
 ## TDD and validation
 
@@ -50,9 +50,9 @@ results: **104/104 tests passed** (139.714 seconds). The final incremental
 fixture was then tightened to use twenty distinct eligible non-holders in each
 round, and its focused rerun passed. Locked restore, strict OpenSpec validation
 and the complete diff whitespace check passed. Machine-readable
-[summary](../../../.scratch/distributed-codex-work-package-control-plane/evidence/ticket-08-proof-2026-09-12/summary.json),
-[full test output](../../../.scratch/distributed-codex-work-package-control-plane/evidence/ticket-08-proof-2026-09-12/full-test-output.txt)
-and [build output](../../../.scratch/distributed-codex-work-package-control-plane/evidence/ticket-08-proof-2026-09-12/build-output.txt)
+[summary](../../../../.scratch/distributed-codex-work-package-control-plane/evidence/ticket-08-proof-2026-09-12/summary.json),
+[full test output](../../../../.scratch/distributed-codex-work-package-control-plane/evidence/ticket-08-proof-2026-09-12/full-test-output.txt)
+and [build output](../../../../.scratch/distributed-codex-work-package-control-plane/evidence/ticket-08-proof-2026-09-12/build-output.txt)
 are retained. The full suite required one rerun after the review-driven fixes;
 no unrelated suite was substituted for the public behavior proof.
 
@@ -103,3 +103,27 @@ of orphaning accepted work. Adapter tombstones can survive a failed database
 transaction; retry converges on the tombstone. No transfer-created session,
 operation cancel, retry or phase transition is hidden behind a successful
 ownership change.
+
+## Acceptance and archive
+
+Daniel accepted the implementation on 2026-09-12 and requested OpenSpec closure,
+commit and push. Implementation commit: `f494549`.
+
+The final DRY/SOLID/KISS pass rechecked the accepted diff and nearby transfer,
+command-fencing and continuation code. Shared fence validation and receipt
+completion retain one implementation; storage, authorization and adapter
+boundaries remain explicit. No further runtime refactoring was needed.
+
+The standard `openspec archive -y transfer-run-control-atomically` command
+synchronized the canonical `atomic-run-control-transfer` and
+`repository-control-lease` specs and moved the complete change to this archive.
+All eight tasks are complete. Ticket 08 remains `resolved`, with acceptance
+recorded and documentation links updated to this archive. The controlled-adapter
+limits above remain part of the accepted scope.
+
+Closeout checks passed: strict change validation before archive, then
+`openspec validate --all --strict --no-interactive` with 42 passed and zero failed,
+`git diff --check`, and all eleven acceptance-document links resolving. The
+active change directory is absent and the dated archive is present. This
+closeout changes documentation only; the 104-test behavior evidence above
+continues to cover the unchanged implementation.

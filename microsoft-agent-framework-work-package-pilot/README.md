@@ -557,4 +557,4 @@ WPCP_TRANSFER_PROOF_DIR=/tmp/wpcp-transfer-proof \
 python3 -m unittest tests.test_repository_reconciliation -v
 ```
 
-See the [acceptance evidence](../openspec/changes/transfer-run-control-atomically/implementation-evidence.md).
+See the [acceptance evidence](../openspec/changes/archive/2026-09-12-transfer-run-control-atomically/implementation-evidence.md).

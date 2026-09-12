@@ -44,10 +44,17 @@ Findings.
 
 Die Nachweise verwenden kontrollierte externe GitHub-/Codex-Adapter sowie echtes
 Wegwerf-PostgreSQL und lokale Git-Repositories. Realer Codex-App-/GitHub-Zugriff
-bleibt Teil der Tickets 10/14. Der Change bleibt zur menschlichen Abnahme offen;
-er wurde nicht archiviert.
+bleibt Teil der Tickets 10/14. Daniel hat die Umsetzung am 2026-09-12 akzeptiert.
+Der Change ist unter `2026-09-12-transfer-run-control-atomically` archiviert;
+seine Anforderungen wurden in die kanonischen OpenSpec-Specs übernommen.
 
-- [Akzeptanzübersicht und getrennte Review-Ergebnisse](../../../../openspec/changes/transfer-run-control-atomically/implementation-evidence.md)
+- [Akzeptanzübersicht und getrennte Review-Ergebnisse](../../../../openspec/changes/archive/2026-09-12-transfer-run-control-atomically/implementation-evidence.md)
 - [Gespeicherte öffentliche Nachweise](../../evidence/ticket-08-proof-2026-09-12/)
 - [HTTP-/CLI-Verhaltenstests](../../../../microsoft-agent-framework-work-package-pilot/tests/test_control_transfer.py)
 - [Operator-Bedienung und Recovery-Grenzen](../../../../microsoft-agent-framework-work-package-pilot/README.md)
+
+## Comments
+
+- 2026-09-12: Daniel akzeptiert die Umsetzung und beauftragt OpenSpec-Abschluss,
+  Commit und Push. Ticket bleibt `resolved`; der akzeptierte Change wurde mit
+  kanonischem Spec-Abgleich archiviert.
