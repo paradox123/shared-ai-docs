@@ -93,6 +93,7 @@ internal static class OperatorCli
             "claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" or
                 "resume" or "fork" or "fresh-retry" or "handoff" or "write" =>
                 ParseControl(baseUrl, fixtureAccessToken, command, options),
+            "queue" or "interrupt" or "cancel" => ParseActiveControl(baseUrl, fixtureAccessToken, command, options),
             "open" => ParseOpen(baseUrl, fixtureAccessToken, options),
             "--help" or "-h" => throw new ArgumentException("Help does not accept an API base URL."),
             _ => throw new ArgumentException("The command must be start, run, attempt, events, audit, claim, or release."),
@@ -219,6 +220,27 @@ internal static class OperatorCli
                 expectedHeadSha = head == "null" ? null : head, leaseEpoch = epoch,
                 operationId = options.GetValueOrDefault("--operation-id"), receiptId = options.GetValueOrDefault("--receipt-id"),
                 requestId, commandId, message = options.GetValueOrDefault("--message") }, capability);
+    }
+
+    private static Invocation ParseActiveControl(Uri baseUrl, string capability, string mode,
+        IReadOnlyDictionary<string, string> options)
+    {
+        string[] fences = ["--run-id", "--target-attempt-id", "--expected-run-version",
+            "--expected-head-sha", "--lease-epoch", "--command-id"];
+        RequireOnly(options, mode == "queue" ? [.. fences, "--message"] :
+            mode == "interrupt" ? [.. fences, "--message", "--reason"] : [.. fences, "--reason", "--scope"]);
+        var target = Require(options, "--target-attempt-id");
+        var commandId = Require(options, "--command-id");
+        if (!Guid.TryParse(target, out _) || !Guid.TryParse(commandId, out _) ||
+            !long.TryParse(Require(options, "--expected-run-version"), out var version) || version < 1 ||
+            !long.TryParse(Require(options, "--lease-epoch"), out var epoch) || epoch < 0)
+            throw new ArgumentException("Explicit target and control fences required.");
+        var head = Require(options, "--expected-head-sha");
+        return new Invocation(baseUrl, HttpMethod.Post,
+            $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/agent-commands/{mode}",
+            new { targetAttemptId = target, expectedRunVersion = version, expectedHeadSha = head == "null" ? null : head,
+                leaseEpoch = epoch, commandId, message = options.GetValueOrDefault("--message"),
+                reason = options.GetValueOrDefault("--reason"), scope = options.GetValueOrDefault("--scope") }, capability);
     }
 
     private static Invocation ParseOpen(
@@ -383,7 +405,7 @@ internal static class OperatorCli
 
     private static object Usage() => new
     {
-        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|attempt|events|audit|continuation|claim|release|retry|reconcile|adopt|retire|resume|fork|fresh-retry|handoff|open|write> [options]",
+        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|attempt|events|audit|continuation|claim|release|retry|reconcile|adopt|retire|resume|fork|fresh-retry|handoff|open|write|queue|interrupt|cancel> [options]",
         requiredEnvironment = new[] { "WPCP_FIXTURE_ACCESS_TOKEN", "WPCP_PROVIDER_TOKEN" },
         commands = new
         {
@@ -401,6 +423,8 @@ internal static class OperatorCli
             recovery = new[] { "retry", "reconcile", "adopt", "retire" },
             continuationDecision = new[] { "resume", "fork", "fresh-retry", "handoff", "--request-id", "--command-id", "control fences" },
             open = new[] { "--run-id", "--attempt-id", "--request-id", "--command-id" },
+            activeControl = new[] { "queue|interrupt|cancel", "control fences", "--command-id", "--message (queue/interrupt)",
+                "--reason (interrupt/cancel)", "--scope operation|attempt (cancel)" },
             write = new[] { "continuation fences", "--message" },
             run = new[] { "--run-id" },
             events = new[] { "--run-id", "--after" },

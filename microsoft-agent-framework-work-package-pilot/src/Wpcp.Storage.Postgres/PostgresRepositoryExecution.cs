@@ -71,7 +71,7 @@ public sealed partial class PostgresImplementationRunStore
             if (current is not null && current.Plan != plan) throw new AgentAssignmentConflictException();
             if (current is null)
             {
-                await using var legacy = new NpgsqlCommand("SELECT EXISTS(SELECT 1 FROM wpcp_agent_sessions WHERE run_id=@id)", connection, transaction);
+                await using var legacy = new NpgsqlCommand("SELECT EXISTS(SELECT 1 FROM wpcp_agent_sessions WHERE run_id=@id UNION ALL SELECT 1 FROM wpcp_live_attempts WHERE run_id=@id)", connection, transaction);
                 legacy.Parameters.AddWithValue("id", Guid.Parse(runId));
                 if (await legacy.ExecuteScalarAsync(token) is true) throw new AgentAssignmentConflictException();
             }
@@ -178,6 +178,13 @@ public sealed partial class PostgresImplementationRunStore
             await using var mode = new NpgsqlCommand("SELECT pg_try_advisory_xact_lock(hashtextextended(@key, 0))", connection, transaction);
             mode.Parameters.AddWithValue("key", "repository-mode:" + next.Plan.Repository.RepositoryId);
             if (await mode.ExecuteScalarAsync(token) is not true) throw new RepositoryRegistrationBusyException();
+            await using var live = new NpgsqlCommand("""
+                SELECT EXISTS(SELECT 1 FROM wpcp_live_attempts a
+                    JOIN wpcp_implementation_runs r ON r.run_id=a.run_id
+                    WHERE r.repository_id=@repo AND a.state->>'state' IN ('running', 'cancelling'))
+                """, connection, transaction);
+            live.Parameters.AddWithValue("repo", next.Plan.Repository.RepositoryId);
+            if (await live.ExecuteScalarAsync(token) is true) throw new RepositoryRegistrationBusyException();
             var config = next.Plan with { ExpectedBaseSha = "", PredecessorIssueNumber = null };
             await using var register = new NpgsqlCommand("""
                 INSERT INTO wpcp_repository_owners(repository_id, configuration) VALUES (@repo, @config)

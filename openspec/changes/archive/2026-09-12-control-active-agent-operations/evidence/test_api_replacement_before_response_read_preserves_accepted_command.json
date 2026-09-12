@@ -1,0 +1,675 @@
+[
+  {
+    "run": {
+      "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+      "state": "running",
+      "correlation": {
+        "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+        "repositoryId": "repo-1",
+        "issueId": "issue-43",
+        "issueNumber": 43,
+        "commandId": "317a09bf-1c40-4331-9421-122ddae8d315",
+        "repository": {
+          "repositoryId": "repo-1",
+          "fullName": "pilot/fixture",
+          "providerRepositoryId": 9001
+        }
+      },
+      "runStartedAt": "2026-09-12T11:02:11.624872+00:00",
+      "activities": [
+        {
+          "activityId": "721a05f4-a3cd-4936-b084-bdf51e2f5f9a",
+          "activityType": "admission",
+          "state": "completed",
+          "startedAt": "2026-09-12T11:02:11.624872+00:00",
+          "completedAt": "2026-09-12T11:02:11.624872+00:00"
+        },
+        {
+          "activityId": "7ee4d1e5-12a4-4e90-acfa-70108ec4b74c",
+          "activityType": "live-codex",
+          "state": "running",
+          "startedAt": "2026-09-12T11:02:12.021306+00:00",
+          "completedAt": null
+        }
+      ],
+      "attempts": [
+        {
+          "attemptId": "85bb5e82-eb57-4b3c-9b4d-f329c7ebb41f",
+          "activityId": "721a05f4-a3cd-4936-b084-bdf51e2f5f9a",
+          "attemptNumber": 1,
+          "state": "completed",
+          "startedAt": "2026-09-12T11:02:11.624872+00:00",
+          "completedAt": "2026-09-12T11:02:11.624872+00:00",
+          "session": null,
+          "liveOperation": null
+        },
+        {
+          "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+          "activityId": "7ee4d1e5-12a4-4e90-acfa-70108ec4b74c",
+          "attemptNumber": 1,
+          "state": "running",
+          "startedAt": "2026-09-12T11:02:12.021306+00:00",
+          "completedAt": null,
+          "session": null,
+          "liveOperation": {
+            "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+            "activityId": "7ee4d1e5-12a4-4e90-acfa-70108ec4b74c",
+            "sessionId": "1e6a7038-522e-47a4-8767-30dceb19a342",
+            "state": "running",
+            "fenceEpoch": 0,
+            "currentOperation": {
+              "operationKey": "e2bf3dfe-43bc-4a3b-a305-788a93e16cb2",
+              "fenceEpoch": 0,
+              "commandId": "4cc3f1fd-b85d-46e0-a384-2ad240a03530",
+              "message": "survive lost response",
+              "processStatus": "running",
+              "processId": "83255",
+              "stopRequested": false,
+              "response": null
+            },
+            "commands": [
+              {
+                "commandId": "4cc3f1fd-b85d-46e0-a384-2ad240a03530",
+                "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+                "mode": "queue",
+                "acceptancePosition": 5,
+                "message": "survive lost response",
+                "reason": null,
+                "scope": null,
+                "state": "running",
+                "operationKey": "e2bf3dfe-43bc-4a3b-a305-788a93e16cb2",
+                "rejectionReason": null,
+                "queuePosition": null
+              }
+            ]
+          }
+        }
+      ],
+      "processes": [
+        {
+          "processId": "8f31a945-2556-4fa2-981f-df56330e049b",
+          "processKind": "api",
+          "processStartedAt": "2026-09-12T11:02:11.258873+00:00",
+          "processStoppedAt": null,
+          "actor": {
+            "kind": "service",
+            "provider": "wpcp-api",
+            "subjectId": "8f31a945-2556-4fa2-981f-df56330e049b"
+          }
+        },
+        {
+          "processId": "fake-worker:2f1be6d3612f40bda6e0bde996b0bfe1",
+          "processKind": "worker",
+          "processStartedAt": "2026-09-12T11:02:11.96709+00:00",
+          "processStoppedAt": "2026-09-12T11:02:12.159173+00:00",
+          "actor": {
+            "kind": "service",
+            "provider": "wpcp-worker",
+            "subjectId": "fake-worker:2f1be6d3612f40bda6e0bde996b0bfe1"
+          }
+        },
+        {
+          "processId": "9785b121-4d80-48d6-bd77-c219d8c5db21",
+          "processKind": "api",
+          "processStartedAt": "2026-09-12T11:02:12.589031+00:00",
+          "processStoppedAt": null,
+          "actor": {
+            "kind": "service",
+            "provider": "wpcp-api",
+            "subjectId": "9785b121-4d80-48d6-bd77-c219d8c5db21"
+          }
+        },
+        {
+          "processId": "fake-worker:3afc5be7ed6a42f98f6279394466b65b",
+          "processKind": "worker",
+          "processStartedAt": "2026-09-12T11:02:13.086354+00:00",
+          "processStoppedAt": "2026-09-12T11:02:13.269374+00:00",
+          "actor": {
+            "kind": "service",
+            "provider": "wpcp-worker",
+            "subjectId": "fake-worker:3afc5be7ed6a42f98f6279394466b65b"
+          }
+        }
+      ],
+      "heartbeats": [
+        {
+          "heartbeatId": "9f818c20-345e-4867-a26a-b16d4268f9b9",
+          "processId": "8f31a945-2556-4fa2-981f-df56330e049b",
+          "heartbeatAt": "2026-09-12T11:02:11.668427+00:00"
+        },
+        {
+          "heartbeatId": "e1ffc593-308e-43d3-8f50-78ba052826cb",
+          "processId": "fake-worker:2f1be6d3612f40bda6e0bde996b0bfe1",
+          "heartbeatAt": "2026-09-12T11:02:12.11001+00:00"
+        },
+        {
+          "heartbeatId": "d2ea8cac-aac6-4a34-bb35-e4e57c9fae30",
+          "processId": "fake-worker:2f1be6d3612f40bda6e0bde996b0bfe1",
+          "heartbeatAt": "2026-09-12T11:02:12.149041+00:00"
+        },
+        {
+          "heartbeatId": "d3428644-7655-4e8a-b3a0-acbfd7d146e5",
+          "processId": "8f31a945-2556-4fa2-981f-df56330e049b",
+          "heartbeatAt": "2026-09-12T11:02:12.189067+00:00"
+        },
+        {
+          "heartbeatId": "8d9692c3-47cd-4b6b-92ac-c94058b3cd04",
+          "processId": "8f31a945-2556-4fa2-981f-df56330e049b",
+          "heartbeatAt": "2026-09-12T11:02:12.347153+00:00"
+        },
+        {
+          "heartbeatId": "e388291f-a6c9-43c1-a92f-e13a454cdcc4",
+          "processId": "8f31a945-2556-4fa2-981f-df56330e049b",
+          "heartbeatAt": "2026-09-12T11:02:12.3736+00:00"
+        },
+        {
+          "heartbeatId": "fb208a4b-704f-49b2-943b-9ac3a65c40d2",
+          "processId": "9785b121-4d80-48d6-bd77-c219d8c5db21",
+          "heartbeatAt": "2026-09-12T11:02:12.895603+00:00"
+        },
+        {
+          "heartbeatId": "bfbe6bb9-02dd-4cba-9fcf-8aab458fcd70",
+          "processId": "fake-worker:3afc5be7ed6a42f98f6279394466b65b",
+          "heartbeatAt": "2026-09-12T11:02:13.221724+00:00"
+        },
+        {
+          "heartbeatId": "56c4d14d-e126-4bb3-b666-d33178ef08de",
+          "processId": "fake-worker:3afc5be7ed6a42f98f6279394466b65b",
+          "heartbeatAt": "2026-09-12T11:02:13.258962+00:00"
+        },
+        {
+          "heartbeatId": "aac90cd6-af36-4020-b073-d689bec4fc86",
+          "processId": "9785b121-4d80-48d6-bd77-c219d8c5db21",
+          "heartbeatAt": "2026-09-12T11:02:13.294382+00:00"
+        },
+        {
+          "heartbeatId": "953f8d39-7c8c-4c7a-9c82-26d4ac746846",
+          "processId": "9785b121-4d80-48d6-bd77-c219d8c5db21",
+          "heartbeatAt": "2026-09-12T11:02:13.325293+00:00"
+        },
+        {
+          "heartbeatId": "28bd2ece-f880-4922-bc6b-bcceec598abe",
+          "processId": "9785b121-4d80-48d6-bd77-c219d8c5db21",
+          "heartbeatAt": "2026-09-12T11:02:13.352223+00:00"
+        }
+      ],
+      "executionEvidence": [],
+      "provenance": {
+        "sourceRevision": "r1",
+        "packageRevision": "r1",
+        "configurationRevision": "r1",
+        "contractRevision": "r1"
+      },
+      "redaction": {
+        "occurred": false,
+        "policyVersion": "",
+        "marker": ""
+      },
+      "lastPosition": 8,
+      "control": {
+        "runVersion": 8,
+        "targetAttemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+        "headSha": null,
+        "leaseEpoch": 1,
+        "holder": {
+          "kind": "human",
+          "provider": "github",
+          "subjectId": "101"
+        },
+        "claimedAt": "2026-09-12T11:02:12.323677+00:00"
+      },
+      "authorization": {
+        "code": "observed",
+        "access": {
+          "actor": {
+            "kind": "human",
+            "provider": "github",
+            "subjectId": "102"
+          },
+          "canRead": true,
+          "canContribute": false,
+          "failureCode": null,
+          "isHuman": true
+        },
+        "current": {
+          "runVersion": 8,
+          "targetAttemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+          "headSha": null,
+          "leaseEpoch": 1,
+          "holder": {
+            "kind": "human",
+            "provider": "github",
+            "subjectId": "101"
+          },
+          "claimedAt": "2026-09-12T11:02:12.323677+00:00"
+        },
+        "continuation": null,
+        "accepted": true,
+        "canClaim": false,
+        "canRelease": false
+      },
+      "repositoryExecution": null
+    },
+    "history": {
+      "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+      "after": 0,
+      "events": [
+        {
+          "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+          "position": 1,
+          "eventId": "02406c85-04d5-41ac-804d-772149a11d3b",
+          "eventType": "ImplementationRunStarted",
+          "occurredAt": "2026-09-12T11:02:11.624872+00:00",
+          "redaction": {
+            "occurred": false,
+            "policyVersion": "",
+            "marker": ""
+          },
+          "payload": {
+            "note": "control proof",
+            "actor": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "101"
+            },
+            "authorization": {
+              "source": "github",
+              "decision": "authorized"
+            }
+          },
+          "correlation": {
+            "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+            "issueId": "issue-43",
+            "commandId": "317a09bf-1c40-4331-9421-122ddae8d315",
+            "repository": {
+              "fullName": "pilot/fixture",
+              "repositoryId": "repo-1",
+              "providerRepositoryId": 9001
+            },
+            "issueNumber": 43,
+            "repositoryId": "repo-1"
+          },
+          "provenance": {
+            "sourceRevision": "r1",
+            "packageRevision": "r1",
+            "contractRevision": "r1",
+            "configurationRevision": "r1"
+          }
+        },
+        {
+          "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+          "position": 2,
+          "eventId": "ade2dd38-e690-4752-962c-28d20cd3ce30",
+          "eventType": "ActiveAgentOperationPrepared",
+          "occurredAt": "2026-09-12T11:02:12.030667+00:00",
+          "redaction": {
+            "occurred": false,
+            "policyVersion": "controlled-canary-v1",
+            "marker": "[REDACTED:CONTROLLED-CANARY]"
+          },
+          "payload": {
+            "state": "running",
+            "commands": [],
+            "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+            "sessionId": "1e6a7038-522e-47a4-8767-30dceb19a342",
+            "activityId": "7ee4d1e5-12a4-4e90-acfa-70108ec4b74c",
+            "fenceEpoch": 0,
+            "currentOperation": {
+              "message": "controlled active operation",
+              "response": null,
+              "commandId": null,
+              "processId": null,
+              "fenceEpoch": 0,
+              "operationKey": "6fbb4719-6595-41a3-bde3-25e8fc45846e",
+              "processStatus": "start-pending",
+              "stopRequested": false
+            }
+          },
+          "correlation": {
+            "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+            "issueId": "issue-43",
+            "commandId": "317a09bf-1c40-4331-9421-122ddae8d315",
+            "repository": {
+              "fullName": "pilot/fixture",
+              "repositoryId": "repo-1",
+              "providerRepositoryId": 9001
+            },
+            "issueNumber": 43,
+            "repositoryId": "repo-1"
+          },
+          "provenance": {
+            "sourceRevision": "r1",
+            "packageRevision": "r1",
+            "contractRevision": "r1",
+            "configurationRevision": "r1"
+          }
+        },
+        {
+          "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+          "position": 3,
+          "eventId": "304b8da1-e265-4400-8cfd-112ee76ec299",
+          "eventType": "ActiveAgentProcessObserved",
+          "occurredAt": "2026-09-12T11:02:12.080635+00:00",
+          "redaction": {
+            "occurred": false,
+            "policyVersion": "controlled-canary-v1",
+            "marker": "[REDACTED:CONTROLLED-CANARY]"
+          },
+          "payload": {
+            "receipt": {
+              "message": "controlled active operation",
+              "response": null,
+              "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+              "commandId": null,
+              "processId": "83208",
+              "sessionId": "1e6a7038-522e-47a4-8767-30dceb19a342",
+              "fenceEpoch": 0,
+              "effectScope": "none",
+              "operationKey": "6fbb4719-6595-41a3-bde3-25e8fc45846e",
+              "processStatus": "running",
+              "contractVersion": "AgentSessionAdapter/v1"
+            },
+            "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+            "commandId": null,
+            "sessionId": "1e6a7038-522e-47a4-8767-30dceb19a342",
+            "fenceEpoch": 0,
+            "operationKey": "6fbb4719-6595-41a3-bde3-25e8fc45846e",
+            "processStatus": "running"
+          },
+          "correlation": {
+            "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+            "issueId": "issue-43",
+            "commandId": "317a09bf-1c40-4331-9421-122ddae8d315",
+            "repository": {
+              "fullName": "pilot/fixture",
+              "repositoryId": "repo-1",
+              "providerRepositoryId": 9001
+            },
+            "issueNumber": 43,
+            "repositoryId": "repo-1"
+          },
+          "provenance": {
+            "sourceRevision": "r1",
+            "packageRevision": "r1",
+            "contractRevision": "r1",
+            "configurationRevision": "r1"
+          }
+        },
+        {
+          "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+          "position": 4,
+          "eventId": "5341abfc-8ebd-46de-950e-66d7311b63ff",
+          "eventType": "ControlLeaseClaimed",
+          "occurredAt": "2026-09-12T11:02:12.32421+00:00",
+          "redaction": {
+            "occurred": false,
+            "policyVersion": "",
+            "marker": ""
+          },
+          "payload": {
+            "actor": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "101"
+            },
+            "current": {
+              "holder": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "101"
+              },
+              "headSha": null,
+              "claimedAt": "2026-09-12T11:02:12.323677+00:00",
+              "leaseEpoch": 1,
+              "runVersion": 4,
+              "targetAttemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c"
+            },
+            "previous": {
+              "holder": null,
+              "headSha": null,
+              "claimedAt": null,
+              "leaseEpoch": 0,
+              "runVersion": 3,
+              "targetAttemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c"
+            }
+          },
+          "correlation": {
+            "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+            "issueId": "issue-43",
+            "commandId": "317a09bf-1c40-4331-9421-122ddae8d315",
+            "repository": {
+              "fullName": "pilot/fixture",
+              "repositoryId": "repo-1",
+              "providerRepositoryId": 9001
+            },
+            "issueNumber": 43,
+            "repositoryId": "repo-1"
+          },
+          "provenance": {
+            "sourceRevision": "r1",
+            "packageRevision": "r1",
+            "contractRevision": "r1",
+            "configurationRevision": "r1"
+          }
+        },
+        {
+          "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+          "position": 5,
+          "eventId": "68785900-2671-48ad-bd70-9e4b275fef80",
+          "eventType": "ActiveAgentCommandAccepted",
+          "occurredAt": "2026-09-12T11:02:12.411277+00:00",
+          "redaction": {
+            "occurred": false,
+            "policyVersion": "controlled-canary-v1",
+            "marker": "[REDACTED:CONTROLLED-CANARY]"
+          },
+          "payload": {
+            "actor": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "101"
+            },
+            "reason": null,
+            "command": {
+              "mode": "queue",
+              "scope": null,
+              "state": "queued",
+              "reason": null,
+              "message": "survive lost response",
+              "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+              "commandId": "4cc3f1fd-b85d-46e0-a384-2ad240a03530",
+              "operationKey": null,
+              "queuePosition": 1,
+              "rejectionReason": null,
+              "acceptancePosition": 5
+            },
+            "message": "survive lost response",
+            "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c"
+          },
+          "correlation": {
+            "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+            "issueId": "issue-43",
+            "commandId": "317a09bf-1c40-4331-9421-122ddae8d315",
+            "repository": {
+              "fullName": "pilot/fixture",
+              "repositoryId": "repo-1",
+              "providerRepositoryId": 9001
+            },
+            "issueNumber": 43,
+            "repositoryId": "repo-1"
+          },
+          "provenance": {
+            "sourceRevision": "r1",
+            "packageRevision": "r1",
+            "contractRevision": "r1",
+            "configurationRevision": "r1"
+          }
+        },
+        {
+          "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+          "position": 6,
+          "eventId": "0efb5e46-4049-400c-9a7a-349085935771",
+          "eventType": "ActiveAgentResponseObserved",
+          "occurredAt": "2026-09-12T11:02:13.171888+00:00",
+          "redaction": {
+            "occurred": false,
+            "policyVersion": "controlled-canary-v1",
+            "marker": "[REDACTED:CONTROLLED-CANARY]"
+          },
+          "payload": {
+            "receipt": {
+              "effects": [],
+              "message": "controlled active operation",
+              "response": {
+                "text": "answer: controlled active operation"
+              },
+              "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+              "commandId": null,
+              "processId": "83208",
+              "sessionId": "1e6a7038-522e-47a4-8767-30dceb19a342",
+              "fenceEpoch": 0,
+              "effectScope": "none",
+              "operationKey": "6fbb4719-6595-41a3-bde3-25e8fc45846e",
+              "processStatus": "completed",
+              "reconciliation": "reconciled",
+              "contractVersion": "AgentSessionAdapter/v1"
+            },
+            "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+            "commandId": null,
+            "sessionId": "1e6a7038-522e-47a4-8767-30dceb19a342",
+            "fenceEpoch": 0,
+            "operationKey": "6fbb4719-6595-41a3-bde3-25e8fc45846e",
+            "processStatus": "completed"
+          },
+          "correlation": {
+            "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+            "issueId": "issue-43",
+            "commandId": "317a09bf-1c40-4331-9421-122ddae8d315",
+            "repository": {
+              "fullName": "pilot/fixture",
+              "repositoryId": "repo-1",
+              "providerRepositoryId": 9001
+            },
+            "issueNumber": 43,
+            "repositoryId": "repo-1"
+          },
+          "provenance": {
+            "sourceRevision": "r1",
+            "packageRevision": "r1",
+            "contractRevision": "r1",
+            "configurationRevision": "r1"
+          }
+        },
+        {
+          "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+          "position": 7,
+          "eventId": "29c135d4-473b-47f4-9887-9930edceeafe",
+          "eventType": "ActiveAgentCommandDeliveryRequested",
+          "occurredAt": "2026-09-12T11:02:13.177872+00:00",
+          "redaction": {
+            "occurred": false,
+            "policyVersion": "controlled-canary-v1",
+            "marker": "[REDACTED:CONTROLLED-CANARY]"
+          },
+          "payload": {
+            "command": {
+              "mode": "queue",
+              "scope": null,
+              "state": "queued",
+              "reason": null,
+              "message": "survive lost response",
+              "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+              "commandId": "4cc3f1fd-b85d-46e0-a384-2ad240a03530",
+              "operationKey": null,
+              "queuePosition": 1,
+              "rejectionReason": null,
+              "acceptancePosition": 5
+            },
+            "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+            "operation": {
+              "message": "survive lost response",
+              "response": null,
+              "commandId": "4cc3f1fd-b85d-46e0-a384-2ad240a03530",
+              "processId": null,
+              "fenceEpoch": 0,
+              "operationKey": "e2bf3dfe-43bc-4a3b-a305-788a93e16cb2",
+              "processStatus": "start-pending",
+              "stopRequested": false
+            },
+            "sessionId": "1e6a7038-522e-47a4-8767-30dceb19a342"
+          },
+          "correlation": {
+            "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+            "issueId": "issue-43",
+            "commandId": "317a09bf-1c40-4331-9421-122ddae8d315",
+            "repository": {
+              "fullName": "pilot/fixture",
+              "repositoryId": "repo-1",
+              "providerRepositoryId": 9001
+            },
+            "issueNumber": 43,
+            "repositoryId": "repo-1"
+          },
+          "provenance": {
+            "sourceRevision": "r1",
+            "packageRevision": "r1",
+            "contractRevision": "r1",
+            "configurationRevision": "r1"
+          }
+        },
+        {
+          "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+          "position": 8,
+          "eventId": "290ed299-fe0a-432f-8833-0c89c2fb3bab",
+          "eventType": "ActiveAgentProcessObserved",
+          "occurredAt": "2026-09-12T11:02:13.193506+00:00",
+          "redaction": {
+            "occurred": false,
+            "policyVersion": "controlled-canary-v1",
+            "marker": "[REDACTED:CONTROLLED-CANARY]"
+          },
+          "payload": {
+            "receipt": {
+              "message": "survive lost response",
+              "response": null,
+              "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+              "commandId": "4cc3f1fd-b85d-46e0-a384-2ad240a03530",
+              "processId": "83255",
+              "sessionId": "1e6a7038-522e-47a4-8767-30dceb19a342",
+              "fenceEpoch": 0,
+              "effectScope": "none",
+              "operationKey": "e2bf3dfe-43bc-4a3b-a305-788a93e16cb2",
+              "processStatus": "running",
+              "contractVersion": "AgentSessionAdapter/v1"
+            },
+            "attemptId": "0385e0b2-05f4-47f8-a942-ec60a2918a4c",
+            "commandId": "4cc3f1fd-b85d-46e0-a384-2ad240a03530",
+            "sessionId": "1e6a7038-522e-47a4-8767-30dceb19a342",
+            "fenceEpoch": 0,
+            "operationKey": "e2bf3dfe-43bc-4a3b-a305-788a93e16cb2",
+            "processStatus": "running"
+          },
+          "correlation": {
+            "runId": "43415f4c-bc97-459e-827a-c789cb7448ff",
+            "issueId": "issue-43",
+            "commandId": "317a09bf-1c40-4331-9421-122ddae8d315",
+            "repository": {
+              "fullName": "pilot/fixture",
+              "repositoryId": "repo-1",
+              "providerRepositoryId": 9001
+            },
+            "issueNumber": 43,
+            "repositoryId": "repo-1"
+          },
+          "provenance": {
+            "sourceRevision": "r1",
+            "packageRevision": "r1",
+            "contractRevision": "r1",
+            "configurationRevision": "r1"
+          }
+        }
+      ],
+      "lastPosition": 8
+    }
+  }
+]

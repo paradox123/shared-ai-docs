@@ -26,7 +26,14 @@ try
             options.DurableTaskOrchestrationId,
             options.DurableTaskTaskId,
             options.EvidenceNote));
-    if (options.RepositoryPlanPath is not null)
+    if (options.DeliverActive || options.LiveActivityKey is not null)
+    {
+        if (options.LiveActivityKey is not null)
+            await store.PrepareActiveAgentAsync(options.RunId, options.LiveActivityKey,
+                Wpcp.Worker.ControlledHttp.Origin(options.FakeAgentOrigin ?? "").AbsoluteUri);
+        await Wpcp.Worker.ActiveAgentWorkflow.ExecuteAsync(store, options.RunId, options.PauseAt);
+    }
+    else if (options.RepositoryPlanPath is not null)
         await Wpcp.Worker.RepositoryWorkflow.ExecuteAsync(store, options.RunId, options.RepositoryPlanPath, options.PauseAt);
     else if (options.FakeAgentOrigin is not null)
         await Wpcp.Worker.FakeAgentWorkflow.ExecuteAsync(store, options.RunId,
@@ -105,7 +112,7 @@ internal sealed record WorkerOptions(
     string? PauseAt,
     bool RejectBlocked,
     int AgentTimeoutMilliseconds,
-    string? RepositoryPlanPath)
+    string? RepositoryPlanPath, string? LiveActivityKey, bool DeliverActive)
 {
     public static WorkerOptions Parse(IReadOnlyList<string> arguments)
     {
@@ -127,7 +134,7 @@ internal sealed record WorkerOptions(
         }
 
         var pauseAt = Value(values, "--pause-at");
-        if (pauseAt is not (null or "after-session-start" or "after-session-mapping" or "after-result-observed" or "after-git-effect" or "after-provider-effect" or "after-reconciled-effect" or "after-session-receipt"))
+        if (pauseAt is not (null or "before-active-dispatch" or "before-active-delivery" or "after-active-response" or "after-active-stop" or "after-active-delivery" or "after-session-start" or "after-session-mapping" or "after-result-observed" or "after-git-effect" or "after-provider-effect" or "after-reconciled-effect" or "after-session-receipt"))
             throw new ArgumentException("Unknown fake fault boundary.");
         var rejectText = Value(values, "--reject-blocked");
         if (rejectText is not (null or "true" or "false"))
@@ -148,7 +155,7 @@ internal sealed record WorkerOptions(
             pauseAt,
             rejectText == "true",
             PositiveIntegerOrDefault(values, "--agent-timeout-ms", 10000),
-            Value(values, "--repository-plan"));
+            Value(values, "--repository-plan"), Value(values, "--live-activity-key"), Value(values, "--deliver-active") == "true");
     }
 
     private static Dictionary<string, string> ParseOptions(IReadOnlyList<string> arguments)

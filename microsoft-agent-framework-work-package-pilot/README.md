@@ -104,9 +104,9 @@ Regrant requires a new claim. Disconnect and token rotation for the same human
 leave the lease intact; no token is retained for background permission checks.
 An invalid token denies the request without guessing its owner or releasing a lease.
 
-The control context is currently the completed admission attempt and an explicit
-null head. Creating writer heads/attempts, live agent commands, transfer and forced
-takeover belong to subsequent tickets. Worker evidence has `kind: service`;
+For the original admission-only path, the control context is the completed
+admission attempt and an explicit null head. The later slices below add sessions,
+attempts and live commands; transfer and forced takeover remain subsequent tickets. Worker evidence has `kind: service`;
 human admission/control/audit records carry `kind: human`, provider and subject ID.
 This separates identities asserted by the provider; it cannot detect automation
 using a human's own credential.
@@ -382,3 +382,89 @@ repository test module. It writes public state transitions, receipts, canonical
 history, external operation counts and killed-worker exit codes without database
 access or provider credentials. Additional crash hooks `after-reconciled-effect`
 and `after-session-receipt` prove idempotent local receipt processing/finalization.
+
+## Targeted active operations (Ticket 07)
+
+The live adapter path adds `queue`, `interrupt` and `cancel` to the Operator CLI
+and `POST /api/v1/runs/{runId}/agent-commands/{mode}` to the API. Select a concrete
+`attemptId` from `run` or `attempt` read-back. `attempt.liveOperation` shows the
+session, current operation/process, fence epoch and ordered command inbox.
+The API rejects an omitted target; the CLI requires `--target-attempt-id`.
+Unlike the admission control context's suggested latest target, live commands
+can select any active attempt belonging to the run.
+
+Each command requires `--command-id` (UUID), `--target-attempt-id`,
+`--expected-run-version`, `--expected-head-sha` (explicit `null` when absent) and
+`--lease-epoch`, plus these mode-specific options:
+
+| Command | Additional options | Behavior |
+| --- | --- | --- |
+| `queue` | `--message` | Execute serially after the current operation in acceptance order. |
+| `interrupt` | `--message`, `--reason` | Advance the operation fence, stop/reconcile the old process, execute this command next, then retain the previous FIFO order. |
+| `cancel` | `--reason`, `--scope operation` | Stop the current operation; previously accepted queued commands remain eligible. |
+| `cancel` | `--reason`, `--scope attempt` | Stop the chosen attempt and visibly reject its pending commands; no automatic retry. |
+
+Use the latest version/head/lease from public read-back for each new decision.
+Repeating the same command ID and redacted intent returns its persisted status;
+substituting another target, message, mode, reason or scope conflicts. A second
+interrupt/cancel during an outstanding stop conflicts. Admission, stop intent,
+reconciliation and agent replies share the same Run History and command/operation
+identities. Human stop decisions do not create repair rounds. An attempt's
+completion timestamp is set only when its stop is confirmed.
+
+The bounded local worker pass is independent of the accepting API or original
+worker. It adopts durable receipts on every invocation. For an admitted,
+unregistered disposable run, start the external controlled adapter and prepare
+an activity (all commands below run from this directory):
+
+```bash
+python3 tests/live_codex_provider.py --port 5092 --database /tmp/wpcp-live-demo.sqlite
+```
+
+In another terminal with `WPCP_CONNECTION_STRING` set, run:
+
+```bash
+dotnet src/Wpcp.Worker/bin/Debug/net10.0/Wpcp.Worker.dll \
+  --fixture tests/Wpcp.BlackBox.Tests/fixtures/synthetic-provider-redaction-fixture.json \
+  --run-id <run-id> --worker-id live-worker \
+  --fake-agent-origin http://127.0.0.1:5092 --live-activity-key planning
+```
+
+A second activity key creates a separately targeted attempt; repeating a key
+adopts the original assignment. Replacement processing needs only the persisted
+run and database, with no adapter-origin or original-worker argument:
+
+```bash
+dotnet src/Wpcp.Worker/bin/Debug/net10.0/Wpcp.Worker.dll \
+  --fixture tests/Wpcp.BlackBox.Tests/fixtures/synthetic-provider-redaction-fixture.json \
+  --run-id <run-id> --worker-id replacement --deliver-active true
+```
+
+Invoke this pass after command acceptance or external operation completion. It
+stops at a still-running operation and processes other attempts independently.
+An unavailable adapter or rejected receipt stays pending with a diagnostic in
+Run History. This ticket uses explicit local worker passes; it does not install
+an automatic polling service or DTS orchestration.
+
+The controlled provider's `POST /operations/{operationKey}/complete` with `{}`
+finishes its real child process and exposes a deterministic agent answer.
+Its durable stop tombstone also blocks delayed starts. The adapter contract
+requires immutable attempt/session/command/operation identities, fence epoch,
+message, process ID, terminal response and explicit effect reconciliation.
+The live fixture is incapable of repository writes (`effectScope: none`);
+nonempty or conflicting effects block further delivery. Live runs cannot gain
+later repository provenance or overlap repository registration. Real Codex
+process control and reconciliation of live Git/GitHub writes remain Ticket 10.
+The existing Ticket 04/06 blocked-session and Human Request paths remain separate.
+
+Run the process proof and optionally export sanitized public HTTP evidence:
+
+```bash
+python3 -m unittest tests.test_active_agent_control -v
+```
+
+Set `WPCP_ACTIVE_PROOF_DIR` to an output directory to export each test's Operator
+projection and canonical history. Tests cover API SIGKILL before response read,
+worker SIGKILL around start/stop/dispatch/response, concurrent replacement,
+stop-before-start, late output, parallel isolation, redaction and authorization.
+See the [acceptance overview](../openspec/changes/archive/2026-09-12-control-active-agent-operations/implementation-evidence.md).

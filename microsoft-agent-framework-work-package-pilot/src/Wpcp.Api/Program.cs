@@ -32,6 +32,25 @@ app.Use(async (context, next) =>
         await context.Response.WriteAsJsonAsync(new { code = "run-store-unavailable" });
     }
 });
+app.MapPost("/api/v1/runs/{runId}/agent-commands/{mode}",
+    async (string runId, string mode, ActiveAgentCommandRequest request, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        var decision = await store.DecideActiveAgentAsync(runId, mode, request,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+        var status = decision.Code switch
+        {
+            "agent-command-accepted" => 202,
+            "repository-provider-unavailable" => 503,
+            "provider-authentication-required" => 401,
+            "implementation-run-not-found" => 404,
+            "invalid-agent-command" => 400,
+            "repository-access-denied" or "repository-contribution-required" or "control-lease-required" => 403,
+            _ => 409,
+        };
+        return Results.Json(decision, statusCode: status);
+    });
+
 app.MapGet("/healthz", () => Results.Text("Healthy"));
 
 app.MapPost(

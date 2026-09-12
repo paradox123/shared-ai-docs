@@ -55,3 +55,15 @@ replacement. It reads only HTTP/CLI state plus the fake provider's public
 diagnostics; it never inspects product tables. All database containers,
 provider processes and receipt files are disposable. This is explicit local
 delivery, not automatic DTS orchestration or real Codex app integration.
+
+## Ticket 07 active operations
+
+`tests/test_active_agent_control.py` launches `live_codex_provider.py`, whose
+independent SQLite receipts own real child processes. It verifies targeted
+HTTP/CLI admission, FIFO delivery, stop-before-start, scoped cancel, adapter
+receipt binding and actual process termination. Worker stdin fault boundaries
+and SIGKILL exercise external success gaps and delayed old output. Concurrent
+replacement workers and API replacement prove durable command identities.
+Repository registration remains excluded while external live processes exist.
+Optional `WPCP_ACTIVE_PROOF_DIR` exports only the public redacted run/history
+surfaces; the exporter checks every controlled canary before writing.

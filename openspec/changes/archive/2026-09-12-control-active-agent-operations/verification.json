@@ -1,0 +1,22 @@
+{
+  "recordedAt": "2026-09-12T11:06:59.561897+00:00",
+  "change": "control-active-agent-operations",
+  "activeTests": 15,
+  "regressionTests": 87,
+  "proofRuns": 21,
+  "canonicalEvents": 164,
+  "sourceSha256": {
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Domain/ActiveAgentOperations.cs": "e1b161ea6b19aff44e479a111065239d77846b8ff04e20a2e475fc08219507eb",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Domain/ImplementationRunContracts.cs": "da819400e74cbd27d550d30eaf094210b1c6f278e0b36a1cb8edb553efed9b15",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Api/Program.cs": "2266c600aeff0e883c2e005b8ea2af0ce7992fb2f759f5e01fded384b6744fd1",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.OperatorCli/Program.cs": "6166a6cd996ca4e4dd71b6294f77861ad9768a072d8e4a6469e39a7d470fc23d",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Worker/Program.cs": "3715ebb282d3fc2d035b566e6301c126b8b94fe399990c322f2ea99aa0e388ae",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Worker/ActiveAgentWorkflow.cs": "54ce044c700ad9c8ce5390aeb7dfe013dc1fb134859b3089702128134fdb6f11",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Storage.Postgres/PostgresActiveAgentOperations.cs": "9e0bb58baf63ac7e1fe87f005a6c8a65ec5734b1d0b06b0736b7d0c60dd720ec",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Storage.Postgres/PostgresActiveAgentDelivery.cs": "2e080c3be1db04a98e9cacae2f66954b02e60941113eb49533fc1f87d9586640",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Storage.Postgres/PostgresImplementationRunStore.cs": "f84f7d76a48bea35c55001e1e2ec3563bd323ad5ec0879d85351a2aef3de4a7d",
+    "microsoft-agent-framework-work-package-pilot/src/Wpcp.Storage.Postgres/PostgresRepositoryExecution.cs": "734b7e896e03350504bea6d978b0cc56ed3d7607f05d07e2d4fa6b51e7ce3c59",
+    "microsoft-agent-framework-work-package-pilot/tests/live_codex_provider.py": "4d00e4bae99a17f3dc9c30cc451b98690bef3eb669d46955021ce8badd739e4e",
+    "microsoft-agent-framework-work-package-pilot/tests/test_active_agent_control.py": "fbfcb5f3596e9148f48a74bb5c81c258e506ec6431ab4b6e9d0a722afe67644d"
+  }
+}
