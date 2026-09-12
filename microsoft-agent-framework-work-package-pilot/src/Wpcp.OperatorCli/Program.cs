@@ -89,7 +89,13 @@ internal static class OperatorCli
             "attempt" => ParseAttempt(baseUrl, fixtureAccessToken, options),
             "events" => ParseEvents(baseUrl, fixtureAccessToken, options),
             "audit" => ParseAudit(baseUrl, fixtureAccessToken, options),
-            "claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" => ParseControl(baseUrl, fixtureAccessToken, command, options),
+            "continuation" => ParseContinuation(baseUrl, fixtureAccessToken, options),
+            "claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" or
+                "resume" or "fork" or "fresh-retry" or "handoff" or "write" or
+                "request-transfer" or "approve-transfer" or "reject-transfer" or "force-takeover" =>
+                ParseControl(baseUrl, fixtureAccessToken, command, options),
+            "queue" or "interrupt" or "cancel" => ParseActiveControl(baseUrl, fixtureAccessToken, command, options),
+            "open" => ParseOpen(baseUrl, fixtureAccessToken, options),
             "--help" or "-h" => throw new ArgumentException("Help does not accept an API base URL."),
             _ => throw new ArgumentException("The command must be start, run, attempt, events, audit, claim, or release."),
         };
@@ -193,7 +199,12 @@ internal static class OperatorCli
         Uri baseUrl, string capability, string action, IReadOnlyDictionary<string, string> options)
     {
         string[] fences = ["--run-id", "--target-attempt-id", "--expected-run-version", "--expected-head-sha", "--lease-epoch"];
-        RequireOnly(options, action == "adopt" ? [..fences, "--operation-id", "--receipt-id"] : fences);
+        var transfer = action is "request-transfer" or "approve-transfer" or "reject-transfer";
+        var continuation = action is "resume" or "fork" or "fresh-retry" or "handoff" or "write";
+        string[] expected = action == "force-takeover" ? [.. fences, "--reason"] : transfer ? [.. fences, "--request-id", "--reason"] : action == "adopt" ? [.. fences, "--operation-id", "--receipt-id"] :
+            continuation ? action == "write" ? [.. fences, "--request-id", "--command-id", "--message"] :
+                [.. fences, "--request-id", "--command-id"] : fences;
+        RequireOnly(options, expected);
         if (!long.TryParse(Require(options, "--expected-run-version"), NumberStyles.None,
                 CultureInfo.InvariantCulture, out var version) || version < 1 ||
             !long.TryParse(Require(options, "--lease-epoch"), NumberStyles.None,
@@ -201,11 +212,50 @@ internal static class OperatorCli
             !Guid.TryParse(Require(options, "--target-attempt-id"), out _))
             throw new ArgumentException("Control fences are required.");
         var head = Require(options, "--expected-head-sha");
+        var requestId = options.GetValueOrDefault("--request-id");
+        var commandId = options.GetValueOrDefault("--command-id");
+        if (continuation && (!Guid.TryParse(requestId, out _) || !Guid.TryParse(commandId, out _)))
+            throw new ArgumentException("Continuation request and command identities are required.");
         return new Invocation(baseUrl, HttpMethod.Post,
             $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/control/{action}",
             new { targetAttemptId = Require(options, "--target-attempt-id"), expectedRunVersion = version,
                 expectedHeadSha = head == "null" ? null : head, leaseEpoch = epoch,
-                operationId = options.GetValueOrDefault("--operation-id"), receiptId = options.GetValueOrDefault("--receipt-id") }, capability);
+                operationId = options.GetValueOrDefault("--operation-id"), receiptId = options.GetValueOrDefault("--receipt-id"),
+                requestId, commandId, message = options.GetValueOrDefault("--message"), reason = options.GetValueOrDefault("--reason") }, capability);
+    }
+
+    private static Invocation ParseActiveControl(Uri baseUrl, string capability, string mode,
+        IReadOnlyDictionary<string, string> options)
+    {
+        string[] fences = ["--run-id", "--target-attempt-id", "--expected-run-version",
+            "--expected-head-sha", "--lease-epoch", "--command-id"];
+        RequireOnly(options, mode == "queue" ? [.. fences, "--message"] :
+            mode == "interrupt" ? [.. fences, "--message", "--reason"] : [.. fences, "--reason", "--scope"]);
+        var target = Require(options, "--target-attempt-id");
+        var commandId = Require(options, "--command-id");
+        if (!Guid.TryParse(target, out _) || !Guid.TryParse(commandId, out _) ||
+            !long.TryParse(Require(options, "--expected-run-version"), out var version) || version < 1 ||
+            !long.TryParse(Require(options, "--lease-epoch"), out var epoch) || epoch < 0)
+            throw new ArgumentException("Explicit target and control fences required.");
+        var head = Require(options, "--expected-head-sha");
+        return new Invocation(baseUrl, HttpMethod.Post,
+            $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/agent-commands/{mode}",
+            new { targetAttemptId = target, expectedRunVersion = version, expectedHeadSha = head == "null" ? null : head,
+                leaseEpoch = epoch, commandId, message = options.GetValueOrDefault("--message"),
+                reason = options.GetValueOrDefault("--reason"), scope = options.GetValueOrDefault("--scope") }, capability);
+    }
+
+    private static Invocation ParseOpen(
+        Uri baseUrl, string capability, IReadOnlyDictionary<string, string> options)
+    {
+        RequireOnly(options, "--run-id", "--attempt-id", "--request-id", "--command-id");
+        var requestId = Require(options, "--request-id");
+        var commandId = Require(options, "--command-id");
+        if (!Guid.TryParse(requestId, out _) || !Guid.TryParse(commandId, out _))
+            throw new ArgumentException("Session-open identities are required.");
+        return new Invocation(baseUrl, HttpMethod.Post,
+            $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/attempts/{Uri.EscapeDataString(Require(options, "--attempt-id"))}/open",
+            new { requestId, commandId }, capability);
     }
 
     private static Invocation ParseAudit(Uri baseUrl, string capability, IReadOnlyDictionary<string, string> options)
@@ -213,6 +263,17 @@ internal static class OperatorCli
         RequireOnly(options, "--run-id");
         return new Invocation(baseUrl, HttpMethod.Get,
             $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/audit", null, capability);
+    }
+
+    private static Invocation ParseContinuation(Uri baseUrl, string capability,
+        IReadOnlyDictionary<string, string> options)
+    {
+        RequireOnly(options, "--run-id", "--command-id");
+        var commandId = Require(options, "--command-id");
+        if (!Guid.TryParse(commandId, out _)) throw new ArgumentException("--command-id must be a GUID.");
+        return new Invocation(baseUrl, HttpMethod.Get,
+            $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/continuations/{Uri.EscapeDataString(commandId)}",
+            null, capability);
     }
 
     private static HttpRequestMessage CreateRequest(Invocation invocation)
@@ -346,7 +407,7 @@ internal static class OperatorCli
 
     private static object Usage() => new
     {
-        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|attempt|events|audit|claim|release|retry|reconcile|adopt|retire> [options]",
+        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|attempt|events|audit|continuation|claim|release|retry|reconcile|adopt|retire|resume|fork|fresh-retry|handoff|open|write|queue|interrupt|cancel|request-transfer|approve-transfer|reject-transfer|force-takeover> [options]",
         requiredEnvironment = new[] { "WPCP_FIXTURE_ACCESS_TOKEN", "WPCP_PROVIDER_TOKEN" },
         commands = new
         {
@@ -357,10 +418,18 @@ internal static class OperatorCli
             },
             attempt = new[] { "--run-id", "--attempt-id" },
             audit = new[] { "--run-id" },
+            continuation = new[] { "--run-id", "--command-id" },
             control = new[] { "--run-id", "--target-attempt-id", "--expected-run-version",
                 "--expected-head-sha", "--lease-epoch" },
             adopt = new[] { "control fences", "--operation-id", "--receipt-id" },
             recovery = new[] { "retry", "reconcile", "adopt", "retire" },
+            continuationDecision = new[] { "resume", "fork", "fresh-retry", "handoff", "--request-id", "--command-id", "control fences" },
+            open = new[] { "--run-id", "--attempt-id", "--request-id", "--command-id" },
+            activeControl = new[] { "queue|interrupt|cancel", "control fences", "--command-id", "--message (queue/interrupt)",
+                "--reason (interrupt/cancel)", "--scope operation|attempt (cancel)" },
+            transfer = new[] { "request-transfer|approve-transfer|reject-transfer", "control fences", "--request-id", "--reason" },
+            takeover = new[] { "force-takeover", "control fences", "--reason" },
+            write = new[] { "continuation fences", "--message" },
             run = new[] { "--run-id" },
             events = new[] { "--run-id", "--after" },
         },

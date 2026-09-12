@@ -41,6 +41,29 @@ concurrent redelivery; unchanged original blocked result plus separate rejection
 process/timeout/transport/contract/schema/infrastructure diagnostics; conflicting
 sequence/identity and null-event rejection; immutable adapter assignment; and
 independent attempt selection after API restart with truthful unavailable Codex
-opening capability. All database containers, provider processes and receipt
-files are disposable. This is explicit local delivery, not automatic DTS
-orchestration or real Codex app integration.
+opening capability.
+
+Ticket 06 extends the same public proof with durable `humanRequest` read-back,
+exactly-once Resume/Fork/Fresh Retry lineage, selected-session open versus
+explicit handoff, lease/fence-protected write-back, and API-replacement recovery
+after a provider-side continuation or interaction success gap. It also rejects
+misbound adapter receipts, preserves the original fake attempt on redelivery
+after a fork, proves redacted-message command replay, rejects substituted
+write messages and incompatible completion contracts, and proves that an
+adapter capability canary is redacted in API/CLI read-back across API
+replacement. It reads only HTTP/CLI state plus the fake provider's public
+diagnostics; it never inspects product tables. All database containers,
+provider processes and receipt files are disposable. This is explicit local
+delivery, not automatic DTS orchestration or real Codex app integration.
+
+## Ticket 07 active operations
+
+`tests/test_active_agent_control.py` launches `live_codex_provider.py`, whose
+independent SQLite receipts own real child processes. It verifies targeted
+HTTP/CLI admission, FIFO delivery, stop-before-start, scoped cancel, adapter
+receipt binding and actual process termination. Worker stdin fault boundaries
+and SIGKILL exercise external success gaps and delayed old output. Concurrent
+replacement workers and API replacement prove durable command identities.
+Repository registration remains excluded while external live processes exist.
+Optional `WPCP_ACTIVE_PROOF_DIR` exports only the public redacted run/history
+surfaces; the exporter checks every controlled canary before writing.

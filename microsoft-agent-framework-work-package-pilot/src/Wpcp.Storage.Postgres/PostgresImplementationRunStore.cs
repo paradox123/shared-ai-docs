@@ -36,8 +36,16 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
     public async Task EnsureSchemaAsync(CancellationToken cancellationToken = default)
     {
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        await using var command = new NpgsqlCommand(Schema + AgentSchema + RepositorySchema, connection);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        await using (var schemaLock = new NpgsqlCommand(
+            "SELECT pg_advisory_xact_lock(hashtextextended('wpcp-schema-evolution', 0))", connection, transaction))
+        {
+            await schemaLock.ExecuteNonQueryAsync(cancellationToken);
+        }
+        await using var command = new NpgsqlCommand(Schema + AgentSchema + ContinuationSchema + RepositorySchema + ActiveAgentSchema,
+            connection, transaction);
         await command.ExecuteNonQueryAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 
     public async Task<StartRunResult> StartAsync(
@@ -667,10 +675,11 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
     {
         const string sql = """
             SELECT attempt.attempt_id::text, attempt.activity_id::text, attempt.attempt_number,
-                   attempt.state, attempt.started_at, attempt.completed_at, session.receipt::text
+                   attempt.state, attempt.started_at, attempt.completed_at, session.receipt::text, live.state::text
               FROM wpcp_activity_attempts attempt
               JOIN wpcp_run_activities activity ON activity.activity_id = attempt.activity_id
               LEFT JOIN wpcp_agent_sessions session ON session.attempt_id = attempt.attempt_id
+              LEFT JOIN wpcp_live_attempts live ON live.attempt_id = attempt.attempt_id
              WHERE activity.run_id = @run_id
              ORDER BY attempt.started_at, attempt.attempt_id;
             """;
@@ -684,7 +693,8 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
                 reader.GetString(0), reader.GetString(1), reader.GetInt32(2), reader.GetString(3),
                 reader.GetFieldValue<DateTimeOffset>(4),
                 reader.IsDBNull(5) ? null : reader.GetFieldValue<DateTimeOffset>(5),
-                reader.IsDBNull(6) ? null : Deserialize<AgentAttemptReceipt>(reader.GetString(6)).Session));
+                reader.IsDBNull(6) ? null : Deserialize<AgentAttemptReceipt>(reader.GetString(6)).Session,
+                reader.IsDBNull(7) ? null : Deserialize<ActiveAgentAttempt>(reader.GetString(7))));
         }
         return results;
     }
@@ -943,6 +953,7 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
         );
 
         ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS repository_binding jsonb;
+        ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS transfer_request jsonb;
         ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS lease_epoch bigint NOT NULL DEFAULT 0;
         ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS lease_holder jsonb;
         ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS lease_claimed_at timestamptz;

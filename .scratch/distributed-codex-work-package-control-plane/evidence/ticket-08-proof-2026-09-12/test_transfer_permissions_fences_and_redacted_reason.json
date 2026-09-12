@@ -1,0 +1,394 @@
+{
+  "observations": [
+    {
+      "run": {
+        "runId": "e1294442-e22d-481f-b069-d943c724f2d2",
+        "state": "admitted",
+        "correlation": {
+          "runId": "e1294442-e22d-481f-b069-d943c724f2d2",
+          "repositoryId": "repo-1",
+          "issueId": "issue-55",
+          "issueNumber": 55,
+          "commandId": "bb9e982b-9bc8-4cc5-aea5-55a814ce4199",
+          "repository": {
+            "repositoryId": "repo-1",
+            "fullName": "pilot/fixture",
+            "providerRepositoryId": 9001
+          }
+        },
+        "runStartedAt": "2026-09-12T12:22:16.966613+00:00",
+        "activities": [
+          {
+            "activityId": "eefd8034-4b63-4c55-ae17-cc3331fdc1a4",
+            "activityType": "admission",
+            "state": "completed",
+            "startedAt": "2026-09-12T12:22:16.966613+00:00",
+            "completedAt": "2026-09-12T12:22:16.966613+00:00"
+          }
+        ],
+        "attempts": [
+          {
+            "attemptId": "20d5318b-aeb8-4681-be2c-2b2b5c53db13",
+            "activityId": "eefd8034-4b63-4c55-ae17-cc3331fdc1a4",
+            "attemptNumber": 1,
+            "state": "completed",
+            "startedAt": "2026-09-12T12:22:16.966613+00:00",
+            "completedAt": "2026-09-12T12:22:16.966613+00:00",
+            "session": null,
+            "liveOperation": null
+          }
+        ],
+        "processes": [
+          {
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "processKind": "api",
+            "processStartedAt": "2026-09-12T12:22:16.657237+00:00",
+            "processStoppedAt": null,
+            "actor": {
+              "kind": "service",
+              "provider": "wpcp-api",
+              "subjectId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e"
+            }
+          }
+        ],
+        "heartbeats": [
+          {
+            "heartbeatId": "5c774c7c-c3db-4507-9ec4-a0ca29a8a226",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:16.980369+00:00"
+          },
+          {
+            "heartbeatId": "61d060f3-f95b-42d0-97da-bff425f1f5bb",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:16.994281+00:00"
+          },
+          {
+            "heartbeatId": "1bc70df7-1de3-4617-944e-a39cbf06b084",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.031608+00:00"
+          },
+          {
+            "heartbeatId": "835320a8-386d-4b17-a928-3b92aefc1abe",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.053087+00:00"
+          },
+          {
+            "heartbeatId": "7b978263-67f3-4b13-b360-8a68d8b0fe3c",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.081674+00:00"
+          },
+          {
+            "heartbeatId": "edc9139b-4815-44cb-843f-986b09c01546",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.111897+00:00"
+          },
+          {
+            "heartbeatId": "d6db2689-a74c-4dde-9294-20518e9bdbb3",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.143161+00:00"
+          },
+          {
+            "heartbeatId": "807ba96a-7995-4251-9645-25440ef4e3e6",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.171785+00:00"
+          },
+          {
+            "heartbeatId": "210fb39a-e949-49c9-834c-c0da1bb4a373",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.203648+00:00"
+          },
+          {
+            "heartbeatId": "8890f977-6df2-44d1-8512-951b13f02143",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.231536+00:00"
+          },
+          {
+            "heartbeatId": "e09505ea-2c98-4337-90c4-0c6c8e0b4f38",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.257859+00:00"
+          },
+          {
+            "heartbeatId": "60533ac0-4224-4171-a706-39d1d358abe4",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.284856+00:00"
+          },
+          {
+            "heartbeatId": "ab4b3d21-8c55-41cc-b6a8-277a4136b160",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.31381+00:00"
+          },
+          {
+            "heartbeatId": "f133bce2-8448-4ff8-b138-dd0942c429d9",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.34674+00:00"
+          },
+          {
+            "heartbeatId": "b124633e-cc96-4a76-97db-dcb6d1723fba",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.374393+00:00"
+          },
+          {
+            "heartbeatId": "dbde0e5e-a79f-4de6-81b7-8233a93e9c75",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.463342+00:00"
+          },
+          {
+            "heartbeatId": "3b99c7a4-794f-471c-9369-7cd619976fe2",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.586411+00:00"
+          },
+          {
+            "heartbeatId": "0e80ef1b-537c-467b-a11b-8968b9eb8e37",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.605533+00:00"
+          },
+          {
+            "heartbeatId": "73fb5ffb-469b-4c68-afdd-2927211eca41",
+            "processId": "97a5e2d0-b3fc-437a-b8a0-a1cb3426d68e",
+            "heartbeatAt": "2026-09-12T12:22:17.628767+00:00"
+          }
+        ],
+        "executionEvidence": [],
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "configurationRevision": "r1",
+          "contractRevision": "r1"
+        },
+        "redaction": {
+          "occurred": true,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "lastPosition": 3,
+        "control": {
+          "runVersion": 3,
+          "targetAttemptId": "20d5318b-aeb8-4681-be2c-2b2b5c53db13",
+          "headSha": null,
+          "leaseEpoch": 2,
+          "holder": {
+            "kind": "human",
+            "provider": "github",
+            "subjectId": "103"
+          },
+          "claimedAt": "2026-09-12T12:22:17.566112+00:00",
+          "transferRequest": null
+        },
+        "authorization": {
+          "code": "observed",
+          "access": {
+            "actor": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "102"
+            },
+            "canRead": true,
+            "canContribute": false,
+            "failureCode": null,
+            "login": "actor-observer",
+            "isHuman": true
+          },
+          "current": {
+            "runVersion": 3,
+            "targetAttemptId": "20d5318b-aeb8-4681-be2c-2b2b5c53db13",
+            "headSha": null,
+            "leaseEpoch": 2,
+            "holder": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "103"
+            },
+            "claimedAt": "2026-09-12T12:22:17.566112+00:00",
+            "transferRequest": null
+          },
+          "continuation": null,
+          "accepted": true,
+          "canClaim": false,
+          "canRequestTransfer": false,
+          "canForceTakeover": false,
+          "canDecideTransfer": false,
+          "canRelease": false
+        },
+        "repositoryExecution": null
+      },
+      "history": {
+        "runId": "e1294442-e22d-481f-b069-d943c724f2d2",
+        "after": 0,
+        "events": [
+          {
+            "runId": "e1294442-e22d-481f-b069-d943c724f2d2",
+            "position": 1,
+            "eventId": "d0ddfe3d-13da-43b6-b06c-a2972d3516d9",
+            "eventType": "ImplementationRunStarted",
+            "occurredAt": "2026-09-12T12:22:16.966613+00:00",
+            "redaction": {
+              "occurred": false,
+              "policyVersion": "",
+              "marker": ""
+            },
+            "payload": {
+              "note": "control proof",
+              "actor": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "101"
+              },
+              "authorization": {
+                "source": "github",
+                "decision": "authorized"
+              }
+            },
+            "correlation": {
+              "runId": "e1294442-e22d-481f-b069-d943c724f2d2",
+              "issueId": "issue-55",
+              "commandId": "bb9e982b-9bc8-4cc5-aea5-55a814ce4199",
+              "repository": {
+                "fullName": "pilot/fixture",
+                "repositoryId": "repo-1",
+                "providerRepositoryId": 9001
+              },
+              "issueNumber": 55,
+              "repositoryId": "repo-1"
+            },
+            "provenance": {
+              "sourceRevision": "r1",
+              "packageRevision": "r1",
+              "contractRevision": "r1",
+              "configurationRevision": "r1"
+            }
+          },
+          {
+            "runId": "e1294442-e22d-481f-b069-d943c724f2d2",
+            "position": 2,
+            "eventId": "d8af7952-1113-43c3-9128-78c944834f86",
+            "eventType": "ControlLeaseClaimed",
+            "occurredAt": "2026-09-12T12:22:17.020565+00:00",
+            "redaction": {
+              "occurred": false,
+              "policyVersion": "",
+              "marker": ""
+            },
+            "payload": {
+              "actor": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "101"
+              },
+              "detail": null,
+              "current": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "101"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:17.019993+00:00",
+                "leaseEpoch": 1,
+                "runVersion": 2,
+                "targetAttemptId": "20d5318b-aeb8-4681-be2c-2b2b5c53db13",
+                "transferRequest": null
+              },
+              "previous": {
+                "holder": null,
+                "headSha": null,
+                "claimedAt": null,
+                "leaseEpoch": 0,
+                "runVersion": 1,
+                "targetAttemptId": "20d5318b-aeb8-4681-be2c-2b2b5c53db13",
+                "transferRequest": null
+              }
+            },
+            "correlation": {
+              "runId": "e1294442-e22d-481f-b069-d943c724f2d2",
+              "issueId": "issue-55",
+              "commandId": "bb9e982b-9bc8-4cc5-aea5-55a814ce4199",
+              "repository": {
+                "fullName": "pilot/fixture",
+                "repositoryId": "repo-1",
+                "providerRepositoryId": 9001
+              },
+              "issueNumber": 55,
+              "repositoryId": "repo-1"
+            },
+            "provenance": {
+              "sourceRevision": "r1",
+              "packageRevision": "r1",
+              "contractRevision": "r1",
+              "configurationRevision": "r1"
+            }
+          },
+          {
+            "runId": "e1294442-e22d-481f-b069-d943c724f2d2",
+            "position": 3,
+            "eventId": "30ed2445-3a93-4d33-9cc0-8ff9eca1559f",
+            "eventType": "ControlLeaseForcedTakenOver",
+            "occurredAt": "2026-09-12T12:22:17.566196+00:00",
+            "redaction": {
+              "occurred": true,
+              "policyVersion": "controlled-canary-v1",
+              "marker": "[REDACTED:CONTROLLED-CANARY]"
+            },
+            "payload": {
+              "actor": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "103"
+              },
+              "detail": {
+                "mode": "forced",
+                "reason": "[REDACTED:CONTROLLED-CANARY]",
+                "requestId": null
+              },
+              "current": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "103"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:17.566112+00:00",
+                "leaseEpoch": 2,
+                "runVersion": 3,
+                "targetAttemptId": "20d5318b-aeb8-4681-be2c-2b2b5c53db13",
+                "transferRequest": null
+              },
+              "previous": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "101"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:17.019993+00:00",
+                "leaseEpoch": 1,
+                "runVersion": 2,
+                "targetAttemptId": "20d5318b-aeb8-4681-be2c-2b2b5c53db13",
+                "transferRequest": null
+              }
+            },
+            "correlation": {
+              "runId": "e1294442-e22d-481f-b069-d943c724f2d2",
+              "issueId": "issue-55",
+              "commandId": "bb9e982b-9bc8-4cc5-aea5-55a814ce4199",
+              "repository": {
+                "fullName": "pilot/fixture",
+                "repositoryId": "repo-1",
+                "providerRepositoryId": 9001
+              },
+              "issueNumber": 55,
+              "repositoryId": "repo-1"
+            },
+            "provenance": {
+              "sourceRevision": "r1",
+              "packageRevision": "r1",
+              "contractRevision": "r1",
+              "configurationRevision": "r1"
+            }
+          }
+        ],
+        "lastPosition": 3
+      }
+    }
+  ],
+  "facts": {}
+}

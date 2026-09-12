@@ -4,7 +4,6 @@
 Define repository-derived human access, exclusive run-wide control, atomic
 mutation fencing, revocation handling, and distinguishable human/service audit
 for the isolated work-package pilot.
-
 ## Requirements
 ### Requirement: Repository provider is the sole Operator access authority
 The pilot SHALL authenticate each request through a provider credential and derive human observation and contribution from current effective permission on the run's pinned repository. Caller-supplied actor identity SHALL NOT grant access. It SHALL store neither credentials nor a separate membership list. GitHub SHALL be the first adapter behind a provider-neutral contract; bot and installation identities SHALL NOT claim human control. Missing permissions, repository identity mismatch and provider failures SHALL fail closed.
@@ -33,11 +32,15 @@ The pilot SHALL atomically permit only one contributor to claim the run-wide Con
 - **THEN** the same lease and epoch remain visible and usable only by that human
 
 ### Requirement: All run mutations are fenced atomically
-Every claim and release SHALL check freshly evaluated contribution permission, explicit current target attempt, expected run version, explicit expected head SHA, and lease epoch inside the serialized decision. Release SHALL additionally check human ownership. Rejected requests SHALL produce no requested mutation, workflow effect or canonical business event. An authorized observer SHALL receive the current decision state; unauthorized identities SHALL receive no protected run data. Security audit MAY record a sanitized rejection separately.
+Every claim, release, Human Request decision, Handoff confirmation, and writing interaction in an opened session SHALL check freshly evaluated contribution permission, explicit current target request and attempt, expected run version, explicit expected head SHA, and lease epoch inside the serialized decision. Claim is the bootstrap exception to lease ownership. A contributing observer MAY request transfer or explicitly force takeover; transfer approval/rejection SHALL require the current holder and current transfer request. All remaining mutations SHALL additionally check human ownership. Rejected requests SHALL produce no requested mutation, workflow effect or canonical business event. An authorized observer SHALL receive the current decision state; unauthorized identities SHALL receive no protected run data. Security audit MAY record a sanitized rejection separately.
 
 #### Scenario: Any fence is stale or missing
-- **WHEN** a mutation has a stale attempt, version, head or epoch, or omits a required fence
+- **WHEN** a mutation has a stale request, attempt, version, head or epoch, or omits a required fence
 - **THEN** it is rejected without applying the action and a read-authorized caller can retrieve the current decision state
+
+#### Scenario: Stale continuation cannot create a session or write
+- **WHEN** a competing human submits Resume, Fork, Fresh Retry, Handoff, or an opened-session write with a stale fence or without the current Control Lease
+- **THEN** no adapter operation, session, interaction, canonical business event, head change, or external effect is applied
 
 ### Requirement: Provider revocation invalidates control without a second ACL
 The pilot SHALL revalidate on every new read connection and before every mutation after acquiring its run lock. Observed loss of contributor permission for the holder SHALL invalidate its lease, advance the epoch and record a distinct security event. Provider unavailability SHALL deny access without transferring control. Regrant SHALL NOT revive the old epoch.

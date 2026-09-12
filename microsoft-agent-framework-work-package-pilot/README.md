@@ -104,9 +104,9 @@ Regrant requires a new claim. Disconnect and token rotation for the same human
 leave the lease intact; no token is retained for background permission checks.
 An invalid token denies the request without guessing its owner or releasing a lease.
 
-The control context is currently the completed admission attempt and an explicit
-null head. Creating writer heads/attempts, live agent commands, transfer and forced
-takeover belong to subsequent tickets. Worker evidence has `kind: service`;
+For the original admission-only path, the control context is the completed
+admission attempt and an explicit null head. The later slices below add sessions,
+attempts, live commands, transfer and forced takeover. Worker evidence has `kind: service`;
 human admission/control/audit records carry `kind: human`, provider and subject ID.
 This separates identities asserted by the provider; it cannot detect automation
 using a human's own credential.
@@ -197,6 +197,111 @@ or exercise live repository writes. The existing managed durability gate and
 LangGraph pilot remain separate. See the
 [Ticket 04 evidence](../openspec/changes/archive/2026-09-11-recover-fake-codex-attempt/implementation-evidence.md).
 
+## Human Request continuation in the controlled Codex session (Ticket 06)
+
+A blocked or semantic-rejected fake attempt now exposes a redacted
+`session.humanRequest` through `run` and `attempt`. It identifies the selected
+attempt and session, current phase, expected head, problem, evidence, permitted
+actions, and the current control context. It is durable product state: API or
+worker replacement does not require the original process, receipt file, or
+database-table access to inspect it.
+
+Read the target and its current fences first. Use fresh `control` values from
+`run` for every control command, because an accepted decision changes the run
+version.
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 attempt \
+  --run-id <run-id> --attempt-id <attempt-id>
+
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 claim --run-id <run-id> \
+  --target-attempt-id <attempt-id> --expected-run-version <version> \
+  --expected-head-sha null --lease-epoch <epoch>
+```
+
+The current Control Lease holder can make exactly one of these continuation
+decisions for an open request. Each requires the request and command UUIDs plus
+the same current target/version/head/epoch fences as `claim`:
+
+| Decision | Result |
+| --- | --- |
+| `resume` | Uses the selected, original session ID. |
+| `fork` | Creates a distinct session with `lineage.parentSessionId` and `lineage.origin: "fork"`. |
+| `fresh-retry` | Creates a distinct session with no parent or imported conversation. It is different from Ticket 05 repository-effect `retry`. |
+
+For example, substitute `fork` or `fresh-retry` only when that is the intended
+operator choice:
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 resume --run-id <run-id> \
+  --target-attempt-id <attempt-id> --expected-run-version <version> \
+  --expected-head-sha <head-or-null> --lease-epoch <epoch> \
+  --request-id <human-request-uuid> --command-id <new-command-uuid>
+```
+
+Repeating the exact command ID returns its durable logical outcome; reusing it
+with a different decision is rejected. Read the run again after completion to
+see the original and continuation attempts, lineage, correlated operation, and
+canonical events.
+
+Read the redacted durable adapter receipt independently with the same command
+identity:
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 continuation --run-id <run-id> \
+  --command-id <continuation-command-uuid>
+```
+
+`open` resolves only the explicitly selected attempt/session and needs a
+read-authorized caller, request ID, and command ID; it does not claim the lease
+or change phase, head, effects, or session identity.
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 open --run-id <run-id> \
+  --attempt-id <attempt-id> --request-id <human-request-uuid> \
+  --command-id <new-command-uuid>
+```
+
+Treat `session.openInCodex` as a capability disclosure, not a promise that this
+pilot has started a real Codex App task:
+
+| Capability mode | Operator result |
+| --- | --- |
+| `same-session` | The controlled adapter opens only that saved session. |
+| `handoff-confirmation-required` | `open` reports the limitation and creates nothing. The lease holder may later submit the separately fenced `handoff` decision, which creates one lineage-marked child session. |
+| `unsupported` | The reason is shown; there is no hidden fallback, fork, or new run. |
+
+After a selected same-session open, interactive `write` is a control action,
+not a read action. It requires fresh provider authorization, the current Control
+Lease, current fences, request/command IDs, and `--message`; its redacted
+message/tool/result observations are appended to the same run history.
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 write --run-id <run-id> \
+  --target-attempt-id <attempt-id> --expected-run-version <version> \
+  --expected-head-sha <head-or-null> --lease-epoch <epoch> \
+  --request-id <human-request-uuid> --command-id <new-command-uuid> \
+  --message "<operator instruction>"
+```
+
+Run the Ticket 06 black-box proof with the Ticket 04 suite:
+
+```bash
+python3 -m unittest tests.test_fake_codex_attempt -v
+```
+
+It uses disposable PostgreSQL, separate API/CLI/worker/fake-provider processes,
+and public HTTP/CLI read-back only. It proves restart-stable Human Requests;
+Resume/Fork/Fresh Retry lineage; truthful open/handoff behavior; lease/fence and
+duplicate-write rejection; and adoption of continuation/write success gaps
+without a duplicate provider session or interaction.
+
 ## Repository base and effect recovery (Ticket 05)
 
 A repository-managed delivery adds exact-base preflight and a durable repository
@@ -277,3 +382,179 @@ repository test module. It writes public state transitions, receipts, canonical
 history, external operation counts and killed-worker exit codes without database
 access or provider credentials. Additional crash hooks `after-reconciled-effect`
 and `after-session-receipt` prove idempotent local receipt processing/finalization.
+
+## Targeted active operations (Ticket 07)
+
+The live adapter path adds `queue`, `interrupt` and `cancel` to the Operator CLI
+and `POST /api/v1/runs/{runId}/agent-commands/{mode}` to the API. Select a concrete
+`attemptId` from `run` or `attempt` read-back. `attempt.liveOperation` shows the
+session, current operation/process, fence epoch and ordered command inbox.
+The API rejects an omitted target; the CLI requires `--target-attempt-id`.
+Unlike the admission control context's suggested latest target, live commands
+can select any active attempt belonging to the run.
+
+Each command requires `--command-id` (UUID), `--target-attempt-id`,
+`--expected-run-version`, `--expected-head-sha` (explicit `null` when absent) and
+`--lease-epoch`, plus these mode-specific options:
+
+| Command | Additional options | Behavior |
+| --- | --- | --- |
+| `queue` | `--message` | Execute serially after the current operation in acceptance order. |
+| `interrupt` | `--message`, `--reason` | Advance the operation fence, stop/reconcile the old process, execute this command next, then retain the previous FIFO order. |
+| `cancel` | `--reason`, `--scope operation` | Stop the current operation; previously accepted queued commands remain eligible. |
+| `cancel` | `--reason`, `--scope attempt` | Stop the chosen attempt and visibly reject its pending commands; no automatic retry. |
+
+Use the latest version/head/lease from public read-back for each new decision.
+Repeating the same command ID and redacted intent returns its persisted status;
+substituting another target, message, mode, reason or scope conflicts. A second
+interrupt/cancel during an outstanding stop conflicts. Admission, stop intent,
+reconciliation and agent replies share the same Run History and command/operation
+identities. Human stop decisions do not create repair rounds. An attempt's
+completion timestamp is set only when its stop is confirmed.
+
+The bounded local worker pass is independent of the accepting API or original
+worker. It adopts durable receipts on every invocation. For an admitted,
+unregistered disposable run, start the external controlled adapter and prepare
+an activity (all commands below run from this directory):
+
+```bash
+python3 tests/live_codex_provider.py --port 5092 --database /tmp/wpcp-live-demo.sqlite
+```
+
+In another terminal with `WPCP_CONNECTION_STRING` set, run:
+
+```bash
+dotnet src/Wpcp.Worker/bin/Debug/net10.0/Wpcp.Worker.dll \
+  --fixture tests/Wpcp.BlackBox.Tests/fixtures/synthetic-provider-redaction-fixture.json \
+  --run-id <run-id> --worker-id live-worker \
+  --fake-agent-origin http://127.0.0.1:5092 --live-activity-key planning
+```
+
+A second activity key creates a separately targeted attempt; repeating a key
+adopts the original assignment. Replacement processing needs only the persisted
+run and database, with no adapter-origin or original-worker argument:
+
+```bash
+dotnet src/Wpcp.Worker/bin/Debug/net10.0/Wpcp.Worker.dll \
+  --fixture tests/Wpcp.BlackBox.Tests/fixtures/synthetic-provider-redaction-fixture.json \
+  --run-id <run-id> --worker-id replacement --deliver-active true
+```
+
+Invoke this pass after command acceptance or external operation completion. It
+stops at a still-running operation and processes other attempts independently.
+An unavailable adapter or rejected receipt stays pending with a diagnostic in
+Run History. This ticket uses explicit local worker passes; it does not install
+an automatic polling service or DTS orchestration.
+
+The controlled provider's `POST /operations/{operationKey}/complete` with `{}`
+finishes its real child process and exposes a deterministic agent answer.
+Its durable stop tombstone also blocks delayed starts. The adapter contract
+requires immutable attempt/session/command/operation identities, fence epoch,
+message, process ID, terminal response and explicit effect reconciliation.
+The live fixture is incapable of repository writes (`effectScope: none`);
+nonempty or conflicting effects block further delivery. Live runs cannot gain
+later repository provenance or overlap repository registration. Real Codex
+process control and reconciliation of live Git/GitHub writes remain Ticket 10.
+The existing Ticket 04/06 blocked-session and Human Request paths remain separate.
+
+Run the process proof and optionally export sanitized public HTTP evidence:
+
+```bash
+python3 -m unittest tests.test_active_agent_control -v
+```
+
+Set `WPCP_ACTIVE_PROOF_DIR` to an output directory to export each test's Operator
+projection and canonical history. Tests cover API SIGKILL before response read,
+worker SIGKILL around start/stop/dispatch/response, concurrent replacement,
+stop-before-start, late output, parallel isolation, redaction and authorization.
+See the [acceptance overview](../openspec/changes/archive/2026-09-12-control-active-agent-operations/implementation-evidence.md).
+
+
+## Atomic Control Transfer and Forced Takeover (Ticket 08)
+
+An observing contributor can request control, and the current holder can approve
+or reject the identified request. Read-only repository users remain observers.
+Use the same fresh `control` attempt/version/head/epoch fences as `claim`:
+
+| CLI / HTTP control action | Additional arguments | Result |
+| --- | --- | --- |
+| `request-transfer` | `--request-id <new-uuid> --reason <text>` | One pending request; holder and epoch remain unchanged. |
+| `approve-transfer` | `--request-id <pending-uuid> --reason <text>` | Recheck recipient permission, then atomically change holder and increment epoch. |
+| `reject-transfer` | `--request-id <pending-uuid> --reason <text>` | Close that request and retain the holder. |
+| `force-takeover` | `--reason <text>` | Another contributor takes control without approval or an administrator role. |
+
+All routes use `POST /api/v1/runs/{runId}/control/{action}`. For example, a
+contributor explicitly taking responsibility uses its own `WPCP_PROVIDER_TOKEN`:
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 force-takeover --run-id <run-id> \
+  --target-attempt-id <attempt-id> --expected-run-version <version> \
+  --expected-head-sha <head-or-null> --lease-epoch <epoch> \
+  --reason "Continue while the previous holder is unavailable"
+```
+
+`run` exposes `control.transferRequest`, its requester, original holder/epoch,
+reason and state. `authorization` includes `canRequestTransfer`,
+`canDecideTransfer` and `canForceTakeover`. Only one request can be pending;
+closed request IDs cannot be reused. Release, revocation and takeover supersede
+pending requests. Duplicate/stale requests return a conflict with current state;
+read fresh fences before submitting a new decision.
+
+The API revalidates both the approving holder and the requested recipient.
+GitHub's collaborator permission endpoint supplies current effective permission;
+the stored login is only a lookup hint, and the returned immutable numeric ID
+must match the requester. Missing access, renamed/replaced identity, malformed
+provider responses and provider failures fail closed. The approving credential
+needs repository Metadata read permission for this endpoint, as documented in
+[GitHub's permission API](https://docs.github.com/en/rest/collaborators/collaborators#get-repository-permissions-for-a-user).
+No requester token or separate membership list is persisted.
+
+Ownership changes preserve the running attempt, session, phase, head and already
+accepted effects. Old credentials (including a new token for the same former
+holder), stale HTTP requests and writes from the former holder's opened window
+cannot obtain mutating rights. A new holder can write the same opened session
+using current fences. `ControlLeaseTransferred` and
+`ControlLeaseForcedTakenOver` expose previous/new identities, event timestamp,
+run identity, redacted reason and voluntary/forced mode in `events`.
+
+Pending session writes receive a durable adapter tombstone by operation key.
+The controlled adapter's `POST /control-operations/{operationKey}/fence` accepts
+`sourceSessionId` and `action` and returns `AgentSessionAdapter/v1`, those exact
+identities, `state: fenced|applied`, and an existing `receipt` if already applied.
+The tombstone and adapter write serialize in the adapter's durable store; it
+rejects delayed writes even if the original API died before receiving its reply.
+Dispatch re-reads the durable command while holding the run lock, so restart
+cannot deliver a fenced command. Pending live queue entries become visibly
+rejected with `control-lease-changed`; the current autonomous operation continues.
+
+A change of responsibility must not orphan an already accepted continuation or
+recovery decision. The API returns these explicit 409 conflicts when settlement
+must finish first:
+
+- `control-continuation-pending`: complete/recover the accepted continuation,
+  then read fresh state and retry.
+- `control-recovery-pending`: deliver the existing repository recovery request
+  through the worker, then retry with fresh state.
+- `control-active-delivery-pending`: a promoted live command has not yet recorded
+  its process receipt; run replacement delivery to settle its existing identity.
+- `control-effects-reconciled`: an external write already existed and was just
+  adopted; read its receipt/current fences and repeat the ownership decision.
+- `control-fencing-unavailable`: the adapter cannot prove a safe fence or receipt;
+  restore that capability before retrying. Ownership remains unchanged.
+
+These paths use bounded local process delivery. They do not claim real Codex App
+process control or live GitHub-account verification; those remain Tickets 10/14.
+Stop old API/worker binaries before upgrading the additive schema. Mixed-version
+writers must not share the upgraded database. The local tests migrate disposable
+databases only.
+
+Run the public proof and optionally retain sanitized observations:
+
+```bash
+WPCP_TRANSFER_PROOF_DIR=/tmp/wpcp-transfer-proof \
+  python3 -m unittest tests.test_control_transfer -v
+python3 -m unittest tests.test_repository_reconciliation -v
+```
+
+See the [acceptance evidence](../openspec/changes/archive/2026-09-12-transfer-run-control-atomically/implementation-evidence.md).

@@ -6,11 +6,63 @@ namespace Wpcp.Storage.Postgres;
 
 public sealed partial class PostgresImplementationRunStore
 {
+    /// <summary>
+    /// A visible-session open is read-authorized, but its durable adapter intent
+    /// must be accepted in the same serialized decision as that authorization.
+    /// </summary>
+    public async Task<ControlDecision> DecideSessionOpenAsync(
+        string runId,
+        string attemptId,
+        SessionOpenCommand command,
+        Func<RepositoryBinding, CancellationToken, Task<RepositoryAccess>> authorize,
+        CancellationToken cancellationToken = default)
+    {
+        if (!Guid.TryParse(runId, out var parsed) || !Guid.TryParse(attemptId, out _) ||
+            !Guid.TryParse(command.RequestId, out _) || !Guid.TryParse(command.CommandId, out _))
+            return new("invalid-session-open-command", new(null, false, false), null);
+
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        await using (var rowLock = new NpgsqlCommand(
+            "SELECT run_id FROM wpcp_implementation_runs WHERE run_id = @id FOR UPDATE", connection, transaction))
+        {
+            rowLock.Parameters.AddWithValue("id", parsed);
+            await rowLock.ExecuteScalarAsync(cancellationToken);
+        }
+        var run = await FindRunAsync(connection, transaction, runId, cancellationToken);
+        if (run is null) return new("implementation-run-not-found", new(null, false, false), null);
+        var (current, access) = await RevalidateControlAccessAsync(connection, transaction, run, authorize,
+            cancellationToken);
+
+        ContinuationOperation? continuation = null;
+        string code;
+        if (!access.CanRead || !access.IsHuman)
+        {
+            code = access.FailureCode ?? "repository-access-denied";
+        }
+        else
+        {
+            continuation = await QueueSessionOpenUnderLockAsync(connection, transaction, run, attemptId, command,
+                cancellationToken);
+            code = continuation is null ? "human-request-not-open" : "continuation-requested";
+            if (continuation is not null)
+            {
+                var updated = await FindRunAsync(connection, transaction, runId, cancellationToken);
+                current = await ReadControlStateAsync(connection, transaction, updated!, cancellationToken);
+            }
+        }
+        await AppendAuditAsync(connection, transaction, runId, "open", code, access.Actor, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return new(code, access, access.CanRead ? current : null, continuation);
+    }
+
     /// <summary>The row lock covers provider revalidation and the complete decision across hosts.</summary>
     public async Task<ControlDecision> DecideControlAsync(
         string runId, string? action, ControlMutation? mutation,
         Func<RepositoryBinding, CancellationToken, Task<RepositoryAccess>> authorize,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default,
+        Func<RepositoryBinding, ControlTransferRequest, CancellationToken, Task<RepositoryAccess>>? authorizeRecipient = null,
+        Func<ContinuationOperation, CancellationToken, Task<System.Text.Json.JsonElement?>>? fenceContinuation = null)
     {
         if (!Guid.TryParse(runId, out var parsed))
             return new("implementation-run-not-found", new(null, false, false), null);
@@ -24,46 +76,56 @@ public sealed partial class PostgresImplementationRunStore
         }
         var run = await FindRunAsync(connection, transaction, runId, cancellationToken);
         if (run is null) return new("implementation-run-not-found", new(null, false, false), null);
-        var current = await ReadControlStateAsync(connection, transaction, run, cancellationToken);
-        var access = run.Correlation.Repository is { } binding
-            ? await authorize(binding, cancellationToken)
-            : new RepositoryAccess(null, false, false, "repository-binding-required");
-        // Revocation is a separate security transition, never the requested action.
-        if (current.Holder is not null && current.Holder == access.Actor && !access.CanContribute &&
-            access.FailureCode is null or "repository-access-denied")
-        {
-            var revoked = current with { RunVersion = current.RunVersion + 1,
-                LeaseEpoch = current.LeaseEpoch + 1, Holder = null, ClaimedAt = null };
-            await WriteControlTransitionAsync(connection, transaction, run, current, revoked,
-                "ControlLeaseRevoked", access.Actor!, cancellationToken);
-            current = revoked;
-            await AppendAuditAsync(connection, transaction, runId, "revalidate", "control-lease-revoked",
-                access.Actor, cancellationToken);
-        }
+        var (current, access) = await RevalidateControlAccessAsync(connection, transaction, run, authorize,
+            cancellationToken);
         string code;
+        ContinuationOperation? continuation = null;
         if (!access.CanRead || !access.IsHuman)
             code = access.FailureCode ?? "repository-access-denied";
         else if (action is null)
             code = "observed";
         else if (!access.CanContribute)
             code = "repository-contribution-required";
-        else if (action is not ("claim" or "release" or "retry" or "reconcile" or "adopt" or "retire"))
+        else if (!IsTransferAction(action) && action is not ("claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" or
+            "resume" or "fork" or "fresh-retry" or "handoff" or "write"))
             code = "invalid-control-action";
         else if (mutation is null || !Guid.TryParse(mutation.TargetAttemptId, out _) ||
             mutation.ExpectedRunVersion < 1 || mutation.LeaseEpoch < 0)
             code = "invalid-control-mutation";
+        else if (action == "write" && string.IsNullOrWhiteSpace(mutation.Message))
+            code = "invalid-control-mutation";
+        else if (action is "resume" or "fork" or "fresh-retry" or "handoff" or "write")
+        {
+            (code, continuation) = await ReplayHumanRequestActionAsync(connection, transaction, run, action,
+                mutation, cancellationToken);
+            // An applied command is a read-only replay. A pending command can
+            // reach the adapter only through a still-current lease/fence; host
+            // replacement separately adopts pending intents at startup.
+            if (code is not ("continuation-fenced" or "continuation-applied" or "continuation-command-conflict" or "invalid-control-mutation"))
+            {
+                if (current.Holder != access.Actor)
+                    code = "control-lease-required";
+                else if (ControlFenceFailure(current, mutation) is { } continuationFenceFailure)
+                    code = continuationFenceFailure;
+                else if (code == "continuation-command-not-found")
+                    (code, continuation) = await QueueHumanRequestActionAsync(connection, transaction, run, action,
+                        mutation, cancellationToken);
+                var updated = await FindRunAsync(connection, transaction, runId, cancellationToken);
+                current = await ReadControlStateAsync(connection, transaction, updated!, cancellationToken);
+            }
+        }
+        else if (IsTransferAction(action))
+        {
+            code = await DecideTransferUnderLockAsync(connection, transaction, run, current, access, action, mutation, authorizeRecipient, fenceContinuation, cancellationToken);
+            var updated = await FindRunAsync(connection, transaction, runId, cancellationToken);
+            current = await ReadControlStateAsync(connection, transaction, updated!, cancellationToken);
+        }
         else if (action == "claim" && current.Holder is not null)
             code = "control-lease-held";
         else if (action != "claim" && current.Holder != access.Actor)
             code = "control-lease-required";
-        else if (mutation.TargetAttemptId != current.TargetAttemptId)
-            code = "stale-target-attempt";
-        else if (mutation.ExpectedRunVersion != current.RunVersion)
-            code = "stale-run-version";
-        else if (mutation.ExpectedHeadSha != current.HeadSha)
-            code = "stale-head-sha";
-        else if (mutation.LeaseEpoch != current.LeaseEpoch)
-            code = "stale-lease-epoch";
+        else if (ControlFenceFailure(current, mutation) is { } fenceFailure)
+            code = fenceFailure;
         else if (action is "retry" or "reconcile" or "adopt" or "retire")
         {
             code = await QueueRepositoryRecoveryAsync(connection, transaction, run, action, mutation, access.Actor!, cancellationToken);
@@ -77,6 +139,7 @@ public sealed partial class PostgresImplementationRunStore
                 RunVersion = current.RunVersion + 1,
                 LeaseEpoch = current.LeaseEpoch + 1,
                 Holder = action == "claim" ? access.Actor : null,
+                TransferRequest = ExpireTransferRequest(current),
                 ClaimedAt = action == "claim" ? DateTimeOffset.UtcNow : null,
             };
             await WriteControlTransitionAsync(connection, transaction, run, current, next,
@@ -86,11 +149,18 @@ public sealed partial class PostgresImplementationRunStore
         }
         if (action is not null || code != "observed")
             await AppendAuditAsync(connection, transaction, runId,
-                action is "claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" ? action : action is null ? "observe" : "invalid",
+                IsTransferAction(action) || action is "claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" or
+                    "resume" or "fork" or "fresh-retry" or "handoff" or "write" ? action! : action is null ? "observe" : "invalid",
                 code, access.Actor, cancellationToken);
         await transaction.CommitAsync(cancellationToken);
-        return new(code, access, access.CanRead ? current : null);
+        return new(code, access, access.CanRead ? current : null, continuation);
     }
+
+    private static string? ControlFenceFailure(RunControlState current, ControlMutation mutation) =>
+        mutation.TargetAttemptId != current.TargetAttemptId ? "stale-target-attempt" :
+        mutation.ExpectedRunVersion != current.RunVersion ? "stale-run-version" :
+        mutation.ExpectedHeadSha != current.HeadSha ? "stale-head-sha" :
+        mutation.LeaseEpoch != current.LeaseEpoch ? "stale-lease-epoch" : null;
 
     private static async Task AppendAuditAsync(
         NpgsqlConnection connection, NpgsqlTransaction transaction, string runId,
@@ -134,7 +204,7 @@ public sealed partial class PostgresImplementationRunStore
                    (SELECT attempt_id::text FROM wpcp_activity_attempts a
                     JOIN wpcp_run_activities activity USING (activity_id)
                     WHERE activity.run_id = r.run_id
-                    ORDER BY a.started_at DESC, a.attempt_number DESC, a.attempt_id DESC LIMIT 1)
+                    ORDER BY a.started_at DESC, a.attempt_number DESC, a.attempt_id DESC LIMIT 1), transfer_request::text
             FROM wpcp_implementation_runs r WHERE run_id = @id;
             """;
         await using var command = new NpgsqlCommand(sql, connection, transaction);
@@ -143,17 +213,51 @@ public sealed partial class PostgresImplementationRunStore
         await reader.ReadAsync(token);
         return new(run.LastPosition, reader.GetString(4), reader.IsDBNull(3) ? null : reader.GetString(3),
             reader.GetInt64(0), reader.IsDBNull(1) ? null : Deserialize<ActorIdentity>(reader.GetString(1)),
-            reader.IsDBNull(2) ? null : reader.GetFieldValue<DateTimeOffset>(2));
+            reader.IsDBNull(2) ? null : reader.GetFieldValue<DateTimeOffset>(2),
+            reader.IsDBNull(5) ? null : Deserialize<ControlTransferRequest>(reader.GetString(5)));
     }
+
+    /// <summary>Provider revalidation and any lease revocation share the locked run decision.</summary>
+    private async Task<(RunControlState Current, RepositoryAccess Access)> RevalidateControlAccessAsync(
+        NpgsqlConnection connection,
+        NpgsqlTransaction transaction,
+        StoredRun run,
+        Func<RepositoryBinding, CancellationToken, Task<RepositoryAccess>> authorize,
+        CancellationToken token)
+    {
+        var current = await ReadControlStateAsync(connection, transaction, run, token);
+        var access = run.Correlation.Repository is { } binding
+            ? await authorize(binding, token)
+            : new RepositoryAccess(null, false, false, "repository-binding-required");
+        // Revocation is a separate security transition, never the requested action.
+        if (current.Holder is not null && current.Holder == access.Actor && !access.CanContribute &&
+            (access.FailureCode is null or "repository-access-denied"))
+        {
+            var revoked = current with { RunVersion = current.RunVersion + 1,
+                LeaseEpoch = current.LeaseEpoch + 1, Holder = null, ClaimedAt = null, TransferRequest = ExpireTransferRequest(current) };
+            await WriteControlTransitionAsync(connection, transaction, run, current, revoked,
+                "ControlLeaseRevoked", access.Actor!, token);
+            current = revoked;
+            await AppendAuditAsync(connection, transaction, run.Correlation.RunId, "revalidate", "control-lease-revoked",
+                access.Actor, token);
+        }
+        return (current, access);
+    }
+
+    private static ControlTransferRequest? ExpireTransferRequest(RunControlState current) =>
+        current.TransferRequest is { State: "pending" } request ? request with { State = "superseded" } : current.TransferRequest;
 
     private async Task WriteControlTransitionAsync(
         NpgsqlConnection connection, NpgsqlTransaction transaction, StoredRun run,
         RunControlState previous, RunControlState next, string eventType, ActorIdentity actor,
-        CancellationToken token)
+        CancellationToken token, object? detail = null)
     {
         const string sql = """
             UPDATE wpcp_implementation_runs SET last_position = @version, lease_epoch = @epoch,
-                lease_holder = @holder, lease_claimed_at = @claimed WHERE run_id = @id;
+                lease_holder = @holder, lease_claimed_at = @claimed, transfer_request = @transfer,
+                redaction_occurred = redaction_occurred OR @redaction_occurred,
+                redaction_policy_version = CASE WHEN @redaction_occurred THEN @redaction_policy_version ELSE redaction_policy_version END,
+                redaction_marker = CASE WHEN @redaction_occurred THEN @redaction_marker ELSE redaction_marker END WHERE run_id = @id;
             INSERT INTO wpcp_run_events
                 (run_id, position, event_id, event_type, occurred_at, correlation, payload,
                  provenance, redaction_occurred, redaction_policy_version, redaction_marker)
@@ -167,13 +271,16 @@ public sealed partial class PostgresImplementationRunStore
         AddNullable(command, "holder", NpgsqlDbType.Jsonb,
             next.Holder is null ? null : System.Text.Json.JsonSerializer.Serialize(next.Holder, JsonOptions));
         AddNullable(command, "claimed", NpgsqlDbType.TimestampTz, next.ClaimedAt);
+        AddNullable(command, "transfer", NpgsqlDbType.Jsonb, next.TransferRequest is null ? null :
+            System.Text.Json.JsonSerializer.Serialize(next.TransferRequest, JsonOptions));
         command.Parameters.AddWithValue("event_id", Guid.NewGuid());
         command.Parameters.AddWithValue("event_type", eventType);
         command.Parameters.AddWithValue("at", DateTimeOffset.UtcNow);
         AddJson(command, "correlation", run.Correlation);
-        AddJson(command, "payload", new { actor, previous, current = next });
+        var payload = RedactAgentValue(System.Text.Json.JsonSerializer.SerializeToElement(new { actor, previous, current = next, detail }, JsonOptions));
+        AddJson(command, "payload", payload.Value);
         AddJson(command, "provenance", run.Provenance);
-        AddRedaction(command, _redactionPolicy.Metadata(false));
+        AddRedaction(command, _redactionPolicy.Metadata(payload.Occurred));
         await command.ExecuteNonQueryAsync(token);
     }
 }

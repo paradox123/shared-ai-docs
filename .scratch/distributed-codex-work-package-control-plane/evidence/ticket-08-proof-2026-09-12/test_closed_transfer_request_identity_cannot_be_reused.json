@@ -1,0 +1,706 @@
+{
+  "observations": [
+    {
+      "run": {
+        "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+        "state": "admitted",
+        "correlation": {
+          "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+          "repositoryId": "repo-1",
+          "issueId": "issue-45",
+          "issueNumber": 45,
+          "commandId": "0bb8c77a-ed15-43aa-b669-174dd8905ca2",
+          "repository": {
+            "repositoryId": "repo-1",
+            "fullName": "pilot/fixture",
+            "providerRepositoryId": 9001
+          }
+        },
+        "runStartedAt": "2026-09-12T12:22:06.2657+00:00",
+        "activities": [
+          {
+            "activityId": "7c142f42-8d0c-4d86-8d41-405c8edd6465",
+            "activityType": "admission",
+            "state": "completed",
+            "startedAt": "2026-09-12T12:22:06.2657+00:00",
+            "completedAt": "2026-09-12T12:22:06.2657+00:00"
+          }
+        ],
+        "attempts": [
+          {
+            "attemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+            "activityId": "7c142f42-8d0c-4d86-8d41-405c8edd6465",
+            "attemptNumber": 1,
+            "state": "completed",
+            "startedAt": "2026-09-12T12:22:06.2657+00:00",
+            "completedAt": "2026-09-12T12:22:06.2657+00:00",
+            "session": null,
+            "liveOperation": null
+          }
+        ],
+        "processes": [
+          {
+            "processId": "4455d256-ff2b-46a7-aec4-05490693c4df",
+            "processKind": "api",
+            "processStartedAt": "2026-09-12T12:22:05.508587+00:00",
+            "processStoppedAt": null,
+            "actor": {
+              "kind": "service",
+              "provider": "wpcp-api",
+              "subjectId": "4455d256-ff2b-46a7-aec4-05490693c4df"
+            }
+          }
+        ],
+        "heartbeats": [
+          {
+            "heartbeatId": "6ff139eb-f51d-4784-a2ff-d5f60fe9ac35",
+            "processId": "4455d256-ff2b-46a7-aec4-05490693c4df",
+            "heartbeatAt": "2026-09-12T12:22:06.274454+00:00"
+          },
+          {
+            "heartbeatId": "e9ef7037-b703-4a87-a4cb-af1b2729348e",
+            "processId": "4455d256-ff2b-46a7-aec4-05490693c4df",
+            "heartbeatAt": "2026-09-12T12:22:06.287173+00:00"
+          },
+          {
+            "heartbeatId": "08d28b4c-06d4-4973-840d-9e59867411ac",
+            "processId": "4455d256-ff2b-46a7-aec4-05490693c4df",
+            "heartbeatAt": "2026-09-12T12:22:06.314713+00:00"
+          },
+          {
+            "heartbeatId": "9ebcae7c-69fe-4e6d-ad55-0077adeb89cd",
+            "processId": "4455d256-ff2b-46a7-aec4-05490693c4df",
+            "heartbeatAt": "2026-09-12T12:22:06.342375+00:00"
+          },
+          {
+            "heartbeatId": "b39694b5-3e39-4678-b4c7-5a480e03cc97",
+            "processId": "4455d256-ff2b-46a7-aec4-05490693c4df",
+            "heartbeatAt": "2026-09-12T12:22:06.373138+00:00"
+          },
+          {
+            "heartbeatId": "c352c7b5-784b-4169-a70d-6198b1986d62",
+            "processId": "4455d256-ff2b-46a7-aec4-05490693c4df",
+            "heartbeatAt": "2026-09-12T12:22:06.403513+00:00"
+          },
+          {
+            "heartbeatId": "63fcee40-c7fd-416a-b676-e7cd868cf5e9",
+            "processId": "4455d256-ff2b-46a7-aec4-05490693c4df",
+            "heartbeatAt": "2026-09-12T12:22:06.437083+00:00"
+          },
+          {
+            "heartbeatId": "29b730fc-fd45-4024-b2c6-90c936fda3dc",
+            "processId": "4455d256-ff2b-46a7-aec4-05490693c4df",
+            "heartbeatAt": "2026-09-12T12:22:06.459355+00:00"
+          },
+          {
+            "heartbeatId": "e03b5ecc-95e9-4c0b-958f-15491d5672b6",
+            "processId": "4455d256-ff2b-46a7-aec4-05490693c4df",
+            "heartbeatAt": "2026-09-12T12:22:06.4898+00:00"
+          },
+          {
+            "heartbeatId": "a3102bd3-c3ff-4536-8d8e-23697f4deb71",
+            "processId": "4455d256-ff2b-46a7-aec4-05490693c4df",
+            "heartbeatAt": "2026-09-12T12:22:06.513706+00:00"
+          }
+        ],
+        "executionEvidence": [],
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "configurationRevision": "r1",
+          "contractRevision": "r1"
+        },
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "",
+          "marker": ""
+        },
+        "lastPosition": 6,
+        "control": {
+          "runVersion": 6,
+          "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+          "headSha": null,
+          "leaseEpoch": 1,
+          "holder": {
+            "kind": "human",
+            "provider": "github",
+            "subjectId": "101"
+          },
+          "claimedAt": "2026-09-12T12:22:06.306374+00:00",
+          "transferRequest": {
+            "requestId": "50ea3105-ab14-4ee9-9901-41c189eb859b",
+            "requester": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "103"
+            },
+            "requesterLogin": "actor-contributor",
+            "holder": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "101"
+            },
+            "leaseEpoch": 1,
+            "requestedAt": "2026-09-12T12:22:06.394046+00:00",
+            "reason": "ask",
+            "state": "rejected"
+          }
+        },
+        "authorization": {
+          "code": "observed",
+          "access": {
+            "actor": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "102"
+            },
+            "canRead": true,
+            "canContribute": false,
+            "failureCode": null,
+            "login": "actor-observer",
+            "isHuman": true
+          },
+          "current": {
+            "runVersion": 6,
+            "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+            "headSha": null,
+            "leaseEpoch": 1,
+            "holder": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "101"
+            },
+            "claimedAt": "2026-09-12T12:22:06.306374+00:00",
+            "transferRequest": {
+              "requestId": "50ea3105-ab14-4ee9-9901-41c189eb859b",
+              "requester": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "103"
+              },
+              "requesterLogin": "actor-contributor",
+              "holder": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "101"
+              },
+              "leaseEpoch": 1,
+              "requestedAt": "2026-09-12T12:22:06.394046+00:00",
+              "reason": "ask",
+              "state": "rejected"
+            }
+          },
+          "continuation": null,
+          "accepted": true,
+          "canClaim": false,
+          "canRequestTransfer": false,
+          "canForceTakeover": false,
+          "canDecideTransfer": false,
+          "canRelease": false
+        },
+        "repositoryExecution": null
+      },
+      "history": {
+        "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+        "after": 0,
+        "events": [
+          {
+            "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+            "position": 1,
+            "eventId": "875615d6-b30f-43a7-86aa-a5b35a5e0065",
+            "eventType": "ImplementationRunStarted",
+            "occurredAt": "2026-09-12T12:22:06.2657+00:00",
+            "redaction": {
+              "occurred": false,
+              "policyVersion": "",
+              "marker": ""
+            },
+            "payload": {
+              "note": "control proof",
+              "actor": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "101"
+              },
+              "authorization": {
+                "source": "github",
+                "decision": "authorized"
+              }
+            },
+            "correlation": {
+              "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+              "issueId": "issue-45",
+              "commandId": "0bb8c77a-ed15-43aa-b669-174dd8905ca2",
+              "repository": {
+                "fullName": "pilot/fixture",
+                "repositoryId": "repo-1",
+                "providerRepositoryId": 9001
+              },
+              "issueNumber": 45,
+              "repositoryId": "repo-1"
+            },
+            "provenance": {
+              "sourceRevision": "r1",
+              "packageRevision": "r1",
+              "contractRevision": "r1",
+              "configurationRevision": "r1"
+            }
+          },
+          {
+            "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+            "position": 2,
+            "eventId": "a4e9a07f-8fa7-44c6-9595-75b9570ff341",
+            "eventType": "ControlLeaseClaimed",
+            "occurredAt": "2026-09-12T12:22:06.306388+00:00",
+            "redaction": {
+              "occurred": false,
+              "policyVersion": "",
+              "marker": ""
+            },
+            "payload": {
+              "actor": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "101"
+              },
+              "detail": null,
+              "current": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "101"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:06.306374+00:00",
+                "leaseEpoch": 1,
+                "runVersion": 2,
+                "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+                "transferRequest": null
+              },
+              "previous": {
+                "holder": null,
+                "headSha": null,
+                "claimedAt": null,
+                "leaseEpoch": 0,
+                "runVersion": 1,
+                "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+                "transferRequest": null
+              }
+            },
+            "correlation": {
+              "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+              "issueId": "issue-45",
+              "commandId": "0bb8c77a-ed15-43aa-b669-174dd8905ca2",
+              "repository": {
+                "fullName": "pilot/fixture",
+                "repositoryId": "repo-1",
+                "providerRepositoryId": 9001
+              },
+              "issueNumber": 45,
+              "repositoryId": "repo-1"
+            },
+            "provenance": {
+              "sourceRevision": "r1",
+              "packageRevision": "r1",
+              "contractRevision": "r1",
+              "configurationRevision": "r1"
+            }
+          },
+          {
+            "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+            "position": 3,
+            "eventId": "460939e2-c800-4f04-bbbe-200d82bded12",
+            "eventType": "ControlTransferRequested",
+            "occurredAt": "2026-09-12T12:22:06.333722+00:00",
+            "redaction": {
+              "occurred": false,
+              "policyVersion": "",
+              "marker": ""
+            },
+            "payload": {
+              "actor": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "103"
+              },
+              "detail": {
+                "mode": "voluntary",
+                "reason": "ask",
+                "requestId": "bf21e65f-fe38-4e86-a174-cac4a2a52d99"
+              },
+              "current": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "101"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:06.306374+00:00",
+                "leaseEpoch": 1,
+                "runVersion": 3,
+                "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+                "transferRequest": {
+                  "state": "pending",
+                  "holder": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "101"
+                  },
+                  "reason": "ask",
+                  "requestId": "bf21e65f-fe38-4e86-a174-cac4a2a52d99",
+                  "requester": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "103"
+                  },
+                  "leaseEpoch": 1,
+                  "requestedAt": "2026-09-12T12:22:06.333699+00:00",
+                  "requesterLogin": "actor-contributor"
+                }
+              },
+              "previous": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "101"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:06.306374+00:00",
+                "leaseEpoch": 1,
+                "runVersion": 2,
+                "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+                "transferRequest": null
+              }
+            },
+            "correlation": {
+              "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+              "issueId": "issue-45",
+              "commandId": "0bb8c77a-ed15-43aa-b669-174dd8905ca2",
+              "repository": {
+                "fullName": "pilot/fixture",
+                "repositoryId": "repo-1",
+                "providerRepositoryId": 9001
+              },
+              "issueNumber": 45,
+              "repositoryId": "repo-1"
+            },
+            "provenance": {
+              "sourceRevision": "r1",
+              "packageRevision": "r1",
+              "contractRevision": "r1",
+              "configurationRevision": "r1"
+            }
+          },
+          {
+            "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+            "position": 4,
+            "eventId": "82a3d45a-9687-42b0-955e-8d7ffe7c3126",
+            "eventType": "ControlTransferRejected",
+            "occurredAt": "2026-09-12T12:22:06.363625+00:00",
+            "redaction": {
+              "occurred": false,
+              "policyVersion": "",
+              "marker": ""
+            },
+            "payload": {
+              "actor": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "101"
+              },
+              "detail": {
+                "mode": "voluntary",
+                "reason": "decline",
+                "requestId": "bf21e65f-fe38-4e86-a174-cac4a2a52d99"
+              },
+              "current": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "101"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:06.306374+00:00",
+                "leaseEpoch": 1,
+                "runVersion": 4,
+                "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+                "transferRequest": {
+                  "state": "rejected",
+                  "holder": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "101"
+                  },
+                  "reason": "ask",
+                  "requestId": "bf21e65f-fe38-4e86-a174-cac4a2a52d99",
+                  "requester": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "103"
+                  },
+                  "leaseEpoch": 1,
+                  "requestedAt": "2026-09-12T12:22:06.333699+00:00",
+                  "requesterLogin": "actor-contributor"
+                }
+              },
+              "previous": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "101"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:06.306374+00:00",
+                "leaseEpoch": 1,
+                "runVersion": 3,
+                "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+                "transferRequest": {
+                  "state": "pending",
+                  "holder": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "101"
+                  },
+                  "reason": "ask",
+                  "requestId": "bf21e65f-fe38-4e86-a174-cac4a2a52d99",
+                  "requester": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "103"
+                  },
+                  "leaseEpoch": 1,
+                  "requestedAt": "2026-09-12T12:22:06.333699+00:00",
+                  "requesterLogin": "actor-contributor"
+                }
+              }
+            },
+            "correlation": {
+              "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+              "issueId": "issue-45",
+              "commandId": "0bb8c77a-ed15-43aa-b669-174dd8905ca2",
+              "repository": {
+                "fullName": "pilot/fixture",
+                "repositoryId": "repo-1",
+                "providerRepositoryId": 9001
+              },
+              "issueNumber": 45,
+              "repositoryId": "repo-1"
+            },
+            "provenance": {
+              "sourceRevision": "r1",
+              "packageRevision": "r1",
+              "contractRevision": "r1",
+              "configurationRevision": "r1"
+            }
+          },
+          {
+            "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+            "position": 5,
+            "eventId": "cd071daa-021a-44f5-b54f-8d7b2e2fb7e1",
+            "eventType": "ControlTransferRequested",
+            "occurredAt": "2026-09-12T12:22:06.394067+00:00",
+            "redaction": {
+              "occurred": false,
+              "policyVersion": "",
+              "marker": ""
+            },
+            "payload": {
+              "actor": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "103"
+              },
+              "detail": {
+                "mode": "voluntary",
+                "reason": "ask",
+                "requestId": "50ea3105-ab14-4ee9-9901-41c189eb859b"
+              },
+              "current": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "101"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:06.306374+00:00",
+                "leaseEpoch": 1,
+                "runVersion": 5,
+                "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+                "transferRequest": {
+                  "state": "pending",
+                  "holder": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "101"
+                  },
+                  "reason": "ask",
+                  "requestId": "50ea3105-ab14-4ee9-9901-41c189eb859b",
+                  "requester": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "103"
+                  },
+                  "leaseEpoch": 1,
+                  "requestedAt": "2026-09-12T12:22:06.394046+00:00",
+                  "requesterLogin": "actor-contributor"
+                }
+              },
+              "previous": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "101"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:06.306374+00:00",
+                "leaseEpoch": 1,
+                "runVersion": 4,
+                "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+                "transferRequest": {
+                  "state": "rejected",
+                  "holder": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "101"
+                  },
+                  "reason": "ask",
+                  "requestId": "bf21e65f-fe38-4e86-a174-cac4a2a52d99",
+                  "requester": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "103"
+                  },
+                  "leaseEpoch": 1,
+                  "requestedAt": "2026-09-12T12:22:06.333699+00:00",
+                  "requesterLogin": "actor-contributor"
+                }
+              }
+            },
+            "correlation": {
+              "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+              "issueId": "issue-45",
+              "commandId": "0bb8c77a-ed15-43aa-b669-174dd8905ca2",
+              "repository": {
+                "fullName": "pilot/fixture",
+                "repositoryId": "repo-1",
+                "providerRepositoryId": 9001
+              },
+              "issueNumber": 45,
+              "repositoryId": "repo-1"
+            },
+            "provenance": {
+              "sourceRevision": "r1",
+              "packageRevision": "r1",
+              "contractRevision": "r1",
+              "configurationRevision": "r1"
+            }
+          },
+          {
+            "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+            "position": 6,
+            "eventId": "944481ae-02dd-4888-bdad-b1bb13771e54",
+            "eventType": "ControlTransferRejected",
+            "occurredAt": "2026-09-12T12:22:06.426902+00:00",
+            "redaction": {
+              "occurred": false,
+              "policyVersion": "",
+              "marker": ""
+            },
+            "payload": {
+              "actor": {
+                "kind": "human",
+                "provider": "github",
+                "subjectId": "101"
+              },
+              "detail": {
+                "mode": "voluntary",
+                "reason": "decline",
+                "requestId": "50ea3105-ab14-4ee9-9901-41c189eb859b"
+              },
+              "current": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "101"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:06.306374+00:00",
+                "leaseEpoch": 1,
+                "runVersion": 6,
+                "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+                "transferRequest": {
+                  "state": "rejected",
+                  "holder": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "101"
+                  },
+                  "reason": "ask",
+                  "requestId": "50ea3105-ab14-4ee9-9901-41c189eb859b",
+                  "requester": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "103"
+                  },
+                  "leaseEpoch": 1,
+                  "requestedAt": "2026-09-12T12:22:06.394046+00:00",
+                  "requesterLogin": "actor-contributor"
+                }
+              },
+              "previous": {
+                "holder": {
+                  "kind": "human",
+                  "provider": "github",
+                  "subjectId": "101"
+                },
+                "headSha": null,
+                "claimedAt": "2026-09-12T12:22:06.306374+00:00",
+                "leaseEpoch": 1,
+                "runVersion": 5,
+                "targetAttemptId": "f71f2e84-2d9c-47fc-a205-ed2134c88474",
+                "transferRequest": {
+                  "state": "pending",
+                  "holder": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "101"
+                  },
+                  "reason": "ask",
+                  "requestId": "50ea3105-ab14-4ee9-9901-41c189eb859b",
+                  "requester": {
+                    "kind": "human",
+                    "provider": "github",
+                    "subjectId": "103"
+                  },
+                  "leaseEpoch": 1,
+                  "requestedAt": "2026-09-12T12:22:06.394046+00:00",
+                  "requesterLogin": "actor-contributor"
+                }
+              }
+            },
+            "correlation": {
+              "runId": "eef85a45-9320-4aa1-9941-c4bdb2bb68ce",
+              "issueId": "issue-45",
+              "commandId": "0bb8c77a-ed15-43aa-b669-174dd8905ca2",
+              "repository": {
+                "fullName": "pilot/fixture",
+                "repositoryId": "repo-1",
+                "providerRepositoryId": 9001
+              },
+              "issueNumber": 45,
+              "repositoryId": "repo-1"
+            },
+            "provenance": {
+              "sourceRevision": "r1",
+              "packageRevision": "r1",
+              "contractRevision": "r1",
+              "configurationRevision": "r1"
+            }
+          }
+        ],
+        "lastPosition": 6
+      }
+    }
+  ],
+  "facts": {}
+}

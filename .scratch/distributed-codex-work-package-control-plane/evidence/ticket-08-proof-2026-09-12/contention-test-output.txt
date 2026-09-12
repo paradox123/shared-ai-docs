@@ -1,0 +1,6 @@
+test_twenty_takeovers_across_two_api_hosts_have_one_winner_per_epoch (tests.test_control_transfer.ControlTransferTests.test_twenty_takeovers_across_two_api_hosts_have_one_winner_per_epoch) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 3.880s
+
+OK

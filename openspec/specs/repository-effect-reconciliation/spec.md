@@ -2,7 +2,6 @@
 
 ## Purpose
 Ensure managed repository runs start from an authoritative base, reconcile controlled external effects after crashes without duplication, and expose safe Operator recovery and repository ownership release.
-
 ## Requirements
 ### Requirement: Repository execution starts only on the authoritative base
 Before a managed repository run starts an agent or missing external work, the worker SHALL persist and compare expected base SHA, actual locally available base SHA and freshly read provider head for the pinned repository. All three SHALL match exactly. A configured predecessor SHALL be provider-confirmed merged and closed. Missing, stale or inconsistent evidence SHALL produce a public preflight blocker without an agent start. Configuration redelivery SHALL NOT silently change repository identity or execution origins.
@@ -16,10 +15,10 @@ Before a managed repository run starts an agent or missing external work, the wo
 - **THEN** execution fails closed and no Git, provider or session effect is created
 
 ### Requirement: Every controlled effect has durable identity and reconciliation
-Each controlled Git, provider and session effect SHALL have an immutable intent with a stable operation ID before execution, an independently readable receipt, and a deterministic lookup and adoption rule. A replacement SHALL adopt one matching existing effect and execute only missing work. Committed history and original session observations SHALL remain intact.
+Each controlled Git, provider, session, continuation, handoff and opened-session interaction effect SHALL have an immutable intent with a stable operation ID before execution, an independently readable receipt, and a deterministic lookup and adoption rule. A replacement SHALL adopt one matching existing effect and execute only missing work. Committed history, original session observations and established session lineage SHALL remain intact.
 
 #### Scenario: Worker dies in the external success gap
-- **WHEN** the worker is killed after a Git, provider or session effect succeeds but before its local activity result is saved
+- **WHEN** the worker is killed after a Git, provider, session, continuation, handoff, or interaction effect succeeds but before its local activity result is saved
 - **THEN** replacement deliveries adopt that same effect, its externally observed effect count stays one, and the public receipt and operation ID identify it
 
 ### Requirement: Uncertain effects become explicit human decisions

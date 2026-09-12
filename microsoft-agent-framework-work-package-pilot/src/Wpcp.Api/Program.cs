@@ -14,6 +14,7 @@ await using var store = new PostgresImplementationRunStore(
     options.ConnectionString,
     fixture.RedactionPolicy);
 await store.EnsureSchemaAsync();
+await RecoverPendingContinuationsAsync(store, CancellationToken.None);
 
 var runtime = new ApiRuntime(Guid.NewGuid().ToString("D"), DateTimeOffset.UtcNow);
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,25 @@ app.Use(async (context, next) =>
         await context.Response.WriteAsJsonAsync(new { code = "run-store-unavailable" });
     }
 });
+app.MapPost("/api/v1/runs/{runId}/agent-commands/{mode}",
+    async (string runId, string mode, ActiveAgentCommandRequest request, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        var decision = await store.DecideActiveAgentAsync(runId, mode, request,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+        var status = decision.Code switch
+        {
+            "agent-command-accepted" => 202,
+            "repository-provider-unavailable" => 503,
+            "provider-authentication-required" => 401,
+            "implementation-run-not-found" => 404,
+            "invalid-agent-command" => 400,
+            "repository-access-denied" or "repository-contribution-required" or "control-lease-required" => 403,
+            _ => 409,
+        };
+        return Results.Json(decision, statusCode: status);
+    });
+
 app.MapGet("/healthz", () => Results.Text("Healthy"));
 
 app.MapPost(
@@ -168,7 +188,9 @@ app.MapGet("/api/v1/runs/{runId}/attempts/{attemptId}",
         var attempt = projection!.Attempts.SingleOrDefault(a => a.AttemptId == attemptId);
         if (attempt is null) return JsonError("attempt-not-found", 404);
         var history = await store.GetEventsAfterAsync(runId, 0, token);
-        return Results.Json(new { runId, attempt, projection.Provenance,
+        return Results.Json(new { runId, attempt, projection.Provenance, projection.Control,
+            projection.RepositoryExecution,
+            effects = projection.RepositoryExecution?.Effects ?? Array.Empty<RepositoryEffect>(),
             events = history!.Events.Where(e => e.Position <= projection.LastPosition &&
                 e.Payload.TryGetProperty("attemptId", out var id) && id.GetString() == attemptId).ToArray() });
     });
@@ -183,6 +205,58 @@ app.MapGet("/api/v1/runs/{runId}/audit",
         return Results.Json(new { runId, entries = await store.GetAuditAsync(runId, token) });
     });
 
+app.MapGet("/api/v1/runs/{runId}/continuations/{commandId}",
+    async (string runId, string commandId, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        var decision = await store.DecideControlAsync(runId, null, null,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+        if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
+        var receipt = await store.GetContinuationReceiptAsync(runId, commandId, token);
+        return receipt is null ? JsonError("continuation-not-found", 404) : Results.Json(receipt);
+    });
+
+app.MapPost("/api/v1/runs/{runId}/attempts/{attemptId}/open",
+    async (string runId, string attemptId, SessionOpenCommand? command, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        if (command is null) return JsonError("invalid-session-open-command", 400);
+        ControlDecision decision;
+        try
+        {
+            decision = await store.DecideSessionOpenAsync(runId, attemptId, command,
+                (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+        }
+        catch (ArgumentException)
+        {
+            return JsonError("invalid-session-open-command", 400);
+        }
+        if (!decision.Accepted)
+        {
+            if (decision.Code == "invalid-session-open-command") return JsonError(decision.Code, 400);
+            if (decision.Code == "human-request-not-open") return Results.Json(decision, statusCode: 409);
+            return Results.Json(decision, statusCode: DecisionStatus(decision));
+        }
+        ContinuationOperation? operation = decision.Continuation;
+        if (operation is null) return JsonError("human-request-not-open", 409);
+        if (operation.State == "pending")
+        {
+            try
+            {
+                operation = await store.DeliverContinuationAsync(runId, operation.CommandId, CallAdapterAsync, token);
+                if (operation is null) return JsonError("session-adapter-unavailable", 503);
+            }
+            catch (ArgumentException)
+            {
+                return JsonError("invalid-session-adapter-receipt", 503);
+            }
+        }
+        var projection = await store.GetProjectionAsync(runId, token);
+        var capability = projection?.Attempts.SingleOrDefault(candidate => candidate.AttemptId == attemptId)
+            ?.Session?.OpenInCodex;
+        return Results.Json(new { operation, capability }, statusCode: StatusCodes.Status200OK);
+    });
+
 app.MapPost("/api/v1/runs/{runId}/control/{action}",
     async (string runId, string action, JsonElement body, HttpContext context, CancellationToken token) =>
     {
@@ -191,7 +265,25 @@ app.MapPost("/api/v1/runs/{runId}/control/{action}",
         try { mutation = body.Deserialize<ControlMutation>(new JsonSerializerOptions(JsonSerializerDefaults.Web)); }
         catch (JsonException) { mutation = null; }
         var decision = await store.DecideControlAsync(runId, action, mutation,
-            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token,
+            (repository, transfer, ct) => authorization.EvaluateRecipientAsync(repository,
+                transfer.Requester, transfer.RequesterLogin, Credential(context), ct), FenceAdapterOperationAsync);
+        if (decision.Accepted && decision.Continuation is { State: "pending" } operation)
+        {
+            ContinuationOperation? completed;
+            try
+            {
+                completed = await store.DeliverContinuationAsync(runId, operation.CommandId, CallAdapterAsync, token);
+                if (completed is null) return JsonError("session-adapter-unavailable", 503);
+            }
+            catch (ArgumentException)
+            {
+                return JsonError("invalid-session-adapter-receipt", 503);
+            }
+            var refreshed = await store.DecideControlAsync(runId, null, null,
+                (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+            decision = decision with { Code = completed.State == "fenced" ? "continuation-fenced" : "continuation-applied", Current = refreshed.Current, Continuation = completed };
+        }
         return Results.Json(decision, statusCode: DecisionStatus(decision));
     });
 
@@ -205,6 +297,76 @@ static int DecisionStatus(ControlDecision decision) => decision.Code switch
     _ when !decision.Access.CanContribute => 403,
     _ => 409,
 };
+
+static Task<JsonElement?> FenceAdapterOperationAsync(ContinuationOperation operation, CancellationToken token) =>
+    CallAdapterAsync(operation with { Action = "fence", Origin = operation.Action }, token);
+
+static async Task<JsonElement?> CallAdapterAsync(
+    ContinuationOperation operation,
+    CancellationToken token)
+{
+    if (!Uri.TryCreate(operation.AdapterOrigin, UriKind.Absolute, out var origin) ||
+        origin.Scheme is not ("http" or "https"))
+        return null;
+    var relative = operation.Action switch
+    {
+        "resume" or "fork" or "fresh-retry" or "handoff" => $"continuations/{operation.OperationKey}",
+        "fence" => $"control-operations/{operation.OperationKey}/fence",
+        "write" => $"sessions/{operation.SourceSessionId}/interactions/{operation.OperationKey}",
+        "open" => $"sessions/{operation.SourceSessionId}/open",
+        _ => null,
+    };
+    if (relative is null) return null;
+    using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false })
+    {
+        Timeout = TimeSpan.FromSeconds(10),
+    };
+    object body = operation.Action switch
+    {
+        "resume" or "fork" or "fresh-retry" or "handoff" => new
+        {
+            action = operation.Action,
+            sourceSessionId = operation.SourceSessionId,
+        },
+        "fence" => new { sourceSessionId = operation.SourceSessionId, action = operation.Origin },
+        "write" => new { message = operation.Message },
+        "open" => new { operationKey = operation.OperationKey },
+        _ => new { },
+    };
+    try
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, new Uri(origin, relative))
+        {
+            Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json"),
+        };
+        using var response = await client.SendAsync(request, token);
+        if (!response.IsSuccessStatusCode) return null;
+        var raw = await response.Content.ReadAsStringAsync(token);
+        return JsonSerializer.Deserialize<JsonElement>(raw);
+    }
+    catch (HttpRequestException) { return null; }
+    catch (TaskCanceledException) { return null; }
+    catch (JsonException) { return null; }
+}
+
+static async Task RecoverPendingContinuationsAsync(
+    PostgresImplementationRunStore store,
+    CancellationToken token)
+{
+    foreach (var operation in await store.GetPendingContinuationsAsync(token))
+    {
+        if (operation.RunId is null) continue;
+        try
+        {
+            await store.DeliverContinuationAsync(operation.RunId, operation.CommandId, CallAdapterAsync, token);
+        }
+        catch (ArgumentException)
+        {
+            // The persisted intent remains inspectable; a malformed external
+            // receipt must not prevent API replacement from serving the run.
+        }
+    }
+}
 
 try
 {

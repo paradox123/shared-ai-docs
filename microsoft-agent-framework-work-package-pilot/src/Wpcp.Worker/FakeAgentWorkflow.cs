@@ -34,9 +34,9 @@ internal static class FakeAgentWorkflow
         await using var run = await InProcessExecution.RunAsync(workflow, runId);
         // Framework errors are events, not necessarily thrown by RunAsync.
         foreach (var error in run.OutgoingEvents.OfType<WorkflowErrorEvent>())
-            throw Unwrap(error.Exception);
+            throw Unwrap(error.Exception ?? new InvalidOperationException("Workflow error event has no exception."));
         foreach (var error in run.OutgoingEvents.OfType<ExecutorFailedEvent>())
-            throw Unwrap(error.Data);
+            throw Unwrap(error.Data ?? new InvalidOperationException("Executor failure event has no exception."));
     }
 
     private static Exception Unwrap(Exception error)
@@ -89,7 +89,8 @@ internal static class FakeAgentWorkflow
                 if (session.OperationKey != receipt.Session.OperationKey || !Guid.TryParse(session.SessionId, out _) ||
                     session.Events is null || session.Events.Count == 0)
                     throw new JsonException();
-                receipt = await store.BindAgentSessionAsync(receipt.RunId, session.SessionId, cancellationToken);
+                receipt = await store.BindAgentSessionAsync(receipt.RunId, session.SessionId,
+                    session.OpenInCodex, cancellationToken);
                 await PauseAsync("after-session-mapping", pauseAt, cancellationToken);
                 var terminal = false;
                 foreach (var observation in session.Events)

@@ -4,7 +4,7 @@ namespace Wpcp.Domain;
 public sealed record ActorIdentity(string Kind, string Provider, string SubjectId);
 
 public sealed record RepositoryAccess(
-    ActorIdentity? Actor, bool CanRead, bool CanContribute, string? FailureCode = null)
+    ActorIdentity? Actor, bool CanRead, bool CanContribute, string? FailureCode = null, string? Login = null)
 {
     public bool IsHuman => Actor?.Kind == "human";
 }
@@ -14,6 +14,9 @@ public sealed record RepositoryBinding(string RepositoryId, string FullName, lon
 /// <summary>Fresh provider evaluation; credentials are request-scoped and never persisted.</summary>
 public interface IRepositoryAuthorization
 {
+    Task<RepositoryAccess> EvaluateRecipientAsync(RepositoryBinding binding, ActorIdentity recipient,
+        string login, string? credential, CancellationToken cancellationToken = default);
+
     Task<RepositoryAccess> EvaluateAsync(
         RepositoryBinding binding, string? credential, CancellationToken cancellationToken = default);
 }
