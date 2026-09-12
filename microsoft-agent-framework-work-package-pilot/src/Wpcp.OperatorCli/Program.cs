@@ -23,8 +23,9 @@ internal static class OperatorCli
             using var client = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false }) { Timeout = TimeSpan.FromSeconds(30) };
             using var request = CreateRequest(invocation);
 
-            return await SendAsync(client, request);
+            return await SendAsync(client, request, invocation.OutputPath);
         }
+        catch (IOException) { return WriteJson(new { code = "operator-file-unavailable" }, 2); }
         catch (ArgumentException)
         {
             return WriteJson(
@@ -88,6 +89,7 @@ internal static class OperatorCli
             "run" => ParseRun(baseUrl, fixtureAccessToken, options),
             "attempt" => ParseAttempt(baseUrl, fixtureAccessToken, options),
             "events" => ParseEvents(baseUrl, fixtureAccessToken, options),
+            "export" => ParseExport(baseUrl, fixtureAccessToken, options),
             "audit" => ParseAudit(baseUrl, fixtureAccessToken, options),
             "continuation" => ParseContinuation(baseUrl, fixtureAccessToken, options),
             "claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" or
@@ -99,6 +101,14 @@ internal static class OperatorCli
             "--help" or "-h" => throw new ArgumentException("Help does not accept an API base URL."),
             _ => throw new ArgumentException("The command must be start, run, attempt, events, audit, claim, or release."),
         };
+    }
+
+    private static Invocation ParseExport(Uri baseUrl, string capability, IReadOnlyDictionary<string, string> options)
+    {
+        RequireOnly(options, "--run-id", "--output");
+        return new(baseUrl, HttpMethod.Get,
+            $"api/v1/runs/{Uri.EscapeDataString(Require(options, "--run-id"))}/export", null, capability,
+            Require(options, "--output"));
     }
 
     private static Invocation ParseStart(
@@ -295,9 +305,23 @@ internal static class OperatorCli
         return request;
     }
 
-    private static async Task<int> SendAsync(HttpClient client, HttpRequestMessage request)
+    private static async Task<int> SendAsync(HttpClient client, HttpRequestMessage request, string? outputPath = null)
     {
         using var response = await client.SendAsync(request);
+        if (outputPath is not null && response.IsSuccessStatusCode)
+        {
+            if (response.Content.Headers.ContentType?.MediaType != "application/zip")
+                return WriteJson(new { code = "invalid-dossier-response" }, 2);
+            var temporary = outputPath + "." + Guid.NewGuid().ToString("N") + ".tmp";
+            try
+            {
+                await using (var file = new FileStream(temporary, FileMode.CreateNew))
+                    await response.Content.CopyToAsync(file);
+                File.Move(temporary, outputPath, overwrite: false);
+            }
+            finally { if (File.Exists(temporary)) File.Delete(temporary); }
+            return WriteJson(new { code = "dossier-exported" }, 0);
+        }
         var body = await response.Content.ReadAsStringAsync();
         var exitCode = response.IsSuccessStatusCode ? 0 : 1;
 
@@ -446,5 +470,5 @@ internal static class OperatorCli
         HttpMethod Method,
         string RelativePath,
         object? Payload,
-        string FixtureAccessToken);
+        string FixtureAccessToken, string? OutputPath = null);
 }

@@ -64,6 +64,13 @@ public sealed partial class PostgresImplementationRunStore
         Func<RepositoryBinding, ControlTransferRequest, CancellationToken, Task<RepositoryAccess>>? authorizeRecipient = null,
         Func<ContinuationOperation, CancellationToken, Task<System.Text.Json.JsonElement?>>? fenceContinuation = null)
     {
+        if (await GetRestoredProjectionAsync(runId, cancellationToken) is { } restored)
+        {
+            var archiveAccess = await authorize(restored.Correlation.Repository!, cancellationToken);
+            var archiveCode = !archiveAccess.CanRead || !archiveAccess.IsHuman ? archiveAccess.FailureCode ?? "repository-access-denied" :
+                action is null ? "observed" : "restored-dossier-read-only";
+            return new(archiveCode, archiveAccess, archiveAccess.CanRead && archiveAccess.IsHuman ? restored.Control : null, Historical: true);
+        }
         if (!Guid.TryParse(runId, out var parsed))
             return new("implementation-run-not-found", new(null, false, false), null);
         await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);

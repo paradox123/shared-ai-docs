@@ -72,13 +72,14 @@ internal static class FakeAgentWorkflow
             try
             {
                 AgentAdapterResponse response;
-                if (receipt.Session.ObservedResponse is { } saved)
-                    response = new(receipt.Session.ResponseStatus!.Value, saved.GetRawText());
+                if (receipt.Session.ObservedResponse is not null)
+                    response = await store.ReadCapturedAgentResponseAsync(receipt, cancellationToken);
                 else
                 {
                     response = await adapter.StartOrReadAsync(receipt.Session.OperationKey, note, cancellationToken);
                     await PauseAsync("after-session-start", pauseAt, cancellationToken);
                     receipt = await store.CaptureAgentResponseAsync(receipt.RunId, response, cancellationToken);
+                    response = await store.ReadCapturedAgentResponseAsync(receipt, cancellationToken);
                 }
                 if (response.StatusCode >= 500) throw new AgentContractFailure("infrastructure-failure");
                 if (response.StatusCode != 200) throw new AgentContractFailure("transport-failure");
@@ -97,6 +98,7 @@ internal static class FakeAgentWorkflow
                 {
                     if (terminal || observation is null) throw new JsonException();
                     receipt = await store.ObserveAgentAsync(receipt.RunId, observation, cancellationToken);
+                    await PauseAsync($"after-source-sequence-{observation.Sequence}", pauseAt, cancellationToken);
                     if (observation.Data.ValueKind != JsonValueKind.Object) throw new JsonException();
                     if (observation.Type == "process-exit")
                     {
@@ -109,7 +111,7 @@ internal static class FakeAgentWorkflow
                     terminal = observation.Type == "result";
                 }
                 await PauseAsync("after-result-observed", pauseAt, cancellationToken);
-                var result = receipt.Session.OriginalResult;
+                var result = await store.ReadOriginalAgentResultAsync(receipt, cancellationToken);
                 if (!terminal || result is null || !TextEquals(result.Value, "schemaVersion", "fake-worker-result/v1") ||
                     !TextEquals(result.Value, "status", "blocked") || !result.Value.TryGetProperty("reason", out var reason) ||
                     reason.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(reason.GetString()))
@@ -119,6 +121,7 @@ internal static class FakeAgentWorkflow
             catch (AgentContractFailure error) { category = error.Category; }
             catch (JsonException) { category = "schema-failure"; }
             catch (ArgumentException) { category = "schema-failure"; }
+            catch (IOException) { category = "infrastructure-failure"; }
             catch (HttpRequestException) { category = "transport-failure"; }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { category = "timeout"; }
             receipt = await store.CompleteAgentAsync(receipt.RunId, category,
