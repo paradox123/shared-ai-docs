@@ -36,6 +36,11 @@ class GitHubProviderFixture:
                 elif self.path == '/repos/pilot/fixture' and identity['read']:
                     status, payload = 200, {'id': fixture.repository_id, 'permissions': {
                         'pull': identity['read'], 'push': identity['push']}}
+                elif self.path.startswith('/repos/pilot/fixture/collaborators/') and self.path.endswith('/permission'):
+                    target = fixture.identities.get(self.path.split('/')[-2])
+                    if target:
+                        status, payload = 200, {'permission': 'write' if target['push'] else 'read' if target['read'] else 'none',
+                            'user': {'id': target['id'], 'type': target['type']}}
                 self.send_response(status)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()

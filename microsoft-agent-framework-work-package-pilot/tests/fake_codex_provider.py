@@ -6,6 +6,7 @@ import sqlite3
 import uuid
 import time
 import subprocess
+import threading
 
 
 OPEN_MODES = ('same-session', 'handoff-confirmation-required', 'unsupported')
@@ -47,7 +48,11 @@ def serve(port, database, scenario, open_mode='unsupported', capability_reason=N
         db.execute('CREATE TABLE IF NOT EXISTS continuation_faults (operation TEXT PRIMARY KEY)')
         db.execute('CREATE TABLE IF NOT EXISTS interaction_faults (operation TEXT PRIMARY KEY)')
         db.execute('CREATE TABLE IF NOT EXISTS opens (operation TEXT PRIMARY KEY, session_id TEXT NOT NULL, body TEXT NOT NULL)')
+        db.execute('CREATE TABLE IF NOT EXISTS control_fences (operation TEXT PRIMARY KEY, intent TEXT NOT NULL)')
         db.execute('CREATE TABLE IF NOT EXISTS interactions (operation TEXT PRIMARY KEY, body TEXT NOT NULL)')
+
+    pending_interactions = {}
+    release_interactions = threading.Event()
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *_):
@@ -104,6 +109,7 @@ def serve(port, database, scenario, open_mode='unsupported', capability_reason=N
                 'continuations': continuations,
                 'openCount': len(opens),
                 'opens': opens,
+                'pendingInteractions': list(pending_interactions),
                 'interactionCount': len(interactions),
                 'interactions': interactions,
             })
@@ -168,6 +174,25 @@ def serve(port, database, scenario, open_mode='unsupported', capability_reason=N
             self.reply(200, stored)
 
         def do_POST(self):
+            if self.path == '/release-interactions':
+                self.read_request()
+                release_interactions.set()
+                return self.reply(200, {'released': True})
+            if self.path.startswith('/control-operations/') and self.path.endswith('/fence'):
+                operation = self.path.split('/')[2]
+                request = self.read_request()
+                if request is None:
+                    return
+                with sqlite3.connect(database) as db:
+                    db.execute('BEGIN IMMEDIATE')
+                    stored = db.execute('SELECT body FROM interactions WHERE operation=?', (operation,)).fetchone()
+                    previous = db.execute('SELECT intent FROM control_fences WHERE operation=?', (operation,)).fetchone()
+                    if previous and json.loads(previous[0]) != request:
+                        return self.reply(409, {'code': 'fence-intent-conflict'})
+                    db.execute('INSERT OR IGNORE INTO control_fences VALUES (?, ?)', (operation, json.dumps(request)))
+                    db.commit()
+                return self.reply(200, dict(request, contractVersion='AgentSessionAdapter/v1', operationKey=operation,
+                    state='applied' if stored else 'fenced', receipt=json.loads(stored[0]) if stored else None))
             continuation_operation = self.resource_path(self.path, '/continuations/')
             if continuation_operation is not None:
                 request = self.read_request()
@@ -312,11 +337,16 @@ def serve(port, database, scenario, open_mode='unsupported', capability_reason=N
             self.reply(200, receipt)
 
         def interact(self, session_id, operation, request):
+            if scenario == 'interaction-delayed':
+                pending_interactions[operation] = True
+                release_interactions.wait(timeout=15)
+                pending_interactions.pop(operation, None)
             message = request.get('message', request.get('text'))
             if not isinstance(message, str) or not message:
                 self.reply(400, {'code': 'invalid-interaction-request'})
                 return
             with sqlite3.connect(database) as db:
+                db.execute('BEGIN IMMEDIATE')
                 stored = db.execute('SELECT body FROM interactions WHERE operation=?', (operation,)).fetchone()
                 if stored:
                     interaction = json.loads(stored[0])
@@ -325,6 +355,11 @@ def serve(port, database, scenario, open_mode='unsupported', capability_reason=N
                         return
                     self.reply(200, interaction)
                     return
+                fenced = db.execute('SELECT intent FROM control_fences WHERE operation=?', (operation,)).fetchone()
+                if fenced:
+                    return self.reply(409, {'code': 'operation-fenced'})
+                if scenario == 'interaction-before-effect-failure':
+                    return self.reply(503, {'code': 'controlled-before-effect-failure'})
                 if self.record_for_session_id(db, session_id) is None:
                     self.reply(404, {'code': 'session-not-found'})
                     return
@@ -350,6 +385,8 @@ def serve(port, database, scenario, open_mode='unsupported', capability_reason=N
                         }},
                     ],
                 }
+                if scenario == 'interaction-malformed-events':
+                    interaction['events'][1] = {}
                 db.execute('INSERT OR IGNORE INTO interactions VALUES (?, ?)', (operation, json.dumps(interaction)))
                 interaction = json.loads(
                     db.execute('SELECT body FROM interactions WHERE operation=?', (operation,)).fetchone()[0])

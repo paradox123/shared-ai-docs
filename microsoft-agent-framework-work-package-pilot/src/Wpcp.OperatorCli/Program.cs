@@ -91,7 +91,8 @@ internal static class OperatorCli
             "audit" => ParseAudit(baseUrl, fixtureAccessToken, options),
             "continuation" => ParseContinuation(baseUrl, fixtureAccessToken, options),
             "claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" or
-                "resume" or "fork" or "fresh-retry" or "handoff" or "write" =>
+                "resume" or "fork" or "fresh-retry" or "handoff" or "write" or
+                "request-transfer" or "approve-transfer" or "reject-transfer" or "force-takeover" =>
                 ParseControl(baseUrl, fixtureAccessToken, command, options),
             "queue" or "interrupt" or "cancel" => ParseActiveControl(baseUrl, fixtureAccessToken, command, options),
             "open" => ParseOpen(baseUrl, fixtureAccessToken, options),
@@ -198,8 +199,9 @@ internal static class OperatorCli
         Uri baseUrl, string capability, string action, IReadOnlyDictionary<string, string> options)
     {
         string[] fences = ["--run-id", "--target-attempt-id", "--expected-run-version", "--expected-head-sha", "--lease-epoch"];
+        var transfer = action is "request-transfer" or "approve-transfer" or "reject-transfer";
         var continuation = action is "resume" or "fork" or "fresh-retry" or "handoff" or "write";
-        string[] expected = action == "adopt" ? [.. fences, "--operation-id", "--receipt-id"] :
+        string[] expected = action == "force-takeover" ? [.. fences, "--reason"] : transfer ? [.. fences, "--request-id", "--reason"] : action == "adopt" ? [.. fences, "--operation-id", "--receipt-id"] :
             continuation ? action == "write" ? [.. fences, "--request-id", "--command-id", "--message"] :
                 [.. fences, "--request-id", "--command-id"] : fences;
         RequireOnly(options, expected);
@@ -219,7 +221,7 @@ internal static class OperatorCli
             new { targetAttemptId = Require(options, "--target-attempt-id"), expectedRunVersion = version,
                 expectedHeadSha = head == "null" ? null : head, leaseEpoch = epoch,
                 operationId = options.GetValueOrDefault("--operation-id"), receiptId = options.GetValueOrDefault("--receipt-id"),
-                requestId, commandId, message = options.GetValueOrDefault("--message") }, capability);
+                requestId, commandId, message = options.GetValueOrDefault("--message"), reason = options.GetValueOrDefault("--reason") }, capability);
     }
 
     private static Invocation ParseActiveControl(Uri baseUrl, string capability, string mode,
@@ -405,7 +407,7 @@ internal static class OperatorCli
 
     private static object Usage() => new
     {
-        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|attempt|events|audit|continuation|claim|release|retry|reconcile|adopt|retire|resume|fork|fresh-retry|handoff|open|write|queue|interrupt|cancel> [options]",
+        usage = "Wpcp.OperatorCli --base-url <http-url> <start|run|attempt|events|audit|continuation|claim|release|retry|reconcile|adopt|retire|resume|fork|fresh-retry|handoff|open|write|queue|interrupt|cancel|request-transfer|approve-transfer|reject-transfer|force-takeover> [options]",
         requiredEnvironment = new[] { "WPCP_FIXTURE_ACCESS_TOKEN", "WPCP_PROVIDER_TOKEN" },
         commands = new
         {
@@ -425,6 +427,8 @@ internal static class OperatorCli
             open = new[] { "--run-id", "--attempt-id", "--request-id", "--command-id" },
             activeControl = new[] { "queue|interrupt|cancel", "control fences", "--command-id", "--message (queue/interrupt)",
                 "--reason (interrupt/cancel)", "--scope operation|attempt (cancel)" },
+            transfer = new[] { "request-transfer|approve-transfer|reject-transfer", "control fences", "--request-id", "--reason" },
+            takeover = new[] { "force-takeover", "control fences", "--reason" },
             write = new[] { "continuation fences", "--message" },
             run = new[] { "--run-id" },
             events = new[] { "--run-id", "--after" },

@@ -953,6 +953,7 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
         );
 
         ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS repository_binding jsonb;
+        ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS transfer_request jsonb;
         ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS lease_epoch bigint NOT NULL DEFAULT 0;
         ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS lease_holder jsonb;
         ALTER TABLE wpcp_implementation_runs ADD COLUMN IF NOT EXISTS lease_claimed_at timestamptz;

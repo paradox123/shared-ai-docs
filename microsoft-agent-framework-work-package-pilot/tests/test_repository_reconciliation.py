@@ -462,6 +462,49 @@ class RepositoryReconciliationTests(harness.ControlPlaneProcessHarness, unittest
         self.assertEqual(current, after['repositoryExecution']['base']['expectedSha'])
         self.assertTrue(any(a.get('session') for a in after['attempts']))
 
+    def test_takeover_preserves_managed_session_head_and_accepted_effects(self):
+        run_id = self.new_run()
+        worker = self.paused_worker(run_id, 'after-session-mapping')
+        self.decide('claim', run_id)
+        before = self.read_run(run_id)
+        self.assertIsNotNone(before['control']['headSha'])
+        self.decide('force-takeover', run_id, '--actor-id', 'actor-contributor', '--reason', 'Change contributor')
+        after = self.read_run(run_id)
+        for key in ('state', 'activities', 'attempts', 'repositoryExecution'):
+            self.assertEqual(before[key], after[key])
+        self.assertEqual(before['control']['headSha'], after['control']['headSha'])
+        code, denied, _ = self.operator_cli('retire', *self.control_args(run_id))
+        self.assertEqual(1, code, denied)
+        self.assertEqual('control-lease-required', denied['code'])
+        os.killpg(worker.pid, signal.SIGKILL)
+        worker.wait(timeout=10)
+        final = self.deliver(run_id)
+        original = next(a for a in before['attempts'] if a.get('session'))
+        recovered = next(a for a in final['attempts'] if a['attemptId'] == original['attemptId'])
+        self.assertEqual(original['session']['sessionId'], recovered['session']['sessionId'])
+        for accepted in before['repositoryExecution']['effects']:
+            if accepted['receipt'] is not None:
+                self.assertEqual(accepted, next(e for e in final['repositoryExecution']['effects']
+                    if e['operationId'] == accepted['operationId']))
+
+    def test_takeover_waits_for_accepted_repository_recovery(self):
+        run_id = self.new_run()
+        worker = self.paused_worker(run_id, 'after-git-effect')
+        os.killpg(worker.pid, signal.SIGKILL)
+        worker.wait(timeout=10)
+        self.decide('claim', run_id)
+        self.decide('reconcile', run_id)
+        before = self.read_run(run_id)
+        code, denied, _ = self.operator_cli('force-takeover', *self.control_args(run_id),
+            '--actor-id', 'actor-contributor', '--reason', 'Change during recovery')
+        self.assertEqual(1, code, denied)
+        self.assertEqual('control-recovery-pending', denied['code'])
+        self.assertEqual(before['control'], self.read_run(run_id)['control'])
+        self.deliver(run_id)
+        self.decide('force-takeover', run_id, '--actor-id', 'actor-contributor', '--reason', 'Recovery settled')
+        self.decide('retire', run_id, '--actor-id', 'actor-contributor')
+        self.deliver(run_id)
+
 
 class RepositoryRegistrationTests(harness.ControlPlaneProcessHarness, unittest.TestCase):
     def test_existing_standalone_session_cannot_gain_later_base_provenance(self):
@@ -525,6 +568,7 @@ class RepositoryRegistrationTests(harness.ControlPlaneProcessHarness, unittest.T
         replacement = harness.command_output(arguments, timeout=20)
         self.assertEqual(0, replacement.returncode, replacement.stdout)
         self.assertIsNotNone(self.read_run(managed_run)['repositoryExecution'])
+
 
 
 if __name__ == '__main__':

@@ -162,11 +162,8 @@ public sealed partial class PostgresImplementationRunStore
         return operation;
     }
 
-    public async Task<ContinuationOperation?> CompleteContinuationAdapterAsync(
-        string runId,
-        string commandId,
-        JsonElement adapterReceipt,
-        CancellationToken token = default)
+    public async Task<ContinuationOperation?> DeliverContinuationAsync(string runId, string commandId,
+        Func<ContinuationOperation, CancellationToken, Task<JsonElement?>> deliver, CancellationToken token = default)
     {
         if (!Guid.TryParse(runId, out _) || !Guid.TryParse(commandId, out _)) return null;
         await using var connection = await _dataSource.OpenConnectionAsync(token);
@@ -175,11 +172,23 @@ public sealed partial class PostgresImplementationRunStore
         var run = await FindRunAsync(connection, transaction, runId, token);
         var command = await ReadContinuationCommandAsync(connection, transaction, commandId, token);
         if (run is null || command is null || command.RunId != runId) return null;
-        if (command.State == "applied")
+        var operation = command.ToOperation();
+        if (command.State == "pending")
         {
-            await transaction.CommitAsync(token);
-            return command.ToOperation();
+            var receipt = await deliver(operation, token);
+            if (receipt is null) return null;
+            operation = await CompleteContinuationUnderLockAsync(connection, transaction, run, command, receipt.Value, token);
         }
+        await transaction.CommitAsync(token);
+        return operation;
+    }
+
+    private async Task<ContinuationOperation> CompleteContinuationUnderLockAsync(NpgsqlConnection connection,
+        NpgsqlTransaction transaction, StoredRun run, StoredContinuationCommand command, JsonElement adapterReceipt,
+        CancellationToken token)
+    {
+        var runId = run.Correlation.RunId;
+        if (command.State != "pending") return command.ToOperation();
         var safeReceipt = RedactAgentValue(adapterReceipt);
         var operation = command.ToOperation();
         RequireReceiptString(safeReceipt.Value, "contractVersion", "AgentSessionAdapter/v1");
@@ -271,7 +280,6 @@ public sealed partial class PostgresImplementationRunStore
             throw new ArgumentException("Continuation action has no adapter completion.");
         }
         await UpdateContinuationCommandAsync(connection, transaction, operation, safeReceipt.Value, token);
-        await transaction.CommitAsync(token);
         return operation;
     }
 
@@ -334,7 +342,8 @@ public sealed partial class PostgresImplementationRunStore
         if (existing.RunId != run.Correlation.RunId || existing.PayloadDigest !=
             ContinuationDigest(action, mutation, _redactionPolicy.Redact(mutation.Message).Value))
             return ("continuation-command-conflict", null);
-        return (existing.State == "applied" ? "continuation-applied" : "continuation-requested", existing.ToOperation());
+        return (existing.State == "fenced" ? "continuation-fenced" :
+            existing.State == "applied" ? "continuation-applied" : "continuation-requested", existing.ToOperation());
     }
 
     private async Task ResolveHumanRequestAsync(
@@ -589,6 +598,6 @@ public sealed partial class PostgresImplementationRunStore
             DROP CONSTRAINT IF EXISTS wpcp_human_request_commands_state_check;
         ALTER TABLE wpcp_human_request_commands
             ADD CONSTRAINT wpcp_human_request_commands_state_check
-            CHECK (state IN ('pending', 'applied', 'limitation'));
+            CHECK (state IN ('pending', 'applied', 'limitation', 'fenced'));
         """;
 }

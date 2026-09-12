@@ -38,12 +38,42 @@ internal sealed class GitHubRepositoryAuthorization(
             var permissions = root.GetProperty("permissions");
             var read = permissions.GetProperty("pull").GetBoolean();
             var push = permissions.GetProperty("push").GetBoolean();
-            return new(actor, read, read && push);
+            return new(actor, read, read && push, Login: user.RootElement.GetProperty("login").GetString());
         }
         catch (Exception error) when (error is HttpRequestException or JsonException or
             InvalidOperationException or KeyNotFoundException or TaskCanceledException or FormatException)
         {
             // Never expose or store upstream bodies, credentials or exception messages.
+            return new(null, false, false, "repository-provider-unavailable");
+        }
+    }
+
+    public async Task<RepositoryAccess> EvaluateRecipientAsync(RepositoryBinding binding,
+        ActorIdentity recipient, string login, string? credential, CancellationToken cancellationToken = default)
+    {
+        if (recipient is not { Kind: "human", Provider: "github" } || string.IsNullOrWhiteSpace(credential))
+            return new(null, false, false, "transfer-recipient-not-contributor");
+        try
+        {
+            var path = "repos/" + string.Join('/', binding.FullName.Split('/').Select(Uri.EscapeDataString)) +
+                "/collaborators/" + Uri.EscapeDataString(login) + "/permission";
+            using var response = await SendAsync(path, credential, cancellationToken);
+            if (response.StatusCode == HttpStatusCode.NotFound)
+                return new(recipient, false, false, "transfer-recipient-not-contributor");
+            response.EnsureSuccessStatusCode();
+            using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync(cancellationToken));
+            var root = document.RootElement;
+            var user = root.GetProperty("user");
+            if (user.GetProperty("id").GetInt64().ToString(System.Globalization.CultureInfo.InvariantCulture) != recipient.SubjectId ||
+                user.GetProperty("type").GetString() != "User")
+                return new(null, false, false, "transfer-recipient-identity-mismatch");
+            var permission = root.GetProperty("permission").GetString();
+            return new(recipient, permission is "read" or "write" or "admin",
+                permission is "write" or "admin");
+        }
+        catch (Exception error) when (error is HttpRequestException or JsonException or
+            InvalidOperationException or KeyNotFoundException or TaskCanceledException or FormatException)
+        {
             return new(null, false, false, "repository-provider-unavailable");
         }
     }

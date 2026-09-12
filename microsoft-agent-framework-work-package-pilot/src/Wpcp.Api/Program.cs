@@ -241,11 +241,10 @@ app.MapPost("/api/v1/runs/{runId}/attempts/{attemptId}/open",
         if (operation is null) return JsonError("human-request-not-open", 409);
         if (operation.State == "pending")
         {
-            var receipt = await CallAdapterAsync(operation, null, token);
-            if (receipt is null) return JsonError("session-adapter-unavailable", 503);
             try
             {
-                operation = await store.CompleteContinuationAdapterAsync(runId, operation.CommandId, receipt.Value, token);
+                operation = await store.DeliverContinuationAsync(runId, operation.CommandId, CallAdapterAsync, token);
+                if (operation is null) return JsonError("session-adapter-unavailable", 503);
             }
             catch (ArgumentException)
             {
@@ -266,15 +265,16 @@ app.MapPost("/api/v1/runs/{runId}/control/{action}",
         try { mutation = body.Deserialize<ControlMutation>(new JsonSerializerOptions(JsonSerializerDefaults.Web)); }
         catch (JsonException) { mutation = null; }
         var decision = await store.DecideControlAsync(runId, action, mutation,
-            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token,
+            (repository, transfer, ct) => authorization.EvaluateRecipientAsync(repository,
+                transfer.Requester, transfer.RequesterLogin, Credential(context), ct), FenceAdapterOperationAsync);
         if (decision.Accepted && decision.Continuation is { State: "pending" } operation)
         {
-            var receipt = await CallAdapterAsync(operation, mutation, token);
-            if (receipt is null) return JsonError("session-adapter-unavailable", 503);
             ContinuationOperation? completed;
             try
             {
-                completed = await store.CompleteContinuationAdapterAsync(runId, operation.CommandId, receipt.Value, token);
+                completed = await store.DeliverContinuationAsync(runId, operation.CommandId, CallAdapterAsync, token);
+                if (completed is null) return JsonError("session-adapter-unavailable", 503);
             }
             catch (ArgumentException)
             {
@@ -282,7 +282,7 @@ app.MapPost("/api/v1/runs/{runId}/control/{action}",
             }
             var refreshed = await store.DecideControlAsync(runId, null, null,
                 (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
-            decision = decision with { Code = "continuation-applied", Current = refreshed.Current, Continuation = completed };
+            decision = decision with { Code = completed.State == "fenced" ? "continuation-fenced" : "continuation-applied", Current = refreshed.Current, Continuation = completed };
         }
         return Results.Json(decision, statusCode: DecisionStatus(decision));
     });
@@ -298,9 +298,11 @@ static int DecisionStatus(ControlDecision decision) => decision.Code switch
     _ => 409,
 };
 
+static Task<JsonElement?> FenceAdapterOperationAsync(ContinuationOperation operation, CancellationToken token) =>
+    CallAdapterAsync(operation with { Action = "fence", Origin = operation.Action }, token);
+
 static async Task<JsonElement?> CallAdapterAsync(
     ContinuationOperation operation,
-    ControlMutation? mutation,
     CancellationToken token)
 {
     if (!Uri.TryCreate(operation.AdapterOrigin, UriKind.Absolute, out var origin) ||
@@ -309,6 +311,7 @@ static async Task<JsonElement?> CallAdapterAsync(
     var relative = operation.Action switch
     {
         "resume" or "fork" or "fresh-retry" or "handoff" => $"continuations/{operation.OperationKey}",
+        "fence" => $"control-operations/{operation.OperationKey}/fence",
         "write" => $"sessions/{operation.SourceSessionId}/interactions/{operation.OperationKey}",
         "open" => $"sessions/{operation.SourceSessionId}/open",
         _ => null,
@@ -325,7 +328,8 @@ static async Task<JsonElement?> CallAdapterAsync(
             action = operation.Action,
             sourceSessionId = operation.SourceSessionId,
         },
-        "write" => new { message = operation.Message ?? mutation?.Message },
+        "fence" => new { sourceSessionId = operation.SourceSessionId, action = operation.Origin },
+        "write" => new { message = operation.Message },
         "open" => new { operationKey = operation.OperationKey },
         _ => new { },
     };
@@ -352,11 +356,9 @@ static async Task RecoverPendingContinuationsAsync(
     foreach (var operation in await store.GetPendingContinuationsAsync(token))
     {
         if (operation.RunId is null) continue;
-        var receipt = await CallAdapterAsync(operation, null, token);
-        if (receipt is null) continue;
         try
         {
-            await store.CompleteContinuationAdapterAsync(operation.RunId, operation.CommandId, receipt.Value, token);
+            await store.DeliverContinuationAsync(operation.RunId, operation.CommandId, CallAdapterAsync, token);
         }
         catch (ArgumentException)
         {

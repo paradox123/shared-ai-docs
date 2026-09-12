@@ -106,7 +106,7 @@ An invalid token denies the request without guessing its owner or releasing a le
 
 For the original admission-only path, the control context is the completed
 admission attempt and an explicit null head. The later slices below add sessions,
-attempts and live commands; transfer and forced takeover remain subsequent tickets. Worker evidence has `kind: service`;
+attempts, live commands, transfer and forced takeover. Worker evidence has `kind: service`;
 human admission/control/audit records carry `kind: human`, provider and subject ID.
 This separates identities asserted by the provider; it cannot detect automation
 using a human's own credential.
@@ -468,3 +468,93 @@ projection and canonical history. Tests cover API SIGKILL before response read,
 worker SIGKILL around start/stop/dispatch/response, concurrent replacement,
 stop-before-start, late output, parallel isolation, redaction and authorization.
 See the [acceptance overview](../openspec/changes/archive/2026-09-12-control-active-agent-operations/implementation-evidence.md).
+
+
+## Atomic Control Transfer and Forced Takeover (Ticket 08)
+
+An observing contributor can request control, and the current holder can approve
+or reject the identified request. Read-only repository users remain observers.
+Use the same fresh `control` attempt/version/head/epoch fences as `claim`:
+
+| CLI / HTTP control action | Additional arguments | Result |
+| --- | --- | --- |
+| `request-transfer` | `--request-id <new-uuid> --reason <text>` | One pending request; holder and epoch remain unchanged. |
+| `approve-transfer` | `--request-id <pending-uuid> --reason <text>` | Recheck recipient permission, then atomically change holder and increment epoch. |
+| `reject-transfer` | `--request-id <pending-uuid> --reason <text>` | Close that request and retain the holder. |
+| `force-takeover` | `--reason <text>` | Another contributor takes control without approval or an administrator role. |
+
+All routes use `POST /api/v1/runs/{runId}/control/{action}`. For example, a
+contributor explicitly taking responsibility uses its own `WPCP_PROVIDER_TOKEN`:
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 force-takeover --run-id <run-id> \
+  --target-attempt-id <attempt-id> --expected-run-version <version> \
+  --expected-head-sha <head-or-null> --lease-epoch <epoch> \
+  --reason "Continue while the previous holder is unavailable"
+```
+
+`run` exposes `control.transferRequest`, its requester, original holder/epoch,
+reason and state. `authorization` includes `canRequestTransfer`,
+`canDecideTransfer` and `canForceTakeover`. Only one request can be pending;
+closed request IDs cannot be reused. Release, revocation and takeover supersede
+pending requests. Duplicate/stale requests return a conflict with current state;
+read fresh fences before submitting a new decision.
+
+The API revalidates both the approving holder and the requested recipient.
+GitHub's collaborator permission endpoint supplies current effective permission;
+the stored login is only a lookup hint, and the returned immutable numeric ID
+must match the requester. Missing access, renamed/replaced identity, malformed
+provider responses and provider failures fail closed. The approving credential
+needs repository Metadata read permission for this endpoint, as documented in
+[GitHub's permission API](https://docs.github.com/en/rest/collaborators/collaborators#get-repository-permissions-for-a-user).
+No requester token or separate membership list is persisted.
+
+Ownership changes preserve the running attempt, session, phase, head and already
+accepted effects. Old credentials (including a new token for the same former
+holder), stale HTTP requests and writes from the former holder's opened window
+cannot obtain mutating rights. A new holder can write the same opened session
+using current fences. `ControlLeaseTransferred` and
+`ControlLeaseForcedTakenOver` expose previous/new identities, event timestamp,
+run identity, redacted reason and voluntary/forced mode in `events`.
+
+Pending session writes receive a durable adapter tombstone by operation key.
+The controlled adapter's `POST /control-operations/{operationKey}/fence` accepts
+`sourceSessionId` and `action` and returns `AgentSessionAdapter/v1`, those exact
+identities, `state: fenced|applied`, and an existing `receipt` if already applied.
+The tombstone and adapter write serialize in the adapter's durable store; it
+rejects delayed writes even if the original API died before receiving its reply.
+Dispatch re-reads the durable command while holding the run lock, so restart
+cannot deliver a fenced command. Pending live queue entries become visibly
+rejected with `control-lease-changed`; the current autonomous operation continues.
+
+A change of responsibility must not orphan an already accepted continuation or
+recovery decision. The API returns these explicit 409 conflicts when settlement
+must finish first:
+
+- `control-continuation-pending`: complete/recover the accepted continuation,
+  then read fresh state and retry.
+- `control-recovery-pending`: deliver the existing repository recovery request
+  through the worker, then retry with fresh state.
+- `control-active-delivery-pending`: a promoted live command has not yet recorded
+  its process receipt; run replacement delivery to settle its existing identity.
+- `control-effects-reconciled`: an external write already existed and was just
+  adopted; read its receipt/current fences and repeat the ownership decision.
+- `control-fencing-unavailable`: the adapter cannot prove a safe fence or receipt;
+  restore that capability before retrying. Ownership remains unchanged.
+
+These paths use bounded local process delivery. They do not claim real Codex App
+process control or live GitHub-account verification; those remain Tickets 10/14.
+Stop old API/worker binaries before upgrading the additive schema. Mixed-version
+writers must not share the upgraded database. The local tests migrate disposable
+databases only.
+
+Run the public proof and optionally retain sanitized observations:
+
+```bash
+WPCP_TRANSFER_PROOF_DIR=/tmp/wpcp-transfer-proof \
+  python3 -m unittest tests.test_control_transfer -v
+python3 -m unittest tests.test_repository_reconciliation -v
+```
+
+See the [acceptance evidence](../openspec/changes/transfer-run-control-atomically/implementation-evidence.md).
