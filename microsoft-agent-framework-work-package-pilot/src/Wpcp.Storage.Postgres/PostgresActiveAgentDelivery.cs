@@ -30,8 +30,9 @@ public sealed partial class PostgresImplementationRunStore
             ?? throw new InvalidOperationException("Unknown run.");
         var attempt = await ReadActiveAttemptAsync(connection, transaction, delivery.RunId, delivery.Attempt.AttemptId, token)
             ?? throw new InvalidOperationException("Unknown live attempt.");
-        var safe = RedactAgentValue(receipt).Value;
-        string? status;
+        var sanitized = await SanitizeEvidenceAsync(connection, transaction, delivery.RunId, receipt, token);
+        var safe = sanitized.Value;
+        string status;
         try
         {
             status = ValidateActiveReceipt(attempt, operation, safe);
@@ -61,7 +62,8 @@ public sealed partial class PostgresImplementationRunStore
                 throw new ArgumentException("Unrequested process stop.");
             var updated = operation with { ProcessStatus = status,
                 ProcessId = safe.TryGetProperty("processId", out var pid) ? pid.GetString() : null,
-                Response = status == "completed" ? safe.GetProperty("response") : null };
+                Response = status == "completed" ? await ExternalizeLargeValueAsync(connection, transaction,
+                    delivery.RunId, safe.GetProperty("response"), sanitized.Occurred, token) : null };
             await AppendAgentEventAsync(connection, transaction, run,
                 status == "completed" ? "ActiveAgentResponseObserved" : "ActiveAgentProcessObserved",
                 new { attempt.AttemptId, attempt.SessionId, operation.OperationKey, operation.CommandId,
@@ -99,7 +101,7 @@ public sealed partial class PostgresImplementationRunStore
         await transaction.CommitAsync(token);
     }
 
-    private static string? ValidateActiveReceipt(ActiveAgentAttempt attempt, ActiveAgentOperation operation, JsonElement safe)
+    private static string ValidateActiveReceipt(ActiveAgentAttempt attempt, ActiveAgentOperation operation, JsonElement safe)
     {
         RequireReceiptString(safe, "contractVersion", "AgentSessionAdapter/v1");
         RequireReceiptString(safe, "operationKey", operation.OperationKey);

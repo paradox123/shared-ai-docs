@@ -6,6 +6,18 @@ var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
 
 try
 {
+    if (args.Length == 4 && args[0] == "--restore-dossier" && args[2] == "--fixture")
+    {
+        var restoreFixture = SyntheticProviderFixture.Load(args[3]);
+        await using var restoreStore = new PostgresImplementationRunStore(
+            Environment.GetEnvironmentVariable("WPCP_CONNECTION_STRING") ?? throw new ArgumentException("Connection required."),
+            restoreFixture.RedactionPolicy);
+        await restoreStore.EnsureSchemaAsync();
+        await using var input = File.OpenRead(args[1]);
+        var restoredRunId = await restoreStore.RestoreDossierAsync(input);
+        Console.Out.WriteLine(JsonSerializer.Serialize(new { code = "dossier-restored", runId = restoredRunId }, jsonOptions));
+        return;
+    }
     var options = WorkerOptions.Parse(args);
     var fixture = SyntheticProviderFixture.Load(options.FixturePath);
     await using var store = new PostgresImplementationRunStore(
@@ -59,6 +71,11 @@ try
             processId,
             DateTimeOffset.UtcNow));
     Console.Out.WriteLine(JsonSerializer.Serialize(result, jsonOptions));
+}
+catch (InvalidDataException)
+{
+    Console.Out.WriteLine("{\"code\":\"invalid-run-dossier\"}");
+    Environment.ExitCode = 2;
 }
 catch (RepositoryRegistrationBusyException)
 {
@@ -134,7 +151,7 @@ internal sealed record WorkerOptions(
         }
 
         var pauseAt = Value(values, "--pause-at");
-        if (pauseAt is not (null or "before-active-dispatch" or "before-active-delivery" or "after-active-response" or "after-active-stop" or "after-active-delivery" or "after-session-start" or "after-session-mapping" or "after-result-observed" or "after-git-effect" or "after-provider-effect" or "after-reconciled-effect" or "after-session-receipt"))
+        if (pauseAt is not (null or "before-active-dispatch" or "before-active-delivery" or "after-active-response" or "after-active-stop" or "after-active-delivery" or "after-session-start" or "after-source-sequence-5000" or "after-session-mapping" or "after-result-observed" or "after-git-effect" or "after-provider-effect" or "after-reconciled-effect" or "after-session-receipt"))
             throw new ArgumentException("Unknown fake fault boundary.");
         var rejectText = Value(values, "--reject-blocked");
         if (rejectText is not (null or "true" or "false"))

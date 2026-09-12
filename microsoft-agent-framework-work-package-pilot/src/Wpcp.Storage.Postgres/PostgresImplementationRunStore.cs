@@ -42,7 +42,7 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
         {
             await schemaLock.ExecuteNonQueryAsync(cancellationToken);
         }
-        await using var command = new NpgsqlCommand(Schema + AgentSchema + ContinuationSchema + RepositorySchema + ActiveAgentSchema,
+        await using var command = new NpgsqlCommand(Schema + AgentSchema + ContinuationSchema + RepositorySchema + ActiveAgentSchema + ArtifactSchema + DossierSchema,
             connection, transaction);
         await command.ExecuteNonQueryAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
@@ -148,6 +148,7 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
         string runId,
         CancellationToken cancellationToken = default)
     {
+        if (await GetRestoredProjectionAsync(runId, cancellationToken) is { } restored) return restored;
         if (!Guid.TryParse(runId, out _))
         {
             return null;
@@ -163,6 +164,15 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
             return null;
         }
 
+        var projection = await ReadProjectionAsync(connection, transaction, run, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return projection;
+    }
+
+    private async Task<ImplementationRunProjection> ReadProjectionAsync(NpgsqlConnection connection,
+        NpgsqlTransaction transaction, StoredRun run, CancellationToken cancellationToken)
+    {
+        var runId = run.Correlation.RunId;
         var activities = await ReadActivitiesAsync(connection, transaction, runId, cancellationToken);
         var attempts = await ReadAttemptsAsync(connection, transaction, runId, cancellationToken);
         var processes = await ReadProcessesAsync(connection, transaction, runId, cancellationToken);
@@ -184,15 +194,20 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
             run.LastPosition,
             await ReadControlStateAsync(connection, transaction, run, cancellationToken),
             RepositoryExecution: await ReadRepositoryExecutionAsync(connection, transaction, runId, cancellationToken));
-        await transaction.CommitAsync(cancellationToken);
         return projection;
     }
 
     public async Task<RunEventsPage?> GetEventsAfterAsync(
         string runId,
         long afterPosition,
+        CancellationToken cancellationToken = default) =>
+        await GetEventsPageAsync(runId, afterPosition, int.MaxValue, cancellationToken);
+
+    public async Task<RunEventsPage?> GetEventsPageAsync(string runId, long afterPosition, int limit,
         CancellationToken cancellationToken = default)
     {
+        if (await GetRestoredProjectionAsync(runId, cancellationToken) is { } restored)
+            return await GetRestoredEventsAsync(restored, afterPosition, limit, cancellationToken);
         if (!Guid.TryParse(runId, out _) || afterPosition < 0)
         {
             return null;
@@ -208,17 +223,28 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
             return null;
         }
 
+        var page = await ReadEventsPageAsync(connection, transaction, run, afterPosition, limit, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return page;
+    }
+
+    private static async Task<RunEventsPage> ReadEventsPageAsync(NpgsqlConnection connection,
+        NpgsqlTransaction transaction, StoredRun run, long afterPosition, int limit, CancellationToken cancellationToken)
+    {
+        var runId = run.Correlation.RunId;
+        if (afterPosition > run.LastPosition) throw new ArgumentOutOfRangeException(nameof(afterPosition));
         const string sql = """
             SELECT run_id::text, position, event_id::text, event_type, occurred_at,
                    payload::text, correlation::text, provenance::text,
                    redaction_occurred, redaction_policy_version, redaction_marker
               FROM wpcp_run_events
              WHERE run_id = @run_id AND position > @after_position
-             ORDER BY position ASC;
+             ORDER BY position ASC LIMIT @limit;
             """;
         await using var command = new NpgsqlCommand(sql, connection, transaction);
         command.Parameters.Add(new NpgsqlParameter("run_id", NpgsqlDbType.Uuid) { Value = Guid.Parse(runId) });
         command.Parameters.Add(new NpgsqlParameter("after_position", NpgsqlDbType.Bigint) { Value = afterPosition });
+        command.Parameters.AddWithValue("limit", limit);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         var events = new List<CanonicalRunEvent>();
         while (await reader.ReadAsync(cancellationToken))
@@ -236,7 +262,6 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
         }
 
         await reader.CloseAsync();
-        await transaction.CommitAsync(cancellationToken);
         return new RunEventsPage(runId, afterPosition, events, run.LastPosition);
     }
 

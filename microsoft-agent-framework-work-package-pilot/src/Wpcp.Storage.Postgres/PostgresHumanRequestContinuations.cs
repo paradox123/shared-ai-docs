@@ -180,7 +180,7 @@ public sealed partial class PostgresImplementationRunStore
             await transaction.CommitAsync(token);
             return command.ToOperation();
         }
-        var safeReceipt = RedactAgentValue(adapterReceipt);
+        var safeReceipt = await SanitizeEvidenceAsync(connection, transaction, runId, adapterReceipt, token);
         var operation = command.ToOperation();
         RequireReceiptString(safeReceipt.Value, "contractVersion", "AgentSessionAdapter/v1");
         RequireReceiptString(safeReceipt.Value, "operationKey", operation.OperationKey);
@@ -270,7 +270,8 @@ public sealed partial class PostgresImplementationRunStore
         {
             throw new ArgumentException("Continuation action has no adapter completion.");
         }
-        await UpdateContinuationCommandAsync(connection, transaction, operation, safeReceipt.Value, token);
+        await UpdateContinuationCommandAsync(connection, transaction, operation,
+            await ExternalizeLargeValueAsync(connection, transaction, runId, safeReceipt.Value, safeReceipt.Occurred, token), token);
         await transaction.CommitAsync(token);
         return operation;
     }

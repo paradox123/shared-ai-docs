@@ -238,7 +238,11 @@ public sealed record RunEventsPage(
     [property: JsonPropertyName("runId")] string RunId,
     [property: JsonPropertyName("after")] long After,
     [property: JsonPropertyName("events")] IReadOnlyList<CanonicalRunEvent> Events,
-    [property: JsonPropertyName("lastPosition")] long LastPosition);
+    [property: JsonPropertyName("lastPosition")] long LastPosition)
+{
+    public long NextAfter => Events.Count == 0 ? After : Events[^1].Position;
+    public bool HasMore => NextAfter < LastPosition;
+}
 
 /// <summary>
 /// The one real lifecycle transition a reporter is persisting.  A process emits

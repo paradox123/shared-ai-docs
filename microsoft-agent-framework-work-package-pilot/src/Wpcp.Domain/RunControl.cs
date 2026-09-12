@@ -29,12 +29,12 @@ public sealed record ContinuationReceipt(
     ContinuationOperation Operation, JsonElement? AdapterReceipt);
 
 public sealed record ControlDecision(string Code, RepositoryAccess Access, RunControlState? Current,
-    ContinuationOperation? Continuation = null)
+    ContinuationOperation? Continuation = null, bool Historical = false)
 {
     public bool Accepted => Code is "control-lease-claimed" or "control-lease-released" or "observed" or
         "recovery-requested" or "continuation-requested" or "continuation-applied";
-    public bool CanClaim => Access.IsHuman && Access.CanContribute && Current is { Holder: null };
-    public bool CanRelease => Access.IsHuman && Access.CanContribute && Current?.Holder == Access.Actor;
+    public bool CanClaim => !Historical && Access.IsHuman && Access.CanContribute && Current is { Holder: null };
+    public bool CanRelease => !Historical && Access.IsHuman && Access.CanContribute && Current?.Holder == Access.Actor;
 }
 
 public sealed record SecurityAuditEntry(

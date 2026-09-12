@@ -15,6 +15,6 @@ internal static class ControlledHttp
         new(new HttpClientHandler { AllowAutoRedirect = false })
         {
             BaseAddress = Origin(origin), Timeout = TimeSpan.FromMilliseconds(timeoutMilliseconds),
-            MaxResponseContentBufferSize = 1024 * 1024
+            MaxResponseContentBufferSize = 64 * 1024 * 1024
         };
 }

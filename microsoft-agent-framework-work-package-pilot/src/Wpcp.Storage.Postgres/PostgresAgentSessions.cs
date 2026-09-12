@@ -46,7 +46,7 @@ public sealed partial class PostgresImplementationRunStore
             receipt = new(runId, activityId.ToString(), attemptId.ToString(), "running", origin,
                 rejectBlocked, new(attemptId.ToString(), OpenInCodex: new()));
             await AppendAgentEventAsync(connection, transaction, run, "AgentPreparationCompleted",
-                new { receipt.ActivityId, receipt.AttemptId, executor = "deterministic", framework = "Microsoft.Agents.AI.Workflows/1.16.0" }, token);
+                new { receipt.ActivityId, receipt.AttemptId, executor = "deterministic", framework = "Microsoft.Agents.AI.Workflows/1.16.0", runtime = Environment.Version.ToString() }, token);
             await AppendAgentEventAsync(connection, transaction, run, "AgentSessionStartRequested",
                 new { receipt.ActivityId, receipt.AttemptId, receipt.Session.OperationKey, receipt.Session.ContractVersion }, token);
             return receipt;
@@ -60,16 +60,17 @@ public sealed partial class PostgresImplementationRunStore
             JsonElement body;
             try { body = JsonSerializer.Deserialize<JsonElement>(response.Body); }
             catch (JsonException) { body = JsonSerializer.SerializeToElement(response.Body); }
-            var safe = RedactAgentValue(body);
+            var safe = await SanitizeEvidenceAsync(connection, transaction, runId, body, token);
+            var storedBody = await ExternalizeLargeValueAsync(connection, transaction, runId, safe.Value, safe.Occurred, token);
             if (receipt.Session.ObservedResponse is { } previous)
             {
-                if (!JsonElement.DeepEquals(previous, safe.Value) || receipt.Session.ResponseStatus != response.StatusCode)
+                if (!JsonElement.DeepEquals(previous, storedBody) || receipt.Session.ResponseStatus != response.StatusCode)
                     throw new ArgumentException("Conflicting adapter response.");
                 return receipt;
             }
             var eventId = await AppendAgentEventAsync(connection, transaction, run, "AgentAdapterResponseObserved",
-                new { receipt.ActivityId, receipt.AttemptId, response.StatusCode, body }, token);
-            return receipt with { Session = receipt.Session with { ObservedResponse = safe.Value,
+                new { receipt.ActivityId, receipt.AttemptId, response.StatusCode, body = storedBody }, token);
+            return receipt with { Session = receipt.Session with { ObservedResponse = storedBody,
                 ResponseStatus = response.StatusCode, ResponseEventId = eventId } };
         }, token);
 
@@ -107,6 +108,9 @@ public sealed partial class PostgresImplementationRunStore
             var session = receipt.Session;
             if (session.SessionId is null) throw new ArgumentException("No bound session.");
             // Compare canonical redacted JSON, including source type and sequence.
+            var safeData = await SanitizeEvidenceAsync(connection, transaction, runId, observation.Data, token);
+            observation = observation with { Data = await ExternalizeLargeValueAsync(connection, transaction,
+                runId, safeData.Value, safeData.Occurred, token) };
             var safe = RedactAgentValue(JsonSerializer.SerializeToElement(observation, JsonOptions));
             if (observation.Sequence <= session.LastSequence)
             {
@@ -155,9 +159,12 @@ public sealed partial class PostgresImplementationRunStore
                 session.SessionId is not null)
             {
                 var control = await ReadHumanRequestControlContextAsync(connection, transaction, run, token);
+                JsonElement? original = session.OriginalResult;
+                try { original = await ReadOriginalAgentResultAsync(receipt, token); }
+                catch (IOException) { /* The immutable reference and availability endpoint retain the failure. */ }
                 var request = new HumanRequest(
                     Guid.NewGuid().ToString(), receipt.AttemptId, session.SessionId, "awaiting-human", control.HeadSha,
-                    HumanRequestProblem(session.OriginalResult),
+                    HumanRequestProblem(original),
                     session.OriginalResultEventId is null ? [] : [session.OriginalResultEventId],
                     HumanRequestAllowedActions(session.OpenInCodex),
                     ExpectedRunVersion: run.LastPosition + 2, LeaseEpoch: control.LeaseEpoch);
@@ -175,7 +182,10 @@ public sealed partial class PostgresImplementationRunStore
         if (originalResult is { ValueKind: JsonValueKind.Object } result &&
             result.TryGetProperty("reason", out var reason) && reason.ValueKind == JsonValueKind.String &&
             !string.IsNullOrWhiteSpace(reason.GetString()))
-            return reason.GetString()!;
+        {
+            var text = reason.GetString()!;
+            return text.Length <= 1024 ? text : text[..1024] + "… (full original in Run History artifacts)";
+        }
         return "Agent attempt requires human direction.";
     }
 
@@ -247,7 +257,13 @@ public sealed partial class PostgresImplementationRunStore
     private async Task<string> AppendAgentEventAsync(NpgsqlConnection connection, NpgsqlTransaction transaction,
         StoredRun run, string type, object payload, CancellationToken token)
     {
-        var safe = RedactAgentValue(JsonSerializer.SerializeToElement(payload, JsonOptions));
+        var safe = await SanitizeEvidenceAsync(connection, transaction, run.Correlation.RunId,
+            JsonSerializer.SerializeToElement(payload, JsonOptions), token);
+        var envelope = JsonNode.Parse(safe.Value.GetRawText())!.AsObject();
+        foreach (var field in new[] { "body", "data", "receipt", "response", "diagnostic" })
+            if (envelope[field] is { } content)
+                envelope[field] = JsonNode.Parse((await ExternalizeLargeValueAsync(connection, transaction,
+                    run.Correlation.RunId, JsonSerializer.SerializeToElement(content, JsonOptions), safe.Occurred, token)).GetRawText());
         var eventId = Guid.NewGuid();
         await using var command = new NpgsqlCommand("""
             UPDATE wpcp_implementation_runs SET last_position=last_position+1,
@@ -267,7 +283,7 @@ public sealed partial class PostgresImplementationRunStore
         command.Parameters.AddWithValue("occurred", safe.Occurred);
         command.Parameters.AddWithValue("policy", _redactionPolicy.Version);
         command.Parameters.AddWithValue("marker", _redactionPolicy.Marker);
-        AddJson(command, "payload", safe.Value);
+        AddJson(command, "payload", envelope);
         AddJson(command, "correlation", run.Correlation);
         AddJson(command, "provenance", run.Provenance);
         await command.ExecuteNonQueryAsync(token);
@@ -282,7 +298,7 @@ public sealed partial class PostgresImplementationRunStore
             if (node is JsonValue v && v.TryGetValue<string>(out var text))
             {
                 var safe = _redactionPolicy.Redact(text);
-                occurred |= safe.Occurred;
+                occurred |= safe.Occurred || text!.Contains(_redactionPolicy.Marker, StringComparison.Ordinal);
                 return JsonValue.Create(safe.Value);
             }
             if (node is JsonObject obj)

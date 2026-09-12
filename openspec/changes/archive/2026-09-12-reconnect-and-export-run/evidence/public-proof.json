@@ -1,0 +1,252 @@
+{
+  "source": {
+    "runId": "0dbaca69-e2f4-4164-a8ed-5723c965462d",
+    "lastPosition": 10015,
+    "historySha256": "06c87737c47d9e4b66cd5d836599a380068781b9e41612ec3ac6fc6d2ab65926",
+    "projectionSha256": "d75288f4c2ee851f05698cc201fb545972210c099e9e56608d3eba7144716cde",
+    "artifacts": [
+      {
+        "artifactId": "449bd69e87c2e2a64f21989cd2ba4345e2280fd8221ddeb449fb3aa7c0d1aeda",
+        "sha256": "a6dd295d976a1c4adb64c5c22de97eccec5a798b76fd5b1d4d04e5ca45815000",
+        "sizeBytes": 184,
+        "mediaType": "text/plain",
+        "availability": "available",
+        "reason": null,
+        "redaction": {
+          "occurred": true,
+          "policyVersion": "controlled-dossier-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        }
+      },
+      {
+        "artifactId": "630e3ad2538ae78170202ad0fdaa2c878d24acf00b60e35b43a651c91cbdbec8",
+        "sha256": "777e4dc8209bfc2d63ec6ee94f126bb19642be796ad8d4384d38d2f97ff895aa",
+        "sizeBytes": 2640622,
+        "mediaType": "application/json",
+        "availability": "available",
+        "reason": null,
+        "redaction": {
+          "occurred": true,
+          "policyVersion": "controlled-dossier-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        }
+      },
+      {
+        "artifactId": "d184d4724ab1b8a25e49daed9bb0aa678d589cc8c7ffe25b682f735782899bcb",
+        "sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9",
+        "sizeBytes": 262144,
+        "mediaType": "application/octet-stream",
+        "availability": "available",
+        "reason": null,
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-dossier-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        }
+      },
+      {
+        "artifactId": "ed5f712ab977cd2a39f8a965bebe21fc625e2ce06929588d8bb02bbe73ff66b3",
+        "sha256": null,
+        "sizeBytes": 0,
+        "mediaType": "application/octet-stream",
+        "availability": "withheld",
+        "reason": "binary-controlled-canary",
+        "redaction": {
+          "occurred": true,
+          "policyVersion": "controlled-dossier-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        }
+      },
+      {
+        "artifactId": "ee92639a7f6f6be318924370545d3b656e3d73646d245faae6b39eb30acdae3b",
+        "sha256": "33e51b98db00e770a3da32c94439f871ac62c22e571b285a81c84f5849e600d4",
+        "sizeBytes": 200198,
+        "mediaType": "application/json",
+        "availability": "available",
+        "reason": null,
+        "redaction": {
+          "occurred": true,
+          "policyVersion": "controlled-dossier-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        }
+      }
+    ]
+  },
+  "restored": {
+    "runId": "0dbaca69-e2f4-4164-a8ed-5723c965462d",
+    "lastPosition": 10015,
+    "historySha256": "06c87737c47d9e4b66cd5d836599a380068781b9e41612ec3ac6fc6d2ab65926",
+    "projectionSha256": "d75288f4c2ee851f05698cc201fb545972210c099e9e56608d3eba7144716cde",
+    "artifacts": [
+      {
+        "artifactId": "449bd69e87c2e2a64f21989cd2ba4345e2280fd8221ddeb449fb3aa7c0d1aeda",
+        "sha256": "a6dd295d976a1c4adb64c5c22de97eccec5a798b76fd5b1d4d04e5ca45815000",
+        "sizeBytes": 184,
+        "mediaType": "text/plain",
+        "availability": "available",
+        "reason": null,
+        "redaction": {
+          "occurred": true,
+          "policyVersion": "controlled-dossier-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        }
+      },
+      {
+        "artifactId": "630e3ad2538ae78170202ad0fdaa2c878d24acf00b60e35b43a651c91cbdbec8",
+        "sha256": "777e4dc8209bfc2d63ec6ee94f126bb19642be796ad8d4384d38d2f97ff895aa",
+        "sizeBytes": 2640622,
+        "mediaType": "application/json",
+        "availability": "available",
+        "reason": null,
+        "redaction": {
+          "occurred": true,
+          "policyVersion": "controlled-dossier-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        }
+      },
+      {
+        "artifactId": "d184d4724ab1b8a25e49daed9bb0aa678d589cc8c7ffe25b682f735782899bcb",
+        "sha256": "2312394bd99545d9de131c24efb781e765ac1aec243f2ed9347597a793a415e9",
+        "sizeBytes": 262144,
+        "mediaType": "application/octet-stream",
+        "availability": "available",
+        "reason": null,
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-dossier-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        }
+      },
+      {
+        "artifactId": "ed5f712ab977cd2a39f8a965bebe21fc625e2ce06929588d8bb02bbe73ff66b3",
+        "sha256": null,
+        "sizeBytes": 0,
+        "mediaType": "application/octet-stream",
+        "availability": "withheld",
+        "reason": "binary-controlled-canary",
+        "redaction": {
+          "occurred": true,
+          "policyVersion": "controlled-dossier-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        }
+      },
+      {
+        "artifactId": "ee92639a7f6f6be318924370545d3b656e3d73646d245faae6b39eb30acdae3b",
+        "sha256": "33e51b98db00e770a3da32c94439f871ac62c22e571b285a81c84f5849e600d4",
+        "sizeBytes": 200198,
+        "mediaType": "application/json",
+        "availability": "available",
+        "reason": null,
+        "redaction": {
+          "occurred": true,
+          "policyVersion": "controlled-dossier-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        }
+      }
+    ]
+  },
+  "reconnect": {
+    "acknowledged": 250,
+    "lastPosition": 10015,
+    "receivedCount": 9765,
+    "streamBytes": 12027444,
+    "first": {
+      "runId": "0dbaca69-e2f4-4164-a8ed-5723c965462d",
+      "position": 251,
+      "eventId": "bf88094a-6cc0-466b-b094-3afe05fbf467",
+      "eventType": "AgentObservationReceived",
+      "occurredAt": "2026-09-12T13:46:27.542495+00:00",
+      "redaction": {
+        "occurred": true,
+        "policyVersion": "controlled-dossier-canary-v1",
+        "marker": "[REDACTED:CONTROLLED-CANARY]"
+      },
+      "payload": {
+        "data": {
+          "text": "observation 246 [REDACTED:CONTROLLED-CANARY] [REDACTED:CONTROLLED-CANARY] [REDACTED:CONTROLLED-CANARY] [REDACTED:CONTROLLED-CANARY] [REDACTED:CONTROLLED-CANARY] [REDACTED:CONTROLLED-CANARY]"
+        },
+        "type": "message",
+        "attemptId": "f44ca6f8-cf6d-46d0-8b46-2a0a85db00f8",
+        "sessionId": "216ad984-4993-5b7e-b34c-5713eb560d95",
+        "activityId": "ef57073f-11f3-4ce9-9f5e-46dcbf5edaf0",
+        "sourceSequence": 246,
+        "causedByEventId": "fd5589ba-d135-44a9-a090-48ac7b99e782"
+      },
+      "correlation": {
+        "runId": "0dbaca69-e2f4-4164-a8ed-5723c965462d",
+        "issueId": "issue-53",
+        "commandId": "c1f1b140-3eae-46e3-9147-f3bc8a6214f0",
+        "repository": {
+          "fullName": "pilot/fixture",
+          "repositoryId": "repo-1",
+          "providerRepositoryId": 9001
+        },
+        "issueNumber": 53,
+        "repositoryId": "repo-1"
+      },
+      "provenance": {
+        "sourceRevision": "r1",
+        "packageRevision": "r1",
+        "contractRevision": "r1",
+        "configurationRevision": "r1"
+      }
+    },
+    "last": {
+      "runId": "0dbaca69-e2f4-4164-a8ed-5723c965462d",
+      "position": 10015,
+      "eventId": "73b23dad-4dd2-4f4d-b157-62a12a60c373",
+      "eventType": "AgentAttemptCompleted",
+      "occurredAt": "2026-09-12T13:48:55.372536+00:00",
+      "redaction": {
+        "occurred": false,
+        "policyVersion": "controlled-dossier-canary-v1",
+        "marker": "[REDACTED:CONTROLLED-CANARY]"
+      },
+      "payload": {
+        "category": "process-failure",
+        "attemptId": "f44ca6f8-cf6d-46d0-8b46-2a0a85db00f8",
+        "sessionId": "216ad984-4993-5b7e-b34c-5713eb560d95",
+        "activityId": "ef57073f-11f3-4ce9-9f5e-46dcbf5edaf0",
+        "originalResultEventId": null
+      },
+      "correlation": {
+        "runId": "0dbaca69-e2f4-4164-a8ed-5723c965462d",
+        "issueId": "issue-53",
+        "commandId": "c1f1b140-3eae-46e3-9147-f3bc8a6214f0",
+        "repository": {
+          "fullName": "pilot/fixture",
+          "repositoryId": "repo-1",
+          "providerRepositoryId": 9001
+        },
+        "issueNumber": 53,
+        "repositoryId": "repo-1"
+      },
+      "provenance": {
+        "sourceRevision": "r1",
+        "packageRevision": "r1",
+        "contractRevision": "r1",
+        "configurationRevision": "r1"
+      }
+    },
+    "gaps": 0,
+    "duplicates": 0,
+    "reordered": 0
+  },
+  "redaction": {
+    "policyVersion": "controlled-dossier-canary-v1",
+    "canaryKinds": [
+      "secret",
+      "token",
+      "authorization",
+      "credential",
+      "email",
+      "person"
+    ],
+    "surfacesScanned": 35,
+    "rawMatches": 0
+  },
+  "outcome": "process-failure",
+  "apiKilled": true,
+  "workersKilled": 2,
+  "freshPostgresAndArtifactRoot": true
+}

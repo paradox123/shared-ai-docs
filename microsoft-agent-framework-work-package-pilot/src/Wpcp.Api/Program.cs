@@ -148,14 +148,14 @@ app.MapGet(
 
 app.MapGet(
     "/api/v1/runs/{runId}/events",
-    async (string runId, long? after, HttpContext context, CancellationToken cancellationToken) =>
+    async (string runId, long? after, int? limit, HttpContext context, CancellationToken cancellationToken) =>
     {
         if (!HasFixtureAccess(context, options))
         {
             return JsonError("synthetic-access-denied", StatusCodes.Status403Forbidden);
         }
 
-        if (after is < 0)
+        if (after is < 0 || limit is < 1 or > 1000)
         {
             return JsonError("invalid-event-position", StatusCodes.Status400BadRequest);
         }
@@ -173,8 +173,107 @@ app.MapGet(
             return JsonError("run-store-unavailable", StatusCodes.Status503ServiceUnavailable);
         }
 
-        var events = await store.GetEventsAfterAsync(runId, after ?? 0, cancellationToken);
-        return Results.Json(events, statusCode: StatusCodes.Status200OK);
+        try
+        {
+            var events = await store.GetEventsPageAsync(runId, after ?? 0, limit ?? 250, cancellationToken);
+            return Results.Json(events);
+        }
+        catch (ArgumentOutOfRangeException) { return JsonError("invalid-event-position", 400); }
+    });
+
+app.MapGet("/api/v1/runs/{runId}/export",
+    async (string runId, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        var decision = await store.DecideControlAsync(runId, null, null,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+        if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
+        return Results.File(await store.ExportDossierAsync(runId, token), "application/zip", $"run-{runId}.zip");
+    });
+
+app.MapGet("/api/v1/runs/{runId}/checksums",
+    async (string runId, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        var decision = await store.DecideControlAsync(runId, null, null,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+        if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
+        return Results.Json(await store.GetChecksumsAsync(runId, token));
+    });
+
+app.MapGet("/api/v1/runs/{runId}/artifacts",
+    async (string runId, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        var decision = await store.DecideControlAsync(runId, null, null,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+        if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
+        return Results.Json(await store.GetArtifactsAsync(runId, token));
+    });
+
+app.MapGet("/api/v1/runs/{runId}/artifacts/{artifactId}",
+    async (string runId, string artifactId, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        var decision = await store.DecideControlAsync(runId, null, null,
+            (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+        if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
+        var found = await store.GetArtifactAsync(runId, artifactId, token);
+        if (found is not { } result) return JsonError("artifact-not-found", 404);
+        if (result.Bytes is null) return Results.Json(result.Artifact, statusCode: 410);
+        context.Response.Headers["X-Content-SHA256"] = result.Artifact.Sha256;
+        context.Response.Headers["X-Redaction-Policy"] = result.Artifact.Redaction.PolicyVersion;
+        context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+        return Results.File(result.Bytes, result.Artifact.MediaType, artifactId);
+    });
+
+app.MapGet("/api/v1/runs/{runId}/events/stream",
+    async (string runId, HttpContext context, CancellationToken token) =>
+    {
+        if (!HasFixtureAccess(context, options))
+        {
+            await JsonError("synthetic-access-denied", 403).ExecuteAsync(context);
+            return;
+        }
+        var cursorText = context.Request.Headers["Last-Event-ID"].FirstOrDefault()
+            ?? context.Request.Query["after"].FirstOrDefault() ?? "0";
+        if (!long.TryParse(cursorText, System.Globalization.NumberStyles.None,
+            System.Globalization.CultureInfo.InvariantCulture, out var cursor))
+        {
+            await JsonError("invalid-event-position", 400).ExecuteAsync(context);
+            return;
+        }
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                var decision = await store.DecideControlAsync(runId, null, null,
+                    (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
+                if (!decision.Accepted)
+                {
+                    if (!context.Response.HasStarted)
+                        await Results.Json(decision, statusCode: DecisionStatus(decision)).ExecuteAsync(context);
+                    else
+                        await context.Response.WriteAsync("event: access-revoked\ndata: {}\n\n", token);
+                    return;
+                }
+                var page = await store.GetEventsPageAsync(runId, cursor, 250, token);
+                if (!context.Response.HasStarted) context.Response.ContentType = "text/event-stream";
+                foreach (var entry in page!.Events)
+                {
+                    await context.Response.WriteAsync($"id: {entry.Position}\nevent: run-event\ndata: " +
+                        JsonSerializer.Serialize(entry, new JsonSerializerOptions(JsonSerializerDefaults.Web)) + "\n\n", token);
+                    cursor = entry.Position;
+                }
+                if (page.Events.Count == 0) await context.Response.WriteAsync(": keepalive\n\n", token);
+                await context.Response.Body.FlushAsync(token);
+                if (!page.HasMore) await Task.Delay(250, token);
+            }
+        }
+        catch (ArgumentOutOfRangeException) when (!context.Response.HasStarted)
+        { await JsonError("invalid-event-position", 400).ExecuteAsync(context); }
+        catch (OperationCanceledException) when (token.IsCancellationRequested) { }
+        catch (IOException) when (token.IsCancellationRequested) { }
     });
 
 app.MapGet("/api/v1/runs/{runId}/attempts/{attemptId}",
@@ -456,11 +555,12 @@ static bool HasFixtureAccess(HttpContext context, ApiOptions options)
 }
 
 static async Task ObserveApiProcessAsync(
-    IImplementationRunStore store,
+    PostgresImplementationRunStore store,
     ApiRuntime runtime,
     string runId,
     CancellationToken cancellationToken)
 {
+    if (await store.GetRestoredProjectionAsync(runId, cancellationToken) is not null) return;
     var observation = runtime.ObservedRuns.GetOrAdd(runId, static _ => new ApiRunObservation());
     await observation.Gate.WaitAsync(cancellationToken);
     try

@@ -40,6 +40,15 @@ public sealed class ControlledRedactionPolicy
     public bool ContainsControlledCanary(string? value) =>
         value is not null && _canaries.Any(canary => value.Contains(canary, StringComparison.Ordinal));
 
+    public bool ContainsControlledCanaryBytes(ReadOnlySpan<byte> value)
+    {
+        foreach (var canary in _canaries)
+            foreach (var encoding in new[] { System.Text.Encoding.UTF8, System.Text.Encoding.Unicode,
+                System.Text.Encoding.BigEndianUnicode })
+                if (value.IndexOf(encoding.GetBytes(canary)) >= 0) return true;
+        return false;
+    }
+
     public RedactedText Redact(string? value)
     {
         if (value is null)

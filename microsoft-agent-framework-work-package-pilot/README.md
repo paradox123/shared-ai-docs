@@ -468,3 +468,103 @@ projection and canonical history. Tests cover API SIGKILL before response read,
 worker SIGKILL around start/stop/dispatch/response, concurrent replacement,
 stop-before-start, late output, parallel isolation, redaction and authorization.
 See the [acceptance overview](../openspec/changes/archive/2026-09-12-control-active-agent-operations/implementation-evidence.md).
+
+## Reconnect and portable Run Dossier (Ticket 09)
+
+The Operator API serves bounded canonical history and an authenticated SSE tail.
+Run identity, event IDs and committed positions survive client/API/worker replacement,
+including a failed run. Set `WPCP_ARTIFACT_ROOT` to the same dedicated absolute
+directory in the API and worker environments before capturing artifact content.
+Use a separate empty directory and database for historical restore.
+
+| Public read | Result |
+| --- | --- |
+| `GET /api/v1/runs/{runId}/events?after=N&limit=250` | Events strictly after N; default 250, maximum 1000. |
+| `GET /api/v1/runs/{runId}/events/stream` | SSE replay and tail, with `Last-Event-ID: N` or `?after=N`. |
+| `GET /api/v1/runs/{runId}/artifacts` | Manifest, current availability and the artifact prerequisite `qualificationEligible`. |
+| `GET /api/v1/runs/{runId}/artifacts/{artifactId}` | Verified bytes, SHA-256 and redaction-policy headers; HTTP 410 with metadata for unavailable evidence. |
+| `GET /api/v1/runs/{runId}/checksums` | SHA-256 of the canonical current history and projection, plus artifact status. |
+| `GET /api/v1/runs/{runId}/export` | Portable ZIP dossier of one consistent history/projection snapshot. |
+
+Every read requires the existing fixture capability and current human repository
+authorization. SSE revalidates on each page/poll and ends with `access-revoked`
+when access fails. Writes await stream backpressure; idle tails emit keepalives.
+
+Persist a page's `nextAfter` only after consuming its events. `lastPosition` is
+the snapshot high-water mark and may be ahead of that delivered cursor. Continue
+from `nextAfter` while `hasMore` is true. SSE uses the same event positions in its
+`id` field. Reconnecting from an older, unacknowledged cursor deliberately replays
+those events, so clients should process/checkpoint by stable event identity. A
+future or negative cursor is rejected. Completion of the agent operation is not
+required to read its committed history.
+
+The CLI reads a page with `events --run-id <runId> --after <N>` and downloads a
+dossier without replacing an existing output file:
+
+```bash
+dotnet src/Wpcp.OperatorCli/bin/Debug/net10.0/Wpcp.OperatorCli.dll \
+  --base-url http://127.0.0.1:5080 export --run-id <run-id> --output run-dossier.zip
+```
+
+Artifacts use an inline adapter envelope with `mediaType` and `contentBase64`.
+Content is decoded and redacted before any durable write. URI-only source events
+retain their descriptor and add an explicit `external-artifact-unavailable` entry. UTF-8 text, JSON and
+JSONL preserve sanitized content; opaque binary content containing a configured
+UTF-8/UTF-16 canary is withheld. Invalid text/JSON/base64 is explicitly unavailable.
+SHA-256 names bind the published bytes. Atomic create-only files precede database
+references, making replay idempotent. A crash may leave unreferenced sanitized
+bytes. Referenced files are verified on read and export; missing/corrupt files
+block the artifact prerequisite for future qualification. Head qualification and
+reviews remain the later qualification ticket's responsibility.
+
+Observations over 16 KiB are exposed as artifact references in canonical event
+envelopes and projections. Fake-session recovery uses its checksum-verified
+sanitized original adapter response. Active-operation responses and continuation
+receipts share the same artifact boundary. Controlled adapter responses are bounded
+at 64 MiB; the local dossier importer accepts at most 256 MiB of expanded ZIP data.
+These are pilot limits, not an unbounded streaming blob service. Redaction matches
+configured canaries; production secret/PII discovery and retention require their
+own policy. Keep policy versions distinct when changing the configured inventory.
+
+The versioned `wpcp-run-dossier/v1` ZIP contains `manifest.json`, `history.json`,
+`projection.json`, and `artifacts/<sha256>`. Its manifest carries core-file hashes,
+artifact availability and policy metadata, admission provenance, adapter contracts,
+execution runtime observations, exporter runtime, and framework/Durable Task
+correlations. JSON canonicalization v1 orders object keys ordinally and preserves
+array order. Use the declared file hashes for comparison; ZIP timestamps can vary.
+Projection hashes describe the export snapshot, including its process observations.
+
+For local restore, stop any worker intended for the destination, configure a fresh
+pilot database through `WPCP_CONNECTION_STRING` and a separate `WPCP_ARTIFACT_ROOT`,
+then run this local service command before starting/reading through the new API:
+
+```bash
+dotnet src/Wpcp.Worker/bin/Debug/net10.0/Wpcp.Worker.dll \
+  --restore-dossier run-dossier.zip \
+  --fixture tests/Wpcp.BlackBox.Tests/fixtures/synthetic-provider-redaction-fixture.json
+```
+
+Use a fixture whose redaction policy covers the dossier's canary inventory. Restore
+validates core checksums, contiguous identities, artifact references and current
+redaction policy before publication. It rejects existing run IDs. Missing or corrupt
+artifact bytes are retained as explicit unavailable entries. Restored runs expose
+the same public history/projection/artifact checksums and current repository access
+checks, with `authorization.historical: true` and disabled control. They are
+historical views: worker execution, session opening and lease revival are unavailable.
+The public manifest remains the authority for current artifact availability when
+immutable historical references describe their original capture status.
+
+Run the isolated process proof:
+
+```bash
+python3 -m unittest tests.test_run_dossier -v
+```
+
+It uses independent API/CLI/worker processes, controlled provider HTTP boundaries,
+two disposable PostgreSQL containers and separate artifact roots. The large case
+injects a pre-commit crash, stops a worker at source event 5000, kills the API,
+reconnects another reader, and compares more than 10,000 events through SSE/pages
+and a fresh restore. It also scans the disposable databases, artifacts, worker logs,
+export and client payloads for every configured canary category. API log providers
+remain disabled. Real provider identities, live Codex and managed DTS dispatch are
+covered by their separate pilot tickets.
