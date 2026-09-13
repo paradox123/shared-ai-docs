@@ -1,0 +1,156 @@
+{
+  "date": "2026-09-13",
+  "context": "migration-ticket-02",
+  "snapshot": {
+    "snapshot": "/Users/dh/.local/state/contextual-llm-wiki/backups/migration-ticket-02-20260913",
+    "files": 211,
+    "checksumFailures": [],
+    "manifestSha256": "d6e8a840504137b0d0efada208fd1ddafd5cd4ae1916b8aabe72b1b3ab5992f8",
+    "inputs": [
+      {
+        "root": "/Users/dh/Documents/DanielsVault/_shared/contextual-llm-wiki/general",
+        "status": "absent",
+        "pages": 0,
+        "eligible": 0,
+        "answers": []
+      },
+      {
+        "root": "/Users/dh/Documents/DanielsVault/_shared/contextual-llm-wiki/private",
+        "status": "absent",
+        "pages": 0,
+        "eligible": 0,
+        "answers": []
+      },
+      {
+        "root": "/Users/dh/Documents/DanielsVault/_shared/contextual-llm-wiki/acceptance-general",
+        "status": "populated",
+        "pages": 22,
+        "eligible": 22,
+        "answers": [
+          {
+            "id": "answers/qmd-gemeinsame-erkenntnis",
+            "eligible": true,
+            "reasons": []
+          }
+        ]
+      },
+      {
+        "root": "/Users/dh/Documents/DanielsVault/_shared/contextual-llm-wiki/acceptance-private",
+        "status": "populated",
+        "pages": 8,
+        "eligible": 8,
+        "answers": []
+      },
+      {
+        "root": "/Users/dh/.local/state/contextual-llm-wiki/backups/acceptance-20260912",
+        "status": "populated",
+        "pages": 27,
+        "eligible": 18,
+        "answers": [
+          {
+            "id": "answers/qmd-gemeinsame-erkenntnis",
+            "eligible": false,
+            "reasons": [
+              "source-changed:shared-ai-docs/docs/rag/operating-model-rag-qmd.md"
+            ]
+          },
+          {
+            "id": "answers/qmd-synthese",
+            "eligible": false,
+            "reasons": [
+              "source-changed:shared-ai-docs/docs/rag/operating-model-rag-qmd.md",
+              "dependency-quarantined:concepts/qmd-als-einzige-persistierte-retrieval-engine",
+              "dependency-quarantined:concepts/direktes-qmd-retrieval-mit-exakter-fallback-suche",
+              "dependency-quarantined:concepts/qmd-gestützte-rag-kompatibilitätsschicht",
+              "dependency-quarantined:concepts/tägliche-qmd-wartung-mit-fail-closed-verhalten",
+              "dependency-quarantined:concepts/repository-gerechte-markdown-indexierung",
+              "dependency-quarantined:concepts/deklarative-collection-verwaltung"
+            ]
+          }
+        ]
+      },
+      {
+        "root": "/Users/dh/.local/state/contextual-llm-wiki/backups/acceptance-20260912-final",
+        "status": "populated",
+        "pages": 27,
+        "eligible": 18,
+        "answers": [
+          {
+            "id": "answers/qmd-gemeinsame-erkenntnis",
+            "eligible": false,
+            "reasons": [
+              "source-changed:shared-ai-docs/docs/rag/operating-model-rag-qmd.md"
+            ]
+          },
+          {
+            "id": "answers/qmd-synthese",
+            "eligible": false,
+            "reasons": [
+              "source-changed:shared-ai-docs/docs/rag/operating-model-rag-qmd.md",
+              "dependency-quarantined:concepts/qmd-als-einzige-persistierte-retrieval-engine",
+              "dependency-quarantined:concepts/direktes-qmd-retrieval-mit-exakter-fallback-suche",
+              "dependency-quarantined:concepts/qmd-gestützte-rag-kompatibilitätsschicht",
+              "dependency-quarantined:concepts/tägliche-qmd-wartung-mit-fail-closed-verhalten",
+              "dependency-quarantined:concepts/repository-gerechte-markdown-indexierung",
+              "dependency-quarantined:concepts/deklarative-collection-verwaltung"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "migrationActions": {
+    "preserved": 30,
+    "quarantined": 18,
+    "deduplicated": 36
+  },
+  "activePages": 30,
+  "activeAnswers": 1,
+  "privateDomainPages": 8,
+  "privateDomainSearchMatches": 8,
+  "legacyFilesChecked": 211,
+  "legacyFilesUnchanged": true,
+  "originalSourceVersionsUnchanged": true,
+  "answer": {
+    "id": "answers/import-349b4f2e5e9698f96b5e396a84b75be7ba9a088af25098b779aec96b9246f217",
+    "originalId": "answers/qmd-gemeinsame-erkenntnis",
+    "hash": "b1b27a7075cc69c7a50e7eeff1cbe7d295cc99b744116b2085ce8393720266be",
+    "originalHash": "b1b27a7075cc69c7a50e7eeff1cbe7d295cc99b744116b2085ce8393720266be",
+    "byteIdentical": true,
+    "sourceIds": [
+      "vault-root/Meetings/Transcripts/20260911-2056-transcript.md",
+      "vault-root/Projects/NCG/AGENTS.md",
+      "vault-root/_shared/danielsvault-rag/README.md",
+      "shared-ai-docs/docs/rag/operating-model-rag-qmd.md"
+    ]
+  },
+  "query": {
+    "provider": "codex-agent",
+    "ok": true,
+    "fallback": false,
+    "evidenceIds": [
+      "answers/import-349b4f2e5e9698f96b5e396a84b75be7ba9a088af25098b779aec96b9246f217"
+    ],
+    "reusesImportedAnswer": true
+  },
+  "lint": true,
+  "maintenanceNoop": true,
+  "migrationRepeatNoop": true,
+  "qmd": {
+    "isolated": true,
+    "database": "/Users/dh/.local/state/contextual-llm-wiki/migration-ticket-02-qmd.sqlite",
+    "foreignCollectionsChanged": false
+  },
+  "verification": {
+    "codeCommit": "4f36f66",
+    "typescript": "passed",
+    "publicCliTests": 48,
+    "migrationCases": 14,
+    "upstreamTests": 59,
+    "operationsTests": 6,
+    "failures": 0,
+    "openspecStrict": "passed",
+    "standardsReviewOpenFindings": 0,
+    "specReviewOpenFindings": 0
+  }
+}

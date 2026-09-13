@@ -38,3 +38,8 @@ Die [gesonderte Ticket-01-Abnahme](../../../contextual-llm-wiki/evidence/shared-
 ## Akzeptierter Abschluss von Ticket 01
 
 Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Sein Wiki-Delta wurde in [share-contextual-wiki-sources](../archive/2026-09-13-share-contextual-wiki-sources/proposal.md) separat abgeschlossen und kanonisch übernommen. Die hier noch offenen Aufgaben 4.2, 4.4, 4.5 und der Produktionsanteil von 4.6 bleiben unverändert den Tickets 02–04 zugeordnet.
+
+
+## Ticket 02: geprüfte Übernahme bestehender Wissensbestände
+
+[Abnahmeübersicht](../../../contextual-llm-wiki/evidence/shared-wiki-02.md): Inventur der tatsächlichen Ausgaben und älteren Backups; 211 Dateien ohne Prüfsummenabweichung gesichert, 30 gültige Seiten übernommen, 36 identische historische Revisionen zugeordnet und 18 veraltete Revisionen zurückgestellt. Die aktuelle gespeicherte Antwort bleibt bytegleich und wird durch die echte verwaltete Query verwendet. Persönliche Seiten sind in derselben QMD-Collection auffindbar. Kollidierende Namen, transitive Antwortketten, gezielte Nachpflege und Wiederaufnahme sind durch CLI-Verhaltenstests nachgewiesen. Alte Bestände bleiben unverändert verfügbar. Kein Vollimport und keine produktive Aktivierung; der Gesamtchange bleibt offen.

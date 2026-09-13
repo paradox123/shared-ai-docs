@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 — Gemeinsames Wiki erzeugen und abfragen.
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 ## Grundlage und Ausgangslage
 
@@ -14,15 +14,15 @@ Vorhanden sind getrennte Konfigurationen und echte Abnahmebestände mit gespeich
 
 ## Abnahmekriterien
 
-- [ ] Vor der Übernahme liegt eine Inventur der tatsächlich vorhandenen Bestände, Seiten, gespeicherten Antworten und ihrer Abhängigkeiten vor. Leere Produktionsausgaben und befüllte Abnahmebestände werden unterschieden.
-- [ ] Eine überprüfbare Sicherung erhält die bisherigen Texte, Provenienz und erforderlichen Zustände vor jeder Ablösung. Die Quelle dieser Sicherung bleibt bis zum erfolgreichen Übernahmenachweis verfügbar.
-- [ ] Gültige gespeicherte Antworten sind nach der Übernahme im gemeinsamen Wiki über die verwaltete Abfrage auffindbar und auf ihre Originalquellen zurückführbar. Sie werden nicht still durch neue Modellformulierungen ersetzt.
-- [ ] Abhängigkeiten von Antworten auf Konzeptseiten und weitere gespeicherte Antworten bleiben erhalten beziehungsweise werden überprüfbar auf gültige gemeinsame Seitenstände überführt.
-- [ ] Gleichnamige Seiten mit unterschiedlichen Aussagen oder Quellen werden nicht still überschrieben. Der Übernahmebericht erklärt, welche Inhalte zusammengeführt, getrennt erhalten oder zur Prüfung zurückgestellt wurden.
-- [ ] Seiten mit veralteter, entfallener oder unvollständig belegter Evidenz erscheinen nicht als aktuelles Wissen. Ihre bisherige Fassung bleibt in der Sicherung überprüfbar; Zurückstellungen und deren Gründe sind sichtbar.
-- [ ] Eine Quelländerung nach der Migration erreicht eine davon abhängige gespeicherte Antwort über die gemeinsame Pflege. Eine unabhängige Antwort bleibt nutzbar und wird nicht unnötig verändert.
-- [ ] Eine unterbrochene oder fehlgeschlagene Übernahme kann wiederholt oder auf den gesicherten Stand zurückgeführt werden. Wiederholung erzeugt keine doppelten aktiven Antworten und verliert keine bereits gesicherten Inhalte.
-- [ ] QMD liefert den übernommenen gültigen Bestand ohne aus dem Tätigkeitsbereich abgeleitete Ausschlüsse. Die Migration repointet oder entfernt keine fremden Collections.
+- [x] Vor der Übernahme liegt eine Inventur der tatsächlich vorhandenen Bestände, Seiten, gespeicherten Antworten und ihrer Abhängigkeiten vor. Leere Produktionsausgaben und befüllte Abnahmebestände werden unterschieden.
+- [x] Eine überprüfbare Sicherung erhält die bisherigen Texte, Provenienz und erforderlichen Zustände vor jeder Ablösung. Die Quelle dieser Sicherung bleibt bis zum erfolgreichen Übernahmenachweis verfügbar.
+- [x] Gültige gespeicherte Antworten sind nach der Übernahme im gemeinsamen Wiki über die verwaltete Abfrage auffindbar und auf ihre Originalquellen zurückführbar. Sie werden nicht still durch neue Modellformulierungen ersetzt.
+- [x] Abhängigkeiten von Antworten auf Konzeptseiten und weitere gespeicherte Antworten bleiben erhalten beziehungsweise werden überprüfbar auf gültige gemeinsame Seitenstände überführt.
+- [x] Gleichnamige Seiten mit unterschiedlichen Aussagen oder Quellen werden nicht still überschrieben. Der Übernahmebericht erklärt, welche Inhalte zusammengeführt, getrennt erhalten oder zur Prüfung zurückgestellt wurden.
+- [x] Seiten mit veralteter, entfallener oder unvollständig belegter Evidenz erscheinen nicht als aktuelles Wissen. Ihre bisherige Fassung bleibt in der Sicherung überprüfbar; Zurückstellungen und deren Gründe sind sichtbar.
+- [x] Eine Quelländerung nach der Migration erreicht eine davon abhängige gespeicherte Antwort über die gemeinsame Pflege. Eine unabhängige Antwort bleibt nutzbar und wird nicht unnötig verändert.
+- [x] Eine unterbrochene oder fehlgeschlagene Übernahme kann wiederholt oder auf den gesicherten Stand zurückgeführt werden. Wiederholung erzeugt keine doppelten aktiven Antworten und verliert keine bereits gesicherten Inhalte.
+- [x] QMD liefert den übernommenen gültigen Bestand ohne aus dem Tätigkeitsbereich abgeleitete Ausschlüsse. Die Migration repointet oder entfernt keine fremden Collections.
 
 ## Umsetzung und Nachweis
 
@@ -33,3 +33,5 @@ Die gemeinsame Wiki-Funktion aus Ticket 01 ist Voraussetzung. Ticket 03 ist kein
 ## Comments
 
 - 13.09.2026: Aufteilung und Abhängigkeiten von Daniel bestätigt. Der vollständige Erstimport ersetzt nicht die verifizierte Übernahme gespeicherter Gesprächssynthesen.
+
+- 13.09.2026: Auf Daniels bestätigtem Zielbranch `codex/shared-wiki-02` implementiert und verifiziert. [Kriterienweise Abnahme](../../../contextual-llm-wiki/evidence/shared-wiki-02.md) mit tatsächlicher Inventur, Snapshot, echter Query und Wiederaufnahme. Standards- und Spec-Review ohne verbleibende Findings. Alte Ausgaben und Backups bleiben verfügbar; Produktivaktivierung und Vollimport gehören weiterhin zu Ticket 04.
