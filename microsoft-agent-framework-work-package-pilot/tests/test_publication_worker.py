@@ -225,10 +225,28 @@ class PublicationWorkerTests(harness.ControlPlaneProcessHarness, unittest.TestCa
         self.assertEqual('draft-published', run['state'], run['publication'])
         self.assertEqual(1, len(fixture.records))
         self.assertIn('![Decisive screenshot]', fixture.pulls[0]['body'])
+        qualification = run['publication']['qualification']
+        self.assertTrue(qualification['schemaValid'])
+        self.assertEqual([{'criterion': identity, 'phase': phase} for identity, phases in (
+            ('REST', ('request', 'response', 'read-back')),
+            ('REPEAT', ('request', 'response', 'repeat', 'read-back')),
+            ('UI', ('interaction', 'screenshot', 'read-back')),
+            ('DOC', ('generate', 'render', 'inspect', 'read-back')))
+            for phase in phases], qualification['missingPhases'])
+        self.assertEqual('correction', run['publication']['capture']['kind'])
+        self.assertEqual(1, run['publication']['capture']['number'])
+        self.assertEqual(run['publication']['captureHeadSha'], run['publication']['intent']['headSha'])
+        self.assertFalse(any(a['state'] == 'running' for a in run['activities'] + run['attempts']))
         if destination := os.environ.get('WPCP_PUBLICATION_PROOF_DIR'):
             import shutil
+            import urllib.request
             root = Path(destination); root.mkdir(parents=True, exist_ok=True)
-            (root / 'direct-surfaces.json').write_text(json.dumps({'run': run, 'providerPullRequest': fixture.pulls[0]}, indent=2))
+            status, events, _ = self.request('GET', f'/api/v1/runs/{run_id}/events')
+            self.assertEqual(200, status)
+            with urllib.request.urlopen(fixture.origin + '/repos/pilot/fixture/pulls/1') as response:
+                provider_pull = json.load(response)
+            (root / 'direct-surfaces.json').write_text(json.dumps({'run': run, 'events': events,
+                'providerPullRequest': provider_pull}, indent=2))
             shutil.copyfile(screenshot, root / 'direct-ui.png')
             shutil.copyfile(fixture.root / 'document.png', root / 'document.png')
 

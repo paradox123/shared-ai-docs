@@ -20,6 +20,9 @@ public sealed partial class PostgresImplementationRunStore
         var previous = await ReadPublicationAsync(connection, transaction, runId, default);
         if (previous is not null && (previous.AssignmentHash != next.AssignmentHash ||
             (previous.Dispatched && !next.Dispatched) ||
+            (previous.CaptureHeadSha is not null && previous.CaptureHeadSha != next.CaptureHeadSha) ||
+            (previous.Qualification is { } qualification &&
+                (next.Qualification is null || !JsonElement.DeepEquals(qualification, next.Qualification.Value))) ||
             (previous.Intent is { } intent && (next.Intent is null || !JsonElement.DeepEquals(intent, next.Intent.Value)))))
             throw new AgentAssignmentConflictException();
         if (previous is null)
@@ -46,10 +49,48 @@ public sealed partial class PostgresImplementationRunStore
         save.Parameters.AddWithValue("id", Guid.Parse(runId));
         save.Parameters.AddWithValue("state", next.State);
         AddNullable(save, "head", NpgsqlTypes.NpgsqlDbType.Text,
-            next.Intent is { } publishedIntent ? publishedIntent.GetProperty("headSha").GetString() : null);
+            next.Intent is { } publishedIntent ? publishedIntent.GetProperty("headSha").GetString() : next.CaptureHeadSha);
         AddJson(save, "value", next);
         await save.ExecuteNonQueryAsync();
         await AppendAgentEventAsync(connection, transaction, run, "PublicationStateObserved", next, default);
+        if (previous?.Qualification is null && next.Qualification is not null)
+            await AppendAgentEventAsync(connection, transaction, run, "EvidenceQualificationObserved",
+                new { next.Qualification, next.CaptureHeadSha }, default);
+        if (next.Capture is { } capture && (capture.Number != previous?.Capture?.Number || capture.State != previous?.Capture?.State))
+        {
+            await using var activity = new NpgsqlCommand(capture.State == "running" ? """
+                INSERT INTO wpcp_run_activities VALUES (@activity, @run, @kind, @state, @now, NULL);
+                INSERT INTO wpcp_activity_attempts VALUES (@attempt, @activity, @number, @state, @now, NULL);
+                """ : """
+                UPDATE wpcp_run_activities SET state=@state, completed_at=@now WHERE activity_id=@activity;
+                UPDATE wpcp_activity_attempts SET state=@state, completed_at=@now WHERE attempt_id=@attempt;
+                """, connection, transaction);
+            activity.Parameters.AddWithValue("activity", Guid.Parse(capture.ActivityId));
+            activity.Parameters.AddWithValue("attempt", Guid.Parse(capture.AttemptId));
+            activity.Parameters.AddWithValue("run", Guid.Parse(runId));
+            activity.Parameters.AddWithValue("kind", "evidence-" + capture.Kind);
+            activity.Parameters.AddWithValue("number", capture.Number);
+            activity.Parameters.AddWithValue("state", capture.State);
+            activity.Parameters.AddWithValue("now", DateTimeOffset.UtcNow);
+            await activity.ExecuteNonQueryAsync();
+            await AppendAgentEventAsync(connection, transaction, run,
+                capture.State == "running" ? "EvidenceCaptureStarted" : "EvidenceCaptureObserved",
+                new { next.CaptureHeadSha, next.Capture, source = next.Qualification?.GetProperty("source") }, default);
+        }
+        if (next.State is "publication-blocked" or "draft-published" && next.Qualification is { } qualified)
+        {
+            var source = qualified.GetProperty("source");
+            var attempt = await ReadAgentAttemptAsync(connection, transaction, runId,
+                source.GetProperty("attemptId").GetString()!, default);
+            if (attempt?.Session.HumanRequest is { State: "open" } request)
+            {
+                await UpdateAgentReceiptAsync(connection, transaction, attempt with {
+                    Session = attempt.Session with { HumanRequest = request with { State = "resolved" } } }, default);
+                await AppendAgentEventAsync(connection, transaction, run, "HumanRequestResolved",
+                    new { request.RequestId, attempt.AttemptId, attempt.Session.SessionId,
+                        reason = "completed-work-reached-publication-disposition", next.State, next.CaptureHeadSha }, default);
+            }
+        }
         await transaction.CommitAsync();
         return next;
     }

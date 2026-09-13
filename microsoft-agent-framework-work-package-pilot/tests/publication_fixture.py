@@ -47,6 +47,7 @@ class PublicationFixture:
         self.agent_content = 'def greet(): return "Hello, Ada!"  # implemented\n'
         self.agent_starts = 0
         self.result_summary = 'Greeting implemented'
+        self.result_evidence = None
         self.adapter_path = str(self.repo)
         self.session = str(uuid.uuid4())
         fixture = self
@@ -103,6 +104,8 @@ class PublicationFixture:
                         'observed_interface': 'greet', 'expected_result': 'Hello, Ada!',
                         'observations': [{'phase': 'read_back', 'description': 'Greeting returned',
                             'artifact': 'Hello, Ada!', 'correlation_id': None}]}]}
+                if fixture.result_evidence is not None:
+                    result['evidence'] = fixture.result_evidence
                 return self.send({'contractVersion': 'AgentSessionAdapter/v1',
                     'operationKey': self.path.split('/')[-1], 'sessionId': fixture.session,
                     'events': [{'sequence': 1, 'type': 'result', 'data': result}]})

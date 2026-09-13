@@ -1,0 +1,19 @@
+test_real_native_issue_publishes_its_executed_evidence_as_one_draft (tests.test_publication_native.NativePublicationTests.test_real_native_issue_publishes_its_executed_evidence_as_one_draft) ... FAIL
+
+======================================================================
+FAIL: test_real_native_issue_publishes_its_executed_evidence_as_one_draft (tests.test_publication_native.NativePublicationTests.test_real_native_issue_publishes_its_executed_evidence_as_one_draft)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/tests/test_publication_native.py", line 51, in test_real_native_issue_publishes_its_executed_evidence_as_one_draft
+    self.assertFalse(any(a.get('session', {}).get('humanRequest', {}).get('state') == 'open'
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        for a in run['attempts'] if a.get('session') and a['session'].get('humanRequest')),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        'Terminal publication still advertises an open human request')
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false : Terminal publication still advertises an open human request
+
+----------------------------------------------------------------------
+Ran 1 test in 58.443s
+
+FAILED (failures=1)

@@ -1,0 +1,111 @@
+{
+  "direct": {
+    "runId": "2714f53e-214c-4a61-a586-13cff8281ecd",
+    "state": "draft-published",
+    "captureHeadSha": "152693a36308ec2c4d00a49f2a2985a656db1b7b",
+    "providerHeadSha": "152693a36308ec2c4d00a49f2a2985a656db1b7b",
+    "draft": true,
+    "schemaValid": true,
+    "missingPhases": [
+      {
+        "phase": "request",
+        "criterion": "REST"
+      },
+      {
+        "phase": "response",
+        "criterion": "REST"
+      },
+      {
+        "phase": "read-back",
+        "criterion": "REST"
+      },
+      {
+        "phase": "request",
+        "criterion": "REPEAT"
+      },
+      {
+        "phase": "response",
+        "criterion": "REPEAT"
+      },
+      {
+        "phase": "repeat",
+        "criterion": "REPEAT"
+      },
+      {
+        "phase": "read-back",
+        "criterion": "REPEAT"
+      },
+      {
+        "phase": "interaction",
+        "criterion": "UI"
+      },
+      {
+        "phase": "screenshot",
+        "criterion": "UI"
+      },
+      {
+        "phase": "read-back",
+        "criterion": "UI"
+      },
+      {
+        "phase": "generate",
+        "criterion": "DOC"
+      },
+      {
+        "phase": "render",
+        "criterion": "DOC"
+      },
+      {
+        "phase": "inspect",
+        "criterion": "DOC"
+      },
+      {
+        "phase": "read-back",
+        "criterion": "DOC"
+      }
+    ],
+    "captureNumber": 1,
+    "captureKind": "correction",
+    "captureState": "succeeded",
+    "phaseCount": 14,
+    "activeActivities": [],
+    "humanRequests": []
+  },
+  "native": {
+    "runId": "e5e2d568-2d27-4de5-9ee0-abf33266dd29",
+    "state": "draft-published",
+    "captureHeadSha": "a2d731da686320d672907c87c7677a6041d9d6c4",
+    "providerHeadSha": "a2d731da686320d672907c87c7677a6041d9d6c4",
+    "draft": true,
+    "schemaValid": true,
+    "missingPhases": [
+      {
+        "phase": "read-back",
+        "criterion": "AC1"
+      }
+    ],
+    "captureNumber": 1,
+    "captureKind": "correction",
+    "captureState": "succeeded",
+    "phaseCount": 1,
+    "activeActivities": [],
+    "humanRequests": [
+      {
+        "requestId": "10fc547b-c551-4c7a-a76c-2adaad6fd827",
+        "state": "resolved"
+      }
+    ]
+  },
+  "verification": {
+    "defaultSuite": {
+      "discovered": 180,
+      "passed": 163,
+      "skipped": 17,
+      "failed": 0
+    },
+    "finalRecoveryPublicationCases": 35,
+    "additionalNativeCasesPassed": 1,
+    "standardsFindings": 0,
+    "specFindings": 0
+  }
+}

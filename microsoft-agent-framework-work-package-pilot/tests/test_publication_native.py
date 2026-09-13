@@ -48,6 +48,9 @@ class NativePublicationTests(harness.ControlPlaneProcessHarness, unittest.TestCa
         self.assertEqual(0, self.publish(run_id, fixture.path).returncode)
         run = self.read_run(run_id)
         self.assertEqual('draft-published', run['state'], run)
+        self.assertFalse(any(a.get('session', {}).get('humanRequest', {}).get('state') == 'open'
+            for a in run['attempts'] if a.get('session') and a['session'].get('humanRequest')),
+            'Terminal publication still advertises an open human request')
         self.assertEqual(1, fixture.creates)
         self.assertEqual(0, self.publish(run_id, fixture.path).returncode)
         self.assertEqual(1, fixture.creates)

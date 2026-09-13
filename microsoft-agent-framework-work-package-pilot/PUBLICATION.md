@@ -1,4 +1,4 @@
-# Executable evidence and draft publication (Ticket 11)
+# Executable evidence, recovery and draft publication (Tickets 11–12)
 
 The worker accepts a trusted `wpcp-publication-plan/v1` JSON file outside the agent
 checkout. It binds its bytes and Python interpreter to the admitted run, checks
@@ -129,6 +129,49 @@ effect retains repository ownership; preflight and evidence rejection before
 dispatch release it. Other publication runs expose `repository-publication-busy`.
 Standalone session dispatch cannot bypass a registered publication plan.
 
+## Bounded evidence recovery
+
+After the original completed result passes schema validation, the worker commits
+safe implementation changes once and records `publication.captureHeadSha`.
+`publication.qualification` separately reports `schemaValid`, `complete` and the
+exact missing `{criterion, phase}` pairs from the trusted plan. Worker
+`read_back` maps to plan `read-back`; failed verdicts, a different evidence kind
+and log phases cannot fill a required phase. The `command` plan kind accepts the
+worker schema's `background` kind. Document phases absent from schema v3 are
+captured through the plan rather than silently counted as present.
+
+Every direct capture is a numbered `evidence-capture` or `evidence-correction`
+activity in `run.activities`, with an attempt and a durable start/result event.
+Missing original phases make the first activity a correction. There are at most
+two capture rounds total, including failed or interrupted rounds. Each round
+executes the trusted scenarios in their declared order, preserving request and
+interaction context for read-backs and screenshots. Plans must therefore use
+repeatable synthetic business scenarios. Agent claims alone never qualify a PR.
+
+Correction reuses the recorded head and branch and does not call Codex or commit
+source. Clean worktree, branch and head are checked before capture and after every
+phase, including a failed command. Drift blocks immediately. A replacement
+worker counts an interrupted dispatch and can execute only the remaining round.
+Capture command groups monitor adapter/worker liveness and have a time bound so
+a killed delivery cannot leave its tool running indefinitely.
+
+`EvidenceQualificationObserved`, `EvidenceCaptureStarted` and
+`EvidenceCaptureObserved` retain the source attempt/session/result event and
+capture head. The original result remains in its original session/artifact;
+correction never overwrites it. The authenticated Operator projection and history
+contain redacted observations, and the provider's draft body exposes the same
+successful head-bound phases and screenshot references.
+
+Exhaustion or drift ends as `publication-blocked`, with `publication.blocker`,
+the capture report and `publication.report.requiredAction`. These pre-dispatch
+terminal runs release repository serialization and have no running capture
+activity. A superseded native preparation Human Request is resolved in the same
+terminal transaction; its original request remains in history. Repeating an exhausted/drifted run is read-only and cannot reset the
+limit; inspect the reported cause and submit a new authorized run when corrected.
+An already dispatched uncertain PR remains subject to the existing ownership
+policy above. A replacement worker command is required after process death;
+this slice does not introduce a background recovery scheduler.
+
 A new plan/interpreter requires a new authorized run after settling the old one.
 Stop older API/worker binaries before upgrading the additive PostgreSQL schema;
 mixed versions cannot enforce the new publication/control guards. Restored
@@ -138,7 +181,7 @@ historical dossiers remain read-only.
 
 ```bash
 uv run --python 3.14 --with-requirements codex-requirements.txt \
-  python -m unittest tests.test_publication_adapter tests.test_publication_worker -v
+  python -m unittest tests.test_evidence_recovery tests.test_publication_adapter tests.test_publication_worker -v
 WPCP_CODEX_ENDPOINT_PROBE=1 \
   uv run --python 3.14 --with-requirements codex-requirements.txt \
   python -m unittest tests.test_publication_native -v

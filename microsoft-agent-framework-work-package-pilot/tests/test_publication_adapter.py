@@ -82,3 +82,37 @@ class PublicationAdapterTests(unittest.TestCase):
             probeImageSha256=hashlib.sha256(self.fixture.probe_image).hexdigest())
         result = self.invoke('preflight')
         self.assertEqual('surface-unavailable:AC1:screenshot', result.get('blocker'), result)
+
+    def test_killed_adapter_does_not_leave_a_capture_command_running(self):
+        import os
+        import signal
+        import time
+        marker = self.fixture.root / 'capture.pid'
+        (self.fixture.repo / 'greeting.py').write_text(self.fixture.agent_content)
+        self.fixture.plan['criteria'][0]['phases'][0]['execute']['argv'] = [sys.executable, '-c',
+            'import os,time; from pathlib import Path; Path(' + repr(str(marker)) + ').write_text(str(os.getpid())); time.sleep(20)']
+        plan = self.fixture.plan
+        process = subprocess.Popen([sys.executable, str(harness.PILOT_ROOT / 'publication_adapter.py')],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        def cleanup():
+            if process.poll() is None: process.kill()
+            process.wait(timeout=5)
+            process.stdout.close(); process.stderr.close()
+            if marker.exists():
+                try: os.killpg(os.getpgid(int(marker.read_text())), signal.SIGKILL)
+                except ProcessLookupError: pass
+        self.addCleanup(cleanup)
+        process.stdin.write(json.dumps({'stage': 'evidence', 'plan': plan, 'fixture': str(harness.FIXTURE),
+            'correlation': {'repository': plan['repository'], 'issueNumber': 43}, 'runId': 'capture-liveness'}))
+        process.stdin.close()
+        deadline = time.monotonic() + 15
+        while not marker.exists() and time.monotonic() < deadline: time.sleep(.05)
+        self.assertTrue(marker.exists(), 'Capture command did not start')
+        process.kill(); process.wait(timeout=5)
+        pid = marker.read_text()
+        deadline = time.monotonic() + 3
+        while time.monotonic() < deadline:
+            observed = subprocess.run(['ps', '-o', 'stat=', '-p', pid], capture_output=True, text=True).stdout.strip()
+            if not observed or observed.startswith('Z'): break
+            time.sleep(.05)
+        else: self.fail('An abandoned capture command can still mutate the surface after replacement')

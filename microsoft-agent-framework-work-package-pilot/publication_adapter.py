@@ -26,7 +26,9 @@ PREREQUISITES = {'contract', 'tools', 'dependencies', 'access', 'sandbox'}
 
 
 class Blocked(Exception):
-    pass
+    def __init__(self, message, **details):
+        super().__init__(message)
+        self.details = details
 
 
 def run_command(argv, cwd, env=None, timeout=30):
@@ -35,7 +37,10 @@ def run_command(argv, cwd, env=None, timeout=30):
     environment = {k: os.environ[k] for k in ('PATH', 'HOME', 'TMPDIR', 'LANG') if k in os.environ}
     environment.update(PYTHONDONTWRITEBYTECODE='1', GIT_TERMINAL_PROMPT='0', GIT_CONFIG_NOSYSTEM='1', GIT_CONFIG_GLOBAL=os.devnull)
     environment.update(env or {})
-    process = subprocess.Popen(argv, cwd=cwd, env=environment, stdout=subprocess.PIPE,
+    supervised = [sys.executable, str(Path(__file__).resolve()), '--supervise-command',
+                  str(os.getpid()), os.environ.get('WPCP_PUBLICATION_OWNER_PID', str(os.getpid())),
+                  str(timeout), *argv]
+    process = subprocess.Popen(supervised, cwd=cwd, env=environment, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, start_new_session=True)
     output = bytearray()
     total = 0
@@ -284,7 +289,26 @@ def inspect_outgoing_history(plan, fixture):
         if '\x00' in content: raise Blocked('uninspectable-outgoing-source')
 
 
-def evidence(plan, correlation, fixture, run_id):
+def qualify(plan, correlation, result, source):
+    validate(plan, correlation)
+    from codex_contract import validate_result
+    schema_valid = not validate_result(result)
+    missing = []
+    for criterion in plan['criteria']:
+        observed = set()
+        if schema_valid:
+            for entry in result['evidence']:
+                kind = entry['kind'].replace('_', '-')
+                expected_kind = 'background' if criterion['kind'] == 'command' else criterion['kind']
+                if entry['criterion'] == criterion['id'] and entry['verdict'] == 'pass' and kind == expected_kind:
+                    observed.update(o['phase'].replace('_', '-') for o in entry['observations'])
+        missing.extend({'criterion': criterion['id'], 'phase': phase['name']}
+                       for phase in criterion['phases'] if phase['name'] not in observed)
+    return {'schemaValid': schema_valid, 'complete': schema_valid and not missing,
+            'missingPhases': missing, 'source': source}
+
+
+def prepare(plan, correlation, fixture):
     validate(plan, correlation)
     base_check(plan, Provider(plan))
     agent_readiness(plan)
@@ -308,6 +332,21 @@ def evidence(plan, correlation, fixture, run_id):
     head = git(plan, 'rev-parse', 'HEAD')
     if head == plan['expectedBaseSha']:
         raise Blocked('branch-not-ahead')
+    return {'state': 'evidence-prepared', 'headSha': head}
+
+
+def check_capture_head(plan, head):
+    if (git(plan, 'rev-parse', 'HEAD') != head or git(plan, 'status', '--porcelain') or
+        git(plan, 'branch', '--show-current') != plan['branch']):
+        raise Blocked('evidence-head-drift')
+
+
+def evidence(plan, correlation, fixture, run_id, head=None):
+    if head is None:
+        head = prepare(plan, correlation, fixture)['headSha']
+    validate(plan, correlation)
+    check_capture_head(plan, head)
+    agent_readiness(plan)
     entries = []
     for criterion in plan['criteria']:
         phases = []
@@ -324,11 +363,13 @@ def evidence(plan, correlation, fixture, run_id):
                     if image != public: raise Blocked('screenshot-readback-mismatch')
                     observation.update(imageUrl=phase['imageUrl'], imageSha256=hashlib.sha256(image).hexdigest())
             except Exception:
-                raise Blocked('evidence-failed:' + criterion['id'] + ':' + phase['name']) from None
+                raise Blocked('evidence-failed:' + criterion['id'] + ':' + phase['name'],
+                    failedPhases=[{'criterion': criterion['id'], 'phase': phase['name']}]) from None
+            finally:
+                check_capture_head(plan, head)
             phases.append({'name': phase['name'], 'headSha': head, **observation})
         entries.append({k: criterion[k] for k in ('id', 'description', 'kind', 'surface', 'expectedReadBack')} | {'phases': phases})
-    if git(plan, 'rev-parse', 'HEAD') != head or git(plan, 'status', '--porcelain'):
-        raise Blocked('evidence-head-drift')
+    check_capture_head(plan, head)
     safe = redact(entries, fixture)
     body = ['<!-- wpcp-run:' + run_id + ' -->', 'Closes #' + str(plan['issueNumber']),
             'Evidence for commit/head `' + head + '`.',
@@ -409,14 +450,42 @@ def main():
     try:
         stage = request['stage']
         if stage == 'preflight': result = preflight(request['plan'], request['correlation'])
+        elif stage == 'qualify': result = qualify(request['plan'], request['correlation'], request['result'], request['source'])
+        elif stage == 'prepare': result = prepare(request['plan'], request['correlation'], fixture)
+        elif stage == 'capture': result = evidence(request['plan'], request['correlation'], fixture, request['runId'], request['headSha'])
         elif stage == 'evidence': result = evidence(request['plan'], request['correlation'], fixture, request['runId'])
         elif stage == 'publish': result = publish(request['plan'], request['correlation'], request['intent'], request['allowCreate'])
         else: raise Blocked('unknown-publication-stage')
     except Blocked as error:
-        result = {'state': 'preflight-blocked' if request['stage'] == 'preflight' else 'publication-blocked', 'blocker': str(error)}
+        result = {'state': 'preflight-blocked' if request['stage'] == 'preflight' else 'publication-blocked', 'blocker': str(error), **error.details}
     except Exception:
         result = {'state': 'preflight-blocked' if request['stage'] == 'preflight' else 'publication-blocked', 'blocker': 'publication-evidence-unavailable'}
     print(json.dumps(redact(result, fixture)))
 
 
-if __name__ == '__main__': main()
+def supervise_command():
+    # This process owns the command group independently of the adapter. A killed
+    # adapter/worker cannot leave a capture tool running until a later retry.
+    parent, owner = int(sys.argv[2]), int(sys.argv[3])
+    deadline = time.monotonic() + float(sys.argv[4])
+    command = subprocess.Popen(sys.argv[5:])
+    try:
+        while command.poll() is None:
+            try:
+                os.kill(owner, 0)
+                alive = os.getppid() == parent
+            except ProcessLookupError:
+                alive = False
+            if not alive or time.monotonic() >= deadline:
+                os.killpg(os.getpgrp(), signal.SIGKILL)
+            time.sleep(.05)
+        return command.returncode
+    finally:
+        if command.poll() is None: command.kill()
+        command.wait()
+
+
+if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == '--supervise-command':
+        raise SystemExit(supervise_command())
+    main()
