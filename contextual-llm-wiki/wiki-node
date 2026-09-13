@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+base=$(cd -- "$(dirname -- "$0")" && pwd)
+export WIKI_QMD_PATH="${WIKI_QMD_PATH:-$PATH}"
+export PATH="$base/.runtime/node/node_modules/node/bin:$PATH"
+exec "$base/.runtime/node/node_modules/node/bin/node" "$@"

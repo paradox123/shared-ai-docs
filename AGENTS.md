@@ -51,14 +51,16 @@ Before archiving any OpenSpec change, perform a refactoring pass over the code, 
 2. SOLID issues: mixed responsibilities, hard-to-test boundaries, or abstractions that are difficult to replace.
 3. KISS issues: accidental complexity, unclear names, needless branching, or structure larger than the current spec requires.
 
-Preserve behavior during this pass and rerun the relevant tests or checks afterward. 
+Preserve behavior during this pass and rerun the relevant tests or checks afterward.
 
-For langgraph-github-issue-pilot, prefer verification through:
+For langgraph-github-issue-pilot and other applications developed in this repo, prefer verification through:
 - local application endpoints
 - behavior tests
 - application logs proving the end-to-end flow
 - screenshots of UIs
 - GitHub Issues you created to show end-to-end behavior
+
+Demonstrate that the change behaves as intended with a concise, human-readable acceptance overview. For each requirement, summarize the expected behavior, the observed result, and the evidence supporting correctness. Clearly identify any unverified behavior or remaining limitations. Keep detailed test logs and activity records in linked supporting files; a list of completed actions or passing tests alone is not proof of correctness.
 
 If end-to-end verification is not possible, state exactly why and what lower-level verification was performed instead.
 If end-to-end verification is not possible, state exactly why and what lower-level verification was performed.

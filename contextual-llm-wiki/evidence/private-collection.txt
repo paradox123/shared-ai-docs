@@ -1,0 +1,4 @@
+Collection: contextual-wiki-acceptance-private
+  Path:     /Users/dh/Documents/DanielsVault/_shared/contextual-llm-wiki/acceptance-private/wiki
+  Pattern:  **/*.md
+  Include:  no

@@ -107,7 +107,7 @@ Ein Dokument in einem bestehenden Fachrepository, das als Beleg und Eingang fuer
 _Avoid_: Rohdaten im Sinne von ausschliesslich unbearbeiteten Inhalten
 
 **LLM-Wiki**:
-Die uebergeordnete Wissensschicht fuer Mensch und Agent, die Fachquellen aus dem jeweiligen Repo-Kontext erschliesst und gemeinsame Erkenntnisse dauerhaft nutzbar macht.
+Die vom LLM geschriebene und gepflegte Wissensschicht nach Karpathys LLM-Wiki-Konzept zwischen Fachquellen und ihrer Nutzung durch Mensch und Agent. Im DanielsVault umfasst sie den jeweiligen Repo-Kontext und macht gemeinsame Erkenntnisse dauerhaft nutzbar.
 _Avoid_: Eigenstaendiges Fachrepository, separates Wiki je Repo
 
 **Repo-Kontext**:

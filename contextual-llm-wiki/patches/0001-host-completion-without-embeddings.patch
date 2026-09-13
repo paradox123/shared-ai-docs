@@ -1,0 +1,136 @@
+diff --git a/src/index.ts b/src/index.ts
+index e75a6fc..b2a6467 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -120,3 +120,6 @@ export type {
+   LoadedProfile,
+   SlugSafe,
+ } from "./profile/types.js";
++
++// Host-supplied evidence: no native retrieval, persistence, or embeddings.
++export { completeText } from "./sdk/completion.js";
+diff --git a/src/providers/codex-agent.ts b/src/providers/codex-agent.ts
+index b54e5c0..9649eb7 100644
+--- a/src/providers/codex-agent.ts
++++ b/src/providers/codex-agent.ts
+@@ -280,6 +280,21 @@ function exitError(result: ProcessResult): CodexAgentError {
+   );
+ }
+
++/** Adapt tool schemas to the strict object contract required by Codex output-schema.
++ * Optional fields are supplied explicitly (empty arrays are valid); original AJV
++ * validation still checks the returned result against the caller's contract.
++ */
++function codexStructuredSchema(value: unknown): unknown {
++  if (Array.isArray(value)) return value.map(codexStructuredSchema);
++  if (!value || typeof value !== "object") return value;
++  const schema = Object.fromEntries(Object.entries(value).map(([key, child]) => [key, codexStructuredSchema(child)]));
++  if (schema.type === "object" && schema.properties) {
++    schema.additionalProperties = false;
++    schema.required = Object.keys(schema.properties as Record<string, unknown>);
++  }
++  return schema;
++}
++
+ /** Codex CLI-backed provider using the CLI's locally managed ChatGPT login. */
+ export class CodexAgentProvider implements LLMProvider {
+   private readonly model?: string;
+@@ -350,7 +365,7 @@ export class CodexAgentProvider implements LLMProvider {
+     const schemaPath = schema ? path.join(cwd, SCHEMA_FILE) : undefined;
+     let releaseCustody = (): void => undefined;
+     try {
+-      if (schemaPath) await writeFile(schemaPath, JSON.stringify(schema), { mode: 0o600 });
++      if (schemaPath) await writeFile(schemaPath, JSON.stringify(codexStructuredSchema(schema)), { mode: 0o600 });
+       const result = await runCodex(
+         codexArgs(cwd, outputPath, this.model, schemaPath),
+         cwd,
+diff --git a/src/sdk/wiki.ts b/src/sdk/wiki.ts
+index ec4dcdb..ecc0076 100644
+--- a/src/sdk/wiki.ts
++++ b/src/sdk/wiki.ts
+@@ -79,7 +79,7 @@ export function createWiki(options: CreateWikiOptions): Wiki {
+
+     compile: (opts: SdkCompileOptions = {}) =>
+       runQuiet(() => {
+-        ensureProviderAvailable();
++        ensureProviderAvailable({ embeddings: opts.embeddings });
+         return compileAndReport(root, opts);
+       }),
+
+diff --git a/src/sources/scan.ts b/src/sources/scan.ts
+index 4e374c0..5dd0839 100644
+--- a/src/sources/scan.ts
++++ b/src/sources/scan.ts
+@@ -48,5 +48,5 @@ export async function listSelectedSourceEntries(root: string, selection?: Source
+
+ /** Markdown subset consumed by compilation and source-record inventory. */
+ export async function listSelectedSourceFiles(root: string, selection?: SourceSelection): Promise<string[]> {
+-  return (await listSelectedSourceEntries(root, selection)).filter((id) => id.endsWith(".md"));
++  return (await listSelectedSourceEntries(root, selection)).filter((id) => id.toLowerCase().endsWith(".md"));
+ }
+diff --git a/src/sources/source-record.ts b/src/sources/source-record.ts
+index 9a3635b..39689a1 100644
+--- a/src/sources/source-record.ts
++++ b/src/sources/source-record.ts
+@@ -44,7 +44,7 @@ export interface ListSourcesResult {
+  */
+ export function assertSafeSourceId(id: string): void {
+   if (typeof id !== "string" || id.length === 0) throw new PathSafetyError("source id must be a non-empty string");
+-  if (!id.endsWith(".md")) throw new PathSafetyError(`source id must end in .md: "${id}"`);
++  if (!id.toLowerCase().endsWith(".md")) throw new PathSafetyError(`source id must end in .md: "${id}"`);
+   if (id.includes("\\") || id.includes("\0") || /^[a-z]:/i.test(id) ||
+       id.split("/").some((part) => !part || part === "." || part === ".."))
+     throw new PathSafetyError(`source id must be a normalized relative path: "${id}"`);
+diff --git a/src/utils/provider-guard.ts b/src/utils/provider-guard.ts
+index 5643334..b6248ed 100644
+--- a/src/utils/provider-guard.ts
++++ b/src/utils/provider-guard.ts
+@@ -99,11 +99,11 @@ function ensureEmbeddingProviderAvailable(): void {
+  * Anthropic accepts either ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN
+  * (resolved through the Claude Code settings fallback chain).
+  */
+-export function ensureProviderAvailable(): void {
+-  ensureEmbeddingProviderAvailable();
++export function ensureProviderAvailable(options: { embeddings?: boolean } = {}): void {
++  if (options.embeddings !== false) ensureEmbeddingProviderAvailable();
+   const provider = normalizeProviderName(process.env.LLMWIKI_PROVIDER ?? DEFAULT_PROVIDER);
+
+-  if (provider === "codex-agent" && !isEmbeddingProviderExplicit()) {
++  if (options.embeddings !== false && provider === "codex-agent" && !isEmbeddingProviderExplicit()) {
+     throw new ProviderUnavailableError(
+       provider,
+       ["LLMWIKI_EMBEDDING_PROVIDER"],
+diff --git a/test/provider-codex-agent.test.ts b/test/provider-codex-agent.test.ts
+index c763472..39ed86a 100644
+--- a/test/provider-codex-agent.test.ts
++++ b/test/provider-codex-agent.test.ts
+@@ -106,6 +106,15 @@ afterEach(async () => {
+ });
+
+ describe("CodexAgentProvider process boundary", () => {
++  it("adapts the compiler extraction schema to Codex strict structured output", async () => {
++    const fake = await useFake({ toolOutput: {concepts:[{concept:"Freigabe", summary:"Explizite Freigabe", is_new:true}]} });
++    const provider = new CodexAgentProvider(undefined, { timeoutMs: 2000 });
++    const tool = {name:"extract_concepts", description:"Concepts", input_schema:{type:"object",properties:{concepts:{type:"array",items:{type:"object",properties:{concept:{type:"string"},summary:{type:"string"},is_new:{type:"boolean"}},required:["concept"]}}},required:["concepts"]}};
++    await provider.toolCall("system", [{role:"user",content:"source"}], [tool], 1024);
++    const [call] = await fake.calls();
++    expect(call.schema).toMatchObject({additionalProperties:false,properties:{concepts:{items:{additionalProperties:false,required:["concept","summary","is_new"]}}}});
++  });
++
+   it("runs an ephemeral, read-only, non-interactive exec in a cleaned throwaway cwd", async () => {
+     const fake = await useFake({ textOutput: "compiled page" });
+     process.env.OPENAI_API_KEY = "sk-parent-must-not-leak";
+diff --git a/.runtime/compiler/src/sdk/completion.ts b/src/sdk/completion.ts
+new file mode 100644
+index 0000000..9836367
+--- /dev/null
++++ b/src/sdk/completion.ts
+@@ -0,0 +1,8 @@
++import { callClaude } from "../utils/llm.js";
++import { ensureProviderAvailable } from "../utils/provider-guard.js";
++import { withQuiet } from "../utils/output.js";
++/** Complete only the supplied evidence; the host owns retrieval and save policy. */
++export async function completeText(input: { system: string; prompt: string; maxTokens?: number }): Promise<string> {
++  ensureProviderAvailable({ embeddings: false });
++  return withQuiet(() => callClaude({system: input.system, messages: [{role: "user", content: input.prompt}], maxTokens: input.maxTokens}));
++}

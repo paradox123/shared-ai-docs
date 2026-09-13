@@ -1,0 +1,77 @@
+
+> contextual-llm-wiki@0.1.0 check
+> npm run typecheck && npm test && npm run test:upstream
+
+
+> contextual-llm-wiki@0.1.0 typecheck
+> ./wiki-node node_modules/typescript/bin/tsc
+
+
+> contextual-llm-wiki@0.1.0 test
+> ./wiki-node --test test/*.test.ts
+
+✔ preflight reports pinned runtime and refuses unavailable provider before creating a wiki (848.270625ms)
+✔ saved answer replacement invalidates dependent answers before another query (9873.806291ms)
+✔ save rejects indirect answer cycles without replacing the valid answer (5219.189708ms)
+✔ restore checks provider availability before changing active content (2681.781083ms)
+✔ managed directories cannot redirect writes through nested symlinks into sources (811.918583ms)
+✔ two original repositories compile into a shared, cited Markdown page without wiki git or embeddings (2051.798166ms)
+✔ recursive inventory reads dirty Markdown, preserves hidden docs, and excludes private, runtime, nested repos, symlinks and generated output (757.590583ms)
+✔ correction revalidates the affected concept, preserves an independent page, and unchanged maintenance does no model work (4051.266167ms)
+✔ setup probes the actual configured completion provider through the public compiler hook (559.756708ms)
+✔ QMD indexes only active wiki pages and supplies current evidence to a saved follow-up answer (3037.003833ms)
+✔ original changes are detected before sync and propagate through two saved answers (7866.355167ms)
+✔ repo withdrawal deletes dependent knowledge from active files, navigation and real QMD; readdition compiles current input (7430.446334ms)
+✔ large Markdown remains lossless through the supported compiler source path and original line mapping (1704.171459ms)
+✔ save refuses unknown or changed evidence instead of publishing unsupported knowledge (2338.121666ms)
+✔ uppercase Markdown extensions are compiled as initial Markdown input (1610.473333ms)
+✔ active publication resolves known wiki links and leaves unknown concepts as plain text (2661.066167ms)
+✔ natural language questions reuse wiki evidence before falling back to originals (2140.906083ms)
+✔ lint reports active broken links and changed page versions as open work with a failing exit (2734.479875ms)
+✔ explicit private contexts remain separate in files, search and saved answers (6465.041208ms)
+✔ a context cannot reuse another scope output directory (2095.291125ms)
+✔ concurrent writers are serialized and a mid-generation source change stays pending (5468.291791ms)
+✔ provider failure preserves pending corrections and index failure retries without recompilation (5847.812417ms)
+✔ an incomplete scan never becomes mass source withdrawal (1795.131333ms)
+✔ a context selection change during generation prevents publication under the old context (2921.529667ms)
+✔ an index failure after save is visible and later maintenance indexes the saved answer without new model calls (7078.674708ms)
+✔ an abruptly killed writer is recovered and cannot expose its stale page through query (4843.089625ms)
+✔ invalid scope configuration is rejected before it can withdraw valid knowledge (2111.284458ms)
+✔ backup restores unique saved answers with provenance and filters a smaller current context before publishing (7777.516209ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 28
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 36323.185125
+
+> contextual-llm-wiki@0.1.0 test:upstream
+> ./scripts/verify-upstream.sh
+
+
+ RUN  v3.2.7 /Users/dh/worktrees/shared-ai-docs-contextual-llm-wiki/contextual-llm-wiki/.runtime/compiler
+
+ ✓ test/source-selection.test.ts (15 tests) 32ms
+ ✓ test/compile-source-deletion-reconciliation.test.ts (3 tests) 82ms
+ ✓ test/sdk/create-wiki-root.test.ts (2 tests) 27ms
+ ✓ test/freshness.test.ts (15 tests) 10ms
+ ✓ test/provider-codex-agent.test.ts (19 tests) 4575ms
+ ✓ test/utils/provider-guard.test.ts (5 tests) 2ms
+
+ Test Files  6 passed (6)
+      Tests  59 passed (59)
+   Start at  16:04:26
+   Duration  7.40s (transform 606ms, setup 0ms, collect 1.64s, tests 4.73s, environment 0ms, prepare 187ms)
+
+
+OpenSpec strict validation: Change 'integrate-contextual-llm-wiki' is valid (2026-09-12).
+Prettier: all matched source/test files use Prettier code style.
+Pinned upstream patch: git apply --reverse --check passed.
+git diff --check: passed after removing trailing whitespace in copied AGENTS.md and blank patch context lines.
+
+Obsidian follow-up (2026-09-12): actual entry → saved synthesis → original source navigation passed; three JPEG screenshots recorded.
+Post-navigation public lint/status: ok, no review or pending work; original hashes unchanged.
+OpenSpec strict validation and git diff --check after A10 evidence update: passed.
+No application code changed during this UI follow-up; prior 28 integration / 59 upstream test results remain applicable.
