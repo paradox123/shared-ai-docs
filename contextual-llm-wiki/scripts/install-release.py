@@ -157,7 +157,7 @@ def install(candidate, args):
     with candidate.check('typecheck'):
         candidate.command('typecheck', ['npm', 'run', 'typecheck'], cwd=wrapper, env=env)
     with candidate.check('upstream-tests'):
-        required_tests(wrapper, compiler, 'upstream')
+        tests = required_tests(wrapper, compiler, 'upstream')
         result_path = candidate.root / 'logs/upstream-results.json'
         candidate.command('upstream-tests', [str(wrapper / 'scripts/verify-upstream.sh'),
                                             '--reporter=json', '--outputFile=' + str(result_path)],
@@ -168,19 +168,39 @@ def install(candidate, args):
                 or results.get('numPassedTests') != count
                 or results.get('numPendingTests') != 0 or results.get('numTodoTests') != 0):
             raise RuntimeError('Required upstream tests missing, pending or failed')
+        executed = {Path(result['name']).resolve(): result for result in results.get('testResults', [])}
+        for test in tests:
+            result = executed.get((compiler / test).resolve(), {})
+            assertions = result.get('assertionResults', [])
+            if (result.get('status') != 'passed' or not assertions
+                    or any(assertion.get('status') != 'passed' for assertion in assertions)):
+                raise RuntimeError(f'Required upstream test not fully executed: {test}')
         candidate.report['checks']['upstream-tests']['testsPassed'] = count
     with candidate.check('integration-tests'):
         tests = required_tests(wrapper, wrapper, 'integration')
         fixtures = candidate.root / 'fixtures'
         fixtures.mkdir()
+        # Inherited Node test filters can silently remove scenarios within a file.
+        test_env = {key: value for key, value in env.items() if key != 'NODE_OPTIONS'}
+        events_path = candidate.root / 'logs/integration-events.jsonl'
         result = candidate.command('integration-tests', [str(wrapper / 'wiki-node'), '--test',
-                                   '--test-reporter=tap', *tests], cwd=wrapper,
-                                   env={**env, 'WIKI_TEST_ROOT': str(fixtures)})
+                                   '--test-reporter=tap', '--test-reporter-destination=stdout',
+                                   '--test-reporter=' + str(wrapper / 'scripts/report-tests.mjs'),
+                                   '--test-reporter-destination=' + str(events_path), *tests], cwd=wrapper,
+                                   env={**test_env, 'WIKI_TEST_ROOT': str(fixtures)})
         summary = {name: int(value) for name, value in re.findall(
             r'^# (tests|pass|fail|cancelled|skipped|todo) (\d+)$', result, re.MULTILINE)}
         if (summary.get('tests', 0) <= 0 or summary.get('pass') != summary.get('tests')
                 or any(summary.get(name) != 0 for name in ('fail', 'cancelled', 'skipped', 'todo'))):
             raise RuntimeError('Required integration tests missing, pending or failed')
+        events = [json.loads(line) for line in events_path.read_text().splitlines()]
+        executed = {Path(event['file']).resolve() for event in events
+                    if event.get('file') and event.get('event') == 'test:pass'
+                    and event.get('type') == 'test' and not event.get('skip') and not event.get('todo')
+                    and (wrapper / event['name']).resolve() != Path(event['file']).resolve()}
+        for test in tests:
+            if (wrapper / test).resolve() not in executed:
+                raise RuntimeError(f'Required integration test not executed: {test}')
         candidate.report['checks']['integration-tests']['testsPassed'] = summary['pass']
     with candidate.check('integrity'):
         if dependency_inputs(compiler) != candidate.report['dependencyInputs']:

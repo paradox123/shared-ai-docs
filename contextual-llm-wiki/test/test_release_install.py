@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import shutil
 import sys
 import tempfile
 import unittest
@@ -25,10 +26,11 @@ class ReleaseInstallTests(unittest.TestCase):
                             html_url='https://github.com/atomicstrata/llm-wiki-compiler/releases/tag/v1.3.0')
         self.destination = self.root / 'candidate'
         self.env = {}
+        self.installer_base = BASE
 
     def install(self, *args):
         result = subprocess.run(
-            [sys.executable, str(BASE / 'scripts/install-release.py'), '--release', 'v1.3.0',
+            [sys.executable, str(self.installer_base / 'scripts/install-release.py'), '--release', 'v1.3.0',
              '--destination', str(self.destination), *args],
             env={**os.environ, 'PATH': str(self.bin) + os.pathsep + os.environ['PATH'],
                  'RELEASE_RESPONSE': json.dumps(self.release), **self.env},
@@ -137,6 +139,61 @@ class ReleaseInstallTests(unittest.TestCase):
         result = self.install('--node', str(self.root / 'missing-node'))
         self.assertIn('active installation', result['error'])
         self.assertFalse(self.destination.exists())
+
+    def test_excluded_upstream_required_file_blocks_eligibility(self):
+        repo = self.root / 'upstream'
+        subprocess.run(['git', 'clone', '-q', '--shared', str(BASE / '.runtime/compiler'), str(repo)],
+                       check=True, capture_output=True)
+        config = repo / 'vitest.config.ts'
+        config.write_text(config.read_text().replace('exclude: [', 'exclude: ["test/freshness.test.ts",'))
+        subprocess.run(['git', '-C', str(repo), 'add', 'vitest.config.ts'], check=True)
+        subprocess.run(['git', '-C', str(repo), '-c', 'core.hooksPath=/dev/null',
+                        '-c', 'user.name=Fixture', '-c', 'user.email=test@example.invalid',
+                        'commit', '-qm', 'exclude a required test'], check=True)
+        subprocess.run(['git', '-C', str(repo), 'tag', '-f', 'v1.3.0'], check=True, capture_output=True)
+        self.env.update(GIT_CONFIG_COUNT='1', GIT_CONFIG_KEY_0=f'url.{repo.as_uri()}.insteadOf',
+                        GIT_CONFIG_VALUE_0='https://github.com/atomicstrata/llm-wiki-compiler.git')
+        # The deliberately missing later check keeps the old implementation's red bounded.
+        source = self.wrapper_input()
+        (source / 'test/release-compatibility.test.ts').unlink()
+        result = self.install('--node', str(BASE / '.runtime/node/node_modules/node/bin/node'))
+        self.assertEqual(result['checks']['upstream-tests']['status'], 'failed')
+        self.assertIn('freshness.test.ts', result['error'])
+        self.assertEqual(result['checks']['integration-tests']['status'], 'pending')
+
+    def wrapper_input(self):
+        source = self.root / 'wrapper-input'
+        source.mkdir()
+        for name in ('src', 'scripts', 'test', 'patches'):
+            shutil.copytree(BASE / name, source / name, ignore=shutil.ignore_patterns('__pycache__'))
+        for name in ('compiler-release.json', 'package.json', 'package-lock.json', 'tsconfig.json', 'wiki', 'wiki-node'):
+            shutil.copy2(BASE / name, source / name)
+        self.installer_base = source
+        return source
+
+    def test_empty_required_integration_file_cannot_qualify_a_candidate(self):
+        source = self.wrapper_input()
+        (source / 'scripts/integration-tests.txt').write_text('test/support.ts\n')
+        repo = (BASE / '.runtime/compiler').resolve()
+        self.env.update(GIT_CONFIG_COUNT='1', GIT_CONFIG_KEY_0=f'url.{repo.as_uri()}.insteadOf',
+                        GIT_CONFIG_VALUE_0='https://github.com/atomicstrata/llm-wiki-compiler.git')
+        result = self.install('--node', str(BASE / '.runtime/node/node_modules/node/bin/node'))
+        self.assertEqual(result['checks']['integration-tests']['status'], 'failed')
+        self.assertIn('test/support.ts', result['error'])
+
+    def test_inherited_node_filter_cannot_hide_a_failing_required_scenario(self):
+        source = self.wrapper_input()
+        (source / 'scripts/integration-tests.txt').write_text('test/filter-required.test.ts\n')
+        (source / 'test/filter-required.test.ts').write_text(
+            'import { test } from "node:test";\n'
+            'test("required scenario", () => { throw Error("must actually execute"); });\n')
+        repo = (BASE / '.runtime/compiler').resolve()
+        self.env.update(GIT_CONFIG_COUNT='1', GIT_CONFIG_KEY_0=f'url.{repo.as_uri()}.insteadOf',
+                        GIT_CONFIG_VALUE_0='https://github.com/atomicstrata/llm-wiki-compiler.git',
+                        NODE_OPTIONS='--test-name-pattern=does-not-exist')
+        result = self.install('--node', str(BASE / '.runtime/node/node_modules/node/bin/node'))
+        self.assertEqual(result['checks']['integration-tests']['status'], 'failed')
+        self.assertIn('must actually execute', (self.destination / 'logs/integration-tests.log').read_text())
 
 
 if __name__ == '__main__':
