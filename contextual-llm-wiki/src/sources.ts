@@ -21,33 +21,21 @@ const matches = (file: string, patterns: string[] = []) =>
   patterns.some((p) => minimatch(file, p, { dot: true, nocase: true }));
 export async function inventory(config: any, includeText = false) {
   const sources: Record<string, Source> = {},
-    general: any[] = [],
-    privateReports: any[] = [],
+    repositories: any[] = [],
     commonDirs = new Set();
   for (const repo of config.repos) {
-    const reports: any[] = [];
-    for (const scope of ["general", "private"]) {
-      const patterns =
-        scope === repo.scope
-          ? repo.include
-          : scope === "private"
-            ? repo.privateInclude
-            : [];
-      if (!patterns?.length) continue;
-      const report: any = {
-        id: repo.id,
-        root: repo.root,
-        scope,
-        include: patterns,
-        exclude: scope === repo.scope ? repo.exclude : [],
-        count: 0,
-        missing: false,
-        excluded: [],
-        zones: {},
-      };
-      reports.push(report);
-      (scope === "private" ? privateReports : general).push(report);
-    }
+    const report: any = {
+      id: repo.id,
+      root: repo.root,
+      include: [...repo.include, ...repo.privateInclude],
+      exclude: repo.exclude,
+      count: 0,
+      missing: false,
+      excluded: [],
+      zones: {},
+    };
+    const reports = [report];
+    repositories.push(report);
     let rootStat;
     try {
       rootStat = await lstat(repo.root);
@@ -132,7 +120,6 @@ export async function inventory(config: any, includeText = false) {
               (z) => relative.startsWith(z + "/"),
             );
             if (zone) r.zones[zone] = (r.zones[zone] || 0) + 1;
-            if (r.scope !== (config.scope || "general")) continue;
             const text = await readFile(file, "utf8"),
               id = repo.id + "/" + relative;
             sources[id] = {
@@ -153,13 +140,9 @@ export async function inventory(config: any, includeText = false) {
   const report = {
     ok: true,
     context: config.context,
-    scope: config.scope || "general",
+    scope: config.scope,
     selectedSources: Object.keys(sources).length,
-    general,
-    private: privateReports.map(({ excluded, ...r }) => ({
-      ...r,
-      excludedCount: excluded.length,
-    })),
+    repositories,
     technicalExclusions: [...excludedNames],
     excludedCheckouts: config.excludedCheckouts || [],
   };

@@ -1,11 +1,7 @@
 import path from "node:path";
 import { readFile } from "node:fs/promises";
 import { json, hash } from "./storage.ts";
-export function initialConfig(
-  vault: string,
-  output: string,
-  scope = "general",
-) {
+export function initialConfig(vault: string, output: string, scope = "common") {
   const roots = {
     "vault-root": ".",
     "meeting-assistant": "_ops/meeting-assistant",
@@ -25,7 +21,7 @@ export function initialConfig(
     repos: Object.entries(roots).map(([id, root]) => ({
       id,
       root: path.resolve(vault, root),
-      scope: id === "private" ? "private" : "general",
+      domain: id === "private" ? "private" : "professional",
       include:
         id === "vault-root"
           ? [
@@ -38,8 +34,7 @@ export function initialConfig(
               "Projects/**/*.md",
             ]
           : ["**/*.md"],
-      exclude: id === "vault-root" ? ["Projects/Private/**"] : [],
-      privateInclude: id === "vault-root" ? ["Projects/Private/**/*.md"] : [],
+      exclude: [],
     })),
     excludedCheckouts: [
       "_shared/shared-ai-docs-ticket-08",
@@ -60,8 +55,11 @@ export async function loadConfig(file: string) {
     !Array.isArray(c.repos)
   )
     throw Error("Invalid context configuration");
-  c.scope ||= "general";
-  if (!["general", "private"].includes(c.scope)) throw Error("Invalid scope");
+  c.scope ||= "common";
+  if (c.scope !== "common")
+    throw Error(
+      "Legacy scope: create a common configuration with a fresh output; existing knowledge requires verified migration",
+    );
   c.output = path.resolve(path.dirname(file), c.output);
   const ids = new Set();
   for (const r of c.repos) {

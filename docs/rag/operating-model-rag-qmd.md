@@ -34,13 +34,15 @@ python3 scripts/sync-qmd-collections.py
 python3 scripts/sync-qmd-collections.py --apply
 ```
 
-Der Helper veraendert keine bestehende Collection mit abweichendem Pfad oder Pattern. Ein Konflikt blockiert die Wartung und muss bewusst geloest werden. Die private Collection ist nur ueber expliziten Private-Scope erreichbar und gehoert nicht zum generischen `all`-Scope.
+Der Helper veraendert keine bestehende Collection mit abweichendem Pfad oder Pattern. Ein Konflikt blockiert die Wartung und muss bewusst geloest werden. Der bisherige Quellen-Collection-Bestand verwendet noch einen getrennten Private-Scope. Das ist ein historischer Routingstand, keine fachliche Zugriffsregel für das gemeinsame Wiki gemäß ADR 0010; seine produktive Ablösung gehört zu den Migrationstickets 02–04.
 
-Jedes echte verschachtelte Git-Repository wird von seinem Repository-Root mit `**/*.md` indexiert. Dadurch sind README-, OpenSpec-, Skill-, Docs- und ADR-Markdown gemeinsam abgedeckt. Fuer von QMD standardmaessig uebersprungene versteckte Verzeichnisse und `vendor`-Verzeichnisse gibt es bei vorhandenem getracktem Markdown explizite Zusatz-Collections. Der Vault-Root selbst verwendet eine nicht-rekursive Top-Level-Collection plus explizite Collections fuer seine eigenen Inhaltszonen, damit verschachtelte Repositories nicht doppelt indexiert werden und `private` nicht in den generischen `all`-Scope gelangt.
+Jedes echte verschachtelte Git-Repository wird von seinem Repository-Root mit `**/*.md` indexiert. Dadurch sind README-, OpenSpec-, Skill-, Docs- und ADR-Markdown gemeinsam abgedeckt. Fuer von QMD standardmaessig uebersprungene versteckte Verzeichnisse und `vendor`-Verzeichnisse gibt es bei vorhandenem getracktem Markdown explizite Zusatz-Collections. Der Vault-Root selbst verwendet eine nicht-rekursive Top-Level-Collection plus explizite Collections fuer seine eigenen Inhaltszonen, damit verschachtelte Repositories nicht doppelt indexiert werden und die ursprüngliche getrennte Quellenauswahl abgebildet bleibt.
 
 ## Standard-Retrieval
 
-Agenten verwenden QMD direkt:
+Für gepflegtes Wiki-Wissen verwenden Agenten `wiki query --config <gemeinsame-konfiguration> --question <frage>`. Dieser Einstieg prüft Originalstände und fachliche Relevanz. Persönliche Quellen sind reguläre Evidenz; ausdrückliche Aufgabenbegrenzungen werden durch `--repo`/`--source` einschließlich transitiver Abhängigkeiten überprüft. Sie dürfen nicht allein aus dem Domainnamen abgeleitet werden. Die gemeinsame Wiki-Collection ist regulär in QMD enthalten; die Aktivierung des produktiven gemeinsamen Bestands steht noch aus.
+
+Für direktes Quellenretrieval bleibt QMD verfügbar:
 
 ```bash
 qmd status

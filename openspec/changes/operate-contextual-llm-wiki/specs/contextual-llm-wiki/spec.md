@@ -33,6 +33,12 @@ The integration MUST identify source membership by stable repository identifiers
 - **THEN** the private-domain sources participate in the common wiki while the unselected clone does not
 - **AND** task-relevant evidence may link private-domain and other selected sources without special private-mode approval
 
+#### Scenario: Explicit task evidence limits include transitive sources
+- **WHEN** a managed query, search or draft save supplies explicit repo or source limits
+- **THEN** every evidence page and all its transitive page/source dependencies must lie within those limits
+- **AND** source fallbacks obey the same limits before model selection; prose instructions alone do not enforce a limit
+- **AND** invalid or empty limits fail visibly instead of broadening the evidence set
+
 ### Requirement: Persistent cross-repository synthesis
 
 The integration MUST generate and maintain interlinked Markdown knowledge using the real compiler, including a useful synthesis supported by multiple selected repos. It MUST preserve provenance, distinguish synthesized conclusions from source statements, and retain relevant differences or contradictions. Valid existing pages MUST remain available across queries and sessions without recompiling all sources for each question.

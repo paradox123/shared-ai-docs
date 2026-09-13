@@ -1,0 +1,93 @@
+
+> contextual-llm-wiki@0.1.0 check
+> npm run typecheck && npm test && npm run test:upstream && npm run test:operations
+
+
+> contextual-llm-wiki@0.1.0 typecheck
+> ./wiki-node node_modules/typescript/bin/tsc
+
+
+> contextual-llm-wiki@0.1.0 test
+> ./wiki-node --test test/*.test.ts
+
+✔ preflight reports pinned runtime and refuses unavailable provider before creating a wiki (1155.564084ms)
+✔ a common context cannot silently reuse a legacy scope output directory (3856.78375ms)
+✔ saved answer replacement invalidates dependent answers before another query (18212.203042ms)
+✔ save rejects indirect answer cycles without replacing the valid answer (7824.752375ms)
+✔ restore checks provider availability before changing active content (5452.45125ms)
+✔ managed directories cannot redirect writes through nested symlinks into sources (784.567833ms)
+✔ two original repositories compile into a shared, cited Markdown page without wiki git or embeddings (2938.534292ms)
+✔ recursive inventory reads dirty Markdown, preserves hidden docs, and includes personal sources and excludes runtime, nested repos and symlinks (1131.297ms)
+✔ correction revalidates the affected concept, preserves an independent page, and unchanged maintenance does no model work (8797.370708ms)
+✔ setup probes the actual configured completion provider through the public compiler hook (868.510125ms)
+✔ QMD indexes only active wiki pages and supplies current evidence to a saved follow-up answer (5211.443583ms)
+✔ original changes are detected before sync and propagate through two saved answers (12258.852708ms)
+✔ repo withdrawal deletes dependent knowledge from active files, navigation and real QMD; readdition compiles current input (8207.436792ms)
+✔ large Markdown remains lossless through the supported compiler source path and original line mapping (2752.850292ms)
+✔ save refuses unknown or changed evidence instead of publishing unsupported knowledge (2551.018ms)
+✔ uppercase Markdown extensions are compiled as initial Markdown input (1615.598166ms)
+✔ active publication resolves known wiki links and leaves unknown concepts as plain text (3009.267625ms)
+✔ natural language questions reuse wiki evidence before falling back to originals (2196.369083ms)
+✔ lint reports active broken links and changed page versions as open work with a failing exit (4127.21525ms)
+✔ concurrent writers are serialized and a mid-generation source change stays pending (8732.381708ms)
+✔ provider failure preserves pending corrections and index failure retries without recompilation (10914.487125ms)
+✔ an incomplete scan never becomes mass source withdrawal (2492.766208ms)
+✔ a context selection change during generation prevents publication under the old context (3956.497291ms)
+✔ an index failure after save is visible and later maintenance indexes the saved answer without new model calls (9672.860875ms)
+✔ an abruptly killed writer is recovered and cannot expose its stale page through query (6298.084083ms)
+✔ invalid scope configuration is rejected before it can withdraw valid knowledge (2403.10975ms)
+✔ backup restores unique saved answers with provenance and filters a smaller current context before publishing (14347.875833ms)
+✔ initial common inventory includes eight identities and recursive personal project and meeting sources (3279.376ms)
+✔ common maintenance synthesizes related personal and project evidence and query excludes a same-term control (5229.082667ms)
+✔ explicit repository and exact-source limits exclude mixed pages, transitive answers and disallowed fallbacks (15685.043334ms)
+✔ common queries reuse valid knowledge without saving and reject stale synthesis before synchronization (13269.963917ms)
+✔ common QMD registration stays in default retrieval and leaves an unrelated collection unchanged (4879.875792ms)
+✔ an invalid model relevance choice cannot introduce unknown evidence or a saved answer (3427.699667ms)
+ℹ tests 33
+ℹ suites 0
+ℹ pass 33
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 51666.853709
+
+> contextual-llm-wiki@0.1.0 test:upstream
+> ./scripts/verify-upstream.sh
+
+
+ RUN  v3.2.7 /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/contextual-llm-wiki/.runtime/compiler
+
+ ✓ test/source-selection.test.ts (15 tests) 51ms
+ ✓ test/compile-source-deletion-reconciliation.test.ts (3 tests) 174ms
+ ✓ test/sdk/create-wiki-root.test.ts (2 tests) 28ms
+ ✓ test/freshness.test.ts (15 tests) 10ms
+ ✓ test/provider-codex-agent.test.ts (19 tests) 5197ms
+   ✓ CodexAgentProvider process boundary > adapts the compiler extraction schema to Codex strict structured output  305ms
+   ✓ CodexAgentProvider process boundary > runs an ephemeral, read-only, non-interactive exec in a cleaned throwaway cwd  316ms
+   ✓ CodexAgentProvider process boundary > bypasses PATH interpreter wrappers that would expand the child environment  307ms
+   ✓ CodexAgentProvider process boundary > rejects malformed JSON before a structured response can be consumed  338ms
+   ✓ CodexAgentProvider process boundary > validates structured last-message JSON against the requested schema  312ms
+   ✓ CodexAgentProvider process boundary > returns schema-valid structured output and cleans schema artifacts  303ms
+   ✓ CodexAgentProvider process boundary > drains unconsumed stdout without charging it to the diagnostic cap  305ms
+   ✓ CodexAgentProvider process boundary > does not charge an unread JSON event stream against final-message delivery  318ms
+   ✓ CodexAgentProvider process boundary > does not double-charge final stdout duplicated into the last-message file  308ms
+   ✓ CodexAgentProvider process boundary > keeps stderr inside the subprocess output cap  315ms
+   ✓ CodexAgentProvider process boundary > cleans its throwaway directory when Codex omits the final message  304ms
+   ✓ CodexAgentProvider process boundary > scrubs secret-shaped subprocess output from actionable failures  326ms
+ ✓ test/utils/provider-guard.test.ts (5 tests) 2ms
+
+ Test Files  6 passed (6)
+      Tests  59 passed (59)
+   Start at  11:04:10
+   Duration  8.28s (transform 977ms, setup 0ms, collect 2.66s, tests 5.46s, environment 0ms, prepare 219ms)
+
+
+> contextual-llm-wiki@0.1.0 test:operations
+> python3 -m unittest discover -s test -p test_maintenance_job.py
+
+......
+----------------------------------------------------------------------
+Ran 6 tests in 2.649s
+
+OK

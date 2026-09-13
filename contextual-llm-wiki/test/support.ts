@@ -35,7 +35,7 @@ export async function invoke(
     });
   });
 }
-export async function fixture() {
+export async function fixture(respond?: (body: any) => any) {
   const dir = await realpath(
     await mkdtemp(path.join(os.tmpdir(), "wiki-behavior-")),
   );
@@ -150,6 +150,18 @@ export async function fixture() {
           text + "\n\n" + sources.map((s) => `Beleg ^[${s}:3-3]`).join("\n\n"),
       };
     }
+    if (prompt.includes("--- RELEVANCE CANDIDATES ---")) {
+      const candidates = JSON.parse(
+        prompt.split("--- RELEVANCE CANDIDATES ---")[1],
+      );
+      message = {
+        role: "assistant",
+        content: JSON.stringify({
+          relevantIds: candidates.map((e: any) => e.id),
+        }),
+      };
+    }
+    if (respond) message = respond(body) ?? message;
     if (body.stream) {
       res.writeHead(200, { "Content-Type": "text/event-stream" });
       res.end(

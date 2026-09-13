@@ -49,7 +49,7 @@ export async function qmd(config: any, operation: string, question?: string) {
           path: root,
           pattern: "**/*.md",
           scopes: ["wiki", config.context],
-          private: config.scope === "private",
+          private: false,
         },
       ],
     });
@@ -63,13 +63,6 @@ export async function qmd(config: any, operation: string, question?: string) {
       ...env,
       QMD_COLLECTION_MANIFEST: manifest,
     });
-    if (config.scope === "private")
-      await runProcess(
-        "qmd",
-        ["collection", "exclude", collectionName(config)],
-        undefined,
-        env,
-      );
   }
   if (operation === "register") return { registered: true };
   const dbPath =
