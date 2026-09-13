@@ -6,15 +6,31 @@ const release = JSON.parse(
 export const PIN: string = release.commit;
 export const compilerRoot = new URL("../.runtime/compiler/", import.meta.url)
   .pathname;
+export function releaseIdentity() {
+  const commit = execFileSync(
+    "git",
+    ["-C", compilerRoot, "rev-parse", "HEAD"],
+    {
+      encoding: "utf8",
+    },
+  ).trim();
+  if (commit !== PIN)
+    throw Error("Compiler pin mismatch; run scripts/bootstrap.sh");
+  return {
+    ok: true,
+    repository: release.repository,
+    release: release.release,
+    commit,
+    wrapper: new URL("../", import.meta.url).pathname.replace(/\/$/, ""),
+    compilerRoot,
+    node: process.execPath,
+    runtime: process.versions.node,
+  };
+}
 export function preflight() {
   if (process.versions.node !== "24.16.0")
     throw Error("Runtime: run scripts/bootstrap.sh to install Node 24.16.0");
-  if (
-    execFileSync("git", ["-C", compilerRoot, "rev-parse", "HEAD"], {
-      encoding: "utf8",
-    }).trim() !== PIN
-  )
-    throw Error("Compiler pin mismatch; run scripts/bootstrap.sh");
+  releaseIdentity();
   const provider = process.env.LLMWIKI_PROVIDER || "codex-agent";
   process.env.LLMWIKI_PROVIDER = provider;
   process.env.LLMWIKI_OUTPUT_LANG ||= "de";

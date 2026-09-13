@@ -14,8 +14,7 @@ from urllib.parse import quote
 import uuid
 
 BASE = Path(__file__).resolve().parents[1]
-REQUIRED = ('release', 'runtime', 'checkout', 'patches', 'dependencies', 'build',
-            'typecheck', 'upstream-tests', 'integration-tests', 'integrity')
+from release_integrity import REQUIRED, runtime_digest, runtime_manifest
 
 
 class Candidate:
@@ -28,7 +27,7 @@ class Candidate:
             raise RuntimeError('Candidate destination overlaps the active installation')
         self.root.mkdir()  # Exclusive creation: never overwrite an existing installation/report.
         (self.root / 'logs').mkdir()
-        self.report = dict(schemaVersion=1, candidate=str(self.root), requestedRelease=tag,
+        self.report = dict(schemaVersion=2, candidate=str(self.root), requestedRelease=tag,
                            createdAt=datetime.now(timezone.utc).isoformat(), ok=False,
                            eligible=False, checks={name: {'status': 'pending'} for name in REQUIRED})
         self.save()
@@ -116,7 +115,7 @@ def install(candidate, args):
         shutil.copy2(BASE / name, wrapper / name)
     node_link = wrapper / '.runtime/node/node_modules/node/bin/node'
     node_link.parent.mkdir(parents=True)
-    node_link.symlink_to(node)
+    shutil.copy2(node, node_link)
     compiler = wrapper / '.runtime/compiler'
     with candidate.check('checkout'):
         candidate.command('git-init', ['git', 'init', '-q', str(compiler)])
@@ -154,13 +153,17 @@ def install(candidate, args):
         candidate.command('build', ['npm', 'run', 'build'], cwd=compiler, env=env)
         if not (compiler / 'dist/index.js').is_file():
             raise RuntimeError('Compiler build entrypoint missing')
+    (wrapper / '.runtime/operation.lock').touch()
+    qualified_tree = runtime_digest(wrapper)
+    (candidate.root / 'logs/qualified-runtime.json').write_text(
+        json.dumps(runtime_manifest(wrapper), sort_keys=True))
     with candidate.check('typecheck'):
         candidate.command('typecheck', ['npm', 'run', 'typecheck'], cwd=wrapper, env=env)
     with candidate.check('upstream-tests'):
         tests = required_tests(wrapper, compiler, 'upstream')
         result_path = candidate.root / 'logs/upstream-results.json'
         candidate.command('upstream-tests', [str(wrapper / 'scripts/verify-upstream.sh'),
-                                            '--reporter=json', '--outputFile=' + str(result_path)],
+                                            '--no-cache', '--reporter=json', '--outputFile=' + str(result_path)],
                           cwd=wrapper, env=env)
         results = json.loads(result_path.read_text())
         count = results.get('numTotalTests', 0)
@@ -205,6 +208,11 @@ def install(candidate, args):
     with candidate.check('integrity'):
         if dependency_inputs(compiler) != candidate.report['dependencyInputs']:
             raise RuntimeError('Build or checks changed upstream manifest or lockfile')
+        if runtime_digest(wrapper) != qualified_tree:
+            (candidate.root / 'logs/changed-runtime.json').write_text(
+                json.dumps(runtime_manifest(wrapper), sort_keys=True))
+            raise RuntimeError('Runtime changed during qualification; see logs/*-runtime.json')
+        candidate.report['runtimeTreeSha256'] = qualified_tree
         candidate.report['compilerBuildSha256'] = tree_digest(compiler / 'dist')
         candidate.report['wrapperSha256'] = tree_digest(wrapper, exclude={'.runtime', 'node_modules'})
         candidate.report['runtime']['sha256'] = digest(node)

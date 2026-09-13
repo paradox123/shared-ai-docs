@@ -9,7 +9,7 @@
     "test:upstream": "./scripts/verify-upstream.sh",
     "check": "npm run typecheck && npm test && npm run test:upstream && npm run test:operations && npm run test:releases",
     "test:operations": "python3 -m unittest discover -s test -p test_maintenance_job.py",
-    "test:releases": "python3 -m unittest discover -s test -p test_release_install.py"
+    "test:releases": "python3 -m unittest discover -s test -p \"test_release_*.py\""
   },
   "engines": {
     "node": "24.16.0"

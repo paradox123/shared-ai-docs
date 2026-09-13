@@ -5,7 +5,7 @@ import { withWriter } from "./lock.ts";
 import { query, search, saveDraft } from "./query.ts";
 import { setup } from "./completion.ts";
 import { status } from "./state.ts";
-import { PIN, preflight } from "./runtime.ts";
+import { PIN, preflight, releaseIdentity } from "./runtime.ts";
 import { json } from "./storage.ts";
 import { loadConfig, initialConfig } from "./config.ts";
 import { inventory } from "./sources.ts";
@@ -43,9 +43,10 @@ try {
     result = {
       ok: true,
       usage:
-        "wiki <preflight|setup|init-config|inventory|maintain|status|lint|search|query|save|source|backup|restore|migration-inventory|migrate> [--config PATH]",
+        "wiki <update|release-status|preflight|setup|init-config|inventory|maintain|status|lint|search|query|save|source|backup|restore|migration-inventory|migrate> [--config PATH]",
       guide: new URL("../README.md", import.meta.url).pathname,
     };
+  else if (command === "release-status") result = releaseIdentity();
   else if (command === "preflight") result = { ok: true, ...preflight() };
   else if (command === "init-config") {
     if (args.includes("--private"))

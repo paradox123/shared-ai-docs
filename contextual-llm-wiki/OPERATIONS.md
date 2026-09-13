@@ -54,3 +54,50 @@ Menschlicher Einstieg: `_shared/contextual-llm-wiki/common/wiki/index.md` im Dan
 Vor der Umstellung wurden die alte Automationdefinition und alle tatsächlich befüllten Altbestände gesichert. [Ticket 02](evidence/shared-wiki-02.md) dokumentiert die geprüfte Migrationsfunktion. Der produktive Übernahmebericht und Snapshot liegen im Ticket-04-Nachweis. Alte gespeicherte Antworten mit inzwischen geänderten oder entfallenen Belegen bleiben im Snapshot erhalten und werden sichtbar zurückgestellt.
 
 Frühere aktive Einstiege und Wiki-Collections dürfen erst nach überprüfter Übernahme kontrolliert abgelöst werden. Fremde QMD-Collections bleiben unangetastet. Abnahmebestände ersetzen keine Produktionsquelle. Die vollständige Konfiguration lässt sich mit `wiki init-config` gemäß [README](README.md) erzeugen; vorhandene Konfigurationen nicht blind überschreiben.
+
+## Geprüfte Releases lokal aktivieren
+
+Die Release-Aktivierung wird unabhängig von Wissenspflege und Scheduler über den
+stabilen Einstieg ausgeführt:
+
+```bash
+python3 scripts/install-release.py --release v1.3.0
+./wiki update --candidate /absoluter/pfad/aus/dem/installationsbericht
+./wiki release-status
+```
+
+Der Installer muss mit dem aktuellen Aktivierungsvertrag erneut durchlaufen sein:
+Berichte aus Ticket 01 ohne vollständigen Runtime-Hash reichen nicht. Die Auswahl
+wird installationslokal unter `.runtime/selection.json` geführt; der Aufruf ist
+jeweils dem Checkout zugeordnet, aus dem `wiki` gestartet wird. Ein Aufruf im
+Feature-Worktree schaltet dessen Einstieg um. Die produktive Pflege verwendet
+weiter den in ihrer bestehenden Definition benannten Einstieg.
+
+`release-status` lädt die ausgewählte Runtime und liefert ihren tatsächlichen
+Compiler-Commit, Release, Wrapper-Pfad, Node-Binary und Node-Version. Der
+Bootstrap-Pin im Checkout beschreibt nach Aktivierung weiterhin den Rückfallstand.
+Aktive Releases werden separat unter `.runtime/releases/` aufbewahrt. Kandidaten,
+aktive Snapshots und frühere Rückfallstände nicht manuell verändern oder löschen.
+Die Update-Ergebnisse und begrenzten künstlichen Prüfdaten liegen unter
+`.runtime/activation-runs/`; sie sind keine produktiven Wissensbestände.
+
+Die Aktivierung übernimmt keine Produktiv-Konfiguration. Der Funktionsnachweis
+prüft künstliche, von der vorherigen Runtime erzeugte Seiten und eine gespeicherte
+Antwort auf Quellenherkunft und unveränderte Weiterverwendung. Bestehende
+Wissensdaten werden dabei nicht migriert. Ein Release mit inkompatiblem
+Zustandsvertrag wird zurückgewiesen; eine künftig erforderliche Datenmigration
+benötigt zunächst eine gesicherte und rücksetzbare Implementierung.
+
+Alle betrieblichen Aufrufe laufen über `wiki`; `wiki-node` bleibt der
+Entwicklungshelfer für Typecheck und Tests. `wiki` hält für die vollständige
+Operation eine installationsweite Sperre. Ein Busy-Fehler bedeutet, dass ein
+Wiki-Aufruf oder Update läuft; nach dessen Abschluss denselben Aufruf wiederholen.
+Die Sperrdatei nicht entfernen: Die Betriebssystem-Sperre endet mit den beteiligten
+Prozessen.
+
+Eine vorläufige Umschaltung hält ihren Rückfallstand im Auswahlzustand fest.
+Schlägt der anschließende Funktionsnachweis fehl, wird die Auswahl zurückgesetzt.
+Nach einem Prozessabbruch stellt der nächste `wiki`-Aufruf die vorige Auswahl vor
+seiner eigentlichen Operation wieder her und meldet die Wiederherstellung auf
+stderr. Der fehlgeschlagene Update-Aufruf liefert Exit 1 und die weiterhin aktive
+Identität. Der unveränderte qualifizierte Kandidat kann erneut angeboten werden.

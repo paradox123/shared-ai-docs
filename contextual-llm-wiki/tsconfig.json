@@ -8,5 +8,8 @@
     "strict": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts",
+    "scripts/activation-probe.ts"
+  ]
 }

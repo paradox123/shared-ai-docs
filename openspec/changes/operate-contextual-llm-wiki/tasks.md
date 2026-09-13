@@ -58,3 +58,9 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 Daniel hat Release-Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Die erledigten Aufgaben 6.1–6.4 und ihr Kandidatenvertrag sind unter [qualify-upstream-wiki-releases](../archive/2026-09-13-qualify-upstream-wiki-releases/tasks.md) abgeschlossen und kanonisch übernommen. [Abnahme und Prüfnachweise](../../../contextual-llm-wiki/evidence/release-install-01.md).
 
 5.2/5.3 bleiben wegen Release-Erkennung, Aktivierung und Rollback offen. Der Installations-/Qualifikationsanteil ist erfüllt; diese Folgeschritte verwenden den kanonischen Kandidatenvertrag. Die offene Wissenspflege aus 4.6 bleibt ebenfalls erhalten.
+
+## 6. Release-Ticket 02
+- [x] 6.1 Vollständige Kandidatenbindung und öffentliche Ablehnung nachträglicher Änderungen nachweisen.
+- [x] 6.2 Atomare Runtime-Auswahl, Status, Prozesssperre und Fehler-/Abbruchwiederherstellung implementieren.
+- [ ] 6.3 Reale Aktivierung, erhaltene Synthesen, No-op und gezielter Aktivierungsfehler auf dem Mac nachweisen.
+- [ ] 6.4 Gesamttests, zweiachsiges Code-Review, Betriebsanleitung und Abnahme vervollständigen.
