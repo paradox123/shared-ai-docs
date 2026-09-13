@@ -14,3 +14,9 @@
 - [x] 3.1 Run direct REST/repeat/UI recovery proof, build, focused tests, full pilot regression and strict OpenSpec validation.
 - [x] 3.2 Perform standards/spec reviews and behavior-preserving refactoring; address findings and recheck relevant tests.
 - [x] 3.3 Update issue/operator guidance and requirement-by-requirement acceptance evidence with explicit limitations.
+
+## 4. Live GitHub acceptance correction
+
+- [x] 4.1 Verify recovery, immutable head, redaction and correlated Operator/PR read-back against real GitHub in an isolated private repository.
+- [x] 4.2 Verify interrupted publication adoption, bounded failure, terminal replay and successor publication against the same real repository.
+- [x] 4.3 Retain authoritative GitHub receipts, correct acceptance claims, review and validate the additional evidence.

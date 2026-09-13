@@ -48,3 +48,31 @@ Kept the pilot's JSON publication contract and PostgreSQL activity/history
 mechanisms; no new service or generic workflow abstraction was introduced.
 
 Total remaining findings: Standards **0**; Spec **0**.
+
+## Live GitHub acceptance follow-up
+
+Fixed point: `672979e` (the delivered Issue 12 implementation). Two independent
+agents reviewed the added live test, acceptance spec and real GitHub receipts.
+Unrelated README/Renovate work is excluded. No production behavior changed.
+
+### Standards
+
+Final Standards review: **0 remaining findings**. One P2 harness robustness
+finding was closed: the proof directory is now required and checked for
+writability before any GitHub call, preventing a late configuration failure
+after remote writes. Direct checks verify missing and invalid destinations fail
+before GitHub access. Both required variables are documented. Credential
+isolation, local cleanup and live body/head assertions passed review.
+
+### Spec
+
+Final Spec review: **0 findings**. Real GitHub PR #4 proves correction, immutable
+head, redaction and adoption after worker death. Two exhausted captures leave no
+running activity, PR or remote branch; the same-repository successor publishes
+PR #5. The retained proof reports `acceptancePassed=true` and unchanged `main`.
+The explicitly controlled incomplete worker/business fixture is consistent with
+Issue 12; the GitHub boundary is real.
+
+The refactoring pass kept the test at public process/HTTP/Git interfaces, reused
+existing fixture/database helpers and kept live opt-in setup local to one test.
+No generic runtime abstraction or new dependency was introduced.

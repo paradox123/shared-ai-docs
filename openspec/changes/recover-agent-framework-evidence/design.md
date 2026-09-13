@@ -60,5 +60,9 @@ while recovery is active because old binaries do not enforce its bound.
 
 ## Open Questions
 
-None. The user confirmed direct delivery on `main`. The accepted Issue 11 provider
-fixture remains the external boundary for this controlled-result acceptance.
+None. The user confirmed direct delivery on `main`. Controlled provider tests
+cover deterministic faults, but acceptance also requires actual GitHub
+authorization, push, draft creation/adoption and authoritative PR read-back.
+Use an isolated private test repository; retain its issues and draft PRs as
+reviewable evidence. The intentionally incomplete worker result remains
+controlled. Tickets 13 and 14 do not own this missing publication proof.

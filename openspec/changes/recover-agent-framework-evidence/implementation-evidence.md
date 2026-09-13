@@ -6,6 +6,35 @@ explicit terminal blocker. The user confirmed `main` as delivery branch after
 Issue 11 was merged. The original checkout was clean at `76f4c51`; unrelated wiki
 work during this session is outside this change.
 
+## Correction: real GitHub acceptance
+
+The earlier complete-acceptance claim was premature: controlled provider tests
+did not prove GitHub publication. Neither Ticket 13 (review qualification) nor
+Ticket 14 (three human identities and coexistence) explicitly owns this missing
+proof. It belongs to Issue 12 and was completed here on 2026-09-13.
+
+The new opt-in public-interface test passed against the real private repository
+[`paradox123/wpcp-evidence-recovery-20260913`](https://github.com/paradox123/wpcp-evidence-recovery-20260913).
+GitHub authenticated the actual `paradox123` human account, authorized access to
+the real repository ID, accepted Git pushes, and returned authoritative draft PR
+receipts. API/worker processes and disposable PostgreSQL ran locally. The worker
+result intentionally omits evidence, as the issue requests; the business API is
+synthetic. Neither GitHub authorization nor publication used the test provider.
+
+| Live scenario | Expected behavior | Observed result |
+| --- | --- | --- |
+| Incomplete result and bounded correction | Preserve the schema-valid original; report exact gaps and capture once without another implementation | Run `5168832f-a933-4206-938c-ea15361e159b` reports exactly response, repeat and read-back missing. Round 1 succeeds; original result, qualification and capture have separate correlated events; one implementation start. |
+| Immutable, redacted evidence | Operator and actual GitHub PR show identical evidence at the unchanged source head | [Draft PR #4](https://github.com/paradox123/wpcp-evidence-recovery-20260913/pull/4), head `cc99a805e8fec5a761a6bdaa3e3dde0017608a1c`. Local HEAD, remote Git ref, GitHub commit, PR head and intent match; one outgoing commit, clean source, unchanged branch. PR body equals Operator intent byte-for-byte. Repeated business request retains count 1; controlled canary is redacted. |
+| Worker killed after actual PR creation | Replacement adopts the existing draft without repeating implementation or capture | Worker killed at `after-provider-effect` before receipt persistence; API replaced; new worker returns `adopted=true`. Terminal replay still finds exactly one PR for the branch and one correction round. |
+| Capture exhaustion and replay | Two rounds, concrete terminal block, no active projection or external publication | Run `d518977f-c5c6-4a3b-ad75-25ec3b195802`: rounds 1 and 2 fail read-back; `publication-blocked`, exact `evidence-failed:AC1:read-back`, `exhausted=true` and concrete `requiredAction`. No running activity/attempt, no GitHub PR or remote branch. Repeating the worker leaves the execution count at two. |
+| Same-repository successor | The terminal failure releases serialization | Run `1ba82961-6dd9-43e1-94e5-b64a23ca647f` publishes [Draft PR #5](https://github.com/paradox123/wpcp-evidence-recovery-20260913/pull/5), head `7ac0fa8c49fa00b8cde1c34f78bff7be228e0265`, in that same GitHub repository. It also has one implementation/correction and no running projection. |
+
+[Retained GitHub receipts, Operator projections and events](evidence/live-github-recovery.json),
+[compact result](evidence/live-github-summary.json),
+[executed test log](evidence/live-github-tests.txt).
+The live test passed in 108.506 seconds. Both PRs remain open drafts for inspection;
+the test repository's `main` SHA is unchanged after the initial synthetic seed.
+
 ## Expected and observed behavior
 
 | Issue requirement | Expected behavior | Observed result and evidence |
@@ -54,12 +83,17 @@ inspect PostgreSQL tables to infer success.
 
 ## Scope and limitations
 
-GitHub publication uses the controlled HTTP provider backed by a real bare Git
-repository. REST calls, browser interaction, screenshot bytes, document render,
-local Git, PostgreSQL and the additional native Codex/TUI run are real. No live
-GitHub PR or merge was created by this acceptance run. Loopback evidence URLs
-belonged to disposable test servers; retained JSON and PNGs preserve the observed
-read-back after teardown. Deployed plans must provide a durable artifact surface.
+The initial regression matrix uses a controlled HTTP GitHub provider backed by a
+real bare Git repository. The additional live acceptance above closes the actual
+GitHub authorization/publication/read-back gap. REST calls, browser interaction,
+screenshot bytes, document render, local Git, PostgreSQL and the additional native
+Codex/TUI run are real. Screenshot/document combinations and native Codex remain
+covered by those earlier controlled-provider runs; Issue 12 explicitly requires
+a controlled incomplete worker result, which the live GitHub test supplies.
+Loopback business/evidence URLs belonged to disposable test servers; retained
+JSON and PNGs preserve their observations after teardown. GitHub draft text remains
+readable independently. Deployed image plans must provide a durable artifact
+surface. No merge was requested or performed.
 
 The controlled-result recovery cases do not require a model to deliberately
 omit evidence. An additional real-native run exercises the same qualification

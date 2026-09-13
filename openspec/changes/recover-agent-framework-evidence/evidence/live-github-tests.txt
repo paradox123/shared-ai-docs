@@ -1,0 +1,6 @@
+test_recovery_adoption_exhaustion_and_successor_on_real_github (tests.test_evidence_recovery_live_github.LiveGitHubEvidenceRecoveryTests.test_recovery_adoption_exhaustion_and_successor_on_real_github) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 108.506s
+
+OK

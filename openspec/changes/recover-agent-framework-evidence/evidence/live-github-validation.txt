@@ -1,0 +1,15 @@
+Follow-up validation, 2026-09-13
+
+Live test: 1 passed in 108.506 seconds (see live-github-tests.txt).
+Default discovery: 1 live test skipped; no GitHub opt-in means no remote writes.
+Proof destination validation: missing variable and invalid /dev/null/unwritable-proof both rejected before GitHub access.
+openspec validate recover-agent-framework-evidence --strict: valid.
+git diff --check: passed.
+Retained live proof: acceptancePassed=true.
+Every phase head equals its capture/PR head; capture event source equals original qualification source.
+GitHub credential and controlled-canary scan across live-github-* artifacts: no matches.
+Independent final review: Standards 0 remaining findings; Spec 0 findings.
+
+No production code changed in this follow-up. The earlier 180-case full regression
+is retained separately in regression-tests.txt; it was not represented as a fresh
+run of the added opt-in live test. The new real GitHub test was executed directly.

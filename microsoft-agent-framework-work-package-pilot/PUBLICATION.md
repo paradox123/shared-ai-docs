@@ -129,6 +129,35 @@ effect retains repository ownership; preflight and evidence rejection before
 dispatch release it. Other publication runs expose `repository-publication-busy`.
 Standalone session dispatch cannot bypass a registered publication plan.
 
+## Live GitHub acceptance
+
+Issue 12 requires an actual GitHub publication proof in addition to controlled
+provider fault tests. `tests/test_evidence_recovery_live_github.py` runs real
+GitHub authorization, push, draft creation, recovery after worker death, PR
+read-back, capture exhaustion and successor publication. The deliberately
+incomplete worker result and idempotent business API remain controlled.
+
+Provision a new empty private repository owned by the authenticated `gh` user,
+with a name starting `wpcp-evidence-recovery-`. The test seeds `main`, creates
+three synthetic issues and retains two open draft PRs. It refuses existing
+branches and unrelated repositories. It uses the `gh` credential store in memory
+and a checkout-local Git credential helper; tokens never enter the plan or proof.
+Docker and the existing .NET/Python test dependencies must be available.
+
+```bash
+WPCP_LIVE_GITHUB_REPOSITORY=<owner>/wpcp-evidence-recovery-<unique-run> \
+WPCP_PUBLICATION_PROOF_DIR=<absolute-evidence-directory> \
+uv run --python 3.14 --with-requirements codex-requirements.txt \
+  python -m unittest tests.test_evidence_recovery_live_github -v
+```
+
+Both environment variables are required for a live run. Without the repository
+variable, normal test discovery skips this test and performs no GitHub writes.
+The proof directory receives sanitized GitHub PR receipts and public Operator
+history, including an explicit `acceptancePassed` only after all scenarios pass.
+For a repeat run use another empty test repository; retained PRs provide the
+previous run's inspectable evidence.
+
 ## Bounded evidence recovery
 
 After the original completed result passes schema validation, the worker commits

@@ -50,6 +50,10 @@ an already dispatched external publication remains uncertain under existing poli
 - **WHEN** a numbered correction captures the trusted scenarios successfully
 - **THEN** one draft and Operator history expose the same redacted evidence/head without another implementation or branch change
 
+#### Scenario: Recovery is accepted against real GitHub
+- **WHEN** Issue 12 is accepted using a controlled incomplete worker result
+- **THEN** an isolated real GitHub repository proves authorized push, draft creation and adoption after interruption, head-bound redacted PR/Operator read-back, and successor publication after terminal capture exhaustion; a simulated provider alone does not complete acceptance
+
 #### Scenario: Recovery limit is reached
 - **WHEN** both capture rounds fail or are interrupted
 - **THEN** the run is terminally blocked, no active agent projection remains, a successor can start, and repeating the command performs no more capture

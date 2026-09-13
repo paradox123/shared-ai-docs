@@ -1,0 +1,110 @@
+{
+  "observedAt": "2026-09-13T15:44:04.937637+00:00",
+  "repository": {
+    "id": 1368533198,
+    "full_name": "paradox123/wpcp-evidence-recovery-20260913",
+    "html_url": "https://github.com/paradox123/wpcp-evidence-recovery-20260913",
+    "private": true
+  },
+  "actor": {
+    "id": 11044764,
+    "login": "paradox123"
+  },
+  "controlledSurfaces": [
+    "intentionally incomplete worker",
+    "synthetic business API"
+  ],
+  "realSurfaces": [
+    "GitHub authorization",
+    "Git push",
+    "GitHub draft PR",
+    "Operator HTTP",
+    "PostgreSQL"
+  ],
+  "acceptancePassed": true,
+  "baseUnchanged": true,
+  "scenarios": {
+    "recovered": {
+      "runId": "5168832f-a933-4206-938c-ea15361e159b",
+      "state": "draft-published",
+      "head": "cc99a805e8fec5a761a6bdaa3e3dde0017608a1c",
+      "captureNumber": 1,
+      "captureState": "succeeded",
+      "missingPhases": [
+        {
+          "phase": "response",
+          "criterion": "AC1"
+        },
+        {
+          "phase": "repeat",
+          "criterion": "AC1"
+        },
+        {
+          "phase": "read-back",
+          "criterion": "AC1"
+        }
+      ],
+      "activeProjections": 0,
+      "eventCount": 18,
+      "prUrl": "https://github.com/paradox123/wpcp-evidence-recovery-20260913/pull/4",
+      "draft": true,
+      "implementationStarts": 1,
+      "adopted": true
+    },
+    "exhausted": {
+      "runId": "d518977f-c5c6-4a3b-ad75-25ec3b195802",
+      "state": "publication-blocked",
+      "head": "90c89d1ca7e77ec691d3452b99f1e818e01373cf",
+      "captureNumber": 2,
+      "captureState": "failed",
+      "missingPhases": [
+        {
+          "phase": "response",
+          "criterion": "AC1"
+        },
+        {
+          "phase": "repeat",
+          "criterion": "AC1"
+        },
+        {
+          "phase": "read-back",
+          "criterion": "AC1"
+        }
+      ],
+      "activeProjections": 0,
+      "eventCount": 19,
+      "blocker": "evidence-failed:AC1:read-back",
+      "requiredAction": "Restore the failed evidence surface and submit a new authorized run; automatic capture is exhausted.",
+      "captureExecutionsAfterReplay": 2,
+      "githubPullCount": 0,
+      "remoteBranchPresent": false
+    },
+    "successor": {
+      "runId": "1ba82961-6dd9-43e1-94e5-b64a23ca647f",
+      "state": "draft-published",
+      "head": "7ac0fa8c49fa00b8cde1c34f78bff7be228e0265",
+      "captureNumber": 1,
+      "captureState": "succeeded",
+      "missingPhases": [
+        {
+          "phase": "response",
+          "criterion": "AC1"
+        },
+        {
+          "phase": "repeat",
+          "criterion": "AC1"
+        },
+        {
+          "phase": "read-back",
+          "criterion": "AC1"
+        }
+      ],
+      "activeProjections": 0,
+      "eventCount": 17,
+      "prUrl": "https://github.com/paradox123/wpcp-evidence-recovery-20260913/pull/5",
+      "draft": true,
+      "implementationStarts": 1,
+      "adopted": false
+    }
+  }
+}
