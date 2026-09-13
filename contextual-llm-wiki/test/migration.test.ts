@@ -774,7 +774,7 @@ test("migration preserves fenced and inline Markdown code examples byte for byte
       (p: any) => p.kind === "concept",
     );
     const example =
-      "Inline: `[guide](guide.md)`.\n\n```markdown\n[guide](guide.md)\n[[Beispiel]]\n```\n\n    [guide](guide.md)\n";
+      'Inline: `[guide](guide.md)`.\n\n```markdown\n[guide](guide.md)\n[[Beispiel]]\n```\n\n    [guide](guide.md)\n\nJavaScript: `value.replace(/x/g, "$&")` und `$$` sowie `$\'` und `$``.\n';
     const draft = path.join(f.dir, "example.json");
     await writeFile(
       draft,

@@ -33,7 +33,7 @@ export function mapMarkdownProse(
   const { masked, saved } = maskCode(body);
   let result = transform(masked);
   for (const [token, original] of saved)
-    result = result.replaceAll(token, original);
+    result = result.replaceAll(token, () => original);
   return result;
 }
 
