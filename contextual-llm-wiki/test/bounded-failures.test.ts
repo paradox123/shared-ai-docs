@@ -438,3 +438,48 @@ test("a shared index failure reports completed content and the remaining retriev
     await f.close();
   }
 });
+
+test("an unclassified compiler rejection alongside a bounded failure cannot lose pending sources", async () => {
+  let oversized = false;
+  const f = await fixture((body) => {
+    const prompt = body.messages.map((m: any) => m.content).join("\n");
+    if (oversized && !body.tools && prompt.includes('about "Kontrollseite"'))
+      return {
+        role: "assistant",
+        content: "# Kontrollseite\n\n" + "Big page. ".repeat(150000),
+      };
+  });
+  try {
+    await writeFile(
+      path.join(f.dir, "beta/control.md"),
+      "# Kontrollseite\n\nKontrolle ALT.\n",
+    );
+    assert.equal((await f.run("maintain")).ok, true);
+    await writeFile(
+      path.join(f.dir, "alpha/README.md"),
+      "# Freigabe\n\nAlpha verlangt vier Freigaben.\n",
+    );
+    await writeFile(
+      path.join(f.dir, "beta/control.md"),
+      "# Kontrollseite\n\nKontrolle NEU.\n",
+    );
+    oversized = true;
+    f.fail((b) => b.tools && JSON.stringify(b).includes("Alpha verlangt vier"));
+    const failed = await f.run("maintain");
+    assert.equal(failed.ok, false);
+    assert.equal(failed.qmdSafe, false, JSON.stringify(failed));
+    assert.match(failed.error, /floor:deny/);
+    assert.ok(
+      (await f.run("status")).changes.changed.includes("beta/control.md"),
+    );
+    oversized = false;
+    f.fail(false);
+    assert.equal((await f.run("maintain")).ok, true);
+    assert.ok(
+      (await f.run("search", "--question", "Kontrollseite")).results.length,
+    );
+    assert.equal((await f.run("maintain")).noop, true);
+  } finally {
+    await f.close();
+  }
+});

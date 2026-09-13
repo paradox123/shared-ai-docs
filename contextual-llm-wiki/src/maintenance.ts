@@ -146,8 +146,17 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       !Number.isInteger(result.deleted)
     )
       throw Error("Incomplete compiler result contract");
-    if (result.errors.length && !failures.length)
-      throw Error(result.errors.join("; "));
+    const unclassified = result.errors.filter(
+      (error) =>
+        !failures.some(
+          (failure) =>
+            error === failure.error ||
+            (failure.phase === "extract" &&
+              error === "No concepts extracted from " + failure.id),
+        ),
+    );
+    if (unclassified.length)
+      throw Error("Unclassified compiler failure: " + unclassified.join("; "));
     if (
       failures.some(
         (f) =>
