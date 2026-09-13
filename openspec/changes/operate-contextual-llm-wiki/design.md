@@ -46,7 +46,7 @@ Bestehende generierte Seiten und gespeicherte Gesprächssynthesen werden vor Mig
 
 ## Risks / Trade-offs
 
-Der Vollimport kann lange dauern und wurde noch nicht ausgeführt. Die gemeinsame CLI samt ersetzten Privacy-Szenarien ist mit Ticket 01 akzeptiert; die Übernahme bestehender Ausgaben steht aus. Die sichere Fortsetzung nach Teilfehlern ist noch nicht implementiert. Mac-Verfügbarkeit und Provider-Anmeldung begrenzen die lokale Ausführung. Gemeinsame Wissensbildung bedeutet keine automatische fachliche Relevanz jeder Quelle für jede Frage.
+Der Vollimport kann lange dauern und wurde noch nicht ausgeführt. Die gemeinsame CLI samt ersetzten Privacy-Szenarien ist mit Ticket 01 akzeptiert; die Übernahme bestehender Ausgaben steht aus. Die sichere Fortsetzung nach Teilfehlern ist mit Ticket 03 isoliert implementiert und verifiziert; die produktive Aktivierung bleibt offen. Mac-Verfügbarkeit und Provider-Anmeldung begrenzen die lokale Ausführung. Gemeinsame Wissensbildung bedeutet keine automatische fachliche Relevanz jeder Quelle für jede Frage.
 
 ## Migration Plan
 

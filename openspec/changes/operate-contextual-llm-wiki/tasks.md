@@ -19,13 +19,16 @@
 - [x] 4.1 Quellenpartition und bisherige Privacy-Szenarien durch gemeinsame Wissensbildung und explizite Aufgabenbegrenzung ersetzen; Rot→Grün über die öffentliche CLI.
 - [ ] 4.2 Bestehende Wissensseiten und gespeicherte Synthesen sichern und samt überprüfter Provenienz in gemeinsamen Zustand/Ausgabe überführen; keine stillen Überschreibungen oder Verluste.
 - [x] 4.3 Gemeinsames QMD-Routing ohne aus dem Domainnamen abgeleitete Ausschlüsse herstellen; betroffene kanonische Retrieval-Regeln abgleichen.
-- [ ] 4.4 Begrenzte Pflegefehler isolieren, sichere unabhängige Arbeit fortsetzen und echte Teilfehlerberichte nachweisen.
+- [x] 4.4 Begrenzte Pflegefehler isolieren, sichere unabhängige Arbeit fortsetzen und echte Teilfehlerberichte nachweisen.
 - [ ] 4.5 Live-Job und Betriebsreferenzen auf die gemeinsame Konfiguration umstellen; bisherigen Zeitplan beibehalten.
 - [ ] 4.6 Echte gemeinsame Synthese aus persönlichem und anderem Tätigkeitsbereich, Relevanzkontrolle, Quelle–Antwort-Nachpflege, Vollimport und No-op prüfen; Abnahme aktualisieren.
 
-[Ticket-01-Abnahme](../../../contextual-llm-wiki/evidence/shared-wiki-01.md): gemeinsame Quellen-/Query-Funktion und QMD-Routing isoliert verifiziert, einschließlich echter repoübergreifender Konzeptseite, Relevanzkontrolle, expliziter transitiver Grenzen, Aktualitätsprüfung und No-op. Damit ist der begrenzte Synthese-/Query-Anteil aus 4.6 nachgewiesen; 4.6 bleibt wegen Vollimport und produktiver Abnahme offen. 4.2, 4.4 und 4.5 gehören zu Tickets 02–04. Bestehende getrennte Ausgaben und Live-Job wurden nicht umgestellt; nicht archivieren.
+[Ticket-01-Abnahme](../../../contextual-llm-wiki/evidence/shared-wiki-01.md): gemeinsame Quellen-/Query-Funktion und QMD-Routing isoliert verifiziert, einschließlich echter repoübergreifender Konzeptseite, Relevanzkontrolle, expliziter transitiver Grenzen, Aktualitätsprüfung und No-op. Damit ist der begrenzte Synthese-/Query-Anteil aus 4.6 nachgewiesen; 4.6 bleibt wegen Vollimport und produktiver Abnahme offen. 4.2 und 4.5 gehören weiterhin zu Tickets 02 und 04; 4.4 ist mit Ticket 03 verifiziert. Bestehende getrennte Ausgaben und Live-Job wurden nicht umgestellt; nicht archivieren.
 
 
 ## Akzeptierter Abschluss von Ticket 01
 
-Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Sein Wiki-Delta wurde in [share-contextual-wiki-sources](../archive/2026-09-13-share-contextual-wiki-sources/proposal.md) separat abgeschlossen und kanonisch übernommen. Die hier noch offenen Aufgaben 4.2, 4.4, 4.5 und der Produktionsanteil von 4.6 bleiben unverändert den Tickets 02–04 zugeordnet.
+Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Sein Wiki-Delta wurde in [share-contextual-wiki-sources](../archive/2026-09-13-share-contextual-wiki-sources/proposal.md) separat abgeschlossen und kanonisch übernommen. Die damals noch offenen Aufgaben 4.2, 4.4, 4.5 und der Produktionsanteil von 4.6 bleiben unverändert den Tickets 02–04 zugeordnet.
+
+
+[Ticket-03-Abnahme](../../../contextual-llm-wiki/evidence/bounded-failures-03.md): Begrenzte Fehler, transitive Sperren, unabhängige Veröffentlichung/QMD-Aktualisierung, strikte Helper-Verträge, Reparatur und No-op über die öffentliche CLI verifiziert. Der Live-Job wurde nicht umgestellt; Aufgaben 4.2, 4.5 und der Produktionsanteil von 4.6 bleiben offen.

@@ -38,3 +38,8 @@ Die [gesonderte Ticket-01-Abnahme](../../../contextual-llm-wiki/evidence/shared-
 ## Akzeptierter Abschluss von Ticket 01
 
 Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Sein Wiki-Delta wurde in [share-contextual-wiki-sources](../archive/2026-09-13-share-contextual-wiki-sources/proposal.md) separat abgeschlossen und kanonisch übernommen. Die hier noch offenen Aufgaben 4.2, 4.4, 4.5 und der Produktionsanteil von 4.6 bleiben unverändert den Tickets 02–04 zugeordnet.
+
+
+## Ergänzung Ticket 03
+
+[Abnahme begrenzter Pflegefehler](../../../contextual-llm-wiki/evidence/bounded-failures-03.md): unabhängige Inhalte werden trotz tatsächlicher Provider-/Validierungsfehler aktualisiert; betroffene Konzepte und Antworten bleiben gesperrt. Die dortigen Nachweise ergänzen die historische Betriebsabnahme oben und belegen keine produktive Umstellung oder vollständige Embedding-Pflege.
