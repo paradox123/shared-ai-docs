@@ -1,0 +1,31 @@
+{
+  "code": 0,
+  "ok": true,
+  "engine": "qmd",
+  "answer": "Das persönliche Portfolio hat heute **2.000 Euro frei verfügbare Reserve**. Erwartete, noch nicht eingegangene Zahlungen zählen nicht dazu. [concepts/abgrenzung-erwarteter-zahlungen-von-heutiger-liquidität]\n\nDie Reserve soll laufende Ausgaben **bis Oktober** decken. Ob sie tatsächlich reicht, ist ohne Angaben zu Höhe und Zeitpunkt der Ausgaben nicht bestimmbar. [concepts/zeitliche-ausgabendeckung-durch-reserven]",
+  "evidence": [
+    {
+      "id": "concepts/abgrenzung-erwarteter-zahlungen-von-heutiger-liquidität",
+      "kind": "concept",
+      "sourceVersions": {
+        "private/README.md": "43052006006b4b7dcf5b6f9f44b03a3d4675f845815c38f76e65d1e181fe5692"
+      },
+      "pageVersions": {},
+      "title": "Abgrenzung erwarteter Zahlungen von heutiger Liquidität",
+      "hash": "4ac0d2fcc79d5e80b9ba991be751ab8c7c9c2efd0d2952fe013e4be7381b144b"
+    },
+    {
+      "id": "concepts/zeitliche-ausgabendeckung-durch-reserven",
+      "kind": "concept",
+      "sourceVersions": {
+        "private/README.md": "43052006006b4b7dcf5b6f9f44b03a3d4675f845815c38f76e65d1e181fe5692"
+      },
+      "pageVersions": {},
+      "title": "Zeitliche Ausgabendeckung durch Reserven",
+      "hash": "0966b6530b9e852e5398203b74820703e131f37122d9d928ec634879c3239dc1"
+    }
+  ],
+  "review": [],
+  "fallback": false,
+  "stderr": ""
+}

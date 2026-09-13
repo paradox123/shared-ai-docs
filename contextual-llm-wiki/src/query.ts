@@ -1,27 +1,34 @@
 import path from "node:path";
+import { evidenceEligibility, type EvidenceLimits } from "./evidence-limits.ts";
 import { readFile } from "node:fs/promises";
 import { checkConfig } from "./config.ts";
 import { qmd, collectionName } from "./qmd.ts";
 import { entry, renderAnswer, normalizeLinks } from "./publish.ts";
-import { answer } from "./completion.ts";
+import { answer, relevantEvidence } from "./completion.ts";
 import { readState, saveState, reviewPages } from "./state.ts";
 import { scan } from "./sources.ts";
 import { json, atomic, hash } from "./storage.ts";
-export async function query(config: any, question: string, save?: string) {
+export async function query(
+  config: any,
+  question: string,
+  save?: string,
+  limits: EvidenceLimits = {},
+) {
   if (!question?.trim()) throw Error("--question is required");
   const state = await readState(config),
     sources = await scan(config),
     review = await reviewPages(config, state, sources);
+  const eligible = evidenceEligibility(config, state, sources, limits);
   const ineligible = new Set(review.map((p) => p.id));
   const results = await qmd(config, "search", question);
-  const evidence: any[] = [];
+  let evidence: any[] = [];
   for (const hit of results) {
     const uri = hit.file || hit.filepath || hit.displayPath;
     const prefix = "qmd://" + collectionName(config) + "/";
     if (!uri?.startsWith(prefix)) continue;
     const id = uri.slice(prefix.length).replace(/\.md$/, "");
     const page = state.pages[id];
-    if (!page || ineligible.has(id)) continue;
+    if (!page || ineligible.has(id) || !eligible.page(id)) continue;
     evidence.push({
       ...page,
       body: await readFile(
@@ -30,10 +37,14 @@ export async function query(config: any, question: string, save?: string) {
       ),
     });
   }
+  evidence = await relevantEvidence(question, evidence);
   if (!evidence.length) {
     const terms = question.toLowerCase().match(/[\p{L}\p{N}]{3,}/gu) || [];
     for (const source of Object.values<any>(sources))
-      if (terms.some((t) => source.text.toLowerCase().includes(t))) {
+      if (
+        eligible.source(source.id) &&
+        terms.some((t) => source.text.toLowerCase().includes(t))
+      ) {
         evidence.push({
           id: "sources/" + source.id,
           hash: source.hash,
@@ -42,8 +53,8 @@ export async function query(config: any, question: string, save?: string) {
           sourceVersions: { [source.id]: source.hash },
           pageVersions: {},
         });
-        if (evidence.length >= 5) break;
       }
+    evidence = await relevantEvidence(question, evidence);
   }
   const text = await answer(question, evidence);
   await checkConfig(config);
@@ -157,10 +168,15 @@ export async function saveAnswer(
   return id;
 }
 
-export async function search(config: any, question: string) {
+export async function search(
+  config: any,
+  question: string,
+  limits: EvidenceLimits = {},
+) {
   const state = await readState(config),
     sources = await scan(config),
     review = await reviewPages(config, state, sources);
+  const eligible = evidenceEligibility(config, state, sources, limits);
   const rejected = new Set(review.map((p) => p.id));
   const hits = await qmd(config, "search", question);
   const prefix = "qmd://" + collectionName(config) + "/";
@@ -169,7 +185,7 @@ export async function search(config: any, question: string) {
     const id = file?.startsWith(prefix)
       ? file.slice(prefix.length).replace(/\.md$/, "")
       : "";
-    return state.pages[id] && !rejected.has(id);
+    return eligible.page(id) && !rejected.has(id);
   });
   return {
     ok: true,
@@ -181,10 +197,15 @@ export async function search(config: any, question: string) {
   };
 }
 
-export async function saveDraft(config: any, draftPath: string) {
+export async function saveDraft(
+  config: any,
+  draftPath: string,
+  limits: EvidenceLimits = {},
+) {
   const draft = await json(draftPath),
     state = await readState(config),
     sources = await scan(config);
+  const eligible = evidenceEligibility(config, state, sources, limits);
   if (!Array.isArray(draft.evidence) || !draft.evidence.length)
     throw Error("Missing evidence provenance");
   const review = await reviewPages(config, state, sources),
@@ -195,6 +216,8 @@ export async function saveDraft(config: any, draftPath: string) {
     if (ref.id.startsWith("sources/")) {
       const id = ref.id.slice(8),
         source = sources[id];
+      if (!eligible.source(id))
+        throw Error("Source evidence outside task limits");
       if (!source || source.hash !== ref.hash)
         throw Error("Source evidence changed or unavailable");
       return {
@@ -205,6 +228,8 @@ export async function saveDraft(config: any, draftPath: string) {
         sourceVersions: { [id]: source.hash },
       };
     }
+    if (!eligible.page(ref.id))
+      throw Error("Page evidence outside task limits or unknown provenance");
     const page = state.pages[ref.id];
     if (!page || page.hash !== ref.hash || invalid.has(ref.id))
       throw Error("Page evidence changed or unavailable");

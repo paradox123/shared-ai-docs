@@ -12,6 +12,7 @@ QMD ist fuer DanielsVault die einzige persistierte Index-, Embedding- und Retrie
 | Lexikalischer Index | `qmd update` |
 | Embeddings | `qmd embed` |
 | Ranked Retrieval | `qmd search` und `qmd query` |
+| Abgeleitete Wissensschicht und Quellenprüfung | `wiki maintain` und verwaltete `wiki query` |
 | Bestehende JSON-/Workflow-Contracts | QMD-backed `rag` CLI |
 | Exakte Fallback-Suche | gezieltes `rg` |
 
@@ -33,13 +34,15 @@ python3 scripts/sync-qmd-collections.py
 python3 scripts/sync-qmd-collections.py --apply
 ```
 
-Der Helper veraendert keine bestehende Collection mit abweichendem Pfad oder Pattern. Ein Konflikt blockiert die Wartung und muss bewusst geloest werden. Die private Collection ist nur ueber expliziten Private-Scope erreichbar und gehoert nicht zum generischen `all`-Scope.
+Der Helper veraendert keine bestehende Collection mit abweichendem Pfad oder Pattern. Ein Konflikt blockiert die Wartung und muss bewusst geloest werden. Der bisherige Quellen-Collection-Bestand verwendet noch einen getrennten Private-Scope. Das ist ein historischer Routingstand, keine fachliche Zugriffsregel für das gemeinsame Wiki gemäß ADR 0010; seine produktive Ablösung gehört zu den Migrationstickets 02–04.
 
-Jedes echte verschachtelte Git-Repository wird von seinem Repository-Root mit `**/*.md` indexiert. Dadurch sind README-, OpenSpec-, Skill-, Docs- und ADR-Markdown gemeinsam abgedeckt. Fuer von QMD standardmaessig uebersprungene versteckte Verzeichnisse und `vendor`-Verzeichnisse gibt es bei vorhandenem getracktem Markdown explizite Zusatz-Collections. Der Vault-Root selbst verwendet eine nicht-rekursive Top-Level-Collection plus explizite Collections fuer seine eigenen Inhaltszonen, damit verschachtelte Repositories nicht doppelt indexiert werden und `private` nicht in den generischen `all`-Scope gelangt.
+Jedes echte verschachtelte Git-Repository wird von seinem Repository-Root mit `**/*.md` indexiert. Dadurch sind README-, OpenSpec-, Skill-, Docs- und ADR-Markdown gemeinsam abgedeckt. Fuer von QMD standardmaessig uebersprungene versteckte Verzeichnisse und `vendor`-Verzeichnisse gibt es bei vorhandenem getracktem Markdown explizite Zusatz-Collections. Der Vault-Root selbst verwendet eine nicht-rekursive Top-Level-Collection plus explizite Collections fuer seine eigenen Inhaltszonen, damit verschachtelte Repositories nicht doppelt indexiert werden und die ursprüngliche getrennte Quellenauswahl abgebildet bleibt.
 
 ## Standard-Retrieval
 
-Agenten verwenden QMD direkt:
+Für gepflegtes Wiki-Wissen verwenden Agenten `wiki query --config <gemeinsame-konfiguration> --question <frage>`. Dieser Einstieg prüft Originalstände und fachliche Relevanz. Persönliche Quellen sind reguläre Evidenz; ausdrückliche Aufgabenbegrenzungen werden durch `--repo`/`--source` einschließlich transitiver Abhängigkeiten überprüft. Sie dürfen nicht allein aus dem Domainnamen abgeleitet werden. Die gemeinsame Wiki-Collection ist regulär in QMD enthalten; die Aktivierung des produktiven gemeinsamen Bestands steht noch aus.
+
+Für direktes Quellenretrieval bleibt QMD verfügbar:
 
 ```bash
 qmd status
@@ -65,11 +68,13 @@ Diese Befehle schreiben keinen eigenen Index und melden `qmd` als Engine.
 Die aktive Codex-Automation `Update QMD Index Daily` fuehrt in dieser Reihenfolge aus:
 
 1. Collection-Manifest mit `scripts/sync-qmd-collections.py --apply` abgleichen.
-2. Bei konfliktfreiem Abgleich `qmd update` ausfuehren.
-3. Nur nach erfolgreichem Update `qmd embed` ausfuehren.
-4. `qmd status` erfassen und Collection-, Dokument- und Vektoranzahl in der Automation-Memory dokumentieren.
+2. Bei konfliktfreiem Abgleich das allgemeine LLM-Wiki über `wiki maintain` pflegen und `wiki status`/`wiki lint` auf vollständigen Erfolg prüfen.
+3. Danach `qmd update` und nur nach dessen Erfolg `qmd embed` ausführen.
+4. `qmd status` erfassen und Wiki-, Collection-, Dokument- und Vektorergebnis in der Automation-Memory dokumentieren.
 
-Bei fehlendem Runtime-Binary, Collection-Konflikten oder Berechtigungsfehlern wird fail-closed abgebrochen. Projekt-Repositories werden von der Wartungsautomation nicht editiert.
+Der ausführbare Ablauf, explizite Kontextkonfigurationen, Sperre und lokale Laufprotokolle sind in der [Wiki-Betriebsanleitung](../../contextual-llm-wiki/OPERATIONS.md) beschrieben. Die Automation bleibt täglich um 07:00 lokal aktiv. Ein Merge startet keinen zusätzlichen Lauf; Private-Scope wird nicht implizit gewählt.
+
+Bei fehlendem Runtime-Binary, Collection-Konflikten oder Berechtigungsfehlern wird fail-closed abgebrochen. Originalquellen in Projekt-Repositories werden von der Wartungsautomation nicht editiert. Schreiben darf sie die konfigurierte generierte Wiki-Ausgabe samt lokalem Zustand, QMD-Daten und lokale Betriebsprotokolle.
 
 ## Troubleshooting
 

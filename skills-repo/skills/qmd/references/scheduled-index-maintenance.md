@@ -97,3 +97,11 @@ printf 'qmd_update_rc=%s\nqmd_embed_rc=%s\nqmd_status_rc=%s\n' \
 5. Capture run time with a portable command such as `date '+%Y-%m-%dT%H:%M:%S%z'`. Do not use GNU-only forms such as `date -Is`; macOS `date` rejects them.
 6. Update the automation memory with run time, command outcomes, indexed file count, vector count, collections touched, and blockers. Immediately before applying the patch, reread a small current header excerpt such as `sed -n '1,40p' "$MEMORY_PATH"` and anchor on the exact current title/header fields. Do not anchor a newest-first insertion on an older run body from the opening output. If the file changed concurrently, reread and retry once.
 7. Do not repair macOS privacy/TCC, QMD installation, runtime, or permission issues during a routine index run; record the blocker and stop.
+
+## DanielsVault wiki maintenance
+
+For `update-qmd-index-daily`, the saved automation invokes the repository-owned `contextual-llm-wiki/scripts/maintain-index.py` after this runtime preflight. Follow the exact configured command in the automation; it owns collection reconciliation, explicit-context wiki maintain/status/lint, then global QMD update/embed/status. Do not run update/embed ahead of the helper or repeat its successful steps.
+
+Read [the operations guide](../../../../contextual-llm-wiki/OPERATIONS.md) only for setup, failure diagnosis or a manual invocation. Only the configurations named by the automation are selected; do not add private scope or replace a production configuration with an acceptance fixture. Original project sources remain read-only; the helper may write configured generated wiki/state, QMD data and ignored local run artifacts.
+
+The first JSON event identifies the artifact directory. Poll the same active execution handle until completion. Read its `report.json`; for a failure read only the failed step's stdout/stderr/exitcode. A missing report is not success. Record context/no-op/counts, the artifact path and any blocker in automation memory. Do not start another collector merely to recover output.

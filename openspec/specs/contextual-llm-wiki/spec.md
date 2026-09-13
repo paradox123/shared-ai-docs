@@ -13,40 +13,43 @@ The integration MUST use Atomicstrata LLM-Wiki-Compiler at the selected baseline
 - **AND** an incompatible runtime or unavailable provider produces an actionable failure before active content changes
 
 ### Requirement: Initial DanielsVault source inventory
+The delivered setup MUST register the eight verified repository identities `vault-root`, `meeting-assistant`, `shared-ai-docs`, `ki-fuer-kmu`, `ncg-docs`, `private`, `probare-crm`, and `sparkle`, using their configured original clone roots and source-zone filters. All selected repositories MUST feed one common wiki. Both `Meetings` and `Projects`, including `Projects/Private`, MUST be recursively included. `private` is a subject-domain label and MUST NOT partition the compiled knowledge or exclude sources from ordinary managed retrieval. Historical SpecOps and technical/runtime exclusions remain as documented; extra worktrees MUST NOT become additional sources.
 
-The delivered setup MUST include an explicit initial registration for the eight verified repository identities `vault-root`, `meeting-assistant`, `shared-ai-docs`, `ki-fuer-kmu`, `ncg-docs`, `private`, `probare-crm`, and `sparkle`, using the clone roots and source-zone filters defined in the local tracker input-repositories document and linked from the design. `private` and the vault's private project zone MUST be scoped to the private context. The vault root MUST ingest only its listed zones rather than recursively re-ingesting nested repositories. Existing extra worktrees and generated test repositories MUST NOT become additional sources.
-
-Before the first compilation, setup MUST provide a read-only inventory of these configured entries, resolved roots, included Markdown counts, scope, exclusions, and missing inputs. Configuration of all eight entries MUST NOT imply that private sources are compiled into the general context. Both `Meetings` and `Projects` MUST be recursively included as initial Markdown source zones of the vault root. Meetings MUST NOT require additional per-meeting selection before ingestion. `Projects/Private` MUST also be ingested, using the private context rather than being omitted. Their mixed subject matter or lack of separate Git roots MUST NOT cause exclusion. General technical/runtime filters still apply. Only the historical SpecOps zone remains excluded from the initial configuration as documented.
+Before first compilation, setup MUST provide a read-only inventory of the configured entries, resolved roots, selected Markdown counts, exclusions and missing inputs. Configuration MUST NOT silently substitute another checkout for a missing root.
 
 #### Scenario: Bootstrap the actual vault source set
-- **WHEN** the integration is set up against the verified DanielsVault layout
-- **THEN** inventory lists the eight configured repository identities with the actual clone roots and their scope
-- **AND** private inputs are listed separately without exposing private contents in the general report
-- **AND** setup does not silently substitute a different checkout for a missing configured root
+- **WHEN** setup inventories the verified DanielsVault layout
+- **THEN** it lists the eight configured repository identities and selected source counts
+- **AND** sources from personal and professional domains belong to the same production input set
 
 #### Scenario: Nested and duplicate checkouts do not duplicate input
-- **WHEN** inventory encounters the selected nested repos, the additional shared-ai-docs checkout and generated plugin repos beneath test output
+- **WHEN** inventory encounters selected nested repos, additional checkouts and generated plugin repos beneath test output
 - **THEN** each selected Fachquelle belongs to one source identity only
-- **AND** the extra checkout and generated test repos are excluded and reported as such
+- **AND** extra checkouts and generated test repos are excluded and reported
 
 #### Scenario: Meetings and Projects are initial sources
-- **WHEN** initial inventory and ingestion run with Markdown files in Meetings, Projects and Projects/Private
-- **THEN** each file is inventoried and processed as a vault-root Fachquelle in its corresponding context
-- **AND** generated knowledge can cite the original meeting or project file
-- **AND** neither Meetings nor Projects is deferred as an optional future source
+- **WHEN** Markdown exists in Meetings, Projects and Projects/Private
+- **THEN** it is recursively inventoried and processed as vault-root Fachquellen in the common wiki
+- **AND** derived knowledge can cite the original files without per-meeting or private-domain approval
 
 ### Requirement: Explicit repository context and source isolation
-
-The integration MUST identify context membership by stable repository identifiers and configured existing clone roots, with explicit recursive Markdown inclusion/exclusion rules. It MUST read original Fachquellen without modifying or moving them, preserve distinct identities for equal relative paths in different repos, and exclude generated output from its own input. Newly discovered unselected repos MUST NOT be silently included. Private contexts MUST require explicit selection and remain outside the general output and search scope.
+The integration MUST identify source membership by stable repository identifiers and explicitly configured original clone roots, with recursive Markdown inclusion/exclusion rules. It MUST read Fachquellen without modifying or moving them, preserve distinct identities for equal relative paths in different repos, and exclude generated output from its own input. Newly discovered unselected repos MUST NOT be silently included. The `private` repository and `Projects/Private` MUST be treated as subject areas within the common selected source set rather than as separate access scopes. Explicit task or source limits MUST still be respected; no access or disclosure policy SHALL be inferred solely from a domain name.
 
 #### Scenario: Two repositories with equal filenames
-- **WHEN** two selected repos contain different documents at the same relative path and maintenance runs
-- **THEN** both documents remain distinguishable by repository and path throughout source ingestion and citation
-- **AND** original file hashes and repository working-tree state remain unchanged by the integration
+- **WHEN** two selected repos contain documents at the same relative path and maintenance runs
+- **THEN** both remain distinguishable by repository and path through ingestion and citation
+- **AND** original files and repository working-tree state remain unchanged by maintenance
 
-#### Scenario: Unselected and private sources
-- **WHEN** an unselected clone and a private test repo exist alongside the general context
-- **THEN** neither their source contents nor derived knowledge appear in the general wiki or general-context query results
+#### Scenario: Selected private domain and unselected repository
+- **WHEN** the selected private repository and an unselected clone exist beside other selected sources
+- **THEN** the private-domain sources participate in the common wiki while the unselected clone does not
+- **AND** task-relevant evidence may link private-domain and other selected sources without special private-mode approval
+
+#### Scenario: Explicit task evidence limits include transitive sources
+- **WHEN** a managed query, search or draft save supplies explicit repo or source limits
+- **THEN** every evidence page and all its transitive page/source dependencies must lie within those limits
+- **AND** source fallbacks obey the same limits before model selection; prose instructions alone do not enforce a limit
+- **AND** invalid or empty limits fail visibly instead of broadening the evidence set
 
 ### Requirement: Directed source synchronization and provenance
 
@@ -75,6 +78,11 @@ The integration MUST generate and maintain interlinked Markdown knowledge using 
 - **WHEN** two repo sources support a common conclusion and a later question asks about that topic
 - **THEN** the wiki contains a coherent shared insight citing both original sources
 - **AND** the later answer uses that active page as evidence without unnecessary recompilation
+
+#### Scenario: Task-relevant synthesis across personal and professional domains
+- **WHEN** a selected source about personal portfolio planning and a selected source about project income support a relationship relevant to the task
+- **THEN** the common wiki can synthesize that relationship citing both original sources
+- **AND** an unrelated control source is not used merely because it shares a term or belongs to the same domain
 
 ### Requirement: Dependency coverage for stored knowledge
 
@@ -130,6 +138,11 @@ The integration MUST use the existing QMD engine and explicit context-scoped col
 - **WHEN** a formerly indexed page is withdrawn during context reconciliation
 - **THEN** the managed QMD results no longer return its content after successful reconciliation
 - **AND** an indexing failure is reported as incomplete maintenance rather than a successful removal
+
+#### Scenario: Domain names do not hide common wiki evidence
+- **WHEN** a common wiki page depends on a source in `private` or `Projects/Private`
+- **THEN** the page remains eligible for ordinary managed retrieval when current and relevant to the task
+- **AND** its domain label does not create a separate excluded wiki collection or a special private query requirement
 
 ### Requirement: Common human and agent entry
 

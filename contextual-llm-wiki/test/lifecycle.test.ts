@@ -27,7 +27,7 @@ test("two original repositories compile into a shared, cited Markdown page witho
   }
 });
 
-test("recursive inventory reads dirty Markdown, preserves hidden docs, and excludes private, runtime, nested repos, symlinks and generated output", async () => {
+test("recursive inventory reads dirty Markdown, preserves hidden docs, and includes personal sources and excludes runtime, nested repos and symlinks", async () => {
   const f = await fixture();
   try {
     const { mkdir, writeFile, symlink } = await import("node:fs/promises");
@@ -52,12 +52,16 @@ test("recursive inventory reads dirty Markdown, preserves hidden docs, and exclu
     await f.saveConfig();
     const r = await f.run("inventory");
     assert.equal(r.ok, true, JSON.stringify(r));
-    assert.equal(r.selectedSources, 3);
-    assert.equal(r.private[0].count, 1);
+    assert.equal(r.selectedSources, 4);
+    assert.equal(r.repositories[1].count, 1);
     assert.ok(
-      r.general[0].excluded.some((e: any) => e.reason === "nested-repository"),
+      r.repositories[0].excluded.some(
+        (e: any) => e.reason === "nested-repository",
+      ),
     );
-    assert.ok(r.general[0].excluded.some((e: any) => e.reason === "symlink"));
+    assert.ok(
+      r.repositories[0].excluded.some((e: any) => e.reason === "symlink"),
+    );
   } finally {
     await f.close();
   }

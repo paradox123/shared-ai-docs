@@ -10,8 +10,8 @@ Dies ist der Einstiegspunkt fuer die RAG-Dokumentation in diesem Ordner.
   Eval-Set mit echten historischen Nutzerfragen, beobachteten Agent-Lookups, hilfreichen Gegenfragen und zukunftsorientierten Folgefragen.
 - [Runtime Closeout 2026-04-23](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/2026-04-23-rag-runtime-closeout.md)
   Abschlussbericht mit voller Verifikations-Checklist, Runtime-Validierung und OpenSpec-Archivpfaden.
-- [Operating Model: rag Default, qmd Optional](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/operating-model-rag-qmd.md)
-  Betriebsentscheidung fuer den Alltag: `rag` ist Standardruntime; `qmd` ist optionaler Discovery-Zusatz.
+- [Operating Model: QMD as the Single Engine](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/operating-model-rag-qmd.md)
+  QMD ist die einzige persistierte Retrieval-Engine; das LLM-Wiki liefert darüber eine gepflegte Wissensschicht.
 - [Delivery Evidence 2026-04-26](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/2026-04-26-rag-qmd-operating-model-delivery-evidence.md)
   Vollstaendige Verification-Checklist fuer den Direct-Mode-Change inkl. `qmd`-Gate und `check-build-watcher`.
 - [Parent Spec](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/_specs/Completed/2026-04-13%20DanielsVault%20Local%20RAG%20Wissensplattform.md)
@@ -42,3 +42,8 @@ Damit laesst sich messen, ob das RAG:
 3. Evaluation Set lesen
 4. Operating Model lesen und Standardpfad verinnerlichen
 5. Runtime-Closeout und Archivpfade pruefen
+
+## LLM-Wiki im Betrieb
+
+- [Tägliche Wiki- und QMD-Pflege](../../contextual-llm-wiki/OPERATIONS.md)
+- [Katalog für Skills und Repo-Kontextdateien](llm-wiki-context-adoption-catalog.md)

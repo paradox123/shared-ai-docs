@@ -21,6 +21,21 @@ try {
     if (!v) throw Error(name + " is required");
     return v;
   };
+  const values = (name: string) => {
+    const matches = args.flatMap((arg, i) => {
+      if (arg !== name) return [];
+      if (!args[i + 1]?.trim() || args[i + 1].startsWith("--"))
+        throw Error(name + " requires a nonempty value");
+      return [args[i + 1]];
+    });
+    return matches.length ? matches : undefined;
+  };
+  const limits = { repos: values("--repo"), sources: values("--source") };
+  if (
+    (limits.repos || limits.sources) &&
+    !["query", "search", "save"].includes(command)
+  )
+    throw Error("Task limits are supported by query, search and save only");
   const configPath = value("--config") || "";
   let result;
   if (command === "--help" || command === "help")
@@ -31,13 +46,11 @@ try {
       guide: new URL("../README.md", import.meta.url).pathname,
     };
   else if (command === "preflight") result = { ok: true, ...preflight() };
-  else if (command === "init-config")
-    result = initialConfig(
-      required("--vault"),
-      required("--output"),
-      args.includes("--private") ? "private" : "general",
-    );
-  else if (command === "backup") {
+  else if (command === "init-config") {
+    if (args.includes("--private"))
+      throw Error("--private is obsolete; init-config creates a common wiki");
+    result = initialConfig(required("--vault"), required("--output"));
+  } else if (command === "backup") {
     const c = await loadConfig(configPath);
     result = await withWriter(c, () => backup(c, required("--destination")));
   } else if (command === "restore") {
@@ -45,16 +58,23 @@ try {
     result = await withWriter(c, () => restore(c, required("--backup")));
   } else if (command === "save") {
     const c = await loadConfig(configPath);
-    result = await withWriter(c, () => saveDraft(c, required("--draft")));
+    result = await withWriter(c, () =>
+      saveDraft(c, required("--draft"), limits),
+    );
   } else if (command === "source")
     result = await source(await loadConfig(configPath), required("--id"));
   else if (command === "lint")
     result = await lint(await loadConfig(configPath));
   else if (command === "search")
-    result = await search(await loadConfig(configPath), required("--question"));
+    result = await search(
+      await loadConfig(configPath),
+      required("--question"),
+      limits,
+    );
   else if (command === "query") {
     const c = await loadConfig(configPath);
-    const action = () => query(c, required("--question"), value("--save"));
+    const action = () =>
+      query(c, required("--question"), value("--save"), limits);
     result = args.includes("--save")
       ? await withWriter(c, action)
       : await action();
