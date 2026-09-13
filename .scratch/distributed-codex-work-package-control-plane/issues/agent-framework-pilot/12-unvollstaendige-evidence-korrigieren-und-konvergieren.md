@@ -24,7 +24,7 @@ Der ProBara-Run blieb nach `missing_direct_observation` aktiv und blockierte Nac
 
 Auf dem ausdrücklich freigegebenen Zielbranch `main` umgesetzt, nachdem Issue 11
 integriert war. Der Change
-[`recover-agent-framework-evidence`](../../../../openspec/changes/recover-agent-framework-evidence/proposal.md)
+[`recover-agent-framework-evidence`](../../../../openspec/changes/archive/2026-09-13-recover-agent-framework-evidence/proposal.md)
 trennt Schema-Validität und fehlende fachliche Phasen. Zwei nummerierte,
 persistierte Capture-Runden verwenden denselben Head, ohne Codex erneut zur
 Implementierung aufzurufen. Abbruch, Drift und ausgeschöpfte Nacherfassung
@@ -50,11 +50,11 @@ selben Repository
 [Draft-PR #5](https://github.com/paradox123/wpcp-evidence-recovery-20260913/pull/5).
 Beide PRs bleiben Drafts, der Basisbranch bleibt unverändert.
 
-[Live-GitHub-Nachweise](../../../../openspec/changes/recover-agent-framework-evidence/evidence/live-github-summary.json)
+[Live-GitHub-Nachweise](../../../../openspec/changes/archive/2026-09-13-recover-agent-framework-evidence/evidence/live-github-summary.json)
 
-[Abnahmeübersicht mit Ergebnissen, Nachweisen und Grenzen](../../../../openspec/changes/recover-agent-framework-evidence/implementation-evidence.md)
+[Abnahmeübersicht mit Ergebnissen, Nachweisen und Grenzen](../../../../openspec/changes/archive/2026-09-13-recover-agent-framework-evidence/implementation-evidence.md)
 
-[Standards-/Spec-Review](../../../../openspec/changes/recover-agent-framework-evidence/review.md)
+[Standards-/Spec-Review](../../../../openspec/changes/archive/2026-09-13-recover-agent-framework-evidence/review.md)
 
 [Operator-Anleitung](../../../../microsoft-agent-framework-work-package-pilot/PUBLICATION.md)
 
@@ -65,3 +65,11 @@ bestehen; Standards- und Spec-Review haben keine offenen Befunde. Der zusätzlic
 Live-GitHub-Test wurde separat aktiviert; reguläre Discovery überspringt ihn ohne
 GitHub-Schreibzugriffe. Für die ergänzte Abnahme war keine Änderung des
 Produktivcodes nötig.
+
+## Acceptance and closeout — 2026-09-13
+
+Vom Nutzer nach dem Live-GitHub-Nachweis ausdrücklich akzeptiert. Issue 12 bleibt
+`resolved`; der OpenSpec-Change wurde mit `openspec archive` archiviert und seine
+Anforderungen in die kanonische Spec `agent-framework-evidence-publication`
+übernommen. Die Abschlussprüfung umfasst die repositoryweite strikte
+OpenSpec-Validierung und die reparierten Abnahme-/Evidence-Links.
