@@ -25,7 +25,7 @@ Git. Repeating the worker command retains the same PR and does not merge it.
 
 ## Reproduction and proof files
 
-Run the commands in [PUBLICATION.md](../../../microsoft-agent-framework-work-package-pilot/PUBLICATION.md#verification).
+Run the commands in [PUBLICATION.md](../../../../microsoft-agent-framework-work-package-pilot/PUBLICATION.md#verification).
 
 - [Full default regression output](evidence/regression-tests.txt).
 - [Publication suite after review corrections: 25 passing tests](evidence/publication-tests.txt).
@@ -85,3 +85,17 @@ are disposed after verification. PNGs are retained alongside the snapshots.
 - This is explicit local worker delivery, not a new managed DTS scheduler or a
   complete production repository onboarding interface. Review qualification,
   repair and release remain their separate tickets.
+
+## Acceptance — 2026-09-13
+
+The user accepted the implementation after viewing the original UI/document
+screenshots and the native run's provider receipt, including the explicit
+controlled-provider limitation. Acceptance includes the documented baseline
+stress-test failure. The user authorized OpenSpec closure, commit and push.
+The reviewed implementation is unchanged since `866e118`; the closeout pass
+confirmed the existing DRY/SOLID/KISS review and requires no code refactoring.
+
+Closeout used the standard `spec-driven` archive path. The CLI created the
+canonical `agent-framework-evidence-publication` spec with all four requirements.
+Post-archive validation: 46 items passed, zero failed; diff and evidence links
+passed. No behavior changed during closeout, so executable tests were not rerun.

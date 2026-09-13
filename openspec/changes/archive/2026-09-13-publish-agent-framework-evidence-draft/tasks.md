@@ -13,5 +13,5 @@
 
 The full regression has one baseline-reproduced stress-test failure; see
 [implementation-evidence.md](implementation-evidence.md#validation-result). All
-publication and final adjacent-runtime checks pass. Acceptance/archive remain
-separate from implementation.
+publication and final adjacent-runtime checks pass. The user accepted the
+implementation and authorized archive, commit and push on 2026-09-13.

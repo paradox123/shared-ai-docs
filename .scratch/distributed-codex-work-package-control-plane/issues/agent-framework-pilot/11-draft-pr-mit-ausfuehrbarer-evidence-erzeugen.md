@@ -24,7 +24,7 @@ ProBara Issue #3 implementierte die Änderung, konnte aber die geforderten REST-
 
 Issue 10 ist abgeschlossen; sein früherer Runtime-Blocker ist überholt.
 Die Umsetzung liegt auf `codex/agent-framework-issue-11` im Change
-[`publish-agent-framework-evidence-draft`](../../../../openspec/changes/publish-agent-framework-evidence-draft/proposal.md).
+[`publish-agent-framework-evidence-draft`](../../../../openspec/changes/archive/2026-09-13-publish-agent-framework-evidence-draft/proposal.md).
 Readiness, ausgeführte Evidence, persistierte Publication-Absicht und Adoption
 bestehen über Worker/HTTP, PostgreSQL, reales lokales Git und einen kontrollierten
 GitHub-Provider. Auch der Durchstich mit echter Codex-Runtime und nativer TUI besteht.
@@ -34,10 +34,17 @@ hat einen Fehler im bestehenden 10.000-Event-Stresstest; derselbe Fehler wurde
 auf dem unveränderten Issue-10-Stand reproduziert. Die Abnahmeübersicht trennt
 diesen Befund von den erfolgreichen Issue-11-Nachweisen.
 
-Implementierung abgeschlossen; Benutzerabnahme und OpenSpec-Archivierung stehen
-aus. Die GitHub-Grenze ist im Nachweis kontrolliert, Codex/TUI und lokales Git
+Implementierung vom Benutzer akzeptiert und abgeschlossen (2026-09-13). Die GitHub-Grenze ist im Nachweis kontrolliert, Codex/TUI und lokales Git
 sind real. Es wurde kein Live-GitHub-PR erzeugt.
 
-[Abnahmeübersicht mit fachlichen Ergebnissen, Grenzen und Nachweisen](../../../../openspec/changes/publish-agent-framework-evidence-draft/implementation-evidence.md)
+[Abnahmeübersicht mit fachlichen Ergebnissen, Grenzen und Nachweisen](../../../../openspec/changes/archive/2026-09-13-publish-agent-framework-evidence-draft/implementation-evidence.md)
 
 [Operator-Anleitung](../../../../microsoft-agent-framework-work-package-pilot/PUBLICATION.md)
+
+## Acceptance
+
+**Akzeptiert und abgeschlossen (2026-09-13).** Der Benutzer hat nach Sichtung
+der Screenshots und des Provider-Nachweises die Umsetzung akzeptiert sowie
+OpenSpec-Archivierung, Commit und Push beauftragt. Die dokumentierten Grenzen
+(kontrollierter GitHub-Provider und reproduzierter Baseline-Stresstestfehler)
+bleiben Bestandteil der Abnahmeübersicht.
