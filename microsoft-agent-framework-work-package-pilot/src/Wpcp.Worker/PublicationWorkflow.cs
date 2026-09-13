@@ -25,6 +25,11 @@ internal static class PublicationWorkflow
         if (publication is not null && publication.AssignmentHash != hash)
             throw new AgentAssignmentConflictException();
         var plan = JsonSerializer.Deserialize<JsonElement>(bytes);
+        if (publication?.HeadQualification is not null)
+        {
+            await HeadQualificationWorkflow.ExecuteAsync(store, run, publication, plan, python, fixture, pauseAt);
+            return;
+        }
         publication ??= await store.SavePublicationAsync(runId, new Publication(hash, "preflight"));
         if (publication.CaptureHeadSha is not null && publication.Intent is null && publication.State == "publication-blocked")
             return;
@@ -85,8 +90,10 @@ internal static class PublicationWorkflow
             intent = publication.Intent, allowCreate });
         if (report.GetProperty("state").GetString() == "draft-published")
             await PauseAsync(pauseAt, "after-provider-effect");
-        await store.SavePublicationAsync(runId, publication with { State = report.GetProperty("state").GetString()!,
+        publication = await store.SavePublicationAsync(runId, publication with { State = report.GetProperty("state").GetString()!,
             Blocker = report.TryGetProperty("blocker", out var blocker) ? blocker.GetString() : null, Report = report });
+        if (publication.State == "draft-published" && plan.TryGetProperty("headQualification", out _))
+            await HeadQualificationWorkflow.ExecuteAsync(store, (await store.GetProjectionAsync(runId))!, publication, plan, python, fixture, pauseAt);
     }
 
     private static async Task<Publication> CaptureEvidenceAsync(PostgresImplementationRunStore store,
@@ -210,7 +217,7 @@ internal static class PublicationWorkflow
         new(hash, report.GetProperty("state").GetString()!,
             report.TryGetProperty("blocker", out var blocker) ? blocker.GetString() : null, report);
 
-    private static async Task<JsonElement> InvokeAsync(string python, object input)
+    internal static async Task<JsonElement> InvokeAsync(string python, object input)
     {
         var start = new ProcessStartInfo(python) { RedirectStandardInput = true,
             RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };

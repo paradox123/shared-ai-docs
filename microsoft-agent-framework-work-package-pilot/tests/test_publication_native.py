@@ -18,6 +18,9 @@ class NativePublicationTests(harness.ControlPlaneProcessHarness, unittest.TestCa
     publish = publication.PublicationWorkerTests.publish
 
     def test_real_native_issue_publishes_its_executed_evidence_as_one_draft(self):
+        self.run_native_publication()
+
+    def run_native_publication(self, qualification=None, initial_prompt=''):
         port = self.start_real()
         run_id = self.new_run()
         fixture = PublicationFixture(Path(self.scratch.name) / run_id, self.read_run(run_id)['correlation']['issueNumber'])
@@ -27,6 +30,8 @@ class NativePublicationTests(harness.ControlPlaneProcessHarness, unittest.TestCa
         fixture.repo = repository
         fixture.plan['localPath'] = str(repository)
         fixture.plan['agentOrigin'] = f'http://127.0.0.1:{port}'
+        if qualification is not None:
+            fixture.plan['headQualification'] = qualification
         (repository / 'greeting.py').write_text('def greet(): return "Wrong"\n')
         (repository / 'ISSUE.md').write_text('Fix greet() to return exactly Hello, Ada! Run a failing assertion first and a passing assertion after. Change greeting.py only.\n')
         git(repository, 'add', '.')
@@ -44,10 +49,11 @@ class NativePublicationTests(harness.ControlPlaneProcessHarness, unittest.TestCa
             'execute a failing Python assertion, fix greeting.py, execute the assertion again. '
             'Return completed canonical output with actual red/green observations and evidence. '
             'Do not create __pycache__; use Python -B. Interpreter: ' + sys.executable)
+        prompt += ' ' + initial_prompt
         _, history = self.run_native_ui(run_id, attempt, prompt)
         self.assertEqual(0, self.publish(run_id, fixture.path).returncode)
         run = self.read_run(run_id)
-        self.assertEqual('draft-published', run['state'], run)
+        self.assertEqual('draft-published' if qualification is None else 'qualified', run['state'], run)
         self.assertFalse(any(a.get('session', {}).get('humanRequest', {}).get('state') == 'open'
             for a in run['attempts'] if a.get('session') and a['session'].get('humanRequest')),
             'Terminal publication still advertises an open human request')
@@ -60,3 +66,4 @@ class NativePublicationTests(harness.ControlPlaneProcessHarness, unittest.TestCa
                 'run': self.read_run(run_id), 'history': history, 'providerPullRequest': fixture.pulls[0],
                 'providerKind': 'controlled HTTP GitHub boundary with real local bare Git',
                 'runtimeKind': 'real pinned Codex with native TUI'}, indent=2))
+        return run, fixture

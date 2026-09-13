@@ -54,6 +54,7 @@ class Adapter:
         self.terminal_events = threading.Condition()
         self.hook_configuration = {}
         self.active_turn = None
+        self.qualification_operation = None
         self.turn_started_at = None
         self.outbox = self.root / 'observations'
         self.outbox.mkdir(exist_ok=True, mode=0o700)
@@ -197,6 +198,12 @@ if __name__ == '__main__': unittest.main()
 
     def watchdog(self):
         while self.runtime is not None and self.runtime.owned.process.poll() is None:
+            operation = self.qualification_operation
+            if operation is not None:
+                try: os.kill(operation['workerPid'], 0)
+                except ProcessLookupError:
+                    self.runtime.close()
+                    return
             target = self.active_turn
             if target and self.turn_started_at and time.monotonic() - self.turn_started_at > 120:
                 try:
@@ -227,8 +234,8 @@ if __name__ == '__main__': unittest.main()
         for client in list(self.clients):
             client.publish(event)
 
-    def wait_turn(self, session, turn):
-        deadline = time.monotonic() + 60
+    def wait_turn(self, session, turn, timeout=60):
+        deadline = time.monotonic() + timeout
         with self.terminal_events:
             while time.monotonic() < deadline:
                 for event in self.runtime.events:
@@ -395,6 +402,11 @@ if __name__ == '__main__': unittest.main()
             return body
 
     def execute(self, command):
+        if self.qualification_operation is not None:
+            self.authorize_qualification_tool(self.qualification_operation['sessionId'])
+            return self.runtime.request('command/exec', {'command': command, 'cwd': str(self.repository),
+                'timeoutMs': 10000, 'sandboxPolicy': {'type': 'workspaceWrite', 'networkAccess': False,
+                    'writableRoots': [str(self.repository)], 'excludeSlashTmp': True, 'excludeTmpdirEnvVar': True}})
         contexts = [context for context in self.contexts.values() if context.active and
                     self.active_turn is not None and context.session == self.active_turn[0]]
         if len(contexts) != 1:
@@ -402,10 +414,24 @@ if __name__ == '__main__': unittest.main()
         return contexts[0].write({'kind': 'execute', 'command': command})
 
     def authorize_tool(self, tool):
+        if self.qualification_operation is not None:
+            self.authorize_qualification_tool(tool.get('session_id'))
+            if tool.get('tool_name') != 'mcp__wpcp__execute': raise ValueError('qualification-tool-denied')
+            return {'allowed': True}
         contexts = [context for context in self.contexts.values() if context.active and context.session == tool.get('session_id')]
         if len(contexts) != 1: raise ValueError('no-authorized-native-turn')
         contexts[0].write({'kind': 'tool-check', 'tool': tool})
         return {'allowed': True}
+
+    def authorize_qualification_tool(self, session):
+        operation = self.qualification_operation
+        if (operation is None or operation['kind'] != 'repair' or operation['sessionId'] != session or
+                self.active_turn is None or self.active_turn[0] != session):
+            raise ValueError('qualification-tool-denied')
+        os.kill(operation['workerPid'], 0)
+        from publication_adapter import git
+        if git({'localPath': str(self.repository)}, 'branch', '--show-current') != operation['branch']:
+            raise ValueError('qualification-branch-drift')
 
     def close(self):
         self.stopping.set()
@@ -451,6 +477,10 @@ def main():
                     return self.reply(403, {'code': 'adapter-access-denied'})
                 if self.command == 'PUT' and len(parts) == 2 and parts[0] == 'sessions':
                     return self.reply(200, adapter.start(parts[1], body))
+                if self.command == 'PUT' and len(parts) == 2 and parts[0] in ('qualification-reviews', 'qualification-repairs'):
+                    from codex_qualification import execute
+                    return self.reply(200, execute(adapter, 'review' if parts[0] == 'qualification-reviews' else 'repair',
+                        parts[1], body, int(self.headers['X-Wpcp-Worker-Pid'])))
                 if self.path in ('/execute', '/authorize-tool'):
                     if self.headers.get('Authorization') != 'Bearer ' + adapter.execution_token:
                         return self.reply(403, {'code': 'execution-denied'})
@@ -467,6 +497,9 @@ def main():
             except Exception as error:
                 # No upstream error text or credentials are returned.
                 safe = {'session-start-uncertain', 'continuation-conflict-or-uncertain', 'interaction-uncertain',
+                        'qualification-policy-rejected', 'qualification-worktree-mismatch', 'qualification-run-mismatch',
+                        'qualification-operation-conflict', 'qualification-operation-uncertain', 'qualification-head-drift',
+                        'qualification-branch-drift', 'qualification-result-unavailable', 'repair-writer-mismatch',
                         'runtime-drift', 'contract-drift', 'dependency-drift', 'protocol-drift', 'preflight-incomplete'}
                 code = str(error) if isinstance(error, ValueError) and str(error) in safe else 'real-adapter-unavailable'
                 return self.reply(503, {'code': code, 'category': type(error).__name__})

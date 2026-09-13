@@ -49,10 +49,18 @@ public sealed partial class PostgresImplementationRunStore
         save.Parameters.AddWithValue("id", Guid.Parse(runId));
         save.Parameters.AddWithValue("state", next.State);
         AddNullable(save, "head", NpgsqlTypes.NpgsqlDbType.Text,
-            next.Intent is { } publishedIntent ? publishedIntent.GetProperty("headSha").GetString() : next.CaptureHeadSha);
+            next.HeadQualification?.HeadSha ?? (next.Intent is { } publishedIntent ? publishedIntent.GetProperty("headSha").GetString() : next.CaptureHeadSha));
         AddJson(save, "value", next);
         await save.ExecuteNonQueryAsync();
         await AppendAgentEventAsync(connection, transaction, run, "PublicationStateObserved", next, default);
+        if (next.HeadQualification is { } headQualification)
+        {
+            await AppendAgentEventAsync(connection, transaction, run, "HeadQualificationObserved", headQualification, default);
+            if (headQualification.HumanRequest is { } request && previous?.HeadQualification?.HumanRequest is null)
+                await AppendAgentEventAsync(connection, transaction, run, "HumanRequestCreated", request, default);
+            if (headQualification.HumanRequest is null && previous?.HeadQualification?.HumanRequest is { } resolved)
+                await AppendAgentEventAsync(connection, transaction, run, "HumanRequestResolved", resolved with { State = "resolved" }, default);
+        }
         if (previous?.Qualification is null && next.Qualification is not null)
             await AppendAgentEventAsync(connection, transaction, run, "EvidenceQualificationObserved",
                 new { next.Qualification, next.CaptureHeadSha }, default);
@@ -102,8 +110,8 @@ public sealed partial class PostgresImplementationRunStore
             SELECT p.run_id::text FROM wpcp_publications p
             JOIN wpcp_implementation_runs r USING(run_id)
             WHERE r.repository_id=@repo AND p.run_id<>@run AND
-                (p.publication->>'state' NOT IN ('preflight-blocked', 'publication-blocked', 'draft-published')
-                 OR (p.publication->>'dispatched'='true' AND p.publication->>'state'<>'draft-published'))
+                (p.publication->>'state' NOT IN ('preflight-blocked', 'publication-blocked', 'draft-published', 'qualification-blocked', 'qualified', 'awaiting-human')
+                 OR (p.publication->>'dispatched'='true' AND p.publication->>'state' NOT IN ('draft-published', 'qualification-blocked', 'qualified', 'awaiting-human')))
             ORDER BY r.run_started_at LIMIT 1
             """, connection);
         read.Parameters.AddWithValue("repo", repositoryId);

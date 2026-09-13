@@ -162,7 +162,7 @@ internal sealed record WorkerOptions(
         }
 
         var pauseAt = Value(values, "--pause-at");
-        if (pauseAt is not (null or "before-active-dispatch" or "before-active-delivery" or "after-active-response" or "after-active-stop" or "after-active-delivery" or "after-session-start" or "after-source-sequence-5000" or "after-session-mapping" or "after-result-observed" or "after-git-effect" or "after-provider-effect" or "after-evidence-capture-start" or "after-evidence-capture-result" or "after-reconciled-effect" or "after-session-receipt"))
+        if (pauseAt is not (null or "before-active-dispatch" or "before-active-delivery" or "after-active-response" or "after-active-stop" or "after-active-delivery" or "after-session-start" or "after-source-sequence-5000" or "after-session-mapping" or "after-result-observed" or "after-git-effect" or "after-provider-effect" or "after-evidence-capture-start" or "after-evidence-capture-result" or "before-qualification-verification" or "after-qualification-review-response" or "after-qualification-repair-response" or "after-reconciled-effect" or "after-session-receipt"))
             throw new ArgumentException("Unknown fake fault boundary.");
         var rejectText = Value(values, "--reject-blocked");
         if (rejectText is not (null or "true" or "false"))

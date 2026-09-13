@@ -121,6 +121,9 @@ def validate(plan, correlation):
         for command in commands:
             require(isinstance(command['argv'], list) and command['argv'] and all(isinstance(a, str) and a for a in command['argv']))
             require(isinstance(command['expected'], str) and command['expected'].strip())
+        if 'headQualification' in plan:
+            from head_qualification import validate_config
+            validate_config(plan['headQualification'])
     except (KeyError, TypeError, ValueError, Blocked):
         raise Blocked('invalid-evidence-plan') from None
 
@@ -131,13 +134,13 @@ class Provider:
         self.origin = plan['providerOrigin'].rstrip('/')
         self.prefix = '/repos/' + plan['repository']['fullName']
 
-    def request(self, path, body=None):
+    def request(self, path, body=None, method=None):
         headers = {'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json'}
         if self.origin == 'https://api.github.com' and os.environ.get('WPCP_PUBLICATION_TOKEN'):
             headers['Authorization'] = 'Bearer ' + os.environ['WPCP_PUBLICATION_TOKEN']
         request = urllib.request.Request(self.origin + self.prefix + path,
             None if body is None else json.dumps(body).encode(), headers,
-            method='GET' if body is None else 'POST')
+            method=method or ('GET' if body is None else 'POST'))
         with urllib.request.urlopen(request, timeout=15) as response:
             return json.load(response)
 
@@ -449,7 +452,19 @@ def main():
     fixture = json.loads(Path(request['fixture']).read_text())
     try:
         stage = request['stage']
-        if stage == 'preflight': result = preflight(request['plan'], request['correlation'])
+        if stage == 'verify-head':
+            from head_qualification import verify
+            result = verify(request['plan'], request['headSha'], request['pullNumber'])
+        elif stage == 'current-head':
+            from head_qualification import current_head
+            result = current_head(request['plan'], request['headSha'], request['pullNumber'])
+        elif stage == 'review-head':
+            from head_qualification import review
+            result = review(request, fixture)
+        elif stage in ('repair-assignment', 'repair-head', 'prepare-repair', 'publish-repair'):
+            from head_qualification import repair_stage
+            result = repair_stage(request, fixture)
+        elif stage == 'preflight': result = preflight(request['plan'], request['correlation'])
         elif stage == 'qualify': result = qualify(request['plan'], request['correlation'], request['result'], request['source'])
         elif stage == 'prepare': result = prepare(request['plan'], request['correlation'], fixture)
         elif stage == 'capture': result = evidence(request['plan'], request['correlation'], fixture, request['runId'], request['headSha'])
@@ -486,6 +501,7 @@ def supervise_command():
 
 
 if __name__ == '__main__':
+    sys.modules['publication_adapter'] = sys.modules[__name__]
     if len(sys.argv) > 1 and sys.argv[1] == '--supervise-command':
         raise SystemExit(supervise_command())
     main()

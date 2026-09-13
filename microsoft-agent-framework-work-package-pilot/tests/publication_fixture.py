@@ -46,6 +46,14 @@ class PublicationFixture:
         self.lose_reply = False
         self.agent_content = 'def greet(): return "Hello, Ada!"  # implemented\n'
         self.agent_starts = 0
+        self.review_requests = []
+        self.review_results = {}
+        self.review_receipts = {}
+        self.review_override = None
+        self.repair_requests = []
+        self.repair_receipts = {}
+        self.repair_changes = True
+        self.repair_lose_reply = False
         self.result_summary = 'Greeting implemented'
         self.result_evidence = None
         self.adapter_path = str(self.repo)
@@ -94,6 +102,36 @@ class PublicationFixture:
                 return self.send({}, 404)
             def do_PUT(self):
                 request = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+                if self.path.startswith('/qualification-repairs/'):
+                    operation = self.path.rsplit('/', 1)[1]
+                    if operation in fixture.repair_receipts:
+                        return self.send(fixture.repair_receipts[operation])
+                    fixture.repair_requests.append(request)
+                    if fixture.repair_changes:
+                        (fixture.repo / 'greeting.py').write_text(fixture.agent_content + '# repair ' + str(request['number']) + '\n')
+                    receipt = {'contractVersion': 'HeadQualificationAdapter/v1', 'operationKey': operation,
+                        'sessionId': request['writerSessionId'], 'policy': request['policy'],
+                        'result': {'schemaVersion': 'wpcp-repair/v1', 'outcome': 'completed', 'summary': 'Findings repaired.'}}
+                    fixture.repair_receipts[operation] = receipt
+                    if fixture.repair_lose_reply:
+                        fixture.repair_lose_reply = False
+                        self.close_connection = True
+                        return
+                    return self.send(receipt)
+                if self.path.startswith('/qualification-reviews/'):
+                    operation = self.path.rsplit('/', 1)[1]
+                    if operation in fixture.review_receipts:
+                        return self.send(fixture.review_receipts[operation])
+                    fixture.review_requests.append(request)
+                    axis = request['axis']
+                    result = {'schemaVersion': 'wpcp-review/v1', 'axis': axis,
+                        'headSha': request['headSha'], 'verdict': 'pass',
+                        'rationale': 'The supplied change satisfies this axis.', 'findings': []}
+                    if fixture.review_override: fixture.review_override(request, result)
+                    receipt = {'contractVersion': 'HeadQualificationAdapter/v1', 'operationKey': operation,
+                        'sessionId': str(uuid.uuid4()), 'policy': request['policy'], 'result': result}
+                    fixture.review_receipts[operation] = receipt
+                    return self.send(receipt)
                 fixture.agent_starts += 1
                 (fixture.repo / 'greeting.py').write_text(fixture.agent_content)
                 observation = {'command': 'python greeting.py', 'observed': 'Hello, Ada!'}
@@ -109,6 +147,14 @@ class PublicationFixture:
                 return self.send({'contractVersion': 'AgentSessionAdapter/v1',
                     'operationKey': self.path.split('/')[-1], 'sessionId': fixture.session,
                     'events': [{'sequence': 1, 'type': 'result', 'data': result}]})
+            def do_PATCH(self):
+                request = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
+                if self.path.startswith('/repos/pilot/fixture/pulls/'):
+                    pull = fixture.pulls[int(self.path.rsplit('/', 1)[1]) - 1]
+                    pull.update(request)
+                    pull['head']['sha'] = git(fixture.remote, 'rev-parse', 'refs/heads/' + fixture.branch)
+                    return self.send(pull)
+                return self.send({}, 404)
             def do_POST(self):
                 if self.path == '/business':
                     request = json.loads(self.rfile.read(int(self.headers['Content-Length'])))

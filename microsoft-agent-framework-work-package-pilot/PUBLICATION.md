@@ -1,5 +1,8 @@
 # Executable evidence, recovery and draft publication (Tickets 11–12)
 
+Continue an evidence-ready draft through [head qualification and bounded repair](QUALIFICATION.md)
+by including `headQualification` in the trusted plan before its first delivery.
+
 The worker accepts a trusted `wpcp-publication-plan/v1` JSON file outside the agent
 checkout. It binds its bytes and Python interpreter to the admitted run, checks
 readiness before starting Codex, executes evidence on a committed head and
