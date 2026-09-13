@@ -1,6 +1,6 @@
 ---
 name: qmd
-description: Search, update, or maintain markdown knowledge-base indexes using QMD. USE WHEN users ask to search notes, find documents, look up information across markdown-heavy repos, update the local QMD index, refresh embeddings, or run scheduled QMD index maintenance. Prefer QMD for ranked retrieval; if QMD is unavailable, fall back to `rg` and state that fallback explicitly.
+description: Search, update, or maintain markdown knowledge-base indexes using QMD. USE WHEN users ask to search notes, find documents, look up information across markdown-heavy repos, update the local QMD index, refresh embeddings, or run scheduled QMD index maintenance. Route DanielsVault context questions to managed WikiQuery; use QMD directly for index operations, diagnostics, or an explicitly requested QMD command.
 license: MIT
 metadata:
   author: tobi
@@ -15,29 +15,15 @@ metadata:
 
 Local search engine for markdown content.
 
-## Status
+## Choose the operation first
 
-!`qmd status 2>/dev/null || echo "Not installed: npm install -g @tobilu/qmd"`
+For DanielsVault knowledge-context questions, use [the managed WikiQuery research flow](../rag-documentation-research/SKILL.md) first and follow its checked original-source references. Do not run QMD status/search/query as a competing context entry. Missing or stale evidence and WikiQuery outages stay visible through that flow. `private` names a subject domain, not a separate query permission.
 
-If QMD is not installed, use a fallback sequence:
-1. `rg --files` to scope candidate files.
-2. `rg -n` keyword probes.
-3. state explicitly that ranking is lexical fallback, not QMD retrieval.
+The commands below are for index operations, diagnostics, an explicitly requested QMD command, or QMD use outside the configured DanielsVault wiki. They do not override WikiQuery routing. Never trigger indexing or embeddings merely to answer a context question.
 
-## Automation Session Guard
+## Runtime and automation guard
 
-When QMD is loaded only as a support skill inside a session-review automation, do not run QMD startup or repo search first. Defer startup order to the primary review skill, such as `improve-skills` and its Codex Desktop session-review reference, then use QMD only for docs or identifiers the bounded session evidence actually implicates.
-
-For repo-specific review or documentation-maintenance automations, confirm that QMD actually indexes the target repo before semantic retrieval:
-
-```bash
-qmd status
-qmd collection list
-```
-
-Treat any nonzero `qmd status` as QMD unavailable for the rest of that run, including database, native-extension, runtime, and permission failures. Do not continue with `qmd collection list`, `qmd search`, or `qmd query` and repeat the same initialization failure. Record the blocker once, fall back to targeted `rg`, and state that retrieval is lexical rather than QMD-ranked.
-
-If the listed collections are unrelated to the target repo, do not run `qmd query` as a broad semantic fallback; it can spend time reranking the wrong corpus. Use `qmd search` only for exact terms that may exist in indexed shared docs, then fall back to targeted `rg` in the repo.
+Inside an automation, read its required state before runtime probes. For direct QMD operations, resolve the installed runtime and run `qmd status` once. A nonzero result is a blocker for dependent index work; report it instead of retrying initialization or repairing installations automatically. Inspect collections only when the operation needs coverage or configuration information. Do not infer private-domain exclusion from historical collection labels.
 
 ## Scheduled Index Maintenance
 

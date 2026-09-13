@@ -88,6 +88,15 @@ export async function query(
     engine: "qmd",
     answer: text,
     evidence: evidence.map(({ body, ...e }) => e),
+    originals: [
+      ...new Set(evidence.flatMap((e) => Object.keys(e.sourceVersions))),
+    ].map((id) => ({
+      id,
+      path: latest[id].original,
+      uri: "obsidian://open?path=" + encodeURIComponent(latest[id].original),
+      hash: latest[id].hash,
+      freshness: "checked-current",
+    })),
     review,
     saved,
     fallback: evidence.some((e) => e.kind === "source"),

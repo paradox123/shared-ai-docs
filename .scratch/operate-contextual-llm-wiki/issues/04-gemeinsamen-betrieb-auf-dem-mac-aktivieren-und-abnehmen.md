@@ -4,7 +4,7 @@
 
 **Blocked by:** 02 — Bestehende Wissensbestände verlustfrei zusammenführen; 03 — Pflege bei begrenzten Fehlern fortsetzen.
 
-**Status:** ready-for-agent
+**Status:** claimed
 
 ## Grundlage und Ausgangslage
 
@@ -39,3 +39,5 @@ Dieser Auftrag umfasst die bestätigte lokale Betriebsumstellung. Fachquellen bl
 - 13.09.2026: Aufteilung und Abhängigkeiten von Daniel bestätigt. Dieses Ticket aktiviert den korrigierten gemeinsamen Betrieb und liefert dessen neue Abnahme.
 
 - 13.09.2026: Zugang präzisiert: WikiQuery-first zentral verankern und über einen tatsächlichen Agentenablauf nachweisen. Keine weitere Ticketabhängigkeit erforderlich.
+
+- 13.09.2026: Daniel bestätigt direkte Umsetzung auf `main`; sauberer Ausgangsstand `76f4c51`, Git-Root `_shared/shared-ai-docs`. Tickets 02/03 sind integriert. Bestehender Change, Aufgaben 4.5–4.7; kein neuer Change und keine Archivierung.

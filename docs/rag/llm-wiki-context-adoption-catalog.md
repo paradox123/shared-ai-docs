@@ -1,17 +1,17 @@
 # LLM-Wiki: Katalog der Kontext-Einstiege
 
-Stand: 13.09.2026, nach Klärung der Tätigkeitsbereich-Semantik. Ziel ist ein gemeinsames Wiki nach [ADR 0010](../adr/0010-shared-wiki-across-personal-and-professional-domains.md); bestehende Betriebsverweise beschreiben bis zur Umstellung noch den vorherigen Betrieb. Dieser Katalog plant die Einführung; nur mit „umgesetzt“ markierte Betriebsverweise wurden in dieser Session geändert. „Geplant“ bedeutet keine bereits aktivierte Wiki-Nutzung.
+Stand: 13.09.2026, nach Klärung der Tätigkeitsbereich-Semantik. Ziel ist ein gemeinsames Wiki nach [ADR 0010](../adr/0010-shared-wiki-across-personal-and-professional-domains.md); der genaue Aktivierungs- und Importstatus steht in der Ticket-04-Evidence. Dieser Katalog plant die Einführung; nur mit „umgesetzt“ markierte Betriebsverweise wurden in dieser Session geändert. „Geplant“ bedeutet keine bereits aktivierte Wiki-Nutzung.
 
 ## Empfohlenes Routing
 
 1. Verpflichtende Repo-Orientierung und ausdrücklich gesetzte Aufgabengrenzen beachten. Bereits bekannte Primärquellen dürfen direkt gelesen werden.
 2. Jede Wissenskontextsuche über die verwaltete WikiQuery des gemeinsamen Wikis beginnen. Sie liefert relevante Erkenntnisse, Prüfstatus und navigierbare Verweise auf Originalquellen.
-3. Aufgabengrenzen an WikiQuery übergeben und dort einschließlich transitiver Evidenz prüfen lassen. Die bisher fehlende technische Begrenzung ist in Ticket 01 zu ergänzen; sie wird nicht durch eine separate QMD-Suche des Agenten ersetzt.
+3. Aufgabengrenzen an WikiQuery übergeben und dort einschließlich transitiver Evidenz prüfen lassen. Die technische Begrenzung aus Ticket 01 gilt einschließlich transitiver Evidenz; sie wird nicht durch separate QMD-Suche ersetzt.
 4. Bei veralteter oder fehlender Wiki-Evidenz verwendet WikiQuery geeignete aktuelle Primärquellen oder meldet die Lücke. Ein Ausfall von WikiQuery wird sichtbar gemeldet. Direkte QMD-Kontextsuche ist kein stiller Ersatz; QMD bleibt intern sowie für Wartung und Diagnose verfügbar.
 5. Verweisen zu Primärquellen folgen, wenn Originalwortlaut oder Details benötigt werden. README/AGENTS/CONTEXT/OpenSpec/ADRs bleiben für ihren jeweiligen Inhalt maßgeblich; Wiki-Text ist abgeleitete Evidenz. Kein automatisches `maintain` oder `--save` bei gewöhnlicher Recherche.
 6. `private` und `Projects/Private` sind Tätigkeitsbereiche im gemeinsamen Wiki. Die fachliche Relevanz entscheidet über Verknüpfung und Nutzung, nicht der Name des Bereichs.
 
-Kanonischer Betrieb und ausführbare Beispiele: [OPERATIONS.md](../../contextual-llm-wiki/OPERATIONS.md). Vor breiter Einführung gehört das Routing in `rag-documentation-research`; Repo-Dateien erhalten kurze Verweise statt kopierter Abläufe.
+Kanonischer Betrieb und ausführbare Beispiele: [OPERATIONS.md](../../contextual-llm-wiki/OPERATIONS.md). Das zentrale Routing steht in `rag-documentation-research`; Repo-Dateien erhalten kurze Verweise statt kopierter Abläufe.
 
 ## Priorisierte Dateien
 
@@ -19,13 +19,13 @@ Alle folgenden Pfade sind relativ zum DanielsVault-Root. P0 = zentraler Einstieg
 
 | Priorität | Datei | Rolle | Konkrete Änderung | Status / Eigentum |
 |---|---|---|---|---|
-| P0 | `_shared/shared-ai-docs/skills-repo/skills/rag-documentation-research/SKILL.md` | Kanonischer DanielsVault-Retrieval-Router | WikiQuery als ersten Zugang für Wissenskontextsuche verankern; Quellenprüfung und Rückgriff auf Primärquellen laufen darüber. Explizite Aufgabengrenzen weitergeben. | geplant; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/skills-repo/skills/qmd/SKILL.md` | Such- und Pflege-Einstieg | Kontextfragen zu WikiQuery routen; direkte QMD-Nutzung für Indexpflege und Diagnose behalten. Keine konkurrierende Standard-Kontextsuche. | geplant; lokal gepflegt |
+| P0 | `_shared/shared-ai-docs/skills-repo/skills/rag-documentation-research/SKILL.md` | Kanonischer DanielsVault-Retrieval-Router | WikiQuery als ersten Zugang für Wissenskontextsuche verankern; Quellenprüfung und Rückgriff auf Primärquellen laufen darüber. Explizite Aufgabengrenzen weitergeben. | umgesetzt in Ticket 04; lokal gepflegt |
+| P0 | `_shared/shared-ai-docs/skills-repo/skills/qmd/SKILL.md` | Such- und Pflege-Einstieg | Kontextfragen zu WikiQuery routen; direkte QMD-Nutzung für Indexpflege und Diagnose behalten. Keine konkurrierende Standard-Kontextsuche. | umgesetzt in Ticket 04; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/skills-repo/skills/qmd/references/scheduled-index-maintenance.md` | Täglicher Betrieb | Auf gemeinsamen Helper, explizite Konfiguration und Laufberichte verweisen. | umgesetzt; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/AGENTS.md` | Repo-Startup und Requirement-Autorität | Nach Pflichtorientierung gezielte Wiki-Nutzung und kanonische Retrieval-Referenz ergänzen; OpenSpec/ADR-Autorität erhalten. | geplant; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/README.md` | Menschlicher Repo-Einstieg | Betriebsanleitung und Einführungskatalog verlinken. | umgesetzt; lokal gepflegt |
 | P1 | `_shared/shared-ai-docs/CONTEXT.md` | Gemeinsame Wiki-Domänensprache | Bereits vorhandene Begriffe um Pflegezyklus/Quellenaktualität präzisieren; CLI-Details in Betriebsanleitung belassen. | teilweise vorhanden; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/.github/copilot-instructions.md` | Copilot Retrieval-Preference | Bisheriges QMD-first für Kontextfragen durch WikiQuery-first ersetzen; Ausfall sichtbar melden und Quellenverweise nutzbar halten. | geplant; lokal gepflegt |
+| P0 | `_shared/shared-ai-docs/.github/copilot-instructions.md` | Copilot Retrieval-Preference | Bisheriges QMD-first für Kontextfragen durch WikiQuery-first ersetzen; Ausfall sichtbar melden und Quellenverweise nutzbar halten. | umgesetzt in Ticket 04; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/docs/rag/README.md` | Kanonischer RAG-/QMD-Einstieg | Wiki-Rolle und tägliche Pflege verlinken; widersprüchliche alte Kurzbeschreibung korrigieren. | umgesetzt; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/docs/rag/index.md` | Kanonischer RAG-/QMD-Einstieg | Wiki-Rolle und tägliche Pflege verlinken; widersprüchliche alte Kurzbeschreibung korrigieren. | umgesetzt; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/docs/rag/operating-model-rag-qmd.md` | Kanonischer RAG-/QMD-Einstieg | Wiki-Rolle und tägliche Pflege verlinken; widersprüchliche alte Kurzbeschreibung korrigieren. | umgesetzt; lokal gepflegt |

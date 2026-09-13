@@ -1,15 +1,8 @@
 # Copilot Instructions (shared-ai-docs)
 
-## QMD Retrieval Preference
+## WikiQuery Context Entry
 
-When working in this repository and the task is to search markdown docs/specs/notes:
-1. Prefer `qmd` if available (`qmd status` succeeds).
-2. If `qmd` is unavailable, use `rg` fallback and state that ranking is lexical fallback.
-
-Fallback sequence:
-- `rg --files` to scope candidates
-- `rg -n "<query terms>"` for targeted lookup
-- summarize results with file+line references
+For knowledge-context searches, follow [the central WikiQuery research flow](../skills-repo/skills/rag-documentation-research/SKILL.md). Start with the common wiki, pass explicit task/source limits, inspect freshness and follow original-source references. QMD remains internal and available for index operations/diagnostics. Report unavailable WikiQuery instead of silently bypassing it. Already named primary files may be read directly; `private` is a subject domain.
 
 ## Spec Review Auto-Resolve
 

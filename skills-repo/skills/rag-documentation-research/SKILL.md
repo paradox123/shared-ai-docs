@@ -1,101 +1,39 @@
 ---
 name: rag-documentation-research
-description: QMD-first documentation research for DanielsVault. Use when users ask to find, research, search, or narrow documentation sources before planning or implementation, or when a requested plan, decision template, review, or other grounded artifact requires synthesizing several DanielsVault documents from one supplied starting path. This skill owns retrieval and source verification, not downstream artifact authoring. Use targeted rg only when QMD is unavailable or for final literal verification.
+description: Research DanielsVault knowledge through managed WikiQuery, verify its original-source references, and hand off grounded evidence for planning or implementation. Use for finding or synthesizing vault documentation; ordinary research does not maintain the index or save answers.
 ---
 
-# QMD Documentation Research
+# DanielsVault Documentation Research
 
-Use QMD as the single DanielsVault indexing and ranked-retrieval engine. Use this either for a standalone source-finding request or as the bounded retrieval phase of a larger deliverable. In the latter case, build the evidence bundle here and then continue the parent task; do not replace the requested artifact with a source list. The skill keeps its legacy name so existing prompts continue to trigger it; it does not use the historical `.rag/store` indexes.
+Start knowledge-context searches through the common wiki's managed WikiQuery. QMD is its internal persisted retrieval engine. This skill owns source discovery and verification; after gathering evidence, continue the user's requested artifact or implementation.
 
-## Automation Session Guard
+## Entry and source verification
 
-When this skill supports a session-review automation, follow that automation's state bootstrap before QMD preflight or documentation retrieval. Search only the repositories, services, or identifiers implicated by the bounded session evidence.
+Honor repository startup requirements and the task's explicit boundaries. Already named primary documents may be opened directly. Inside session-review automations, read the required automation/session state before knowledge retrieval.
 
-## Preflight
-
-Run one coverage check:
+Use the existing local installation:
 
 ```bash
-qmd status
-qmd collection list
+WIKI_HOME=/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/contextual-llm-wiki
+"$WIKI_HOME/wiki" query --config "$WIKI_HOME/.local/common.json" \
+  --question '<specific question>'
 ```
 
-If `qmd status` exits non-zero, treat QMD as unavailable for the remainder of the task. State the blocker once and use targeted `rg`; do not repeat QMD initialization through multiple commands.
+For an explicitly repository-limited task, append `--repo <id>` (repeat for multiple allowed repos). Registered identities are `vault-root`, `meeting-assistant`, `shared-ai-docs`, `ki-fuer-kmu`, `ncg-docs`, `private`, `probare-crm`, and `sparkle`. Exact source limits use repeated `--source '<repo-id>/<relative.md>'`. WikiQuery enforces these limits across transitive evidence. Do not infer a private access restriction from a directory name.
 
-## Collection Routing
+1. Inspect `ok`, `answer`, `evidence`, `originals`, `review`, and `fallback`.
+2. Follow selected `originals[].path` or `uri` references; read the relevant original sections before relying on their claims. `hash` and `freshness` identify the checked original version.
+3. Treat `review` as visible maintenance needs. `fallback:true` means the same interface used current original evidence instead of eligible stored wiki knowledge. It does not certify the stale wiki pages.
+4. Report missing evidence or an unavailable WikiQuery. Do not silently start a parallel QMD or broad `rg` context search. Already supplied or returned primary paths remain directly readable; targeted literal checks in those sources are appropriate.
 
-Prefer the narrowest collection set that covers the question:
+Keep the execution handle of a running query and follow that execution to completion. A query does not compile or create a saved answer unless the user requests saving. Do not invoke `maintain` or add `--save` for ordinary research.
 
-- Shared AI workflows, skills, prompts, and OpenSpec: `shared-ai-docs`
-- SpecOps entities and dashboards: `shared-specops`
-- NCG repository Markdown: `ncg-docs`
-- KI repository Markdown: `ki-fuer-kmu-docs`
-- Probare CRM repository Markdown: `probare-crm-docs`
-- Meeting Assistant repository Markdown: `meeting-assistant-docs`
-- QMD-excluded repository Markdown when relevant: `meeting-assistant-agents`, `shared-ai-codex`, `shared-ai-github`, `shared-ai-vendor`, `shared-ai-vendor-council-github`, `shared-ai-vendor-mattpocock-agents`, `ki-fuer-kmu-agents`, `ki-fuer-kmu-codex`, `ki-fuer-kmu-github`, `ncg-agents`
-- Meeting and project context: `vault-meetings`, `vault-projects`
-- RAG/QMD compatibility workspace and its OpenSpec: `danielsvault-rag`
-- Private knowledge: `private`, only when the user or task explicitly selects private scope
-- Standalone notes: `sparkle`
+## Evidence handoff
 
-Do not query the private collection as part of a generic broad search.
-Repository collections cover complete repository roots, including Markdown outside `docs` and `adr`. Add the matching supplementary collection when the question concerns `.agents`, `.codex`, `.github`, or tracked vendor skills, because QMD intentionally excludes hidden directories and directories named `vendor` during parent-root traversal.
+Return the relevant original paths and sections, a brief explanation of their relevance, the managed query used and its freshness/fallback result, and any remaining gaps or conflicts. Wiki text is derived evidence; original requirements, AGENTS, OpenSpec and ADRs retain their authority. A documentation lookup does not prove runtime behavior.
 
-## Retrieval Flow
+## Operations and compatibility
 
-For exact identifiers, filenames, environment variables, route fragments, or titles, start lexically:
+Use the [operations guide](../../../contextual-llm-wiki/OPERATIONS.md) for the installed runtime, maintenance, diagnostics and production acceptance status. Direct QMD belongs to index operations and diagnostics; historical QMD-backed `rag` envelopes remain compatibility interfaces for explicit callers, not a second standard context route. There is no additional `.rag/store`.
 
-```bash
-qmd search "<exact term>" -c <collection> -n 20 --json
-```
-
-For natural-language questions where document vocabulary is unknown, use ranked hybrid retrieval:
-
-```bash
-qmd query "<specific question>" -c <collection> -n 7 --json
-```
-
-For questions spanning a known set of domains, repeat `-c` only for those collections. Do not search every collection by default.
-
-Use this bounded sequence:
-
-1. Run one QMD search or query against the narrowest relevant collection set.
-2. Project at most seven results: `file`, `title`, `snippet`, `score`, and `docid`.
-3. Resolve the selected `qmd://<collection>/<path>` source through `qmd get` or the collection root shown by `qmd collection show <collection>`.
-4. Open only the selected on-disk sections and verify claims against source text.
-5. If exact QMD search misses an obvious literal, run targeted `rg -n -F` in the implicated documentation root.
-
-Do not treat a QMD snippet as final evidence until the source document and relevant section are opened.
-
-## Compatibility Workflows
-
-The local `rag` command at `~/Documents/DanielsVault/_shared/danielsvault-rag` is a QMD-backed compatibility interface for callers that require the historical `hits[]`, `facts[]`, `research-for-review`, or `spec-closeout` JSON envelopes. It does not own an index.
-
-Prefer native QMD for ordinary research. Use compatibility commands only when their stable envelope is useful:
-
-```bash
-rag workflow research-for-review --scope <scope> --query "<question>" --top-k 7 --format json
-rag workflow spec-closeout --scope <scope> --change "<change>" --top-k 7 --format json
-```
-
-## Local Runtime Transfer Mode
-
-Read [runtime-transfer.md](references/runtime-transfer.md) only when the user asks to move, package, reinstall, or explain the DanielsVault retrieval setup.
-
-## Output Or Handoff Contract
-
-For a standalone research request, return the following. When supporting a downstream artifact, retain the same fields as the internal evidence handoff and then continue the parent workflow:
-
-1. Prioritized source paths.
-2. Section or heading when available.
-3. A short why-relevant rationale.
-4. The collection and retrieval method used (`qmd search`, `qmd query`, compatibility workflow, or `rg` fallback).
-5. Gaps, stale paths, or low-confidence findings.
-
-## Guardrails
-
-- Keep private retrieval explicitly scoped.
-- Do not claim runtime or system validation from documentation retrieval alone.
-- Do not mutate QMD collections or embeddings during ordinary research.
-- Do not inspect or repair historical `.rag/store` files; collection/index maintenance belongs to the daily QMD automation or an explicit maintenance task.
-- If documentation conflicts with code or OpenSpec, report the conflict instead of silently choosing one.
+Read [runtime-transfer.md](references/runtime-transfer.md) only for an explicitly requested move or runtime transfer; its historical QMD commands do not override this context entry.

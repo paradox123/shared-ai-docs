@@ -1,60 +1,56 @@
-# LLM-Wiki auf Daniels Mac betreiben
+# Gemeinsames LLM-Wiki auf Daniels Mac
 
-> Sollzustand nach Betriebsklärung am 13.09.2026: ein gemeinsames Wiki über alle ausgewählten Fachquellen, einschließlich `private` und `Projects/Private`; „privat“ ist ein Tätigkeitsbereich. [ADR 0010](../docs/adr/0010-shared-wiki-across-personal-and-professional-domains.md). Die folgenden Kommandos beschreiben bis zur ausstehenden Umstellung den bisherigen Live-Betrieb.
+Die bestehende Automation `update-qmd-index-daily` ist der einzige tägliche Pflegeauslöser, um 07:00 Uhr Europe/Berlin im bisherigen lokalen Projekt `codex-global`. Die gemeinsame Produktionskonfiguration ist `contextual-llm-wiki/.local/common.json`; sie umfasst alle acht Originalrepos sowie die rekursiven Zonen Meetings und Projects einschließlich Projects/Private. `private` bezeichnet einen Tätigkeitsbereich, keine Zugriffsgrenze. [ADR 0010](../docs/adr/0010-shared-wiki-across-personal-and-professional-domains.md).
 
-Die bestehende Codex-Automation `update-qmd-index-daily` übernimmt täglich um 07:00 Uhr (lokale Europe/Berlin-Zeit) die allgemeine Wiki-Pflege und anschließend QMD. Sie läuft lokal im gespeicherten Projekt `codex-global` mit den bisherigen Modell- und Zeitplaneinstellungen. Ein Merge löst keinen eigenen Lauf aus. Der Mac und die lokale Codex-Ausführung müssen verfügbar sein; der Termin garantiert keine Echtzeitaktualität.
+Der aktuelle Aktivierungs-, Import- und Abnahmestand steht in [Ticket-04-Evidence](evidence/production-04.md). Ein gestarteter Lauf oder ein aktiver Zeitplan beweist keinen abgeschlossenen Vollimport. Ein manueller Produktionslauf und ein späterer automatischer Schedulerlauf werden dort getrennt ausgewiesen.
 
-## Implementierter gemeinsamer Helper (Ticket 03)
+## Runtime und Aufruf
 
-Der neue Helper wurde isoliert mit der gemeinsamen Wiki-CLI geprüft und ist noch nicht im Live-Job aktiviert. Er akzeptiert einen Teilfehler nur bei ausdrücklich bestätigter QMD-Eignung, vorhandenem übereinstimmendem Laufbericht und passenden Status-/Lint-Audits: Betroffene Seiten müssen zurückgezogen sein, verbleibende Änderungen müssen zum gemeldeten Fehlerzweig gehören. Danach darf QMD weiterlaufen; der Gesamt-Exit bleibt ungleich null. Fehlerhafte oder fehlende Verträge stoppen abhängige Schritte. [Abnahme und reproduzierbare Prüfungen](evidence/bounded-failures-03.md).
+Die eingerichtete Wiki-Runtime verwendet Node 24.16.0 und den gepinnten Atomicstrata-Compiler. QMD verwendet seine vorhandene Node-22-Installation. Im reduzierten Scheduler-PATH liegt Node nicht automatisch auf PATH, auch nach Homebrew shellenv; deshalb wird die vorhandene Installation ausdrücklich ergänzt. Der Codex-Provider verwendet die bestehende Anmeldung. Die gemeinsame Konfiguration begrenzt den Compiler mit `concurrency: 8` auf acht gleichzeitige Modellanfragen.
 
-Die folgenden Abschnitte dokumentieren weiterhin den vor Ticket 04 aktivierten Live-Ablauf und seine bisherigen Konfigurationen.
-
-## Ablauf und Zuständigkeit
-
-`python3 scripts/maintain-index.py` führt aus:
-
-1. Bestehende Quell-Collections über `sync-qmd-collections.py --apply` abgleichen.
-2. Vorhandenen Wiki-Provider und gepinnte Runtime prüfen.
-3. Für jede ausdrücklich übergebene Konfiguration `wiki maintain`, `wiki status` und `wiki lint` ausführen. Maintain aktualisiert Konzepte, gespeicherte Antworten und die eigene QMD-Collection.
-4. Erst nach vollständigem Erfolg globales `qmd update`, `qmd embed` und `qmd status` aus `/` ausführen.
-
-Der Helper prüft strukturierte Erfolgsmeldungen und offene Arbeit. Ein Fehler stoppt Folgeschritte. Die Betriebssystemsperre serialisiert den gesamten Lauf; zusätzlich schützt die bestehende Wiki-Sperre jeden Kontext. Ein unveränderter Wiki-Lauf benötigt keine neue Kompilierung, führt aber die globale Retrieval-Pflege aus.
-
-## Konfiguration
-
-Produktiv wird `.local/general.json` verwendet: der vollständige allgemeine Eingang einschließlich Meetings und Projects. `.local/acceptance-general.json` enthält nur den begrenzten Abnahmebestand und ist kein Ersatz dafür. Die private Konfiguration wird nicht automatisch ergänzt; private Pflege erfordert eine ausdrücklich gewählte zusätzliche `--config`-Option und getrennte Ausgabe/Collection.
-
-Die Konfiguration lässt sich nach einem Umzug mit `wiki init-config` aus der [Einrichtungsanleitung](README.md) neu erzeugen. Bestehende Konfigurationen nicht überschreiben. Providerstandard ist `codex-agent`; optional wirken die vorhandenen `LLMWIKI_PROVIDER`-/`LLMWIKI_MODEL`-Variablen. Die Automation verwendet `LLMWIKI_PROVIDER=codex-agent` und die vorhandene Anmeldung. Ist `codex` nicht auf PATH, ergänzt sie das auf diesem Mac verifizierte gebündelte CLI-Verzeichnis `/Applications/ChatGPT.app/Contents/Resources`; sie installiert keinen neuen Provider. Provider- und Compilerinstallation gehören zur Einrichtung, nicht zu Reparaturaktionen des Tagesjobs.
-
-## Manueller Lauf
-
-Aus `contextual-llm-wiki/`, mit bereits eingerichtetem QMD auf PATH:
+Aus dem Wiki-Verzeichnis:
 
 ```bash
-RUN_DIR="$PWD/.local/operations-runs/$(date '+%Y%m%dT%H%M%S')-$$"
-python3 scripts/maintain-index.py \
-  --config "$PWD/.local/general.json" \
-  --artifacts "$RUN_DIR" \
+export PATH="/opt/homebrew/opt/node@22/bin:/opt/homebrew/bin:/Applications/ChatGPT.app/Contents/Resources:$PATH"
+command -v node
+command -v qmd
+command -v codex
+./wiki preflight
+WIKI_RUN_DIR="$PWD/.local/operations-runs/$(date '+%Y%m%dT%H%M%S')-$$"
+LLMWIKI_PROVIDER=codex-agent python3 scripts/maintain-index.py \
+  --config "$PWD/.local/common.json" \
+  --artifacts "$WIKI_RUN_DIR" \
   --lock-file "$PWD/.local/operations-runs/maintenance.lock" \
   --qmd "$(command -v qmd)" \
   --reconcile "$PWD/../../danielsvault-rag/scripts/sync-qmd-collections.py"
 ```
 
-Für mehrere autorisierte Kontexte `--config` wiederholen; alle laufen seriell. Alle manuellen und automatischen Aufrufe verwenden dieselbe `--lock-file`. Der erste JSON-Datensatz nennt das neu angelegte Artefaktverzeichnis. Bei einem laufenden Tool-Prozess denselben Session-Handle pollen; nicht erneut starten. Pro Schritt werden `.stdout`, `.stderr` und `.exitcode` gespeichert, der Abschluss steht in `report.json`. Das Verzeichnis muss neu sein. Rohartefakte bleiben lokal/ignoriert und können Quelleninhalte enthalten.
+Vorher müssen Runtime-Binaries, Provider-Anmeldung, QMD-Datenbank und deren Verzeichnis verfügbar und schreibbar sein. Fehlende Mac-Verfügbarkeit, Anmeldung, Berechtigungen oder Runtime werden als Blocker gemeldet. Der Tagesjob installiert nichts und repariert keine TCC-Einstellungen.
 
-Bei Fehlern `report.json` und die Dateien des dort genannten `failedStep` lesen. Nach Behebung einen neuen Lauf mit neuem Artefaktverzeichnis starten. Bei lebender Sperre den bestehenden Lauf abwarten; keine pauschalen Prozessabbrüche. Anmeldung, TCC- oder Collection-Konflikte werden als Blocker gemeldet. Fehlgeschlagene Wiki-Pflege blockiert auch die anschließende globale QMD-Pflege.
+## Pflege, Teilfehler und Protokolle
 
-## Agenten und Aktualität
+Der Helper gleicht Quell-Collections ab, prüft die Runtime und führt `wiki maintain`, `status` und `lint` aus. Er aktualisiert anschließend QMD inklusive Embeddings über gültige Ergebnisse. Begrenzte Fehler sperren betroffene und transitiv abhängige Aussagen; nachweislich unabhängige Arbeit darf weiterlaufen. Gemeinsame Runtime-/Indexfehler oder unbestimmbare Abhängigkeiten blockieren die davon abhängigen Schritte. Unvollständige Scans sind kein Quellenentzug.
 
-Für wiederverwendbare Synthesen die verwaltete Schnittstelle verwenden:
+Der erste JSON-Datensatz nennt das neue Laufverzeichnis. Den gleichen Prozesshandle bis zum Abschluss verfolgen; keinen zweiten Aufruf starten, um Ausgabe zurückzugewinnen. Jeder Schritt bewahrt stdout, stderr und Exitcode. `report.json` enthält Gesamtergebnis, `contexts`, `failures`, `pending` beziehungsweise `remaining` sowie den Wiki-Laufbericht. Fehlende oder widersprüchliche Ergebnisse sind kein Erfolg.
+
+Vollständiger Erfolg verlangt Exit 0, `ok:true`, keine offene Arbeit und einen abgeschlossenen Pflegezeitpunkt. Teilfehler behalten einen erfolglosen Gesamtexit auch bei erfolgreichem QMD. Die Automation-Memory nennt das genaue Artefaktverzeichnis, abgeschlossene und offene Arbeit, Quellen-/Seitenzahlen, No-op und `lastCompleted`. Dieser Zeitpunkt wird durch Teilfehler nicht vorgezogen. Nach Behebung erfolgt ein neuer Lauf mit neuem Artefaktverzeichnis. Alle manuellen und automatischen Aufrufe teilen dieselbe Sperrdatei; zusätzlich schützt die Wiki-Schreibsperre den gemeinsamen Bestand.
+
+Originalrepos und ihre Quellkonfiguration bleiben für den Tagesjob unverändert. Er schreibt nur generiertes Wiki samt Zustand, QMD-Daten, lokale ignorierte Laufartefakte und seine Memory. Keine weiteren Jobs, Watcher oder Fachautomationsänderungen. Query und Merge starten keine Pflege. Ein unveränderter erfolgreicher Folgelauf ist No-op ohne Modellkompilierung.
+
+## Agenten und menschlicher Einstieg
+
+Kontextfragen beginnen mit WikiQuery:
 
 ```bash
-./wiki query --config .local/general.json --question 'Welche Rolle hat QMD im Wiki?'
+./wiki query --config .local/common.json --question 'Welche Rolle hat QMD im gemeinsamen Wiki?'
 ```
 
-Sie prüft Originalstände und verwendet bei Lücken aktuelle Quellen. Ohne `--save` entsteht keine dauerhafte Antwort. Direkte QMD-Treffer oder Obsidian-Seiten allein beweisen keine Aktualität. README, AGENTS, CONTEXT, OpenSpec und ADRs bleiben für ihre jeweiligen Regeln maßgeblich. Der [Einführungskatalog](../docs/rag/llm-wiki-context-adoption-catalog.md) benennt die vorgesehenen Verweise; er behauptet keine bereits erfolgte flächendeckende Einführung.
+`originals` enthält geprüfte Originalpfade, navigierbare Obsidian-URIs, Hashes und Aktualitätsstatus. `review` meldet veraltete Seiten; `fallback:true` kennzeichnet aktuelle Primärquellen im selben Zugang. Explizite Grenzen werden mit `--repo` oder `--source` durchgesetzt, auch transitiv. Ohne Speicherauftrag kein `--save`. Bei Ausfall den Blocker melden; keine parallele direkte QMD-Kontextsuche starten. Der [Recherche-Skill](../skills-repo/skills/rag-documentation-research/SKILL.md) ist der zentrale Agentenablauf.
 
-## Abnahme und Vollimport
+Menschlicher Einstieg: `_shared/contextual-llm-wiki/common/wiki/index.md` im DanielsVault. Wiki-Seiten sind abgeleitete Evidenz; ihre Originalverweise öffnen unveränderte Fachdateien. Direkte Anzeige in Obsidian oder ein QMD-Treffer allein garantiert keine Aktualität. Der [Einführungskatalog](../docs/rag/llm-wiki-context-adoption-catalog.md) bleibt der Plan für weitere Repo-Einstiege.
 
-[Abnahme dieser Betriebserweiterung](../openspec/changes/operate-contextual-llm-wiki/acceptance.md). Die Erstkompilierung des vollständigen allgemeinen Bestands ist vom begrenzten echten Abnahmelauf getrennt zu beurteilen. Maßgeblich sind produktives `wiki status` (`lastCompleted`, `pending`, `changes`, `review`) und der konkrete Laufbericht, nicht die Aktivierung des Zeitplans allein.
+## Übernahme und Wiederherstellung
+
+Vor der Umstellung wurden die alte Automationdefinition und alle tatsächlich befüllten Altbestände gesichert. [Ticket 02](evidence/shared-wiki-02.md) dokumentiert die geprüfte Migrationsfunktion. Der produktive Übernahmebericht und Snapshot liegen im Ticket-04-Nachweis. Alte gespeicherte Antworten mit inzwischen geänderten oder entfallenen Belegen bleiben im Snapshot erhalten und werden sichtbar zurückgestellt.
+
+Frühere aktive Einstiege und Wiki-Collections dürfen erst nach überprüfter Übernahme kontrolliert abgelöst werden. Fremde QMD-Collections bleiben unangetastet. Abnahmebestände ersetzen keine Produktionsquelle. Die vollständige Konfiguration lässt sich mit `wiki init-config` gemäß [README](README.md) erzeugen; vorhandene Konfigurationen nicht blind überschreiben.

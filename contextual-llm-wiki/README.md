@@ -18,7 +18,7 @@ export LLMWIKI_PROVIDER=codex-agent
 
 `preflight` prüft Runtime, Compiler-Pin und vorhandene Providerkonfiguration ohne Inhaltsänderungen. `setup` führt zusätzlich eine tatsächliche Completion-Anfrage aus. `LLMWIKI_MODEL` ist optional; Zugangsdaten bleiben in der vorhandenen Providerkonfiguration beziehungsweise Umgebung. Alternativen: `claude-agent` oder `openai` mit `OPENAI_API_KEY` und gegebenenfalls `OPENAI_BASE_URL`. Der bei der Abnahme getestete Provider steht in [Evidence](evidence/acceptance.md). Die Compiler-Ausgabe ist standardmäßig deutsch.
 
-Ticket 01 stellt die gemeinsame CLI bereit. Bestehende getrennte Bestände und der Live-Job werden erst in den Tickets 02–04 migriert. Für einen neuen, isolierten Bestand:
+Die gemeinsame Produktion verwendet `.local/common.json`. Aktivierungs- und Importstatus: [Ticket 04](evidence/production-04.md). Für einen neuen Bestand (vorhandene Konfiguration nicht überschreiben):
 
 ```bash
 export DANIELSVAULT_ROOT=/Users/dh/Documents/DanielsVault
@@ -45,7 +45,9 @@ Die Quelle ist jeweils der konfigurierte Originalcheckout. Zusätzliche Worktree
 ./wiki query --config .local/common.json --question 'Welche Rolle hat QMD?' --save qmd-rolle
 ```
 
-`maintain` inventarisiert vollständig, meldet direkte und indirekte Prüfgründe, zieht ungültige Seiten zurück, kompiliert mit dem echten SDK ohne Embeddings, prüft gespeicherte Antworten und aktualisiert nur die eigene QMD-Collection. Ein unveränderter erfolgreicher Lauf benötigt keine neue Modellarbeit. Status und Fehler sind JSON; ein Fehler oder offener erforderlicher Arbeitsschritt liefert einen Exitcode ungleich null.
+`maintain` inventarisiert vollständig, meldet direkte und indirekte Prüfgründe, zieht ungültige Seiten zurück, kompiliert mit dem echten SDK ohne Embeddings, prüft gespeicherte Antworten und aktualisiert nur die eigene QMD-Collection. Ein unveränderter erfolgreicher Lauf benötigt keine neue Modellarbeit. WikiQuery liefert unter `originals` direkt lesbare Originalpfade und Obsidian-URIs mit geprüftem Hash und Aktualitätsstatus. Kontextfragen beginnen mit dieser Schnittstelle; QMD arbeitet intern.
+
+Status und Fehler sind JSON; ein Fehler oder offener erforderlicher Arbeitsschritt liefert einen Exitcode ungleich null.
 
 Begrenzte Provider- und Validierungsfehler sperren den betroffenen Quellen-/Seitenzweig einschließlich gespeicherter Antworten. Unabhängige gültige Seiten werden weiter gepflegt und indexiert. Der Lauf bleibt mit `ok: false` und Exitcode 1 unvollständig; `completed`, `unchanged`, `failures` und `pending` beschreiben den Arbeitsstand, `report` verweist auf den lokalen Laufbericht unter `<output>/.state/runs/`. Gemeinsame Runtime-/Indexfehler, unvollständige Scans und nicht bestimmbare Abhängigkeiten sperren abhängige Arbeit. Ein fehlender konfigurierter Repo-Root ist kein bestätigter Quellenentzug.
 

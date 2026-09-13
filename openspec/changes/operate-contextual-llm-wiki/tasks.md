@@ -20,7 +20,7 @@
 - [x] 4.2 Bestehende Wissensseiten und gespeicherte Synthesen sichern und samt überprüfter Provenienz in gemeinsamen Zustand/Ausgabe überführen; keine stillen Überschreibungen oder Verluste.
 - [x] 4.3 Gemeinsames QMD-Routing ohne aus dem Domainnamen abgeleitete Ausschlüsse herstellen; betroffene kanonische Retrieval-Regeln abgleichen.
 - [x] 4.4 Begrenzte Pflegefehler isolieren, sichere unabhängige Arbeit fortsetzen und echte Teilfehlerberichte nachweisen.
-- [ ] 4.5 Live-Job und Betriebsreferenzen auf die gemeinsame Konfiguration umstellen; bisherigen Zeitplan beibehalten.
+- [x] 4.5 Live-Job und Betriebsreferenzen auf die gemeinsame Konfiguration umstellen; bisherigen Zeitplan beibehalten.
 - [ ] 4.6 Echte gemeinsame Synthese aus persönlichem und anderem Tätigkeitsbereich, Relevanzkontrolle, Quelle–Antwort-Nachpflege, Vollimport und No-op prüfen; Abnahme aktualisieren.
 
 [Ticket-01-Abnahme](../../../contextual-llm-wiki/evidence/shared-wiki-01.md): gemeinsame Quellen-/Query-Funktion und QMD-Routing isoliert verifiziert, einschließlich echter repoübergreifender Konzeptseite, Relevanzkontrolle, expliziter transitiver Grenzen, Aktualitätsprüfung und No-op. Damit ist der begrenzte Synthese-/Query-Anteil aus 4.6 nachgewiesen; 4.6 bleibt wegen Vollimport und produktiver Abnahme offen. 4.2 ist mit Ticket 02 und 4.4 mit Ticket 03 verifiziert; 4.5 und die produktive Abnahme gehören zu Ticket 04. Bestehende getrennte Ausgaben und Live-Job wurden nicht umgestellt; nicht archivieren.
@@ -39,7 +39,7 @@ Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commi
 Daniel hat Ticket 03 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Das erfüllte Requirement ist in [continue-contextual-wiki-maintenance](../archive/2026-09-13-continue-contextual-wiki-maintenance/proposal.md) separat archiviert und kanonisch übernommen. Live-Aktivierung und Vollimport bleiben in diesem Change offen.
 
 ## 4.7 Ergänzung zum Agentenzugang
-- [ ] WikiQuery als Standard-Kontextzugang zentral verankern und im Agentenablauf nachweisen; vorhandene Quellenbegrenzung und Primärquellenprüfung beibehalten.
+- [x] WikiQuery als Standard-Kontextzugang zentral verankern und im Agentenablauf nachweisen; vorhandene Quellenbegrenzung und Primärquellenprüfung beibehalten.
 
 
 ## 5. Ergänzung: Upstream-Stand lokal übernehmen
@@ -50,3 +50,5 @@ Daniel hat Ticket 03 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commi
 Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Session zurückgestellt. Offene Punkte aus Abschnitt 4 bleiben erhalten und werden in dieser Session nicht weiter umgesetzt. Die Live-Pflegeautomation bleibt unverändert.
 
 - [x] 5.4 Kanal „veröffentlichte Releases“ bestätigen und drei freigegebene [Umsetzungstickets](../../../.scratch/update-llm-wiki-releases/spec.md) mit Abhängigkeiten 01 → 02 → 03 veröffentlichen.
+
+[Ticket-04-Zwischenstand](../../../contextual-llm-wiki/evidence/production-04.md): bestehender Live-Job auf gemeinsame Konfiguration umgestellt, Einstellungen erhalten; WikiQuery-first in zentralen Skills und tatsächlichem Agentenablauf samt aktuellem Quellen-Fallback nachgewiesen. Vollimport und produktive Gesamtabnahme (4.6) laufen noch. Keine Archivierung.

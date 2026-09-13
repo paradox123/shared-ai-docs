@@ -13,7 +13,7 @@ Diese Seite sammelt die Dokumentation fuer das lokale RAG-Projekt auf Basis von 
 - [Runtime Closeout 2026-04-23](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/2026-04-23-rag-runtime-closeout.md)
   Formales Closeout mit gruener 01-05-Verifikation, Runtime-Health/Smoke und archivierten OpenSpec-Changes.
 - [Operating Model: QMD as the Single Engine](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/operating-model-rag-qmd.md)
-  QMD ist die einzige persistierte Retrieval-Engine; `rag` bleibt eine Kompatibilitätshülle.
+  WikiQuery ist der Standardzugang; QMD bleibt die interne einzige Retrieval-Engine und `rag` eine Kompatibilitätshülle.
 - [Delivery Evidence 2026-04-26](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/2026-04-26-rag-qmd-operating-model-delivery-evidence.md)
   Command-by-command Nachweis des Direct-Mode-Changes inkl. `qmd`-Checks und Watcher-State.
 

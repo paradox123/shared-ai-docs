@@ -473,3 +473,55 @@ test("fallback can reach later relevant sources when the provider only accepts b
     await f.close();
   }
 });
+
+test("WikiQuery returns directly navigable checked originals for wiki evidence and current-source fallback", async () => {
+  const f = await fixture();
+  try {
+    await f.run("maintain");
+    const result = await f.run(
+      "query",
+      "--question",
+      "Freigabe",
+      "--repo",
+      "alpha",
+    );
+    assert.equal(result.ok, true, JSON.stringify(result));
+    assert.deepEqual(
+      result.originals.map((s: any) => s.id),
+      ["alpha/README.md"],
+    );
+    assert.equal(result.originals[0].path, path.join(f.dir, "alpha/README.md"));
+    assert.equal(
+      result.originals[0].uri,
+      "obsidian://open?path=" +
+        encodeURIComponent(path.join(f.dir, "alpha/README.md")),
+    );
+    assert.equal(result.originals[0].freshness, "checked-current");
+    assert.equal(
+      await readFile(result.originals[0].path, "utf8"),
+      "# Freigabe\n\nAlpha verlangt zwei Freigaben.\n",
+    );
+    await writeFile(
+      path.join(f.dir, "alpha/README.md"),
+      "# Freigabe\n\nAlpha verlangt vier Freigaben.\n",
+    );
+    const changed = await f.run(
+      "query",
+      "--question",
+      "Freigabe",
+      "--repo",
+      "alpha",
+    );
+    assert.equal(changed.ok, true, JSON.stringify(changed));
+    assert.equal(changed.fallback, true);
+    assert.ok(changed.review.length > 0);
+    assert.equal(changed.originals[0].freshness, "checked-current");
+    assert.notEqual(changed.originals[0].hash, result.originals[0].hash);
+    assert.deepEqual(
+      changed.originals.map((s: any) => s.id),
+      ["alpha/README.md"],
+    );
+  } finally {
+    await f.close();
+  }
+});
