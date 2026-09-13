@@ -35,7 +35,7 @@ head around deterministic checks and each review. A failed command cannot hide
 a mutation. A normal check failure still receives all three reviews. Requirements,
 code-quality and architecture use distinct fresh Codex sessions with Terra/xhigh,
 read-only access and the prescribed skill routing. They receive the same
-requirements, guidance, diff and current evidence, without writer conversation or
+requirements, guidance, full changed source files, diff and current evidence, without writer conversation or
 peer verdicts. The pinned runtime adapter disables reviewer tools and receives
 all required inputs explicitly.
 
@@ -48,6 +48,7 @@ all required inputs explicitly.
   verification, separate reviewer results, invocation/session IDs and policies.
 - `repairs` retains monotonic rounds 1–3, the original writer session/worktree,
   actionable findings, assignment, result, new head and updated draft receipt.
+  Later assignments include the earlier repairs' result summaries.
 - `humanRequest` gives the concrete blocker/open findings and links to the draft
   and run evidence. These are handoff requests for inspecting and resolving the
   retained conflict; this slice does not introduce an in-app answer command.

@@ -132,6 +132,7 @@ class HeadQualificationTests(harness.ControlPlaneProcessHarness, unittest.TestCa
         self.assertTrue(all(r['verification']['state'] == 'check-failed' for r in q['rounds']))
         self.assertEqual('gpt-5.6-sol', fixture.repair_requests[-1]['policy']['model'])
         self.assertEqual('final_repair_round', fixture.repair_requests[-1]['policy']['escalationReason'])
+        self.assertEqual('Findings repaired.', fixture.repair_requests[-1]['priorAttempts'][0]['summary'])
         self.assertIn('greeting normalization', q['humanRequest']['problem'])
         self.assertEqual('repair-limit-exhausted', q['blocker'])
         self.assertIsNone(q['qualifiedHeadSha'])

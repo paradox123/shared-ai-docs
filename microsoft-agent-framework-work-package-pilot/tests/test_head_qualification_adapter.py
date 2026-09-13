@@ -59,3 +59,9 @@ class HeadQualificationAdapterTests(unittest.TestCase):
         Path(self.fixture.plan['headQualification']['skills']['code-review']['path']).write_text('Changed skill')
         self.assertEqual('invalid-head-qualification-plan', self.review()['blocker'])
         self.assertEqual([], self.fixture.review_requests)
+
+    def test_reviewer_receives_full_changed_source_and_explicit_base(self):
+        self.assertEqual('review-completed', self.review()['state'])
+        request = self.fixture.review_requests[0]
+        self.assertEqual(self.fixture.base, request['baseSha'])
+        self.assertEqual(self.fixture.agent_content.strip(), request['input']['implementation']['greeting.py'])

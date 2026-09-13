@@ -53,7 +53,8 @@ internal sealed class HeadQualificationWorkflow(PostgresImplementationRunStore s
             var assignment = await PublicationWorkflow.InvokeAsync(python, new { stage = "repair-assignment", plan,
                 run.Correlation, fixture, headSha = round.HeadSha, pullNumber, runId = run.RunId,
                 number, writerSessionId = writer, reviews = round.Reviews, verification = round.Verification,
-                priorAttempts = qualification.Repairs!.Select(r => new { r.Number, r.SourceHeadSha, r.HeadSha, r.State }), intent = round.Evidence });
+                priorAttempts = qualification.Repairs!.Select(r => new { r.Number, r.SourceHeadSha, r.HeadSha, r.State,
+                    summary = r.Report?.GetProperty("result").GetProperty("summary").GetString() }), intent = round.Evidence });
             if (State(assignment) != "repair-assigned") { await BlockAsync(Blocker(assignment)); return; }
             var repair = new QualificationRepair(number, Guid.NewGuid().ToString(), round.HeadSha, assignment.GetProperty("assignment").Clone());
             // Invalidate usable qualification before the writer is dispatched.

@@ -25,11 +25,7 @@ class NativeHeadQualificationTests(harness.ControlPlaneProcessHarness, unittest.
     def configuration(self):
         skills = {}
         for name in ('code-review', 'codebase-design', 'domain-modeling'):
-            path = Path(self.scratch.name) / (name + '.md')
-            path.write_text('Independently review the assigned axis from supplied inputs. '
-                'Requirements must match executable evidence and diff; code-quality checks correctness and standards; '
-                'architecture checks appropriate module boundaries. Return pass, fail with actionable findings, '
-                'or reasoned not_applicable only for code-quality or architecture. Do not demand out-of-scope changes.')
+            path = harness.PILOT_ROOT.parent / 'skills-repo' / 'skills' / name / 'SKILL.md'
             skills[name] = {'path': str(path), 'sha256': hashlib.sha256(path.read_bytes()).hexdigest()}
         return {'skills': skills, 'guidance': ['ISSUE.md'],
             'requirements': 'Fix greet() to return exactly Hello, Ada! Change greeting.py only.',

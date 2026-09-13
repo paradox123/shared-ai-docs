@@ -69,6 +69,8 @@ def review_input(plan, head, intent, fixture):
     validate_config(config)
     return redact({'requirements': config['requirements'], 'evidence': intent['entries'],
         'diff': git(plan, 'diff', plan['expectedBaseSha'], head),
+        'implementation': {path: git(plan, 'show', head + ':' + path) for path in
+            git(plan, 'diff', '--name-only', '--diff-filter=ACMR', plan['expectedBaseSha'], head).splitlines()},
         'guidance': {p: git(plan, 'show', head + ':' + p) for p in config['guidance']}}, fixture)
 
 
@@ -113,7 +115,7 @@ def review(request, fixture):
     current_head(plan, head, request['pullNumber'])
     axis = request['axis']
     policy = review_policy(plan['headQualification'], axis)
-    assignment = {'runId': request['runId'], 'axis': axis, 'headSha': head,
+    assignment = {'runId': request['runId'], 'axis': axis, 'headSha': head, 'baseSha': plan['expectedBaseSha'],
         'localPath': plan['localPath'], 'policy': policy,
         'input': review_input(plan, head, request['intent'], fixture),
         'skills': {name: Path(plan['headQualification']['skills'][name]['path']).read_text() for name in SKILLS[axis]}}
