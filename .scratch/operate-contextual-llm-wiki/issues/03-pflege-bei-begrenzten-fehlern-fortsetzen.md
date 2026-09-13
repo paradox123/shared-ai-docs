@@ -8,7 +8,7 @@
 
 ## Grundlage und Ausgangslage
 
-Maßgeblich sind der OpenSpec-Change [operate-contextual-llm-wiki](../../../openspec/changes/operate-contextual-llm-wiki/proposal.md), sein [Design](../../../openspec/changes/operate-contextual-llm-wiki/design.md) und die [Betriebs-Requirements](../../../openspec/changes/operate-contextual-llm-wiki/specs/contextual-wiki-operations/spec.md), insbesondere „Observable serialized maintenance with bounded failures“.
+Maßgeblich sind der OpenSpec-Change [operate-contextual-llm-wiki](../../../openspec/changes/operate-contextual-llm-wiki/proposal.md), sein [Design](../../../openspec/changes/operate-contextual-llm-wiki/design.md) und die [kanonischen Betriebs-Requirements](../../../openspec/specs/contextual-wiki-operations/spec.md), insbesondere „Observable serialized maintenance with bounded failures“.
 
 Der bestehende Wartungshelfer stoppt beim ersten Fehler den gesamten Lauf; auch die Kompilierung veröffentlicht bisher keine unabhängig abgeschlossenen Teilbereiche eines fehlgeschlagenen Gesamtlaufs. Daniel hat unabhängige Weiterverarbeitung ausdrücklich grundsätzlich bestätigt. Die fachliche Einheit der Fehlerisolation ist betroffene Evidenz mit ihren Abhängigkeiten, nicht eine allgemeine/private Wiki-Grenze.
 
@@ -35,3 +35,5 @@ Ticket 02 ist keine Voraussetzung. Vorhandene Migrationsbestände werden für di
 - 13.09.2026: Aufteilung und Abhängigkeiten von Daniel bestätigt. Sichere unabhängige Fortsetzung bedeutet keine Freigabe, fehlerhafte oder unbestimmbare Ergebnisse zu verwenden.
 
 - 13.09.2026: Auf Daniels bestätigtem Zielbranch `codex/shared-wiki-03` auf Basis von Ticket 01 umgesetzt und isoliert verifiziert. [Abnahme mit beobachtetem Verhalten, Rohartefakten und Grenzen](../../../contextual-llm-wiki/evidence/bounded-failures-03.md). Keine Live-Umstellung; Ticket 02 wird nicht vorausgesetzt. Standards- und Spec-Review abgeschlossen; ein reproduzierbarer Wiederaufnahmefehler aus dem Review wurde testgeführt behoben und unabhängig erneut geprüft.
+
+- 13.09.2026: Von Daniel ausdrücklich akzeptiert; Spec-/OpenSpec-Abschluss, Commit und Push beauftragt. [Archivierter Ticket-03-Change](../../../openspec/changes/archive/2026-09-13-continue-contextual-wiki-maintenance/proposal.md). Der übergeordnete Betriebs-Change bleibt für die offenen Folgetickets aktiv.

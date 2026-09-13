@@ -32,3 +32,8 @@ Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commi
 
 
 [Ticket-03-Abnahme](../../../contextual-llm-wiki/evidence/bounded-failures-03.md): Begrenzte Fehler, transitive Sperren, unabhängige Veröffentlichung/QMD-Aktualisierung, strikte Helper-Verträge, Reparatur und No-op über die öffentliche CLI verifiziert. Der Live-Job wurde nicht umgestellt; Aufgaben 4.2, 4.5 und der Produktionsanteil von 4.6 bleiben offen.
+
+
+## Akzeptierter Abschluss von Ticket 03
+
+Daniel hat Ticket 03 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Das erfüllte Requirement ist in [continue-contextual-wiki-maintenance](../archive/2026-09-13-continue-contextual-wiki-maintenance/proposal.md) separat archiviert und kanonisch übernommen. Migration, Live-Aktivierung und Vollimport bleiben in diesem Change offen.

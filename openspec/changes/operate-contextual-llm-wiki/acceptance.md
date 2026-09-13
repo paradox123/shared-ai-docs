@@ -43,3 +43,8 @@ Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commi
 ## Ergänzung Ticket 03
 
 [Abnahme begrenzter Pflegefehler](../../../contextual-llm-wiki/evidence/bounded-failures-03.md): unabhängige Inhalte werden trotz tatsächlicher Provider-/Validierungsfehler aktualisiert; betroffene Konzepte und Antworten bleiben gesperrt. Die dortigen Nachweise ergänzen die historische Betriebsabnahme oben und belegen keine produktive Umstellung oder vollständige Embedding-Pflege.
+
+
+## Akzeptierter Abschluss von Ticket 03
+
+Daniel hat Ticket 03 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Das erfüllte Requirement ist in [continue-contextual-wiki-maintenance](../archive/2026-09-13-continue-contextual-wiki-maintenance/proposal.md) separat archiviert und kanonisch übernommen. Migration, Live-Aktivierung und Vollimport bleiben in diesem Change offen.
