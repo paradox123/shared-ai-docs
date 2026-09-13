@@ -53,12 +53,8 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 
 [Ticket-04-Zwischenstand](../../../contextual-llm-wiki/evidence/production-04.md): bestehender Live-Job auf gemeinsame Konfiguration umgestellt, Einstellungen erhalten; WikiQuery-first in zentralen Skills und tatsächlichem Agentenablauf samt aktuellem Quellen-Fallback nachgewiesen. Vollimport und produktive Gesamtabnahme (4.6) sind wegen wiederholter paralleler Originalquellenänderungen blockiert; Meetings-Verbleib ist offen. Keine Archivierung.
 
-## 6. Release-Ticket 01: Kandidat installieren und prüfen
-- [x] 6.1 Compiler-Release-Definition vereinheitlichen und bisherige CLI-Prüfung nachweisen.
-- [x] 6.2 Öffentlichen Kandidatenaufruf mit Release-Nachweis, exaktem Commit, unveränderten Lock-Eingängen und isolierter Installation testgetrieben umsetzen.
-- [x] 6.3 Build-/Integrationspflichtprüfungen und nicht erfolgreiche Fehlerberichte an den Kandidaten binden.
-- [x] 6.4 Echten erfolgreichen und gezielt fehlschlagenden Aufruf nachweisen; Abnahme, Tests und Review dokumentieren.
+## Akzeptierter Abschluss von Release-Ticket 01
 
-5.2/5.3 bleiben wegen Erkennung, Aktivierung und Rollback der Folgetickets offen.
+Daniel hat Release-Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Die erledigten Aufgaben 6.1–6.4 und ihr Kandidatenvertrag sind unter [qualify-upstream-wiki-releases](../archive/2026-09-13-qualify-upstream-wiki-releases/tasks.md) abgeschlossen und kanonisch übernommen. [Abnahme und Prüfnachweise](../../../contextual-llm-wiki/evidence/release-install-01.md).
 
-[Release-Ticket-01-Abnahme](../../../contextual-llm-wiki/evidence/release-install-01.md): reguläres Release v1.3.0 auf exakten Commit aufgelöst, frischer Kandidat mit unveränderten Lock-Eingängen und beiden Integrationspatches gebaut; 59 Upstream-/29 Integrationspflichtprüfungen bestanden. Fehlender Pflicht-Test blockiert Eignung trotz erfolgreicher Installation/Build. Öffentliche Fehler- und Review-Regressionsprüfungen sowie vollständiger `npm run check` bestanden; beide Review-Achsen haben keine offenen Findings. Aktive Installation im Worktree unverändert, Produktion/Automation nicht verwendet. Tickets 02/03 und Aufgaben 5.2/5.3 bleiben offen.
+5.2/5.3 bleiben wegen Release-Erkennung, Aktivierung und Rollback offen. Der Installations-/Qualifikationsanteil ist erfüllt; diese Folgeschritte verwenden den kanonischen Kandidatenvertrag. Die offene Wissenspflege aus 4.6 bleibt ebenfalls erhalten.

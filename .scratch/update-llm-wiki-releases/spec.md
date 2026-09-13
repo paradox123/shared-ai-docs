@@ -16,10 +16,14 @@ Wissenspflege, deren Schedulerwechsel, die gemeinsame Wiki-Migration sowie unabh
 2. Einen erfolgreichen Kandidaten lokal aktivieren und bei Fehlern den bisherigen funktionsfähigen Stand erhalten.
 3. Neue Releases regelmäßig erkennen und die gesamte Übernahme automatisch ausführen.
 
-Jedes Ticket wird über die direkteste öffentliche Schnittstelle nachgewiesen. Ticket 01 ist auf `codex/update-llm-wiki-releases` umgesetzt und geprüft; [Abnahme](../../contextual-llm-wiki/evidence/release-install-01.md). Aktivierung und regelmäßige Erkennung aus Tickets 02/03 sind noch nicht umgesetzt.
+Jedes Ticket wird über die direkteste öffentliche Schnittstelle nachgewiesen. Ticket 01 ist auf `codex/update-llm-wiki-releases` umgesetzt, geprüft und von Daniel am 13.09.2026 ausdrücklich akzeptiert; [Abnahme](../../contextual-llm-wiki/evidence/release-install-01.md). Aktivierung und regelmäßige Erkennung aus Tickets 02/03 sind noch nicht umgesetzt.
 
 ## Quellen
 
 - [Aktiver OpenSpec-Change](../../openspec/changes/operate-contextual-llm-wiki/design.md)
 - [Anforderung zur Upstream-Übernahme](../../openspec/changes/operate-contextual-llm-wiki/specs/contextual-wiki-operations/spec.md)
 - [Korrigierte Betriebsnotiz](../../docs/rag/2026-09-13-llm-wiki-dependency-updates.md)
+
+## Abschluss von Ticket 01
+
+Der Kandidatenvertrag ist in der [kanonischen Operations-Spec](../../openspec/specs/contextual-wiki-operations/spec.md) festgehalten und unter [qualify-upstream-wiki-releases](../../openspec/changes/archive/2026-09-13-qualify-upstream-wiki-releases/proposal.md) archiviert. Diese Feature-Spec bleibt für Tickets 02/03 erhalten; Ticket 01 ist abgeschlossen.

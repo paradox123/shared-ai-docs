@@ -17,3 +17,5 @@
 ## Comments
 
 13.09.2026: Implementiert und reviewed auf `codex/update-llm-wiki-releases` im isolierten Worktree `../shared-ai-docs-update-llm-wiki-releases`, Basis `dbb6df2030f26543099eb34d3bb6b7ff38963dbc`. [Abnahme und Grenzen](../../../contextual-llm-wiki/evidence/release-install-01.md), [Kandidatenberichte](../../../contextual-llm-wiki/evidence/release-install-01-results.json) und [Standards-/Spec-Review](../../../contextual-llm-wiki/evidence/release-install-01-review.md). Kein Merge und keine produktive Aktivierung; Tickets 02/03 bleiben separat.
+
+13.09.2026: Daniel hat das Ergebnis ausdrücklich akzeptiert und Spec-/OpenSpec-Abschluss, Commit und Push beauftragt. Ticket 01 ist abgeschlossen (`resolved`). Der erfüllte Vertrag ist [kanonisch](../../../openspec/specs/contextual-wiki-operations/spec.md) übernommen und im [OpenSpec-Archiv](../../../openspec/changes/archive/2026-09-13-qualify-upstream-wiki-releases/proposal.md) dokumentiert. Die offenen Tickets 02/03 bleiben im aktiven Betriebs-Change.

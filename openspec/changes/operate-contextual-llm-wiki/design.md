@@ -96,12 +96,6 @@ weiterhin dem einmaligen Neuaufbau aus Ticket 03. Die Pflege behält das
 Migrationsjournal und behandelt Fehler importierter Antwortketten mit denselben
 Abhängigkeitssperren wie andere gespeicherte Antworten.
 
-## Release-Ticket 01: isolierter Kandidat
+## Akzeptierter Release-Ticket-01-Vertrag
 
-Owning Git root: `_shared/shared-ai-docs`, Ausgang `main` bei `dbb6df2030f26543099eb34d3bb6b7ff38963dbc`; Ziel `codex/update-llm-wiki-releases` im separaten Worktree `../shared-ai-docs-update-llm-wiki-releases`. Derselbe Ausgangscommit ist die Review-Basis. Fremde Änderungen im ursprünglichen Checkout werden nicht übernommen. Der bestehende Abschnitt 5 besitzt dieses Verhalten; kein neuer Change ist notwendig.
-
-`scripts/install-release.py --release TAG` erzeugt einen neuen Kandidaten unter `.runtime/candidates/` oder einem ausdrücklich angegebenen neuen Ziel. GitHub Release-Metadaten über `gh api --hostname github.com` belegen die Veröffentlichung; ein frischer Git-Fetch des Release-Tags liefert den exakten Commit. Ein isolierter Wrapper-Snapshot erhält eine eigene Release-Definition und einen eigenen Compiler, sodass die bestehenden statischen SDK-Imports tatsächlich den Kandidaten prüfen. Der vorhandene Node wird nur lesend verwendet, bei fehlender oder inkompatibler Runtime scheitert der Kandidat. Manifest/Lock bleiben bytegleich; `npm ci` installiert die festgelegten Versionen einschließlich Build-Abhängigkeiten. Bestehende Integrationspatches werden in Dateireihenfolge angewandt.
-
-Die stabile Testgrenze ist der öffentliche Installationsprozess samt JSON-Bericht und Exitcode. GitHub-/Git-Transport werden für Fehlerfälle an der externen Prozessgrenze kontrolliert; der echte Release-Nachweis verwendet GitHub, Git, npm, Compiler und QMD. Nur der Modellprovider bleibt in den begrenzten Integrationstests deterministisch. Jeder erforderliche Schritt beginnt mit einem dauerhaft gespeicherten nicht erfolgreichen Status. Aktivierung, Rollback und periodische Erkennung bleiben Tickets 02/03.
-
-Der Review ergänzte einen Ausführungsnachweis je Pflichtdatei: Vitest-JSON muss jede kanonische Datei mit erfolgreichen Assertions enthalten; ein Node-JSONL-Reporter unterscheidet tatsächliche Tests von synthetischen Erfolgen leerer Dateien. Die Summenprüfung bleibt zusätzlich bestehen. Der Node-Integrationslauf entfernt geerbte `NODE_OPTIONS`, damit ein äußerer Testfilter keine Pflichtszenarien auslassen kann.
+Installation und Qualifikation von Release-Kandidaten sind am 13.09.2026 akzeptiert und unter [qualify-upstream-wiki-releases](../archive/2026-09-13-qualify-upstream-wiki-releases/design.md) abgeschlossen. Die kanonische `contextual-wiki-operations`-Spec besitzt diesen Vertrag. Dieser aktive Change ergänzt ihn um Aktivierung/Rollback und automatische Erkennung; die offenen Wissenspflegeanforderungen bleiben bestehen.

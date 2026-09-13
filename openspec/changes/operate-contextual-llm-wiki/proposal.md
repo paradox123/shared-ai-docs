@@ -27,3 +27,7 @@ Bestehende Codex-Automation, `contextual-llm-wiki/scripts`, QMD-Wartungsreferenz
 ### Bereits abgeschlossener Ticket-03-Anteil
 
 Der akzeptierte Fehler-/Wiederaufnahmevertrag ist unter [continue-contextual-wiki-maintenance](../archive/2026-09-13-continue-contextual-wiki-maintenance/proposal.md) abgeschlossen. Dieser aktive Change behält Migration, Live-Aktivierung und Vollimport; kein Ticket-03-Requirement bleibt hier als unerfülltes Delta dupliziert.
+
+### Bereits abgeschlossener Release-Ticket-01-Anteil
+
+Die akzeptierte Kandidateninstallation/-qualifikation ist unter [qualify-upstream-wiki-releases](../archive/2026-09-13-qualify-upstream-wiki-releases/proposal.md) abgeschlossen und in `contextual-wiki-operations` kanonisch übernommen. Dieser Change behält lokale Aktivierung/Rollback, automatische Release-Erkennung und die offenen Wissenspflegeaufgaben.

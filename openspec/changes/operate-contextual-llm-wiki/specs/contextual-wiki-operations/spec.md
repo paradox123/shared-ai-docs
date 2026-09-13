@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Automatically adopt verified upstream wiki revisions
-The local wiki installation MUST follow published releases of the upstream LLM Wiki repository as a whole, resolving each adopted release to an exact commit and using the dependency versions defined by that revision's manifest and lockfile. It MUST NOT independently update compiler libraries or re-resolve their locked versions ahead of upstream. Independent Node, QMD and wrapper dependency updates are outside this update scope. A required build MUST reproduce the adopted upstream revision with the existing integration patch rather than introduce new dependency versions.
+The local wiki installation MUST follow regular published releases of the upstream LLM Wiki repository as a whole. Candidates MUST satisfy the canonical "Reproducible upstream wiki release qualification" requirement before adoption. Release detection and local activation MUST preserve the candidate's exact commit and upstream-defined dependency versions, without independently updating compiler libraries, Node, QMD or wrapper dependencies.
 
 After a successful build and all required compatibility tests, the verified upstream update MUST be adopted automatically without renewed human review or merge approval. Required checks MUST cover the existing integration patch and managed wiki behavior. Missing, pending or failed required checks MUST block adoption. If Renovate and integration PRs are used, they MUST update only our upstream reference and MUST merge automatically after the required checks pass. This flow MUST NOT modify the upstream repository. Repository merge success MUST NOT be reported as successful Mac installation without verifying local activation separately.
 
@@ -24,15 +24,6 @@ After a successful build and all required compatibility tests, the verified upst
 - **WHEN** a required build or test fails, is missing or is still pending
 - **THEN** the update is not adopted and any integration PR does not merge
 - **AND** the previous working installation is retained and the incomplete or failed verification remains visible
-
-#### Scenario: Install and qualify an isolated release candidate
-- **WHEN** an operator selects a regular published upstream release
-- **THEN** the public installer resolves its release tag to an exact commit and prepares a fresh candidate separate from the active installation
-- **AND** the existing integration patches apply without changing the release manifest or lockfile, and installation uses the frozen lockfile
-- **AND** build, upstream compatibility tests and managed CLI tests cover query, original-source provenance, freshness and maintenance on bounded fixtures
-- **AND** the candidate report binds release identity, commit, patch hashes, dependency input hashes and required check results to that candidate
-- **AND** missing runtimes, patch conflicts, installation failures and missing, pending or failed checks leave eligibility false and the active installation unchanged
-- **AND** bootstrap and runtime validation read one shared release/commit definition, preserving the previously selected release before extension
 
 ### Requirement: Scheduled wiki maintenance before global retrieval maintenance
 The existing local daily QMD automation MUST maintain one common production wiki over all selected source repositories, including `private`, `Projects/Private`, Meetings and Projects, before subsequent QMD retrieval maintenance. It MUST preserve the existing schedule, model, project and notification settings. The name `private` MUST describe a subject domain only and MUST NOT cause a separate wiki, a maintenance exclusion, a special query approval or a confidentiality classification. The automation MUST NOT substitute acceptance fixtures for the full production inventory. No additional scheduler or watcher SHALL be installed.
