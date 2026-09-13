@@ -1,0 +1,6 @@
+test_actionable_findings_repair_same_writer_then_reverify_new_head (tests.test_head_qualification.HeadQualificationTests.test_actionable_findings_repair_same_writer_then_reverify_new_head) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 33.800s
+
+OK

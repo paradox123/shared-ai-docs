@@ -22,9 +22,9 @@ Die alten LangGraph-Verträge für drei Reviewachsen und begrenzte Reparatur ble
 
 ## Implementation — 2026-09-13
 
-Auf dem angeforderten `main` implementiert. Der aktive OpenSpec-Change
-[qualify-agent-framework-head](../../../../openspec/changes/qualify-agent-framework-head/proposal.md)
-trägt die Anforderungen, Tasks und [Abnahmeübersicht](../../../../openspec/changes/qualify-agent-framework-head/implementation-evidence.md).
+Auf dem angeforderten `main` implementiert. Der archivierte OpenSpec-Change
+[qualify-agent-framework-head](../../../../openspec/changes/archive/2026-09-13-qualify-agent-framework-head/proposal.md)
+trägt die Anforderungen, Tasks und [Abnahmeübersicht](../../../../openspec/changes/archive/2026-09-13-qualify-agent-framework-head/implementation-evidence.md).
 Die [Operator-Anleitung](../../../../microsoft-agent-framework-work-package-pilot/QUALIFICATION.md)
 erklärt Plan-Konfiguration, Qualification, Human Requests und Wiederaufnahme.
 
@@ -39,4 +39,13 @@ Runtime-/Live-Provider-Probes übersprungen. Die beiden neuen nativen Qualificat
 wurden zusätzlich separat bestanden. Auch der 10.015-Event-Abbruch-/Wiederherstellungstest
 ist erfolgreich. Build, strikte OpenSpec-Validierung und Diff-Prüfung bestehen.
 
-Der Change bleibt zur Benutzerabnahme aktiv und ist nicht archiviert.
+Der Benutzer hat Ticket 13 am 2026-09-13 nach Erläuterung der Testgrenzen akzeptiert.
+Der Change ist archiviert; die Anforderungen sind in der
+[kanonischen Spec](../../../../openspec/specs/agent-framework-head-qualification/spec.md) übernommen.
+
+
+## Comments
+
+2026-09-13: Explizite Benutzerabnahme mit Auftrag „schließe spec / openspec, commit und push“.
+Die 17 übrigen Codex-Integrationstests und der Live-GitHub-Recovery-Test bleiben ungetestet;
+die beiden neuen nativen Qualification-Tests bestanden separat. Ticketstatus bleibt `resolved`.

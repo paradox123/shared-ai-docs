@@ -1,0 +1,10 @@
+test_changed_skill_bytes_block_before_reviewer_start (tests.test_head_qualification_adapter.HeadQualificationAdapterTests.test_changed_skill_bytes_block_before_reviewer_start) ... ok
+test_malformed_verdicts_keep_diagnostics_without_becoming_actionable (tests.test_head_qualification_adapter.HeadQualificationAdapterTests.test_malformed_verdicts_keep_diagnostics_without_becoming_actionable) ... ok
+test_optimized_python_still_rejects_forbidden_requirements_not_applicable (tests.test_head_qualification_adapter.HeadQualificationAdapterTests.test_optimized_python_still_rejects_forbidden_requirements_not_applicable) ... ok
+test_review_source_preserves_unicode_and_whitespace_paths (tests.test_head_qualification_adapter.HeadQualificationAdapterTests.test_review_source_preserves_unicode_and_whitespace_paths) ... ok
+test_reviewer_receives_full_changed_source_and_explicit_base (tests.test_head_qualification_adapter.HeadQualificationAdapterTests.test_reviewer_receives_full_changed_source_and_explicit_base) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 45.199s
+
+OK

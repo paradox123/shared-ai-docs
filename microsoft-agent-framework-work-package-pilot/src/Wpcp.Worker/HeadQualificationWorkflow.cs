@@ -169,8 +169,11 @@ internal sealed class HeadQualificationWorkflow(PostgresImplementationRunStore s
     private Task SaveRoundAsync(QualificationRound round) => SaveAsync(qualification with {
         Rounds = [.. qualification.Rounds.Take(qualification.Rounds.Count - 1), round] });
 
-    private Task SaveRepairAsync(QualificationRepair repair) => SaveAsync(qualification with {
-        Repairs = [.. qualification.Repairs!.Take(qualification.Repairs.Count - 1), repair] });
+    private Task SaveRepairAsync(QualificationRepair repair)
+    {
+        var repairs = qualification.Repairs!;
+        return SaveAsync(qualification with { Repairs = [.. repairs.Take(repairs.Count - 1), repair] });
+    }
 
     private async Task SaveAsync(HeadQualification next)
     {

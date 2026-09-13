@@ -19,9 +19,9 @@ The user’s pre-existing README/Renovate changes are excluded.
 | Recovery | Adopt completed external operations without another session/write | SIGKILL after a review or repair receipt is followed by adoption under the same operation ID. A lost repair reply retains repository ownership until read-back adopts it; a successor is blocked while uncertain. Interrupted deterministic work is not rerun. |
 | Input integrity | Preserve schema checks, provenance and source paths | Tests under Python -O reject forbidden/malformed verdicts and changed skill bytes. Unicode and tab/newline Git paths preserve full source content via NUL-delimited raw reads. |
 
-The executable scenarios are in [worker/HTTP tests](../../../microsoft-agent-framework-work-package-pilot/tests/test_head_qualification.py),
-[adapter contract tests](../../../microsoft-agent-framework-work-package-pilot/tests/test_head_qualification_adapter.py) and
-[real Codex tests](../../../microsoft-agent-framework-work-package-pilot/tests/test_head_qualification_native.py).
+The executable scenarios are in [worker/HTTP tests](../../../../microsoft-agent-framework-work-package-pilot/tests/test_head_qualification.py),
+[adapter contract tests](../../../../microsoft-agent-framework-work-package-pilot/tests/test_head_qualification_adapter.py) and
+[real Codex tests](../../../../microsoft-agent-framework-work-package-pilot/tests/test_head_qualification_native.py).
 Direct public observations:
 
 - [Failed command mutates the head](evidence/test_failed_verification_that_mutates_head_is_rejected.json)
@@ -57,7 +57,7 @@ Reviewer isolation and actual-skill compatibility were checked separately from c
 - Human Requests retain findings and investigation links; an in-app answer/resume command for qualification handoff
   is outside this slice. Repeating the original command cannot reset the automatic repair limit.
 - Existing publication policy rejects uninspectable/binary outgoing source before draft creation; this change retains that limit.
-- OpenSpec remains active for user acceptance; no archive, push, merge, deployment or release was performed.
+- The user accepted this implementation on 2026-09-13 after clarification of the skipped tests, and authorized OpenSpec closure, commit and push. This closes ticket 13 without claiming full external integration coverage.
 
 ## Validation
 
@@ -79,3 +79,12 @@ WPCP_CODEX_ENDPOINT_PROBE=1 uv run --python 3.14 --with-requirements codex-requi
 ```
 
 Set `WPCP_QUALIFICATION_PROOF_DIR` to a disposable output directory to capture the public JSON observations. No credentials or private adapter receipts are included in this evidence directory.
+
+
+## Accepted closure — 2026-09-13
+
+The user explicitly accepted ticket 13 after reviewing the evidence boundaries: two of the twenty opt-in tests were the new native qualification probes and passed separately; seventeen other Codex integration probes and one live GitHub recovery probe were not run. The ticket-specific behavior is accepted; complete external-system coverage is not claimed.
+
+Before archive, the implementation diff and neighboring publication/runtime boundaries were inspected for DRY, SOLID and KISS. Qualification orchestration, provider/head checks and native-runtime effects remain in separate modules; existing command, publication and persistence helpers are reused. The fresh build exposed one nullable-flow warning in SaveRepairAsync. Capturing its existing non-null repair list once removes the repeated nullable property access without changing runtime behavior. No broader refactoring was warranted; the repair scenario was rerun for this small closure change.
+
+Closure verification: [five adapter tests](evidence/closure-adapter.txt) and [the same-writer repair/reverification test](evidence/closure-repair.txt) pass; the [fresh build](evidence/closure-build.txt) reports zero warnings/errors. [Strict repository-wide OpenSpec validation](evidence/closure-openspec.txt) passes all 49 items. The standard CLI archive path synchronized five requirements into the canonical spec; their text matches the accepted delta. Archive location, relocated links, retained JSON evidence and git diff formatting were checked.
