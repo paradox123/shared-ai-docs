@@ -658,3 +658,147 @@ and a fresh restore. It also scans the disposable databases, artifacts, worker l
 export and client payloads for every configured canary category. API log providers
 remain disabled. Real provider identities, live Codex and managed DTS dispatch are
 covered by their separate pilot tickets.
+
+## Real Codex issue and native continuation (Ticket 10)
+
+The real adapter now opens the exact background session in the official pinned
+Codex TUI. The disposable greeting issue has been implemented through that UI,
+with independent passing tests and all accepted interactions under the same
+run. Native messages and tool execution use current repository authorization
+and the run's exclusive Control Lease. Read-only observers, stale windows and
+revoked contributors cannot write. Late results are retained as non-qualifying
+quarantine evidence. See the [acceptance overview](../openspec/changes/archive/2026-09-13-prove-real-codex-runtime/implementation-evidence.md).
+
+The capability intentionally reports `appTaskVisible:false`: this is native
+**TUI** opening, not a desktop sidebar entry. It uses the public remote client
+and the exact background session ID. It does not edit native app databases or
+silently create a handoff session.
+
+Run the full real integration proof from this directory:
+
+```bash
+WPCP_CODEX_ENDPOINT_PROBE=1 \
+  uv run --python 3.14 --with-requirements codex-requirements.txt \
+  python -m unittest discover -s tests -p test_real_codex_adapter.py -v
+```
+
+For a manual disposable run, configure the same `WPCP_REAL_ADAPTER_ORIGIN`
+(e.g. `http://127.0.0.1:8791/`) and random private
+`WPCP_REAL_ADAPTER_TOKEN` **before starting API, worker and adapter**. The API only
+sends the token to that exact origin. Use the existing isolated pilot database,
+synthetic fixture and admitted run. Resolve `WPCP_CODEX_PYTHON` to the absolute
+Python interpreter in the pinned dependency environment, then start the adapter:
+
+```bash
+uv run --python 3.14 --with-requirements codex-requirements.txt \
+  python codex_adapter.py --config codex-runtime-pin.json \
+  --state-root <private-disposable-state-root> --api-url <pilot-api-url> \
+  --port 8791 --native-port 8792
+```
+
+The adapter accepts one run per state root and creates its own repository; no
+product checkout path is accepted. In a second terminal with the same service
+configuration, dispatch the existing Agent Framework worker:
+
+```bash
+dotnet src/Wpcp.Worker/bin/Debug/net10.0/Wpcp.Worker.dll \
+  --fixture <synthetic-issue-fixture.json> --run-id <run-uuid> --worker-id real-codex \
+  --real-agent-origin "$WPCP_REAL_ADAPTER_ORIGIN" \
+  --codex-python "$WPCP_CODEX_PYTHON" --agent-timeout-ms 90000
+```
+
+Read the run/attempt using the Operator. Claim its Control Lease using the current
+fences as described above. With `WPCP_PROVIDER_TOKEN` set for that human, open it:
+
+```bash
+uv run --python 3.14 --with-requirements codex-requirements.txt \
+  python codex_open.py --api-url <pilot-api-url> \
+  --run-id <run-uuid> --attempt-id <real-attempt-uuid>
+```
+
+Opening itself requires read access; writing additionally requires current
+contributor permission and the lease. The launcher does not claim control for
+the human. Optional `--prompt` submits the next instruction through the same
+fenced boundary. Ask Codex to implement `ISSUE.md` and use `mcp__wpcp__execute`
+for commands, starting with the supplied failing tests. Successful native output
+is retained as evidence; it does not silently resolve the Human Request or
+publish anything. Stop the adapter and remove its private state when the
+throwaway run is no longer needed; the central Run History remains available.
+
+## Standalone real Codex admission diagnostic
+
+The earlier standalone `codex_runtime_gate.py` remains a deliberately isolated
+capability diagnostic. It has no native gateway and therefore still returns
+`no-go` / `native-client-lease-fencing-unverified`. This is its diagnostic scope,
+not a blocker of the real adapter above. Its trusted `UserPromptSubmit` canary
+also proves a synthetic prompt denial. Historical evidence is preserved.
+
+`codex-runtime-pin.json` binds executable, protocol and canonical schema hashes.
+`contracts/worker-result-v3.json` is a byte-identical versioned fixture from the
+LangGraph sibling. `codex_contract.py` derives a separate conservative endpoint
+projection; complete local validation still rejects incomplete completion
+evidence. No LangGraph runtime, file or service is modified.
+
+From this directory, run the deterministic tests and then opt into real probes:
+
+```bash
+uv run --python 3.14 --with-requirements codex-requirements.txt \
+  python -m unittest tests.test_codex_contract tests.test_codex_runtime_gate tests.test_codex_preflight_operator -v
+
+WPCP_REAL_CODEX_PROBE=1 WPCP_CODEX_ENDPOINT_PROBE=1 \
+  uv run --python 3.14 --with-requirements codex-requirements.txt \
+  python -m unittest tests.test_codex_runtime_gate tests.test_codex_preflight_operator -v
+```
+
+The second command makes bounded authenticated model requests to check the
+schema and interruption. It copies the existing `CODEX_HOME/auth.json` (default
+`~/.codex/auth.json`) into a private disposable Codex home. It does not import
+personal configuration, MCP servers or plugins. Ordinary completion removes
+that home; crash recovery removes the attempt's leftover probe directories.
+Treat the state root as private runtime data and never export or commit it.
+
+For a standalone read-only gate probe, use a new private state directory and
+explicit run/attempt UUIDs:
+
+```bash
+uv run --python 3.14 --with-requirements codex-requirements.txt \
+  python codex_runtime_gate.py --config codex-runtime-pin.json \
+  --state-dir <private-state-directory> --run-id <run-uuid> --attempt-id <attempt-uuid>
+```
+
+Exit code `2` means no-go; read the JSON reasons. Add `--read` to inspect the
+current snapshot without starting work. Replay with the same identity returns
+the original report. An incomplete delivery ends explicitly unsafe, without
+starting another session. `--pause-at after-session-start` is a controlled
+SIGKILL boundary, before the session mapping is persisted. The owned supervisor
+stops the runtime process group when its adapter pipe closes. No arbitrary
+repository path or issue prompt is accepted by the gate.
+
+To run the authenticated endpoint probe, create a private copy of the pin file
+with `"probeEndpoint": true` and `"rpcTimeoutSeconds": 45`. Both choices are
+part of the immutable operation intent. The default metadata probe does not
+make model requests; Resume/Fork of an unmaterialized empty session can fail and
+are reported as such. An endpoint probe first completes a synthetic turn, then
+checks those continuation operations.
+
+To retain the report in an admitted synthetic run's authenticated Operator
+surface, obtain the absolute Python interpreter path from the dependency
+environment (`python -c 'import sys; print(sys.executable)'`) and run:
+
+```bash
+dotnet src/Wpcp.Worker/bin/Debug/net10.0/Wpcp.Worker.dll \
+  --fixture <synthetic-issue-fixture.json> --run-id <run-uuid> --worker-id runtime-preflight \
+  --codex-preflight-config <absolute-pin-file> --codex-state-root <private-state-root> \
+  --codex-python <absolute-python-interpreter>
+```
+
+Use the existing `WPCP_CONNECTION_STRING` for the isolated pilot database.
+The mode cannot be combined with fake-agent, repository or active-operation
+delivery. Config, state-root and interpreter identity are bound to the attempt.
+`run`, `attempt` and `events` expose `real-codex-preflight`, the retained report,
+real session identities and terminal `capability-unavailable` state. Probe
+sessions are disposed and cannot be resumed through the Operator; they are not
+accepted implementation sessions. Worker exit zero acknowledges persistence,
+including no-go, rather than successful issue implementation.
+
+See the [acceptance overview](../openspec/changes/archive/2026-09-13-prove-real-codex-runtime/implementation-evidence.md).

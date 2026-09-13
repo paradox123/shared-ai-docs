@@ -1,0 +1,10 @@
+{
+  "executable": "/Applications/ChatGPT.app/Contents/Resources/codex",
+  "version": "codex-cli 0.153.4",
+  "sha256": "c147aa90d34139599711fb568102ceefc6319ca1ac5cb6f4056ca46a1834edd9",
+  "contractVersion": "AgentSessionAdapter/v1",
+  "canonicalSchemaSha256": "457e7331f32ee67465787dc50b4c796a6d4f697d9a82c581f929eb5ca5f73c62",
+  "protocolSha256": "25bc001b5dfe3b35785597b8f9ad9e5aaf7e437331fa9921f041c9e0e03fc9f3",
+  "jsonschemaVersion": "4.26.0",
+  "rpcTimeoutSeconds": 15
+}

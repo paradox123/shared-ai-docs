@@ -1,0 +1,8 @@
+test_native_live_revocation_blocks_tools_and_quarantines_late_result (test_real_codex_adapter.RealCodexAdapterTests.test_native_live_revocation_blocks_tools_and_quarantines_late_result) ... ok
+test_native_non_holder_cannot_write_or_change_backend_configuration (test_real_codex_adapter.RealCodexAdapterTests.test_native_non_holder_cannot_write_or_change_backend_configuration) ... ok
+test_native_observation_outbox_survives_api_and_adapter_crash (test_real_codex_adapter.RealCodexAdapterTests.test_native_observation_outbox_survives_api_and_adapter_crash) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 47.694s
+
+OK

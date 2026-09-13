@@ -1,0 +1,14 @@
+test_holder_completes_disposable_issue_through_native_protocol_and_history (test_real_codex_adapter.RealCodexAdapterTests.test_holder_completes_disposable_issue_through_native_protocol_and_history) ... ok
+test_native_interrupt_returns_correlated_terminal_event (test_real_codex_adapter.RealCodexAdapterTests.test_native_interrupt_returns_correlated_terminal_event) ... ok
+test_native_live_revocation_blocks_tools_and_quarantines_late_result (test_real_codex_adapter.RealCodexAdapterTests.test_native_live_revocation_blocks_tools_and_quarantines_late_result) ... ok
+test_native_non_holder_cannot_write_or_change_backend_configuration (test_real_codex_adapter.RealCodexAdapterTests.test_native_non_holder_cannot_write_or_change_backend_configuration) ... ok
+test_native_old_window_is_fenced_after_forced_takeover (test_real_codex_adapter.RealCodexAdapterTests.test_native_old_window_is_fenced_after_forced_takeover) ... ok
+test_open_launcher_displays_the_background_session_in_native_codex_tui (test_real_codex_adapter.RealCodexAdapterTests.test_open_launcher_displays_the_background_session_in_native_codex_tui) ... ok
+test_real_adapter_replacement_reopens_exact_session (test_real_codex_adapter.RealCodexAdapterTests.test_real_adapter_replacement_reopens_exact_session) ... ok
+test_real_background_session_has_complete_result_and_native_open_descriptor (test_real_codex_adapter.RealCodexAdapterTests.test_real_background_session_has_complete_result_and_native_open_descriptor) ... ok
+test_real_resume_and_fork_are_exactly_once_through_operator (test_real_codex_adapter.RealCodexAdapterTests.test_real_resume_and_fork_are_exactly_once_through_operator) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 161.910s
+
+OK

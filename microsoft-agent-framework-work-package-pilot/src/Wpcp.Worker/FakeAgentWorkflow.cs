@@ -5,11 +5,11 @@ using Wpcp.Storage.Postgres;
 
 namespace Wpcp.Worker;
 
-internal sealed class FakeAgentSessionAdapter(HttpClient client, bool readOnly = false) : IAgentSessionAdapter
+internal sealed class HttpAgentSessionAdapter(HttpClient client, bool readOnly = false, string? runId = null) : IAgentSessionAdapter
 {
     public async Task<AgentAdapterResponse> StartOrReadAsync(string operationKey, string note, CancellationToken token)
     {
-        using var body = new StringContent(JsonSerializer.Serialize(new { note }), System.Text.Encoding.UTF8, "application/json");
+        using var body = new StringContent(JsonSerializer.Serialize(new { note, runId }), System.Text.Encoding.UTF8, "application/json");
         using var response = readOnly ? await client.GetAsync($"sessions/{operationKey}", token) :
             await client.PutAsync($"sessions/{operationKey}", body, token);
         return new((int)response.StatusCode, await response.Content.ReadAsStringAsync(token));
@@ -21,15 +21,19 @@ internal static class FakeAgentWorkflow
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public static async Task ExecuteAsync(PostgresImplementationRunStore store, string runId,
-        string origin, string note, string? pauseAt, bool rejectBlocked, int timeoutMs, bool repositoryDelivery = false, bool readOnly = false)
+        string origin, string note, string? pauseAt, bool rejectBlocked, int timeoutMs, bool repositoryDelivery = false, bool readOnly = false,
+        string? realPython = null)
     {
         var uri = ControlledHttp.Origin(origin);
         await using var delivery = repositoryDelivery ? null : await store.AcquireAgentDeliveryAsync(runId);
         await using var standalone = repositoryDelivery ? null : await store.AcquireStandaloneAgentAsync(runId);
         using var client = ControlledHttp.Client(origin, timeoutMs);
-        var prepare = new PrepareExecutor(store, uri.AbsoluteUri, rejectBlocked);
-        var execute = new FakeExecutor(store, new FakeAgentSessionAdapter(client, readOnly), note, pauseAt);
-        var workflow = new WorkflowBuilder(prepare).WithName("FakeCodexAttemptV1")
+        if (realPython is not null && uri.AbsoluteUri == Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_ORIGIN") &&
+            Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_TOKEN") is { Length: > 0 } adapterToken)
+            client.DefaultRequestHeaders.Add("X-Wpcp-Adapter-Token", adapterToken);
+        var prepare = new PrepareExecutor(store, uri.AbsoluteUri, rejectBlocked, realPython is null ? "fake-codex" : "real-codex");
+        var execute = new SessionExecutor(store, new HttpAgentSessionAdapter(client, readOnly, realPython is null ? null : runId), note, pauseAt, realPython);
+        var workflow = new WorkflowBuilder(prepare).WithName(realPython is null ? "FakeCodexAttemptV1" : "RealCodexAttemptV1")
             .AddEdge(prepare, execute).Build();
         await using var run = await InProcessExecution.RunAsync(workflow, runId);
         // Framework errors are events, not necessarily thrown by RunAsync.
@@ -53,16 +57,16 @@ internal static class FakeAgentWorkflow
         await Task.Delay(Timeout.InfiniteTimeSpan, token);
     }
 
-    private sealed class PrepareExecutor(PostgresImplementationRunStore store, string origin, bool rejectBlocked)
-        : Executor<string, AgentAttemptReceipt>("PrepareFakeAttempt")
+    private sealed class PrepareExecutor(PostgresImplementationRunStore store, string origin, bool rejectBlocked, string kind)
+        : Executor<string, AgentAttemptReceipt>(kind == "real-codex" ? "PrepareRealAttempt" : "PrepareFakeAttempt")
     {
         public override async ValueTask<AgentAttemptReceipt> HandleAsync(string runId, IWorkflowContext context,
             CancellationToken cancellationToken = default) =>
-            await store.PrepareAgentAsync(runId, origin, rejectBlocked, cancellationToken);
+            await store.PrepareAgentAsync(runId, origin, rejectBlocked, cancellationToken, kind);
     }
 
-    private sealed class FakeExecutor(PostgresImplementationRunStore store, IAgentSessionAdapter adapter, string note, string? pauseAt)
-        : Executor<AgentAttemptReceipt, string>("ExecuteExternalFakeSession")
+    private sealed class SessionExecutor(PostgresImplementationRunStore store, IAgentSessionAdapter adapter, string note, string? pauseAt, string? realPython)
+        : Executor<AgentAttemptReceipt, string>(realPython is null ? "ExecuteExternalFakeSession" : "ExecuteRealCodexSession")
     {
         public override async ValueTask<string> HandleAsync(AgentAttemptReceipt receipt, IWorkflowContext context,
             CancellationToken cancellationToken = default)
@@ -112,21 +116,32 @@ internal static class FakeAgentWorkflow
                 }
                 await PauseAsync("after-result-observed", pauseAt, cancellationToken);
                 var result = await store.ReadOriginalAgentResultAsync(receipt, cancellationToken);
-                if (!terminal || result is null || !TextEquals(result.Value, "schemaVersion", "fake-worker-result/v1") ||
-                    !TextEquals(result.Value, "status", "blocked") || !result.Value.TryGetProperty("reason", out var reason) ||
-                    reason.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(reason.GetString()))
-                    throw new JsonException();
-                category = receipt.RejectBlocked ? "semantic-rejection" : "blocked";
+                if (realPython is not null)
+                {
+                    if (!terminal || result is null || !await CanonicalResult.ValidateAsync(realPython, result.Value, cancellationToken))
+                        throw new JsonException();
+                    category = result.Value.GetProperty("outcome").GetString() == "completed" ? "completed" :
+                        receipt.RejectBlocked ? "semantic-rejection" : "blocked";
+                }
+                else
+                {
+                    if (!terminal || result is null || !TextEquals(result.Value, "schemaVersion", "fake-worker-result/v1") ||
+                        !TextEquals(result.Value, "status", "blocked") || !result.Value.TryGetProperty("reason", out var reason) ||
+                        reason.ValueKind != JsonValueKind.String || string.IsNullOrWhiteSpace(reason.GetString()))
+                        throw new JsonException();
+                    category = receipt.RejectBlocked ? "semantic-rejection" : "blocked";
+                }
             }
             catch (AgentContractFailure error) { category = error.Category; }
             catch (JsonException) { category = "schema-failure"; }
             catch (ArgumentException) { category = "schema-failure"; }
+            catch (System.ComponentModel.Win32Exception) { category = "infrastructure-failure"; }
             catch (IOException) { category = "infrastructure-failure"; }
             catch (HttpRequestException) { category = "transport-failure"; }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { category = "timeout"; }
             receipt = await store.CompleteAgentAsync(receipt.RunId, category,
                 category is "blocked" or "semantic-rejection" ? "blocked" :
-                category == "process-failure" ? "failed" : "unknown", cancellationToken);
+                category == "process-failure" ? "failed" : category == "completed" ? "completed" : "unknown", cancellationToken);
             return receipt.State;
         }
     }

@@ -38,7 +38,10 @@ try
             options.DurableTaskOrchestrationId,
             options.DurableTaskTaskId,
             options.EvidenceNote));
-    if (options.DeliverActive || options.LiveActivityKey is not null)
+    if (options.CodexPreflightConfig is not null)
+        await Wpcp.Worker.CodexRuntimePreflight.ExecuteAsync(store, options.RunId,
+            options.CodexPreflightConfig, options.CodexStateRoot!, options.CodexPython!);
+    else if (options.DeliverActive || options.LiveActivityKey is not null)
     {
         if (options.LiveActivityKey is not null)
             await store.PrepareActiveAgentAsync(options.RunId, options.LiveActivityKey,
@@ -47,6 +50,11 @@ try
     }
     else if (options.RepositoryPlanPath is not null)
         await Wpcp.Worker.RepositoryWorkflow.ExecuteAsync(store, options.RunId, options.RepositoryPlanPath, options.PauseAt);
+    else if (options.RealAgentOrigin is not null)
+        await Wpcp.Worker.FakeAgentWorkflow.ExecuteAsync(store, options.RunId,
+            options.RealAgentOrigin, options.EvidenceNote ?? "bounded disposable issue",
+            options.PauseAt, options.RejectBlocked, options.AgentTimeoutMilliseconds,
+            realPython: options.CodexPython);
     else if (options.FakeAgentOrigin is not null)
         await Wpcp.Worker.FakeAgentWorkflow.ExecuteAsync(store, options.RunId,
             options.FakeAgentOrigin, options.EvidenceNote ?? "controlled fake attempt",
@@ -129,7 +137,8 @@ internal sealed record WorkerOptions(
     string? PauseAt,
     bool RejectBlocked,
     int AgentTimeoutMilliseconds,
-    string? RepositoryPlanPath, string? LiveActivityKey, bool DeliverActive)
+    string? RepositoryPlanPath, string? LiveActivityKey, bool DeliverActive,
+    string? CodexPreflightConfig, string? CodexStateRoot, string? CodexPython, string? RealAgentOrigin)
 {
     public static WorkerOptions Parse(IReadOnlyList<string> arguments)
     {
@@ -156,6 +165,17 @@ internal sealed record WorkerOptions(
         var rejectText = Value(values, "--reject-blocked");
         if (rejectText is not (null or "true" or "false"))
             throw new ArgumentException("--reject-blocked must be true or false.");
+        var codexConfig = Value(values, "--codex-preflight-config");
+        var realOrigin = Value(values, "--real-agent-origin");
+        if (realOrigin is not null && (Value(values, "--codex-python") is null || codexConfig is not null ||
+            Value(values, "--fake-agent-origin") is not null || Value(values, "--repository-plan") is not null ||
+            Value(values, "--live-activity-key") is not null || Value(values, "--deliver-active") is not null))
+            throw new ArgumentException("Real adapter mode requires Python and exclusive dispatch.");
+        if (codexConfig is not null && (Value(values, "--codex-state-root") is null ||
+            Value(values, "--codex-python") is null || Value(values, "--fake-agent-origin") is not null ||
+            Value(values, "--repository-plan") is not null || Value(values, "--live-activity-key") is not null ||
+            Value(values, "--deliver-active") is not null))
+            throw new ArgumentException("Codex preflight requires isolated state and Python, and is an exclusive worker mode.");
         return new WorkerOptions(
             connectionString,
             fixturePath,
@@ -172,7 +192,8 @@ internal sealed record WorkerOptions(
             pauseAt,
             rejectText == "true",
             PositiveIntegerOrDefault(values, "--agent-timeout-ms", 10000),
-            Value(values, "--repository-plan"), Value(values, "--live-activity-key"), Value(values, "--deliver-active") == "true");
+            Value(values, "--repository-plan"), Value(values, "--live-activity-key"), Value(values, "--deliver-active") == "true",
+            codexConfig, Value(values, "--codex-state-root"), Value(values, "--codex-python"), realOrigin);
     }
 
     private static Dictionary<string, string> ParseOptions(IReadOnlyList<string> arguments)

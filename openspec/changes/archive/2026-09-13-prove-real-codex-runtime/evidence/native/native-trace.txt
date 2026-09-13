@@ -1,0 +1,21 @@
+native method initialize
+native method initialized
+native method account/read
+native method thread/read
+native method model/list
+native method configRequirements/read
+native method hooks/list
+native method thread/resume
+native method thread/turns/list
+native method thread/items/list
+native method thread/loaded/list
+native method thread/list
+native method thread/list
+native method thread/goal/get
+native error PermissionError unsupported-native-method:thread/goal/get
+native method thread/read
+native method account/rateLimits/read
+native method skills/list
+native method plugin/list
+native method skills/list
+native method thread/turns/list

@@ -1,0 +1,1775 @@
+{
+  "run": {
+    "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+    "state": "blocked",
+    "correlation": {
+      "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+      "repositoryId": "repo-1",
+      "issueId": "issue-47",
+      "issueNumber": 47,
+      "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+      "repository": {
+        "repositoryId": "repo-1",
+        "fullName": "pilot/fixture",
+        "providerRepositoryId": 9001
+      }
+    },
+    "runStartedAt": "2026-09-13T09:16:48.944999+00:00",
+    "activities": [
+      {
+        "activityId": "7107cf2a-534e-4a82-98a8-0327c0b06380",
+        "activityType": "admission",
+        "state": "completed",
+        "startedAt": "2026-09-13T09:16:48.944999+00:00",
+        "completedAt": "2026-09-13T09:16:48.944999+00:00"
+      },
+      {
+        "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+        "activityType": "real-codex",
+        "state": "blocked",
+        "startedAt": "2026-09-13T09:16:49.259436+00:00",
+        "completedAt": "2026-09-13T09:16:55.726555+00:00"
+      }
+    ],
+    "attempts": [
+      {
+        "attemptId": "116f1148-8372-4a19-b61c-9ab040831209",
+        "activityId": "7107cf2a-534e-4a82-98a8-0327c0b06380",
+        "attemptNumber": 1,
+        "state": "completed",
+        "startedAt": "2026-09-13T09:16:48.944999+00:00",
+        "completedAt": "2026-09-13T09:16:48.944999+00:00",
+        "session": null,
+        "liveOperation": null
+      },
+      {
+        "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+        "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+        "attemptNumber": 1,
+        "state": "blocked",
+        "startedAt": "2026-09-13T09:16:49.259436+00:00",
+        "completedAt": "2026-09-13T09:16:55.726555+00:00",
+        "session": {
+          "operationKey": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "status": "blocked",
+          "contractVersion": "AgentSessionAdapter/v1",
+          "startedEventId": "502d2e7b-226e-4b8a-b033-f40c1ad8fb2e",
+          "lastSequence": 8,
+          "lastEventId": "92e80d91-1694-4b5c-8938-443e01b97408",
+          "originalResult": {
+            "outcome": "blocked",
+            "summary": "Disposable greeting issue is ready for the human continuation.",
+            "evidence": [],
+            "findings": [],
+            "intervention": null,
+            "verification": [],
+            "changed_files": [],
+            "schema_version": "3",
+            "red_green_slices": []
+          },
+          "originalResultEventId": "92e80d91-1694-4b5c-8938-443e01b97408",
+          "failureCategory": "blocked",
+          "openInCodex": {
+            "mode": "same-session",
+            "sameSession": true,
+            "appTaskVisible": false,
+            "reason": "native-codex-tui-via-fenced-gateway; desktop-sidebar-not-used",
+            "url": "ws://127.0.0.1:58233/sessions/01a09a0e-18d0-7f73-bdda-a4b41722afd8"
+          },
+          "openedInCodex": true,
+          "observedResponse": {
+            "events": [
+              {
+                "data": {
+                  "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                  "process": {
+                    "processId": 61153,
+                    "ownerProcessId": 61128,
+                    "processGroupId": 61152
+                  },
+                  "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                  "preflight": {
+                    "process": {
+                      "processId": 61153,
+                      "ownerProcessId": 61128,
+                      "processGroupId": 61152
+                    },
+                    "remoteCount": 0,
+                    "capabilities": {
+                      "tools": {
+                        "tool": "python",
+                        "status": "passed",
+                        "exitCode": 0,
+                        "interface": "command/exec"
+                      },
+                      "sandbox": {
+                        "policy": {
+                          "type": "workspaceWrite",
+                          "networkAccess": false,
+                          "writableRoots": [
+                            "/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-hdp4so_2/adapter-58232/repository"
+                          ],
+                          "excludeSlashTmp": true,
+                          "excludeTmpdirEnvVar": true
+                        },
+                        "status": "passed",
+                        "networkDenied": true,
+                        "insideWriteAllowed": true,
+                        "outsideWriteDenied": true
+                      },
+                      "timeout": {
+                        "status": "passed",
+                        "exitCode": 124,
+                        "timeoutMs": 100,
+                        "elapsedSeconds": 0.105,
+                        "commandProcessId": 61178,
+                        "lateOutputObserved": false
+                      }
+                    },
+                    "dependencies": {
+                      "jsonschema": "4.26.0",
+                      "websockets": "15.0.1"
+                    },
+                    "runtimeSha256": "c147aa90d34139599711fb568102ceefc6319ca1ac5cb6f4056ca46a1834edd9",
+                    "protocolSha256": "25bc001b5dfe3b35785597b8f9ad9e5aaf7e437331fa9921f041c9e0e03fc9f3",
+                    "runtimeVersion": "codex-cli 0.153.4",
+                    "repositoryBaseSha": "a080eecd5d43bfd7bc811325e8d648631d9bfa46",
+                    "canonicalSchemaSha256": "457e7331f32ee67465787dc50b4c796a6d4f697d9a82c581f929eb5ca5f73c62"
+                  },
+                  "runtimeSha256": "c147aa90d34139599711fb568102ceefc6319ca1ac5cb6f4056ca46a1834edd9",
+                  "runtimeVersion": "codex-cli 0.153.4",
+                  "canonicalValidationPassed": true
+                },
+                "type": "message",
+                "sequence": 1
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "turn/started",
+                    "params": {
+                      "turn": {
+                        "id": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                        "error": null,
+                        "items": [],
+                        "status": "inProgress",
+                        "itemsView": "notLoaded",
+                        "startedAt": 1789291010,
+                        "durationMs": null,
+                        "completedAt": null
+                      },
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8"
+                    },
+                    "emittedAtMs": 1789291010375
+                  }
+                },
+                "type": "message",
+                "sequence": 2
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "item/started",
+                    "params": {
+                      "item": {
+                        "id": "01a09a0e-1ed9-7e50-9301-a3020ef3dcc9",
+                        "type": "userMessage",
+                        "content": [
+                          {
+                            "text": "Preflight phase. Do not use tools or start implementation. Return exactly: {\"schema_version\": \"3\", \"outcome\": \"blocked\", \"summary\": \"Disposable greeting issue is ready for the human continuation.\", \"red_green_slices\": [], \"changed_files\": [], \"verification\": [], \"evidence\": [], \"findings\": [], \"intervention\": null}",
+                            "type": "text",
+                            "text_elements": []
+                          }
+                        ],
+                        "clientId": null
+                      },
+                      "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                      "startedAtMs": 1789291011801
+                    },
+                    "emittedAtMs": 1789291011801
+                  }
+                },
+                "type": "message",
+                "sequence": 3
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "item/completed",
+                    "params": {
+                      "item": {
+                        "id": "01a09a0e-1ed9-7e50-9301-a3020ef3dcc9",
+                        "type": "userMessage",
+                        "content": [
+                          {
+                            "text": "Preflight phase. Do not use tools or start implementation. Return exactly: {\"schema_version\": \"3\", \"outcome\": \"blocked\", \"summary\": \"Disposable greeting issue is ready for the human continuation.\", \"red_green_slices\": [], \"changed_files\": [], \"verification\": [], \"evidence\": [], \"findings\": [], \"intervention\": null}",
+                            "type": "text",
+                            "text_elements": []
+                          }
+                        ],
+                        "clientId": null
+                      },
+                      "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                      "completedAtMs": 1789291011801
+                    },
+                    "emittedAtMs": 1789291011802
+                  }
+                },
+                "type": "message",
+                "sequence": 4
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "item/started",
+                    "params": {
+                      "item": {
+                        "id": "msg_0d441d0b674be516016aa66a0616a087d2b2904f4f0f8aa785",
+                        "text": "",
+                        "type": "agentMessage",
+                        "phase": "final_answer",
+                        "delivery": null,
+                        "questions": null,
+                        "memoryCitation": null
+                      },
+                      "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                      "startedAtMs": 1789291014130
+                    },
+                    "emittedAtMs": 1789291014131
+                  }
+                },
+                "type": "message",
+                "sequence": 5
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "item/completed",
+                    "params": {
+                      "item": {
+                        "id": "msg_0d441d0b674be516016aa66a0616a087d2b2904f4f0f8aa785",
+                        "text": "{\"schema_version\":\"3\",\"outcome\":\"blocked\",\"summary\":\"Disposable greeting issue is ready for the human continuation.\",\"red_green_slices\":[],\"changed_files\":[],\"verification\":[],\"evidence\":[],\"findings\":[],\"intervention\":null}",
+                        "type": "agentMessage",
+                        "phase": "final_answer",
+                        "delivery": null,
+                        "questions": null,
+                        "memoryCitation": null
+                      },
+                      "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                      "completedAtMs": 1789291015346
+                    },
+                    "emittedAtMs": 1789291015349
+                  }
+                },
+                "type": "message",
+                "sequence": 6
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "turn/completed",
+                    "params": {
+                      "turn": {
+                        "id": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                        "error": null,
+                        "items": [
+                          {
+                            "id": "msg_0d441d0b674be516016aa66a0616a087d2b2904f4f0f8aa785",
+                            "text": "{\"schema_version\":\"3\",\"outcome\":\"blocked\",\"summary\":\"Disposable greeting issue is ready for the human continuation.\",\"red_green_slices\":[],\"changed_files\":[],\"verification\":[],\"evidence\":[],\"findings\":[],\"intervention\":null}",
+                            "type": "agentMessage",
+                            "phase": "final_answer",
+                            "delivery": null,
+                            "questions": null,
+                            "memoryCitation": null
+                          }
+                        ],
+                        "status": "completed",
+                        "itemsView": "summary",
+                        "startedAt": 1789291010,
+                        "durationMs": 5051,
+                        "completedAt": 1789291015
+                      },
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8"
+                    },
+                    "emittedAtMs": 1789291015379
+                  }
+                },
+                "type": "message",
+                "sequence": 7
+              },
+              {
+                "data": {
+                  "outcome": "blocked",
+                  "summary": "Disposable greeting issue is ready for the human continuation.",
+                  "evidence": [],
+                  "findings": [],
+                  "intervention": null,
+                  "verification": [],
+                  "changed_files": [],
+                  "schema_version": "3",
+                  "red_green_slices": []
+                },
+                "type": "result",
+                "sequence": 8
+              }
+            ],
+            "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+            "openInCodex": {
+              "url": "ws://127.0.0.1:58233/sessions/01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+              "mode": "same-session",
+              "reason": "native-codex-tui-via-fenced-gateway; desktop-sidebar-not-used",
+              "sameSession": true,
+              "appTaskVisible": false
+            },
+            "operationKey": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+            "contractVersion": "AgentSessionAdapter/v1"
+          },
+          "responseStatus": 200,
+          "responseEventId": "20d12146-ddd3-448f-bd5e-5e5ca21af384",
+          "humanRequest": {
+            "requestId": "5383b7fe-9adb-45af-92b2-70a016a17617",
+            "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+            "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+            "phase": "awaiting-human",
+            "expectedHeadSha": null,
+            "problem": "Disposable greeting issue is ready for the human continuation.",
+            "evidence": [
+              "92e80d91-1694-4b5c-8938-443e01b97408"
+            ],
+            "allowedActions": [
+              "resume",
+              "fork",
+              "fresh-retry",
+              "open",
+              "write"
+            ],
+            "state": "open",
+            "createdEventId": "67e1dc53-ebe5-43b0-bc27-cfacd4c1c083",
+            "expectedRunVersion": 15,
+            "leaseEpoch": 0
+          },
+          "lineage": null
+        },
+        "liveOperation": null
+      }
+    ],
+    "processes": [
+      {
+        "processId": "4d8c0add-8438-429e-bd87-2e1faa39bb53",
+        "processKind": "api",
+        "processStartedAt": "2026-09-13T09:16:48.581542+00:00",
+        "processStoppedAt": null,
+        "actor": {
+          "kind": "service",
+          "provider": "wpcp-api",
+          "subjectId": "4d8c0add-8438-429e-bd87-2e1faa39bb53"
+        }
+      },
+      {
+        "processId": "real-codex:4233589d3bad41adb258385720fecda5",
+        "processKind": "worker",
+        "processStartedAt": "2026-09-13T09:16:49.166995+00:00",
+        "processStoppedAt": "2026-09-13T09:16:55.805232+00:00",
+        "actor": {
+          "kind": "service",
+          "provider": "wpcp-worker",
+          "subjectId": "real-codex:4233589d3bad41adb258385720fecda5"
+        }
+      }
+    ],
+    "heartbeats": [
+      {
+        "heartbeatId": "4539a261-a643-40c5-b934-15f1adfe5112",
+        "processId": "4d8c0add-8438-429e-bd87-2e1faa39bb53",
+        "heartbeatAt": "2026-09-13T09:16:48.993416+00:00"
+      },
+      {
+        "heartbeatId": "c181fb47-11c5-429c-b685-44c9cf353d5e",
+        "processId": "real-codex:4233589d3bad41adb258385720fecda5",
+        "heartbeatAt": "2026-09-13T09:16:55.761233+00:00"
+      },
+      {
+        "heartbeatId": "7e833978-fe1c-44c8-a9c4-013de1ba8cb2",
+        "processId": "real-codex:4233589d3bad41adb258385720fecda5",
+        "heartbeatAt": "2026-09-13T09:16:55.794915+00:00"
+      },
+      {
+        "heartbeatId": "0493d29e-3093-4ed4-bd19-91795f5c3ca4",
+        "processId": "4d8c0add-8438-429e-bd87-2e1faa39bb53",
+        "heartbeatAt": "2026-09-13T09:16:55.861484+00:00"
+      },
+      {
+        "heartbeatId": "31e860cd-f563-452b-9f9b-8130b49ffacb",
+        "processId": "4d8c0add-8438-429e-bd87-2e1faa39bb53",
+        "heartbeatAt": "2026-09-13T09:16:56.086141+00:00"
+      },
+      {
+        "heartbeatId": "2718e735-27dd-4e3a-b063-fd992b7f1a44",
+        "processId": "4d8c0add-8438-429e-bd87-2e1faa39bb53",
+        "heartbeatAt": "2026-09-13T09:16:56.153054+00:00"
+      },
+      {
+        "heartbeatId": "7af68391-2bed-423d-8ff1-0fa7da4ec5ad",
+        "processId": "4d8c0add-8438-429e-bd87-2e1faa39bb53",
+        "heartbeatAt": "2026-09-13T09:16:56.190324+00:00"
+      },
+      {
+        "heartbeatId": "d8d00719-80fe-46fa-bea0-92352f889353",
+        "processId": "4d8c0add-8438-429e-bd87-2e1faa39bb53",
+        "heartbeatAt": "2026-09-13T09:16:56.225446+00:00"
+      },
+      {
+        "heartbeatId": "cfc2f97d-866b-45e6-a68d-38d078c5472e",
+        "processId": "4d8c0add-8438-429e-bd87-2e1faa39bb53",
+        "heartbeatAt": "2026-09-13T09:16:56.279714+00:00"
+      },
+      {
+        "heartbeatId": "536f2bf9-5337-41f0-ae46-0985e0c4011c",
+        "processId": "4d8c0add-8438-429e-bd87-2e1faa39bb53",
+        "heartbeatAt": "2026-09-13T09:16:56.33304+00:00"
+      },
+      {
+        "heartbeatId": "9d6a3911-4b95-4db3-af6e-b7af9a9d50d7",
+        "processId": "4d8c0add-8438-429e-bd87-2e1faa39bb53",
+        "heartbeatAt": "2026-09-13T09:16:56.379595+00:00"
+      }
+    ],
+    "executionEvidence": [],
+    "provenance": {
+      "sourceRevision": "r1",
+      "packageRevision": "r1",
+      "configurationRevision": "r1",
+      "contractRevision": "r1"
+    },
+    "redaction": {
+      "occurred": false,
+      "policyVersion": "",
+      "marker": ""
+    },
+    "lastPosition": 19,
+    "control": {
+      "runVersion": 19,
+      "targetAttemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+      "headSha": null,
+      "leaseEpoch": 2,
+      "holder": {
+        "kind": "human",
+        "provider": "github",
+        "subjectId": "103"
+      },
+      "claimedAt": "2026-09-13T09:16:56.260611+00:00",
+      "transferRequest": null
+    },
+    "authorization": {
+      "code": "observed",
+      "access": {
+        "actor": {
+          "kind": "human",
+          "provider": "github",
+          "subjectId": "102"
+        },
+        "canRead": true,
+        "canContribute": false,
+        "failureCode": null,
+        "login": "actor-observer",
+        "isHuman": true
+      },
+      "current": {
+        "runVersion": 19,
+        "targetAttemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+        "headSha": null,
+        "leaseEpoch": 2,
+        "holder": {
+          "kind": "human",
+          "provider": "github",
+          "subjectId": "103"
+        },
+        "claimedAt": "2026-09-13T09:16:56.260611+00:00",
+        "transferRequest": null
+      },
+      "continuation": null,
+      "historical": false,
+      "accepted": true,
+      "canClaim": false,
+      "canRequestTransfer": false,
+      "canForceTakeover": false,
+      "canDecideTransfer": false,
+      "canRelease": false
+    },
+    "repositoryExecution": null
+  },
+  "history": {
+    "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+    "after": 0,
+    "events": [
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 1,
+        "eventId": "15341cef-b992-4828-8006-e1e288a98561",
+        "eventType": "ImplementationRunStarted",
+        "occurredAt": "2026-09-13T09:16:48.944999+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "",
+          "marker": ""
+        },
+        "payload": {
+          "note": "control proof",
+          "actor": {
+            "kind": "human",
+            "provider": "github",
+            "subjectId": "101"
+          },
+          "authorization": {
+            "source": "github",
+            "decision": "authorized"
+          }
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 2,
+        "eventId": "d0ab2a35-cc47-4d86-9349-03e97970643f",
+        "eventType": "AgentPreparationCompleted",
+        "occurredAt": "2026-09-13T09:16:49.26597+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "runtime": "10.0.7",
+          "executor": "deterministic",
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "framework": "Microsoft.Agents.AI.Workflows/1.16.0",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 3,
+        "eventId": "0a0dc4da-a510-4be2-b241-9ae119c9b3f3",
+        "eventType": "AgentSessionStartRequested",
+        "occurredAt": "2026-09-13T09:16:49.271388+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "operationKey": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "contractVersion": "AgentSessionAdapter/v1"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 4,
+        "eventId": "20d12146-ddd3-448f-bd5e-5e5ca21af384",
+        "eventType": "AgentAdapterResponseObserved",
+        "occurredAt": "2026-09-13T09:16:55.464072+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "body": {
+            "events": [
+              {
+                "data": {
+                  "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                  "process": {
+                    "processId": 61153,
+                    "ownerProcessId": 61128,
+                    "processGroupId": 61152
+                  },
+                  "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                  "preflight": {
+                    "process": {
+                      "processId": 61153,
+                      "ownerProcessId": 61128,
+                      "processGroupId": 61152
+                    },
+                    "remoteCount": 0,
+                    "capabilities": {
+                      "tools": {
+                        "tool": "python",
+                        "status": "passed",
+                        "exitCode": 0,
+                        "interface": "command/exec"
+                      },
+                      "sandbox": {
+                        "policy": {
+                          "type": "workspaceWrite",
+                          "networkAccess": false,
+                          "writableRoots": [
+                            "/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-hdp4so_2/adapter-58232/repository"
+                          ],
+                          "excludeSlashTmp": true,
+                          "excludeTmpdirEnvVar": true
+                        },
+                        "status": "passed",
+                        "networkDenied": true,
+                        "insideWriteAllowed": true,
+                        "outsideWriteDenied": true
+                      },
+                      "timeout": {
+                        "status": "passed",
+                        "exitCode": 124,
+                        "timeoutMs": 100,
+                        "elapsedSeconds": 0.105,
+                        "commandProcessId": 61178,
+                        "lateOutputObserved": false
+                      }
+                    },
+                    "dependencies": {
+                      "jsonschema": "4.26.0",
+                      "websockets": "15.0.1"
+                    },
+                    "runtimeSha256": "c147aa90d34139599711fb568102ceefc6319ca1ac5cb6f4056ca46a1834edd9",
+                    "protocolSha256": "25bc001b5dfe3b35785597b8f9ad9e5aaf7e437331fa9921f041c9e0e03fc9f3",
+                    "runtimeVersion": "codex-cli 0.153.4",
+                    "repositoryBaseSha": "a080eecd5d43bfd7bc811325e8d648631d9bfa46",
+                    "canonicalSchemaSha256": "457e7331f32ee67465787dc50b4c796a6d4f697d9a82c581f929eb5ca5f73c62"
+                  },
+                  "runtimeSha256": "c147aa90d34139599711fb568102ceefc6319ca1ac5cb6f4056ca46a1834edd9",
+                  "runtimeVersion": "codex-cli 0.153.4",
+                  "canonicalValidationPassed": true
+                },
+                "type": "message",
+                "sequence": 1
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "turn/started",
+                    "params": {
+                      "turn": {
+                        "id": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                        "error": null,
+                        "items": [],
+                        "status": "inProgress",
+                        "itemsView": "notLoaded",
+                        "startedAt": 1789291010,
+                        "durationMs": null,
+                        "completedAt": null
+                      },
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8"
+                    },
+                    "emittedAtMs": 1789291010375
+                  }
+                },
+                "type": "message",
+                "sequence": 2
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "item/started",
+                    "params": {
+                      "item": {
+                        "id": "01a09a0e-1ed9-7e50-9301-a3020ef3dcc9",
+                        "type": "userMessage",
+                        "content": [
+                          {
+                            "text": "Preflight phase. Do not use tools or start implementation. Return exactly: {\"schema_version\": \"3\", \"outcome\": \"blocked\", \"summary\": \"Disposable greeting issue is ready for the human continuation.\", \"red_green_slices\": [], \"changed_files\": [], \"verification\": [], \"evidence\": [], \"findings\": [], \"intervention\": null}",
+                            "type": "text",
+                            "text_elements": []
+                          }
+                        ],
+                        "clientId": null
+                      },
+                      "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                      "startedAtMs": 1789291011801
+                    },
+                    "emittedAtMs": 1789291011801
+                  }
+                },
+                "type": "message",
+                "sequence": 3
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "item/completed",
+                    "params": {
+                      "item": {
+                        "id": "01a09a0e-1ed9-7e50-9301-a3020ef3dcc9",
+                        "type": "userMessage",
+                        "content": [
+                          {
+                            "text": "Preflight phase. Do not use tools or start implementation. Return exactly: {\"schema_version\": \"3\", \"outcome\": \"blocked\", \"summary\": \"Disposable greeting issue is ready for the human continuation.\", \"red_green_slices\": [], \"changed_files\": [], \"verification\": [], \"evidence\": [], \"findings\": [], \"intervention\": null}",
+                            "type": "text",
+                            "text_elements": []
+                          }
+                        ],
+                        "clientId": null
+                      },
+                      "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                      "completedAtMs": 1789291011801
+                    },
+                    "emittedAtMs": 1789291011802
+                  }
+                },
+                "type": "message",
+                "sequence": 4
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "item/started",
+                    "params": {
+                      "item": {
+                        "id": "msg_0d441d0b674be516016aa66a0616a087d2b2904f4f0f8aa785",
+                        "text": "",
+                        "type": "agentMessage",
+                        "phase": "final_answer",
+                        "delivery": null,
+                        "questions": null,
+                        "memoryCitation": null
+                      },
+                      "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                      "startedAtMs": 1789291014130
+                    },
+                    "emittedAtMs": 1789291014131
+                  }
+                },
+                "type": "message",
+                "sequence": 5
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "item/completed",
+                    "params": {
+                      "item": {
+                        "id": "msg_0d441d0b674be516016aa66a0616a087d2b2904f4f0f8aa785",
+                        "text": "{\"schema_version\":\"3\",\"outcome\":\"blocked\",\"summary\":\"Disposable greeting issue is ready for the human continuation.\",\"red_green_slices\":[],\"changed_files\":[],\"verification\":[],\"evidence\":[],\"findings\":[],\"intervention\":null}",
+                        "type": "agentMessage",
+                        "phase": "final_answer",
+                        "delivery": null,
+                        "questions": null,
+                        "memoryCitation": null
+                      },
+                      "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                      "completedAtMs": 1789291015346
+                    },
+                    "emittedAtMs": 1789291015349
+                  }
+                },
+                "type": "message",
+                "sequence": 6
+              },
+              {
+                "data": {
+                  "runtimeEvent": {
+                    "method": "turn/completed",
+                    "params": {
+                      "turn": {
+                        "id": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                        "error": null,
+                        "items": [
+                          {
+                            "id": "msg_0d441d0b674be516016aa66a0616a087d2b2904f4f0f8aa785",
+                            "text": "{\"schema_version\":\"3\",\"outcome\":\"blocked\",\"summary\":\"Disposable greeting issue is ready for the human continuation.\",\"red_green_slices\":[],\"changed_files\":[],\"verification\":[],\"evidence\":[],\"findings\":[],\"intervention\":null}",
+                            "type": "agentMessage",
+                            "phase": "final_answer",
+                            "delivery": null,
+                            "questions": null,
+                            "memoryCitation": null
+                          }
+                        ],
+                        "status": "completed",
+                        "itemsView": "summary",
+                        "startedAt": 1789291010,
+                        "durationMs": 5051,
+                        "completedAt": 1789291015
+                      },
+                      "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8"
+                    },
+                    "emittedAtMs": 1789291015379
+                  }
+                },
+                "type": "message",
+                "sequence": 7
+              },
+              {
+                "data": {
+                  "outcome": "blocked",
+                  "summary": "Disposable greeting issue is ready for the human continuation.",
+                  "evidence": [],
+                  "findings": [],
+                  "intervention": null,
+                  "verification": [],
+                  "changed_files": [],
+                  "schema_version": "3",
+                  "red_green_slices": []
+                },
+                "type": "result",
+                "sequence": 8
+              }
+            ],
+            "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+            "openInCodex": {
+              "url": "ws://127.0.0.1:58233/sessions/01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+              "mode": "same-session",
+              "reason": "native-codex-tui-via-fenced-gateway; desktop-sidebar-not-used",
+              "sameSession": true,
+              "appTaskVisible": false
+            },
+            "operationKey": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+            "contractVersion": "AgentSessionAdapter/v1"
+          },
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "statusCode": 200
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 5,
+        "eventId": "502d2e7b-226e-4b8a-b033-f40c1ad8fb2e",
+        "eventType": "AgentSessionStarted",
+        "occurredAt": "2026-09-13T09:16:55.486185+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "openInCodex": {
+            "url": "ws://127.0.0.1:58233/sessions/01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+            "mode": "same-session",
+            "reason": "native-codex-tui-via-fenced-gateway; desktop-sidebar-not-used",
+            "sameSession": true,
+            "appTaskVisible": false
+          },
+          "operationKey": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "contractVersion": "AgentSessionAdapter/v1"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 6,
+        "eventId": "384ee748-b7e8-41fe-a3ce-b99506731531",
+        "eventType": "AgentObservationReceived",
+        "occurredAt": "2026-09-13T09:16:55.502217+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "data": {
+            "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+            "process": {
+              "processId": 61153,
+              "ownerProcessId": 61128,
+              "processGroupId": 61152
+            },
+            "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+            "preflight": {
+              "process": {
+                "processId": 61153,
+                "ownerProcessId": 61128,
+                "processGroupId": 61152
+              },
+              "remoteCount": 0,
+              "capabilities": {
+                "tools": {
+                  "tool": "python",
+                  "status": "passed",
+                  "exitCode": 0,
+                  "interface": "command/exec"
+                },
+                "sandbox": {
+                  "policy": {
+                    "type": "workspaceWrite",
+                    "networkAccess": false,
+                    "writableRoots": [
+                      "/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-hdp4so_2/adapter-58232/repository"
+                    ],
+                    "excludeSlashTmp": true,
+                    "excludeTmpdirEnvVar": true
+                  },
+                  "status": "passed",
+                  "networkDenied": true,
+                  "insideWriteAllowed": true,
+                  "outsideWriteDenied": true
+                },
+                "timeout": {
+                  "status": "passed",
+                  "exitCode": 124,
+                  "timeoutMs": 100,
+                  "elapsedSeconds": 0.105,
+                  "commandProcessId": 61178,
+                  "lateOutputObserved": false
+                }
+              },
+              "dependencies": {
+                "jsonschema": "4.26.0",
+                "websockets": "15.0.1"
+              },
+              "runtimeSha256": "c147aa90d34139599711fb568102ceefc6319ca1ac5cb6f4056ca46a1834edd9",
+              "protocolSha256": "25bc001b5dfe3b35785597b8f9ad9e5aaf7e437331fa9921f041c9e0e03fc9f3",
+              "runtimeVersion": "codex-cli 0.153.4",
+              "repositoryBaseSha": "a080eecd5d43bfd7bc811325e8d648631d9bfa46",
+              "canonicalSchemaSha256": "457e7331f32ee67465787dc50b4c796a6d4f697d9a82c581f929eb5ca5f73c62"
+            },
+            "runtimeSha256": "c147aa90d34139599711fb568102ceefc6319ca1ac5cb6f4056ca46a1834edd9",
+            "runtimeVersion": "codex-cli 0.153.4",
+            "canonicalValidationPassed": true
+          },
+          "type": "message",
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "sourceSequence": 1,
+          "causedByEventId": "502d2e7b-226e-4b8a-b033-f40c1ad8fb2e"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 7,
+        "eventId": "6161280b-fc7f-4fb5-b355-1e44654fb9c2",
+        "eventType": "AgentObservationReceived",
+        "occurredAt": "2026-09-13T09:16:55.528238+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "data": {
+            "runtimeEvent": {
+              "method": "turn/started",
+              "params": {
+                "turn": {
+                  "id": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                  "error": null,
+                  "items": [],
+                  "status": "inProgress",
+                  "itemsView": "notLoaded",
+                  "startedAt": 1789291010,
+                  "durationMs": null,
+                  "completedAt": null
+                },
+                "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8"
+              },
+              "emittedAtMs": 1789291010375
+            }
+          },
+          "type": "message",
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "sourceSequence": 2,
+          "causedByEventId": "384ee748-b7e8-41fe-a3ce-b99506731531"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 8,
+        "eventId": "8329abe1-68f1-45a4-9269-2f3a51cdf1eb",
+        "eventType": "AgentObservationReceived",
+        "occurredAt": "2026-09-13T09:16:55.540482+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "data": {
+            "runtimeEvent": {
+              "method": "item/started",
+              "params": {
+                "item": {
+                  "id": "01a09a0e-1ed9-7e50-9301-a3020ef3dcc9",
+                  "type": "userMessage",
+                  "content": [
+                    {
+                      "text": "Preflight phase. Do not use tools or start implementation. Return exactly: {\"schema_version\": \"3\", \"outcome\": \"blocked\", \"summary\": \"Disposable greeting issue is ready for the human continuation.\", \"red_green_slices\": [], \"changed_files\": [], \"verification\": [], \"evidence\": [], \"findings\": [], \"intervention\": null}",
+                      "type": "text",
+                      "text_elements": []
+                    }
+                  ],
+                  "clientId": null
+                },
+                "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                "startedAtMs": 1789291011801
+              },
+              "emittedAtMs": 1789291011801
+            }
+          },
+          "type": "message",
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "sourceSequence": 3,
+          "causedByEventId": "6161280b-fc7f-4fb5-b355-1e44654fb9c2"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 9,
+        "eventId": "2b1423dd-c0e2-4adc-b83b-9adb81d94115",
+        "eventType": "AgentObservationReceived",
+        "occurredAt": "2026-09-13T09:16:55.553957+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "data": {
+            "runtimeEvent": {
+              "method": "item/completed",
+              "params": {
+                "item": {
+                  "id": "01a09a0e-1ed9-7e50-9301-a3020ef3dcc9",
+                  "type": "userMessage",
+                  "content": [
+                    {
+                      "text": "Preflight phase. Do not use tools or start implementation. Return exactly: {\"schema_version\": \"3\", \"outcome\": \"blocked\", \"summary\": \"Disposable greeting issue is ready for the human continuation.\", \"red_green_slices\": [], \"changed_files\": [], \"verification\": [], \"evidence\": [], \"findings\": [], \"intervention\": null}",
+                      "type": "text",
+                      "text_elements": []
+                    }
+                  ],
+                  "clientId": null
+                },
+                "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                "completedAtMs": 1789291011801
+              },
+              "emittedAtMs": 1789291011802
+            }
+          },
+          "type": "message",
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "sourceSequence": 4,
+          "causedByEventId": "8329abe1-68f1-45a4-9269-2f3a51cdf1eb"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 10,
+        "eventId": "5fe278ef-a341-4b74-9521-7eed5ef9767e",
+        "eventType": "AgentObservationReceived",
+        "occurredAt": "2026-09-13T09:16:55.565329+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "data": {
+            "runtimeEvent": {
+              "method": "item/started",
+              "params": {
+                "item": {
+                  "id": "msg_0d441d0b674be516016aa66a0616a087d2b2904f4f0f8aa785",
+                  "text": "",
+                  "type": "agentMessage",
+                  "phase": "final_answer",
+                  "delivery": null,
+                  "questions": null,
+                  "memoryCitation": null
+                },
+                "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                "startedAtMs": 1789291014130
+              },
+              "emittedAtMs": 1789291014131
+            }
+          },
+          "type": "message",
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "sourceSequence": 5,
+          "causedByEventId": "2b1423dd-c0e2-4adc-b83b-9adb81d94115"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 11,
+        "eventId": "aa5b49dc-4bbc-46a8-80d0-f6c7ab1a1f0d",
+        "eventType": "AgentObservationReceived",
+        "occurredAt": "2026-09-13T09:16:55.578067+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "data": {
+            "runtimeEvent": {
+              "method": "item/completed",
+              "params": {
+                "item": {
+                  "id": "msg_0d441d0b674be516016aa66a0616a087d2b2904f4f0f8aa785",
+                  "text": "{\"schema_version\":\"3\",\"outcome\":\"blocked\",\"summary\":\"Disposable greeting issue is ready for the human continuation.\",\"red_green_slices\":[],\"changed_files\":[],\"verification\":[],\"evidence\":[],\"findings\":[],\"intervention\":null}",
+                  "type": "agentMessage",
+                  "phase": "final_answer",
+                  "delivery": null,
+                  "questions": null,
+                  "memoryCitation": null
+                },
+                "turnId": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+                "completedAtMs": 1789291015346
+              },
+              "emittedAtMs": 1789291015349
+            }
+          },
+          "type": "message",
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "sourceSequence": 6,
+          "causedByEventId": "5fe278ef-a341-4b74-9521-7eed5ef9767e"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 12,
+        "eventId": "36fb79d3-c96f-4344-942c-13e94fe622c0",
+        "eventType": "AgentObservationReceived",
+        "occurredAt": "2026-09-13T09:16:55.589774+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "data": {
+            "runtimeEvent": {
+              "method": "turn/completed",
+              "params": {
+                "turn": {
+                  "id": "01a09a0e-1916-7832-8937-6ffabab6cb60",
+                  "error": null,
+                  "items": [
+                    {
+                      "id": "msg_0d441d0b674be516016aa66a0616a087d2b2904f4f0f8aa785",
+                      "text": "{\"schema_version\":\"3\",\"outcome\":\"blocked\",\"summary\":\"Disposable greeting issue is ready for the human continuation.\",\"red_green_slices\":[],\"changed_files\":[],\"verification\":[],\"evidence\":[],\"findings\":[],\"intervention\":null}",
+                      "type": "agentMessage",
+                      "phase": "final_answer",
+                      "delivery": null,
+                      "questions": null,
+                      "memoryCitation": null
+                    }
+                  ],
+                  "status": "completed",
+                  "itemsView": "summary",
+                  "startedAt": 1789291010,
+                  "durationMs": 5051,
+                  "completedAt": 1789291015
+                },
+                "threadId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8"
+              },
+              "emittedAtMs": 1789291015379
+            }
+          },
+          "type": "message",
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "sourceSequence": 7,
+          "causedByEventId": "aa5b49dc-4bbc-46a8-80d0-f6c7ab1a1f0d"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 13,
+        "eventId": "92e80d91-1694-4b5c-8938-443e01b97408",
+        "eventType": "AgentResultObserved",
+        "occurredAt": "2026-09-13T09:16:55.601263+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "data": {
+            "outcome": "blocked",
+            "summary": "Disposable greeting issue is ready for the human continuation.",
+            "evidence": [],
+            "findings": [],
+            "intervention": null,
+            "verification": [],
+            "changed_files": [],
+            "schema_version": "3",
+            "red_green_slices": []
+          },
+          "type": "result",
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "sourceSequence": 8,
+          "causedByEventId": "36fb79d3-c96f-4344-942c-13e94fe622c0"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 14,
+        "eventId": "7a8a8db6-db28-4b1c-832c-47d5fa5ee7eb",
+        "eventType": "AgentAttemptCompleted",
+        "occurredAt": "2026-09-13T09:16:55.721833+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "category": "blocked",
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "activityId": "0aef9cea-b9de-44f1-bdf1-165f19da983b",
+          "originalResultEventId": "92e80d91-1694-4b5c-8938-443e01b97408"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 15,
+        "eventId": "67e1dc53-ebe5-43b0-bc27-cfacd4c1c083",
+        "eventType": "HumanRequestCreated",
+        "occurredAt": "2026-09-13T09:16:55.725782+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "phase": "awaiting-human",
+          "problem": "Disposable greeting issue is ready for the human continuation.",
+          "evidence": [
+            "92e80d91-1694-4b5c-8938-443e01b97408"
+          ],
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "requestId": "5383b7fe-9adb-45af-92b2-70a016a17617",
+          "sessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+          "leaseEpoch": 0,
+          "allowedActions": [
+            "resume",
+            "fork",
+            "fresh-retry",
+            "open",
+            "write"
+          ],
+          "expectedHeadSha": null,
+          "expectedRunVersion": 15
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 16,
+        "eventId": "7f42f272-83ca-4ee7-8bbc-a11f04ba253a",
+        "eventType": "CodexSessionOpenRequested",
+        "occurredAt": "2026-09-13T09:16:56.008619+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "commandId": "14c683b4-0f12-4287-9207-6e7a5aa0ae41",
+          "requestId": "5383b7fe-9adb-45af-92b2-70a016a17617",
+          "capability": {
+            "url": "ws://127.0.0.1:58233/sessions/01a09a0e-18d0-7f73-bdda-a4b41722afd8",
+            "mode": "same-session",
+            "reason": "native-codex-tui-via-fenced-gateway; desktop-sidebar-not-used",
+            "sameSession": true,
+            "appTaskVisible": false
+          },
+          "sourceAttemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sourceSessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 17,
+        "eventId": "61fdb9cb-c414-4cec-9119-90adaf0dbdf2",
+        "eventType": "CodexSessionOpened",
+        "occurredAt": "2026-09-13T09:16:56.038282+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "attemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "commandId": "14c683b4-0f12-4287-9207-6e7a5aa0ae41",
+          "requestId": "5383b7fe-9adb-45af-92b2-70a016a17617",
+          "operationKey": "054143cc-3846-4bdb-9ddd-61107d4c7601",
+          "sourceAttemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+          "sourceSessionId": "01a09a0e-18d0-7f73-bdda-a4b41722afd8"
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 18,
+        "eventId": "779d7794-a22b-4081-8a49-b1a932654149",
+        "eventType": "ControlLeaseClaimed",
+        "occurredAt": "2026-09-13T09:16:56.122829+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "",
+          "marker": ""
+        },
+        "payload": {
+          "actor": {
+            "kind": "human",
+            "provider": "github",
+            "subjectId": "101"
+          },
+          "detail": null,
+          "current": {
+            "holder": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "101"
+            },
+            "headSha": null,
+            "claimedAt": "2026-09-13T09:16:56.122242+00:00",
+            "leaseEpoch": 1,
+            "runVersion": 18,
+            "targetAttemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+            "transferRequest": null
+          },
+          "previous": {
+            "holder": null,
+            "headSha": null,
+            "claimedAt": null,
+            "leaseEpoch": 0,
+            "runVersion": 17,
+            "targetAttemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+            "transferRequest": null
+          }
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+        "position": 19,
+        "eventId": "7c47dc5f-f725-4c32-a3d6-833f65bc7f6d",
+        "eventType": "ControlLeaseForcedTakenOver",
+        "occurredAt": "2026-09-13T09:16:56.260679+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "",
+          "marker": ""
+        },
+        "payload": {
+          "actor": {
+            "kind": "human",
+            "provider": "github",
+            "subjectId": "103"
+          },
+          "detail": {
+            "mode": "forced",
+            "reason": "Native session takeover verification",
+            "requestId": null
+          },
+          "current": {
+            "holder": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "103"
+            },
+            "headSha": null,
+            "claimedAt": "2026-09-13T09:16:56.260611+00:00",
+            "leaseEpoch": 2,
+            "runVersion": 19,
+            "targetAttemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+            "transferRequest": null
+          },
+          "previous": {
+            "holder": {
+              "kind": "human",
+              "provider": "github",
+              "subjectId": "101"
+            },
+            "headSha": null,
+            "claimedAt": "2026-09-13T09:16:56.122242+00:00",
+            "leaseEpoch": 1,
+            "runVersion": 18,
+            "targetAttemptId": "21b3e484-fb3b-4aa7-8a37-c3f5b5ac73db",
+            "transferRequest": null
+          }
+        },
+        "correlation": {
+          "runId": "a1d6c703-1784-44ac-a5e1-e66ccf4c4ee0",
+          "issueId": "issue-47",
+          "commandId": "2bb3f6ff-61ff-419d-9126-a474fa5f66be",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 47,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      }
+    ],
+    "lastPosition": 19,
+    "nextAfter": 19,
+    "hasMore": false
+  },
+  "facts": {
+    "denied": {
+      "id": 2,
+      "error": {
+        "code": -32001,
+        "message": "control-lease-required"
+      }
+    }
+  }
+}

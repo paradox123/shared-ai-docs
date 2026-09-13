@@ -1,0 +1,1028 @@
+{
+  "report": {
+    "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+    "process": {
+      "processId": 24996,
+      "startedAt": "2026-09-12T17:30:04.151171+00:00",
+      "ownerProcessId": 24985,
+      "processGroupId": 24995
+    },
+    "reasons": [
+      "native-client-lease-fencing-unverified"
+    ],
+    "runtime": {
+      "model": "gpt-6-astra",
+      "sha256": "c147aa90d34139599711fb568102ceefc6319ca1ac5cb6f4056ca46a1834edd9",
+      "userAgent": "wpcp_runtime_gate/0.153.4 (Mac OS 26.6.2; arm64) unknown (wpcp_runtime_gate; 1)",
+      "protocolSha256": "25bc001b5dfe3b35785597b8f9ad9e5aaf7e437331fa9921f041c9e0e03fc9f3",
+      "expectedVersion": "codex-cli 0.153.4",
+      "reasoningEffort": null,
+      "canonicalSchemaSha256": "457e7331f32ee67465787dc50b4c796a6d4f697d9a82c581f929eb5ca5f73c62"
+    },
+    "decision": "no-go",
+    "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+    "startedAt": "2026-09-12T17:30:03.929912+00:00",
+    "repository": {
+      "disposable": true,
+      "remoteCount": 0,
+      "issueWorkStarted": false
+    },
+    "completedAt": "2026-09-12T17:30:10.954787+00:00",
+    "probeTurnId": "01a096ab-5045-7091-94f4-26cd5bf6e67c",
+    "processStop": {
+      "status": "stopped",
+      "exitCode": -9,
+      "stoppedAt": "2026-09-12T17:30:10.893170+00:00",
+      "processGroupId": 24995
+    },
+    "capabilities": {
+      "fork": {
+        "status": "passed",
+        "sessionId": "01a096ab-67c9-76c3-b697-c305c5cb08ad",
+        "parentSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+        "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+      },
+      "read": {
+        "status": "passed",
+        "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+        "parentSessionId": null,
+        "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+      },
+      "tools": {
+        "tool": "python",
+        "status": "passed",
+        "exitCode": 0,
+        "interface": "command/exec"
+      },
+      "resume": {
+        "status": "passed",
+        "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+        "parentSessionId": null,
+        "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+      },
+      "sandbox": {
+        "policy": {
+          "type": "workspaceWrite",
+          "networkAccess": false,
+          "writableRoots": [
+            "/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-h8s159l3/codex/71922d73-d5d5-4e1e-9f53-4f6aee274bb8/probe-vjqh4hw5/repository"
+          ],
+          "excludeSlashTmp": true,
+          "excludeTmpdirEnvVar": true
+        },
+        "status": "passed",
+        "networkDenied": true,
+        "insideWriteAllowed": true,
+        "outsideWriteDenied": true
+      },
+      "timeout": {
+        "status": "passed",
+        "exitCode": 124,
+        "timeoutMs": 100,
+        "elapsedSeconds": 0.105,
+        "commandProcessId": 25058,
+        "lateOutputObserved": false
+      },
+      "protocol": {
+        "status": "passed",
+        "missingMethods": [],
+        "experimentalApi": false,
+        "requiredMethods": [
+          "thread/start",
+          "thread/read",
+          "thread/resume",
+          "thread/fork",
+          "turn/start",
+          "turn/interrupt",
+          "command/exec"
+        ]
+      },
+      "interrupt": {
+        "status": "passed",
+        "turnId": "01a096ab-6831-71a1-8455-655786db9bd3",
+        "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+        "turnStatus": "interrupted"
+      },
+      "startFresh": {
+        "status": "passed",
+        "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+      },
+      "openInCodex": {
+        "url": null,
+        "reason": "native-client-lease-fencing-unverified",
+        "status": "unsupported",
+        "sameSession": false,
+        "appTaskVisible": false,
+        "canAcceptDirectInput": true
+      },
+      "outputSchema": {
+        "status": "passed",
+        "turnId": "01a096ab-5045-7091-94f4-26cd5bf6e67c",
+        "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+        "turnStatus": "completed",
+        "endpointSchemaSha256": "469364349ab9cb0b1ada854533be780337844141ed271e5c20a7b2b43bf0e0a9",
+        "canonicalValidationPassed": true,
+        "exactSyntheticResultMatched": true
+      }
+    },
+    "dependencies": {
+      "python": "3.14.2",
+      "jsonschema": "4.26.0"
+    },
+    "schemaVersion": "codex-runtime-gate/v1",
+    "issueWorkStarted": false,
+    "sessionStartState": "mapped"
+  },
+  "attempt": {
+    "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+    "attempt": {
+      "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+      "activityId": "99ad067f-e009-4043-a14f-eec7d8c31b1a",
+      "attemptNumber": 1,
+      "state": "capability-unavailable",
+      "startedAt": "2026-09-12T17:30:03.862472+00:00",
+      "completedAt": "2026-09-12T17:30:11.026126+00:00",
+      "session": {
+        "operationKey": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+        "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+        "status": "not-admitted",
+        "contractVersion": "AgentSessionAdapter/v1",
+        "startedEventId": "a4b54cfc-bb97-47fc-b14b-0b6bdd451d4e",
+        "lastSequence": 0,
+        "lastEventId": "a4b54cfc-bb97-47fc-b14b-0b6bdd451d4e",
+        "originalResult": null,
+        "originalResultEventId": null,
+        "failureCategory": "capability-unavailable",
+        "openInCodex": {
+          "mode": "unsupported",
+          "sameSession": false,
+          "appTaskVisible": false,
+          "reason": "isolated-probe-session-disposed; native-client-lease-fencing-unverified",
+          "url": null
+        },
+        "openedInCodex": false,
+        "observedResponse": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "process": {
+            "processId": 24996,
+            "startedAt": "2026-09-12T17:30:04.151171+00:00",
+            "ownerProcessId": 24985,
+            "processGroupId": 24995
+          },
+          "reasons": [
+            "native-client-lease-fencing-unverified"
+          ],
+          "runtime": {
+            "model": "gpt-6-astra",
+            "sha256": "c147aa90d34139599711fb568102ceefc6319ca1ac5cb6f4056ca46a1834edd9",
+            "userAgent": "wpcp_runtime_gate/0.153.4 (Mac OS 26.6.2; arm64) unknown (wpcp_runtime_gate; 1)",
+            "protocolSha256": "25bc001b5dfe3b35785597b8f9ad9e5aaf7e437331fa9921f041c9e0e03fc9f3",
+            "expectedVersion": "codex-cli 0.153.4",
+            "reasoningEffort": null,
+            "canonicalSchemaSha256": "457e7331f32ee67465787dc50b4c796a6d4f697d9a82c581f929eb5ca5f73c62"
+          },
+          "decision": "no-go",
+          "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "startedAt": "2026-09-12T17:30:03.929912+00:00",
+          "repository": {
+            "disposable": true,
+            "remoteCount": 0,
+            "issueWorkStarted": false
+          },
+          "completedAt": "2026-09-12T17:30:10.954787+00:00",
+          "probeTurnId": "01a096ab-5045-7091-94f4-26cd5bf6e67c",
+          "processStop": {
+            "status": "stopped",
+            "exitCode": -9,
+            "stoppedAt": "2026-09-12T17:30:10.893170+00:00",
+            "processGroupId": 24995
+          },
+          "capabilities": {
+            "fork": {
+              "status": "passed",
+              "sessionId": "01a096ab-67c9-76c3-b697-c305c5cb08ad",
+              "parentSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+              "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+            },
+            "read": {
+              "status": "passed",
+              "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+              "parentSessionId": null,
+              "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+            },
+            "tools": {
+              "tool": "python",
+              "status": "passed",
+              "exitCode": 0,
+              "interface": "command/exec"
+            },
+            "resume": {
+              "status": "passed",
+              "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+              "parentSessionId": null,
+              "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+            },
+            "sandbox": {
+              "policy": {
+                "type": "workspaceWrite",
+                "networkAccess": false,
+                "writableRoots": [
+                  "/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-h8s159l3/codex/71922d73-d5d5-4e1e-9f53-4f6aee274bb8/probe-vjqh4hw5/repository"
+                ],
+                "excludeSlashTmp": true,
+                "excludeTmpdirEnvVar": true
+              },
+              "status": "passed",
+              "networkDenied": true,
+              "insideWriteAllowed": true,
+              "outsideWriteDenied": true
+            },
+            "timeout": {
+              "status": "passed",
+              "exitCode": 124,
+              "timeoutMs": 100,
+              "elapsedSeconds": 0.105,
+              "commandProcessId": 25058,
+              "lateOutputObserved": false
+            },
+            "protocol": {
+              "status": "passed",
+              "missingMethods": [],
+              "experimentalApi": false,
+              "requiredMethods": [
+                "thread/start",
+                "thread/read",
+                "thread/resume",
+                "thread/fork",
+                "turn/start",
+                "turn/interrupt",
+                "command/exec"
+              ]
+            },
+            "interrupt": {
+              "status": "passed",
+              "turnId": "01a096ab-6831-71a1-8455-655786db9bd3",
+              "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+              "turnStatus": "interrupted"
+            },
+            "startFresh": {
+              "status": "passed",
+              "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+            },
+            "openInCodex": {
+              "url": null,
+              "reason": "native-client-lease-fencing-unverified",
+              "status": "unsupported",
+              "sameSession": false,
+              "appTaskVisible": false,
+              "canAcceptDirectInput": true
+            },
+            "outputSchema": {
+              "status": "passed",
+              "turnId": "01a096ab-5045-7091-94f4-26cd5bf6e67c",
+              "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+              "turnStatus": "completed",
+              "endpointSchemaSha256": "469364349ab9cb0b1ada854533be780337844141ed271e5c20a7b2b43bf0e0a9",
+              "canonicalValidationPassed": true,
+              "exactSyntheticResultMatched": true
+            }
+          },
+          "dependencies": {
+            "python": "3.14.2",
+            "jsonschema": "4.26.0"
+          },
+          "schemaVersion": "codex-runtime-gate/v1",
+          "issueWorkStarted": false,
+          "sessionStartState": "mapped"
+        },
+        "responseStatus": 200,
+        "responseEventId": "0c429b24-f7d1-4fd9-bf1e-6739a0409b41",
+        "humanRequest": null,
+        "lineage": null
+      },
+      "liveOperation": null
+    },
+    "provenance": {
+      "sourceRevision": "r1",
+      "packageRevision": "r1",
+      "configurationRevision": "r1",
+      "contractRevision": "r1"
+    },
+    "control": {
+      "runVersion": 6,
+      "targetAttemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+      "headSha": null,
+      "leaseEpoch": 0,
+      "holder": null,
+      "claimedAt": null,
+      "transferRequest": null
+    },
+    "repositoryExecution": null,
+    "effects": [],
+    "events": [
+      {
+        "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+        "position": 2,
+        "eventId": "a28d63d9-fb28-4403-b1e8-c72e05b90f3f",
+        "eventType": "AgentPreparationCompleted",
+        "occurredAt": "2026-09-12T17:30:03.866995+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "runtime": "10.0.7",
+          "executor": "deterministic",
+          "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "framework": "Microsoft.Agents.AI.Workflows/1.16.0",
+          "activityId": "99ad067f-e009-4043-a14f-eec7d8c31b1a"
+        },
+        "correlation": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "issueId": "issue-45",
+          "commandId": "7ea20def-0919-4225-8254-b5eddea50144",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 45,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+        "position": 3,
+        "eventId": "3b19988e-6ac7-4249-9436-f8faf01531a6",
+        "eventType": "CodexRuntimePreflightRequested",
+        "occurredAt": "2026-09-12T17:30:03.871575+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "activityId": "99ad067f-e009-4043-a14f-eec7d8c31b1a",
+          "operationKey": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "contractVersion": "AgentSessionAdapter/v1"
+        },
+        "correlation": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "issueId": "issue-45",
+          "commandId": "7ea20def-0919-4225-8254-b5eddea50144",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 45,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+        "position": 4,
+        "eventId": "0c429b24-f7d1-4fd9-bf1e-6739a0409b41",
+        "eventType": "AgentAdapterResponseObserved",
+        "occurredAt": "2026-09-12T17:30:10.992701+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "body": {
+            "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+            "process": {
+              "processId": 24996,
+              "startedAt": "2026-09-12T17:30:04.151171+00:00",
+              "ownerProcessId": 24985,
+              "processGroupId": 24995
+            },
+            "reasons": [
+              "native-client-lease-fencing-unverified"
+            ],
+            "runtime": {
+              "model": "gpt-6-astra",
+              "sha256": "c147aa90d34139599711fb568102ceefc6319ca1ac5cb6f4056ca46a1834edd9",
+              "userAgent": "wpcp_runtime_gate/0.153.4 (Mac OS 26.6.2; arm64) unknown (wpcp_runtime_gate; 1)",
+              "protocolSha256": "25bc001b5dfe3b35785597b8f9ad9e5aaf7e437331fa9921f041c9e0e03fc9f3",
+              "expectedVersion": "codex-cli 0.153.4",
+              "reasoningEffort": null,
+              "canonicalSchemaSha256": "457e7331f32ee67465787dc50b4c796a6d4f697d9a82c581f929eb5ca5f73c62"
+            },
+            "decision": "no-go",
+            "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+            "startedAt": "2026-09-12T17:30:03.929912+00:00",
+            "repository": {
+              "disposable": true,
+              "remoteCount": 0,
+              "issueWorkStarted": false
+            },
+            "completedAt": "2026-09-12T17:30:10.954787+00:00",
+            "probeTurnId": "01a096ab-5045-7091-94f4-26cd5bf6e67c",
+            "processStop": {
+              "status": "stopped",
+              "exitCode": -9,
+              "stoppedAt": "2026-09-12T17:30:10.893170+00:00",
+              "processGroupId": 24995
+            },
+            "capabilities": {
+              "fork": {
+                "status": "passed",
+                "sessionId": "01a096ab-67c9-76c3-b697-c305c5cb08ad",
+                "parentSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+                "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+              },
+              "read": {
+                "status": "passed",
+                "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+                "parentSessionId": null,
+                "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+              },
+              "tools": {
+                "tool": "python",
+                "status": "passed",
+                "exitCode": 0,
+                "interface": "command/exec"
+              },
+              "resume": {
+                "status": "passed",
+                "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+                "parentSessionId": null,
+                "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+              },
+              "sandbox": {
+                "policy": {
+                  "type": "workspaceWrite",
+                  "networkAccess": false,
+                  "writableRoots": [
+                    "/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-h8s159l3/codex/71922d73-d5d5-4e1e-9f53-4f6aee274bb8/probe-vjqh4hw5/repository"
+                  ],
+                  "excludeSlashTmp": true,
+                  "excludeTmpdirEnvVar": true
+                },
+                "status": "passed",
+                "networkDenied": true,
+                "insideWriteAllowed": true,
+                "outsideWriteDenied": true
+              },
+              "timeout": {
+                "status": "passed",
+                "exitCode": 124,
+                "timeoutMs": 100,
+                "elapsedSeconds": 0.105,
+                "commandProcessId": 25058,
+                "lateOutputObserved": false
+              },
+              "protocol": {
+                "status": "passed",
+                "missingMethods": [],
+                "experimentalApi": false,
+                "requiredMethods": [
+                  "thread/start",
+                  "thread/read",
+                  "thread/resume",
+                  "thread/fork",
+                  "turn/start",
+                  "turn/interrupt",
+                  "command/exec"
+                ]
+              },
+              "interrupt": {
+                "status": "passed",
+                "turnId": "01a096ab-6831-71a1-8455-655786db9bd3",
+                "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+                "turnStatus": "interrupted"
+              },
+              "startFresh": {
+                "status": "passed",
+                "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+              },
+              "openInCodex": {
+                "url": null,
+                "reason": "native-client-lease-fencing-unverified",
+                "status": "unsupported",
+                "sameSession": false,
+                "appTaskVisible": false,
+                "canAcceptDirectInput": true
+              },
+              "outputSchema": {
+                "status": "passed",
+                "turnId": "01a096ab-5045-7091-94f4-26cd5bf6e67c",
+                "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+                "turnStatus": "completed",
+                "endpointSchemaSha256": "469364349ab9cb0b1ada854533be780337844141ed271e5c20a7b2b43bf0e0a9",
+                "canonicalValidationPassed": true,
+                "exactSyntheticResultMatched": true
+              }
+            },
+            "dependencies": {
+              "python": "3.14.2",
+              "jsonschema": "4.26.0"
+            },
+            "schemaVersion": "codex-runtime-gate/v1",
+            "issueWorkStarted": false,
+            "sessionStartState": "mapped"
+          },
+          "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "activityId": "99ad067f-e009-4043-a14f-eec7d8c31b1a",
+          "statusCode": 200
+        },
+        "correlation": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "issueId": "issue-45",
+          "commandId": "7ea20def-0919-4225-8254-b5eddea50144",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 45,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+        "position": 5,
+        "eventId": "a4b54cfc-bb97-47fc-b14b-0b6bdd451d4e",
+        "eventType": "AgentSessionStarted",
+        "occurredAt": "2026-09-12T17:30:11.012576+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+          "activityId": "99ad067f-e009-4043-a14f-eec7d8c31b1a",
+          "openInCodex": {
+            "url": null,
+            "mode": "unsupported",
+            "reason": "isolated-probe-session-disposed; native-client-lease-fencing-unverified",
+            "sameSession": false,
+            "appTaskVisible": false
+          },
+          "operationKey": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "contractVersion": "AgentSessionAdapter/v1"
+        },
+        "correlation": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "issueId": "issue-45",
+          "commandId": "7ea20def-0919-4225-8254-b5eddea50144",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 45,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+        "position": 6,
+        "eventId": "49730e6e-e3b0-480e-b360-748dd173b08d",
+        "eventType": "AgentAttemptCompleted",
+        "occurredAt": "2026-09-12T17:30:11.0253+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "category": "capability-unavailable",
+          "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+          "activityId": "99ad067f-e009-4043-a14f-eec7d8c31b1a",
+          "originalResultEventId": null
+        },
+        "correlation": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "issueId": "issue-45",
+          "commandId": "7ea20def-0919-4225-8254-b5eddea50144",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 45,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      }
+    ]
+  },
+  "history": {
+    "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+    "after": 0,
+    "events": [
+      {
+        "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+        "position": 1,
+        "eventId": "c3ca94ac-14d5-4914-b099-5469bb48536a",
+        "eventType": "ImplementationRunStarted",
+        "occurredAt": "2026-09-12T17:30:03.649139+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "",
+          "marker": ""
+        },
+        "payload": {
+          "note": "control proof",
+          "actor": {
+            "kind": "human",
+            "provider": "github",
+            "subjectId": "101"
+          },
+          "authorization": {
+            "source": "github",
+            "decision": "authorized"
+          }
+        },
+        "correlation": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "issueId": "issue-45",
+          "commandId": "7ea20def-0919-4225-8254-b5eddea50144",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 45,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+        "position": 2,
+        "eventId": "a28d63d9-fb28-4403-b1e8-c72e05b90f3f",
+        "eventType": "AgentPreparationCompleted",
+        "occurredAt": "2026-09-12T17:30:03.866995+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "runtime": "10.0.7",
+          "executor": "deterministic",
+          "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "framework": "Microsoft.Agents.AI.Workflows/1.16.0",
+          "activityId": "99ad067f-e009-4043-a14f-eec7d8c31b1a"
+        },
+        "correlation": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "issueId": "issue-45",
+          "commandId": "7ea20def-0919-4225-8254-b5eddea50144",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 45,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+        "position": 3,
+        "eventId": "3b19988e-6ac7-4249-9436-f8faf01531a6",
+        "eventType": "CodexRuntimePreflightRequested",
+        "occurredAt": "2026-09-12T17:30:03.871575+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "activityId": "99ad067f-e009-4043-a14f-eec7d8c31b1a",
+          "operationKey": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "contractVersion": "AgentSessionAdapter/v1"
+        },
+        "correlation": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "issueId": "issue-45",
+          "commandId": "7ea20def-0919-4225-8254-b5eddea50144",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 45,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+        "position": 4,
+        "eventId": "0c429b24-f7d1-4fd9-bf1e-6739a0409b41",
+        "eventType": "AgentAdapterResponseObserved",
+        "occurredAt": "2026-09-12T17:30:10.992701+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "body": {
+            "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+            "process": {
+              "processId": 24996,
+              "startedAt": "2026-09-12T17:30:04.151171+00:00",
+              "ownerProcessId": 24985,
+              "processGroupId": 24995
+            },
+            "reasons": [
+              "native-client-lease-fencing-unverified"
+            ],
+            "runtime": {
+              "model": "gpt-6-astra",
+              "sha256": "c147aa90d34139599711fb568102ceefc6319ca1ac5cb6f4056ca46a1834edd9",
+              "userAgent": "wpcp_runtime_gate/0.153.4 (Mac OS 26.6.2; arm64) unknown (wpcp_runtime_gate; 1)",
+              "protocolSha256": "25bc001b5dfe3b35785597b8f9ad9e5aaf7e437331fa9921f041c9e0e03fc9f3",
+              "expectedVersion": "codex-cli 0.153.4",
+              "reasoningEffort": null,
+              "canonicalSchemaSha256": "457e7331f32ee67465787dc50b4c796a6d4f697d9a82c581f929eb5ca5f73c62"
+            },
+            "decision": "no-go",
+            "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+            "startedAt": "2026-09-12T17:30:03.929912+00:00",
+            "repository": {
+              "disposable": true,
+              "remoteCount": 0,
+              "issueWorkStarted": false
+            },
+            "completedAt": "2026-09-12T17:30:10.954787+00:00",
+            "probeTurnId": "01a096ab-5045-7091-94f4-26cd5bf6e67c",
+            "processStop": {
+              "status": "stopped",
+              "exitCode": -9,
+              "stoppedAt": "2026-09-12T17:30:10.893170+00:00",
+              "processGroupId": 24995
+            },
+            "capabilities": {
+              "fork": {
+                "status": "passed",
+                "sessionId": "01a096ab-67c9-76c3-b697-c305c5cb08ad",
+                "parentSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+                "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+              },
+              "read": {
+                "status": "passed",
+                "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+                "parentSessionId": null,
+                "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+              },
+              "tools": {
+                "tool": "python",
+                "status": "passed",
+                "exitCode": 0,
+                "interface": "command/exec"
+              },
+              "resume": {
+                "status": "passed",
+                "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+                "parentSessionId": null,
+                "sourceSessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+              },
+              "sandbox": {
+                "policy": {
+                  "type": "workspaceWrite",
+                  "networkAccess": false,
+                  "writableRoots": [
+                    "/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-h8s159l3/codex/71922d73-d5d5-4e1e-9f53-4f6aee274bb8/probe-vjqh4hw5/repository"
+                  ],
+                  "excludeSlashTmp": true,
+                  "excludeTmpdirEnvVar": true
+                },
+                "status": "passed",
+                "networkDenied": true,
+                "insideWriteAllowed": true,
+                "outsideWriteDenied": true
+              },
+              "timeout": {
+                "status": "passed",
+                "exitCode": 124,
+                "timeoutMs": 100,
+                "elapsedSeconds": 0.105,
+                "commandProcessId": 25058,
+                "lateOutputObserved": false
+              },
+              "protocol": {
+                "status": "passed",
+                "missingMethods": [],
+                "experimentalApi": false,
+                "requiredMethods": [
+                  "thread/start",
+                  "thread/read",
+                  "thread/resume",
+                  "thread/fork",
+                  "turn/start",
+                  "turn/interrupt",
+                  "command/exec"
+                ]
+              },
+              "interrupt": {
+                "status": "passed",
+                "turnId": "01a096ab-6831-71a1-8455-655786db9bd3",
+                "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+                "turnStatus": "interrupted"
+              },
+              "startFresh": {
+                "status": "passed",
+                "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52"
+              },
+              "openInCodex": {
+                "url": null,
+                "reason": "native-client-lease-fencing-unverified",
+                "status": "unsupported",
+                "sameSession": false,
+                "appTaskVisible": false,
+                "canAcceptDirectInput": true
+              },
+              "outputSchema": {
+                "status": "passed",
+                "turnId": "01a096ab-5045-7091-94f4-26cd5bf6e67c",
+                "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+                "turnStatus": "completed",
+                "endpointSchemaSha256": "469364349ab9cb0b1ada854533be780337844141ed271e5c20a7b2b43bf0e0a9",
+                "canonicalValidationPassed": true,
+                "exactSyntheticResultMatched": true
+              }
+            },
+            "dependencies": {
+              "python": "3.14.2",
+              "jsonschema": "4.26.0"
+            },
+            "schemaVersion": "codex-runtime-gate/v1",
+            "issueWorkStarted": false,
+            "sessionStartState": "mapped"
+          },
+          "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "activityId": "99ad067f-e009-4043-a14f-eec7d8c31b1a",
+          "statusCode": 200
+        },
+        "correlation": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "issueId": "issue-45",
+          "commandId": "7ea20def-0919-4225-8254-b5eddea50144",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 45,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+        "position": 5,
+        "eventId": "a4b54cfc-bb97-47fc-b14b-0b6bdd451d4e",
+        "eventType": "AgentSessionStarted",
+        "occurredAt": "2026-09-12T17:30:11.012576+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+          "activityId": "99ad067f-e009-4043-a14f-eec7d8c31b1a",
+          "openInCodex": {
+            "url": null,
+            "mode": "unsupported",
+            "reason": "isolated-probe-session-disposed; native-client-lease-fencing-unverified",
+            "sameSession": false,
+            "appTaskVisible": false
+          },
+          "operationKey": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "contractVersion": "AgentSessionAdapter/v1"
+        },
+        "correlation": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "issueId": "issue-45",
+          "commandId": "7ea20def-0919-4225-8254-b5eddea50144",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 45,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      },
+      {
+        "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+        "position": 6,
+        "eventId": "49730e6e-e3b0-480e-b360-748dd173b08d",
+        "eventType": "AgentAttemptCompleted",
+        "occurredAt": "2026-09-12T17:30:11.0253+00:00",
+        "redaction": {
+          "occurred": false,
+          "policyVersion": "controlled-canary-v1",
+          "marker": "[REDACTED:CONTROLLED-CANARY]"
+        },
+        "payload": {
+          "category": "capability-unavailable",
+          "attemptId": "71922d73-d5d5-4e1e-9f53-4f6aee274bb8",
+          "sessionId": "01a096ab-4f7a-7931-ace5-a9c59c95cc52",
+          "activityId": "99ad067f-e009-4043-a14f-eec7d8c31b1a",
+          "originalResultEventId": null
+        },
+        "correlation": {
+          "runId": "9b80e075-ff0b-4320-9753-755d63326c81",
+          "issueId": "issue-45",
+          "commandId": "7ea20def-0919-4225-8254-b5eddea50144",
+          "repository": {
+            "fullName": "pilot/fixture",
+            "repositoryId": "repo-1",
+            "providerRepositoryId": 9001
+          },
+          "issueNumber": 45,
+          "repositoryId": "repo-1"
+        },
+        "provenance": {
+          "sourceRevision": "r1",
+          "packageRevision": "r1",
+          "contractRevision": "r1",
+          "configurationRevision": "r1"
+        }
+      }
+    ],
+    "lastPosition": 6,
+    "nextAfter": 6,
+    "hasMore": false
+  },
+  "limits": [
+    "native app not opened: lease fencing unverified",
+    "no issue implementation",
+    "explicit local dispatch",
+    "controlled GitHub authorization provider"
+  ]
+}

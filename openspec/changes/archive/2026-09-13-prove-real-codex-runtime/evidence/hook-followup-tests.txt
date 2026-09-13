@@ -1,0 +1,18 @@
+test_completed_result_without_evidence_is_rejected (test_codex_contract.CodexContractTests.test_completed_result_without_evidence_is_rejected) ... ok
+test_endpoint_projection_preserves_fields_without_canonical_conditionals (test_codex_contract.CodexContractTests.test_endpoint_projection_preserves_fields_without_canonical_conditionals) ... ok
+test_gate_failure_survives_worker_replay_and_api_replacement (test_codex_preflight_operator.CodexPreflightOperatorTests.test_gate_failure_survives_worker_replay_and_api_replacement) ... ok
+test_missing_interpreter_is_a_visible_terminal_prerequisite_failure (test_codex_preflight_operator.CodexPreflightOperatorTests.test_missing_interpreter_is_a_visible_terminal_prerequisite_failure) ... ok
+test_real_capabilities_and_no_go_are_readable_under_the_original_run (test_codex_preflight_operator.CodexPreflightOperatorTests.test_real_capabilities_and_no_go_are_readable_under_the_original_run) ... ok
+test_invalid_configuration_is_a_visible_preflight_failure (test_codex_runtime_gate.CodexRuntimeGateTests.test_invalid_configuration_is_a_visible_preflight_failure) ... ok
+test_real_endpoint_schema_and_completed_session_continuations (test_codex_runtime_gate.CodexRuntimeGateTests.test_real_endpoint_schema_and_completed_session_continuations) ... ok
+test_real_prompt_hook_blocks_input_with_correlated_session_and_turn (test_codex_runtime_gate.CodexRuntimeGateTests.test_real_prompt_hook_blocks_input_with_correlated_session_and_turn) ... ok
+test_real_session_capabilities_are_reported_without_enabling_unsafe_open (test_codex_runtime_gate.CodexRuntimeGateTests.test_real_session_capabilities_are_reported_without_enabling_unsafe_open) ... ok
+test_replay_returns_original_probe_without_creating_another_session (test_codex_runtime_gate.CodexRuntimeGateTests.test_replay_returns_original_probe_without_creating_another_session) ... ok
+test_runtime_drift_stops_before_executable_is_started (test_codex_runtime_gate.CodexRuntimeGateTests.test_runtime_drift_stops_before_executable_is_started) ... ok
+test_session_start_crash_stops_owned_process_and_replay_never_restarts (test_codex_runtime_gate.CodexRuntimeGateTests.test_session_start_crash_stops_owned_process_and_replay_never_restarts) ... ok
+test_version_drift_stops_before_session_creation (test_codex_runtime_gate.CodexRuntimeGateTests.test_version_drift_stops_before_session_creation) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 29.200s
+
+OK

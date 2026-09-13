@@ -23,31 +23,35 @@ public sealed partial class PostgresImplementationRunStore
     }
 
     public Task<AgentAttemptReceipt> PrepareAgentAsync(string runId, string origin, bool rejectBlocked,
-        CancellationToken token = default) =>
+        CancellationToken token = default, string kind = "fake-codex") =>
         ChangeAgentAsync(runId, async (connection, transaction, run, receipt) =>
         {
+            if (kind is not ("fake-codex" or "real-codex-preflight" or "real-codex")) throw new ArgumentException("Unknown agent kind.");
             if (receipt is not null)
             {
-                if (receipt.AdapterOrigin != origin || receipt.RejectBlocked != rejectBlocked)
+                if (receipt.AdapterOrigin != origin || receipt.RejectBlocked != rejectBlocked || receipt.Kind != kind)
                     throw new AgentAssignmentConflictException();
                 return receipt;
             }
             var activityId = Guid.NewGuid();
             var attemptId = Guid.NewGuid();
             await using var insert = new NpgsqlCommand("""
-                INSERT INTO wpcp_run_activities VALUES (@activity, @run, 'fake-codex', 'running', @now, NULL);
+                INSERT INTO wpcp_run_activities VALUES (@activity, @run, @kind, 'running', @now, NULL);
                 INSERT INTO wpcp_activity_attempts VALUES (@attempt, @activity, 1, 'running', @now, NULL);
                 """, connection, transaction);
             insert.Parameters.AddWithValue("activity", activityId);
             insert.Parameters.AddWithValue("attempt", attemptId);
             insert.Parameters.AddWithValue("run", Guid.Parse(runId));
+            insert.Parameters.AddWithValue("kind", kind);
             insert.Parameters.AddWithValue("now", DateTimeOffset.UtcNow);
             await insert.ExecuteNonQueryAsync(token);
             receipt = new(runId, activityId.ToString(), attemptId.ToString(), "running", origin,
-                rejectBlocked, new(attemptId.ToString(), OpenInCodex: new()));
+                rejectBlocked, new(attemptId.ToString(), OpenInCodex: kind == "fake-codex" ? new() :
+                    new(Reason: "real-runtime-preflight-not-admitted")), kind);
             await AppendAgentEventAsync(connection, transaction, run, "AgentPreparationCompleted",
                 new { receipt.ActivityId, receipt.AttemptId, executor = "deterministic", framework = "Microsoft.Agents.AI.Workflows/1.16.0", runtime = Environment.Version.ToString() }, token);
-            await AppendAgentEventAsync(connection, transaction, run, "AgentSessionStartRequested",
+            await AppendAgentEventAsync(connection, transaction, run,
+                kind != "real-codex-preflight" ? "AgentSessionStartRequested" : "CodexRuntimePreflightRequested",
                 new { receipt.ActivityId, receipt.AttemptId, receipt.Session.OperationKey, receipt.Session.ContractVersion }, token);
             return receipt;
         }, token);
@@ -179,6 +183,9 @@ public sealed partial class PostgresImplementationRunStore
 
     private static string HumanRequestProblem(JsonElement? originalResult)
     {
+        if (originalResult is { ValueKind: JsonValueKind.Object } canonical &&
+            canonical.TryGetProperty("summary", out var summary) && summary.ValueKind == JsonValueKind.String)
+            return summary.GetString() is { Length: > 1024 } text ? text[..1024] : summary.GetString()!;
         if (originalResult is { ValueKind: JsonValueKind.Object } result &&
             result.TryGetProperty("reason", out var reason) && reason.ValueKind == JsonValueKind.String &&
             !string.IsNullOrWhiteSpace(reason.GetString()))
@@ -226,7 +233,7 @@ public sealed partial class PostgresImplementationRunStore
               FROM wpcp_agent_sessions session
               JOIN wpcp_activity_attempts attempt ON attempt.attempt_id=session.attempt_id
               JOIN wpcp_run_activities activity ON activity.activity_id=attempt.activity_id
-             WHERE session.run_id=@id AND activity.activity_type='fake-codex'
+             WHERE session.run_id=@id AND activity.activity_type IN ('fake-codex', 'real-codex-preflight', 'real-codex')
              ORDER BY attempt.started_at, attempt.attempt_id
              LIMIT 1
             """, connection, transaction);

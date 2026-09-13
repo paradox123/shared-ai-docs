@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:danielsvault:github-issue-pilot:worker-result:3",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "outcome",
+    "summary",
+    "red_green_slices",
+    "changed_files",
+    "verification",
+    "evidence",
+    "findings",
+    "intervention"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "const": "3"},
+    "outcome": {
+      "type": "string",
+      "enum": ["completed", "blocked", "intervention"]
+    },
+    "summary": {"type": "string", "minLength": 1},
+    "red_green_slices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["requirement", "red", "green"],
+        "properties": {
+          "requirement": {"type": "string", "minLength": 1},
+          "red": {"$ref": "#/$defs/command_observation"},
+          "green": {"$ref": "#/$defs/command_observation"}
+        }
+      }
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "verification": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/command_observation"}
+    },
+    "evidence": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/evidence_item"}
+    },
+    "findings": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    },
+    "intervention": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/intervention_request"}
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"outcome": {"const": "completed"}}},
+      "then": {
+        "properties": {
+          "red_green_slices": {"minItems": 1},
+          "evidence": {"minItems": 1},
+          "intervention": {"type": "null"}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"outcome": {"const": "intervention"}}},
+      "then": {
+        "properties": {
+          "intervention": {"$ref": "#/$defs/intervention_request"}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "command_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command", "observed"],
+      "properties": {
+        "command": {"type": "string", "minLength": 1},
+        "observed": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "criterion",
+        "verdict",
+        "kind",
+        "observed_interface",
+        "expected_result",
+        "observations"
+      ],
+      "properties": {
+        "criterion": {"type": "string", "minLength": 1},
+        "verdict": {"type": "string", "enum": ["pass", "fail"]},
+        "kind": {
+          "type": "string",
+          "enum": [
+            "rest",
+            "ui",
+            "recovery",
+            "idempotency",
+            "negative_gate",
+            "background",
+            "document"
+          ]
+        },
+        "observed_interface": {"type": "string", "minLength": 1},
+        "expected_result": {"type": "string", "minLength": 1},
+        "observations": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"$ref": "#/$defs/evidence_observation"}
+        }
+      }
+    },
+    "evidence_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["phase", "description", "artifact", "correlation_id"],
+      "properties": {
+        "phase": {
+          "type": "string",
+          "enum": [
+            "request",
+            "response",
+            "read_back",
+            "interaction",
+            "screenshot",
+            "restart",
+            "repeat",
+            "rejection",
+            "side_effect_read_back",
+            "eventual_result",
+            "log"
+          ]
+        },
+        "description": {"type": "string", "minLength": 1},
+        "artifact": {"type": "string", "minLength": 1},
+        "correlation_id": {"type": ["string", "null"]}
+      }
+    },
+    "intervention_request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "repository",
+        "run",
+        "role",
+        "context",
+        "classification",
+        "problem",
+        "required_action",
+        "options",
+        "recommendation",
+        "preserved"
+      ],
+      "properties": {
+        "schema_version": {"type": "string", "const": "1"},
+        "repository": {"type": "object", "additionalProperties": false, "required": ["full_name", "issue_number"], "properties": {"full_name": {"type": "string", "minLength": 1}, "issue_number": {"type": "integer", "minimum": 1}}},
+        "run": {"type": "object", "additionalProperties": false, "required": ["id", "phase", "operation_key"], "properties": {"id": {"type": "string", "minLength": 1}, "phase": {"type": "string", "enum": ["implementation", "review", "repair"]}, "operation_key": {"type": "string", "minLength": 1}}},
+        "role": {"type": "string", "enum": ["implementer", "requirements_reviewer", "code_reviewer", "architecture_reviewer", "repairer"]},
+        "context": {"type": "object", "additionalProperties": false, "required": ["worktree_path", "branch", "pull_request_number", "head_sha"], "properties": {"worktree_path": {"type": ["string", "null"], "minLength": 1}, "branch": {"type": "string", "minLength": 1}, "pull_request_number": {"type": ["integer", "null"], "minimum": 1}, "head_sha": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"}}},
+        "classification": {"type": "string", "enum": ["product_decision", "scope_expansion", "missing_access", "manual_evidence", "requirements_missing_or_contradictory", "unresolvable_conflict", "repair_rounds_exhausted"]},
+        "problem": {"type": "string", "minLength": 1},
+        "required_action": {"type": "string", "minLength": 1},
+        "options": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["label", "impact"], "properties": {"label": {"type": "string", "minLength": 1}, "impact": {"type": "string", "minLength": 1}}}},
+        "recommendation": {"type": "object", "additionalProperties": false, "required": ["option_label", "rationale"], "properties": {"option_label": {"type": ["string", "null"], "minLength": 1}, "rationale": {"type": "string", "minLength": 1}}},
+        "preserved": {"type": "object", "additionalProperties": false, "required": ["findings", "results"], "properties": {"findings": {"type": "array", "items": {"type": "string", "minLength": 1}}, "results": {"type": "array", "items": {"type": "string", "minLength": 1}}}}
+      }
+    }
+  }
+}

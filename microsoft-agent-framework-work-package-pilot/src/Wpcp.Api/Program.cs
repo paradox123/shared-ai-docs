@@ -356,6 +356,26 @@ app.MapPost("/api/v1/runs/{runId}/attempts/{attemptId}/open",
         return Results.Json(new { operation, capability }, statusCode: StatusCodes.Status200OK);
     });
 
+app.MapPost("/api/v1/runs/{runId}/native-quarantine/{attemptId}",
+    async (string runId, string attemptId, JsonElement body, HttpContext context, CancellationToken token) =>
+    {
+        var expected = Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_TOKEN");
+        var supplied = context.Request.Headers["X-Wpcp-Adapter-Token"].ToString();
+        var origin = Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_ORIGIN");
+        if (string.IsNullOrEmpty(expected) || string.IsNullOrEmpty(origin) ||
+            !System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(
+                Encoding.UTF8.GetBytes(expected), Encoding.UTF8.GetBytes(supplied)))
+            return JsonError("adapter-access-denied", 403);
+        try
+        {
+            await store.AppendNativeQuarantineAsync(runId, attemptId, body.GetProperty("sessionId").GetString()!,
+                body.GetProperty("observationId").GetString()!, body.GetProperty("event"), origin, token);
+            return Results.Json(new { recorded = true, qualifiesResult = false });
+        }
+        catch (Exception error) when (error is ArgumentException or KeyNotFoundException or InvalidOperationException)
+        { return JsonError("invalid-native-observation", 400); }
+    });
+
 app.MapPost("/api/v1/runs/{runId}/control/{action}",
     async (string runId, string action, JsonElement body, HttpContext context, CancellationToken token) =>
     {
@@ -438,6 +458,9 @@ static async Task<JsonElement?> CallAdapterAsync(
         {
             Content = new StringContent(JsonSerializer.Serialize(body), Encoding.UTF8, "application/json"),
         };
+        if (origin.AbsoluteUri == Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_ORIGIN") &&
+            Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_TOKEN") is { Length: > 0 } adapterToken)
+            request.Headers.Add("X-Wpcp-Adapter-Token", adapterToken);
         using var response = await client.SendAsync(request, token);
         if (!response.IsSuccessStatusCode) return null;
         var raw = await response.Content.ReadAsStringAsync(token);

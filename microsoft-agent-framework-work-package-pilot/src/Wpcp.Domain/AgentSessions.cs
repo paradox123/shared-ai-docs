@@ -26,7 +26,7 @@ public sealed record AgentSession(
 
 public sealed record AgentAttemptReceipt(
     string RunId, string ActivityId, string AttemptId, string State,
-    string AdapterOrigin, bool RejectBlocked, AgentSession Session);
+    string AdapterOrigin, bool RejectBlocked, AgentSession Session, string Kind = "fake-codex");
 
 public sealed record AgentAdapterResponse(int StatusCode, string Body);
 

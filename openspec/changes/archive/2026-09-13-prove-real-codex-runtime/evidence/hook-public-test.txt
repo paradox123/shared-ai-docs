@@ -1,0 +1,6 @@
+test_real_capabilities_and_no_go_are_readable_under_the_original_run (test_codex_preflight_operator.CodexPreflightOperatorTests.test_real_capabilities_and_no_go_are_readable_under_the_original_run) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 14.426s
+
+OK

@@ -1,0 +1,13 @@
+{
+  "broadPassed": 125,
+  "targetedPassed": 12,
+  "distinctPassed": 132,
+  "canonicalSchemaUnchanged": true,
+  "fullIssueAcceptance": false,
+  "lockedRestorePassed": true,
+  "buildWarnings": 0,
+  "buildErrors": 0,
+  "strictOpenSpecValidationPassed": true,
+  "scopedDiffCheckPassed": true,
+  "protectedSiblingDiffEmpty": true
+}

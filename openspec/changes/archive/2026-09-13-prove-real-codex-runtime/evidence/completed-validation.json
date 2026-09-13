@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-13",
+  "status": "implemented-and-verified",
+  "fullRegression": {
+    "tests": 143,
+    "passed": 143,
+    "skipped": 0
+  },
+  "focusedNativeRecovery": {
+    "tests": 3,
+    "passed": 3
+  },
+  "distinctTests": 144,
+  "lockedRestore": "passed",
+  "build": {
+    "status": "passed",
+    "warnings": 0,
+    "errors": 0
+  },
+  "openSpecStrict": "passed",
+  "scopedDiffCheck": "passed",
+  "realIssue": {
+    "runId": "f59ef322-fe77-45b0-b41f-946ee3cedaee",
+    "sessionId": "01a09a0c-a9a8-7b21-ba89-0a09f1243841",
+    "outcome": "completed",
+    "historyEvents": 172,
+    "redGreenCommandExitCodes": [
+      0,
+      1,
+      0,
+      0
+    ],
+    "suppliedTestsUnchanged": true,
+    "remoteCount": 0,
+    "surface": "official native Codex TUI",
+    "appTaskVisible": false
+  },
+  "archived": true,
+  "archivePath": "openspec/changes/archive/2026-09-13-prove-real-codex-runtime",
+  "acceptedDate": "2026-09-13",
+  "archiveValidation": {
+    "path": "standard",
+    "schema": "spec-driven",
+    "canonicalRequirementsAdded": 4,
+    "openSpecItemsPassed": 46,
+    "openSpecItemsFailed": 0,
+    "canonicalContractChecksPassed": 2,
+    "incompleteTasks": 0,
+    "archiveLinks": "passed",
+    "stagedDiffCheck": "passed"
+  }
+}
