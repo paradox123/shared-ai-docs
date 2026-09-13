@@ -72,7 +72,11 @@ export async function writableOutput(config: any) {
     }
   }
 }
-export async function withWriter(config: any, operation: () => Promise<any>) {
+export async function withWriter(
+  config: any,
+  operation: () => Promise<any>,
+  options: { migration?: boolean } = {},
+) {
   await writableOutput(config);
   await mkdir(path.join(config.output, ".state"), { recursive: true });
   const file = path.join(config.output, ".state/writer.lock");
@@ -107,6 +111,22 @@ export async function withWriter(config: any, operation: () => Promise<any>) {
     JSON.stringify({ pid: process.pid, started: new Date().toISOString() }),
   );
   try {
+    if (!options.migration) {
+      try {
+        const pending = JSON.parse(
+          await readFile(
+            path.join(config.output, ".state/migration-pending.json"),
+            "utf8",
+          ),
+        );
+        throw Error(
+          "Resume pending migration with migrate --snapshot " +
+            pending.snapshot,
+        );
+      } catch (e) {
+        if ((e as any).code !== "ENOENT") throw e;
+      }
+    }
     return await operation();
   } finally {
     await handle.close();

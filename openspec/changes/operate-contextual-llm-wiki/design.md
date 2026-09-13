@@ -49,3 +49,11 @@ Der Vollimport kann lange dauern und wurde noch nicht ausgeführt. Die gemeinsam
 ## Interview-Abschluss
 
 Feststehend sind gemeinsame Wissensbildung ohne Privat-Sondergrenze, fachliche Relevanz als Auswahlkriterium, tägliche Pflege und Fortsetzung unabhängiger Arbeit bei Teilfehlern. Es bleibt keine offene Produktentscheidung für diesen Plan. Technische Parameter werden während der Umsetzung entschieden. Ticket 01 ist akzeptiert und im separaten Change `share-contextual-wiki-sources` archiviert. Dieser aktive Betriebs-Change führt die offenen Tickets 02–04 fort; Live-Job und Bestände sind noch nicht entsprechend umgestellt.
+
+## Ticket 02: bestätigter Implementierungsrahmen
+
+Owning Git root: `_shared/shared-ai-docs`; Ausgangsbranch `main` mit parallelen Änderungen. Daniel bestätigte den isolierten Zielbranch `codex/shared-wiki-02` auf Ticket-01-Commit `1c13f089b559441e887a124c7ee63c41c568610f`. Review-Basis ist dieser feste Ausgangscommit. Task 4.2 gehört zum bestehenden Change; Produktion und Scheduler bleiben Ticket 04.
+
+Die CLI erhält `migration-inventory --from PATH` für Ausgabeverzeichnisse oder bestehende `backup.json`-Backups und `migrate --from PATH --snapshot PATH` (jeweils wiederholbares `--from`). Inventur und Migration lesen historische Scopes ohne sie als aktive Konfiguration zuzulassen. Die Sicherung enthält alle Dateien und SHA-256-Prüfsummen; ein fehlendes Manifest bedeutet unvollständige Sicherung. Wiederholung mit demselben Snapshot verwendet dessen eingefrorene Eingänge. Ein offener Migrationslauf sperrt andere Schreiber bis zur Wiederaufnahme.
+
+Importe erhalten deterministische Seitenidentitäten anhand ihrer Revision und Abhängigkeiten. Unterschiedliche gleichnamige Seiten bleiben getrennt; gleiche Revisionen samt Abhängigkeitsgraph können gemeinsam geführt werden. Originalbytes bleiben im Snapshot; aktive Kopien ändern ausschließlich aufgelöste lokale Verweise und Versionsreferenzen. Importierte Konzepte bleiben als eigene abgeleitete Seiten pflegbar, unabhängig von den Namen neuer Compilerkonzepte. Quellenkorrekturen durchlaufen die bestehende topologische Nachpflege. Unvollständig belegte Altstände werden nicht automatisch durch neue Modellformulierungen zu gültigen Importen erklärt.

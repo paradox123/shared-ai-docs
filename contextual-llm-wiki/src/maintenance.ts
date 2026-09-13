@@ -119,7 +119,7 @@ export async function maintain(config: any) {
     }
     // Revalidate saved syntheses in dependency order, including answers on answers.
     const remaining = Object.values<any>(state.pages).filter(
-      (p) => p.kind === "answer",
+      (p) => p.kind === "answer" || p.migration,
     );
     while (remaining.length) {
       let progressed = false;
@@ -157,7 +157,8 @@ export async function maintain(config: any) {
               body: sources[id].text,
               sourceVersions: { [id]: sources[id].hash },
             });
-        const text = await answer(old.question, evidence),
+        const question = old.question || old.title || old.migration.originalId;
+        const text = await answer(question, evidence),
           sourceVersions: any = {},
           pageVersions: any = {};
         for (const e of evidence) {
@@ -165,13 +166,15 @@ export async function maintain(config: any) {
           if (e.kind !== "source") pageVersions[e.id] = e.hash;
         }
         bodies[old.id] = normalizeLinks(
-          renderAnswer(old.question, text, evidence, sources),
+          renderAnswer(question, text, evidence, sources),
           old.id,
           pages,
         );
         pages[old.id] = {
+          ...old,
+          withdrawn: false,
           id: old.id,
-          kind: "answer",
+          kind: old.kind,
           question: old.question,
           sourceVersions,
           pageVersions,
@@ -206,6 +209,7 @@ export async function maintain(config: any) {
     for (const page of Object.values<any>(pages))
       await publishPage(config, page, bodies[page.id]);
     const next = {
+      migrations: state.migrations,
       publicationVersion: 1,
       context: config.context,
       scope: config.scope,

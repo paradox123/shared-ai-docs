@@ -115,3 +115,33 @@ npm run check
 ```
 
 Die Tests benutzen die öffentliche CLI, den echten gepinnten Compiler und echte isolierte QMD-Datenbanken. Nur die Modellprovidergrenze wird deterministisch kontrolliert. [Ticket-01-Abnahme](evidence/shared-wiki-01.md), [frühere Abnahme](evidence/acceptance.md), [initiale Inventur](evidence/initial-inventory.json), [Integrationsentscheidungen](evidence/implementation-notes.md) und [Upstream-Patch](patches/0001-host-completion-without-embeddings.patch) dokumentieren Nachweise und Grenzen.
+
+## Bestehende Wissensbestände übernehmen
+
+`migration-inventory` untersucht tatsächliche Ausgabeordner und bestehende lokale `backup.json`-Backups. Ein wiederholtes `--from` nimmt weitere Bestände auf. Die gemeinsame Zielkonfiguration enthält die Originalrepos und Quellenfilter, gegen die alle alten Belege geprüft werden. Alte `general`-/`private`-Labels begrenzen diesen Import nicht.
+
+```bash
+./wiki migration-inventory --config .local/common.json \
+  --from "$OLD_GENERAL_OUTPUT" --from "$OLD_PRIVATE_OUTPUT" \
+  --from "$OLD_BACKUP"
+./wiki migrate --config .local/common.json \
+  --from "$OLD_GENERAL_OUTPUT" --from "$OLD_PRIVATE_OUTPUT" \
+  --from "$OLD_BACKUP" --snapshot "$MIGRATION_SNAPSHOT"
+./wiki status --config .local/common.json
+./wiki query --config .local/common.json --question 'Gespeicherte Entscheidung'
+./wiki lint --config .local/common.json
+```
+
+Vor dem ersten Schreiben ins Wiki sichert der Lauf alle Dateien der Eingänge und des bisherigen Zielbestands einschließlich Compilerzustand und unverwalteter Notizen. `manifest.json` enthält SHA-256-Prüfsummen, Inventur und Herkunft; erst das vollständig geschriebene und geprüfte Manifest macht den Snapshot verwendbar. Der neue Snapshot muss außerhalb der Fachrepos und getrennt von Eingängen/Ziel liegen. Alte Ausgaben und Backups bleiben erhalten. Laufende Schreiber im Altbestand verhindern die Sicherung.
+
+Der Bericht nennt für jede Seite `preserved`, `deduplicated` oder `quarantined` und gegebenenfalls Gründe. Unverwaltete Markdown-Dateien werden als `unmanaged` aufgelistet und vollständig gesichert, jedoch ohne belegte Abhängigkeiten nicht veröffentlicht. Leere Produktionsordner werden von befüllten Abnahmeausgaben unterschieden. Texte gültiger Seiten bleiben erhalten; ausschließlich lokale Seitenlinks und die zugehörigen Versionsverweise werden auf neue Identitäten umgesetzt. Unterschiedliche gleichnamige Seiten erhalten getrennte Identitäten. Identische Revisionen samt Abhängigkeitsgraph werden zusammengeführt. Historische Quellenstände, fehlende Provenienz, manipulierte Seiten und ungültige Abhängigkeiten werden zurückgestellt.
+
+Importierte Konzeptseiten und gespeicherte Antwortketten nehmen an der normalen Pflege teil. Die erste Migration kompiliert den Zielumfang bei Bedarf mit dem vorhandenen Compiler; diese neuen Konzepte ersetzen keine einzigartigen importierten Formulierungen. Ein erfolgreicher Import wird im Zustand vermerkt, sodass Wiederholung auch nach späterer Pflege keine alten Texte zurückschreibt.
+
+Nach einem Abbruch oder Indexfehler denselben geprüften Snapshot erneut verwenden:
+
+```bash
+./wiki migrate --config .local/common.json --snapshot "$MIGRATION_SNAPSHOT"
+```
+
+Die Wiederaufnahme benötigt die ursprünglichen Eingabeordner nicht mehr. Sie prüft sämtliche Snapshot-Dateien erneut und bearbeitet inzwischen geänderte Quellen. Andere Schreiboperationen melden bis dahin den offenen Migrationslauf und den Wiederaufnahmebefehl. Ein Snapshot ohne vollständiges Manifest wird nicht überschrieben: Ursache beheben und einen neuen Snapshot-Pfad verwenden; die unvollständige Sicherung bleibt überprüfbar erhalten. QMD-Collections anderer Bestände bleiben unverändert. Produktive Aktivierung und Ablösung alter Ausgaben gehören zu Ticket 04.

@@ -1,3 +1,4 @@
+import { migrationInventory, migrate } from "./migration.ts";
 import { backup, restore } from "./backup.ts";
 import { source, lint } from "./inspection.ts";
 import { withWriter } from "./lock.ts";
@@ -42,7 +43,7 @@ try {
     result = {
       ok: true,
       usage:
-        "wiki <preflight|setup|init-config|inventory|maintain|status|lint|search|query|save|source|backup|restore> [--config PATH]",
+        "wiki <preflight|setup|init-config|inventory|maintain|status|lint|search|query|save|source|backup|restore|migration-inventory|migrate> [--config PATH]",
       guide: new URL("../README.md", import.meta.url).pathname,
     };
   else if (command === "preflight") result = { ok: true, ...preflight() };
@@ -50,6 +51,18 @@ try {
     if (args.includes("--private"))
       throw Error("--private is obsolete; init-config creates a common wiki");
     result = initialConfig(required("--vault"), required("--output"));
+  } else if (command === "migrate") {
+    const c = await loadConfig(configPath);
+    result = await withWriter(
+      c,
+      () => migrate(c, values("--from") || [], required("--snapshot")),
+      { migration: true },
+    );
+  } else if (command === "migration-inventory") {
+    result = await migrationInventory(
+      await loadConfig(configPath),
+      values("--from") || [],
+    );
   } else if (command === "backup") {
     const c = await loadConfig(configPath);
     result = await withWriter(c, () => backup(c, required("--destination")));

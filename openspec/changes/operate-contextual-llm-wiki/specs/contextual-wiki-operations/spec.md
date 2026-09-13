@@ -40,3 +40,30 @@ The delivery MUST catalog actual relevant maintained skills, AGENTS/README/CONTE
 - **THEN** each proposed surface has an existing path, rationale and concrete intended change
 - **AND** proposed entries are not represented as already installed routing
 - **AND** private-domain evidence is selected or omitted by task relevance rather than an inferred access policy
+
+### Requirement: Lossless verified knowledge migration
+Before replacing any existing knowledge, migration MUST inventory actual output and backup contents, including saved answers, page dependencies, untracked Markdown and empty configured outputs. It MUST preserve original bytes and required state in a checksummed local snapshot whose completeness can be verified before publication. Original inputs MUST remain available. Valid unique texts MUST be carried without model rewriting; only navigational links and dependency version references may be remapped with an explicit report. Equal names with different texts or provenance MUST remain distinct. Identical page revisions and dependency graphs MAY be deduplicated with recorded origins.
+
+Migration MUST validate current original source identities and hashes, page hashes, complete transitive source coverage and dependency versions. Missing, withdrawn, stale, malformed or cyclic evidence MUST be quarantined in the snapshot with reasons, never published as current knowledge. Imported concepts and answer chains MUST participate in ordinary maintenance and query freshness checks. An unrelated saved answer MUST remain unchanged when an independent source changes.
+
+Migration MUST be repeatable from its verified snapshot after interruption or indexing failure, without duplicate active answers or overwriting subsequent valid maintenance. Incomplete migration MUST block competing writes and report non-success. QMD MUST index eligible imports in the common collection without changing unrelated collections. Productive activation and retirement of legacy outputs remain a separate operation.
+
+#### Scenario: Inventory and preserve historical knowledge
+- **WHEN** the operator supplies empty production outputs, populated legacy outputs and older backups
+- **THEN** inventory distinguishes them and records pages, unique answers, dependency versions and untracked content
+- **AND** migration snapshots their original bytes and state before changing the destination
+
+#### Scenario: Merge colliding names and dependent answers
+- **WHEN** two valid pages share a name but differ in content or provenance and answers depend on concepts and other answers
+- **THEN** migration preserves distinct texts, remaps links and dependency versions, and reports each origin and destination
+- **AND** managed query retrieves the valid imported answer with original-source provenance without a private-domain exclusion
+
+#### Scenario: Quarantine unsupported historical knowledge
+- **WHEN** a historical page has stale, removed, incomplete, tampered or cyclic evidence
+- **THEN** it and dependent pages remain inspectable in the snapshot with explicit reasons
+- **AND** neither active Markdown nor managed QMD retrieval presents them as current knowledge
+
+#### Scenario: Maintain and resume imported knowledge
+- **WHEN** migration is interrupted or indexing fails
+- **THEN** retry uses the verified snapshot and finishes without duplicate active answers or lost saved content
+- **AND** later source correction reaches imported concepts and dependent answer chains while an independent answer remains byte-identical
