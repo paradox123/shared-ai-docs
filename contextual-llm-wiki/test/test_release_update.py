@@ -149,7 +149,10 @@ class ReleaseUpdateTests(unittest.TestCase):
         active = json.loads(result.stdout)
         self.assertEqual(Path(active['wrapper']), self.base)
         self.assertIsNone(json.loads(state.read_text()))
-        self.assertIn('recovered', result.stderr)
+        recovery = json.loads(result.stderr)
+        self.assertTrue(recovery['recovered'])
+        self.assertEqual(recovery.get('active'), active)
+        self.assertEqual(json.loads((Path(recovery['artifacts']) / 'report.json').read_text()), recovery)
 
     def test_running_public_wiki_rejects_update_as_busy(self):
         bin_dir = self.root / 'bin'

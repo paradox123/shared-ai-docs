@@ -87,7 +87,7 @@ def activate(candidate, report, previous, artifacts):
         raise RuntimeError('Candidate changed while copying; renewed qualification required')
     prepared = probe(selected(previous), 'prepare', artifacts)
     current = dict(wrapper=str(snapshot), runtimeTreeSha256=report['runtimeTreeSha256'])
-    save_selection({**current, 'pending': True, 'previous': previous})
+    save_selection({**current, 'pending': True, 'previous': previous, 'artifacts': str(artifacts)})
     active = identity(selected(selection()))
     if (active['commit'] != report['commit'] or active['release'] != report['release']['tag_name']
             or Path(active['wrapper']) != snapshot):
@@ -132,6 +132,20 @@ def update(args):
     return 0 if result['ok'] else 1
 
 
+def recover(state):
+    save_selection(state['previous'])
+    artifacts = Path(state.get('artifacts') or BASE / '.runtime/activation-runs' / uuid.uuid4().hex)
+    artifacts.mkdir(parents=True, exist_ok=True)
+    result = dict(ok=False, outcome='recovered', recovered=True, artifacts=str(artifacts),
+                  error='Interrupted activation recovered; previous runtime restored')
+    try:
+        result['active'] = identity(selected(state['previous']))
+    except Exception as error:
+        result['activeError'] = str(error)
+    (artifacts / 'report.json').write_text(json.dumps(result, indent=2) + '\n')
+    print(json.dumps(result), file=sys.stderr)
+
+
 def main():
     global LOCK_FD
     args = sys.argv[1:]
@@ -145,9 +159,7 @@ def main():
         LOCK_FD = lock.fileno()
         state = selection()
         if state and state.get('pending'):
-            save_selection(state['previous'])
-            print(json.dumps(dict(ok=False, recovered=True,
-                                  error='Interrupted activation recovered; previous runtime restored')), file=sys.stderr)
+            recover(state)
         if args and args[0] == 'update':
             return update(args[1:])
         return run_runtime(selected(selection()), args).returncode
