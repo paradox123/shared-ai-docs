@@ -140,6 +140,15 @@ class ReleaseInstallTests(unittest.TestCase):
         self.assertIn('active installation', result['error'])
         self.assertFalse(self.destination.exists())
 
+    def test_destination_inside_release_snapshots_is_rejected_without_writing(self):
+        source = self.wrapper_input()
+        active = source / '.runtime/releases/current/wrapper'
+        active.mkdir(parents=True)
+        self.destination = active / 'forbidden-candidate'
+        result = self.install('--node', str(self.root / 'missing-node'))
+        self.assertIn('active installation', result['error'])
+        self.assertFalse(self.destination.exists())
+
     def test_excluded_upstream_required_file_blocks_eligibility(self):
         repo = self.root / 'upstream'
         subprocess.run(['git', 'clone', '-q', '--shared', str(BASE / '.runtime/compiler'), str(repo)],

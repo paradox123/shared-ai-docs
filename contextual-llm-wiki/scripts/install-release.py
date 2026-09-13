@@ -21,7 +21,7 @@ class Candidate:
     def __init__(self, destination, tag):
         self.root = destination.resolve()
         protected = [BASE / name for name in (
-            '.runtime/compiler', '.runtime/node', '.local', 'src', 'test',
+            '.runtime/compiler', '.runtime/node', '.runtime/releases', '.local', 'src', 'test',
             'scripts', 'patches', 'node_modules')]
         if any(self.root.is_relative_to(path.resolve()) for path in protected):
             raise RuntimeError('Candidate destination overlaps the active installation')
