@@ -1,0 +1,52 @@
+{
+  "code": 0,
+  "ok": true,
+  "engine": "qmd",
+  "answer": "Die erwarteten Projekteinnahmen erhöhen die heute verfügbare Liquidität noch nicht: Das persönliche Portfolio hat aktuell **2.000 Euro Reserve**, die laufende Ausgaben bis Oktober decken soll. Die **5.000 Euro aus dem Projektvertrag werden im Oktober erwartet** und dürfen erst nach tatsächlichem Zahlungseingang als verfügbare Reserve zählen. Heute stehen somit nicht 7.000 Euro zur Verfügung. [concepts/liquiditätsreserve]\n\nFür die Planung sind die 5.000 Euro daher als künftiger Zufluss getrennt vom heutigen Bestand zu berücksichtigen. Bis zum Eingang müssen die laufenden Ausgaben aus den aktuell verfügbaren Mitteln gedeckt werden. [concepts/zeitliche-abgrenzung-verfügbarer-liquidität]\n\nOb die 2.000 Euro dafür ausreichen, bleibt offen: „bis Oktober“ ist ein Deckungsziel; Angaben zur Höhe und zeitlichen Verteilung der Ausgaben fehlen. [concepts/zeitliche-ausgabendeckung-durch-reserven]",
+  "evidence": [
+    {
+      "id": "concepts/zeitliche-abgrenzung-verfügbarer-liquidität",
+      "kind": "concept",
+      "sourceVersions": {
+        "probare-crm/README.md": "7b3cdf1d6463228b11c4bd0e94b1f7852a3ae53eb109a57b27c825f137d2da9a"
+      },
+      "pageVersions": {},
+      "title": "Zeitliche Abgrenzung verfügbarer Liquidität",
+      "hash": "44dce7504f0f90b5ca0280fc7e774a449a1b26ee66d246d544ed9191b0da0754"
+    },
+    {
+      "id": "concepts/abgrenzung-erwarteter-zahlungen-von-heutiger-liquidität",
+      "kind": "concept",
+      "sourceVersions": {
+        "private/README.md": "43052006006b4b7dcf5b6f9f44b03a3d4675f845815c38f76e65d1e181fe5692"
+      },
+      "pageVersions": {},
+      "title": "Abgrenzung erwarteter Zahlungen von heutiger Liquidität",
+      "hash": "4ac0d2fcc79d5e80b9ba991be751ab8c7c9c2efd0d2952fe013e4be7381b144b"
+    },
+    {
+      "id": "concepts/liquiditätsreserve",
+      "kind": "concept",
+      "sourceVersions": {
+        "private/README.md": "43052006006b4b7dcf5b6f9f44b03a3d4675f845815c38f76e65d1e181fe5692",
+        "probare-crm/README.md": "7b3cdf1d6463228b11c4bd0e94b1f7852a3ae53eb109a57b27c825f137d2da9a"
+      },
+      "pageVersions": {},
+      "title": "Liquiditätsreserve",
+      "hash": "4be3327367eb7a5540768daae1c0360ad7499e464f734f4d1007ca749a3fea78"
+    },
+    {
+      "id": "concepts/zeitliche-ausgabendeckung-durch-reserven",
+      "kind": "concept",
+      "sourceVersions": {
+        "private/README.md": "43052006006b4b7dcf5b6f9f44b03a3d4675f845815c38f76e65d1e181fe5692"
+      },
+      "pageVersions": {},
+      "title": "Zeitliche Ausgabendeckung durch Reserven",
+      "hash": "0966b6530b9e852e5398203b74820703e131f37122d9d928ec634879c3239dc1"
+    }
+  ],
+  "review": [],
+  "fallback": false,
+  "stderr": ""
+}

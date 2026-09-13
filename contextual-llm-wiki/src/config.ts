@@ -1,7 +1,7 @@
 import path from "node:path";
 import { readFile } from "node:fs/promises";
-import { json, hash } from "./storage.ts";
-export function initialConfig(vault: string, output: string, scope = "common") {
+import { hash } from "./storage.ts";
+export function initialConfig(vault: string, output: string) {
   const roots = {
     "vault-root": ".",
     "meeting-assistant": "_ops/meeting-assistant",
@@ -14,8 +14,8 @@ export function initialConfig(vault: string, output: string, scope = "common") {
   };
   return {
     version: 1,
-    context: scope,
-    scope,
+    context: "common",
+    scope: "common",
     vault,
     output,
     repos: Object.entries(roots).map(([id, root]) => ({

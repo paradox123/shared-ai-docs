@@ -4,7 +4,7 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 ## Grundlage und Ausgangslage
 
@@ -14,14 +14,14 @@ Der vorhandene Scanner partitioniert Quellen nach allgemeinem beziehungsweise pr
 
 ## Abnahmekriterien
 
-- [ ] Die gemeinsame Inventur registriert die acht vereinbarten Repo-Identitäten `vault-root`, `meeting-assistant`, `shared-ai-docs`, `ki-fuer-kmu`, `ncg-docs`, `private`, `probare-crm` und `sparkle`. Meetings und Projects einschließlich Projects/Private sind rekursiv enthalten.
-- [ ] Persönliche und berufliche Fachquellen werden in derselben Wissensschicht verarbeitet. Zusätzliche Worktrees, unselektierte Repos, technische Laufzeitdaten und generierte Ausgaben werden weiterhin ausgeschlossen; Originalquellen bleiben unverändert.
-- [ ] Eine öffentlich ausführbare Pflege verarbeitet eine persönliche und eine andere ausgewählte Fachquelle mit einem tatsächlich relevanten Zusammenhang zu einer belegten Synthese. Der Nachweis verwendet den echten gepinnten Compiler und QMD; deterministische Substitution ist auf die Providergrenze begrenzt.
-- [ ] Eine passende verwaltete Abfrage verwendet diese Synthese ohne privaten Sondermodus. Ein irrelevanter Kontrollbeleg wird nicht allein wegen gleicher Begriffe oder gleicher Tätigkeitszuordnung als Evidenz einbezogen.
-- [ ] Eine ausdrücklich auf bestimmte Repos oder Quellen begrenzte Aufgabe verwendet ausschließlich zulässige Evidenz. Die Beschränkung gilt auch für transitive Quellenabhängigkeiten einer Synthese und für Quellen-Fallbacks; eine bloße Anweisung im Fragetext ersetzt keine Überprüfung.
-- [ ] Eine nach der Pflege geänderte Originalquelle führt dazu, dass die abhängige Wiki-Seite nicht ungeprüft als aktuell verwendet wird. Die Abfrage meldet offenen Pflegebedarf oder verwendet passende aktuelle Quellen.
-- [ ] Wiederholte Abfragen verwenden gültiges gespeichertes Wissen ohne erneute Kompilierung; ohne Speicherauftrag entstehen keine dauerhaften Antwortseiten. Ein unveränderter Pflegelauf ist ein No-op.
-- [ ] QMD bleibt die einzige persistierte Retrieval-Engine. Der Tätigkeitsbereich `private` erzeugt keine ausgeblendete Wiki-Collection; fremde Collections werden nicht verändert.
+- [x] Die gemeinsame Inventur registriert die acht vereinbarten Repo-Identitäten `vault-root`, `meeting-assistant`, `shared-ai-docs`, `ki-fuer-kmu`, `ncg-docs`, `private`, `probare-crm` und `sparkle`. Meetings und Projects einschließlich Projects/Private sind rekursiv enthalten.
+- [x] Persönliche und berufliche Fachquellen werden in derselben Wissensschicht verarbeitet. Zusätzliche Worktrees, unselektierte Repos, technische Laufzeitdaten und generierte Ausgaben werden weiterhin ausgeschlossen; Originalquellen bleiben unverändert.
+- [x] Eine öffentlich ausführbare Pflege verarbeitet eine persönliche und eine andere ausgewählte Fachquelle mit einem tatsächlich relevanten Zusammenhang zu einer belegten Synthese. Der Nachweis verwendet den echten gepinnten Compiler und QMD; deterministische Substitution ist auf die Providergrenze begrenzt.
+- [x] Eine passende verwaltete Abfrage verwendet diese Synthese ohne privaten Sondermodus. Ein irrelevanter Kontrollbeleg wird nicht allein wegen gleicher Begriffe oder gleicher Tätigkeitszuordnung als Evidenz einbezogen.
+- [x] Eine ausdrücklich auf bestimmte Repos oder Quellen begrenzte Aufgabe verwendet ausschließlich zulässige Evidenz. Die Beschränkung gilt auch für transitive Quellenabhängigkeiten einer Synthese und für Quellen-Fallbacks; eine bloße Anweisung im Fragetext ersetzt keine Überprüfung.
+- [x] Eine nach der Pflege geänderte Originalquelle führt dazu, dass die abhängige Wiki-Seite nicht ungeprüft als aktuell verwendet wird. Die Abfrage meldet offenen Pflegebedarf oder verwendet passende aktuelle Quellen.
+- [x] Wiederholte Abfragen verwenden gültiges gespeichertes Wissen ohne erneute Kompilierung; ohne Speicherauftrag entstehen keine dauerhaften Antwortseiten. Ein unveränderter Pflegelauf ist ein No-op.
+- [x] QMD bleibt die einzige persistierte Retrieval-Engine. Der Tätigkeitsbereich `private` erzeugt keine ausgeblendete Wiki-Collection; fremde Collections werden nicht verändert.
 
 ## Umsetzung und Nachweis
 
@@ -32,3 +32,5 @@ Die gemeinsame Ausgabe zunächst isoliert verifizieren. Die Übernahme bestehend
 ## Comments
 
 - 13.09.2026: Aufteilung und Abhängigkeiten von Daniel bestätigt. Dieses Ticket deckt die gemeinsame Quellen-/Abfragefunktion und deren QMD-Anbindung ab.
+
+- 13.09.2026: Auf dem von Daniel bestätigten Branch `codex/shared-wiki-01` im isolierten Worktree umgesetzt. [Abnahme samt Inhalt, Originalbelegen, Aktualitätsprüfung und Review](../../../contextual-llm-wiki/evidence/shared-wiki-01.md). Gemeinsame Inventur umfasst alle acht Repos und 1.888 Fachquellen. Echte Provider-Pflege erzeugt eine gemeinsame Liquiditätsreserve-Seite aus persönlichem Portfolio und Projekteinnahmen; Query, Grenzen, Relevanzkontrolle und No-op verifiziert. Tickets 02–04 bleiben offen; keine Altbestände gelöscht und kein Live-Job umgestellt.

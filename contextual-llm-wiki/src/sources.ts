@@ -34,14 +34,13 @@ export async function inventory(config: any, includeText = false) {
       excluded: [],
       zones: {},
     };
-    const reports = [report];
     repositories.push(report);
     let rootStat;
     try {
       rootStat = await lstat(repo.root);
     } catch (e) {
       if ((e as any).code === "ENOENT") {
-        for (const r of reports) r.missing = true;
+        report.missing = true;
         continue;
       }
       throw e;
@@ -72,7 +71,7 @@ export async function inventory(config: any, includeText = false) {
         const file = path.join(dir, entry.name),
           relative = path.relative(repo.root, file);
         const omit = (reason: string) =>
-          reports.forEach((r) => r.excluded.push({ path: relative, reason }));
+          report.excluded.push({ path: relative, reason });
         if (
           file === config.output ||
           file.startsWith(config.output + path.sep)
@@ -98,13 +97,11 @@ export async function inventory(config: any, includeText = false) {
           }
           // Vault zones are selected explicitly; prune unrelated subtrees before reading them.
           if (
-            !reports.some((r) =>
-              r.include.some(
-                (p: string) =>
-                  p.startsWith("**") ||
-                  p.startsWith(relative + "/") ||
-                  relative.startsWith(p.split("*")[0].replace(/\/$/, "")),
-              ),
+            !report.include.some(
+              (p: string) =>
+                p.startsWith("**") ||
+                p.startsWith(relative + "/") ||
+                relative.startsWith(p.split("*")[0].replace(/\/$/, "")),
             )
           ) {
             omit("outside-included-zones");
@@ -112,26 +109,27 @@ export async function inventory(config: any, includeText = false) {
           }
           await walk(file);
         } else if (entry.isFile() && relative.toLowerCase().endsWith(".md")) {
-          for (const r of reports) {
-            if (!matches(relative, r.include) || matches(relative, r.exclude))
-              continue;
-            r.count++;
-            const zone = ["Meetings", "Projects/Private", "Projects"].find(
-              (z) => relative.startsWith(z + "/"),
-            );
-            if (zone) r.zones[zone] = (r.zones[zone] || 0) + 1;
-            const text = await readFile(file, "utf8"),
-              id = repo.id + "/" + relative;
-            sources[id] = {
-              id,
-              repo: repo.id,
-              relative,
-              original: file,
-              hash: hash(text),
-              commit,
-              text,
-            };
-          }
+          if (
+            !matches(relative, report.include) ||
+            matches(relative, report.exclude)
+          )
+            continue;
+          report.count++;
+          const zone = ["Meetings", "Projects/Private", "Projects"].find((z) =>
+            relative.startsWith(z + "/"),
+          );
+          if (zone) report.zones[zone] = (report.zones[zone] || 0) + 1;
+          const text = await readFile(file, "utf8"),
+            id = repo.id + "/" + relative;
+          sources[id] = {
+            id,
+            repo: repo.id,
+            relative,
+            original: file,
+            hash: hash(text),
+            commit,
+            text,
+          };
         }
       }
     }

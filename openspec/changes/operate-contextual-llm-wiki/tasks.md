@@ -16,11 +16,11 @@
 - [x] 3.3 Glossar, ADR 0010, bestehende Quellen-/Retrieval-Requirements und Einführungskatalog auf das gemeinsame Wiki ausrichten.
 
 ## 4. Bestätigtes Modell umsetzen
-- [ ] 4.1 Quellenpartition und bisherige Privacy-Szenarien durch gemeinsame Wissensbildung und explizite Aufgabenbegrenzung ersetzen; Rot→Grün über die öffentliche CLI.
+- [x] 4.1 Quellenpartition und bisherige Privacy-Szenarien durch gemeinsame Wissensbildung und explizite Aufgabenbegrenzung ersetzen; Rot→Grün über die öffentliche CLI.
 - [ ] 4.2 Bestehende Wissensseiten und gespeicherte Synthesen sichern und samt überprüfter Provenienz in gemeinsamen Zustand/Ausgabe überführen; keine stillen Überschreibungen oder Verluste.
-- [ ] 4.3 Gemeinsames QMD-Routing ohne aus dem Domainnamen abgeleitete Ausschlüsse herstellen; betroffene kanonische Retrieval-Regeln abgleichen.
+- [x] 4.3 Gemeinsames QMD-Routing ohne aus dem Domainnamen abgeleitete Ausschlüsse herstellen; betroffene kanonische Retrieval-Regeln abgleichen.
 - [ ] 4.4 Begrenzte Pflegefehler isolieren, sichere unabhängige Arbeit fortsetzen und echte Teilfehlerberichte nachweisen.
 - [ ] 4.5 Live-Job und Betriebsreferenzen auf die gemeinsame Konfiguration umstellen; bisherigen Zeitplan beibehalten.
 - [ ] 4.6 Echte gemeinsame Synthese aus persönlichem und anderem Tätigkeitsbereich, Relevanzkontrolle, Quelle–Antwort-Nachpflege, Vollimport und No-op prüfen; Abnahme aktualisieren.
 
-Die bisherige Abnahme dokumentiert ausschließlich den vorangegangenen Betriebsstand. Das Interview ist abgeschlossen, die Umsetzung des korrigierten gemeinsamen Wikis und ihre Abnahme stehen aus. Keine weitere materielle Entscheidung ist für diesen Plan offen.
+[Ticket-01-Abnahme](../../../contextual-llm-wiki/evidence/shared-wiki-01.md): gemeinsame Quellen-/Query-Funktion und QMD-Routing isoliert verifiziert, einschließlich echter repoübergreifender Konzeptseite, Relevanzkontrolle, expliziter transitiver Grenzen, Aktualitätsprüfung und No-op. Damit ist der begrenzte Synthese-/Query-Anteil aus 4.6 nachgewiesen; 4.6 bleibt wegen Vollimport und produktiver Abnahme offen. 4.2, 4.4 und 4.5 gehören zu Tickets 02–04. Bestehende getrennte Ausgaben und Live-Job wurden nicht umgestellt; nicht archivieren.

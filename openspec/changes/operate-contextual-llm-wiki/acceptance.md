@@ -28,3 +28,8 @@ Damit ist nicht nur ein gestarteter Prozess, sondern die inhaltliche Übernahme 
 - Produktives `wiki status` zeigte bei der letzten Bestandsprüfung 1.667 ausgewählte Quellen, `lastCompleted:null` und alle als hinzugefügt. Die Zahl wächst durch neue Markdown-Dokumentation dieser Session. Ein erfolgreicher Vollimport und der nächste tatsächliche Schedulerlauf sind **noch nicht nachgewiesen**. Die begrenzte echte Ausführung und die gespeicherte aktive Definition sind die hier möglichen unmittelbaren Nachweise; der Vollimport erfolgt über den regulären Job.
 - Ausführung bei schlafendem/abgemeldetem Mac oder nicht verfügbarer Codex-Anmeldung wurde nicht geprüft. Der Zeitplan ist keine Echtzeitgarantie. Private Wiki-Pflege und flächendeckendes Agent-Routing sind nicht aktiviert.
 - Vorhandene fremde Änderungen am Agent-Framework-Piloten sowie das unversionierte Wiki-Vergleichsdokument wurden nicht übernommen oder verändert. Rohprotokolle bleiben lokal/ignoriert.
+
+
+## Ticket 01: gemeinsame Quellen-/Abfragefunktion (13.09.2026)
+
+Die [gesonderte Ticket-01-Abnahme](../../../contextual-llm-wiki/evidence/shared-wiki-01.md) belegt die gemeinsame CLI anhand realer Inventur, echter Compiler-/QMD-Ausführung, echter Provider-Synthese und öffentlicher Verhaltenstests. Die frühere Betriebsabnahme oben beschreibt weiterhin den alten Live-Stand. Bestandsmigration, Fehlerisolation, Aktivierung und Vollimport sind noch offen; der Change bleibt aktiv.

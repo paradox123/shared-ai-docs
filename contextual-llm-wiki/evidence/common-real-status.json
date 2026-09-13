@@ -1,0 +1,98 @@
+{
+  "code": 0,
+  "ok": true,
+  "context": "common-acceptance-01",
+  "lastCompleted": "2026-09-13T09:06:28.338Z",
+  "pending": [],
+  "changes": {
+    "added": [],
+    "changed": [],
+    "removed": []
+  },
+  "review": [],
+  "pages": [
+    {
+      "id": "concepts/liquiditätsreserve",
+      "kind": "concept",
+      "sourceVersions": {
+        "private/README.md": "43052006006b4b7dcf5b6f9f44b03a3d4675f845815c38f76e65d1e181fe5692",
+        "probare-crm/README.md": "7b3cdf1d6463228b11c4bd0e94b1f7852a3ae53eb109a57b27c825f137d2da9a"
+      },
+      "pageVersions": {},
+      "title": "Liquiditätsreserve",
+      "hash": "4be3327367eb7a5540768daae1c0360ad7499e464f734f4d1007ca749a3fea78"
+    },
+    {
+      "id": "concepts/zeitliche-ausgabendeckung-durch-reserven",
+      "kind": "concept",
+      "sourceVersions": {
+        "private/README.md": "43052006006b4b7dcf5b6f9f44b03a3d4675f845815c38f76e65d1e181fe5692"
+      },
+      "pageVersions": {},
+      "title": "Zeitliche Ausgabendeckung durch Reserven",
+      "hash": "0966b6530b9e852e5398203b74820703e131f37122d9d928ec634879c3239dc1"
+    },
+    {
+      "id": "concepts/abgrenzung-erwarteter-zahlungen-von-heutiger-liquidität",
+      "kind": "concept",
+      "sourceVersions": {
+        "private/README.md": "43052006006b4b7dcf5b6f9f44b03a3d4675f845815c38f76e65d1e181fe5692"
+      },
+      "pageVersions": {},
+      "title": "Abgrenzung erwarteter Zahlungen von heutiger Liquidität",
+      "hash": "4ac0d2fcc79d5e80b9ba991be751ab8c7c9c2efd0d2952fe013e4be7381b144b"
+    },
+    {
+      "id": "concepts/designportfolio",
+      "kind": "concept",
+      "sourceVersions": {
+        "private/control.md": "2838e87f27e9778666944f392c32cf722bd98c69c6b311b931fdeb7ae3c488a3"
+      },
+      "pageVersions": {},
+      "title": "Designportfolio",
+      "hash": "a29103989519770170a38c230faf04fa17d1090e977a3a4a10931b0e95f0f837"
+    },
+    {
+      "id": "concepts/umschlaggestaltung",
+      "kind": "concept",
+      "sourceVersions": {
+        "private/control.md": "2838e87f27e9778666944f392c32cf722bd98c69c6b311b931fdeb7ae3c488a3"
+      },
+      "pageVersions": {},
+      "title": "Umschlaggestaltung",
+      "hash": "fc0c3bcd1ccf874c4cc66bd75e05d35ef2b496d58bbb59f361488aa3cafbb75b"
+    },
+    {
+      "id": "concepts/typografische-entwürfe",
+      "kind": "concept",
+      "sourceVersions": {
+        "private/control.md": "2838e87f27e9778666944f392c32cf722bd98c69c6b311b931fdeb7ae3c488a3"
+      },
+      "pageVersions": {},
+      "title": "Typografische Entwürfe",
+      "hash": "3943e3ff7c1c8fbb613d347d6144ed9ec42842e454bc7c02badbc2a151b9135a"
+    },
+    {
+      "id": "concepts/erwarteter-zahlungseingang",
+      "kind": "concept",
+      "sourceVersions": {
+        "probare-crm/README.md": "7b3cdf1d6463228b11c4bd0e94b1f7852a3ae53eb109a57b27c825f137d2da9a"
+      },
+      "pageVersions": {},
+      "title": "Erwarteter Zahlungseingang",
+      "hash": "f31c38c282f2d3ef562bdd6da4f4ec4f3a036ebdb5e02fa395b0a2fc76f8439d"
+    },
+    {
+      "id": "concepts/zeitliche-abgrenzung-verfügbarer-liquidität",
+      "kind": "concept",
+      "sourceVersions": {
+        "probare-crm/README.md": "7b3cdf1d6463228b11c4bd0e94b1f7852a3ae53eb109a57b27c825f137d2da9a"
+      },
+      "pageVersions": {},
+      "title": "Zeitliche Abgrenzung verfügbarer Liquidität",
+      "hash": "44dce7504f0f90b5ca0280fc7e774a449a1b26ee66d246d544ed9191b0da0754"
+    }
+  ],
+  "sourceCount": 3,
+  "stderr": ""
+}

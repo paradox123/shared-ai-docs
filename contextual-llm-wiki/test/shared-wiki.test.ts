@@ -436,3 +436,40 @@ test("an invalid model relevance choice cannot introduce unknown evidence or a s
     await f.close();
   }
 });
+
+test("fallback can reach later relevant sources when the provider only accepts bounded candidate batches", async () => {
+  const f = await fixture((body) => {
+    const prompt = body.messages.map((m: any) => m.content).join("\n");
+    if (!prompt.includes("--- RELEVANCE CANDIDATES ---")) return;
+    const candidates = JSON.parse(
+      prompt.split("--- RELEVANCE CANDIDATES ---")[1],
+    );
+    if (candidates.length > 10)
+      return { role: "assistant", content: "Provider context limit exceeded" };
+    return {
+      role: "assistant",
+      content: JSON.stringify({
+        relevantIds: candidates
+          .filter((e: any) => e.body.includes("Beta verlangt drei"))
+          .map((e: any) => e.id),
+      }),
+    };
+  });
+  try {
+    for (let i = 0; i < 14; i++)
+      await writeFile(
+        path.join(f.dir, "alpha", `control-${i}.md`),
+        "# Freigabe\n\nFreigabe eines Designkatalogs ohne fachlichen Zusammenhang.\n",
+      );
+    const query = await f.run("query", "--question", "Freigabe");
+    assert.equal(query.ok, true, JSON.stringify(query));
+    assert.equal(query.fallback, true);
+    assert.deepEqual(
+      query.evidence.map((e: any) => e.id),
+      ["sources/beta/README.md"],
+    );
+    assert.match(query.answer, /Beta verlangt drei/);
+  } finally {
+    await f.close();
+  }
+});

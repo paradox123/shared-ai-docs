@@ -23,4 +23,24 @@ Der bestehende Change `operate-contextual-llm-wiki` deckt die Änderung ab. Tick
 
 Die Inhalts- und Relevanzauswahl bleibt Modellverhalten, kein mathematischer Relevanzbeweis. Modellantworten zur Auswahl dürfen nur tatsächlich angebotene IDs enthalten; ungültige Antworten brechen ab. Repo-/Quellenbegrenzung und Originalhash-Prüfung sind deterministisch. QMD liefert Kandidaten, keine ungeprüft autorisierte Evidenz.
 
-Die gemeinsame Produktionsausgabe wurde noch nicht übernommen oder vollständig kompiliert. Die reale Inventur ist kein Vollimport. Bestehende alte Top-Level-Konfigurationen `general`/`private` werden mit Migrationshinweis abgewiesen, bestehende Ausgabestände nicht still konvertiert. Das Review und die ergänzende echte Provider-Abnahme werden nach Abschluss unten dokumentiert.
+Die gemeinsame Produktionsausgabe wurde noch nicht übernommen oder vollständig kompiliert. Die reale Inventur ist kein Vollimport. Bestehende alte Top-Level-Konfigurationen `general`/`private` werden mit Migrationshinweis abgewiesen, bestehende Ausgabestände nicht still konvertiert. Eine frische Obsidian-UI-Abnahme war für diese CLI-Änderung nicht Bestandteil von Ticket 01; die frühere Navigationsabnahme bleibt separat dokumentiert.
+
+
+## Zusätzliche echte Provider-Abnahme
+
+Reproduzierbar mit `./wiki-node test/accept-common.ts`: drei künstliche Markdown-Fachquellen in zwei temporären Git-Repos, echter Codex-Provider, gepinnter Compiler, echte isolierte QMD-Datenbank. Keine tatsächlichen Finanzdaten und kein produktiver Erstimport.
+
+Der Compiler erzeugte **`concepts/liquiditätsreserve` mit beiden Originalabhängigkeiten**. Die Seite stellt die heutige 2.000-Euro-Reserve dem erst im Oktober erwarteten 5.000-Euro-Zufluss gegenüber und erklärt dessen zeitliche Abgrenzung. Die anschließende Query verwendet diese persistierte Seite: „Heute stehen somit nicht 7.000 Euro zur Verfügung.“ Der Portfolio-Designkatalog ist in keiner verwendeten Quellenabhängigkeit enthalten. Die auf `private` begrenzte Query verwirft die gemischte Seite und nutzt nur zulässige persönliche Konzepte. Originaldateien sind bytegleich, es gibt keine gespeicherte Antwortseite; der Folgelauf meldet `noop:true`.
+
+Belege: [Pflegelauf](common-real-maintain.json), [erzeugte Seiten](common-real-pages.md), [gemeinsame Antwort mit Abhängigkeiten](common-real-query.json), [begrenzte Antwort](common-real-limited.json), [No-op](common-real-noop.json), [Abschlusszustand](common-real-status.json). Der erste Pilotlauf mit unterschiedlichen Konzeptbezeichnungen erzeugte getrennte Konzepte und erst bei Query eine gemeinsame Antwort; die hier abgelegten finalen Belege stammen aus dem anschließend geprüften Lauf mit dem gemeinsamen Fachbegriff „Liquiditätsreserve“ in beiden Quellen. Das zeigt auch die Abhängigkeit der Konzeptzusammenführung vom Modell und den Quellbegriffen.
+
+## Code-Review und Refactoring
+
+Vergleich: `git diff 0b1e678...HEAD`, Standards und Spec getrennt durch zwei Review-Agenten.
+
+- **Standards:** keine zwingende dokumentierte Regelverletzung; zwei Hinweise: unbeschränkte Quellen-Fallback-Anfrage (P2) und überflüssige Mehrfachbericht-Struktur (P3).
+- **Spec:** ein P2-Befund zur praktischen Ausführbarkeit des Fallbacks: eine natürliche Frage konnte 883 Quellen mit etwa 8,9 Millionen Zeichen auswählen.
+
+Die Relevanzprüfung verarbeitet jetzt höchstens zehn Belege und 128.000 Zeichen pro Anfrage und höchstens fünf Belege/128.000 Zeichen für die Antwort. Ganze Quellentexte werden nicht still abgeschnitten; übergroße Einzelbelege melden einen expliziten Fehler. Ein neuer Rot→Grün-Test weist nach, dass eine relevante Quelle hinter 14 irrelevanten Kandidaten weiterhin erreichbar ist, obwohl der Provider große Kandidatenpakete ablehnt. Der Scanner arbeitet direkt mit einem Bericht je Repo; unnötige Scope-Parameter und Imports sind entfernt. DRY/SOLID/KISS: gemeinsame Evidenzgrenzen liegen in einem Modul für Query, Search und Save; es wurde keine zusätzliche Retrieval-Engine oder generische Workflow-Abstraktion eingeführt.
+
+Die erneute Prüfung nach diesen Änderungen steht in [Review-Verifikation](shared-wiki-review-verification.txt). Der vorherige vollständige Lauf einschließlich unverändertem Compiler und Betriebshelfer steht im [Gesamtprotokoll](shared-wiki-verification.txt).

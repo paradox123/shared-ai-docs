@@ -47,7 +47,7 @@ Die Quelle ist jeweils der konfigurierte Originalcheckout. Zusätzliche Worktree
 
 `maintain` inventarisiert vollständig, meldet direkte und indirekte Prüfgründe, zieht ungültige Seiten zurück, kompiliert mit dem echten SDK ohne Embeddings, prüft gespeicherte Antworten und aktualisiert nur die eigene QMD-Collection. Ein unveränderter erfolgreicher Lauf benötigt keine neue Modellarbeit. Status und Fehler sind JSON; ein Fehler oder offener erforderlicher Arbeitsschritt liefert einen Exitcode ungleich null.
 
-`query` verwendet QMD-Treffer nur mit gültigen Seiten- und Originalquellenständen. Bei fehlender aktueller Wiki-Evidenz liest es passende aktuelle Fachquellen als vorübergehenden Fallback. Ohne `--save` entsteht keine dauerhafte Antwortseite. Die Antwort enthält die tatsächlich übergebene Evidenzmenge einschließlich IDs, Versionen und transitiver Quellenstände. Diese Menge ist bewusst konservativ: Alle übergebenen Belege zählen als Abhängigkeit. Die Relevanzauswahl bewertet QMD-Kandidaten vor der Antwortbildung anhand ihrer fachlichen Beziehung zur Frage; gleiche Begriffe oder Tätigkeitsbereiche allein genügen nicht. Bei ungeeigneten Wiki-Treffern werden passende aktuelle Originalquellen geprüft. Ungültige Provider-Auswahl wird als Fehler gemeldet.
+`query` verwendet QMD-Treffer nur mit gültigen Seiten- und Originalquellenständen. Bei fehlender aktueller Wiki-Evidenz liest es passende aktuelle Fachquellen als vorübergehenden Fallback. Ohne `--save` entsteht keine dauerhafte Antwortseite. Die Antwort enthält die tatsächlich übergebene Evidenzmenge einschließlich IDs, Versionen und transitiver Quellenstände. Diese Menge ist bewusst konservativ: Alle übergebenen Belege zählen als Abhängigkeit. Die Relevanzauswahl bewertet QMD-Kandidaten vor der Antwortbildung anhand ihrer fachlichen Beziehung zur Frage; gleiche Begriffe oder Tätigkeitsbereiche allein genügen nicht. Bei ungeeigneten Wiki-Treffern werden passende aktuelle Originalquellen geprüft. Ungültige Provider-Auswahl wird als Fehler gemeldet. Die Relevanzprüfung verarbeitet höchstens zehn Kandidaten und 128.000 Textzeichen je Anfrage; die Antwort erhält höchstens fünf Belege mit zusammen 128.000 Textzeichen. Spätere Kandidaten werden bei fehlender Relevanz weiter geprüft. Einzelne zu große Belege werden mit explizitem Budgetfehler gemeldet und nicht still abgeschnitten.
 
 Explizite Aufgabengrenzen werden mit wiederholbaren `--repo ID` oder `--source REPO/PFAD.md` bei `query`, `search` und `save` gesetzt:
 
@@ -110,6 +110,8 @@ Das neue Sicherungsverzeichnis muss außerhalb der Fachrepos und aktiven Ausgabe
 
 ```bash
 npm run check
+# Optionaler echter Codex-Providerlauf mit künstlichen Quellen und isoliertem QMD:
+./wiki-node test/accept-common.ts
 ```
 
 Die Tests benutzen die öffentliche CLI, den echten gepinnten Compiler und echte isolierte QMD-Datenbanken. Nur die Modellprovidergrenze wird deterministisch kontrolliert. [Ticket-01-Abnahme](evidence/shared-wiki-01.md), [frühere Abnahme](evidence/acceptance.md), [initiale Inventur](evidence/initial-inventory.json), [Integrationsentscheidungen](evidence/implementation-notes.md) und [Upstream-Patch](patches/0001-host-completion-without-embeddings.patch) dokumentieren Nachweise und Grenzen.

@@ -1,3 +1,4 @@
+import assert from "node:assert/strict";
 import { fixture, invoke } from "./support.ts";
 import { writeFile, readFile } from "node:fs/promises";
 import path from "node:path";
@@ -36,20 +37,45 @@ const run = async (name: string, args: string[]) => {
   return result;
 };
 await run("maintain", ["maintain"]);
-await run("query", [
+const queried = await run("query", [
   "query",
   "--question",
   "Wie wirken die erwarteten Projekteinnahmen auf die heutige Liquiditätsplanung des persönlichen Portfolios?",
 ]);
-await run("limited", [
+const limited = await run("limited", [
   "query",
   "--question",
   "Welche Reserve hat das persönliche Portfolio heute?",
   "--repo",
   "private",
 ]);
-await run("noop", ["maintain"]);
+assert.equal((await run("noop", ["maintain"])).noop, true);
 const state = await run("status", ["status"]);
+const shared = state.pages.filter(
+  (p: any) =>
+    p.sourceVersions["private/README.md"] &&
+    p.sourceVersions["probare-crm/README.md"],
+);
+assert.ok(
+  shared.length > 0,
+  "maintenance produces a persistent shared concept",
+);
+assert.ok(
+  queried.evidence.some((e: any) => shared.some((p: any) => p.id === e.id)),
+);
+assert.ok(
+  queried.evidence.every((e: any) => !e.sourceVersions["private/control.md"]),
+);
+assert.ok(
+  limited.evidence.every((e: any) =>
+    Object.keys(e.sourceVersions).every((id) => id === "private/README.md"),
+  ),
+);
+assert.equal(queried.fallback, false);
+assert.ok(
+  state.pages.every((p: any) => p.kind === "concept"),
+  "queries do not implicitly save answers",
+);
 const bodies = await Promise.all(
   state.pages
     .filter((p: any) => p.kind === "concept")

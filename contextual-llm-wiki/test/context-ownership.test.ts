@@ -1,7 +1,5 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFile, writeFile } from "node:fs/promises";
-import path from "node:path";
 import { fixture } from "./support.ts";
 test("a common context cannot silently reuse a legacy scope output directory", async () => {
   const f = await fixture();
