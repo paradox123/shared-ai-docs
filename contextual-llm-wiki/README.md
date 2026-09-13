@@ -1,6 +1,6 @@
 # Kontextabhängiges LLM-Wiki
 
-Diese lokale CLI verbindet bestehende Markdown-Fachrepos mit Atomicstratas Compiler am Commit `34ca1df97b3e60a6700048c48c7cf70c92a9bfdb`. Sie erzeugt eine gemeinsame Markdown-Wissensschicht, verfolgt Quellen- und Antwortabhängigkeiten und verwendet ausschließlich QMD für persistiertes Retrieval.
+Diese lokale CLI verbindet bestehende Markdown-Fachrepos mit Atomicstratas Compiler gemäß der gemeinsamen [Release-/Commit-Definition](compiler-release.json). Sie erzeugt eine gemeinsame Markdown-Wissensschicht, verfolgt Quellen- und Antwortabhängigkeiten und verwendet ausschließlich QMD für persistiertes Retrieval.
 
 Originalrepos werden gelesen, einschließlich nicht committeter Markdown-Änderungen. Die CLI pflegt über `maintain`; auf Daniels Mac ruft die bestehende tägliche QMD-Automation diesen Befehl auf. [Betrieb, Protokolle und manueller Start](OPERATIONS.md). Ein Merge oder eine Query löst selbst keine Pflege aus. Das Wiki erhält keinen eigenen Watcher, Git-Repo oder Cloud-Dienst.
 
@@ -151,3 +151,27 @@ Nach einem Abbruch oder Indexfehler denselben geprüften Snapshot erneut verwend
 ```
 
 Die Wiederaufnahme benötigt die ursprünglichen Eingabeordner nicht mehr. Sie prüft sämtliche Snapshot-Dateien erneut und bearbeitet inzwischen geänderte Quellen. Andere Schreiboperationen melden bis dahin den offenen Migrationslauf und den Wiederaufnahmebefehl. Ein Snapshot ohne vollständiges Manifest wird nicht überschrieben: Ursache beheben und einen neuen Snapshot-Pfad verwenden; die unvollständige Sicherung bleibt überprüfbar erhalten. QMD-Collections anderer Bestände bleiben unverändert. Produktive Aktivierung und Ablösung alter Ausgaben gehören zu Ticket 04.
+
+## Upstream-Release als Kandidaten prüfen
+
+Python 3.9+, Git, npm, `gh` mit GitHub-API-Zugang und die vorhandene lokale Node-/QMD-Runtime werden benötigt. Bootstrap und Runtime lesen denselben Compiler-Pin aus `compiler-release.json`. Für einen ausgewählten regulären veröffentlichten Release:
+
+```bash
+python3 scripts/install-release.py --release v1.3.0
+```
+
+Der Aufruf erzeugt einen neuen Ordner unter `.runtime/candidates/` und gibt JSON mit `candidate`, `release`, `commit`, `checks`, `ok` und `eligible` aus. `--destination /absoluter/neuer/ordner` wählt einen ausdrücklich noch nicht vorhandenen Kandidatenordner; `--node /pfad/zum/node` wählt eine vorhandene Runtime. Die Runtime muss zum Wrapper und zu den `engines` der Release-Abhängigkeiten passen. Fehlende oder inkompatible Laufzeiten ergeben einen Fehler; dieser Aufruf installiert keine unabhängigen Runtime-Updates.
+
+GitHub-Release-Metadaten belegen die Veröffentlichung; der Release-Tag wird aus dem bestätigten Upstream auf einen exakten Commit aufgelöst. Entwürfe, Vorabversionen und Tags ohne Release werden abgewiesen. Im Kandidaten liegt ein eigener Wrapper-Snapshot mit eigener Release-Definition und eigenem Compiler. `npm ci --ignore-scripts --include=dev --engine-strict` installiert die vom Release festgelegten Versionen. Manifest und Lockdatei werden vor und nach Patch, Installation, Build und Prüfungen auf unveränderte Bytes geprüft. Die Wrapper-Abhängigkeiten werden ebenfalls aus ihrer bestehenden Lockdatei installiert.
+
+`report.json` wird vor jedem Schritt atomar geschrieben. Nur alle erfolgreichen Pflichtprüfungen ergeben Exitcode 0 und `eligible: true`; Fehler liefern Exitcode 1. Unter `logs/` bleiben Build-, Installations- und Testergebnisse erhalten. Release-ID, Commit, Patch-Hashes, Dependency-Eingänge sowie Hashes von Wrapper, Build und verwendetem Node sind dem Kandidaten zugeordnet. Ein abgebrochener Lauf bleibt ungeeignet; Wiederholung verwendet einen neuen Ordner. Ein Bericht qualifiziert genau die geprüften Bytes zum Prüfzeitpunkt und ist keine Aktivierungsbestätigung.
+
+Die festen Prüflisten liegen unter `scripts/upstream-tests.txt` und `scripts/integration-tests.txt`. Fehlende Dateien, nicht bestandene Tests und übersprungene/ausstehende Tests sperren die Eignung. Die Integration verwendet echte Compiler-/QMD-Abläufe mit künstlichen Fachquellen, separaten Datenbanken und einem deterministischen lokalen Modellprovider. `fixtures/` enthält ausschließlich diese Testbestände. Aktive Wiki-Daten und Pflegeautomation werden nicht verwendet. Aktivierung und Rollback folgen in Ticket 02, regelmäßige Release-Erkennung in Ticket 03.
+
+```bash
+npm run test:releases
+# Optionaler realer Abnahmelauf: erfolgreicher Release + fehlender Pflicht-Test
+python3 test/accept-release.py --release v1.3.0
+```
+
+[Abnahme von Release-Ticket 01](evidence/release-install-01.md).

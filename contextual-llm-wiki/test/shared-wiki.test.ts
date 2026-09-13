@@ -1,3 +1,4 @@
+import { PIN } from "../src/runtime.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdir, writeFile, readFile } from "node:fs/promises";
@@ -181,7 +182,7 @@ test("common maintenance synthesizes related personal and project evidence and q
   try {
     const compiled = await f.run("maintain");
     assert.equal(compiled.ok, true, JSON.stringify(compiled));
-    assert.equal(compiled.compiler, "34ca1df97b3e60a6700048c48c7cf70c92a9bfdb");
+    assert.equal(compiled.compiler, PIN);
     const page = await readFile(
       path.join(f.config.output, "wiki/concepts/liquiditaetsreserve.md"),
       "utf8",

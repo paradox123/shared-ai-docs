@@ -52,3 +52,11 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 - [x] 5.4 Kanal „veröffentlichte Releases“ bestätigen und drei freigegebene [Umsetzungstickets](../../../.scratch/update-llm-wiki-releases/spec.md) mit Abhängigkeiten 01 → 02 → 03 veröffentlichen.
 
 [Ticket-04-Zwischenstand](../../../contextual-llm-wiki/evidence/production-04.md): bestehender Live-Job auf gemeinsame Konfiguration umgestellt, Einstellungen erhalten; WikiQuery-first in zentralen Skills und tatsächlichem Agentenablauf samt aktuellem Quellen-Fallback nachgewiesen. Vollimport und produktive Gesamtabnahme (4.6) sind wegen wiederholter paralleler Originalquellenänderungen blockiert; Meetings-Verbleib ist offen. Keine Archivierung.
+
+## 6. Release-Ticket 01: Kandidat installieren und prüfen
+- [x] 6.1 Compiler-Release-Definition vereinheitlichen und bisherige CLI-Prüfung nachweisen.
+- [x] 6.2 Öffentlichen Kandidatenaufruf mit Release-Nachweis, exaktem Commit, unveränderten Lock-Eingängen und isolierter Installation testgetrieben umsetzen.
+- [x] 6.3 Build-/Integrationspflichtprüfungen und nicht erfolgreiche Fehlerberichte an den Kandidaten binden.
+- [ ] 6.4 Echten erfolgreichen und gezielt fehlschlagenden Aufruf nachweisen; Abnahme, Tests und Review dokumentieren.
+
+5.2/5.3 bleiben wegen Erkennung, Aktivierung und Rollback der Folgetickets offen.

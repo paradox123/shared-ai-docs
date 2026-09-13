@@ -1,0 +1,5 @@
+test/cli.test.ts
+test/release-compatibility.test.ts
+test/lifecycle.test.ts
+test/integrity.test.ts
+test/bounded-failures.test.ts

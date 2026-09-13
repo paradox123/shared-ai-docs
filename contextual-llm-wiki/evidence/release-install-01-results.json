@@ -1,0 +1,174 @@
+{
+  "release": "v1.3.0",
+  "commit": "34ca1df97b3e60a6700048c48c7cf70c92a9bfdb",
+  "success": {
+    "schemaVersion": 1,
+    "candidate": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-update-llm-wiki-releases/contextual-llm-wiki/.runtime/release-acceptance-kwqfeaij/success",
+    "requestedRelease": "v1.3.0",
+    "createdAt": "2026-09-13T12:02:17.436182+00:00",
+    "ok": true,
+    "eligible": true,
+    "checks": {
+      "release": {
+        "status": "passed"
+      },
+      "runtime": {
+        "status": "passed"
+      },
+      "checkout": {
+        "status": "passed"
+      },
+      "patches": {
+        "status": "passed"
+      },
+      "dependencies": {
+        "status": "passed"
+      },
+      "build": {
+        "status": "passed"
+      },
+      "typecheck": {
+        "status": "passed"
+      },
+      "upstream-tests": {
+        "status": "passed",
+        "testsPassed": 59
+      },
+      "integration-tests": {
+        "status": "passed",
+        "testsPassed": 29
+      },
+      "integrity": {
+        "status": "passed"
+      }
+    },
+    "repository": "atomicstrata/llm-wiki-compiler",
+    "release": {
+      "id": 386878086,
+      "tag_name": "v1.3.0",
+      "draft": false,
+      "prerelease": false,
+      "published_at": "2026-09-11T08:16:39Z",
+      "html_url": "https://github.com/atomicstrata/llm-wiki-compiler/releases/tag/v1.3.0"
+    },
+    "runtime": {
+      "node": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-update-llm-wiki-releases/contextual-llm-wiki/.runtime/node/node_modules/node/bin/node",
+      "version": "24.16.0",
+      "sha256": "1ee75375e33b94fc34b3b19aede049e11dae90efb63b374dc96d6bdace70c4b8"
+    },
+    "commit": "34ca1df97b3e60a6700048c48c7cf70c92a9bfdb",
+    "dependencyInputs": {
+      "package.json": "f4232799512b2d64c3ea64ecff8a98c7f14438e097abdd4e029a67936b6c3697",
+      "package-lock.json": "6e5853638fb50c41b890552ede09be85c10eb3b53fcb49132e3c98b70e792395"
+    },
+    "patches": [
+      {
+        "name": "0001-host-completion-without-embeddings.patch",
+        "sha256": "1f6546f85760700f98ecfbdd29b671067e23203cd566c2eba4bc80ac9978c7be"
+      },
+      {
+        "name": "0002-bounded-provider-failures.patch",
+        "sha256": "e28cf6536834607f2d2d1a269074674b5432fed99ebff88f1ac46be18e6daadc"
+      }
+    ],
+    "compilerBuildSha256": "3cb7d55696586c8ce89f0bc8444b7f86b7dcf34e0531ba012bf21afcf31eca6b",
+    "wrapperSha256": "f954bd127851dfad1a633f9d62fe2d13456735137fa5f440292d6660b78f5238"
+  },
+  "failure": {
+    "schemaVersion": 1,
+    "candidate": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-update-llm-wiki-releases/contextual-llm-wiki/.runtime/release-acceptance-kwqfeaij/failure",
+    "requestedRelease": "v1.3.0",
+    "createdAt": "2026-09-13T12:03:41.944620+00:00",
+    "ok": false,
+    "eligible": false,
+    "checks": {
+      "release": {
+        "status": "passed"
+      },
+      "runtime": {
+        "status": "passed"
+      },
+      "checkout": {
+        "status": "passed"
+      },
+      "patches": {
+        "status": "passed"
+      },
+      "dependencies": {
+        "status": "passed"
+      },
+      "build": {
+        "status": "passed"
+      },
+      "typecheck": {
+        "status": "passed"
+      },
+      "upstream-tests": {
+        "status": "passed",
+        "testsPassed": 59
+      },
+      "integration-tests": {
+        "status": "failed"
+      },
+      "integrity": {
+        "status": "pending"
+      }
+    },
+    "repository": "atomicstrata/llm-wiki-compiler",
+    "release": {
+      "id": 386878086,
+      "tag_name": "v1.3.0",
+      "draft": false,
+      "prerelease": false,
+      "published_at": "2026-09-11T08:16:39Z",
+      "html_url": "https://github.com/atomicstrata/llm-wiki-compiler/releases/tag/v1.3.0"
+    },
+    "runtime": {
+      "node": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-update-llm-wiki-releases/contextual-llm-wiki/.runtime/node/node_modules/node/bin/node",
+      "version": "24.16.0"
+    },
+    "commit": "34ca1df97b3e60a6700048c48c7cf70c92a9bfdb",
+    "dependencyInputs": {
+      "package.json": "f4232799512b2d64c3ea64ecff8a98c7f14438e097abdd4e029a67936b6c3697",
+      "package-lock.json": "6e5853638fb50c41b890552ede09be85c10eb3b53fcb49132e3c98b70e792395"
+    },
+    "patches": [
+      {
+        "name": "0001-host-completion-without-embeddings.patch",
+        "sha256": "1f6546f85760700f98ecfbdd29b671067e23203cd566c2eba4bc80ac9978c7be"
+      },
+      {
+        "name": "0002-bounded-provider-failures.patch",
+        "sha256": "e28cf6536834607f2d2d1a269074674b5432fed99ebff88f1ac46be18e6daadc"
+      }
+    ],
+    "error": "Required integration test files missing"
+  },
+  "activeInstallationUnchanged": true,
+  "activeBefore": {
+    "files": {
+      "compiler-release.json": "f1b4940620cbabaea648c42b0715c95e632cc1d7aba5d600befc7da3aba0764e",
+      "src/runtime.ts": "35f94ecbb12ccf40d322d197b2039fdcdf855de8639cba93306eeb605ce4c3f6",
+      "wiki": "8010225df6c44a601bfc1a5e6f2a24610317191d29979f8ea96e2feaadef5c80",
+      "wiki-node": "aaeb74f2cd6d3822ba9bba575a2d5d908e94f63fa5f20d00f39b47de983d8481",
+      ".runtime/compiler/package.json": "f4232799512b2d64c3ea64ecff8a98c7f14438e097abdd4e029a67936b6c3697",
+      ".runtime/compiler/package-lock.json": "6e5853638fb50c41b890552ede09be85c10eb3b53fcb49132e3c98b70e792395",
+      ".runtime/compiler/dist/index.js": "6927b0f87318a097fda57f802b936535f5f8d9dae060d2a8a91d9ce4205711df"
+    },
+    "commit": "34ca1df97b3e60a6700048c48c7cf70c92a9bfdb",
+    "patch": "da7516d76239f27382f2b8b79d041d9dac6992dcc53014c3d5311527d2233819"
+  },
+  "activeAfter": {
+    "files": {
+      "compiler-release.json": "f1b4940620cbabaea648c42b0715c95e632cc1d7aba5d600befc7da3aba0764e",
+      "src/runtime.ts": "35f94ecbb12ccf40d322d197b2039fdcdf855de8639cba93306eeb605ce4c3f6",
+      "wiki": "8010225df6c44a601bfc1a5e6f2a24610317191d29979f8ea96e2feaadef5c80",
+      "wiki-node": "aaeb74f2cd6d3822ba9bba575a2d5d908e94f63fa5f20d00f39b47de983d8481",
+      ".runtime/compiler/package.json": "f4232799512b2d64c3ea64ecff8a98c7f14438e097abdd4e029a67936b6c3697",
+      ".runtime/compiler/package-lock.json": "6e5853638fb50c41b890552ede09be85c10eb3b53fcb49132e3c98b70e792395",
+      ".runtime/compiler/dist/index.js": "6927b0f87318a097fda57f802b936535f5f8d9dae060d2a8a91d9ce4205711df"
+    },
+    "commit": "34ca1df97b3e60a6700048c48c7cf70c92a9bfdb",
+    "patch": "da7516d76239f27382f2b8b79d041d9dac6992dcc53014c3d5311527d2233819"
+  }
+}

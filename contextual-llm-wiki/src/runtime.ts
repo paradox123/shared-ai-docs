@@ -1,5 +1,9 @@
 import { execFileSync } from "node:child_process";
-export const PIN = "34ca1df97b3e60a6700048c48c7cf70c92a9bfdb";
+import { readFileSync } from "node:fs";
+const release = JSON.parse(
+  readFileSync(new URL("../compiler-release.json", import.meta.url), "utf8"),
+);
+export const PIN: string = release.commit;
 export const compilerRoot = new URL("../.runtime/compiler/", import.meta.url)
   .pathname;
 export function preflight() {
@@ -32,7 +36,7 @@ export function preflight() {
   return {
     runtime: process.versions.node,
     compiler: PIN,
-    version: "1.3.0",
+    version: release.release.replace(/^v/, ""),
     provider,
     model: process.env.LLMWIKI_MODEL || "provider default",
     embeddings: false,

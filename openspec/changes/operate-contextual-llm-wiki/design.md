@@ -95,3 +95,11 @@ Pflegeaufruf erhalten bleiben. Bestehender alter Compiler-Kontext unterliegt
 weiterhin dem einmaligen Neuaufbau aus Ticket 03. Die Pflege behält das
 Migrationsjournal und behandelt Fehler importierter Antwortketten mit denselben
 Abhängigkeitssperren wie andere gespeicherte Antworten.
+
+## Release-Ticket 01: isolierter Kandidat
+
+Owning Git root: `_shared/shared-ai-docs`, Ausgang `main` bei `dbb6df2030f26543099eb34d3bb6b7ff38963dbc`; Ziel `codex/update-llm-wiki-releases` im separaten Worktree `../shared-ai-docs-update-llm-wiki-releases`. Derselbe Ausgangscommit ist die Review-Basis. Fremde Änderungen im ursprünglichen Checkout werden nicht übernommen. Der bestehende Abschnitt 5 besitzt dieses Verhalten; kein neuer Change ist notwendig.
+
+`scripts/install-release.py --release TAG` erzeugt einen neuen Kandidaten unter `.runtime/candidates/` oder einem ausdrücklich angegebenen neuen Ziel. GitHub Release-Metadaten über `gh api --hostname github.com` belegen die Veröffentlichung; ein frischer Git-Fetch des Release-Tags liefert den exakten Commit. Ein isolierter Wrapper-Snapshot erhält eine eigene Release-Definition und einen eigenen Compiler, sodass die bestehenden statischen SDK-Imports tatsächlich den Kandidaten prüfen. Der vorhandene Node wird nur lesend verwendet, bei fehlender oder inkompatibler Runtime scheitert der Kandidat. Manifest/Lock bleiben bytegleich; `npm ci` installiert die festgelegten Versionen einschließlich Build-Abhängigkeiten. Bestehende Integrationspatches werden in Dateireihenfolge angewandt.
+
+Die stabile Testgrenze ist der öffentliche Installationsprozess samt JSON-Bericht und Exitcode. GitHub-/Git-Transport werden für Fehlerfälle an der externen Prozessgrenze kontrolliert; der echte Release-Nachweis verwendet GitHub, Git, npm, Compiler und QMD. Nur der Modellprovider bleibt in den begrenzten Integrationstests deterministisch. Jeder erforderliche Schritt beginnt mit einem dauerhaft gespeicherten nicht erfolgreichen Status. Aktivierung, Rollback und periodische Erkennung bleiben Tickets 02/03.

@@ -1,0 +1,6 @@
+test/source-selection.test.ts
+test/compile-source-deletion-reconciliation.test.ts
+test/freshness.test.ts
+test/sdk/create-wiki-root.test.ts
+test/provider-codex-agent.test.ts
+test/utils/provider-guard.test.ts

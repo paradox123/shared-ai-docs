@@ -25,6 +25,15 @@ After a successful build and all required compatibility tests, the verified upst
 - **THEN** the update is not adopted and any integration PR does not merge
 - **AND** the previous working installation is retained and the incomplete or failed verification remains visible
 
+#### Scenario: Install and qualify an isolated release candidate
+- **WHEN** an operator selects a regular published upstream release
+- **THEN** the public installer resolves its release tag to an exact commit and prepares a fresh candidate separate from the active installation
+- **AND** the existing integration patches apply without changing the release manifest or lockfile, and installation uses the frozen lockfile
+- **AND** build, upstream compatibility tests and managed CLI tests cover query, original-source provenance, freshness and maintenance on bounded fixtures
+- **AND** the candidate report binds release identity, commit, patch hashes, dependency input hashes and required check results to that candidate
+- **AND** missing runtimes, patch conflicts, installation failures and missing, pending or failed checks leave eligibility false and the active installation unchanged
+- **AND** bootstrap and runtime validation read one shared release/commit definition, preserving the previously selected release before extension
+
 ### Requirement: Scheduled wiki maintenance before global retrieval maintenance
 The existing local daily QMD automation MUST maintain one common production wiki over all selected source repositories, including `private`, `Projects/Private`, Meetings and Projects, before subsequent QMD retrieval maintenance. It MUST preserve the existing schedule, model, project and notification settings. The name `private` MUST describe a subject domain only and MUST NOT cause a separate wiki, a maintenance exclusion, a special query approval or a confidentiality classification. The automation MUST NOT substitute acceptance fixtures for the full production inventory. No additional scheduler or watcher SHALL be installed.
 

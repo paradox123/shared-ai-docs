@@ -1,3 +1,4 @@
+import { PIN } from "../src/runtime.ts";
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
@@ -19,6 +20,6 @@ test("preflight reports pinned runtime and refuses unavailable provider before c
     OPENAI_API_KEY: "",
   });
   assert.equal(r.code, 1);
-  assert.equal(r.data.compiler, "34ca1df97b3e60a6700048c48c7cf70c92a9bfdb");
+  assert.equal(r.data.compiler, PIN);
   assert.match(r.data.error, /OPENAI_API_KEY/);
 });
