@@ -4,6 +4,7 @@ This repository contains AI-related documentation, prompts, skills, hooks, and w
 
 ## Contents
 
+- **Repository maintenance**: [Renovate in each owning GitHub repository](docs/renovate-repository-standard.md) and [ADR 0011](docs/adr/0011-renovate-in-each-owning-github-repository.md)
 - **contextual-llm-wiki/**: [Context-scoped Markdown wiki with Atomicstrata and QMD](contextual-llm-wiki/README.md), [daily Mac operations](contextual-llm-wiki/OPERATIONS.md), and [agent-context adoption catalog](docs/rag/llm-wiki-context-adoption-catalog.md)
 - **n8n/**: Workflow automation engine setup
 - **langgraph-github-issue-pilot/**: Local persistent GitHub issue workflow receiver
