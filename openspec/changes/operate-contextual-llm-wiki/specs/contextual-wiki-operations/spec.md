@@ -1,5 +1,30 @@
 ## ADDED Requirements
 
+### Requirement: Automatically adopt verified upstream wiki revisions
+The local wiki installation MUST follow published releases of the upstream LLM Wiki repository as a whole, resolving each adopted release to an exact commit and using the dependency versions defined by that revision's manifest and lockfile. It MUST NOT independently update compiler libraries or re-resolve their locked versions ahead of upstream. Independent Node, QMD and wrapper dependency updates are outside this update scope. A required build MUST reproduce the adopted upstream revision with the existing integration patch rather than introduce new dependency versions.
+
+After a successful build and all required compatibility tests, the verified upstream update MUST be adopted automatically without renewed human review or merge approval. Required checks MUST cover the existing integration patch and managed wiki behavior. Missing, pending or failed required checks MUST block adoption. If Renovate and integration PRs are used, they MUST update only our upstream reference and MUST merge automatically after the required checks pass. This flow MUST NOT modify the upstream repository. Repository merge success MUST NOT be reported as successful Mac installation without verifying local activation separately.
+
+#### Scenario: Upstream changes without a published release
+- **WHEN** upstream has new main-branch commits, a tag without a published release or a draft release
+- **THEN** the updater does not adopt those changes
+- **AND** prereleases are excluded by default
+
+#### Scenario: A compiler library publishes a new version
+- **WHEN** Library X publishes a new version that the adopted upstream wiki revision has not incorporated
+- **THEN** the local updater retains the version defined by that upstream revision
+- **AND** it does not create a separate dependency update for Library X
+
+#### Scenario: Upstream incorporates a library update
+- **WHEN** a new adopted upstream wiki revision includes an updated Library X and its build and all required checks pass
+- **THEN** the updater adopts that wiki revision with its upstream-defined dependency versions automatically
+- **AND** it verifies local activation without requesting renewed human approval
+
+#### Scenario: Update checks are incomplete or fail
+- **WHEN** a required build or test fails, is missing or is still pending
+- **THEN** the update is not adopted and any integration PR does not merge
+- **AND** the previous working installation is retained and the incomplete or failed verification remains visible
+
 ### Requirement: Scheduled wiki maintenance before global retrieval maintenance
 The existing local daily QMD automation MUST maintain one common production wiki over all selected source repositories, including `private`, `Projects/Private`, Meetings and Projects, before subsequent QMD retrieval maintenance. It MUST preserve the existing schedule, model, project and notification settings. The name `private` MUST describe a subject domain only and MUST NOT cause a separate wiki, a maintenance exclusion, a special query approval or a confidentiality classification. The automation MUST NOT substitute acceptance fixtures for the full production inventory. No additional scheduler or watcher SHALL be installed.
 
@@ -13,8 +38,23 @@ The existing local daily QMD automation MUST maintain one common production wiki
 - **THEN** these sources participate in the same maintained knowledge layer without renewed per-run approval
 - **AND** the compiler can synthesize their supported relationships without a general/private partition
 
+### Requirement: WikiQuery is the standard agent context entry
+Agents MUST start knowledge-context searches through the managed WikiQuery interface of the common wiki. QMD MUST remain the internal persisted retrieval engine and MUST NOT be presented as a competing standard context-search route. WikiQuery MUST return relevant supported knowledge with navigable original-source references and freshness information, respecting explicit task/source limits. Agents MAY follow those references to inspect authoritative original documents directly.
+
+Scheduled maintenance MUST NOT replace query-time checks of relevant original-source versions. WikiQuery MUST reject stale wiki evidence and expose maintenance needs or fall back to appropriate current original sources within the same interface. Ordinary context queries MUST NOT trigger compilation or durable answer creation without a save request. Unavailable WikiQuery MUST be reported rather than silently bypassed through an unvalidated QMD context search. Direct QMD remains available for index operations and diagnostics.
+
+#### Scenario: Agent starts a context investigation
+- **WHEN** an agent needs contextual knowledge for a task
+- **THEN** it calls WikiQuery and receives relevant knowledge with original-source references
+- **AND** it can inspect those original sources without selecting a second retrieval product or manually assembling QMD collections
+
+#### Scenario: Original source changes after scheduled maintenance
+- **WHEN** an original source has changed since the last successful scheduled run
+- **THEN** WikiQuery does not certify the dependent wiki statement as current
+- **AND** it reports the gap or uses suitable current original evidence through the same entry
+
 ### Requirement: Verified context adoption catalog
-The delivery MUST catalog actual relevant maintained skills, AGENTS/README/CONTEXT and other agent entry files, with priority, intended role and adoption status. It MUST distinguish canonical files from aliases, history and vendor content. Proposed routing MUST use the common wiki with freshness validation, relevance to the concrete task, current-source fallback and original-source authority. Explicit task/source limits MUST be respected. The label `private` alone MUST NOT exclude evidence or require a separate query mode.
+The delivery MUST catalog actual relevant maintained skills, AGENTS/README/CONTEXT and other agent entry files, with priority, intended role and adoption status. It MUST distinguish canonical files from aliases, history and vendor content. Proposed routing MUST use WikiQuery as the standard context entry with freshness validation, relevance to the concrete task, current-source fallback and original-source authority. Explicit task/source limits MUST be respected. The label `private` alone MUST NOT exclude evidence or require a separate query mode.
 
 #### Scenario: Operator plans context adoption
 - **WHEN** the operator reads the catalog

@@ -9,3 +9,7 @@ Das DanielsVault-Wiki bildet einen gemeinsamen Wissensbestand über alle ausgew�
 Diese Entscheidung präzisiert [ADR 0009](0009-contextual-llm-wiki-over-existing-source-repositories.md). Repo-Identitäten, Originalquellen, Provenienz, Quellenaktualität und ausdrücklich gesetzte Aufgabengrenzen bleiben erhalten. Ein gemeinsamer Wissensbestand erfordert weder das Laden sämtlicher Quellen bei jeder Anfrage noch die Veröffentlichung oder Weitergabe des Wikis.
 
 Die technischen Änderungen an Quellenfilterung, Ausgabe, QMD-Routing und Betrieb sind im [aktiven Change](../../openspec/changes/operate-contextual-llm-wiki/design.md) geplant. Die bisherige Abnahme der getrennten Bestände belegt diese Zielarchitektur noch nicht.
+
+## Agentenzugang
+
+Agenten verwenden WikiQuery als ersten Anlaufpunkt für Kontextrecherche und folgen dessen Belegen zu den Primärquellen. QMD bleibt intern die Suchmaschine; Agenten erhalten keine zwei konkurrierenden Standardwege für die Kontextsuche. Die regelmäßige Pflege wird durch Aktualitätsprüfung bei der Abfrage ergänzt, weil zwischen Pflege und Nutzung Quellenänderungen eintreten können. Damit bleiben gemeinsamer Einstieg, überprüfte Synthesen und Quellenautorität im selben Ablauf verbunden.

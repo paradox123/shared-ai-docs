@@ -36,3 +36,9 @@ Die gemeinsame Ausgabe zunächst isoliert verifizieren. Die Übernahme bestehend
 - 13.09.2026: Auf dem von Daniel bestätigten Branch `codex/shared-wiki-01` im isolierten Worktree umgesetzt. [Abnahme samt Inhalt, Originalbelegen, Aktualitätsprüfung und Review](../../../contextual-llm-wiki/evidence/shared-wiki-01.md). Gemeinsame Inventur umfasst alle acht Repos und 1.888 Fachquellen. Echte Provider-Pflege erzeugt eine gemeinsame Liquiditätsreserve-Seite aus persönlichem Portfolio und Projekteinnahmen; Query, Grenzen, Relevanzkontrolle und No-op verifiziert. Tickets 02–04 bleiben offen; keine Altbestände gelöscht und kein Live-Job umgestellt.
 
 - 13.09.2026: Daniel hat die Umsetzung ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Ticket 01 ist geschlossen; sein OpenSpec-Anteil ist separat als [share-contextual-wiki-sources](../../../openspec/changes/archive/2026-09-13-share-contextual-wiki-sources/proposal.md) archiviert. Der ursprüngliche Betriebs-Change bleibt für Tickets 02–04 aktiv.
+
+## Lokale Ergänzung zum Agentenzugang (noch offen)
+
+- [ ] WikiQuery ist die durchgängige Schnittstelle für Agenten-Kontextfragen: Sie liefert passende Erkenntnisse, nachvollziehbaren Prüfstatus und navigierbare Primärquellenverweise. QMD wird intern verwendet; der Agent muss weder einen parallelen Kontextzugang noch Collection-Auswahl beherrschen.
+
+- 13.09.2026: Zugang präzisiert: WikiQuery zuerst, Primärquellen über Verweise; QMD arbeitet intern. Die tägliche Pflege ersetzt nicht die Aktualitätsprüfung bei der Abfrage.

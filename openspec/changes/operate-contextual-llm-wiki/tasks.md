@@ -37,3 +37,16 @@ Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commi
 ## Akzeptierter Abschluss von Ticket 03
 
 Daniel hat Ticket 03 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Das erfüllte Requirement ist in [continue-contextual-wiki-maintenance](../archive/2026-09-13-continue-contextual-wiki-maintenance/proposal.md) separat archiviert und kanonisch übernommen. Live-Aktivierung und Vollimport bleiben in diesem Change offen.
+
+## 4.7 Ergänzung zum Agentenzugang
+- [ ] WikiQuery als Standard-Kontextzugang zentral verankern und im Agentenablauf nachweisen; vorhandene Quellenbegrenzung und Primärquellenprüfung beibehalten.
+
+
+## 5. Ergänzung: Upstream-Stand lokal übernehmen
+- [x] 5.1 Umfang korrigieren: LLM Wiki als Ganzes mit seinen upstream festgelegten Abhängigkeiten übernehmen; keine eigenständigen Library-Updates. Automatische Übernahme nach erfolgreichem Build und erforderlichen Tests bleibt bestätigt.
+- [ ] 5.2 Veröffentlichte Releases erkennen und samt Integrationsprüfung übernehmen; falls Renovate verwendet wird, ausschließlich die Upstream-Referenz aktualisieren und automatisch mergen. Unveränderte Upstream-Revision trotz neuer Library-Version sowie Blockade bei fehlenden oder fehlgeschlagenen Prüfungen verifizieren.
+- [ ] 5.3 Reproduzierbare lokale Installation der Upstream-Revision mit ihrer Lockdatei einschließlich Aktivierungsprüfung und Rückkehr zur bisherigen Installation umsetzen.
+
+Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Session zurückgestellt. Offene Punkte aus Abschnitt 4 bleiben erhalten und werden in dieser Session nicht weiter umgesetzt. Die Live-Pflegeautomation bleibt unverändert.
+
+- [x] 5.4 Kanal „veröffentlichte Releases“ bestätigen und drei freigegebene [Umsetzungstickets](../../../.scratch/update-llm-wiki-releases/spec.md) mit Abhängigkeiten 01 → 02 → 03 veröffentlichen.

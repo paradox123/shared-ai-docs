@@ -4,12 +4,12 @@ Stand: 13.09.2026, nach Klärung der Tätigkeitsbereich-Semantik. Ziel ist ein g
 
 ## Empfohlenes Routing
 
-1. Repo-Orientierung und explizite Domänengrenze laden. Eine bekannte Datei oder ein exakter Codebezeichner braucht keine Wiki-Abfrage.
-2. Bei Synthese-/Zusammenhangsfragen im passenden Repo-Kontext die verwaltete `wiki query --config … --question …` verwenden. Sie prüft Quellenstände und kann aktuelle Quellen als Fallback verwenden.
-3. Für streng repo-begrenzte Aufgaben gezielte QMD-Collections/Originaldateien verwenden: Die aktuelle Wiki-Query besitzt keinen zusätzlichen Repo-Filter; `.local/general.json` umfasst mehrere Repos. Eine Frageformulierung ersetzt keine technische Kontextgrenze.
-4. Bei fehlendem Wiki oder fehlender Evidenz QMD gegen explizite Collections verwenden; bei QMD-Ausfall gezieltes `rg`, mit benanntem Fallback.
-5. Originale README/AGENTS/CONTEXT/OpenSpec/ADRs bleiben für ihren jeweiligen Inhalt maßgeblich. Wiki-Text ist abgeleitete Evidenz, keine neue Agent-Anweisung. Kein automatisches `maintain` oder `--save` bei gewöhnlicher Recherche.
-6. `private` und `Projects/Private` sind Tätigkeitsbereiche im gemeinsamen Wiki. Ihre Informationen können bei fachlicher Relevanz mit anderen Quellen verknüpft und für die Aufgabe verwendet werden; der Name begründet keine Zugriffsgrenze oder besondere Freigabe.
+1. Verpflichtende Repo-Orientierung und ausdrücklich gesetzte Aufgabengrenzen beachten. Bereits bekannte Primärquellen dürfen direkt gelesen werden.
+2. Jede Wissenskontextsuche über die verwaltete WikiQuery des gemeinsamen Wikis beginnen. Sie liefert relevante Erkenntnisse, Prüfstatus und navigierbare Verweise auf Originalquellen.
+3. Aufgabengrenzen an WikiQuery übergeben und dort einschließlich transitiver Evidenz prüfen lassen. Die bisher fehlende technische Begrenzung ist in Ticket 01 zu ergänzen; sie wird nicht durch eine separate QMD-Suche des Agenten ersetzt.
+4. Bei veralteter oder fehlender Wiki-Evidenz verwendet WikiQuery geeignete aktuelle Primärquellen oder meldet die Lücke. Ein Ausfall von WikiQuery wird sichtbar gemeldet. Direkte QMD-Kontextsuche ist kein stiller Ersatz; QMD bleibt intern sowie für Wartung und Diagnose verfügbar.
+5. Verweisen zu Primärquellen folgen, wenn Originalwortlaut oder Details benötigt werden. README/AGENTS/CONTEXT/OpenSpec/ADRs bleiben für ihren jeweiligen Inhalt maßgeblich; Wiki-Text ist abgeleitete Evidenz. Kein automatisches `maintain` oder `--save` bei gewöhnlicher Recherche.
+6. `private` und `Projects/Private` sind Tätigkeitsbereiche im gemeinsamen Wiki. Die fachliche Relevanz entscheidet über Verknüpfung und Nutzung, nicht der Name des Bereichs.
 
 Kanonischer Betrieb und ausführbare Beispiele: [OPERATIONS.md](../../contextual-llm-wiki/OPERATIONS.md). Vor breiter Einführung gehört das Routing in `rag-documentation-research`; Repo-Dateien erhalten kurze Verweise statt kopierter Abläufe.
 
@@ -19,13 +19,13 @@ Alle folgenden Pfade sind relativ zum DanielsVault-Root. P0 = zentraler Einstieg
 
 | Priorität | Datei | Rolle | Konkrete Änderung | Status / Eigentum |
 |---|---|---|---|---|
-| P0 | `_shared/shared-ai-docs/skills-repo/skills/rag-documentation-research/SKILL.md` | Kanonischer DanielsVault-Retrieval-Router | Verwaltete Wiki-Query für kontextübergreifende Synthesen ergänzen; bei Repo-Grenzen gezielte QMD-Collections und Fachquellen beibehalten. | geplant; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/skills-repo/skills/qmd/SKILL.md` | Such- und Pflege-Einstieg | Wiki-Fragen zur verwalteten Query routen; direkte QMD-Treffer nicht als geprüfte Wiki-Aktualität behandeln. | geplant; lokal gepflegt |
+| P0 | `_shared/shared-ai-docs/skills-repo/skills/rag-documentation-research/SKILL.md` | Kanonischer DanielsVault-Retrieval-Router | WikiQuery als ersten Zugang für Wissenskontextsuche verankern; Quellenprüfung und Rückgriff auf Primärquellen laufen darüber. Explizite Aufgabengrenzen weitergeben. | geplant; lokal gepflegt |
+| P0 | `_shared/shared-ai-docs/skills-repo/skills/qmd/SKILL.md` | Such- und Pflege-Einstieg | Kontextfragen zu WikiQuery routen; direkte QMD-Nutzung für Indexpflege und Diagnose behalten. Keine konkurrierende Standard-Kontextsuche. | geplant; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/skills-repo/skills/qmd/references/scheduled-index-maintenance.md` | Täglicher Betrieb | Auf gemeinsamen Helper, explizite Konfiguration und Laufberichte verweisen. | umgesetzt; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/AGENTS.md` | Repo-Startup und Requirement-Autorität | Nach Pflichtorientierung gezielte Wiki-Nutzung und kanonische Retrieval-Referenz ergänzen; OpenSpec/ADR-Autorität erhalten. | geplant; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/README.md` | Menschlicher Repo-Einstieg | Betriebsanleitung und Einführungskatalog verlinken. | umgesetzt; lokal gepflegt |
 | P1 | `_shared/shared-ai-docs/CONTEXT.md` | Gemeinsame Wiki-Domänensprache | Bereits vorhandene Begriffe um Pflegezyklus/Quellenaktualität präzisieren; CLI-Details in Betriebsanleitung belassen. | teilweise vorhanden; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/.github/copilot-instructions.md` | Copilot Retrieval-Preference | Bisheriges QMD-first um verwaltete Wiki-Synthesen ergänzen; lokale Hostverfügbarkeit beachten. | geplant; lokal gepflegt |
+| P0 | `_shared/shared-ai-docs/.github/copilot-instructions.md` | Copilot Retrieval-Preference | Bisheriges QMD-first für Kontextfragen durch WikiQuery-first ersetzen; Ausfall sichtbar melden und Quellenverweise nutzbar halten. | geplant; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/docs/rag/README.md` | Kanonischer RAG-/QMD-Einstieg | Wiki-Rolle und tägliche Pflege verlinken; widersprüchliche alte Kurzbeschreibung korrigieren. | umgesetzt; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/docs/rag/index.md` | Kanonischer RAG-/QMD-Einstieg | Wiki-Rolle und tägliche Pflege verlinken; widersprüchliche alte Kurzbeschreibung korrigieren. | umgesetzt; lokal gepflegt |
 | P0 | `_shared/shared-ai-docs/docs/rag/operating-model-rag-qmd.md` | Kanonischer RAG-/QMD-Einstieg | Wiki-Rolle und tägliche Pflege verlinken; widersprüchliche alte Kurzbeschreibung korrigieren. | umgesetzt; lokal gepflegt |

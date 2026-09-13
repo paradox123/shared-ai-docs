@@ -14,6 +14,8 @@ Die aktive Automation `update-qmd-index-daily` läuft lokal täglich um 07:00 Uh
 
 ## Abnahmekriterien
 
+- [ ] Die zentralen Recherche-Anweisungen routen Kontextfragen zuerst zu WikiQuery; QMD erscheint als interne Suchmaschine und Wartungswerkzeug. Ein tatsächlicher Agentenablauf beginnt mit WikiQuery und folgt dessen Primärquellenverweisen, ohne parallele QMD-Kontextsuche. Fehlende oder veraltete Evidenz wird im selben Ablauf sichtbar behandelt.
+
 - [ ] Die bisherige Definition und die abzulösenden Wissensbestände sind gesichert; der überprüfte Übernahmebericht aus Ticket 02 liegt vor. Gespeicherte Synthesen werden beim Erstimport nicht überschrieben oder verloren.
 - [ ] Die bestehende Automation wird auf die gemeinsame Produktionskonfiguration umgestellt. Zeitplan, Modell, Projekt und Benachrichtigungseinstellungen bleiben erhalten; es entsteht kein zweiter Job oder Watcher.
 - [ ] Der tatsächliche Produktionseingang umfasst alle acht ausgewählten Repo-Identitäten sowie Meetings und Projects einschließlich Projects/Private. Die Inventur weist vorhandene Quellen und Ausschlüsse aus; Abnahmefixtures ersetzen keinen Teil des Produktionsbestands.
@@ -35,3 +37,5 @@ Dieser Auftrag umfasst die bestätigte lokale Betriebsumstellung. Fachquellen bl
 ## Comments
 
 - 13.09.2026: Aufteilung und Abhängigkeiten von Daniel bestätigt. Dieses Ticket aktiviert den korrigierten gemeinsamen Betrieb und liefert dessen neue Abnahme.
+
+- 13.09.2026: Zugang präzisiert: WikiQuery-first zentral verankern und über einen tatsächlichen Agentenablauf nachweisen. Keine weitere Ticketabhängigkeit erforderlich.

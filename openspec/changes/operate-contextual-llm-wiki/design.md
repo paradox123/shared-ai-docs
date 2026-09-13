@@ -16,9 +16,25 @@ Keine weitere Retrieval-Engine, kein zusätzlicher Scheduler/Watcher, keine Fach
 
 Alle ausgewählten Fachquellen fließen in dieselbe Wissensschicht. Tätigkeitsbereiche sind fachliche Zuordnungen und keine separaten Wiki-Produkte. Die konkrete Frage und ihr Aufgabenbezug bestimmen passende Evidenz und sinnvolle Synthesen; gleiche Begriffe allein begründen noch keinen fachlichen Zusammenhang. Private Quellen dürfen dabei ohne besondere Freigabe verwendet werden. Explizite Nutzerbegrenzungen auf bestimmte Quellen oder Repos gelten weiterhin.
 
+### WikiQuery als erster Kontextzugang
+
+Agenten beginnen Kontextrecherchen mit der vorhandenen verwalteten WikiQuery-Schnittstelle. Diese liefert passende Wiki-Erkenntnisse mit überprüfbarer Quellenherkunft und navigierbaren Verweisen auf Primärquellen, denen der Agent bei Bedarf direkt folgt. Der Agent entscheidet nicht zwischen QMD und WikiQuery und muss keine Collection-Auswahl zusammensetzen. QMD bleibt intern die einzige persistierte Suchmaschine sowie das Werkzeug für Indexbetrieb und Diagnose.
+
+Die WikiQuery prüft die für ihre Evidenz relevanten Originalstände weiterhin bei der Abfrage. Ein täglicher Pflegejob garantiert keine Aktualität zwischen zwei Läufen oder nach einem Teilfehler. Veraltete Synthesen werden ausgeschlossen; geeignete aktuelle Primärquellen oder ein sichtbarer Pflegebedarf werden über denselben Zugang geliefert. Ist WikiQuery nicht verfügbar, wird der Ausfall gemeldet und nicht still auf ungeprüfte direkte QMD-Kontextsuche gewechselt. Direkte Lektüre bereits benannter oder verlinkter Primärquellen bleibt möglich.
+
+Die zentrale Einführung richtet bestehende Recherche-Skills auf WikiQuery aus. Ein zusätzlicher Kontextadapter vor QMD ist für dieses Ziel nicht vorgesehen. Die genaue Ausgabeform für Agenten wird an der bestehenden Schnittstelle gestaltet; Primärquellenverweise und Prüfstatus gehören zum Vertrag. Die ursprüngliche WikiQuery kann bereits Antworten erzeugen; eine zusätzliche konkurrierende Antwort- oder Suchschnittstelle wird nicht eingeführt.
+
 ### Automatische Pflege
 
 Der bestehende lokale Job bleibt täglich um 07:00 mit den vorhandenen Modell-, Projekt- und Benachrichtigungseinstellungen aktiv. Er pflegt den vollständigen gemeinsamen Bestand und danach QMD. Merge und Query sind keine zusätzlichen Auslöser. Ein unveränderter erfolgreicher Lauf vermeidet neue Modellkompilierung.
+
+### Upstream-Stand automatisch übernehmen
+
+Aktualisierungseinheit ist das Upstream-Repository `atomicstrata/llm-wiki-compiler` als Ganzes. Der Mac übernimmt dessen Stand mit den dort festgelegten Abhängigkeiten aus Manifest und Lockdatei. Ein neues Release einer enthaltenen Library löst kein eigenständiges lokales Update aus; erst ihre Übernahme upstream macht sie zum Bestandteil eines Wiki-Updates. Unabhängige Library-, Node-, QMD- und Wrapper-Updates gehören nicht zu diesem Auftrag. Ein notwendiger Build reproduziert den Upstream-Stand unter Beibehaltung des vorhandenen Integrationspatches.
+
+Erfolgreicher Build und alle erforderlichen Integrationstests führen zur automatischen Übernahme ohne erneute menschliche Vorlage. Fehlende, ausstehende oder fehlgeschlagene Pflichtprüfungen blockieren sie. Falls Renovate eingesetzt wird, aktualisiert es ausschließlich unsere Upstream-Referenz und mergt diesen Integrations-PR nach erfolgreichen Prüfungen automatisch. Es ändert weder interne Compiler-Abhängigkeiten noch das Upstream-Repository. Lokale Aktivierung ist separat zu verifizieren. Daniel hat veröffentlichte Releases als Kanal bestätigt. Reguläre Releases werden auf einen exakten Commit aufgelöst; Hauptbranch-Commits, bloße Tags und Entwürfe lösen keine Übernahme aus. Vorabversionen werden standardmäßig ausgeschlossen.
+
+Die [korrigierte Betriebsnotiz](../../../docs/rag/2026-09-13-llm-wiki-dependency-updates.md) ersetzt den vorherigen breiten Dependency-Vorschlag. Wissenspflege einschließlich eines möglichen Schedulerwechsels ist auf ausdrücklichen Nutzerwunsch in eine andere Session verschoben. Die bisherigen Anforderungen bleiben dokumentiert; ihre Umsetzung und die Live-Automation werden hier nicht weiter verändert.
 
 ### Fehlerisolation und sichtbare Teilergebnisse
 
@@ -58,7 +74,7 @@ Der Vollimport kann lange dauern und wurde noch nicht ausgeführt. Die gemeinsam
 
 ## Interview-Abschluss
 
-Feststehend sind gemeinsame Wissensbildung ohne Privat-Sondergrenze, fachliche Relevanz als Auswahlkriterium, tägliche Pflege und Fortsetzung unabhängiger Arbeit bei Teilfehlern. Es bleibt keine offene Produktentscheidung für diesen Plan. Technische Parameter werden während der Umsetzung entschieden. Ticket 01 ist akzeptiert und im separaten Change `share-contextual-wiki-sources` archiviert. Dieser aktive Betriebs-Change führt die offenen Tickets 02–04 fort; Live-Job und Bestände sind noch nicht entsprechend umgestellt.
+Feststehend sind gemeinsame Wissensbildung ohne Privat-Sondergrenze, WikiQuery als erster Agenten-Kontextzugang mit QMD im Hintergrund, fachliche Relevanz als Auswahlkriterium, tägliche Pflege und Fortsetzung unabhängiger Arbeit bei Teilfehlern. Es bleibt keine offene Produktentscheidung für diesen Plan. Technische Parameter werden während der Umsetzung entschieden. Ticket 01 ist akzeptiert und im separaten Change `share-contextual-wiki-sources` archiviert. Dieser aktive Betriebs-Change führt die offenen Tickets 02–04 fort; Live-Job und Bestände sind noch nicht entsprechend umgestellt.
 
 ## Ticket 02: bestätigter Implementierungsrahmen
 
