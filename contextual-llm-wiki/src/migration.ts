@@ -58,7 +58,8 @@ export async function migrate(
         await maintain(config);
         state = await readState(config);
       } else {
-        state.publicationVersion = 1;
+        // Fresh imports have verified dependencies and no legacy compiler context.
+        state.publicationVersion = 2;
         state.pending = [];
         await writeJson(
           path.join(config.output, ".state/compiler/.llmwiki/config.json"),

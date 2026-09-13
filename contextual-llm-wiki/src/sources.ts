@@ -147,5 +147,12 @@ export async function inventory(config: any, includeText = false) {
   return includeText ? { ...report, sources } : report;
 }
 export async function scan(config: any): Promise<Record<string, Source>> {
-  return ((await inventory(config, true)) as any).sources;
+  const result = await inventory(config, true);
+  const missing = result.repositories.filter((repo: any) => repo.missing);
+  if (missing.length)
+    throw Error(
+      "Incomplete scan: configured roots unavailable: " +
+        missing.map((repo: any) => repo.id).join(", "),
+    );
+  return (result as any).sources;
 }

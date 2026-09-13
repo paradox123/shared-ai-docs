@@ -17,7 +17,45 @@ import { qmd } from "./qmd.ts";
 import { lint } from "./inspection.ts";
 import { checkConfig } from "./config.ts";
 import { preflight } from "./runtime.ts";
+import { failureScope } from "./failure-scope.ts";
 export async function maintain(config: any) {
+  const artifacts = path.join(config.output, ".state/runs", randomUUID());
+  await mkdir(artifacts, { recursive: true, mode: 0o700 });
+  let report: any;
+  const progress: any = {
+    completed: [],
+    unchanged: [],
+    failures: [],
+    pages: [],
+  };
+  try {
+    report = await maintainRun(config, artifacts, progress);
+  } catch (error) {
+    const message = String((error as Error).message);
+    const pending = await readState(config)
+      .then((s) => s.pending)
+      .catch(() => []);
+    report = {
+      ...progress,
+      ok: false,
+      qmdSafe: false,
+      error: message,
+      failures: [...progress.failures, { phase: "shared", error: message }],
+      pending: pending.length
+        ? pending
+        : [{ phase: "blocked", error: message }],
+    };
+  }
+  report = {
+    ...report,
+    artifacts,
+    report: path.join(artifacts, "report.json"),
+  };
+  await writeJson(report.report, report);
+  return report;
+}
+
+async function maintainRun(config: any, artifacts: string, progress: any) {
   const runtime = preflight(),
     sources = await scan(config),
     state = await readState(config);
@@ -28,20 +66,27 @@ export async function maintain(config: any) {
     delta.changed.length +
     delta.removed.length +
     review.length;
-  if (!work && !state.pending.length && state.publicationVersion === 1)
+  if (!work && !state.pending.length && state.publicationVersion === 2)
     return {
       ok: true,
       ...runtime,
       noop: true,
       pages: Object.keys(state.pages),
       review: [],
+      qmdSafe: true,
+      completed: [],
+      unchanged: Object.keys(state.pages),
+      failures: [],
+      pending: [],
     };
   await qmd(config, "register");
-  const stage = path.join(config.output, ".state/staging", randomUUID()),
+  const stage = path.join(artifacts, "staging"),
     root = path.join(stage, "compiler");
   const baseline = path.join(config.output, ".state/compiler");
   await mkdir(stage, { recursive: true });
   const changedIds = new Set(review.map((p) => p.id));
+  if (state.publicationVersion !== 2)
+    for (const id of Object.keys(state.pages)) changedIds.add(id);
   try {
     state.pending = [
       {
@@ -69,27 +114,75 @@ export async function maintain(config: any) {
     });
     for (const source of Object.values(sources))
       await atomic(path.join(root, "sources", source.id), source.text);
-    // Removed evidence must never enter the compiler again via an old page/index.
-    if (delta.removed.length) {
-      for (const id of changedIds)
-        await rm(path.join(root, "wiki", id + ".md"), { force: true });
-      await rm(path.join(root, "wiki/index.md"), { force: true });
+    // Existing pages/index are unrecorded model context upstream. Generate from
+    // current primary evidence only; restore unchanged compiler pages afterwards.
+    const priorOwned = await json(path.join(root, ".llmwiki/state.json"), {
+      sources: {},
+    });
+    if (state.publicationVersion !== 2) {
+      const rebuild = structuredClone(priorOwned);
+      for (const source of Object.values<any>(rebuild.sources))
+        source.hash = "";
+      await writeJson(path.join(root, ".llmwiki/state.json"), rebuild);
     }
+    await rm(path.join(root, "wiki"), { recursive: true, force: true });
+    const failures: any[] = progress.failures;
     const wiki = createWiki({ root });
     const result = await wiki.compile({
       embeddings: false,
       concurrency: config.concurrency || 2,
+      onBoundedFailure: (failure) => failures.push(failure),
     });
-    if (result.errors.length) throw Error(result.errors.join("; "));
+    await writeJson(path.join(artifacts, "compiler-result.json"), {
+      result,
+      failures,
+    });
+    if (
+      !Array.isArray(result.errors) ||
+      !Array.isArray(result.pages) ||
+      !Array.isArray(result.concepts) ||
+      !Number.isInteger(result.compiled) ||
+      !Number.isInteger(result.skipped) ||
+      !Number.isInteger(result.deleted)
+    )
+      throw Error("Incomplete compiler result contract");
+    const unclassified = result.errors.filter(
+      (error) =>
+        !failures.some(
+          (failure) =>
+            error === failure.error ||
+            (failure.phase === "extract" &&
+              error === "No concepts extracted from " + failure.id),
+        ),
+    );
+    if (unclassified.length)
+      throw Error("Unclassified compiler failure: " + unclassified.join("; "));
+    if (
+      failures.some(
+        (f) =>
+          f.phase === "extract" && !priorOwned.sources[f.id]?.concepts?.length,
+      )
+    )
+      throw Error(
+        "Unknown dependencies after source extraction failure: " +
+          failures.map((f) => f.id).join(", "),
+      );
     const owned = await json(path.join(root, ".llmwiki/state.json"), {
-        sources: {},
-      }),
-      pages: any = {},
+      sources: {},
+    });
+    const { failedSources, blocked } = failureScope(
+      priorOwned,
+      owned,
+      state.pages,
+      failures,
+    );
+    const pages: any = {},
       bodies: any = {};
     for (const [sourceId, sourceState] of Object.entries<any>(owned.sources)) {
       if (!sources[sourceId]) continue;
       for (const slug of sourceState.concepts) {
         const id = "concepts/" + slug;
+        if (failedSources.has(sourceId)) blocked.add(id);
         pages[id] ||= {
           id,
           kind: "concept",
@@ -99,7 +192,15 @@ export async function maintain(config: any) {
         pages[id].sourceVersions[sourceId] = sources[sourceId].hash;
       }
     }
+    for (const id of blocked) delete pages[id];
+    await mkdir(path.join(root, "wiki/concepts"), { recursive: true });
     for (const page of Object.values<any>(pages)) {
+      if (!result.pages.includes(page.id.slice(9))) {
+        await cp(
+          path.join(baseline, "wiki", page.id + ".md"),
+          path.join(root, "wiki", page.id + ".md"),
+        );
+      }
       const body = await readFile(
         path.join(root, "wiki", page.id + ".md"),
         "utf8",
@@ -125,9 +226,18 @@ export async function maintain(config: any) {
       let progressed = false;
       for (const old of [...remaining]) {
         const deps = Object.keys(old.pageVersions);
+        if (
+          !Object.keys(old.sourceVersions).length ||
+          deps.some((id) => !state.pages[id])
+        )
+          throw Error("Unknown saved-answer dependencies: " + old.id);
         if (deps.some((id) => remaining.some((p) => p.id === id))) continue;
         remaining.splice(remaining.indexOf(old), 1);
         progressed = true;
+        if (blocked.has(old.id) || deps.some((id) => blocked.has(id))) {
+          blocked.add(old.id);
+          continue;
+        }
         if (
           Object.keys(old.sourceVersions).some((id) => !sources[id]) ||
           deps.some((id) => !pages[id])
@@ -158,8 +268,20 @@ export async function maintain(config: any) {
               sourceVersions: { [id]: sources[id].hash },
             });
         const question = old.question || old.title || old.migration.originalId;
-        const text = await answer(question, evidence),
-          sourceVersions: any = {},
+        let text: string;
+        try {
+          text = await answer(question, evidence);
+        } catch (error) {
+          failures.push({
+            phase: "answer",
+            id: old.id,
+            sources: [],
+            error: String(error),
+          });
+          blocked.add(old.id);
+          continue;
+        }
+        const sourceVersions: any = {},
           pageVersions: any = {};
         for (const e of evidence) {
           Object.assign(sourceVersions, e.sourceVersions);
@@ -208,20 +330,60 @@ export async function maintain(config: any) {
         await rm(path.join(config.output, "wiki", id + ".md"), { force: true });
     for (const page of Object.values<any>(pages))
       await publishPage(config, page, bodies[page.id]);
+    for (const id of blocked) {
+      await rm(path.join(config.output, "wiki", id + ".md"), { force: true });
+      if (state.pages[id]) pages[id] = { ...state.pages[id], withdrawn: true };
+    }
+    for (const id of failedSources) {
+      owned.sources[id] = {
+        ...(owned.sources[id] || priorOwned.sources[id]),
+        hash: "",
+        concepts: [
+          ...new Set([
+            ...(priorOwned.sources[id]?.concepts || []),
+            ...(owned.sources[id]?.concepts || []),
+          ]),
+        ],
+      };
+    }
+    await writeJson(path.join(root, ".llmwiki/state.json"), owned);
+    const pending: any[] = failures.length
+      ? [
+          {
+            phase: "compile",
+            sources: [...failedSources],
+            pages: [...blocked],
+            failures,
+          },
+        ]
+      : [];
     const next = {
       migrations: state.migrations,
-      publicationVersion: 1,
+      publicationVersion: 2,
       context: config.context,
       scope: config.scope,
       sources: Object.fromEntries(
-        Object.entries(sources).map(([id, { text, ...s }]) => [id, s]),
+        Object.entries(sources).flatMap(([id, { text, ...s }]) =>
+          failedSources.has(id)
+            ? state.sources[id]
+              ? [[id, state.sources[id]]]
+              : []
+            : [[id, s]],
+        ),
       ),
       pages,
       lastCompleted: state.lastCompleted,
-      pending: [{ phase: "qmd" }],
+      pending: [...pending, { phase: "qmd" }],
     };
     await saveState(config, next);
     await entry(config, next);
+    progress.completed = Object.keys(pages).filter(
+      (id) => !pages[id].withdrawn && pages[id].hash !== state.pages[id]?.hash,
+    );
+    progress.unchanged = Object.keys(pages).filter(
+      (id) => !pages[id].withdrawn && pages[id].hash === state.pages[id]?.hash,
+    );
+    progress.pages = Object.keys(pages).filter((id) => !pages[id].withdrawn);
     await rm(baseline, { recursive: true, force: true });
     await rename(root, baseline);
     const audit = await lint(config);
@@ -234,8 +396,8 @@ export async function maintain(config: any) {
           ]),
       );
     const index = await qmd(config, "update");
-    next.lastCompleted = new Date().toISOString();
-    next.pending = [];
+    if (!pending.length) next.lastCompleted = new Date().toISOString();
+    next.pending = pending;
     (next as any).lint = {
       activeIssues: audit.activeIssues,
       compilerLinkSuggestions: audit.compilerLinkSuggestions,
@@ -243,14 +405,22 @@ export async function maintain(config: any) {
     await saveState(config, next);
     await entry(config, next);
     return {
-      ok: true,
+      ok: !pending.length,
+      qmdSafe: true,
+      error: pending.length
+        ? failures.map((f) => f.error).join("; ")
+        : undefined,
+      failures,
+      pending,
+      completed: progress.completed,
+      unchanged: progress.unchanged,
       ...runtime,
       result,
       index,
-      lint: { ...audit, ok: true, pending: [] },
+      lint: { ...audit, ok: !pending.length, pending },
       changes: delta,
       review,
-      pages: Object.keys(pages),
+      pages: Object.keys(pages).filter((id) => !pages[id].withdrawn),
     };
   } catch (error) {
     const actual = await readState(config);

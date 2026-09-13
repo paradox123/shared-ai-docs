@@ -4,6 +4,12 @@
 
 Die bestehende Codex-Automation `update-qmd-index-daily` übernimmt täglich um 07:00 Uhr (lokale Europe/Berlin-Zeit) die allgemeine Wiki-Pflege und anschließend QMD. Sie läuft lokal im gespeicherten Projekt `codex-global` mit den bisherigen Modell- und Zeitplaneinstellungen. Ein Merge löst keinen eigenen Lauf aus. Der Mac und die lokale Codex-Ausführung müssen verfügbar sein; der Termin garantiert keine Echtzeitaktualität.
 
+## Implementierter gemeinsamer Helper (Ticket 03)
+
+Der neue Helper wurde isoliert mit der gemeinsamen Wiki-CLI geprüft und ist noch nicht im Live-Job aktiviert. Er akzeptiert einen Teilfehler nur bei ausdrücklich bestätigter QMD-Eignung, vorhandenem übereinstimmendem Laufbericht und passenden Status-/Lint-Audits: Betroffene Seiten müssen zurückgezogen sein, verbleibende Änderungen müssen zum gemeldeten Fehlerzweig gehören. Danach darf QMD weiterlaufen; der Gesamt-Exit bleibt ungleich null. Fehlerhafte oder fehlende Verträge stoppen abhängige Schritte. [Abnahme und reproduzierbare Prüfungen](evidence/bounded-failures-03.md).
+
+Die folgenden Abschnitte dokumentieren weiterhin den vor Ticket 04 aktivierten Live-Ablauf und seine bisherigen Konfigurationen.
+
 ## Ablauf und Zuständigkeit
 
 `python3 scripts/maintain-index.py` führt aus:

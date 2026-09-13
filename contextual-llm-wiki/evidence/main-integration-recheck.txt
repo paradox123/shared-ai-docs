@@ -1,0 +1,12 @@
+✔ an answer provider failure retains the answer for repair while independent compilation completes (7432.874375ms)
+✔ colliding concepts remain distinct and source correction refreshes an imported answer chain without changing an independent answer (10995.252583ms)
+✔ migration into a fresh common output preserves knowledge without triggering the full first compilation (5367.833416ms)
+✔ concurrent writers are serialized and a mid-generation source change stays pending (4397.573625ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16479.090708

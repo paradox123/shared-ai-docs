@@ -43,3 +43,12 @@ Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commi
 ## Ticket 02: geprüfte Übernahme bestehender Wissensbestände
 
 [Abnahmeübersicht](../../../contextual-llm-wiki/evidence/shared-wiki-02.md): Inventur der tatsächlichen Ausgaben und älteren Backups; 211 Dateien ohne Prüfsummenabweichung gesichert, 30 gültige Seiten übernommen, 36 identische historische Revisionen zugeordnet und 18 veraltete Revisionen zurückgestellt. Die aktuelle gespeicherte Antwort bleibt bytegleich und wird durch die echte verwaltete Query verwendet. Persönliche Seiten sind in derselben QMD-Collection auffindbar. Kollidierende Namen, transitive Antwortketten, gezielte Nachpflege und Wiederaufnahme sind durch CLI-Verhaltenstests nachgewiesen. Alte Bestände bleiben unverändert verfügbar. Kein Vollimport und keine produktive Aktivierung; der Gesamtchange bleibt offen.
+
+## Ergänzung Ticket 03
+
+[Abnahme begrenzter Pflegefehler](../../../contextual-llm-wiki/evidence/bounded-failures-03.md): unabhängige Inhalte werden trotz tatsächlicher Provider-/Validierungsfehler aktualisiert; betroffene Konzepte und Antworten bleiben gesperrt. Die dortigen Nachweise ergänzen die historische Betriebsabnahme oben und belegen keine produktive Umstellung oder vollständige Embedding-Pflege.
+
+
+## Akzeptierter Abschluss von Ticket 03
+
+Daniel hat Ticket 03 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Das erfüllte Requirement ist in [continue-contextual-wiki-maintenance](../archive/2026-09-13-continue-contextual-wiki-maintenance/proposal.md) separat archiviert und kanonisch übernommen. Migration ist durch Ticket 02 verifiziert; Live-Aktivierung und Vollimport bleiben in diesem Change offen.

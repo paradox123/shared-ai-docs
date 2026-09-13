@@ -13,13 +13,14 @@ async function until(check: () => boolean) {
 
 test("concurrent writers are serialized and a mid-generation source change stays pending", async () => {
   const f = await fixture();
+  let releaseProvider = () => {};
   try {
     assert.equal((await f.run("maintain")).ok, true);
     await writeFile(
       path.join(f.dir, "alpha/README.md"),
       "# Freigabe\n\nAlpha verlangt vier Freigaben.\n",
     );
-    f.delay(500);
+    releaseProvider = f.hold();
     const count = f.calls.length;
     const first = f.run("maintain");
     await until(() => f.calls.length > count);
@@ -30,10 +31,10 @@ test("concurrent writers are serialized and a mid-generation source change stays
       path.join(f.dir, "alpha/README.md"),
       "# Freigabe\n\nAlpha verlangt drei Freigaben.\n",
     );
+    releaseProvider();
     const stale = await first;
     assert.equal(stale.ok, false);
     assert.match(stale.error, /changed during/);
-    f.delay(0);
     const resumed = await f.run("maintain");
     assert.equal(resumed.ok, true, JSON.stringify(resumed));
     assert.match(
@@ -44,6 +45,7 @@ test("concurrent writers are serialized and a mid-generation source change stays
       /Alpha verlangt drei/,
     );
   } finally {
+    releaseProvider();
     await f.close();
   }
 });

@@ -13,25 +13,6 @@ The existing local daily QMD automation MUST maintain one common production wiki
 - **THEN** these sources participate in the same maintained knowledge layer without renewed per-run approval
 - **AND** the compiler can synthesize their supported relationships without a general/private partition
 
-### Requirement: Observable serialized maintenance with bounded failures
-The maintenance helper MUST serialize runs, persist command stdout, stderr and exit status in a unique local artifact directory, and emit a compact machine-readable final report. It MUST validate result contracts rather than trusting exit codes alone. A bounded failure MUST block affected outputs and dependent work while permitting independent maintenance and safely executable QMD maintenance to continue. A partial run MUST report non-success, the failed work and what remains pending. Missing evidence, invalid responses and incomplete scans MUST NOT be treated as valid current knowledge or confirmed source removal. Shared failures MUST block every dependent operation. Repeated successful runs MUST preserve no-op behavior.
-
-#### Scenario: Bounded source or compilation failure
-- **WHEN** one source or dependent synthesis cannot be processed but other work is independent
-- **THEN** affected knowledge is not exposed as verified current evidence
-- **AND** independent maintenance can complete with a partial-failure report
-- **AND** QMD work proceeds only over states whose eligibility can be established
-
-#### Scenario: Shared failure or unknown dependencies
-- **WHEN** a shared runtime or index fails, or the affected work cannot be safely separated
-- **THEN** the operations depending on that failed prerequisite stop visibly
-- **AND** neither empty output nor an incomplete scan is interpreted as success or mass removal
-
-#### Scenario: Unchanged or concurrent run
-- **WHEN** an unchanged wiki is maintained again
-- **THEN** the no-op outcome is reported and QMD maintenance still completes
-- **AND** a concurrent invocation fails visibly without overlapping mutations
-
 ### Requirement: Verified context adoption catalog
 The delivery MUST catalog actual relevant maintained skills, AGENTS/README/CONTEXT and other agent entry files, with priority, intended role and adoption status. It MUST distinguish canonical files from aliases, history and vendor content. Proposed routing MUST use the common wiki with freshness validation, relevance to the concrete task, current-source fallback and original-source authority. Explicit task/source limits MUST be respected. The label `private` alone MUST NOT exclude evidence or require a separate query mode.
 
