@@ -231,7 +231,7 @@ public sealed record ImplementationRunProjection(
     [property: JsonPropertyName("lastPosition")] long LastPosition,
     [property: JsonPropertyName("control")] RunControlState Control,
     [property: JsonPropertyName("authorization")] ControlDecision? Authorization = null,
-    RepositoryExecution? RepositoryExecution = null);
+    RepositoryExecution? RepositoryExecution = null, Publication? Publication = null);
 
 /// <summary>A canonical-history page strictly after an acknowledged event position.</summary>
 public sealed record RunEventsPage(

@@ -31,7 +31,7 @@ public sealed partial class PostgresImplementationRunStore
         }
         await using var mode = new NpgsqlCommand("""
             SELECT pg_advisory_xact_lock_shared(hashtextextended(@key, 0));
-            SELECT EXISTS(SELECT 1 FROM wpcp_repository_owners WHERE repository_id=@repo);
+            SELECT EXISTS(SELECT 1 FROM wpcp_repository_owners WHERE repository_id=@repo UNION ALL SELECT 1 FROM wpcp_publications p JOIN wpcp_implementation_runs r USING(run_id) WHERE r.repository_id=@repo);
             """, connection, transaction);
         mode.Parameters.AddWithValue("key", "repository-mode:" + run.Correlation.RepositoryId);
         mode.Parameters.AddWithValue("repo", run.Correlation.RepositoryId);

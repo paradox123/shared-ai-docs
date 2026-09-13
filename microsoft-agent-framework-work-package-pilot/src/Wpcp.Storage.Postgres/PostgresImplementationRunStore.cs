@@ -42,7 +42,7 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
         {
             await schemaLock.ExecuteNonQueryAsync(cancellationToken);
         }
-        await using var command = new NpgsqlCommand(Schema + AgentSchema + ContinuationSchema + RepositorySchema + ActiveAgentSchema + ArtifactSchema + DossierSchema,
+        await using var command = new NpgsqlCommand(Schema + AgentSchema + ContinuationSchema + RepositorySchema + ActiveAgentSchema + ArtifactSchema + DossierSchema + PublicationSchema,
             connection, transaction);
         await command.ExecuteNonQueryAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
@@ -193,7 +193,8 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
             MergeRedaction(run.Redaction, lifecycleRedaction),
             run.LastPosition,
             await ReadControlStateAsync(connection, transaction, run, cancellationToken),
-            RepositoryExecution: await ReadRepositoryExecutionAsync(connection, transaction, runId, cancellationToken));
+            RepositoryExecution: await ReadRepositoryExecutionAsync(connection, transaction, runId, cancellationToken),
+            Publication: await ReadPublicationAsync(connection, transaction, runId, cancellationToken));
         return projection;
     }
 

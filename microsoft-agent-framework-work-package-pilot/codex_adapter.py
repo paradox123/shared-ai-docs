@@ -175,7 +175,14 @@ if __name__ == '__main__': unittest.main()
         with (self.home / 'config.toml').open('a') as output:
             output.write('\n[hooks.state.' + json.dumps(hook['key']) + ']\ntrusted_hash = ' + json.dumps(hook['currentHash']) + '\n')
         capabilities = {}
-        probe_tools(self.runtime, self.repository, self.root, capabilities)
+        # Capability probes must leave a supplied checkout unchanged.
+        probe_file = self.repository / 'probe.txt'
+        previous_probe = probe_file.read_bytes() if probe_file.exists() else None
+        try:
+            probe_tools(self.runtime, self.repository, self.root, capabilities)
+        finally:
+            if previous_probe is None: probe_file.unlink(missing_ok=True)
+            else: probe_file.write_bytes(previous_probe)
         if any(value['status'] != 'passed' for value in capabilities.values()):
             raise ValueError('runtime-tools-or-sandbox-failed')
         persist(self.root / 'preflight.json', {'runtimeVersion': self.config['version'],
@@ -259,7 +266,7 @@ if __name__ == '__main__': unittest.main()
                 'baseInstructions': 'You implement only ISSUE.md in the disposable repository. Use only mcp__wpcp__execute for commands and file changes. Never access external repositories. Follow the user phase instructions.'})
             session = response['thread']['id']
             persist(path, {'state': 'mapped', 'runId': request['runId'], 'sessionId': session})
-            turn, result = self.materialize(session)
+            turn, result = self.materialize(session, request.get('note'))
             background = [{'sequence': index + 2, 'type': 'message', 'data': {'runtimeEvent': event}}
                 for index, event in enumerate(e for e in self.runtime.events
                     if e.get('params', {}).get('threadId') == session and
@@ -274,13 +281,13 @@ if __name__ == '__main__': unittest.main()
             persist(path, {'state': 'complete', 'runId': request['runId'], 'body': body})
             return body
 
-    def materialize(self, session):
+    def materialize(self, session, assignment=None):
         expected = {'schema_version': '3', 'outcome': 'blocked',
             'summary': 'Disposable greeting issue is ready for the human continuation.',
             'red_green_slices': [], 'changed_files': [], 'verification': [], 'evidence': [],
             'findings': [], 'intervention': None}
         turn = self.runtime.request('turn/start', {'threadId': session, 'outputSchema': endpoint_schema(),
-            'input': [{'type': 'text', 'text': 'Preflight phase. Do not use tools or start implementation. Return exactly: ' + json.dumps(expected)}]})['turn']['id']
+            'input': [{'type': 'text', 'text': 'Preflight phase. Retain this assignment for the later authorized continuation: ' + (assignment or 'ISSUE.md') + '. Do not use tools or start implementation. Return exactly: ' + json.dumps(expected)}]})['turn']['id']
         completed = self.wait_turn(session, turn)
         messages = [e['params']['item']['text'] for e in self.runtime.events
             if e.get('method') == 'item/completed' and e['params'].get('threadId') == session
@@ -422,6 +429,16 @@ def main():
             self.end_headers(); self.wfile.write(data)
         def do_GET(self):
             if self.path == '/health': return self.reply(200, {'status': 'ready'})
+            if self.path == '/publication-readiness':
+                if not secrets.compare_digest(self.headers.get('X-Wpcp-Adapter-Token', ''), adapter.service_token):
+                    return self.reply(403, {'code': 'adapter-access-denied'})
+                try:
+                    with adapter.lock: adapter.start_runtime()
+                    return self.reply(200, {'contractVersion': 'AgentSessionAdapter/v1',
+                        'localPath': str(adapter.repository), 'runtimeReady': adapter.ready,
+                        'sandboxReady': adapter.ready, 'activeTurn': adapter.active_turn is not None})
+                except Exception:
+                    return self.reply(503, {'code': 'agent-readiness-unavailable'})
             return self.reply(404, {'code': 'not-found'})
         def mutate(self):
             try:
