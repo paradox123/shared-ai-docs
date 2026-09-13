@@ -6,6 +6,8 @@ import subprocess
 import sys
 import threading
 import uuid
+import struct
+import zlib
 
 
 def git(path, *args):
@@ -34,6 +36,9 @@ class PublicationFixture:
         git(self.repo, 'push', '-q', 'origin', 'main')
         self.branch = 'codex/issue-' + str(issue)
         git(self.repo, 'switch', '-qc', self.branch)
+        def chunk(kind, data): return struct.pack('>I', len(data)) + kind + data + struct.pack('>I', zlib.crc32(kind + data))
+        self.probe_image = (b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', 1, 1, 8, 2, 0, 0, 0)) +
+                            chunk(b'IDAT', zlib.compress(b'\x00\xff\xff\xff')) + chunk(b'IEND', b''))
         self.records = set()
         self.pulls = []
         self.creates = 0
@@ -41,6 +46,7 @@ class PublicationFixture:
         self.lose_reply = False
         self.agent_content = 'def greet(): return "Hello, Ada!"  # implemented\n'
         self.agent_starts = 0
+        self.result_summary = 'Greeting implemented'
         self.adapter_path = str(self.repo)
         self.session = str(uuid.uuid4())
         fixture = self
@@ -54,6 +60,9 @@ class PublicationFixture:
                 self.end_headers(); self.wfile.write(body)
             def do_GET(self):
                 path = self.path.split('?')[0]
+                if path == '/image-ready':
+                    body = fixture.probe_image; self.send_response(200)
+                    self.send_header('Content-Length', str(len(body))); self.end_headers(); self.wfile.write(body); return
                 if path == '/business': return self.send({'count': len(fixture.records)})
                 if path in ('/image', '/document'):
                     file = fixture.root / ('evidence.png' if path == '/image' else 'document.html')
@@ -70,7 +79,7 @@ class PublicationFixture:
                     return self.send({'contractVersion': 'AgentSessionAdapter/v1', 'localPath': fixture.adapter_path,
                         'runtimeReady': True, 'sandboxReady': True})
                 if path == '/repos/pilot/fixture':
-                    return self.send({'id': 9001, 'full_name': 'pilot/fixture',
+                    return self.send({'id': 9001, 'full_name': 'pilot/fixture', 'clone_url': str(fixture.remote),
                         'permissions': {'push': fixture.allowed}})
                 if path.startswith('/repos/pilot/fixture/commits/'):
                     branch = path.removeprefix('/repos/pilot/fixture/commits/')
@@ -87,7 +96,7 @@ class PublicationFixture:
                 fixture.agent_starts += 1
                 (fixture.repo / 'greeting.py').write_text(fixture.agent_content)
                 observation = {'command': 'python greeting.py', 'observed': 'Hello, Ada!'}
-                result = {'schema_version': '3', 'outcome': 'completed', 'summary': 'Greeting implemented',
+                result = {'schema_version': '3', 'outcome': 'completed', 'summary': fixture.result_summary,
                     'red_green_slices': [{'requirement': 'AC1', 'red': {**observation, 'observed': 'Wrong greeting'}, 'green': observation}],
                     'changed_files': ['greeting.py'], 'verification': [observation], 'findings': [], 'intervention': None,
                     'evidence': [{'criterion': 'AC1', 'verdict': 'pass', 'kind': 'background',

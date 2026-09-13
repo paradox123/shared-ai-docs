@@ -9,4 +9,9 @@
 
 ## 3. Acceptance
 - [x] 3.1 Document executable use and requirement-level evidence with explicit live-versus-controlled limits.
-- [ ] 3.2 Run full regression, strict OpenSpec validation and Standards/Spec review; resolve findings.
+- [x] 3.2 Run full regression, strict OpenSpec validation and Standards/Spec review; resolve findings.
+
+The full regression has one baseline-reproduced stress-test failure; see
+[implementation-evidence.md](implementation-evidence.md#validation-result). All
+publication and final adjacent-runtime checks pass. Acceptance/archive remain
+separate from implementation.

@@ -1,0 +1,6 @@
+test_real_native_issue_publishes_its_executed_evidence_as_one_draft (tests.test_publication_native.NativePublicationTests.test_real_native_issue_publishes_its_executed_evidence_as_one_draft) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 56.222s
+
+OK

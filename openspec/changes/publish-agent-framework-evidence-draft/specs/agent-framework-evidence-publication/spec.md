@@ -30,6 +30,10 @@ block publication with a terminal public disposition.
 - **WHEN** a phase is missing, fails or changes the worktree/head
 - **THEN** no push or PR create occurs and the run exposes evidence rejection
 
+#### Scenario: Completed result is externalized
+- **WHEN** the accepted completed result exceeds the dossier inline limit
+- **THEN** publication resolves its checksum-verified artifact before executing evidence; unavailable bytes never count as completion
+
 ### Requirement: Publish and adopt one exact draft
 The pilot SHALL persist publication intent before push or PR create. It SHALL
 push only the explicit run branch and publish exactly one draft PR for the

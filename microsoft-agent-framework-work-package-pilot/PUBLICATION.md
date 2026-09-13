@@ -15,7 +15,10 @@ uv run --python 3.14 --with-requirements codex-requirements.txt python -c 'impor
 Pass the printed interpreter to the worker and configure the existing isolated
 PostgreSQL connection, fixture, real adapter origin and adapter service token.
 `WPCP_PUBLICATION_TOKEN` supplies GitHub API credentials to `api.github.com` only.
-Git uses its separately configured noninteractive credential mechanism. Tokens
+Git uses a separately configured noninteractive credential mechanism from the
+local repository config or SSH setup; global/system Git config is disabled.
+Fetch and push URLs must each match the provider-reported `clone_url` or `ssh_url`;
+a fork containing the same base does not authorize a different remote. Tokens
 must not appear in the plan, command arguments or outgoing source.
 
 ```bash
@@ -83,9 +86,15 @@ the PR for review.
 | `background` | `request`, `read-back` |
 
 Each phase has its own `probe` and `execute`. A screenshot phase additionally
-requires `imagePath` and `imageUrl`: PNG bytes at both surfaces must match, and the
-PR embeds the URL and checksum. Publish images from a durable, already sanitized
-artifact surface; do not place private data in screenshots. The runner redacts
+requires `imagePath`, `imageUrl`, `probeImageUrl` and `probeImageSha256`. The
+readiness probe image must be readable at the same origin as the final image and
+match its configured checksum before agent start. Images must use non-interlaced
+8-bit grayscale, RGB, grayscale-alpha or RGBA PNG encoding. Decoded rows and
+pixels are checked within a 32 MiB limit. Final PNG bytes at the local and public
+surfaces must match; the PR embeds the URL and checksum. Publish images from a
+durable, already sanitized artifact surface; do not place private data in screenshots.
+The source check covers all outgoing Git blobs and commit messages, including
+content removed from the tip; uninspectable binary source is rejected. The runner redacts
 configured canaries and recognizable textual credentials; it does not implement
 OCR or general image PII discovery. Artifact lifetime remains the responsibility
 of that configured surface.
@@ -100,7 +109,9 @@ The existing native adapter initially returns a blocked preparation result. Open
 and claim the same session using the Ticket 10 Operator/TUI flow, perform the
 prepared assignment, then repeat the publication worker command. Only an accepted
 terminal completed result in that session's canonical history can resume
-publication. Quarantined observations do not qualify. Adapters returning a valid
+publication. Large results and interactive observations are resolved from their
+checksum-verified dossier artifacts; unavailable bytes do not qualify.
+Quarantined observations do not qualify. Adapters returning a valid
 completed initial result proceed directly.
 
 `run`, `events`, and portable dossier export retain `publication`, including the
@@ -127,7 +138,7 @@ historical dossiers remain read-only.
 
 ```bash
 uv run --python 3.14 --with-requirements codex-requirements.txt \
-  python -m unittest tests.test_publication_worker -v
+  python -m unittest tests.test_publication_adapter tests.test_publication_worker -v
 WPCP_CODEX_ENDPOINT_PROBE=1 \
   uv run --python 3.14 --with-requirements codex-requirements.txt \
   python -m unittest tests.test_publication_native -v

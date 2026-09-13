@@ -1,0 +1,18 @@
+Baseline: 6c2a4f2b7000bd4c5127d6614350a8e808feb457 (accepted Issue 10); no Issue 11 implementation.
+test_more_than_ten_thousand_events_reconnect_after_api_and_worker_kills_and_restore (tests.test_run_dossier.RunDossierTests.test_more_than_ten_thousand_events_reconnect_after_api_and_worker_kills_and_restore) ... FAIL
+
+======================================================================
+FAIL: test_more_than_ten_thousand_events_reconnect_after_api_and_worker_kills_and_restore (tests.test_run_dossier.RunDossierTests.test_more_than_ten_thousand_events_reconnect_after_api_and_worker_kills_and_restore)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/tests/test_run_dossier.py", line 368, in test_more_than_ten_thousand_events_reconnect_after_api_and_worker_kills_and_restore
+    middle = self.evidence_pause(run_id, port, 'after-source-sequence-5000')
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/microsoft-agent-framework-work-package-pilot/tests/test_run_dossier.py", line 160, in evidence_pause
+    self.fail('Worker missed boundary')
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Worker missed boundary
+
+----------------------------------------------------------------------
+Ran 1 test in 99.679s
+
+FAILED (failures=1)

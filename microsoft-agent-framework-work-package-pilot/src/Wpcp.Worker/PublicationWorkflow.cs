@@ -81,7 +81,8 @@ internal static class PublicationWorkflow
         var attempt = run.Attempts.LastOrDefault(a => a.Session is not null);
         if (attempt?.Session is not { } session) return false;
         if (attempt.State == "completed" && session.OriginalResult is { } original &&
-            original.TryGetProperty("outcome", out var outcome) && outcome.GetString() == "completed") return true;
+            await ResolveEvidenceValueAsync(store, run.RunId, original) is { } resultValue &&
+            resultValue.TryGetProperty("outcome", out var outcome) && outcome.GetString() == "completed") return true;
         string? turn = null;
         JsonElement? candidate = null;
         var completed = false;
@@ -95,7 +96,10 @@ internal static class PublicationWorkflow
                 var payload = item.Payload;
                 if (payload.GetProperty("sourceSessionId").GetString() != session.SessionId ||
                     payload.GetProperty("type").GetString() != "observation") continue;
-                var observation = payload.GetProperty("data").GetProperty("event");
+                var data = await ResolveEvidenceValueAsync(store, run.RunId, payload.GetProperty("data"));
+                // Missing/corrupt artifact bytes must not preserve an older completion.
+                if (data is null) return false;
+                var observation = data.Value.GetProperty("event");
                 var parameters = observation.GetProperty("params");
                 switch (observation.GetProperty("method").GetString())
                 {
@@ -120,6 +124,14 @@ internal static class PublicationWorkflow
         return completed && candidate is { } result &&
             result.TryGetProperty("outcome", out var status) && status.GetString() == "completed" &&
             await CanonicalResult.ValidateAsync(python, result, default);
+    }
+
+    private static async Task<JsonElement?> ResolveEvidenceValueAsync(PostgresImplementationRunStore store,
+        string runId, JsonElement value)
+    {
+        if (value.ValueKind != JsonValueKind.Object || !value.TryGetProperty("artifactId", out var id)) return value;
+        var artifact = await store.GetArtifactAsync(runId, id.GetString()!);
+        return artifact is { Bytes: { } bytes } ? JsonSerializer.Deserialize<JsonElement>(bytes) : null;
     }
 
     private static Publication FromReport(string hash, JsonElement report) =>

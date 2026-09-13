@@ -56,6 +56,22 @@ class PublicationWorkerTests(harness.ControlPlaneProcessHarness, unittest.TestCa
         self.assertEqual(pull['head']['sha'], run['publication']['intent']['headSha'])
         self.assertEqual(1, fixture.agent_starts)
 
+    def test_large_completed_result_is_read_from_verified_artifact(self):
+        import os
+        from unittest.mock import patch
+        run_id = self.new_run()
+        fixture = PublicationFixture(Path(self.scratch.name) / run_id, self.read_run(run_id)['correlation']['issueNumber'])
+        self.addCleanup(fixture.close)
+        fixture.result_summary = 'Implemented greeting. ' * 1200
+        with patch.dict(os.environ, {'WPCP_ARTIFACT_ROOT': str(fixture.root / 'artifacts')}):
+            worker = self.publish(run_id, fixture.path)
+        self.assertEqual(0, worker.returncode, worker.stdout + worker.stderr)
+        run = self.read_run(run_id)
+        session = next(a['session'] for a in run['attempts'] if a.get('session'))
+        self.assertIn('artifactId', session['originalResult'])
+        self.assertEqual('draft-published', run['state'], run['publication'])
+        self.assertEqual(1, fixture.creates)
+
     def test_adapter_must_prove_it_uses_the_planned_checkout_before_start(self):
         run_id = self.new_run()
         fixture = PublicationFixture(Path(self.scratch.name) / run_id, self.read_run(run_id)['correlation']['issueNumber'])
@@ -189,7 +205,9 @@ class PublicationWorkerTests(harness.ControlPlaneProcessHarness, unittest.TestCa
         browser = {'argv': [node, str(harness.PILOT_ROOT / 'tests/publication_browser.cjs'), playwright,
             fixture.origin + '/app', str(screenshot), 'interact'], 'expected': 'Records: 1'}
         image = phase('screenshot', command('from pathlib import Path; assert Path(' + repr(str(screenshot)) + ').read_bytes().startswith(b"\\x89PNG"); print("Rendered record count: 1")', 'Rendered record count: 1'))
-        image.update(imagePath=str(screenshot), imageUrl=fixture.origin + '/image')
+        import hashlib
+        image.update(imagePath=str(screenshot), imageUrl=fixture.origin + '/image',
+                     probeImageUrl=fixture.origin + '/image-ready', probeImageSha256=hashlib.sha256(fixture.probe_image).hexdigest())
         document = fixture.root / 'document.html'
         generate = command('from pathlib import Path; Path(' + repr(str(document)) + ').write_text("<title>Report</title><h1>Records: 1</h1>"); print("Report generated")', 'Report generated')
         render = {'argv': [node, str(harness.PILOT_ROOT / 'tests/publication_browser.cjs'), playwright,
@@ -300,6 +318,25 @@ class PublicationWorkerTests(harness.ControlPlaneProcessHarness, unittest.TestCa
         self.assertEqual('draft-published', self.read_run(run_id)['state'])
         self.assertEqual(1, fixture.creates)
         self.assertEqual(1, fixture.agent_starts)
+
+    def test_registered_publication_rejects_other_managed_execution_modes(self):
+        run_id = self.new_run()
+        fixture = PublicationFixture(Path(self.scratch.name) / run_id, self.read_run(run_id)['correlation']['issueNumber'])
+        self.addCleanup(fixture.close)
+        fixture.plan['prerequisites']['sandbox']['expected'] = 'denied'
+        fixture.save()
+        self.assertEqual(0, self.publish(run_id, fixture.path).returncode)
+        repository_plan = fixture.root / 'repository-plan.json'
+        repository_plan.write_text(json.dumps({key: fixture.plan[key] for key in
+            ('repository', 'localPath', 'remoteName', 'baseBranch', 'providerOrigin', 'agentOrigin', 'expectedBaseSha')}))
+        for mode in (['--fake-agent-origin', fixture.origin, '--live-activity-key', 'bypass'],
+                     ['--repository-plan', str(repository_plan)]):
+            with self.subTest(mode=mode[0]):
+                worker = harness.command_output(['dotnet', str(harness.WORKER_DLL),
+                    '--connection-string', self.connection_string, '--fixture', str(self.fixture_path),
+                    '--run-id', run_id, '--worker-id', 'bypass', *mode])
+                self.assertEqual(2, worker.returncode, worker.stdout)
+        self.assertFalse(any(a.get('session') or a.get('liveOperation') for a in self.read_run(run_id)['attempts']))
 
 
 class StandalonePublicationTests(harness.ControlPlaneProcessHarness, unittest.TestCase):

@@ -181,7 +181,9 @@ public sealed partial class PostgresImplementationRunStore
             await using var live = new NpgsqlCommand("""
                 SELECT EXISTS(SELECT 1 FROM wpcp_live_attempts a
                     JOIN wpcp_implementation_runs r ON r.run_id=a.run_id
-                    WHERE r.repository_id=@repo AND a.state->>'state' IN ('running', 'cancelling'))
+                    WHERE r.repository_id=@repo AND a.state->>'state' IN ('running', 'cancelling')
+                    UNION ALL SELECT 1 FROM wpcp_publications p JOIN wpcp_implementation_runs r USING(run_id)
+                    WHERE r.repository_id=@repo)
                 """, connection, transaction);
             live.Parameters.AddWithValue("repo", next.Plan.Repository.RepositoryId);
             if (await live.ExecuteScalarAsync(token) is true) throw new RepositoryRegistrationBusyException();

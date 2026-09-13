@@ -6,7 +6,11 @@ import os
 from pathlib import Path
 import re
 import signal
+import selectors
+import time
 import shutil
+import struct
+import zlib
 import subprocess
 import sys
 import urllib.request
@@ -33,15 +37,34 @@ def run_command(argv, cwd, env=None, timeout=30):
     environment.update(env or {})
     process = subprocess.Popen(argv, cwd=cwd, env=environment, stdout=subprocess.PIPE,
                                stderr=subprocess.PIPE, start_new_session=True)
+    output = bytearray()
+    total = 0
+    deadline = time.monotonic() + timeout
     try:
-        stdout, _ = process.communicate(timeout=timeout)
-    except BaseException:
-        os.killpg(process.pid, signal.SIGKILL)
-        process.communicate()
-        raise
-    if process.returncode != 0 or len(stdout) > 1024 * 1024:
-        raise Blocked('command-failed')
-    return stdout.decode('utf-8').strip()
+        with selectors.DefaultSelector() as selector:
+            selector.register(process.stdout, selectors.EVENT_READ, True)
+            selector.register(process.stderr, selectors.EVENT_READ, False)
+            while selector.get_map():
+                remaining = deadline - time.monotonic()
+                if remaining <= 0: raise Blocked('command-timeout')
+                for key, _ in selector.select(remaining):
+                    chunk = os.read(key.fileobj.fileno(), 65536)
+                    if not chunk:
+                        selector.unregister(key.fileobj)
+                        continue
+                    total += len(chunk)
+                    if total > 1024 * 1024: raise Blocked('command-output-limit')
+                    if key.data: output.extend(chunk)
+        process.wait(timeout=max(.01, deadline - time.monotonic()))
+        if process.returncode != 0: raise Blocked('command-failed')
+        return output.decode('utf-8').strip()
+    finally:
+        try: os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError: pass
+        process.wait()
+        process.stdout.close()
+        process.stderr.close()
+
 
 
 def git(plan, *args):
@@ -56,33 +79,44 @@ def checked(command, plan, head=None):
 
 
 def validate(plan, correlation):
+    def require(condition):
+        if not condition: raise Blocked('invalid-evidence-plan')
     try:
-        assert plan['schemaVersion'] == 'wpcp-publication-plan/v1'
-        assert plan['repository'] == correlation['repository']
-        assert plan['issueNumber'] == correlation['issueNumber']
-        assert Path(plan['localPath']).is_absolute() and Path(plan['localPath']).is_dir()
-        assert re.fullmatch(r'[0-9a-f]{40}', plan['expectedBaseSha'])
-        assert re.fullmatch(r'[A-Za-z0-9_-]+', plan['remoteName'])
-        assert plan['branch'] != plan['baseBranch']
+        require(plan['schemaVersion'] == 'wpcp-publication-plan/v1')
+        require(plan['repository'] == correlation['repository'])
+        require(plan['issueNumber'] == correlation['issueNumber'])
+        require(Path(plan['localPath']).is_absolute() and Path(plan['localPath']).is_dir())
+        require(re.fullmatch(r'[0-9a-f]{40}', plan['expectedBaseSha']))
+        require(re.fullmatch(r'[A-Za-z0-9_-]+', plan['remoteName']))
+        require(plan['branch'] != plan['baseBranch'])
         for name in ('branch', 'baseBranch'):
             git(plan, 'check-ref-format', 'refs/heads/' + plan[name])
         origin = urllib.parse.urlsplit(plan['providerOrigin'])
-        assert origin.scheme == 'https' or (origin.scheme == 'http' and origin.hostname in ('127.0.0.1', 'localhost'))
-        assert not origin.username and not origin.password and origin.path in ('', '/') and not origin.query and not origin.fragment
-        assert PREREQUISITES <= set(plan['prerequisites'])
-        assert isinstance(plan['title'], str) and plan['title'].strip()
-        assert plan['criteria'] and len({c['id'] for c in plan['criteria']}) == len(plan['criteria'])
+        require(origin.scheme == 'https' or (origin.scheme == 'http' and origin.hostname in ('127.0.0.1', 'localhost')))
+        require(not origin.username and not origin.password and origin.path in ('', '/') and not origin.query and not origin.fragment)
+        require(PREREQUISITES <= set(plan['prerequisites']))
+        require(isinstance(plan['title'], str) and plan['title'].strip())
+        require(plan['criteria'] and len({c['id'] for c in plan['criteria']}) == len(plan['criteria']))
         commands = list(plan['prerequisites'].values())
         for criterion in plan['criteria']:
-            assert all(isinstance(criterion[k], str) and criterion[k].strip() for k in ('id', 'description', 'surface', 'expectedReadBack'))
-            assert [p['name'] for p in criterion['phases']] == PHASES[criterion['kind']]
-            assert criterion['phases'][-1]['execute']['expected'] == criterion['expectedReadBack']
+            require(all(isinstance(criterion[k], str) and criterion[k].strip() for k in ('id', 'description', 'surface', 'expectedReadBack')))
+            require([p['name'] for p in criterion['phases']] == PHASES[criterion['kind']])
+            require(criterion['phases'][-1]['execute']['expected'] == criterion['expectedReadBack'])
             for phase in criterion['phases']:
+                if phase['name'] == 'screenshot':
+                    require(Path(phase['imagePath']).is_absolute())
+                    target = urllib.parse.urlsplit(phase['imageUrl'])
+                    probe_url = urllib.parse.urlsplit(phase['probeImageUrl'])
+                    require(target.scheme in ('http', 'https') and target.hostname)
+                    require(not target.username and not target.password and not target.fragment)
+                    require((target.scheme, target.netloc) == (probe_url.scheme, probe_url.netloc))
+                    require(not probe_url.fragment)
+                    require(re.fullmatch(r'[0-9a-f]{64}', phase['probeImageSha256']))
                 commands.extend([phase['probe'], phase['execute']])
         for command in commands:
-            assert isinstance(command['argv'], list) and command['argv'] and all(isinstance(a, str) and a for a in command['argv'])
-            assert isinstance(command['expected'], str) and command['expected'].strip()
-    except (AssertionError, KeyError, TypeError, ValueError, Blocked):
+            require(isinstance(command['argv'], list) and command['argv'] and all(isinstance(a, str) and a for a in command['argv']))
+            require(isinstance(command['expected'], str) and command['expected'].strip())
+    except (KeyError, TypeError, ValueError, Blocked):
         raise Blocked('invalid-evidence-plan') from None
 
 
@@ -108,6 +142,11 @@ class Provider:
             raise Blocked('provider-repository-mismatch')
         if repo.get('permissions', {}).get('push') is not True:
             raise Blocked('provider-write-access-unavailable')
+        permitted = {url for name in ('clone_url', 'ssh_url') if isinstance(url := repo.get(name), str) and url}
+        fetch = git(self.plan, 'remote', 'get-url', '--all', self.plan['remoteName']).splitlines()
+        push = git(self.plan, 'remote', 'get-url', '--push', '--all', self.plan['remoteName']).splitlines()
+        if len(fetch) != 1 or len(push) != 1 or fetch[0] not in permitted or push[0] not in permitted:
+            raise Blocked('git-remote-repository-mismatch')
 
     def head(self, branch):
         return self.request('/commits/' + urllib.parse.quote(branch, safe=''))['sha']
@@ -164,6 +203,10 @@ def preflight(plan, correlation):
             try:
                 if not shutil.which(phase['execute']['argv'][0]): raise Blocked('tool-unavailable')
                 observation = checked(phase['probe'], plan)
+                if phase['name'] == 'screenshot':
+                    image = read_png(phase['probeImageUrl'])
+                    if hashlib.sha256(image).hexdigest() != phase['probeImageSha256']:
+                        raise Blocked('image-surface-mismatch')
             except Exception: raise Blocked('surface-unavailable:' + criterion['id'] + ':' + phase['name']) from None
             observations.append({'criterion': criterion['id'], 'phase': phase['name'], **observation})
     adapter = agent_readiness(plan)
@@ -171,12 +214,84 @@ def preflight(plan, correlation):
     return {'state': 'ready', 'base': base, 'plan': plan['criteria'], 'probes': observations, 'adapter': adapter}
 
 
+def verify_png(image):
+    if not image.startswith(b'\x89PNG\r\n\x1a\n') or len(image) > 4 * 1024 * 1024:
+        raise Blocked('invalid-screenshot')
+    offset, compressed, dimensions = 8, bytearray(), None
+    ended, data_ended = False, False
+    channels = 0
+    while offset + 12 <= len(image):
+        length, = struct.unpack('>I', image[offset:offset + 4])
+        kind = image[offset + 4:offset + 8]
+        data = image[offset + 8:offset + 8 + length]
+        end = offset + length + 12
+        if end > len(image) or zlib.crc32(kind + data) != struct.unpack('>I', image[end - 4:end])[0]:
+            raise Blocked('invalid-screenshot')
+        if kind == b'IHDR':
+            if length != 13 or offset != 8: raise Blocked('invalid-screenshot')
+            width, height, depth, color, compression, filtering, interlace = struct.unpack('>IIBBBBB', data)
+            # Browser screenshots use non-interlaced eight-bit pixels. Reject other
+            # encodings rather than pretending to decode formats we cannot inspect.
+            channels = {0: 1, 2: 3, 4: 2, 6: 4}.get(color, 0)
+            if depth != 8 or not channels or compression or filtering or interlace:
+                raise Blocked('invalid-screenshot')
+            dimensions = (width, height)
+        elif not dimensions:
+            raise Blocked('invalid-screenshot')
+        elif kind == b'IDAT':
+            if data_ended: raise Blocked('invalid-screenshot')
+            compressed.extend(data)
+        elif kind == b'IEND':
+            ended = length == 0 and end == len(image)
+            break
+        else:
+            if compressed: data_ended = True
+            # PLTE is optional for truecolor; no other unknown critical chunks.
+            if kind == b'PLTE':
+                if compressed or color in (0, 4) or not 0 < length <= 768 or length % 3:
+                    raise Blocked('invalid-screenshot')
+            elif not kind[0] & 32:
+                raise Blocked('invalid-screenshot')
+        offset = end
+    if not ended or not dimensions or not all(0 < n <= 10000 for n in dimensions) or not compressed:
+        raise Blocked('invalid-screenshot')
+    stride = 1 + width * channels
+    expected = stride * height
+    if expected > 32 * 1024 * 1024: raise Blocked('invalid-screenshot')
+    decoder = zlib.decompressobj()
+    pixels = decoder.decompress(compressed, expected + 1)
+    if (len(pixels) != expected or not decoder.eof or decoder.unused_data or
+        any(pixels[row] > 4 for row in range(0, expected, stride))):
+        raise Blocked('invalid-screenshot')
+
+
+def read_png(url):
+    with urllib.request.urlopen(url, timeout=10) as response:
+        image = response.read(4 * 1024 * 1024 + 1)
+    verify_png(image)
+    return image
+
+
+def inspect_outgoing_history(plan, fixture):
+    objects = git(plan, 'rev-list', '--objects', '--no-object-names', plan['expectedBaseSha'] + '..HEAD').splitlines()
+    for identity in objects:
+        kind = git(plan, 'cat-file', '-t', identity)
+        if kind not in ('blob', 'commit'): continue
+        try: content = git(plan, 'cat-file', '-p', identity)
+        except (UnicodeError, Blocked): raise Blocked('uninspectable-outgoing-source') from None
+        if kind == 'commit': content = content.partition('\n\n')[2]
+        if redact(content, fixture) != content: raise Blocked('sensitive-outgoing-source')
+        if '\x00' in content: raise Blocked('uninspectable-outgoing-source')
+
+
 def evidence(plan, correlation, fixture, run_id):
     validate(plan, correlation)
     base_check(plan, Provider(plan))
     agent_readiness(plan)
-    # Scan current and previously committed outgoing content; never rewrite source.
+    inspect_outgoing_history(plan, fixture)
+    # Inspect current source as well as every outgoing historical blob/message.
     diff = git(plan, 'diff', '--binary', plan['expectedBaseSha'])
+    if 'GIT binary patch' in diff: raise Blocked('uninspectable-outgoing-source')
     if redact(diff, fixture) != diff:
         raise Blocked('sensitive-outgoing-source')
     untracked = git(plan, 'ls-files', '--others', '--exclude-standard').splitlines()
@@ -189,6 +304,7 @@ def evidence(plan, correlation, fixture, run_id):
         git(plan, 'add', '--all')
         git(plan, '-c', 'user.name=WPCP Publication', '-c', 'user.email=wpcp@localhost',
             '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Implement issue #' + str(plan['issueNumber']))
+    inspect_outgoing_history(plan, fixture)
     head = git(plan, 'rev-parse', 'HEAD')
     if head == plan['expectedBaseSha']:
         raise Blocked('branch-not-ahead')
@@ -200,10 +316,11 @@ def evidence(plan, correlation, fixture, run_id):
                 observation = checked(phase['execute'], plan, head)
                 if phase['name'] == 'screenshot':
                     image = Path(phase['imagePath']).read_bytes()
-                    if not image.startswith(b'\x89PNG\r\n\x1a\n'):
-                        raise Blocked('invalid-screenshot')
-                    with urllib.request.urlopen(phase['imageUrl'], timeout=10) as response:
-                        public = response.read(4 * 1024 * 1024 + 1)
+                    verify_png(image)
+                    for canary in fixture['redactionPolicy']['controlledCanaries']:
+                        if any(canary['value'].encode(encoding) in image for encoding in ('utf-8', 'utf-16-le', 'utf-16-be')):
+                            raise Blocked('sensitive-screenshot')
+                    public = read_png(phase['imageUrl'])
                     if image != public: raise Blocked('screenshot-readback-mismatch')
                     observation.update(imageUrl=phase['imageUrl'], imageSha256=hashlib.sha256(image).hexdigest())
             except Exception:

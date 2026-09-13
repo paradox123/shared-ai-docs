@@ -1,0 +1,559 @@
+{
+  "run": {
+    "runId": "594d67d2-c075-44bb-bf7c-2e96ca1f86c0",
+    "state": "draft-published",
+    "correlation": {
+      "runId": "594d67d2-c075-44bb-bf7c-2e96ca1f86c0",
+      "repositoryId": "repo-1",
+      "issueId": "issue-59",
+      "issueNumber": 59,
+      "commandId": "fa45190d-169a-45b6-b4f0-d270569577fb",
+      "repository": {
+        "repositoryId": "repo-1",
+        "fullName": "pilot/fixture",
+        "providerRepositoryId": 9001
+      }
+    },
+    "runStartedAt": "2026-09-13T10:11:12.846984+00:00",
+    "activities": [
+      {
+        "activityId": "f007edc6-5ad2-46ce-bad4-cd01e163bb4f",
+        "activityType": "admission",
+        "state": "completed",
+        "startedAt": "2026-09-13T10:11:12.846984+00:00",
+        "completedAt": "2026-09-13T10:11:12.846984+00:00"
+      },
+      {
+        "activityId": "f4724f13-df7d-4a12-b982-c64ae81a66b8",
+        "activityType": "real-codex",
+        "state": "completed",
+        "startedAt": "2026-09-13T10:11:15.073666+00:00",
+        "completedAt": "2026-09-13T10:11:15.791773+00:00"
+      }
+    ],
+    "attempts": [
+      {
+        "attemptId": "bf27b33f-7f94-4607-9e11-2251033aeb03",
+        "activityId": "f007edc6-5ad2-46ce-bad4-cd01e163bb4f",
+        "attemptNumber": 1,
+        "state": "completed",
+        "startedAt": "2026-09-13T10:11:12.846984+00:00",
+        "completedAt": "2026-09-13T10:11:12.846984+00:00",
+        "session": null,
+        "liveOperation": null
+      },
+      {
+        "attemptId": "d237e7ae-d5e9-49c4-b7c5-05a84847e25b",
+        "activityId": "f4724f13-df7d-4a12-b982-c64ae81a66b8",
+        "attemptNumber": 1,
+        "state": "completed",
+        "startedAt": "2026-09-13T10:11:15.073666+00:00",
+        "completedAt": "2026-09-13T10:11:15.791773+00:00",
+        "session": {
+          "operationKey": "d237e7ae-d5e9-49c4-b7c5-05a84847e25b",
+          "sessionId": "64896f7e-147c-4a6c-baba-0dafaf0a2f5a",
+          "status": "completed",
+          "contractVersion": "AgentSessionAdapter/v1",
+          "startedEventId": "9ae0b928-e4e4-49e1-8fb5-8e04f2897819",
+          "lastSequence": 1,
+          "lastEventId": "24bf0703-95d7-4deb-bdf2-ac5064e002cc",
+          "originalResult": {
+            "outcome": "completed",
+            "summary": "Greeting implemented",
+            "evidence": [
+              {
+                "kind": "background",
+                "verdict": "pass",
+                "criterion": "AC1",
+                "observations": [
+                  {
+                    "phase": "read_back",
+                    "artifact": "Hello, Ada!",
+                    "description": "Greeting returned",
+                    "correlation_id": null
+                  }
+                ],
+                "expected_result": "Hello, Ada!",
+                "observed_interface": "greet"
+              }
+            ],
+            "findings": [],
+            "intervention": null,
+            "verification": [
+              {
+                "command": "python greeting.py",
+                "observed": "Hello, Ada!"
+              }
+            ],
+            "changed_files": [
+              "greeting.py"
+            ],
+            "schema_version": "3",
+            "red_green_slices": [
+              {
+                "red": {
+                  "command": "python greeting.py",
+                  "observed": "Wrong greeting"
+                },
+                "green": {
+                  "command": "python greeting.py",
+                  "observed": "Hello, Ada!"
+                },
+                "requirement": "AC1"
+              }
+            ]
+          },
+          "originalResultEventId": "24bf0703-95d7-4deb-bdf2-ac5064e002cc",
+          "failureCategory": "completed",
+          "openInCodex": {
+            "mode": "unsupported",
+            "sameSession": false,
+            "appTaskVisible": false,
+            "reason": "real-runtime-preflight-not-admitted",
+            "url": null
+          },
+          "openedInCodex": false,
+          "observedResponse": {
+            "events": [
+              {
+                "data": {
+                  "outcome": "completed",
+                  "summary": "Greeting implemented",
+                  "evidence": [
+                    {
+                      "kind": "background",
+                      "verdict": "pass",
+                      "criterion": "AC1",
+                      "observations": [
+                        {
+                          "phase": "read_back",
+                          "artifact": "Hello, Ada!",
+                          "description": "Greeting returned",
+                          "correlation_id": null
+                        }
+                      ],
+                      "expected_result": "Hello, Ada!",
+                      "observed_interface": "greet"
+                    }
+                  ],
+                  "findings": [],
+                  "intervention": null,
+                  "verification": [
+                    {
+                      "command": "python greeting.py",
+                      "observed": "Hello, Ada!"
+                    }
+                  ],
+                  "changed_files": [
+                    "greeting.py"
+                  ],
+                  "schema_version": "3",
+                  "red_green_slices": [
+                    {
+                      "red": {
+                        "command": "python greeting.py",
+                        "observed": "Wrong greeting"
+                      },
+                      "green": {
+                        "command": "python greeting.py",
+                        "observed": "Hello, Ada!"
+                      },
+                      "requirement": "AC1"
+                    }
+                  ]
+                },
+                "type": "result",
+                "sequence": 1
+              }
+            ],
+            "sessionId": "64896f7e-147c-4a6c-baba-0dafaf0a2f5a",
+            "operationKey": "d237e7ae-d5e9-49c4-b7c5-05a84847e25b",
+            "contractVersion": "AgentSessionAdapter/v1"
+          },
+          "responseStatus": 200,
+          "responseEventId": "ba7ccc9b-1286-4c0c-aaa9-eb161d3092f1",
+          "humanRequest": null,
+          "lineage": null
+        },
+        "liveOperation": null
+      }
+    ],
+    "processes": [
+      {
+        "processId": "8152d612-8ca5-4070-b190-3b480c7faaf3",
+        "processKind": "api",
+        "processStartedAt": "2026-09-13T10:10:45.559217+00:00",
+        "processStoppedAt": null,
+        "actor": {
+          "kind": "service",
+          "provider": "wpcp-api",
+          "subjectId": "8152d612-8ca5-4070-b190-3b480c7faaf3"
+        }
+      },
+      {
+        "processId": "publication:f5aa92de2d2049eea7c84f1f26d170f2",
+        "processKind": "worker",
+        "processStartedAt": "2026-09-13T10:11:13.706225+00:00",
+        "processStoppedAt": "2026-09-13T10:11:24.145695+00:00",
+        "actor": {
+          "kind": "service",
+          "provider": "wpcp-worker",
+          "subjectId": "publication:f5aa92de2d2049eea7c84f1f26d170f2"
+        }
+      }
+    ],
+    "heartbeats": [
+      {
+        "heartbeatId": "a4a00e0b-2116-41e7-8cf6-9bae411de80b",
+        "processId": "8152d612-8ca5-4070-b190-3b480c7faaf3",
+        "heartbeatAt": "2026-09-13T10:11:12.89264+00:00"
+      },
+      {
+        "heartbeatId": "f87f35f2-4849-4e88-8c6c-f7ddb2771d0f",
+        "processId": "8152d612-8ca5-4070-b190-3b480c7faaf3",
+        "heartbeatAt": "2026-09-13T10:11:12.954145+00:00"
+      },
+      {
+        "heartbeatId": "093a6dbf-e079-4e2c-933c-b008172e11a3",
+        "processId": "publication:f5aa92de2d2049eea7c84f1f26d170f2",
+        "heartbeatAt": "2026-09-13T10:11:24.097356+00:00"
+      },
+      {
+        "heartbeatId": "415c5140-8164-463d-ae1f-268f97a0d9fd",
+        "processId": "publication:f5aa92de2d2049eea7c84f1f26d170f2",
+        "heartbeatAt": "2026-09-13T10:11:24.136712+00:00"
+      },
+      {
+        "heartbeatId": "b231309a-1134-4df7-b96d-9f38cc100d73",
+        "processId": "8152d612-8ca5-4070-b190-3b480c7faaf3",
+        "heartbeatAt": "2026-09-13T10:11:24.207416+00:00"
+      }
+    ],
+    "executionEvidence": [],
+    "provenance": {
+      "sourceRevision": "r1",
+      "packageRevision": "r1",
+      "configurationRevision": "r1",
+      "contractRevision": "r1"
+    },
+    "redaction": {
+      "occurred": false,
+      "policyVersion": "",
+      "marker": ""
+    },
+    "lastPosition": 13,
+    "control": {
+      "runVersion": 13,
+      "targetAttemptId": "d237e7ae-d5e9-49c4-b7c5-05a84847e25b",
+      "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+      "leaseEpoch": 0,
+      "holder": null,
+      "claimedAt": null,
+      "transferRequest": null
+    },
+    "authorization": {
+      "code": "observed",
+      "access": {
+        "actor": {
+          "kind": "human",
+          "provider": "github",
+          "subjectId": "101"
+        },
+        "canRead": true,
+        "canContribute": true,
+        "failureCode": null,
+        "login": "actor-authorized",
+        "isHuman": true
+      },
+      "current": {
+        "runVersion": 13,
+        "targetAttemptId": "d237e7ae-d5e9-49c4-b7c5-05a84847e25b",
+        "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+        "leaseEpoch": 0,
+        "holder": null,
+        "claimedAt": null,
+        "transferRequest": null
+      },
+      "continuation": null,
+      "historical": false,
+      "accepted": true,
+      "canClaim": true,
+      "canRequestTransfer": false,
+      "canForceTakeover": false,
+      "canDecideTransfer": false,
+      "canRelease": false
+    },
+    "repositoryExecution": null,
+    "publication": {
+      "assignmentHash": "70c05b39062728d2bd8b6fe6e8fab324dd64ca3c3fe13af7b7915a3463b2a312",
+      "state": "draft-published",
+      "blocker": null,
+      "report": {
+        "state": "draft-published",
+        "adopted": false,
+        "pullRequest": {
+          "base": {
+            "ref": "main",
+            "repo": {
+              "id": 9001
+            }
+          },
+          "body": "<!-- wpcp-run:594d67d2-c075-44bb-bf7c-2e96ca1f86c0 -->\n\nCloses #59\n\nEvidence for commit/head `5bd51219b38962cb33252ca6d12cf5babd0d6391`.\n\nReview qualification is a separate gate.\n\n### REST: One readable record\n\nKind: rest; surface: http://127.0.0.1:53586/business\n\nExpected read-back: {\"count\": 1}\n\n**request**\n\n<pre>{\n  &quot;name&quot;: &quot;request&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(urllib.request.Request(&#x27;http://127.0.0.1:53586/business&#x27;,data=b&#x27;{\\&quot;id\\&quot;:\\&quot;one\\&quot;}&#x27;,method=\\&quot;POST\\&quot;)).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**response**\n\n<pre>{\n  &quot;name&quot;: &quot;response&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n### REPEAT: One readable record\n\nKind: idempotency; surface: http://127.0.0.1:53586/business\n\nExpected read-back: {\"count\": 1}\n\n**request**\n\n<pre>{\n  &quot;name&quot;: &quot;request&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(urllib.request.Request(&#x27;http://127.0.0.1:53586/business&#x27;,data=b&#x27;{\\&quot;id\\&quot;:\\&quot;one\\&quot;}&#x27;,method=\\&quot;POST\\&quot;)).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**response**\n\n<pre>{\n  &quot;name&quot;: &quot;response&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**repeat**\n\n<pre>{\n  &quot;name&quot;: &quot;repeat&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(urllib.request.Request(&#x27;http://127.0.0.1:53586/business&#x27;,data=b&#x27;{\\&quot;id\\&quot;:\\&quot;one\\&quot;}&#x27;,method=\\&quot;POST\\&quot;)).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n### UI: One readable record\n\nKind: ui; surface: http://127.0.0.1:53586/business\n\nExpected read-back: {\"count\": 1}\n\n**interaction**\n\n<pre>{\n  &quot;name&quot;: &quot;interaction&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node&quot;,\n    &quot;/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-ticket-11/microsoft-agent-framework-work-package-pilot/tests/publication_browser.cjs&quot;,\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright&quot;,\n    &quot;http://127.0.0.1:53586/app&quot;,\n    &quot;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/evidence.png&quot;,\n    &quot;interact&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>\n\n**screenshot**\n\n<pre>{\n  &quot;name&quot;: &quot;screenshot&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;from pathlib import Path; assert Path(&#x27;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/evidence.png&#x27;).read_bytes().startswith(b\\&quot;\\\\x89PNG\\&quot;); print(\\&quot;Rendered record count: 1\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Rendered record count: 1&quot;,\n  &quot;observed&quot;: &quot;Rendered record count: 1&quot;,\n  &quot;imageUrl&quot;: &quot;http://127.0.0.1:53586/image&quot;,\n  &quot;imageSha256&quot;: &quot;4cc041b088fa99b4503df38fe4e3fc532f9698d1a71f4c19eb86b97ff49edbf5&quot;\n}</pre>\n\n![Decisive screenshot](http://127.0.0.1:53586/image)\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n### DOC: One readable record\n\nKind: document; surface: http://127.0.0.1:53586/business\n\nExpected read-back: Records: 1\n\n**generate**\n\n<pre>{\n  &quot;name&quot;: &quot;generate&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;from pathlib import Path; Path(&#x27;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.html&#x27;).write_text(\\&quot;&lt;title&gt;Report&lt;/title&gt;&lt;h1&gt;Records: 1&lt;/h1&gt;\\&quot;); print(\\&quot;Report generated\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Report generated&quot;,\n  &quot;observed&quot;: &quot;Report generated&quot;\n}</pre>\n\n**render**\n\n<pre>{\n  &quot;name&quot;: &quot;render&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node&quot;,\n    &quot;/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-ticket-11/microsoft-agent-framework-work-package-pilot/tests/publication_browser.cjs&quot;,\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright&quot;,\n    &quot;http://127.0.0.1:53586/document&quot;,\n    &quot;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.png&quot;,\n    &quot;render&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>\n\n**inspect**\n\n<pre>{\n  &quot;name&quot;: &quot;inspect&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;from pathlib import Path; assert \\&quot;&lt;h1&gt;Records: 1&lt;/h1&gt;\\&quot; in Path(&#x27;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.html&#x27;).read_text(); print(\\&quot;Records: 1\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; assert \\&quot;&lt;h1&gt;Records: 1&lt;/h1&gt;\\&quot; in urllib.request.urlopen(&#x27;http://127.0.0.1:53586/document&#x27;).read().decode(); print(\\&quot;Records: 1\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>",
+          "head": {
+            "ref": "codex/issue-59",
+            "sha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+            "repo": {
+              "id": 9001
+            }
+          },
+          "draft": true,
+          "state": "open",
+          "title": "Implement greeting",
+          "number": 1,
+          "html_url": "http://127.0.0.1:53586/pull/1"
+        }
+      },
+      "intent": {
+        "body": "<!-- wpcp-run:594d67d2-c075-44bb-bf7c-2e96ca1f86c0 -->\n\nCloses #59\n\nEvidence for commit/head `5bd51219b38962cb33252ca6d12cf5babd0d6391`.\n\nReview qualification is a separate gate.\n\n### REST: One readable record\n\nKind: rest; surface: http://127.0.0.1:53586/business\n\nExpected read-back: {\"count\": 1}\n\n**request**\n\n<pre>{\n  &quot;name&quot;: &quot;request&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(urllib.request.Request(&#x27;http://127.0.0.1:53586/business&#x27;,data=b&#x27;{\\&quot;id\\&quot;:\\&quot;one\\&quot;}&#x27;,method=\\&quot;POST\\&quot;)).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**response**\n\n<pre>{\n  &quot;name&quot;: &quot;response&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n### REPEAT: One readable record\n\nKind: idempotency; surface: http://127.0.0.1:53586/business\n\nExpected read-back: {\"count\": 1}\n\n**request**\n\n<pre>{\n  &quot;name&quot;: &quot;request&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(urllib.request.Request(&#x27;http://127.0.0.1:53586/business&#x27;,data=b&#x27;{\\&quot;id\\&quot;:\\&quot;one\\&quot;}&#x27;,method=\\&quot;POST\\&quot;)).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**response**\n\n<pre>{\n  &quot;name&quot;: &quot;response&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**repeat**\n\n<pre>{\n  &quot;name&quot;: &quot;repeat&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(urllib.request.Request(&#x27;http://127.0.0.1:53586/business&#x27;,data=b&#x27;{\\&quot;id\\&quot;:\\&quot;one\\&quot;}&#x27;,method=\\&quot;POST\\&quot;)).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n### UI: One readable record\n\nKind: ui; surface: http://127.0.0.1:53586/business\n\nExpected read-back: {\"count\": 1}\n\n**interaction**\n\n<pre>{\n  &quot;name&quot;: &quot;interaction&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node&quot;,\n    &quot;/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-ticket-11/microsoft-agent-framework-work-package-pilot/tests/publication_browser.cjs&quot;,\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright&quot;,\n    &quot;http://127.0.0.1:53586/app&quot;,\n    &quot;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/evidence.png&quot;,\n    &quot;interact&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>\n\n**screenshot**\n\n<pre>{\n  &quot;name&quot;: &quot;screenshot&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;from pathlib import Path; assert Path(&#x27;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/evidence.png&#x27;).read_bytes().startswith(b\\&quot;\\\\x89PNG\\&quot;); print(\\&quot;Rendered record count: 1\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Rendered record count: 1&quot;,\n  &quot;observed&quot;: &quot;Rendered record count: 1&quot;,\n  &quot;imageUrl&quot;: &quot;http://127.0.0.1:53586/image&quot;,\n  &quot;imageSha256&quot;: &quot;4cc041b088fa99b4503df38fe4e3fc532f9698d1a71f4c19eb86b97ff49edbf5&quot;\n}</pre>\n\n![Decisive screenshot](http://127.0.0.1:53586/image)\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n### DOC: One readable record\n\nKind: document; surface: http://127.0.0.1:53586/business\n\nExpected read-back: Records: 1\n\n**generate**\n\n<pre>{\n  &quot;name&quot;: &quot;generate&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;from pathlib import Path; Path(&#x27;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.html&#x27;).write_text(\\&quot;&lt;title&gt;Report&lt;/title&gt;&lt;h1&gt;Records: 1&lt;/h1&gt;\\&quot;); print(\\&quot;Report generated\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Report generated&quot;,\n  &quot;observed&quot;: &quot;Report generated&quot;\n}</pre>\n\n**render**\n\n<pre>{\n  &quot;name&quot;: &quot;render&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node&quot;,\n    &quot;/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-ticket-11/microsoft-agent-framework-work-package-pilot/tests/publication_browser.cjs&quot;,\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright&quot;,\n    &quot;http://127.0.0.1:53586/document&quot;,\n    &quot;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.png&quot;,\n    &quot;render&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>\n\n**inspect**\n\n<pre>{\n  &quot;name&quot;: &quot;inspect&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;from pathlib import Path; assert \\&quot;&lt;h1&gt;Records: 1&lt;/h1&gt;\\&quot; in Path(&#x27;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.html&#x27;).read_text(); print(\\&quot;Records: 1\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; assert \\&quot;&lt;h1&gt;Records: 1&lt;/h1&gt;\\&quot; in urllib.request.urlopen(&#x27;http://127.0.0.1:53586/document&#x27;).read().decode(); print(\\&quot;Records: 1\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>",
+        "title": "Implement greeting",
+        "branch": "codex/issue-59",
+        "entries": [
+          {
+            "id": "REST",
+            "kind": "rest",
+            "phases": [
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "import urllib.request; print(urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:53586/business',data=b'{\"id\":\"one\"}',method=\"POST\")).read().decode())"
+                ],
+                "name": "request",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "{\"count\": 1}",
+                "observed": "{\"count\": 1}"
+              },
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:53586/business').read().decode())"
+                ],
+                "name": "response",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "{\"count\": 1}",
+                "observed": "{\"count\": 1}"
+              },
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:53586/business').read().decode())"
+                ],
+                "name": "read-back",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "{\"count\": 1}",
+                "observed": "{\"count\": 1}"
+              }
+            ],
+            "surface": "http://127.0.0.1:53586/business",
+            "description": "One readable record",
+            "expectedReadBack": "{\"count\": 1}"
+          },
+          {
+            "id": "REPEAT",
+            "kind": "idempotency",
+            "phases": [
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "import urllib.request; print(urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:53586/business',data=b'{\"id\":\"one\"}',method=\"POST\")).read().decode())"
+                ],
+                "name": "request",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "{\"count\": 1}",
+                "observed": "{\"count\": 1}"
+              },
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:53586/business').read().decode())"
+                ],
+                "name": "response",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "{\"count\": 1}",
+                "observed": "{\"count\": 1}"
+              },
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "import urllib.request; print(urllib.request.urlopen(urllib.request.Request('http://127.0.0.1:53586/business',data=b'{\"id\":\"one\"}',method=\"POST\")).read().decode())"
+                ],
+                "name": "repeat",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "{\"count\": 1}",
+                "observed": "{\"count\": 1}"
+              },
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:53586/business').read().decode())"
+                ],
+                "name": "read-back",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "{\"count\": 1}",
+                "observed": "{\"count\": 1}"
+              }
+            ],
+            "surface": "http://127.0.0.1:53586/business",
+            "description": "One readable record",
+            "expectedReadBack": "{\"count\": 1}"
+          },
+          {
+            "id": "UI",
+            "kind": "ui",
+            "phases": [
+              {
+                "argv": [
+                  "/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                  "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-ticket-11/microsoft-agent-framework-work-package-pilot/tests/publication_browser.cjs",
+                  "/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright",
+                  "http://127.0.0.1:53586/app",
+                  "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/evidence.png",
+                  "interact"
+                ],
+                "name": "interaction",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "Records: 1",
+                "observed": "Records: 1"
+              },
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "from pathlib import Path; assert Path('/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/evidence.png').read_bytes().startswith(b\"\\x89PNG\"); print(\"Rendered record count: 1\")"
+                ],
+                "name": "screenshot",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "Rendered record count: 1",
+                "imageUrl": "http://127.0.0.1:53586/image",
+                "observed": "Rendered record count: 1",
+                "imageSha256": "4cc041b088fa99b4503df38fe4e3fc532f9698d1a71f4c19eb86b97ff49edbf5"
+              },
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "import urllib.request; print(urllib.request.urlopen('http://127.0.0.1:53586/business').read().decode())"
+                ],
+                "name": "read-back",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "{\"count\": 1}",
+                "observed": "{\"count\": 1}"
+              }
+            ],
+            "surface": "http://127.0.0.1:53586/business",
+            "description": "One readable record",
+            "expectedReadBack": "{\"count\": 1}"
+          },
+          {
+            "id": "DOC",
+            "kind": "document",
+            "phases": [
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "from pathlib import Path; Path('/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.html').write_text(\"<title>Report</title><h1>Records: 1</h1>\"); print(\"Report generated\")"
+                ],
+                "name": "generate",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "Report generated",
+                "observed": "Report generated"
+              },
+              {
+                "argv": [
+                  "/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node",
+                  "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-ticket-11/microsoft-agent-framework-work-package-pilot/tests/publication_browser.cjs",
+                  "/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright",
+                  "http://127.0.0.1:53586/document",
+                  "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.png",
+                  "render"
+                ],
+                "name": "render",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "Records: 1",
+                "observed": "Records: 1"
+              },
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "from pathlib import Path; assert \"<h1>Records: 1</h1>\" in Path('/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.html').read_text(); print(\"Records: 1\")"
+                ],
+                "name": "inspect",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "Records: 1",
+                "observed": "Records: 1"
+              },
+              {
+                "argv": [
+                  "/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python",
+                  "-B",
+                  "-c",
+                  "import urllib.request; assert \"<h1>Records: 1</h1>\" in urllib.request.urlopen('http://127.0.0.1:53586/document').read().decode(); print(\"Records: 1\")"
+                ],
+                "name": "read-back",
+                "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+                "expected": "Records: 1",
+                "observed": "Records: 1"
+              }
+            ],
+            "surface": "http://127.0.0.1:53586/business",
+            "description": "One readable record",
+            "expectedReadBack": "Records: 1"
+          }
+        ],
+        "headSha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+        "baseBranch": "main"
+      },
+      "dispatched": true
+    }
+  },
+  "providerPullRequest": {
+    "number": 1,
+    "state": "open",
+    "draft": true,
+    "body": "<!-- wpcp-run:594d67d2-c075-44bb-bf7c-2e96ca1f86c0 -->\n\nCloses #59\n\nEvidence for commit/head `5bd51219b38962cb33252ca6d12cf5babd0d6391`.\n\nReview qualification is a separate gate.\n\n### REST: One readable record\n\nKind: rest; surface: http://127.0.0.1:53586/business\n\nExpected read-back: {\"count\": 1}\n\n**request**\n\n<pre>{\n  &quot;name&quot;: &quot;request&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(urllib.request.Request(&#x27;http://127.0.0.1:53586/business&#x27;,data=b&#x27;{\\&quot;id\\&quot;:\\&quot;one\\&quot;}&#x27;,method=\\&quot;POST\\&quot;)).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**response**\n\n<pre>{\n  &quot;name&quot;: &quot;response&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n### REPEAT: One readable record\n\nKind: idempotency; surface: http://127.0.0.1:53586/business\n\nExpected read-back: {\"count\": 1}\n\n**request**\n\n<pre>{\n  &quot;name&quot;: &quot;request&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(urllib.request.Request(&#x27;http://127.0.0.1:53586/business&#x27;,data=b&#x27;{\\&quot;id\\&quot;:\\&quot;one\\&quot;}&#x27;,method=\\&quot;POST\\&quot;)).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**response**\n\n<pre>{\n  &quot;name&quot;: &quot;response&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**repeat**\n\n<pre>{\n  &quot;name&quot;: &quot;repeat&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(urllib.request.Request(&#x27;http://127.0.0.1:53586/business&#x27;,data=b&#x27;{\\&quot;id\\&quot;:\\&quot;one\\&quot;}&#x27;,method=\\&quot;POST\\&quot;)).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n### UI: One readable record\n\nKind: ui; surface: http://127.0.0.1:53586/business\n\nExpected read-back: {\"count\": 1}\n\n**interaction**\n\n<pre>{\n  &quot;name&quot;: &quot;interaction&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node&quot;,\n    &quot;/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-ticket-11/microsoft-agent-framework-work-package-pilot/tests/publication_browser.cjs&quot;,\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright&quot;,\n    &quot;http://127.0.0.1:53586/app&quot;,\n    &quot;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/evidence.png&quot;,\n    &quot;interact&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>\n\n**screenshot**\n\n<pre>{\n  &quot;name&quot;: &quot;screenshot&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;from pathlib import Path; assert Path(&#x27;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/evidence.png&#x27;).read_bytes().startswith(b\\&quot;\\\\x89PNG\\&quot;); print(\\&quot;Rendered record count: 1\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Rendered record count: 1&quot;,\n  &quot;observed&quot;: &quot;Rendered record count: 1&quot;,\n  &quot;imageUrl&quot;: &quot;http://127.0.0.1:53586/image&quot;,\n  &quot;imageSha256&quot;: &quot;4cc041b088fa99b4503df38fe4e3fc532f9698d1a71f4c19eb86b97ff49edbf5&quot;\n}</pre>\n\n![Decisive screenshot](http://127.0.0.1:53586/image)\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; print(urllib.request.urlopen(&#x27;http://127.0.0.1:53586/business&#x27;).read().decode())&quot;\n  ],\n  &quot;expected&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;,\n  &quot;observed&quot;: &quot;{\\&quot;count\\&quot;: 1}&quot;\n}</pre>\n\n### DOC: One readable record\n\nKind: document; surface: http://127.0.0.1:53586/business\n\nExpected read-back: Records: 1\n\n**generate**\n\n<pre>{\n  &quot;name&quot;: &quot;generate&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;from pathlib import Path; Path(&#x27;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.html&#x27;).write_text(\\&quot;&lt;title&gt;Report&lt;/title&gt;&lt;h1&gt;Records: 1&lt;/h1&gt;\\&quot;); print(\\&quot;Report generated\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Report generated&quot;,\n  &quot;observed&quot;: &quot;Report generated&quot;\n}</pre>\n\n**render**\n\n<pre>{\n  &quot;name&quot;: &quot;render&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin/node&quot;,\n    &quot;/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-ticket-11/microsoft-agent-framework-work-package-pilot/tests/publication_browser.cjs&quot;,\n    &quot;/Users/dh/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright&quot;,\n    &quot;http://127.0.0.1:53586/document&quot;,\n    &quot;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.png&quot;,\n    &quot;render&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>\n\n**inspect**\n\n<pre>{\n  &quot;name&quot;: &quot;inspect&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;from pathlib import Path; assert \\&quot;&lt;h1&gt;Records: 1&lt;/h1&gt;\\&quot; in Path(&#x27;/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/wpcp-control-himidds8/594d67d2-c075-44bb-bf7c-2e96ca1f86c0/document.html&#x27;).read_text(); print(\\&quot;Records: 1\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;5bd51219b38962cb33252ca6d12cf5babd0d6391&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpNSdLa5/bin/python&quot;,\n    &quot;-B&quot;,\n    &quot;-c&quot;,\n    &quot;import urllib.request; assert \\&quot;&lt;h1&gt;Records: 1&lt;/h1&gt;\\&quot; in urllib.request.urlopen(&#x27;http://127.0.0.1:53586/document&#x27;).read().decode(); print(\\&quot;Records: 1\\&quot;)&quot;\n  ],\n  &quot;expected&quot;: &quot;Records: 1&quot;,\n  &quot;observed&quot;: &quot;Records: 1&quot;\n}</pre>",
+    "title": "Implement greeting",
+    "html_url": "http://127.0.0.1:53586/pull/1",
+    "head": {
+      "ref": "codex/issue-59",
+      "sha": "5bd51219b38962cb33252ca6d12cf5babd0d6391",
+      "repo": {
+        "id": 9001
+      }
+    },
+    "base": {
+      "ref": "main",
+      "repo": {
+        "id": 9001
+      }
+    }
+  }
+}
