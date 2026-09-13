@@ -1,0 +1,169 @@
+diff --git a/src/compiler/extraction-phase.ts b/src/compiler/extraction-phase.ts
+index 6e0c4fe..9d2d843 100644
+--- a/src/compiler/extraction-phase.ts
++++ b/src/compiler/extraction-phase.ts
+@@ -51,12 +51,13 @@ async function extractSourcesLimited(
+   root: string,
+   files: string[],
+   limit: ReturnType<typeof pLimit>,
++  onFailure?: import("../utils/types.js").CompileOptions["onBoundedFailure"],
+ ): Promise<ExtractionResult[]> {
+   let aborted = false;
+   return Promise.all(files.map((file) => limit(async () => {
+     if (aborted) throw new Error(`extraction skipped for ${file}: a prior source failed`);
+     try {
+-      return await extractForSource(root, file);
++      return await extractForSource(root, file, onFailure);
+     } catch (err) {
+       aborted = true;
+       throw err;
+@@ -89,9 +90,10 @@ export async function runExtractionPhases(
+   state: WikiState,
+   changeSets: ChangeSets,
+   concurrency: number,
++  onFailure?: import("../utils/types.js").CompileOptions["onBoundedFailure"],
+ ): Promise<ExtractionResult[]> {
+   const limit = pLimit(concurrency);
+-  const extractions = await extractSourcesLimited(root, toCompile.map((c) => c.file), limit);
++  const extractions = await extractSourcesLimited(root, toCompile.map((c) => c.file), limit, onFailure);
+ 
+   while (true) {
+     const extracted = new Set(extractions.map((result) => result.sourceFile));
+@@ -102,7 +104,7 @@ export async function runExtractionPhases(
+     for (const file of lateAffected) {
+       output.status("~", output.info(`${file} [shares concept with new source]`));
+     }
+-    const batch = await extractSourcesLimited(root, lateAffected, limit);
++    const batch = await extractSourcesLimited(root, lateAffected, limit, onFailure);
+     extractions.push(...batch);
+   }
+ 
+@@ -116,6 +118,7 @@ export async function runExtractionPhases(
+ async function extractForSource(
+   root: string,
+   sourceFile: string,
++  onFailure?: import("../utils/types.js").CompileOptions["onBoundedFailure"],
+ ): Promise<ExtractionResult> {
+   output.status("*", output.info(`Extracting: ${sourceFile}`));
+ 
+@@ -125,7 +128,16 @@ async function extractForSource(
+   const chars = sourceContent.length;
+   verbose(`source ${sourceFile}: ${lines} lines, ${chars} chars`);
+   const existingIndex = await readConfinedExtractionIndex(root);
+-  const concepts = await extractConcepts(sourceContent, existingIndex);
++  let concepts: ExtractedConcept[];
++  try {
++    concepts = await extractConcepts(sourceContent, existingIndex);
++  } catch (error) {
++    if (!onFailure) throw error;
++    onFailure({ phase: "extract", id: sourceFile, sources: [sourceFile], error: String(error) });
++    concepts = [];
++  }
++  if (!concepts.length && onFailure)
++    onFailure({ phase: "extract", id: sourceFile, sources: [sourceFile], error: "No concepts extracted" });
+ 
+   if (concepts.length > 0) {
+     const names = concepts.map((c) => c.concept).join(", ");
+diff --git a/src/compiler/index.ts b/src/compiler/index.ts
+index 6b8b2ab..0b6a83d 100644
+--- a/src/compiler/index.ts
++++ b/src/compiler/index.ts
+@@ -188,8 +188,11 @@ async function generatePagesPhase(
+   const errors: string[] = [];
+   const candidates: string[] = [];
+   const review = { held: [] as ReviewedCandidateRef[], forced: [] as ReviewedCandidateRef[] };
+-  for (const { result } of outcomes) {
+-    if (result.error) errors.push(result.error);
++  for (const { entry, result } of outcomes) {
++    if (result.error) {
++      errors.push(result.error);
++      options.onBoundedFailure?.({ phase: "page", id: entry.slug, sources: entry.sourceFiles, error: result.error });
++    }
+     if (result.candidate) {
+       candidates.push(result.candidate.id);
+       review[result.candidate.mode].push(result.candidate.ref);
+@@ -472,7 +475,7 @@ async function runCompilePipeline(
+   // extraction and page-generation fan-outs identically.
+   const concurrency = resolveCompileConcurrency(options.concurrency);
+   const extractions = await runExtractionPhases(
+-    root, buckets.toCompile, state, { scoped: changes, detected }, concurrency,
++    root, buckets.toCompile, state, { scoped: changes, detected }, concurrency, options.onBoundedFailure,
+   );
+   if (!options.review) {
+     freezeFailedExtractions(draft, extractions, frozenSlugs);
+diff --git a/src/compiler/page-renderer.ts b/src/compiler/page-renderer.ts
+index bf62f7a..e5ef4a9 100644
+--- a/src/compiler/page-renderer.ts
++++ b/src/compiler/page-renderer.ts
+@@ -48,6 +48,7 @@ export async function renderMergedPageContent(
+   root: string,
+   entry: RenderableConcept,
+   schema: SchemaConfig,
++  onFailure?: import("../utils/types.js").CompileOptions["onBoundedFailure"],
+ ): Promise<string> {
+   const existingPage = await readWikiPageContentOrWarn(
+     root, CONCEPTS_DIR, entry.slug, false /* new page — absence is normal */,
+@@ -61,13 +62,21 @@ export async function renderMergedPageContent(
+     relatedPages,
+   );
+ 
+-  const rawPageBody = await callClaude({
++  let rawPageBody: string;
++  try {
++    rawPageBody = await callClaude({
+     system,
+     messages: [
+       { role: "user", content: `Write the wiki page for "${entry.concept.concept}".` },
+     ],
+   });
+ 
++  } catch (error) {
++    if (!onFailure) throw error;
++    onFailure({ phase: "page", id: entry.slug, sources: entry.sourceFiles, error: String(error) });
++    return "";
++  }
++
+   const pageBody = normalizeCitationsInBody(
+     rawPageBody,
+     entry.sourceFiles,
+diff --git a/src/compiler/review-pipeline.ts b/src/compiler/review-pipeline.ts
+index ef473bc..15b27d2 100644
+--- a/src/compiler/review-pipeline.ts
++++ b/src/compiler/review-pipeline.ts
+@@ -66,7 +66,7 @@ export async function generateMergedPage(
+   sourceStates: SourceStateMap,
+   policy: ReviewPolicy,
+ ): Promise<MergedPageOutcome> {
+-  const fullPage = await renderMergedPageContent(root, entry, schema);
++  const fullPage = await renderMergedPageContent(root, entry, schema, options.onBoundedFailure);
+   const diagnostics = await collectReviewDiagnostics(root, entry, fullPage, schema);
+   const signals = buildPolicySignals(fullPage, diagnostics);
+   const reasons = evaluatePolicy(signals, policy);
+diff --git a/src/sdk/types.ts b/src/sdk/types.ts
+index 0cef57c..8d0aff6 100644
+--- a/src/sdk/types.ts
++++ b/src/sdk/types.ts
+@@ -77,6 +77,9 @@ export interface CreateWikiOptions {
+ 
+ /** Compile options exposed through the SDK. A public subset of the core CompileOptions shape. */
+ export interface SdkCompileOptions {
++  /** Host opts into bounded provider failures; shared filesystem/runtime errors still throw. */
++  onBoundedFailure?: (failure: { phase: "extract" | "page"; id: string; sources: string[]; error: string }) => void;
++
+   /** Write generated pages as candidates for review instead of mutating wiki/. */
+   review?: boolean;
+   /**
+diff --git a/src/utils/types.ts b/src/utils/types.ts
+index 4d8193b..8b3ca2e 100644
+--- a/src/utils/types.ts
++++ b/src/utils/types.ts
+@@ -176,6 +176,9 @@ export interface ReviewedCandidateRef {
+ 
+ /** Optional behaviour controls for the compile pipeline. */
+ export interface CompileOptions {
++  /** Host opts into bounded provider failures; shared filesystem/runtime errors still throw. */
++  onBoundedFailure?: (failure: { phase: "extract" | "page"; id: string; sources: string[]; error: string }) => void;
++
+   /**
+    * Write generated pages as candidates under .llmwiki/candidates/ instead
+    * of mutating wiki/. Reviewers approve/reject via `llmwiki review`.

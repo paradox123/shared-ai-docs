@@ -37,7 +37,9 @@ export async function invoke(
 }
 export async function fixture(respond?: (body: any) => any) {
   const dir = await realpath(
-    await mkdtemp(path.join(os.tmpdir(), "wiki-behavior-")),
+    await mkdtemp(
+      path.join(process.env.WIKI_TEST_ROOT || os.tmpdir(), "wiki-behavior-"),
+    ),
   );
   for (const repo of ["alpha", "beta"]) {
     await mkdir(path.join(dir, repo));
@@ -79,7 +81,7 @@ export async function fixture(respond?: (body: any) => any) {
   const configPath = path.join(dir, "config.json");
   await writeFile(configPath, JSON.stringify(config));
   let calls: any[] = [];
-  let failure = false;
+  let failure: boolean | ((body: any) => boolean) = false;
   let delay = 0;
   const server = http.createServer(async (req, res) => {
     let raw = "";
@@ -87,7 +89,7 @@ export async function fixture(respond?: (body: any) => any) {
     const body = JSON.parse(raw);
     calls.push(body);
     if (delay) await new Promise((r) => setTimeout(r, delay));
-    if (failure) {
+    if (typeof failure === "function" ? failure(body) : failure) {
       res.writeHead(400, { "Content-Type": "application/json" });
       res.end(
         JSON.stringify({ error: { message: "controlled provider failure" } }),
@@ -195,7 +197,7 @@ export async function fixture(respond?: (body: any) => any) {
     configPath,
     env,
     calls,
-    fail: (value: boolean) => (failure = value),
+    fail: (value: boolean | ((body: any) => boolean)) => (failure = value),
     delay: (ms: number) => (delay = ms),
     close: () => new Promise<void>((r) => server.close(() => r())),
     run: (command: string, ...args: string[]) =>

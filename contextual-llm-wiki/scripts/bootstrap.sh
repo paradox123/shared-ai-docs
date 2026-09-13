@@ -11,11 +11,12 @@ if [[ ! -d .runtime/compiler/.git ]]; then
   git -C .runtime/compiler -c core.hooksPath=/dev/null checkout "$pin"
 fi
 [[ $(git -C .runtime/compiler rev-parse HEAD) == "$pin" ]] || { echo 'Compiler pin mismatch' >&2; exit 1; }
-patch="$base/patches/0001-host-completion-without-embeddings.patch"
-if git -C .runtime/compiler apply --check "$patch" 2>/dev/null; then
-  git -C .runtime/compiler apply "$patch"
-else
-  git -C .runtime/compiler apply --reverse --check "$patch"
-fi
+for patch in "$base"/patches/*.patch; do
+  if git -C .runtime/compiler apply --check "$patch" 2>/dev/null; then
+    git -C .runtime/compiler apply "$patch"
+  else
+    git -C .runtime/compiler apply --reverse --check "$patch"
+  fi
+done
 HUSKY=0 npm --prefix .runtime/compiler ci --ignore-scripts --no-audit --no-fund
 npm --prefix .runtime/compiler run build

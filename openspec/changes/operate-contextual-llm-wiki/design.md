@@ -24,6 +24,16 @@ Der bestehende lokale Job bleibt täglich um 07:00 mit den vorhandenen Modell-, 
 
 Daniel hat die Fortsetzung unabhängiger Arbeit bei begrenzten Fehlern grundsätzlich bestätigt. Ein Fehler sperrt die betroffenen Aussagen und davon abhängige Schritte; unabhängige Pflege und sicher ausführbare QMD-Wartung können weiterlaufen. Der Gesamtbericht meldet Teilfehler mit offenem Arbeitsumfang, niemals vollständigen Erfolg. Ein Scanfehler ist kein bestätigter Quellenentzug; gemeinsame Runtime-/Indexfehler oder unbestimmbare Abhängigkeiten blockieren die davon betroffenen Arbeiten.
 
+### Umsetzung der Teilfehlerfortsetzung (Ticket 03)
+
+Der gepinnte Compiler erhält einen optionalen Host-Callback für Fehler an den Providergrenzen der Quellenextraktion und Seitengenerierung. Validierungsfehler nennen ebenfalls ihre Quellen; gemeinsame Dateisystem-/Runtime-Fehler werden weiterhin geworfen. Die verwaltete Pflege kompiliert aus aktuellen Fachquellen ohne frühere Wiki-Seiten als unprotokollierten Modellkontext. Gemeinsame Quellenbesitzer und gespeicherte Seitenabhängigkeiten bestimmen konservativ den gesperrten Zweig. Fehlt bei einer fehlgeschlagenen Extraktion die bisherige Zuordnung, wird keine unabhängige Veröffentlichung behauptet.
+
+Komplett vorbereitete unabhängige Seiten werden veröffentlicht. Gesperrte Seiten behalten ihre Metadaten für die Wiederaufnahme; ihre Dateien werden aus der aktiven Ausgabe entfernt. Fehlgeschlagene Quellen erhalten Retry-Marker im Compilerzustand. Antworten werden in Abhängigkeitsreihenfolge erneuert; ein Antwortfehler sperrt seine Nachfolger. Bei einer bekannten Quellenentfernung dürfen nicht mehr belegte Antworten wie bisher entfallen; fehlende Abhängigkeitsdatensätze sind dagegen offene Fehler.
+
+`publicationVersion: 2` kennzeichnet den aus vollständigen Fachquellen abgeleiteten Zustand ohne versteckte Nachbarseitenabhängigkeiten. Ältere veröffentlichte Zustände werden einmal neu aufgebaut, bevor unabhängige Wiederverwendung zugesichert wird. Das führt keine Migration zwischen den bisherigen getrennten Ausgaben durch.
+
+Jeder Wiki-Aufruf behält einen lokalen JSON-Laufbericht, der Compiler zusätzlich sein Rohresultat und begrenzte Fehler. Der Helper bewahrt Prozess-stdout, stderr und Exitcode und prüft die Übereinstimmung mit dem lokalen Wiki-Bericht. Teilfehler erlauben QMD nur mit expliziter Eignung und passenden Status-/Lint-Audits; vollständiger Erfolg und `lastCompleted` werden erst ohne offene Arbeit ausgewiesen. Der Live-Job bleibt Ticket 04 vorbehalten.
+
 ### Quellenautorität und Kontextdateien
 
 Originalrepos bleiben Fachquellen an ihren bestehenden Orten. Generated Wiki-Seiten sind abgeleitete Evidenz, keine neuen Agent-Anweisungen und kein Ersatz für gültige Anforderungen oder ADRs. Die verwaltete Query prüft relevante Originalstände, nutzt passende aktuelle Wiki-Evidenz und fällt bei Lücken auf aktuelle Quellen zurück. Skills und Repo-Einstiege erhalten später kurze Verweise gemäß dem aktualisierten Katalog.

@@ -29,7 +29,7 @@ if step == os.environ.get('FAIL'):
 if kind == 'reconcile': result = {'status':'ok'}
 elif kind == 'wiki':
     result = {'ok':True}
-    if sys.argv[1] == 'maintain': result.update(noop=True, pages=[])
+    if sys.argv[1] == 'maintain': result.update(noop=True, pages=[], qmdSafe=True, completed=[], unchanged=[], pending=[], failures=[])
     if sys.argv[1] == 'status': result.update(pending=[], review=[], changes={'added':[], 'changed':[], 'removed':[]}, pages=[], sourceCount=0, lastCompleted='2026-09-13T00:00:00Z')
     if sys.argv[1] == 'lint': result.update(pending=[], review=[], activeIssues=[], unresolvedCompilerErrors=[], forbiddenStores=[])
 else: result = {'qmd':sys.argv[1]}
@@ -38,7 +38,26 @@ if step == os.environ.get('MALFORMED'):
     sys.exit(0)
 if step == os.environ.get('INVALID'):
     result = json.loads(os.environ['RESPONSE'])
+if step == 'wiki:maintain' and os.environ.get('PARTIAL'):
+    result = {'ok':False, 'qmdSafe':True, 'pages':[], 'changes':{'added':[], 'changed':['alpha.md'], 'removed':[]},
+              'completed':['concepts/control'], 'unchanged':[], 'failures':[{'error':'broken branch'}],
+              'pending':[{'phase':'compile', 'sources':['alpha.md'], 'pages':['concepts/affected']}], 'error':'broken branch'}
+if kind == 'wiki' and sys.argv[1] in ['status', 'lint'] and os.environ.get('PARTIAL'):
+    result.update(pending=[{'phase':'compile', 'sources':['alpha.md'], 'pages':['concepts/affected']}],
+                  review=[{'id':'concepts/affected'}])
+    if sys.argv[1] == 'status':
+        result.update(changes={'added':[], 'changed':['alpha.md'], 'removed':[]},
+                      pages=[{'id':'concepts/affected', 'withdrawn':True}])
+    else: result['ok'] = False
+if step == 'wiki:maintain' and isinstance(result, dict):
+    artifact = Path(os.environ['CALLS']).parent / 'wiki-report.json'
+    result['report'] = str(artifact)
+    if os.environ.get('DROP_FIELD'): result.pop(os.environ['DROP_FIELD'], None)
+    artifact.write_text(json.dumps(result))
+    if os.environ.get('BROKEN_REPORT') == 'missing': artifact.unlink()
+    if os.environ.get('BROKEN_REPORT') == 'invalid': artifact.write_text('not json')
 print(json.dumps(result))
+if step == 'wiki:maintain' and os.environ.get('PARTIAL'): sys.exit(1)
 ''')
         peer.chmod(0o755)
         for name in ['wiki', 'qmd', 'reconcile']:
@@ -80,6 +99,17 @@ print(json.dumps(result))
                 self.assertFalse(report['ok'])
                 self.assertNotIn('qmd:update', (self.root / 'calls').read_text())
 
+    def test_verified_partial_run_continues_qmd_but_retains_failure_and_pending_work(self):
+        self.env['PARTIAL'] = '1'
+        p, report = self.run_job()
+        self.assertNotEqual(p.returncode, 0)
+        self.assertFalse(report['ok'])
+        self.assertIn('qmd:embed', (self.root / 'calls').read_text())
+        self.assertEqual(report['contexts'][0]['pending'][0]['sources'], ['alpha.md'])
+        self.assertEqual(report['contexts'][0]['completed'], ['concepts/control'])
+        self.assertEqual((self.root / 'run/03-maintain-test.exitcode').read_text(), '1\n')
+        self.assertIn('broken branch', (self.root / 'run/03-maintain-test.stdout').read_text())
+
     def test_failed_command_retains_exit_and_stderr_and_blocks_embed(self):
         self.env['FAIL'] = 'qmd:update'
         p, report = self.run_job()
@@ -88,6 +118,23 @@ print(json.dumps(result))
         self.assertEqual((self.root / 'run/06-qmd-update.exitcode').read_text(), '7\n')
         self.assertIn('forced failure', (self.root / 'run/06-qmd-update.stderr').read_text())
         self.assertNotIn('qmd:embed', (self.root / 'calls').read_text())
+
+    def test_missing_result_fields_or_run_reports_never_authorize_qmd(self):
+        for i, (key, value) in enumerate([
+            ('DROP_FIELD', 'pending'), ('DROP_FIELD', 'completed'),
+            ('DROP_FIELD', 'failures'), ('DROP_FIELD', 'qmdSafe'),
+            ('DROP_FIELD', 'report'), ('BROKEN_REPORT', 'missing'),
+            ('BROKEN_REPORT', 'invalid'),
+        ]):
+            with self.subTest(key=key, value=value):
+                (self.root / 'calls').write_text('')
+                self.env.pop('DROP_FIELD', None)
+                self.env.pop('BROKEN_REPORT', None)
+                self.env[key] = value
+                p, report = self.run_job('missing-' + str(i))
+                self.assertNotEqual(p.returncode, 0)
+                self.assertFalse(report['ok'])
+                self.assertNotIn('qmd:update', (self.root / 'calls').read_text())
 
     def test_malformed_json_blocks_following_commands(self):
         self.env['MALFORMED'] = 'wiki:maintain'

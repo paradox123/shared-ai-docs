@@ -22,6 +22,12 @@ The maintenance helper MUST serialize runs, persist command stdout, stderr and e
 - **AND** independent maintenance can complete with a partial-failure report
 - **AND** QMD work proceeds only over states whose eligibility can be established
 
+#### Scenario: Repair after an isolated failure
+- **WHEN** an established dependency branch fails while an independent source is corrected
+- **THEN** the independent page is published and indexed, but directly and transitively dependent concepts and saved answers remain unavailable as current wiki evidence
+- **AND** local run evidence records completed, unchanged, failed and pending work with a non-success exit
+- **AND** after repair only pending compilation is retried and the next unchanged run is a no-op
+
 #### Scenario: Shared failure or unknown dependencies
 - **WHEN** a shared runtime or index fails, or the affected work cannot be safely separated
 - **THEN** the operations depending on that failed prerequisite stop visibly
