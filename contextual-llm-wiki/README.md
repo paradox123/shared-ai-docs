@@ -2,7 +2,7 @@
 
 Diese lokale CLI verbindet bestehende Markdown-Fachrepos mit Atomicstratas Compiler am Commit `34ca1df97b3e60a6700048c48c7cf70c92a9bfdb`. Sie erzeugt eine gemeinsame Markdown-Wissensschicht, verfolgt Quellen- und Antwortabhängigkeiten und verwendet ausschließlich QMD für persistiertes Retrieval.
 
-Originalrepos werden gelesen, einschließlich nicht committeter Markdown-Änderungen. Pflege erfolgt ausdrücklich. Es werden keine Automationen, Watcher, Git-Repos für das Wiki oder Cloud-Dienste angelegt.
+Originalrepos werden gelesen, einschließlich nicht committeter Markdown-Änderungen. Die CLI pflegt über `maintain`; auf Daniels Mac ruft die bestehende tägliche QMD-Automation diesen Befehl auf. [Betrieb, Protokolle und manueller Start](OPERATIONS.md). Ein Merge oder eine Query löst selbst keine Pflege aus. Das Wiki erhält keinen eigenen Watcher, Git-Repo oder Cloud-Dienst.
 
 ## Einrichtung
 

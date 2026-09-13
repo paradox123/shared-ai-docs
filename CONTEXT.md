@@ -120,3 +120,11 @@ _Avoid_: Blosse Quellensammlung, Kopie einer Fachseite
 **Quellenabhängigkeit**:
 Die Beziehung zwischen einer abgeleiteten Aussage und den Fachquellen oder weiteren abgeleiteten Aussagen, auf denen sie beruht. Sie macht sichtbar, welche Aussage bei einer Quellenaenderung erneut geprueft werden muss.
 _Avoid_: Beliebiger Querverweis, reine Themengleichheit
+
+**Wiki-Pflegeumfang**:
+Die Menge der Fachquellen, deren abgeleitete Inhalte im gemeinsamen Wiki regelmaessig aktualisiert werden sollen. Sie ist unabhaengig davon, welche Quellen fuer eine einzelne Abfrage fachlich relevant sind.
+_Avoid_: Abfragefreigabe, nur der gerade abgefragte Kontext
+
+**Privater Tätigkeitsbereich**:
+Der Lebens- und Aufgabenbereich fuer persoenliche Belange wie Vermietung oder Portfoliopflege. Die Bezeichnung „privat“ ordnet Informationen fachlich zu und begruendet fuer sich keine Zugriffs-, Verknuepfungs- oder Sichtbarkeitsbeschraenkung.
+_Avoid_: Vertraulichkeitsstufe, gesperrter Wissensbestand, separates Privat-Wiki
