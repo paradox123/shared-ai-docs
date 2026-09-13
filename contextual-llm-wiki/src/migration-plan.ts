@@ -1,5 +1,6 @@
 import path from "node:path";
 import { hash } from "./storage.ts";
+import { mapMarkdownProse } from "./markdown-prose.ts";
 
 function remapBody(
   body: string,
@@ -10,42 +11,44 @@ function remapBody(
 ) {
   const links: any[] = [];
   // Only navigation and evidence-version references change; original prose stays intact.
-  const text = body.replace(
-    /\[([^\]]+)\]\(([^)]+)\)( @ [a-f0-9]{64})?/g,
-    (whole, label, target, version) => {
-      if (/^(?:[a-z][a-z0-9+.-]*:|#)/i.test(target)) return whole;
-      const [file, anchor] = target.replace(/^<|>$/g, "").split("#");
-      let decoded;
-      try {
-        decoded = decodeURI(file);
-      } catch {
-        links.push({ target, action: "unresolved" });
-        return label;
-      }
-      const relativeFile = path.posix.normalize(
-        path.posix.join("wiki", path.posix.dirname(page.id), decoded),
-      );
-      const id = relativeFile.replace(/^wiki\//, "").replace(/\.md$/, "");
-      const resolved = mapping.get(id);
-      if (!resolved) {
-        if (files[relativeFile]) {
-          const uri =
-            "obsidian://open?path=" +
-            encodeURIComponent(path.join(snapshotRoot, relativeFile));
-          links.push({ target, destination: uri, action: "snapshot" });
-          return `[${label} (historisch)](${uri})${version || ""}`;
+  const text = mapMarkdownProse(body, (prose) =>
+    prose.replace(
+      /\[([^\]]+)\]\(([^)]+)\)( @ [a-f0-9]{64})?/g,
+      (whole, label, target, version) => {
+        if (/^(?:[a-z][a-z0-9+.-]*:|#)/i.test(target)) return whole;
+        const [file, anchor] = target.replace(/^<|>$/g, "").split("#");
+        let decoded;
+        try {
+          decoded = decodeURI(file);
+        } catch {
+          links.push({ target, action: "unresolved" });
+          return label;
         }
-        links.push({ target, action: "unresolved" });
-        return label;
-      }
-      const relative = path.posix.relative(
-        path.posix.dirname(page.id),
-        resolved.id + ".md",
-      );
-      const destination = encodeURI(relative) + (anchor ? "#" + anchor : "");
-      links.push({ target, destination, action: "remapped" });
-      return `[${label}](${destination})${version ? " @ " + resolved.hash : ""}`;
-    },
+        const relativeFile = path.posix.normalize(
+          path.posix.join("wiki", path.posix.dirname(page.id), decoded),
+        );
+        const id = relativeFile.replace(/^wiki\//, "").replace(/\.md$/, "");
+        const resolved = mapping.get(id);
+        if (!resolved) {
+          if (files[relativeFile]) {
+            const uri =
+              "obsidian://open?path=" +
+              encodeURIComponent(path.join(snapshotRoot, relativeFile));
+            links.push({ target, destination: uri, action: "snapshot" });
+            return `[${label} (historisch)](${uri})${version || ""}`;
+          }
+          links.push({ target, action: "unresolved" });
+          return label;
+        }
+        const relative = path.posix.relative(
+          path.posix.dirname(page.id),
+          resolved.id + ".md",
+        );
+        const destination = encodeURI(relative) + (anchor ? "#" + anchor : "");
+        links.push({ target, destination, action: "remapped" });
+        return `[${label}](${destination})${version ? " @ " + resolved.hash : ""}`;
+      },
+    ),
   );
   return { body: text, links };
 }

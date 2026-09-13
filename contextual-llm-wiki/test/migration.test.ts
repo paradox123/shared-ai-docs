@@ -765,3 +765,56 @@ test("index-only retry of a fresh import needs no model compilation", async () =
     await f.close();
   }
 });
+
+test("migration preserves fenced and inline Markdown code examples byte for byte", async () => {
+  const f = await fixture();
+  try {
+    await f.run("maintain");
+    const concept = (await f.run("status")).pages.find(
+      (p: any) => p.kind === "concept",
+    );
+    const example =
+      "Inline: `[guide](guide.md)`.\n\n```markdown\n[guide](guide.md)\n[[Beispiel]]\n```\n\n    [guide](guide.md)\n";
+    const draft = path.join(f.dir, "example.json");
+    await writeFile(
+      draft,
+      JSON.stringify({
+        slug: "beispiel",
+        question: "Freigabe",
+        answer: example,
+        evidence: [{ id: concept.id, hash: concept.hash }],
+      }),
+    );
+    assert.equal((await f.run("save", "--draft", draft)).ok, true);
+    const legacy = f.config.output;
+    const before = await readFile(
+      path.join(legacy, "wiki/answers/beispiel.md"),
+      "utf8",
+    );
+    f.config.output = path.join(f.dir, "common");
+    f.config.context = "common";
+    await f.saveConfig();
+    const result = await f.run(
+      "migrate",
+      "--from",
+      legacy,
+      "--snapshot",
+      path.join(f.dir, "snapshot"),
+    );
+    assert.equal(result.ok, true, JSON.stringify(result));
+    const page = result.report.pages.find(
+      (p: any) => p.id === "answers/beispiel",
+    );
+    const after = await readFile(
+      path.join(f.config.output, "wiki", page.target + ".md"),
+      "utf8",
+    );
+    assert.equal(
+      after.split("## Verwendete Evidenz")[0],
+      before.split("## Verwendete Evidenz")[0],
+    );
+    assert.equal((await f.run("lint")).ok, true);
+  } finally {
+    await f.close();
+  }
+});
