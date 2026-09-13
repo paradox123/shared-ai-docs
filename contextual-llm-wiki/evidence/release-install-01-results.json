@@ -3,9 +3,9 @@
   "commit": "34ca1df97b3e60a6700048c48c7cf70c92a9bfdb",
   "success": {
     "schemaVersion": 1,
-    "candidate": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-update-llm-wiki-releases/contextual-llm-wiki/.runtime/release-acceptance-kwqfeaij/success",
+    "candidate": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-update-llm-wiki-releases/contextual-llm-wiki/.runtime/release-acceptance-120lxqez/success",
     "requestedRelease": "v1.3.0",
-    "createdAt": "2026-09-13T12:02:17.436182+00:00",
+    "createdAt": "2026-09-13T12:13:05.863210+00:00",
     "ok": true,
     "eligible": true,
     "checks": {
@@ -72,13 +72,13 @@
       }
     ],
     "compilerBuildSha256": "3cb7d55696586c8ce89f0bc8444b7f86b7dcf34e0531ba012bf21afcf31eca6b",
-    "wrapperSha256": "f954bd127851dfad1a633f9d62fe2d13456735137fa5f440292d6660b78f5238"
+    "wrapperSha256": "f757a65aa9086e53cb3f75369d4180a30628d1a20d0979160cec82a5cf5e38f8"
   },
   "failure": {
     "schemaVersion": 1,
-    "candidate": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-update-llm-wiki-releases/contextual-llm-wiki/.runtime/release-acceptance-kwqfeaij/failure",
+    "candidate": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-update-llm-wiki-releases/contextual-llm-wiki/.runtime/release-acceptance-120lxqez/failure",
     "requestedRelease": "v1.3.0",
-    "createdAt": "2026-09-13T12:03:41.944620+00:00",
+    "createdAt": "2026-09-13T12:16:30.970796+00:00",
     "ok": false,
     "eligible": false,
     "checks": {

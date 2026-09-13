@@ -57,6 +57,8 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 - [x] 6.1 Compiler-Release-Definition vereinheitlichen und bisherige CLI-Prüfung nachweisen.
 - [x] 6.2 Öffentlichen Kandidatenaufruf mit Release-Nachweis, exaktem Commit, unveränderten Lock-Eingängen und isolierter Installation testgetrieben umsetzen.
 - [x] 6.3 Build-/Integrationspflichtprüfungen und nicht erfolgreiche Fehlerberichte an den Kandidaten binden.
-- [ ] 6.4 Echten erfolgreichen und gezielt fehlschlagenden Aufruf nachweisen; Abnahme, Tests und Review dokumentieren.
+- [x] 6.4 Echten erfolgreichen und gezielt fehlschlagenden Aufruf nachweisen; Abnahme, Tests und Review dokumentieren.
 
 5.2/5.3 bleiben wegen Erkennung, Aktivierung und Rollback der Folgetickets offen.
+
+[Release-Ticket-01-Abnahme](../../../contextual-llm-wiki/evidence/release-install-01.md): reguläres Release v1.3.0 auf exakten Commit aufgelöst, frischer Kandidat mit unveränderten Lock-Eingängen und beiden Integrationspatches gebaut; 59 Upstream-/29 Integrationspflichtprüfungen bestanden. Fehlender Pflicht-Test blockiert Eignung trotz erfolgreicher Installation/Build. Öffentliche Fehler- und Review-Regressionsprüfungen sowie vollständiger `npm run check` bestanden; beide Review-Achsen haben keine offenen Findings. Aktive Installation im Worktree unverändert, Produktion/Automation nicht verwendet. Tickets 02/03 und Aufgaben 5.2/5.3 bleiben offen.
