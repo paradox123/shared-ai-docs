@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 import uuid
-from tests.publication_fixture import PublicationFixture, probe
+from tests.publication_fixture import PublicationFixture, git, probe
 from tests import test_control_plane_black_box as harness
 
 
@@ -64,4 +64,18 @@ class HeadQualificationAdapterTests(unittest.TestCase):
         self.assertEqual('review-completed', self.review()['state'])
         request = self.fixture.review_requests[0]
         self.assertEqual(self.fixture.base, request['baseSha'])
-        self.assertEqual(self.fixture.agent_content.strip(), request['input']['implementation']['greeting.py'])
+        self.assertEqual(self.fixture.agent_content, request['input']['implementation']['greeting.py'])
+
+    def test_review_source_preserves_unicode_and_whitespace_paths(self):
+        content = '  exact source text\n'
+        names = ['grüße.txt', '\tleading\nname.txt']
+        for name in names: (self.fixture.repo / name).write_text(content)
+        git(self.fixture.repo, 'add', '.')
+        git(self.fixture.repo, 'commit', '-qm', 'Add source with valid Git paths')
+        self.intent = self.call('evidence')['intent']
+        git(self.fixture.repo, 'push', '-q', 'origin', self.fixture.branch)
+        self.fixture.pulls[0]['head']['sha'] = self.intent['headSha']
+        self.fixture.pulls[0]['body'] = self.intent['body']
+        self.assertEqual('review-completed', self.review()['state'])
+        files = self.fixture.review_requests[0]['input']['implementation']
+        for name in names: self.assertEqual(content, files[name])

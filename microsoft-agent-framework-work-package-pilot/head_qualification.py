@@ -69,8 +69,8 @@ def review_input(plan, head, intent, fixture):
     validate_config(config)
     return redact({'requirements': config['requirements'], 'evidence': intent['entries'],
         'diff': git(plan, 'diff', plan['expectedBaseSha'], head),
-        'implementation': {path: git(plan, 'show', head + ':' + path) for path in
-            git(plan, 'diff', '--name-only', '--diff-filter=ACMR', plan['expectedBaseSha'], head).splitlines()},
+        'implementation': {path: git(plan, 'show', head + ':' + path, raw=True) for path in
+            git(plan, 'diff', '--name-only', '-z', '--diff-filter=ACMR', plan['expectedBaseSha'], head, raw=True).split('\0') if path},
         'guidance': {p: git(plan, 'show', head + ':' + p) for p in config['guidance']}}, fixture)
 
 

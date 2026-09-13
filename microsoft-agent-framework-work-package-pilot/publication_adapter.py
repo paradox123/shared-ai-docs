@@ -31,7 +31,7 @@ class Blocked(Exception):
         self.details = details
 
 
-def run_command(argv, cwd, env=None, timeout=30):
+def run_command(argv, cwd, env=None, timeout=30, strip_output=True):
     if not isinstance(argv, list) or not argv or not all(isinstance(a, str) and a for a in argv):
         raise Blocked('invalid-command')
     environment = {k: os.environ[k] for k in ('PATH', 'HOME', 'TMPDIR', 'LANG') if k in os.environ}
@@ -62,7 +62,8 @@ def run_command(argv, cwd, env=None, timeout=30):
                     if key.data: output.extend(chunk)
         process.wait(timeout=max(.01, deadline - time.monotonic()))
         if process.returncode != 0: raise Blocked('command-failed')
-        return output.decode('utf-8').strip()
+        decoded = output.decode('utf-8')
+        return decoded.strip() if strip_output else decoded
     finally:
         try: os.killpg(process.pid, signal.SIGKILL)
         except ProcessLookupError: pass
@@ -72,8 +73,9 @@ def run_command(argv, cwd, env=None, timeout=30):
 
 
 
-def git(plan, *args):
-    return run_command(['git', '-c', 'core.hooksPath=/dev/null', '-C', plan['localPath'], *args], plan['localPath'])
+def git(plan, *args, raw=False):
+    return run_command(['git', '-c', 'core.hooksPath=/dev/null', '-C', plan['localPath'], *args],
+                       plan['localPath'], strip_output=not raw)
 
 
 def checked(command, plan, head=None):
