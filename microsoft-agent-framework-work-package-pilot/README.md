@@ -802,3 +802,8 @@ accepted implementation sessions. Worker exit zero acknowledges persistence,
 including no-go, rather than successful issue implementation.
 
 See the [acceptance overview](../openspec/changes/archive/2026-09-13-prove-real-codex-runtime/implementation-evidence.md).
+
+## Evidence-backed draft publication (Ticket 11)
+
+See [PUBLICATION.md](PUBLICATION.md) for the trusted executable plan, readiness
+gates, native continuation, publication/reconciliation command and verification.

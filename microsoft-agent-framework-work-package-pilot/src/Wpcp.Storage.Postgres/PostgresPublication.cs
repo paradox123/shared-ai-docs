@@ -1,0 +1,86 @@
+using System.Text.Json;
+using Npgsql;
+using Wpcp.Domain;
+
+namespace Wpcp.Storage.Postgres;
+
+public sealed partial class PostgresImplementationRunStore
+{
+    public async Task<Publication> SavePublicationAsync(string runId, Publication next)
+    {
+        await using var connection = await _dataSource.OpenConnectionAsync();
+        await using var transaction = await connection.BeginTransactionAsync();
+        await using (var row = new NpgsqlCommand("SELECT run_id FROM wpcp_implementation_runs WHERE run_id=@id FOR UPDATE", connection, transaction))
+        {
+            row.Parameters.AddWithValue("id", Guid.Parse(runId));
+            await row.ExecuteScalarAsync();
+        }
+        var run = await FindRunAsync(connection, transaction, runId, default)
+            ?? throw new InvalidOperationException("Unknown run.");
+        var previous = await ReadPublicationAsync(connection, transaction, runId, default);
+        if (previous is not null && (previous.AssignmentHash != next.AssignmentHash ||
+            (previous.Dispatched && !next.Dispatched) ||
+            (previous.Intent is { } intent && (next.Intent is null || !JsonElement.DeepEquals(intent, next.Intent.Value)))))
+            throw new AgentAssignmentConflictException();
+        if (previous is null)
+        {
+            await using var mode = new NpgsqlCommand("SELECT pg_try_advisory_xact_lock(hashtextextended(@key, 0))", connection, transaction);
+            mode.Parameters.AddWithValue("key", "repository-mode:" + run.Correlation.RepositoryId);
+            if (await mode.ExecuteScalarAsync() is not true) throw new RepositoryRegistrationBusyException();
+            await using var legacy = new NpgsqlCommand("""
+                SELECT EXISTS(SELECT 1 FROM wpcp_agent_sessions WHERE run_id=@id
+                    UNION ALL SELECT 1 FROM wpcp_live_attempts WHERE run_id=@id
+                    UNION ALL SELECT 1 FROM wpcp_repository_owners WHERE repository_id=@repo)
+                """, connection, transaction);
+            legacy.Parameters.AddWithValue("id", Guid.Parse(runId));
+            legacy.Parameters.AddWithValue("repo", run.Correlation.RepositoryId);
+            if (await legacy.ExecuteScalarAsync() is true) throw new AgentAssignmentConflictException();
+        }
+        var safe = RedactAgentValue(JsonSerializer.SerializeToElement(next, JsonOptions));
+        next = safe.Value.Deserialize<Publication>(JsonOptions)!;
+        await using var save = new NpgsqlCommand("""
+            INSERT INTO wpcp_publications VALUES (@id, @value)
+                ON CONFLICT (run_id) DO UPDATE SET publication=EXCLUDED.publication;
+            UPDATE wpcp_implementation_runs SET state=@state, head_sha=COALESCE(@head, head_sha) WHERE run_id=@id;
+            """, connection, transaction);
+        save.Parameters.AddWithValue("id", Guid.Parse(runId));
+        save.Parameters.AddWithValue("state", next.State);
+        AddNullable(save, "head", NpgsqlTypes.NpgsqlDbType.Text,
+            next.Intent is { } publishedIntent ? publishedIntent.GetProperty("headSha").GetString() : null);
+        AddJson(save, "value", next);
+        await save.ExecuteNonQueryAsync();
+        await AppendAgentEventAsync(connection, transaction, run, "PublicationStateObserved", next, default);
+        await transaction.CommitAsync();
+        return next;
+    }
+
+    public async Task<string?> FindPublicationOwnerAsync(string repositoryId, string runId)
+    {
+        await using var connection = await _dataSource.OpenConnectionAsync();
+        await using var read = new NpgsqlCommand("""
+            SELECT p.run_id::text FROM wpcp_publications p
+            JOIN wpcp_implementation_runs r USING(run_id)
+            WHERE r.repository_id=@repo AND p.run_id<>@run AND
+                (p.publication->>'state' NOT IN ('preflight-blocked', 'publication-blocked', 'draft-published')
+                 OR (p.publication->>'dispatched'='true' AND p.publication->>'state'<>'draft-published'))
+            ORDER BY r.run_started_at LIMIT 1
+            """, connection);
+        read.Parameters.AddWithValue("repo", repositoryId);
+        read.Parameters.AddWithValue("run", Guid.Parse(runId));
+        return await read.ExecuteScalarAsync() as string;
+    }
+
+    private static async Task<Publication?> ReadPublicationAsync(NpgsqlConnection connection,
+        NpgsqlTransaction transaction, string runId, CancellationToken token)
+    {
+        await using var read = new NpgsqlCommand("SELECT publication::text FROM wpcp_publications WHERE run_id=@id", connection, transaction);
+        read.Parameters.AddWithValue("id", Guid.Parse(runId));
+        return await read.ExecuteScalarAsync(token) is string raw ? Deserialize<Publication>(raw) : null;
+    }
+
+    private const string PublicationSchema = """
+        CREATE TABLE IF NOT EXISTS wpcp_publications (
+            run_id uuid PRIMARY KEY REFERENCES wpcp_implementation_runs(run_id), publication jsonb NOT NULL
+        );
+        """;
+}

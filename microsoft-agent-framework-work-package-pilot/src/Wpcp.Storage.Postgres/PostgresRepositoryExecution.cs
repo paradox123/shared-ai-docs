@@ -20,7 +20,7 @@ public sealed partial class PostgresImplementationRunStore
             await using var gate = new NpgsqlCommand("SELECT pg_advisory_lock_shared(hashtextextended(@key, 0))", connection);
             gate.Parameters.AddWithValue("key", "repository-mode:" + repositoryId);
             await gate.ExecuteNonQueryAsync(token);
-            await using var check = new NpgsqlCommand("SELECT EXISTS(SELECT 1 FROM wpcp_repository_owners WHERE repository_id=@repo)", connection);
+            await using var check = new NpgsqlCommand("SELECT EXISTS(SELECT 1 FROM wpcp_repository_owners WHERE repository_id=@repo UNION ALL SELECT 1 FROM wpcp_publications p JOIN wpcp_implementation_runs r USING(run_id) WHERE r.repository_id=@repo)", connection);
             check.Parameters.AddWithValue("repo", repositoryId);
             if (await check.ExecuteScalarAsync(token) is true) throw new RepositoryExecutionRequiredException();
             return new DeliveryLock(connection);

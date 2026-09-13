@@ -38,7 +38,9 @@ try
             options.DurableTaskOrchestrationId,
             options.DurableTaskTaskId,
             options.EvidenceNote));
-    if (options.CodexPreflightConfig is not null)
+    if (options.PublicationPlan is not null)
+        await Wpcp.Worker.PublicationWorkflow.ExecuteAsync(store, options.RunId, options.PublicationPlan, options.CodexPython!, options.FixturePath, options.PauseAt);
+    else if (options.CodexPreflightConfig is not null)
         await Wpcp.Worker.CodexRuntimePreflight.ExecuteAsync(store, options.RunId,
             options.CodexPreflightConfig, options.CodexStateRoot!, options.CodexPython!);
     else if (options.DeliverActive || options.LiveActivityKey is not null)
@@ -138,7 +140,7 @@ internal sealed record WorkerOptions(
     bool RejectBlocked,
     int AgentTimeoutMilliseconds,
     string? RepositoryPlanPath, string? LiveActivityKey, bool DeliverActive,
-    string? CodexPreflightConfig, string? CodexStateRoot, string? CodexPython, string? RealAgentOrigin)
+    string? CodexPreflightConfig, string? CodexStateRoot, string? CodexPython, string? RealAgentOrigin, string? PublicationPlan)
 {
     public static WorkerOptions Parse(IReadOnlyList<string> arguments)
     {
@@ -167,6 +169,11 @@ internal sealed record WorkerOptions(
             throw new ArgumentException("--reject-blocked must be true or false.");
         var codexConfig = Value(values, "--codex-preflight-config");
         var realOrigin = Value(values, "--real-agent-origin");
+        if (Value(values, "--publication-plan") is not null &&
+            (Value(values, "--codex-python") is null || codexConfig is not null ||
+             Value(values, "--fake-agent-origin") is not null || Value(values, "--repository-plan") is not null ||
+             Value(values, "--live-activity-key") is not null || Value(values, "--deliver-active") is not null))
+            throw new ArgumentException("Publication requires Python and exclusive dispatch.");
         if (realOrigin is not null && (Value(values, "--codex-python") is null || codexConfig is not null ||
             Value(values, "--fake-agent-origin") is not null || Value(values, "--repository-plan") is not null ||
             Value(values, "--live-activity-key") is not null || Value(values, "--deliver-active") is not null))
@@ -193,7 +200,8 @@ internal sealed record WorkerOptions(
             rejectText == "true",
             PositiveIntegerOrDefault(values, "--agent-timeout-ms", 10000),
             Value(values, "--repository-plan"), Value(values, "--live-activity-key"), Value(values, "--deliver-active") == "true",
-            codexConfig, Value(values, "--codex-state-root"), Value(values, "--codex-python"), realOrigin);
+            codexConfig, Value(values, "--codex-state-root"), Value(values, "--codex-python"), realOrigin,
+            Value(values, "--publication-plan"));
     }
 
     private static Dictionary<string, string> ParseOptions(IReadOnlyList<string> arguments)

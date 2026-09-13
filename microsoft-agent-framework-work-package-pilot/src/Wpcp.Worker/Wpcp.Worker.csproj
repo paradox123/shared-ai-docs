@@ -5,7 +5,7 @@
     <RootNamespace>Wpcp.Worker</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="../../codex_runtime_gate.py;../../codex_process.py;../../codex_contract.py" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../publication_adapter.py;../../codex_runtime_gate.py;../../codex_process.py;../../codex_contract.py" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../contracts/worker-result-v3.json" Link="contracts/worker-result-v3.json" CopyToOutputDirectory="PreserveNewest" />
     <PackageReference Include="Microsoft.Agents.AI.Workflows" />
     <ProjectReference Include="../Wpcp.Domain/Wpcp.Domain.csproj" />

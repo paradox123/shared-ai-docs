@@ -93,6 +93,8 @@ public sealed partial class PostgresImplementationRunStore
             code = "observed";
         else if (!access.CanContribute)
             code = "repository-contribution-required";
+        else if (await ReadPublicationAsync(connection, transaction, runId, cancellationToken) is { State: not "awaiting-agent" })
+            code = "publication-control-fenced";
         else if (!IsTransferAction(action) && action is not ("claim" or "release" or "retry" or "reconcile" or "adopt" or "retire" or
             "resume" or "fork" or "fresh-retry" or "handoff" or "write"))
             code = "invalid-control-action";

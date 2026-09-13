@@ -18,3 +18,16 @@
 ## Session lesson
 
 ProBara Issue #3 implementierte die Änderung, konnte aber die geforderten REST-, Idempotenz- und UI-Phasen nicht liefern. Der Evidence-Plan wird deshalb vor dem Agentenstart ausführbar geprüft.
+
+
+## Implementation status — 2026-09-13
+
+Issue 10 ist abgeschlossen; sein früherer Runtime-Blocker ist überholt.
+Die Umsetzung liegt auf `codex/agent-framework-issue-11` im Change
+[`publish-agent-framework-evidence-draft`](../../../../openspec/changes/publish-agent-framework-evidence-draft/proposal.md).
+Readiness, ausgeführte Evidence, persistierte Publication-Absicht und Adoption
+bestehen über Worker/HTTP, PostgreSQL, reales lokales Git und einen kontrollierten
+GitHub-Provider. Auch der Durchstich mit echter Codex-Runtime und nativer TUI besteht.
+Gesamtregression und abschließendes Standards-/Spec-Review laufen noch.
+
+[Operator-Anleitung](../../../../microsoft-agent-framework-work-package-pilot/PUBLICATION.md)
