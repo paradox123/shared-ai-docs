@@ -51,4 +51,4 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 
 - [x] 5.4 Kanal „veröffentlichte Releases“ bestätigen und drei freigegebene [Umsetzungstickets](../../../.scratch/update-llm-wiki-releases/spec.md) mit Abhängigkeiten 01 → 02 → 03 veröffentlichen.
 
-[Ticket-04-Zwischenstand](../../../contextual-llm-wiki/evidence/production-04.md): bestehender Live-Job auf gemeinsame Konfiguration umgestellt, Einstellungen erhalten; WikiQuery-first in zentralen Skills und tatsächlichem Agentenablauf samt aktuellem Quellen-Fallback nachgewiesen. Vollimport und produktive Gesamtabnahme (4.6) laufen noch. Keine Archivierung.
+[Ticket-04-Zwischenstand](../../../contextual-llm-wiki/evidence/production-04.md): bestehender Live-Job auf gemeinsame Konfiguration umgestellt, Einstellungen erhalten; WikiQuery-first in zentralen Skills und tatsächlichem Agentenablauf samt aktuellem Quellen-Fallback nachgewiesen. Vollimport und produktive Gesamtabnahme (4.6) sind wegen wiederholter paralleler Originalquellenänderungen blockiert; Meetings-Verbleib ist offen. Keine Archivierung.

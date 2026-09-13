@@ -4,7 +4,7 @@
 
 **Blocked by:** 02 — Bestehende Wissensbestände verlustfrei zusammenführen; 03 — Pflege bei begrenzten Fehlern fortsetzen.
 
-**Status:** claimed
+**Status:** needs-info
 
 ## Grundlage und Ausgangslage
 
@@ -14,10 +14,10 @@ Die aktive Automation `update-qmd-index-daily` läuft lokal täglich um 07:00 Uh
 
 ## Abnahmekriterien
 
-- [ ] Die zentralen Recherche-Anweisungen routen Kontextfragen zuerst zu WikiQuery; QMD erscheint als interne Suchmaschine und Wartungswerkzeug. Ein tatsächlicher Agentenablauf beginnt mit WikiQuery und folgt dessen Primärquellenverweisen, ohne parallele QMD-Kontextsuche. Fehlende oder veraltete Evidenz wird im selben Ablauf sichtbar behandelt.
+- [x] Die zentralen Recherche-Anweisungen routen Kontextfragen zuerst zu WikiQuery; QMD erscheint als interne Suchmaschine und Wartungswerkzeug. Ein tatsächlicher Agentenablauf beginnt mit WikiQuery und folgt dessen Primärquellenverweisen, ohne parallele QMD-Kontextsuche. Fehlende oder veraltete Evidenz wird im selben Ablauf sichtbar behandelt.
 
 - [ ] Die bisherige Definition und die abzulösenden Wissensbestände sind gesichert; der überprüfte Übernahmebericht aus Ticket 02 liegt vor. Gespeicherte Synthesen werden beim Erstimport nicht überschrieben oder verloren.
-- [ ] Die bestehende Automation wird auf die gemeinsame Produktionskonfiguration umgestellt. Zeitplan, Modell, Projekt und Benachrichtigungseinstellungen bleiben erhalten; es entsteht kein zweiter Job oder Watcher.
+- [x] Die bestehende Automation wird auf die gemeinsame Produktionskonfiguration umgestellt. Zeitplan, Modell, Projekt und Benachrichtigungseinstellungen bleiben erhalten; es entsteht kein zweiter Job oder Watcher.
 - [ ] Der tatsächliche Produktionseingang umfasst alle acht ausgewählten Repo-Identitäten sowie Meetings und Projects einschließlich Projects/Private. Die Inventur weist vorhandene Quellen und Ausschlüsse aus; Abnahmefixtures ersetzen keinen Teil des Produktionsbestands.
 - [ ] Ein vollständiger Produktionslauf mit echtem Provider, gepinntem Compiler und QMD wird abgeschlossen. Laufberichte, abgeschlossener Pflegezeitpunkt und offene Arbeit werden geprüft; Aktivierung oder erfolgreicher Start allein gelten nicht als Abnahme.
 - [ ] Eine inhaltlich geprüfte Synthese verknüpft passende persönliche und andere Fachquellen, belegt diese und ist über die verwaltete Abfrage wiederverwendbar. Ein irrelevanter Kontrollbeleg wird nicht verwendet; ausdrücklich vorgegebene Aufgabengrenzen werden eingehalten.
@@ -25,7 +25,7 @@ Die aktive Automation `update-qmd-index-daily` läuft lokal täglich um 07:00 Uh
 - [ ] Der produktive Aufruf verwendet die in Ticket 03 verifizierte Teilfehlerbehandlung. Laufberichte und Automation-Memory unterscheiden vollständigen Erfolg von Teilfehlern; der genaue Artefaktpfad und verbleibende Arbeit sind auffindbar.
 - [ ] Die Ausführung mit der tatsächlichen lokalen Runtime, vorhandener Provideranmeldung und reduziertem Scheduler-PATH ist überprüft. Fehlende Mac-/Runtime-Verfügbarkeit wird sichtbar gemeldet, ohne automatisierte Installations- oder TCC-Reparatur.
 - [ ] Der gemeinsame Bestand ist über QMD und den vorhandenen menschlichen Wiki-Einstieg erreichbar. Frühere Wiki-Einstiege beziehungsweise Collections werden erst nach überprüfter Übernahme kontrolliert abgelöst, ohne fremde Collections anzutasten oder doppelte aktive Wissensbestände zu hinterlassen.
-- [ ] Die unmittelbar betroffenen Betriebs- und kanonischen Retrieval-Anweisungen beschreiben den gemeinsamen Bestand und leiten aus `private` keine Zugriffssonderregel mehr ab. Der bestehende Einführungskatalog bleibt die Planung für weitere Repo-Einstiege; diese werden nicht pauschal ausgerollt.
+- [x] Die unmittelbar betroffenen Betriebs- und kanonischen Retrieval-Anweisungen beschreiben den gemeinsamen Bestand und leiten aus `private` keine Zugriffssonderregel mehr ab. Der bestehende Einführungskatalog bleibt die Planung für weitere Repo-Einstiege; diese werden nicht pauschal ausgerollt.
 - [ ] Eine neue Abnahmeübersicht dokumentiert je Requirement Erwartung, beobachtetes Verhalten und Evidence. Der tatsächliche manuelle Produktionsnachweis und ein eventuell noch ausstehender automatischer Schedulerlauf werden ausdrücklich unterschieden. Relevante Tests, strikte OpenSpec-Validierung und Diff-Prüfung bestehen.
 
 ## Umsetzung und Nachweis
@@ -41,3 +41,5 @@ Dieser Auftrag umfasst die bestätigte lokale Betriebsumstellung. Fachquellen bl
 - 13.09.2026: Zugang präzisiert: WikiQuery-first zentral verankern und über einen tatsächlichen Agentenablauf nachweisen. Keine weitere Ticketabhängigkeit erforderlich.
 
 - 13.09.2026: Daniel bestätigt direkte Umsetzung auf `main`; sauberer Ausgangsstand `76f4c51`, Git-Root `_shared/shared-ai-docs`. Tickets 02/03 sind integriert. Bestehender Change, Aufgaben 4.5–4.7; kein neuer Change und keine Archivierung.
+
+- 13.09.2026: Betriebsumstellung und WikiQuery-first implementiert (`44f9dbe`), Prüfungen und zwei Reviewachsen bestanden. Vollimport nach zweimaliger tatsächlicher Änderung produktiver Originalquellen kontrolliert angehalten. [Kriterienweise Abnahme und konkrete Blocker](../../../contextual-llm-wiki/evidence/production-04.md). Für Wiederaufnahme Abschluss der parallelen Quellschreibarbeiten und Klärung der inzwischen leeren Meetings-Ordner erforderlich. Keine Gesamtabnahme oder Archivierung.

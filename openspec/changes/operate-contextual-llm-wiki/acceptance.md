@@ -52,3 +52,8 @@ Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commi
 ## Akzeptierter Abschluss von Ticket 03
 
 Daniel hat Ticket 03 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Das erfüllte Requirement ist in [continue-contextual-wiki-maintenance](../archive/2026-09-13-continue-contextual-wiki-maintenance/proposal.md) separat archiviert und kanonisch übernommen. Migration ist durch Ticket 02 verifiziert; Live-Aktivierung und Vollimport bleiben in diesem Change offen.
+
+
+## Ticket 04 — Stand 13.09.2026
+
+[Neue kriterienweise Produktionsabnahme](../../../contextual-llm-wiki/evidence/production-04.md): gemeinsame Automation aktiviert, zentrale WikiQuery-Einführung samt realem Agentenablauf geprüft. Vollimport nicht abgeschlossen: zwei Versuche durch parallele Änderungen an Originalquellen überholt und kontrolliert beendet. Gesicherte Altantworten mit entfallenen/geänderten Belegen bleiben zurückgestellt. Meetings aktuell leer, Verbleib angefragt. Prüfungen und beide Reviewachsen bestehen; Aufgaben 4.5/4.7 umgesetzt, 4.6 blockiert. Kein gemeinsamer Scheduler-Erfolg oder abgeschlossener Produktionsimport behauptet; nicht archivieren.
