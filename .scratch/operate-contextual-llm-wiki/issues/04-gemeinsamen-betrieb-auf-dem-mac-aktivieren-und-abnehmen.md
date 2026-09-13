@@ -8,7 +8,7 @@
 
 ## Grundlage und Ausgangslage
 
-Maßgeblich sind der OpenSpec-Change [operate-contextual-llm-wiki](../../../openspec/changes/operate-contextual-llm-wiki/proposal.md), sein [Design](../../../openspec/changes/operate-contextual-llm-wiki/design.md), die [Betriebs-Requirements](../../../openspec/changes/operate-contextual-llm-wiki/specs/contextual-wiki-operations/spec.md), die [geänderten Wiki-Requirements](../../../openspec/changes/operate-contextual-llm-wiki/specs/contextual-llm-wiki/spec.md) und [ADR 0010](../../../docs/adr/0010-shared-wiki-across-personal-and-professional-domains.md).
+Maßgeblich sind der OpenSpec-Change [operate-contextual-llm-wiki](../../../openspec/changes/operate-contextual-llm-wiki/proposal.md), sein [Design](../../../openspec/changes/operate-contextual-llm-wiki/design.md), die [Betriebs-Requirements](../../../openspec/changes/operate-contextual-llm-wiki/specs/contextual-wiki-operations/spec.md), die [kanonischen Wiki-Requirements](../../../openspec/specs/contextual-llm-wiki/spec.md) und [ADR 0010](../../../docs/adr/0010-shared-wiki-across-personal-and-professional-domains.md).
 
 Die aktive Automation `update-qmd-index-daily` läuft lokal täglich um 07:00 Uhr mit den bereits konfigurierten Modell-, Projekt- und Benachrichtigungseinstellungen. Sie verwendet bisher nur die allgemeine Konfiguration. Die bisherigen echten Durchläufe betrafen einen begrenzten Abnahmebestand und belegen keinen Vollimport. Ticket 01 ist über die beiden direkten Vorgänger bereits Voraussetzung.
 

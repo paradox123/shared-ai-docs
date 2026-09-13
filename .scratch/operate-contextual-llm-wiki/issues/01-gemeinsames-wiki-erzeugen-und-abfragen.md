@@ -8,7 +8,7 @@
 
 ## Grundlage und Ausgangslage
 
-Maßgeblich sind der OpenSpec-Change [operate-contextual-llm-wiki](../../../openspec/changes/operate-contextual-llm-wiki/proposal.md), sein [Design](../../../openspec/changes/operate-contextual-llm-wiki/design.md), die [geänderten Wiki-Requirements](../../../openspec/changes/operate-contextual-llm-wiki/specs/contextual-llm-wiki/spec.md) und [ADR 0010](../../../docs/adr/0010-shared-wiki-across-personal-and-professional-domains.md). Bei der Umsetzung zusätzlich die unveränderten kanonischen Wiki-Requirements beachten.
+Maßgeblich sind der OpenSpec-Change [operate-contextual-llm-wiki](../../../openspec/changes/operate-contextual-llm-wiki/proposal.md), sein [Design](../../../openspec/changes/operate-contextual-llm-wiki/design.md), die [kanonischen Wiki-Requirements](../../../openspec/specs/contextual-llm-wiki/spec.md) und [ADR 0010](../../../docs/adr/0010-shared-wiki-across-personal-and-professional-domains.md). Bei der Umsetzung zusätzlich die unveränderten kanonischen Wiki-Requirements beachten.
 
 Der vorhandene Scanner partitioniert Quellen nach allgemeinem beziehungsweise privatem Scope. Auch die private Produktionskonfiguration umfasst dadurch nicht alle Quellen gemeinsam. Die bisherige getrennte Abnahme ist kein Nachweis für das gewünschte gemeinsame Wiki. Compiler-Pin, QMD als einzige Retrieval-Engine und Quellen-/Antwortabhängigkeiten sind bereits implementiert und bleiben erhalten.
 
@@ -34,3 +34,5 @@ Die gemeinsame Ausgabe zunächst isoliert verifizieren. Die Übernahme bestehend
 - 13.09.2026: Aufteilung und Abhängigkeiten von Daniel bestätigt. Dieses Ticket deckt die gemeinsame Quellen-/Abfragefunktion und deren QMD-Anbindung ab.
 
 - 13.09.2026: Auf dem von Daniel bestätigten Branch `codex/shared-wiki-01` im isolierten Worktree umgesetzt. [Abnahme samt Inhalt, Originalbelegen, Aktualitätsprüfung und Review](../../../contextual-llm-wiki/evidence/shared-wiki-01.md). Gemeinsame Inventur umfasst alle acht Repos und 1.888 Fachquellen. Echte Provider-Pflege erzeugt eine gemeinsame Liquiditätsreserve-Seite aus persönlichem Portfolio und Projekteinnahmen; Query, Grenzen, Relevanzkontrolle und No-op verifiziert. Tickets 02–04 bleiben offen; keine Altbestände gelöscht und kein Live-Job umgestellt.
+
+- 13.09.2026: Daniel hat die Umsetzung ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Ticket 01 ist geschlossen; sein OpenSpec-Anteil ist separat als [share-contextual-wiki-sources](../../../openspec/changes/archive/2026-09-13-share-contextual-wiki-sources/proposal.md) archiviert. Der ursprüngliche Betriebs-Change bleibt für Tickets 02–04 aktiv.

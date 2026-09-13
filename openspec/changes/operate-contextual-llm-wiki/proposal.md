@@ -5,7 +5,7 @@ Das akzeptierte Wiki kompiliert nur auf ausdrücklichen Aufruf. Die tägliche QM
 ## What Changes
 
 - Bestehende lokale Automation `update-qmd-index-daily` um Wiki-Pflege vor QMD update/embed erweitern; Zeitplan und Modell beibehalten.
-- Allgemeine und private Quellen in einem gemeinsamen Wiki zusammenführen; „privat“ als Tätigkeitsbereich statt Zugriffsgrenze behandeln und Synthesen nach fachlicher Relevanz bilden.
+- Bestehende allgemeine/private Wissensbestände in den mit Ticket 01 bereitgestellten gemeinsamen Wiki-Vertrag migrieren.
 - Begrenzte Pflegefehler isolieren und unabhängige Arbeit mit sichtbarem Teilfehlerbericht fortsetzen.
 - Einen ausführbaren Wartungshelfer mit expliziten Kontextkonfigurationen, serieller Ausführung, überprüften Ergebnissen und dauerhaften Laufartefakten bereitstellen.
 - Betriebsanleitung und priorisierten Katalog tatsächlich vorhandener Skills, Repo-Einstiege und Kontextdateien liefern. Die flächendeckende Einführung der Retrieval-Verweise bleibt ein separater Umsetzungsschritt.
@@ -15,9 +15,9 @@ Das akzeptierte Wiki kompiliert nur auf ausdrücklichen Aufruf. Die tägliche QM
 ### New Capabilities
 - `contextual-wiki-operations`: Wiederkehrende lokale Pflege und überprüfbarer Einführungsplan.
 
-### Modified Capabilities
+### Bereits abgeschlossene Voraussetzung
 
-- `contextual-llm-wiki`: Gemeinsamer Quellenbestand ohne Privatpartition, kontextbezogene repoübergreifende Synthesen und entsprechende Query-Nutzung. Der bestehende Compiler bleibt gesetzt.
+Der Ticket-01-Anteil `contextual-llm-wiki` ist unter [share-contextual-wiki-sources](../archive/2026-09-13-share-contextual-wiki-sources/proposal.md) abgeschlossen und in die kanonische Wiki-Spec übernommen. Dieser aktive Change besitzt ausschließlich das verbleibende Betriebs-Delta.
 
 ## Impact
 

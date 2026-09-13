@@ -47,3 +47,10 @@ Die erneute Prüfung nach diesen Änderungen steht in [Review-Verifikation](shar
 
 
 Abschließende Nachprüfung des Commits `f484414`: **Standards: 0 offene Befunde; Spec: 0 offene Befunde.** Beide unabhängigen Prüfer bestätigen die Behebung ihrer ursprünglichen Hinweise. Nach dem Refactoring bestehen TypeScript und alle **34 CLI-Verhaltenstests** erneut; die bereits bestandenen 59 Compiler- und 6 Betriebstests betreffen unveränderte Komponenten. OpenSpec-Validierung und Whitespace-Prüfung sind erneut erfolgreich. Ticket 01 ist abgeschlossen; der gesamte Betriebs-Change bleibt mit 12/16 erledigten Aufgaben aktiv.
+
+
+## Nutzerabnahme und Spec-Abschluss
+
+Daniel hat die Umsetzung am 13.09.2026 mit „akzeptiert, schließe spec / openspec, commit und push“ abgenommen. Der abgeschlossene Ticket-01-Anteil ist über den Standard-CLI-Archivpfad als [share-contextual-wiki-sources](../../openspec/changes/archive/2026-09-13-share-contextual-wiki-sources/proposal.md) archiviert; das Wiki-Delta ist kanonisch übernommen. `operate-contextual-llm-wiki` bleibt für Tickets 02–04 aktiv. Es wird keine ausstehende Bestandsmigration oder Produktionsabnahme als erledigt ausgewiesen.
+
+Abschlussprüfung: Standardarchivierung ohne unvollständige Aufgaben; vier Wiki-Requirements kanonisch aktualisiert. `openspec validate --all --strict --no-interactive`: 45 Einträge erfolgreich, 0 Fehler. Lokale Links der Abschlussdokumente und `git diff --check` geprüft.

@@ -1,6 +1,6 @@
 ## Context
 
-Die ursprüngliche Integration ist archiviert. Der erste Betriebsstand verwendet den bestehenden täglichen QMD-Job, einen seriellen Wartungshelfer und getrennte allgemeine/private Wiki-Konfigurationen. Der Live-Job pflegt bisher nur den allgemeinen Bestand. Der Code liest ausschließlich Quellen mit passendem Konfigurations-Scope; dadurch verhindert er Synthesen zwischen privaten und allgemeinen Fachquellen.
+Die ursprüngliche Integration ist archiviert. Der erste Betriebsstand verwendet den bestehenden täglichen QMD-Job, einen seriellen Wartungshelfer und getrennte allgemeine/private Wiki-Konfigurationen. Der Live-Job pflegt bisher nur den allgemeinen Bestand. Dieser frühere Code partitionierte Quellen nach Scope. Ticket 01 hat die gemeinsame CLI inzwischen implementiert und isoliert verifiziert; bestehende produktive Bestände und der Live-Job sind noch nicht migriert.
 
 Daniel hat im Interview klargestellt: „privat“ bezeichnet seinen persönlichen Tätigkeitsbereich, keine Schutzklasse. Die bisherige Architektur leitete daraus eine nicht beabsichtigte Wissensgrenze ab. [ADR 0010](../../../docs/adr/0010-shared-wiki-across-personal-and-professional-domains.md) korrigiert diese Annahme.
 
@@ -36,7 +36,7 @@ Bestehende generierte Seiten und gespeicherte Gesprächssynthesen werden vor Mig
 
 ## Risks / Trade-offs
 
-Der Vollimport kann lange dauern und wurde noch nicht ausgeführt. Die bisherige Quellenpartition und Privacy-Tests passen nicht zum bestätigten Modell. Die sichere Fortsetzung nach Teilfehlern ist noch nicht implementiert. Mac-Verfügbarkeit und Provider-Anmeldung begrenzen die lokale Ausführung. Gemeinsame Wissensbildung bedeutet keine automatische fachliche Relevanz jeder Quelle für jede Frage.
+Der Vollimport kann lange dauern und wurde noch nicht ausgeführt. Die gemeinsame CLI samt ersetzten Privacy-Szenarien ist mit Ticket 01 akzeptiert; die Übernahme bestehender Ausgaben steht aus. Die sichere Fortsetzung nach Teilfehlern ist noch nicht implementiert. Mac-Verfügbarkeit und Provider-Anmeldung begrenzen die lokale Ausführung. Gemeinsame Wissensbildung bedeutet keine automatische fachliche Relevanz jeder Quelle für jede Frage.
 
 ## Migration Plan
 
@@ -48,4 +48,4 @@ Der Vollimport kann lange dauern und wurde noch nicht ausgeführt. Die bisherige
 
 ## Interview-Abschluss
 
-Feststehend sind gemeinsame Wissensbildung ohne Privat-Sondergrenze, fachliche Relevanz als Auswahlkriterium, tägliche Pflege und Fortsetzung unabhängiger Arbeit bei Teilfehlern. Es bleibt keine offene Produktentscheidung für diesen Plan. Technische Parameter werden während der Umsetzung entschieden. Diese Dokumentation beschreibt den bestätigten Sollzustand; der bestehende Code und Live-Job sind noch nicht entsprechend umgestellt.
+Feststehend sind gemeinsame Wissensbildung ohne Privat-Sondergrenze, fachliche Relevanz als Auswahlkriterium, tägliche Pflege und Fortsetzung unabhängiger Arbeit bei Teilfehlern. Es bleibt keine offene Produktentscheidung für diesen Plan. Technische Parameter werden während der Umsetzung entschieden. Ticket 01 ist akzeptiert und im separaten Change `share-contextual-wiki-sources` archiviert. Dieser aktive Betriebs-Change führt die offenen Tickets 02–04 fort; Live-Job und Bestände sind noch nicht entsprechend umgestellt.

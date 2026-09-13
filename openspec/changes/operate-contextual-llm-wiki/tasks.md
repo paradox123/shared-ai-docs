@@ -24,3 +24,8 @@
 - [ ] 4.6 Echte gemeinsame Synthese aus persönlichem und anderem Tätigkeitsbereich, Relevanzkontrolle, Quelle–Antwort-Nachpflege, Vollimport und No-op prüfen; Abnahme aktualisieren.
 
 [Ticket-01-Abnahme](../../../contextual-llm-wiki/evidence/shared-wiki-01.md): gemeinsame Quellen-/Query-Funktion und QMD-Routing isoliert verifiziert, einschließlich echter repoübergreifender Konzeptseite, Relevanzkontrolle, expliziter transitiver Grenzen, Aktualitätsprüfung und No-op. Damit ist der begrenzte Synthese-/Query-Anteil aus 4.6 nachgewiesen; 4.6 bleibt wegen Vollimport und produktiver Abnahme offen. 4.2, 4.4 und 4.5 gehören zu Tickets 02–04. Bestehende getrennte Ausgaben und Live-Job wurden nicht umgestellt; nicht archivieren.
+
+
+## Akzeptierter Abschluss von Ticket 01
+
+Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Sein Wiki-Delta wurde in [share-contextual-wiki-sources](../archive/2026-09-13-share-contextual-wiki-sources/proposal.md) separat abgeschlossen und kanonisch übernommen. Die hier noch offenen Aufgaben 4.2, 4.4, 4.5 und der Produktionsanteil von 4.6 bleiben unverändert den Tickets 02–04 zugeordnet.

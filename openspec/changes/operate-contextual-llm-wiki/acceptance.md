@@ -33,3 +33,8 @@ Damit ist nicht nur ein gestarteter Prozess, sondern die inhaltliche Übernahme 
 ## Ticket 01: gemeinsame Quellen-/Abfragefunktion (13.09.2026)
 
 Die [gesonderte Ticket-01-Abnahme](../../../contextual-llm-wiki/evidence/shared-wiki-01.md) belegt die gemeinsame CLI anhand realer Inventur, echter Compiler-/QMD-Ausführung, echter Provider-Synthese und öffentlicher Verhaltenstests. Die frühere Betriebsabnahme oben beschreibt weiterhin den alten Live-Stand. Bestandsmigration, Fehlerisolation, Aktivierung und Vollimport sind noch offen; der Change bleibt aktiv.
+
+
+## Akzeptierter Abschluss von Ticket 01
+
+Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Sein Wiki-Delta wurde in [share-contextual-wiki-sources](../archive/2026-09-13-share-contextual-wiki-sources/proposal.md) separat abgeschlossen und kanonisch übernommen. Die hier noch offenen Aufgaben 4.2, 4.4, 4.5 und der Produktionsanteil von 4.6 bleiben unverändert den Tickets 02–04 zugeordnet.
