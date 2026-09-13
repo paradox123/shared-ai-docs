@@ -11,5 +11,5 @@
 
 ## 3. Acceptance
 
-- [ ] 3.1 Run full pilot regression and strict OpenSpec validation; document observed behavior and limits.
-- [ ] 3.2 Perform independent Standards and Spec reviews, address findings, and update ticket/evidence.
+- [x] 3.1 Run full pilot regression and strict OpenSpec validation; document observed behavior and limits.
+- [x] 3.2 Perform independent Standards and Spec reviews, address findings, and update ticket/evidence.

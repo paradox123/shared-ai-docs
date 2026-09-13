@@ -1,0 +1,104 @@
+[
+  {
+    "runId": "a40f2115-7dc1-423c-bb54-1821ddf97bc4",
+    "state": "qualification-blocked",
+    "headQualification": {
+      "headSha": "a1cdcfc88b387f0563549fe5023b25e396f78d1e",
+      "state": "qualification-blocked",
+      "rounds": [
+        {
+          "number": 0,
+          "headSha": "a1cdcfc88b387f0563549fe5023b25e396f78d1e",
+          "evidence": {
+            "body": "<!-- wpcp-run:a40f2115-7dc1-423c-bb54-1821ddf97bc4 -->\n\nCloses #45\n\nEvidence for commit/head `a1cdcfc88b387f0563549fe5023b25e396f78d1e`.\n\nReview qualification is a separate gate.\n\n### AC1: Greeting is readable\n\nKind: command; surface: python greeting public function\n\nExpected read-back: Hello, Ada!\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;a1cdcfc88b387f0563549fe5023b25e396f78d1e&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpWTQnkZ/bin/python&quot;,\n    &quot;-c&quot;,\n    &quot;from greeting import greet; print(greet())&quot;\n  ],\n  &quot;expected&quot;: &quot;Hello, Ada!&quot;,\n  &quot;observed&quot;: &quot;Hello, Ada!&quot;\n}</pre>",
+            "title": "Implement greeting",
+            "branch": "codex/issue-45",
+            "entries": [
+              {
+                "id": "AC1",
+                "kind": "command",
+                "phases": [
+                  {
+                    "argv": [
+                      "/Users/dh/.cache/uv/builds-v0/.tmpWTQnkZ/bin/python",
+                      "-c",
+                      "from greeting import greet; print(greet())"
+                    ],
+                    "name": "read-back",
+                    "headSha": "a1cdcfc88b387f0563549fe5023b25e396f78d1e",
+                    "expected": "Hello, Ada!",
+                    "observed": "Hello, Ada!"
+                  }
+                ],
+                "surface": "python greeting public function",
+                "description": "Greeting is readable",
+                "expectedReadBack": "Hello, Ada!"
+              }
+            ],
+            "headSha": "a1cdcfc88b387f0563549fe5023b25e396f78d1e",
+            "baseBranch": "main"
+          },
+          "state": "reviewing",
+          "verification": {
+            "state": "publication-blocked",
+            "blocker": "qualification-head-drift"
+          },
+          "reviews": null
+        }
+      ],
+      "qualifiedHeadSha": null,
+      "blocker": "qualification-head-drift",
+      "humanRequest": {
+        "requestId": "286ae3ac-e618-4342-a638-e3affa01d361",
+        "attemptId": "40cc495e-2b22-450b-8ee8-c7150b47b272",
+        "sessionId": "ff258d36-1207-476f-a5f9-93f162a32242",
+        "phase": "qualification",
+        "expectedHeadSha": "a1cdcfc88b387f0563549fe5023b25e396f78d1e",
+        "problem": "qualification-head-drift:  Inspect the retained draft and evidence; resolve this conflict before authorizing further work.",
+        "evidence": [
+          "http://127.0.0.1:51585/pull/1",
+          "/api/v1/runs/a40f2115-7dc1-423c-bb54-1821ddf97bc4",
+          "head:a1cdcfc88b387f0563549fe5023b25e396f78d1e"
+        ],
+        "allowedActions": [
+          "inspect-draft",
+          "inspect-evidence"
+        ],
+        "state": "open",
+        "createdEventId": null,
+        "expectedRunVersion": null,
+        "leaseEpoch": null
+      },
+      "repairs": []
+    },
+    "publicationBlocker": "qualification-head-drift",
+    "providerPullRequests": [
+      {
+        "number": 1,
+        "state": "open",
+        "draft": true,
+        "body": "<!-- wpcp-run:a40f2115-7dc1-423c-bb54-1821ddf97bc4 -->\n\nCloses #45\n\nEvidence for commit/head `a1cdcfc88b387f0563549fe5023b25e396f78d1e`.\n\nReview qualification is a separate gate.\n\n### AC1: Greeting is readable\n\nKind: command; surface: python greeting public function\n\nExpected read-back: Hello, Ada!\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;a1cdcfc88b387f0563549fe5023b25e396f78d1e&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpWTQnkZ/bin/python&quot;,\n    &quot;-c&quot;,\n    &quot;from greeting import greet; print(greet())&quot;\n  ],\n  &quot;expected&quot;: &quot;Hello, Ada!&quot;,\n  &quot;observed&quot;: &quot;Hello, Ada!&quot;\n}</pre>",
+        "title": "Implement greeting",
+        "html_url": "http://127.0.0.1:51585/pull/1",
+        "head": {
+          "ref": "codex/issue-45",
+          "sha": "a1cdcfc88b387f0563549fe5023b25e396f78d1e",
+          "repo": {
+            "id": 9001
+          }
+        },
+        "base": {
+          "ref": "main",
+          "repo": {
+            "id": 9001
+          }
+        }
+      }
+    ],
+    "providerCreates": 1,
+    "controlledReviewStarts": 0,
+    "controlledRepairStarts": 0,
+    "runtimeKind": "controlled Codex adapter",
+    "providerKind": "controlled HTTP provider with real local and bare Git"
+  }
+]

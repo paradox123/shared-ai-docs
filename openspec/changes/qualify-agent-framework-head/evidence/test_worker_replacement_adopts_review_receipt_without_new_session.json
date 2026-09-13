@@ -1,0 +1,183 @@
+[
+  {
+    "runId": "03d12568-090c-4280-9f08-9f5d96987bdc",
+    "state": "qualified",
+    "headQualification": {
+      "headSha": "2b19b5f2350ac4bed5714e9da38e9c7da2ae2855",
+      "state": "qualified",
+      "rounds": [
+        {
+          "number": 0,
+          "headSha": "2b19b5f2350ac4bed5714e9da38e9c7da2ae2855",
+          "evidence": {
+            "body": "<!-- wpcp-run:03d12568-090c-4280-9f08-9f5d96987bdc -->\n\nCloses #53\n\nEvidence for commit/head `2b19b5f2350ac4bed5714e9da38e9c7da2ae2855`.\n\nReview qualification is a separate gate.\n\n### AC1: Greeting is readable\n\nKind: command; surface: python greeting public function\n\nExpected read-back: Hello, Ada!\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;2b19b5f2350ac4bed5714e9da38e9c7da2ae2855&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpWTQnkZ/bin/python&quot;,\n    &quot;-c&quot;,\n    &quot;from greeting import greet; print(greet())&quot;\n  ],\n  &quot;expected&quot;: &quot;Hello, Ada!&quot;,\n  &quot;observed&quot;: &quot;Hello, Ada!&quot;\n}</pre>",
+            "title": "Implement greeting",
+            "branch": "codex/issue-53",
+            "entries": [
+              {
+                "id": "AC1",
+                "kind": "command",
+                "phases": [
+                  {
+                    "argv": [
+                      "/Users/dh/.cache/uv/builds-v0/.tmpWTQnkZ/bin/python",
+                      "-c",
+                      "from greeting import greet; print(greet())"
+                    ],
+                    "name": "read-back",
+                    "headSha": "2b19b5f2350ac4bed5714e9da38e9c7da2ae2855",
+                    "expected": "Hello, Ada!",
+                    "observed": "Hello, Ada!"
+                  }
+                ],
+                "surface": "python greeting public function",
+                "description": "Greeting is readable",
+                "expectedReadBack": "Hello, Ada!"
+              }
+            ],
+            "headSha": "2b19b5f2350ac4bed5714e9da38e9c7da2ae2855",
+            "baseBranch": "main"
+          },
+          "state": "passed",
+          "verification": {
+            "argv": [
+              "/Users/dh/.cache/uv/builds-v0/.tmpWTQnkZ/bin/python",
+              "-c",
+              "print('checks passed')"
+            ],
+            "state": "check-passed",
+            "headSha": "2b19b5f2350ac4bed5714e9da38e9c7da2ae2855",
+            "expected": "checks passed",
+            "observed": "checks passed"
+          },
+          "reviews": [
+            {
+              "axis": "requirements",
+              "operationKey": "b89f9da7-05a8-4533-a26d-c7ed3d8fe76e",
+              "report": {
+                "state": "review-completed",
+                "policy": {
+                  "model": "gpt-5.6-terra",
+                  "access": "read-only",
+                  "skills": [
+                    {
+                      "name": "code-review",
+                      "sha256": "2a7a862c0cb351e43fbbe9dbc38928f4f32f099fdf51ce682258dc6d8653f0fd"
+                    }
+                  ],
+                  "reasoningEffort": "xhigh"
+                },
+                "result": {
+                  "axis": "requirements",
+                  "headSha": "2b19b5f2350ac4bed5714e9da38e9c7da2ae2855",
+                  "verdict": "pass",
+                  "findings": [],
+                  "rationale": "The supplied change satisfies this axis.",
+                  "schemaVersion": "wpcp-review/v1"
+                },
+                "sessionId": "e5b91923-05bf-40f4-bb0e-713ad9c98e57",
+                "operationKey": "b89f9da7-05a8-4533-a26d-c7ed3d8fe76e",
+                "contractVersion": "HeadQualificationAdapter/v1"
+              }
+            },
+            {
+              "axis": "code-quality",
+              "operationKey": "a05b2fe5-c145-4a51-9722-a0f43adf8078",
+              "report": {
+                "state": "review-completed",
+                "policy": {
+                  "model": "gpt-5.6-terra",
+                  "access": "read-only",
+                  "skills": [
+                    {
+                      "name": "code-review",
+                      "sha256": "2a7a862c0cb351e43fbbe9dbc38928f4f32f099fdf51ce682258dc6d8653f0fd"
+                    }
+                  ],
+                  "reasoningEffort": "xhigh"
+                },
+                "result": {
+                  "axis": "code-quality",
+                  "headSha": "2b19b5f2350ac4bed5714e9da38e9c7da2ae2855",
+                  "verdict": "pass",
+                  "findings": [],
+                  "rationale": "The supplied change satisfies this axis.",
+                  "schemaVersion": "wpcp-review/v1"
+                },
+                "sessionId": "7a11deef-1a7f-43e4-b8e6-34b7743c5540",
+                "operationKey": "a05b2fe5-c145-4a51-9722-a0f43adf8078",
+                "contractVersion": "HeadQualificationAdapter/v1"
+              }
+            },
+            {
+              "axis": "architecture",
+              "operationKey": "b03e8352-1371-470d-b68e-703368deb613",
+              "report": {
+                "state": "review-completed",
+                "policy": {
+                  "model": "gpt-5.6-terra",
+                  "access": "read-only",
+                  "skills": [
+                    {
+                      "name": "codebase-design",
+                      "sha256": "249931796f60c9e2132b1522736535251c3a38aa8ef3a22c67e444c29590b6f8"
+                    },
+                    {
+                      "name": "domain-modeling",
+                      "sha256": "fd1dbe06303d8a6824930ded77d1aa297d2b9e51ebabcf18ff011bb11c1af8b4"
+                    }
+                  ],
+                  "reasoningEffort": "xhigh"
+                },
+                "result": {
+                  "axis": "architecture",
+                  "headSha": "2b19b5f2350ac4bed5714e9da38e9c7da2ae2855",
+                  "verdict": "pass",
+                  "findings": [],
+                  "rationale": "The supplied change satisfies this axis.",
+                  "schemaVersion": "wpcp-review/v1"
+                },
+                "sessionId": "9b2df85a-66b2-4ffa-8a8b-ab288780306a",
+                "operationKey": "b03e8352-1371-470d-b68e-703368deb613",
+                "contractVersion": "HeadQualificationAdapter/v1"
+              }
+            }
+          ]
+        }
+      ],
+      "qualifiedHeadSha": "2b19b5f2350ac4bed5714e9da38e9c7da2ae2855",
+      "blocker": null,
+      "humanRequest": null,
+      "repairs": []
+    },
+    "publicationBlocker": null,
+    "providerPullRequests": [
+      {
+        "number": 1,
+        "state": "open",
+        "draft": true,
+        "body": "<!-- wpcp-run:03d12568-090c-4280-9f08-9f5d96987bdc -->\n\nCloses #53\n\nEvidence for commit/head `2b19b5f2350ac4bed5714e9da38e9c7da2ae2855`.\n\nReview qualification is a separate gate.\n\n### AC1: Greeting is readable\n\nKind: command; surface: python greeting public function\n\nExpected read-back: Hello, Ada!\n\n**read-back**\n\n<pre>{\n  &quot;name&quot;: &quot;read-back&quot;,\n  &quot;headSha&quot;: &quot;2b19b5f2350ac4bed5714e9da38e9c7da2ae2855&quot;,\n  &quot;argv&quot;: [\n    &quot;/Users/dh/.cache/uv/builds-v0/.tmpWTQnkZ/bin/python&quot;,\n    &quot;-c&quot;,\n    &quot;from greeting import greet; print(greet())&quot;\n  ],\n  &quot;expected&quot;: &quot;Hello, Ada!&quot;,\n  &quot;observed&quot;: &quot;Hello, Ada!&quot;\n}</pre>",
+        "title": "Implement greeting",
+        "html_url": "http://127.0.0.1:56511/pull/1",
+        "head": {
+          "ref": "codex/issue-53",
+          "sha": "2b19b5f2350ac4bed5714e9da38e9c7da2ae2855",
+          "repo": {
+            "id": 9001
+          }
+        },
+        "base": {
+          "ref": "main",
+          "repo": {
+            "id": 9001
+          }
+        }
+      }
+    ],
+    "providerCreates": 1,
+    "controlledReviewStarts": 3,
+    "controlledRepairStarts": 0,
+    "runtimeKind": "controlled Codex adapter",
+    "providerKind": "controlled HTTP provider with real local and bare Git"
+  }
+]

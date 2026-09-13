@@ -1,0 +1,17 @@
+test_changed_skill_bytes_block_before_reviewer_start (tests.test_head_qualification_adapter.HeadQualificationAdapterTests.test_changed_skill_bytes_block_before_reviewer_start) ... ok
+test_malformed_verdicts_keep_diagnostics_without_becoming_actionable (tests.test_head_qualification_adapter.HeadQualificationAdapterTests.test_malformed_verdicts_keep_diagnostics_without_becoming_actionable) ... ok
+test_optimized_python_still_rejects_forbidden_requirements_not_applicable (tests.test_head_qualification_adapter.HeadQualificationAdapterTests.test_optimized_python_still_rejects_forbidden_requirements_not_applicable) ... ok
+test_review_source_preserves_unicode_and_whitespace_paths (tests.test_head_qualification_adapter.HeadQualificationAdapterTests.test_review_source_preserves_unicode_and_whitespace_paths) ... ok
+test_reviewer_receives_full_changed_source_and_explicit_base (tests.test_head_qualification_adapter.HeadQualificationAdapterTests.test_reviewer_receives_full_changed_source_and_explicit_base) ... ok
+test_excessive_stderr_is_bounded_before_admission (tests.test_publication_adapter.PublicationAdapterTests.test_excessive_stderr_is_bounded_before_admission) ... ok
+test_killed_adapter_does_not_leave_a_capture_command_running (tests.test_publication_adapter.PublicationAdapterTests.test_killed_adapter_does_not_leave_a_capture_command_running) ... ok
+test_missing_screenshot_fields_are_rejected_during_readiness (tests.test_publication_adapter.PublicationAdapterTests.test_missing_screenshot_fields_are_rejected_during_readiness) ... ok
+test_optimized_interpreter_cannot_disable_assignment_validation (tests.test_publication_adapter.PublicationAdapterTests.test_optimized_interpreter_cannot_disable_assignment_validation) ... ok
+test_png_without_pixel_bytes_cannot_pass_surface_readiness (tests.test_publication_adapter.PublicationAdapterTests.test_png_without_pixel_bytes_cannot_pass_surface_readiness) ... ok
+test_same_base_in_another_remote_does_not_authorize_that_destination (tests.test_publication_adapter.PublicationAdapterTests.test_same_base_in_another_remote_does_not_authorize_that_destination) ... ok
+test_secret_removed_from_tip_still_blocks_outgoing_history (tests.test_publication_adapter.PublicationAdapterTests.test_secret_removed_from_tip_still_blocks_outgoing_history) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 87.878s
+
+OK

@@ -1,0 +1,15 @@
+test_actionable_findings_repair_same_writer_then_reverify_new_head (tests.test_head_qualification.HeadQualificationTests.test_actionable_findings_repair_same_writer_then_reverify_new_head) ... ok
+test_changed_provider_head_invalidates_qualified_head_on_redelivery (tests.test_head_qualification.HeadQualificationTests.test_changed_provider_head_invalidates_qualified_head_on_redelivery) ... ok
+test_failed_verification_that_mutates_head_is_rejected (tests.test_head_qualification.HeadQualificationTests.test_failed_verification_that_mutates_head_is_rejected) ... ok
+test_interrupted_verification_never_reexecutes_check (tests.test_head_qualification.HeadQualificationTests.test_interrupted_verification_never_reexecutes_check) ... ok
+test_invalid_review_is_retained_and_never_repaired (tests.test_head_qualification.HeadQualificationTests.test_invalid_review_is_retained_and_never_repaired) ... ok
+test_lost_repair_reply_remains_owned_until_same_operation_is_adopted (tests.test_head_qualification.HeadQualificationTests.test_lost_repair_reply_remains_owned_until_same_operation_is_adopted) ... ok
+test_three_fresh_peer_blind_reviews_qualify_only_the_current_head (tests.test_head_qualification.HeadQualificationTests.test_three_fresh_peer_blind_reviews_qualify_only_the_current_head) ... ok
+test_three_unsuccessful_repairs_leave_concrete_human_request_and_no_fourth (tests.test_head_qualification.HeadQualificationTests.test_three_unsuccessful_repairs_leave_concrete_human_request_and_no_fourth) ... ok
+test_worker_replacement_adopts_repair_in_same_numbered_round (tests.test_head_qualification.HeadQualificationTests.test_worker_replacement_adopts_repair_in_same_numbered_round) ... ok
+test_worker_replacement_adopts_review_receipt_without_new_session (tests.test_head_qualification.HeadQualificationTests.test_worker_replacement_adopts_review_receipt_without_new_session) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 325.917s
+
+OK

@@ -1,0 +1,7 @@
+test_real_three_session_review_qualifies_the_evidence_head (tests.test_head_qualification_native.NativeHeadQualificationTests.test_real_three_session_review_qualifies_the_evidence_head) ... ok
+test_real_writer_repairs_review_findings_in_original_session (tests.test_head_qualification_native.NativeHeadQualificationTests.test_real_writer_repairs_review_findings_in_original_session) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 298.790s
+
+OK
