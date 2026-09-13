@@ -45,7 +45,7 @@ Daniel hat Ticket 03 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commi
 ## 5. Ergänzung: Upstream-Stand lokal übernehmen
 - [x] 5.1 Umfang korrigieren: LLM Wiki als Ganzes mit seinen upstream festgelegten Abhängigkeiten übernehmen; keine eigenständigen Library-Updates. Automatische Übernahme nach erfolgreichem Build und erforderlichen Tests bleibt bestätigt.
 - [ ] 5.2 Veröffentlichte Releases erkennen und samt Integrationsprüfung übernehmen; falls Renovate verwendet wird, ausschließlich die Upstream-Referenz aktualisieren und automatisch mergen. Unveränderte Upstream-Revision trotz neuer Library-Version sowie Blockade bei fehlenden oder fehlgeschlagenen Prüfungen verifizieren.
-- [ ] 5.3 Reproduzierbare lokale Installation der Upstream-Revision mit ihrer Lockdatei einschließlich Aktivierungsprüfung und Rückkehr zur bisherigen Installation umsetzen.
+- [x] 5.3 Reproduzierbare lokale Installation der Upstream-Revision mit ihrer Lockdatei einschließlich Aktivierungsprüfung und Rückkehr zur bisherigen Installation umsetzen.
 
 Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Session zurückgestellt. Offene Punkte aus Abschnitt 4 bleiben erhalten und werden in dieser Session nicht weiter umgesetzt. Die Live-Pflegeautomation bleibt unverändert.
 
@@ -62,5 +62,7 @@ Daniel hat Release-Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschlus
 ## 6. Release-Ticket 02
 - [x] 6.1 Vollständige Kandidatenbindung und öffentliche Ablehnung nachträglicher Änderungen nachweisen.
 - [x] 6.2 Atomare Runtime-Auswahl, Status, Prozesssperre und Fehler-/Abbruchwiederherstellung implementieren.
-- [ ] 6.3 Reale Aktivierung, erhaltene Synthesen, No-op und gezielter Aktivierungsfehler auf dem Mac nachweisen.
-- [ ] 6.4 Gesamttests, zweiachsiges Code-Review, Betriebsanleitung und Abnahme vervollständigen.
+- [x] 6.3 Reale Aktivierung, erhaltene Synthesen, No-op und gezielter Aktivierungsfehler auf dem Mac nachweisen.
+- [x] 6.4 Gesamttests, zweiachsiges Code-Review, Betriebsanleitung und Abnahme vervollständigen.
+
+Release-Ticket 02: [Abnahme und Grenzen](../../../contextual-llm-wiki/evidence/release-activation-02.md), [zweiachsiges Review](../../../contextual-llm-wiki/evidence/release-activation-02-review.md). Lokale Aktivierung/Rollback abgeschlossen; 5.2 (Erkennung) und 4.6 (Wissenspflege) bleiben offen.

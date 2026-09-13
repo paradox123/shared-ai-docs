@@ -78,7 +78,7 @@ Compiler-Commit, Release, Wrapper-Pfad, Node-Binary und Node-Version. Der
 Bootstrap-Pin im Checkout beschreibt nach Aktivierung weiterhin den Rückfallstand.
 Aktive Releases werden separat unter `.runtime/releases/` aufbewahrt. Kandidaten,
 aktive Snapshots und frühere Rückfallstände nicht manuell verändern oder löschen.
-Die Update-Ergebnisse und begrenzten künstlichen Prüfdaten liegen unter
+`outcome: activated` bestätigt die Übernahme, `outcome: noop` eine unveränderte bereits aktive Runtime. Der No-op verändert die Auswahl nicht. Die Update-Ergebnisse und begrenzten künstlichen Prüfdaten liegen unter
 `.runtime/activation-runs/`; sie sind keine produktiven Wissensbestände.
 
 Die Aktivierung übernimmt keine Produktiv-Konfiguration. Der Funktionsnachweis
@@ -99,5 +99,5 @@ Eine vorläufige Umschaltung hält ihren Rückfallstand im Auswahlzustand fest.
 Schlägt der anschließende Funktionsnachweis fehl, wird die Auswahl zurückgesetzt.
 Nach einem Prozessabbruch stellt der nächste `wiki`-Aufruf die vorige Auswahl vor
 seiner eigentlichen Operation wieder her und meldet die Wiederherstellung auf
-stderr. Der fehlgeschlagene Update-Aufruf liefert Exit 1 und die weiterhin aktive
+stderr einschließlich der tatsächlich wiederhergestellten Identität. Derselbe Fehlerbericht bleibt beim unterbrochenen Lauf erhalten. Der fehlgeschlagene Update-Aufruf liefert Exit 1 und die weiterhin aktive
 Identität. Der unveränderte qualifizierte Kandidat kann erneut angeboten werden.

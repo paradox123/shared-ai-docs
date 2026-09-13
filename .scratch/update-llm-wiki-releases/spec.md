@@ -16,7 +16,7 @@ Wissenspflege, deren Schedulerwechsel, die gemeinsame Wiki-Migration sowie unabh
 2. Einen erfolgreichen Kandidaten lokal aktivieren und bei Fehlern den bisherigen funktionsfähigen Stand erhalten.
 3. Neue Releases regelmäßig erkennen und die gesamte Übernahme automatisch ausführen.
 
-Jedes Ticket wird über die direkteste öffentliche Schnittstelle nachgewiesen. Ticket 01 ist auf `codex/update-llm-wiki-releases` umgesetzt, geprüft und von Daniel am 13.09.2026 ausdrücklich akzeptiert; [Abnahme](../../contextual-llm-wiki/evidence/release-install-01.md). Aktivierung und regelmäßige Erkennung aus Tickets 02/03 sind noch nicht umgesetzt.
+Jedes Ticket wird über die direkteste öffentliche Schnittstelle nachgewiesen. Ticket 01 ist auf `codex/update-llm-wiki-releases` umgesetzt, geprüft und von Daniel am 13.09.2026 ausdrücklich akzeptiert; [Abnahme](../../contextual-llm-wiki/evidence/release-install-01.md). Ticket 02 ist auf demselben Branch implementiert und verifiziert; [Aktivierungsabnahme](../../contextual-llm-wiki/evidence/release-activation-02.md). Die regelmäßige Erkennung aus Ticket 03 bleibt offen.
 
 ## Quellen
 
