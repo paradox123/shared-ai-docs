@@ -30,4 +30,8 @@ Der akzeptierte Fehler-/Wiederaufnahmevertrag ist unter [continue-contextual-wik
 
 ### Bereits abgeschlossener Release-Ticket-01-Anteil
 
-Die akzeptierte Kandidateninstallation/-qualifikation ist unter [qualify-upstream-wiki-releases](../archive/2026-09-13-qualify-upstream-wiki-releases/proposal.md) abgeschlossen und in `contextual-wiki-operations` kanonisch übernommen. Dieser Change behält lokale Aktivierung/Rollback, automatische Release-Erkennung und die offenen Wissenspflegeaufgaben.
+Die akzeptierte Kandidateninstallation/-qualifikation ist unter [qualify-upstream-wiki-releases](../archive/2026-09-13-qualify-upstream-wiki-releases/proposal.md) abgeschlossen und in `contextual-wiki-operations` kanonisch übernommen. Dieser Change behält automatische Release-Erkennung und die offenen Wissenspflegeaufgaben.
+
+### Bereits abgeschlossener Release-Ticket-02-Anteil
+
+Aktivierung/Rollback ist unter [activate-qualified-wiki-releases](../archive/2026-09-13-activate-qualified-wiki-releases/proposal.md) abgeschlossen und in `contextual-wiki-operations` kanonisch übernommen.

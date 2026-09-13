@@ -98,14 +98,8 @@ Abhängigkeitssperren wie andere gespeicherte Antworten.
 
 ## Akzeptierter Release-Ticket-01-Vertrag
 
-Installation und Qualifikation von Release-Kandidaten sind am 13.09.2026 akzeptiert und unter [qualify-upstream-wiki-releases](../archive/2026-09-13-qualify-upstream-wiki-releases/design.md) abgeschlossen. Die kanonische `contextual-wiki-operations`-Spec besitzt diesen Vertrag. Dieser aktive Change ergänzt ihn um Aktivierung/Rollback und automatische Erkennung; die offenen Wissenspflegeanforderungen bleiben bestehen.
+Installation und Qualifikation von Release-Kandidaten sind am 13.09.2026 akzeptiert und unter [qualify-upstream-wiki-releases](../archive/2026-09-13-qualify-upstream-wiki-releases/design.md) abgeschlossen. Die kanonische `contextual-wiki-operations`-Spec besitzt diesen Vertrag. Dieser aktive Change ergänzt die kanonischen Qualifikations-/Aktivierungsverträge um automatische Erkennung; die offenen Wissenspflegeanforderungen bleiben bestehen.
 
-## Release-Ticket 02: transaktionale lokale Aktivierung
+## Akzeptierter Abschluss von Release-Ticket 02
 
-Owning Git root: `_shared/shared-ai-docs`; beim Start `main` mit unabhängigen Renovate-Änderungen. Ziel und sauberer Implementierungsworktree: `codex/update-llm-wiki-releases` in `../shared-ai-docs-update-llm-wiki-releases`, Ausgangs-/Review-Commit `1cf3892a8641bc02510a349e64f27cbd5aa02388`. Der bestehende Betriebs-Change umfasst Aktivierung/Rollback (5.3); kein neuer Change, kein Schedulerumbau.
-
-`wiki update --candidate PATH` prüft sämtliche Pflichtstatus und den vollständigen geprüften Runtime-Baum (Wrapper, Compiler, installierte Abhängigkeiten, lokale Node-Kopie). Ältere Berichte ohne vollständige Bindung werden sichtbar zur erneuten Qualifikation verwiesen. Eine getrennte, erneut hashgeprüfte Kopie unter `.runtime/releases/` wird über einen atomaren Auswahlzustand aktiviert. Kandidatenänderungen können weder vorhandene aktive Dateien verändern noch die vorherige Qualifikation übernehmen.
-
-Der stabile `wiki`-Einstieg und Updates halten dieselbe exklusive Betriebssystem-Dateisperre während ihrer gesamten Prozesse. Konkurrierende Aufrufe melden einen wiederholbaren Busy-Fehler. Ein persistenter vorläufiger Auswahlzustand hält die vorige Runtime fest; bei Aktivierungsfehler oder Wiederaufnahme nach Prozessabbruch wird sie vor weiterer Nutzung wiederhergestellt. `wiki release-status` führt die Identitätsprüfung in der ausgewählten Runtime aus.
-
-Ein begrenzter öffentlicher Funktionsnachweis erzeugt mit der bisherigen Runtime künstliche Wissensseiten und eine gespeicherte Synthese und liest sie nach Umschaltung mit der ausgewählten Runtime samt Herkunft wieder. Ein kompatibler No-op-Pflegelauf und die Nachpflege nach einer kontrollierten Quellenkorrektur prüfen weiterverwendbaren Zustand einschließlich gespeicherter Antworten. Aktivierung erhält keine Produktionskonfiguration und verändert keine vorhandenen Wissensdaten. Ein Release, das diese zustandserhaltende Kompatibilität nicht erfüllt, wird zurückgewiesen; automatische Produktiv-Datenmigration wird nicht eingeführt. Eine später nötige Migration muss zunächst einen eigenen gesicherten und rücksetzbaren Vertrag erfüllen.
+Aktivierung/Rollback ist unter [activate-qualified-wiki-releases](../archive/2026-09-13-activate-qualified-wiki-releases/design.md) abgeschlossen und kanonisch übernommen. Dieser Change behält automatische Release-Erkennung und offene Wissenspflege.

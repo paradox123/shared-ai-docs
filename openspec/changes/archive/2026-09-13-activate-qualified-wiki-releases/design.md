@@ -1,0 +1,13 @@
+## Release-Ticket 02: transaktionale lokale Aktivierung
+
+Owning Git root: `_shared/shared-ai-docs`; beim Start `main` mit unabhängigen Renovate-Änderungen. Ziel und sauberer Implementierungsworktree: `codex/update-llm-wiki-releases` in `../shared-ai-docs-update-llm-wiki-releases`, Ausgangs-/Review-Commit `1cf3892a8641bc02510a349e64f27cbd5aa02388`. Implementiert wurde im bestehenden Betriebs-Change (5.3); zum ausdrücklich akzeptierten Abschluss wird ausschließlich dieser erfüllte Anteil separat archiviert. Kein Schedulerumbau.
+
+`wiki update --candidate PATH` prüft sämtliche Pflichtstatus und den vollständigen geprüften Runtime-Baum (Wrapper, Compiler, installierte Abhängigkeiten, lokale Node-Kopie). Ältere Berichte ohne vollständige Bindung werden sichtbar zur erneuten Qualifikation verwiesen. Eine getrennte, erneut hashgeprüfte Kopie unter `.runtime/releases/` wird über einen atomaren Auswahlzustand aktiviert. Kandidatenänderungen können weder vorhandene aktive Dateien verändern noch die vorherige Qualifikation übernehmen.
+
+Der stabile `wiki`-Einstieg und Updates halten dieselbe exklusive Betriebssystem-Dateisperre während ihrer gesamten Prozesse. Konkurrierende Aufrufe melden einen wiederholbaren Busy-Fehler. Ein persistenter vorläufiger Auswahlzustand hält die vorige Runtime fest; bei Aktivierungsfehler oder Wiederaufnahme nach Prozessabbruch wird sie vor weiterer Nutzung wiederhergestellt. `wiki release-status` führt die Identitätsprüfung in der ausgewählten Runtime aus.
+
+Ein begrenzter öffentlicher Funktionsnachweis erzeugt mit der bisherigen Runtime künstliche Wissensseiten und eine gespeicherte Synthese und liest sie nach Umschaltung mit der ausgewählten Runtime samt Herkunft wieder. Ein kompatibler No-op-Pflegelauf und die Nachpflege nach einer kontrollierten Quellenkorrektur prüfen weiterverwendbaren Zustand einschließlich gespeicherter Antworten. Aktivierung erhält keine Produktionskonfiguration und verändert keine vorhandenen Wissensdaten. Ein Release, das diese zustandserhaltende Kompatibilität nicht erfüllt, wird zurückgewiesen; automatische Produktiv-Datenmigration wird nicht eingeführt. Eine später nötige Migration muss zunächst einen eigenen gesicherten und rücksetzbaren Vertrag erfüllen.
+
+## Abschlussprüfung
+
+Der erneute DRY/SOLID/KISS-Pass über Implementierungsdiff und benachbarte Runtime-/Installer-Grenzen bestätigt die vorhandene Aufteilung: gemeinsame Inhaltsbindung und Identitätsprüfung, getrennte Aktivierungssteuerung und Funktionsprobe. Keine weitere Codeänderung erforderlich. Die vollständigen Verhaltenstests und das unabhängige Review sind in der Abnahme verlinkt. Der öffentliche Status und ein erneuter Update-No-op wurden unmittelbar vor der Nutzerabnahme erfolgreich geprüft.

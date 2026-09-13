@@ -21,3 +21,7 @@ Implementiert auf `codex/update-llm-wiki-releases` mit `1f68c57`, `c6b69ba` und 
 `wiki update --candidate PATH` aktiviert nur vollständig qualifizierte, unveränderte Kandidaten. Der Feature-Worktree verwendet nach realer Aktivierung v1.3.0 / `34ca1df97b3e60a6700048c48c7cf70c92a9bfdb` aus einer eigenen Runtime-Kopie. No-op, erhaltener und weiterpflegbarer Zustand, gezielter Fehler samt Rückfall, Abbruchwiederherstellung und Serialisierung sind nachgewiesen. Typecheck, 61 CLI-, 59 Upstream-, acht Wartungshelfer- und 21 Release-Tests sind grün; keine offenen Review-Findings.
 
 Produktive Wissensdaten, Konfiguration und Schedulerdefinition sind hashgleich erhalten. Der produktive Scheduler verwendet weiterhin seinen bisherigen Einstieg; aktiviert wurde der öffentliche Einstieg des Feature-Worktrees. Der reale Release benötigt keine Produktivmigration; inkompatible Zustandsverträge werden zurückgewiesen, eine künftig nötige Migration braucht zuvor einen gesicherten, rücksetzbaren Vertrag. Ticket 03 (Release-Erkennung) bleibt offen. Der gemeinsame Betriebs-Change wird nicht archiviert.
+
+## Comments
+
+Daniel hat die Implementierung am 13.09.2026 ausdrücklich akzeptiert und Spec-Abschluss, Commit und Push beauftragt. Ticket 02 bleibt `resolved`; sein erfüllter Vertrag ist unter [activate-qualified-wiki-releases](../../../openspec/changes/archive/2026-09-13-activate-qualified-wiki-releases/proposal.md) separat abgeschlossen und kanonisch übernommen. Ticket 03 und offene Wissenspflege bleiben im Betriebs-Change.

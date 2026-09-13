@@ -48,3 +48,7 @@ Der nach `2ae80c5` vollständig neu qualifizierte Kandidat `.runtime/release-02-
 Die Ergebnisdatei enthält diesen Nachweis separat unter `deliveryQualification`, `worktreeActivation`, `worktreeStatus` und `worktreeNoop`. Eine erneute Prüfsumme nach der tatsächlichen Worktree-Aktivierung bestätigt die unveränderten produktiven Daten, Konfiguration und Schedulerdefinition (`worktreeProtectedUnchanged: true`).
 
 Ticket 02 ist implementiert und verifiziert. Der Betriebs-Change bleibt wegen Release-Erkennung aus Ticket 03 und weiterer, hier ausgeklammerter Wissenspflegeaufgaben offen; er wird nicht archiviert.
+
+## Akzeptierter Abschluss
+
+Daniel hat die Implementierung am 13.09.2026 ausdrücklich akzeptiert. Unmittelbar zuvor bestätigten der öffentliche Status erneut v1.3.0 / `34ca1df97b3e60a6700048c48c7cf70c92a9bfdb` und der wiederholte Updateaufruf Exit 0, `outcome: noop` sowie bytegleiche Runtime-Auswahl. Der erfüllte Aktivierungsvertrag ist separat unter [activate-qualified-wiki-releases](../../openspec/changes/archive/2026-09-13-activate-qualified-wiki-releases/proposal.md) abgeschlossen; der übrige Betriebs-Change bleibt offen.

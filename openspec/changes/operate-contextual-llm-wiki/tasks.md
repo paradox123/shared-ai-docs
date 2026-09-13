@@ -57,12 +57,8 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 
 Daniel hat Release-Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Die erledigten Aufgaben 6.1–6.4 und ihr Kandidatenvertrag sind unter [qualify-upstream-wiki-releases](../archive/2026-09-13-qualify-upstream-wiki-releases/tasks.md) abgeschlossen und kanonisch übernommen. [Abnahme und Prüfnachweise](../../../contextual-llm-wiki/evidence/release-install-01.md).
 
-5.2/5.3 bleiben wegen Release-Erkennung, Aktivierung und Rollback offen. Der Installations-/Qualifikationsanteil ist erfüllt; diese Folgeschritte verwenden den kanonischen Kandidatenvertrag. Die offene Wissenspflege aus 4.6 bleibt ebenfalls erhalten.
+Zum Abschluss von Release-Ticket 01 blieben 5.2/5.3 offen. Mit dem akzeptierten Release-Ticket 02 ist auch 5.3 erfüllt; 5.2 (Release-Erkennung) verwendet künftig die beiden kanonischen Verträge. Die offene Wissenspflege aus 4.6 bleibt ebenfalls erhalten.
 
-## 6. Release-Ticket 02
-- [x] 6.1 Vollständige Kandidatenbindung und öffentliche Ablehnung nachträglicher Änderungen nachweisen.
-- [x] 6.2 Atomare Runtime-Auswahl, Status, Prozesssperre und Fehler-/Abbruchwiederherstellung implementieren.
-- [x] 6.3 Reale Aktivierung, erhaltene Synthesen, No-op und gezielter Aktivierungsfehler auf dem Mac nachweisen.
-- [x] 6.4 Gesamttests, zweiachsiges Code-Review, Betriebsanleitung und Abnahme vervollständigen.
+## Akzeptierter Abschluss von Release-Ticket 02
 
-Release-Ticket 02: [Abnahme und Grenzen](../../../contextual-llm-wiki/evidence/release-activation-02.md), [zweiachsiges Review](../../../contextual-llm-wiki/evidence/release-activation-02-review.md). Lokale Aktivierung/Rollback abgeschlossen; 5.2 (Erkennung) und 4.6 (Wissenspflege) bleiben offen.
+Daniel hat Release-Ticket 02 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Die erledigten Aufgaben 6.1–6.4 und Aktivierung/Rollback aus 5.3 sind unter [activate-qualified-wiki-releases](../archive/2026-09-13-activate-qualified-wiki-releases/tasks.md) abgeschlossen und kanonisch übernommen. [Abnahme](../../../contextual-llm-wiki/evidence/release-activation-02.md). 5.2 (Release-Erkennung) und 4.6 (Wissenspflege) bleiben offen.
