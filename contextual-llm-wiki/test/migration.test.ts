@@ -546,3 +546,222 @@ test("retry removes unpublished imports after a source changes during publicatio
     await f.close();
   }
 });
+
+test("malformed historical metadata is preserved and quarantined without blocking valid pages", async () => {
+  const f = await fixture();
+  try {
+    await f.run("maintain");
+    const legacy = path.join(f.dir, "legacy");
+    await f.run("backup", "--destination", legacy);
+    const metadata = path.join(legacy, "backup.json");
+    const raw = JSON.parse(await readFile(metadata, "utf8"));
+    raw.state.pages["answers/broken"] = null;
+    await writeFile(metadata, JSON.stringify(raw));
+    const invalid = path.join(f.dir, "invalid");
+    await mkdir(path.join(invalid, "wiki"), { recursive: true });
+    await writeFile(path.join(invalid, "backup.json"), "{invalid-json");
+    await writeFile(
+      path.join(invalid, "wiki/notiz.md"),
+      "Unersetzlicher alter Text.",
+    );
+    f.config.output = path.join(f.dir, "common");
+    f.config.context = "common";
+    await f.saveConfig();
+    const result = await f.run(
+      "migrate",
+      "--from",
+      legacy,
+      "--from",
+      invalid,
+      "--snapshot",
+      path.join(f.dir, "snapshot"),
+    );
+    assert.equal(result.ok, true, JSON.stringify(result));
+    assert.equal(
+      result.report.pages.find((p: any) => p.id === "answers/broken").action,
+      "quarantined",
+    );
+    assert.equal(result.report.inputs[1].status, "invalid-state");
+    assert.ok(result.report.inputs[1].reasons.includes("malformed-state-json"));
+    assert.equal(
+      await readFile(
+        path.join(f.dir, "snapshot/inputs/1/wiki/notiz.md"),
+        "utf8",
+      ),
+      "Unersetzlicher alter Text.",
+    );
+    assert.ok((await f.run("status")).pages.some((p: any) => p.migration));
+  } finally {
+    await f.close();
+  }
+});
+
+test("navigation to quarantined pages opens their snapshot and never binds to an unrelated fresh page", async () => {
+  const f = await fixture();
+  try {
+    await writeFile(
+      path.join(f.dir, "beta/README.md"),
+      "# Kontrollseite\n\nUnabhängige Kontrollseite.\n",
+    );
+    await f.run("maintain");
+    const legacy = f.config.output;
+    const raw = JSON.parse(
+      await readFile(path.join(legacy, ".state/state.json"), "utf8"),
+    );
+    const file = path.join(legacy, "wiki/concepts/freigabe.md");
+    const text =
+      (await readFile(file, "utf8")) +
+      "\n[Kontrolle](kontrollseite.md)\n[Fehlender Altverweis](fehlt.md)\n";
+    const { createHash } = await import("node:crypto");
+    await writeFile(file, text);
+    raw.pages["concepts/freigabe"].hash = createHash("sha256")
+      .update(text)
+      .digest("hex");
+    raw.pages["concepts/kontrollseite"].withdrawn = true;
+    await writeFile(
+      path.join(legacy, ".state/state.json"),
+      JSON.stringify(raw),
+    );
+    f.config.output = path.join(f.dir, "common");
+    f.config.context = "common";
+    await f.saveConfig();
+    const snapshot = path.join(f.dir, "snapshot");
+    const result = await f.run(
+      "migrate",
+      "--from",
+      legacy,
+      "--snapshot",
+      snapshot,
+    );
+    assert.equal(result.ok, true, JSON.stringify(result));
+    const page = result.report.pages.find(
+      (p: any) => p.id === "concepts/freigabe",
+    );
+    const body = await readFile(
+      path.join(f.config.output, "wiki", page.target + ".md"),
+      "utf8",
+    );
+    assert.ok(
+      body.includes(
+        encodeURIComponent(
+          path.join(snapshot, "inputs/0/wiki/concepts/kontrollseite.md"),
+        ),
+      ),
+    );
+    assert.doesNotMatch(body, /\]\(kontrollseite.md\)/);
+    assert.ok(page.links.some((l: any) => l.action === "unresolved"));
+    assert.equal((await f.run("lint")).ok, true);
+  } finally {
+    await f.close();
+  }
+});
+
+test("migration into a fresh common output preserves knowledge without triggering the full first compilation", async () => {
+  const f = await fixture();
+  try {
+    await f.run("maintain");
+    await f.run("query", "--question", "Freigabe", "--save", "einmalig");
+    const legacy = f.config.output;
+    f.config.output = path.join(f.dir, "common");
+    f.config.context = "common";
+    await f.saveConfig();
+    f.fail(true);
+    const migrated = await f.run(
+      "migrate",
+      "--from",
+      legacy,
+      "--snapshot",
+      path.join(f.dir, "snapshot"),
+    );
+    assert.equal(migrated.ok, true, JSON.stringify(migrated));
+    const current = await f.run("status");
+    assert.deepEqual(current.review, []);
+    assert.equal(
+      current.pages.filter((p: any) => p.kind === "answer").length,
+      1,
+    );
+    assert.equal(
+      (await f.run("source", "--id", "alpha/README.md")).text,
+      "# Freigabe\n\nAlpha verlangt zwei Freigaben.\n",
+    );
+    assert.equal((await f.run("maintain")).noop, true);
+  } finally {
+    await f.close();
+  }
+});
+
+test("migration leaves an unrelated QMD collection usable at its original path", async () => {
+  const f = await fixture();
+  try {
+    await f.run("maintain");
+    await f.run("query", "--question", "Freigabe", "--save", "bisher");
+    const legacy = f.config.output,
+      originalConfig = path.join(f.dir, "original-config.json");
+    await writeFile(originalConfig, await readFile(f.configPath));
+    const { invoke } = await import("./support.ts");
+    const originalSearch = () =>
+      invoke(
+        ["search", "--config", originalConfig, "--question", "Freigabe"],
+        f.env,
+      );
+    const before = await originalSearch();
+    f.config.output = path.join(f.dir, "common");
+    f.config.context = "common";
+    await f.saveConfig();
+    assert.equal(
+      (
+        await f.run(
+          "migrate",
+          "--from",
+          legacy,
+          "--snapshot",
+          path.join(f.dir, "snapshot"),
+        )
+      ).ok,
+      true,
+    );
+    const after = await originalSearch();
+    assert.equal(after.ok, true, JSON.stringify(after));
+    const identity = (rows: any[]) =>
+      rows
+        .map(({ filepath, hash, body }) => ({ filepath, hash, body }))
+        .sort((a, b) => a.filepath.localeCompare(b.filepath));
+    assert.deepEqual(identity(after.results), identity(before.results));
+    assert.ok(
+      (await f.run("search", "--question", "Freigabe")).results.length > 0,
+    );
+  } finally {
+    await f.close();
+  }
+});
+
+test("index-only retry of a fresh import needs no model compilation", async () => {
+  const f = await fixture();
+  try {
+    await f.run("maintain");
+    await f.run("query", "--question", "Freigabe", "--save", "einmalig");
+    const legacy = f.config.output;
+    f.config.output = path.join(f.dir, "common");
+    f.config.context = "common";
+    (f.config.qmd as any).node = "/missing-qmd-runtime";
+    await f.saveConfig();
+    const snapshot = path.join(f.dir, "snapshot");
+    assert.equal(
+      (await f.run("migrate", "--from", legacy, "--snapshot", snapshot)).ok,
+      false,
+    );
+    delete (f.config.qmd as any).node;
+    await f.saveConfig();
+    f.fail(true);
+    const resumed = await f.run("migrate", "--snapshot", snapshot);
+    assert.equal(resumed.ok, true, JSON.stringify(resumed));
+    assert.deepEqual((await f.run("status")).pending, []);
+    assert.equal(
+      (await f.run("status")).pages.filter((p: any) => p.kind === "answer")
+        .length,
+      1,
+    );
+  } finally {
+    await f.close();
+  }
+});
