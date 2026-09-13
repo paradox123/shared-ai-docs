@@ -1,0 +1,189 @@
+{
+  "date": "2026-09-12",
+  "providerProbe": {
+    "ok": true,
+    "runtime": "24.16.0",
+    "compiler": "34ca1df97b3e60a6700048c48c7cf70c92a9bfdb",
+    "version": "1.3.0",
+    "provider": "codex-agent",
+    "model": "provider default",
+    "embeddings": false,
+    "providerProbe": "ok"
+  },
+  "generalFirstCompile": {
+    "ok": true,
+    "compiled": 4,
+    "skipped": 0,
+    "deleted": 0,
+    "errors": [],
+    "activePageCount": 25,
+    "qmd": {
+      "collections": 1,
+      "indexed": 25,
+      "updated": 1,
+      "unchanged": 0,
+      "removed": 0,
+      "needsEmbedding": 26
+    }
+  },
+  "privateFirstCompile": {
+    "ok": true,
+    "compiled": 1,
+    "skipped": 0,
+    "deleted": 0,
+    "errors": [],
+    "activePageCount": 8,
+    "qmd": {
+      "collections": 1,
+      "indexed": 9,
+      "updated": 0,
+      "unchanged": 0,
+      "removed": 0,
+      "needsEmbedding": 36
+    }
+  },
+  "sharedSynthesis": {
+    "saved": "answers/qmd-synthese",
+    "evidencePages": 9,
+    "originalSourceIds": [
+      "shared-ai-docs/docs/rag/operating-model-rag-qmd.md",
+      "vault-root/_shared/danielsvault-rag/README.md"
+    ]
+  },
+  "finalFollowup": {
+    "ok": true,
+    "fallback": false,
+    "evidencePageIds": [
+      "answers/qmd-synthese",
+      "concepts/qmd-als-einzige-persistierte-retrieval-engine",
+      "concepts/direktes-qmd-retrieval-mit-exakter-fallback-suche",
+      "concepts/qmd-gestützte-rag-kompatibilitätsschicht",
+      "concepts/tägliche-qmd-wartung-mit-fail-closed-verhalten",
+      "concepts/repository-gerechte-markdown-indexierung",
+      "concepts/deklarative-collection-verwaltung",
+      "concepts/qmd-als-zentrale-wissensabruf-engine",
+      "concepts/direkter-wissensabruf-mit-qmd"
+    ]
+  },
+  "activeLint": {
+    "ok": true,
+    "review": [],
+    "pending": [],
+    "activeIssues": [],
+    "forbiddenStores": [],
+    "unresolvedCompilerErrors": [],
+    "compilerLinkSuggestions": 127
+  },
+  "sourceChecks": [
+    {
+      "context": "acceptance-general",
+      "id": "vault-root/Meetings/Transcripts/20260911-2056-transcript.md",
+      "sha256": "4a67e3981ce6fd062080858955d7c22cc219b8a041c0d642aa5ced602c5b5e87",
+      "originalUnchangedSinceCompilation": true
+    },
+    {
+      "context": "acceptance-general",
+      "id": "vault-root/Projects/NCG/AGENTS.md",
+      "sha256": "73334c50c401c8071ab6c279302bc921c1425554c2cdef270dfa80f09d8b1cd7",
+      "originalUnchangedSinceCompilation": true
+    },
+    {
+      "context": "acceptance-general",
+      "id": "vault-root/_shared/danielsvault-rag/README.md",
+      "sha256": "6b1baaed1f5856b93741c25e5619fef8cb5f3402d70728134b3deff16d60209f",
+      "originalUnchangedSinceCompilation": true
+    },
+    {
+      "context": "acceptance-general",
+      "id": "shared-ai-docs/docs/rag/operating-model-rag-qmd.md",
+      "sha256": "e711ebd10e6b3f4596bcbb888af730043b2d1ba620e5d0e2ad3fa4025d5a8207",
+      "originalUnchangedSinceCompilation": true
+    },
+    {
+      "context": "acceptance-private",
+      "id": "vault-root/Projects/Private/AGENTS.md",
+      "sha256": "3ea6e4f175ea108d73cc345a95727c93c5b5e18aa5adaa53b558609011c49097",
+      "originalUnchangedSinceCompilation": true
+    }
+  ],
+  "backup": {
+    "ok": true,
+    "backup": "/Users/dh/.local/state/contextual-llm-wiki/backups/acceptance-20260912",
+    "pages": 27
+  },
+  "restoreWithSmallerContext": {
+    "ok": true,
+    "sources": 1,
+    "pages": 7,
+    "qmdRemoved": 20,
+    "removedMeetingSearchRawMatches": 0,
+    "activeSavedAnswers": 0
+  },
+  "restoreFullContext": {
+    "ok": true,
+    "pages": 27
+  },
+  "unchangedMaintenance": {
+    "ok": true,
+    "noop": true
+  },
+  "privateCollectionExcludedFromDefaultSearch": true,
+  "obsidian": {
+    "status": "passed",
+    "app": "Obsidian 1.13.7",
+    "vault": "DanielsVault",
+    "verifiedAt": "2026-09-12T16:53:55.440763+00:00",
+    "initialBlocker": "Mac locked; resolved after manual unlock confirmed by user",
+    "navigation": [
+      "Quick switcher: _shared/contextual-llm-wiki/acceptance-general/wiki/index.md",
+      "Entry link: answers/qmd-synthese.md",
+      "Original source link: obsidian://open?path=/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/rag/operating-model-rag-qmd.md"
+    ],
+    "screenshots": [
+      {
+        "path": "obsidian/01-entry.jpg",
+        "sha256": "78c0b6fb29d7eb0a4375c5ce7b0d43b884a517bd1829f91dbee1ed8dd98e4a83",
+        "format": "JPEG",
+        "width": 1336,
+        "height": 768
+      },
+      {
+        "path": "obsidian/02-shared-synthesis.jpg",
+        "sha256": "c8c0cb60642855c6cd3f169af35ade7826e05ae8d221c97cd01b1f308bc9c85b",
+        "format": "JPEG",
+        "width": 1336,
+        "height": 768
+      },
+      {
+        "path": "obsidian/03-original-source.jpg",
+        "sha256": "56f61948486ae539653409168da50e517627815803fc6114bb0a96bab1ce9751",
+        "format": "JPEG",
+        "width": 1336,
+        "height": 768
+      }
+    ],
+    "postNavigationLint": {
+      "ok": true,
+      "review": [],
+      "pending": []
+    },
+    "originalHashesUnchanged": true
+  },
+  "verification": {
+    "publicCliTests": 28,
+    "upstreamTests": 59,
+    "failures": 0,
+    "typescript": "passed"
+  },
+  "finalBackup": {
+    "ok": true,
+    "backup": "/Users/dh/.local/state/contextual-llm-wiki/backups/acceptance-20260912-final",
+    "pages": 27
+  },
+  "privateActiveLint": {
+    "ok": true,
+    "pending": [],
+    "activeIssues": [],
+    "forbiddenStores": []
+  }
+}

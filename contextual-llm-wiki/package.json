@@ -1,0 +1,23 @@
+{
+  "name": "contextual-llm-wiki",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "./wiki-node --test test/*.test.ts",
+    "typecheck": "./wiki-node node_modules/typescript/bin/tsc",
+    "test:upstream": "./scripts/verify-upstream.sh",
+    "check": "npm run typecheck && npm test && npm run test:upstream"
+  },
+  "engines": {
+    "node": "24.16.0"
+  },
+  "dependencies": {
+    "minimatch": "^10.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.4",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  }
+}
