@@ -17,7 +17,7 @@
 
 ## 4. Bestätigtes Modell umsetzen
 - [x] 4.1 Quellenpartition und bisherige Privacy-Szenarien durch gemeinsame Wissensbildung und explizite Aufgabenbegrenzung ersetzen; Rot→Grün über die öffentliche CLI.
-- [ ] 4.2 Bestehende Wissensseiten und gespeicherte Synthesen sichern und samt überprüfter Provenienz in gemeinsamen Zustand/Ausgabe überführen; keine stillen Überschreibungen oder Verluste.
+- [x] 4.2 Bestehende Wissensseiten und gespeicherte Synthesen sichern und samt überprüfter Provenienz in gemeinsamen Zustand/Ausgabe überführen; keine stillen Überschreibungen oder Verluste.
 - [x] 4.3 Gemeinsames QMD-Routing ohne aus dem Domainnamen abgeleitete Ausschlüsse herstellen; betroffene kanonische Retrieval-Regeln abgleichen.
 - [ ] 4.4 Begrenzte Pflegefehler isolieren, sichere unabhängige Arbeit fortsetzen und echte Teilfehlerberichte nachweisen.
 - [ ] 4.5 Live-Job und Betriebsreferenzen auf die gemeinsame Konfiguration umstellen; bisherigen Zeitplan beibehalten.
@@ -29,3 +29,6 @@
 ## Akzeptierter Abschluss von Ticket 01
 
 Daniel hat Ticket 01 am 13.09.2026 ausdrücklich akzeptiert und Abschluss, Commit und Push beauftragt. Sein Wiki-Delta wurde in [share-contextual-wiki-sources](../archive/2026-09-13-share-contextual-wiki-sources/proposal.md) separat abgeschlossen und kanonisch übernommen. Die hier noch offenen Aufgaben 4.2, 4.4, 4.5 und der Produktionsanteil von 4.6 bleiben unverändert den Tickets 02–04 zugeordnet.
+
+
+[Ticket-02-Abnahme](../../../contextual-llm-wiki/evidence/shared-wiki-02.md): sechs reale Altbestände inventarisiert, 211 Dateien gesichert und geprüft; 30 gültige Seiten einschließlich einer bytegleichen gespeicherten Antwort gemeinsam übernommen, 36 identische Revisionen zugeordnet und 18 veraltete Revisionen zurückgestellt. Echte Query, gemeinsames QMD inklusive acht persönlichen Seiten und No-op verifiziert. Antwortketten, Quellenkorrektur, Namenskollisionen und sichere Wiederaufnahme über die öffentliche CLI geprüft. Task 4.2 ist umgesetzt; 4.4, 4.5 und der Vollimport-/Produktionsanteil von 4.6 bleiben offen. Kein Archivieren.

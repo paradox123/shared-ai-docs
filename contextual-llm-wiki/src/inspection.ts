@@ -4,6 +4,7 @@ import { createWiki } from "../.runtime/compiler/dist/index.js";
 import { scan } from "./sources.ts";
 import { readState, status } from "./state.ts";
 import { hash } from "./storage.ts";
+import { markdownProse } from "./markdown-prose.ts";
 export async function source(config: any, id: string) {
   const state = await readState(config),
     record = state.sources[id];
@@ -37,7 +38,8 @@ export async function lint(config: any) {
       activeIssues.push({ rule: "missing-page", page: page.id });
       continue;
     }
-    for (const match of body.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)) {
+    const prose = markdownProse(body);
+    for (const match of prose.matchAll(/\[([^\]]+)\]\(([^)]+)\)/g)) {
       const target = match[2].replace(/^<|>$/g, "");
       if (/^(?:[a-z][a-z0-9+.-]*:|#)/i.test(target)) continue;
       try {
@@ -48,7 +50,7 @@ export async function lint(config: any) {
         activeIssues.push({ rule: "broken-link", page: page.id, target });
       }
     }
-    for (const match of body.matchAll(/\[\[([^\]]+)\]\]/g))
+    for (const match of prose.matchAll(/\[\[([^\]]+)\]\]/g))
       activeIssues.push({
         rule: "unresolved-wikilink",
         page: page.id,
