@@ -7,6 +7,17 @@ The graphical Operator Client SHALL accept a GitHub issue URL or a local issue o
 - **WHEN** a user submits an eligible authorized work input through the graphical client
 - **THEN** the client identifies its admitted background run and provides access to its state and history
 
+#### Scenario: Start a saved GitHub issue or admit and start together (Ticket 02)
+- **WHEN** an authorized contributor starts a saved GitHub submission, or enters a new eligible GitHub URL and chooses start
+- **THEN** current repository identity, contribution access, the open issue's implementation authorization and the configured agent runtime prerequisites are checked before atomically linking the immutable submission to one ImplementationRun and a durable background disposition
+- **AND** redelivery returns the same run and logical first step; a source edit does not replace the admitted work mandate, and an unrelated pre-existing issue run is not silently adopted for new execution
+
+#### Scenario: Observe the first real background step (Ticket 02)
+- **WHEN** the independent worker claims an admitted start
+- **THEN** it performs a real agent analysis of the retained issue requirements, preserves the assignment, observable messages, tool calls/results, artifacts and actual session identity through the existing Run History boundary, and records a readable result or concrete failure
+- **AND** the GUI distinguishes waiting, running, completed first-step analysis and failed execution, without claiming implementation, qualification or full workflow completion from a completed analysis
+- **AND** closing the browser or initiating terminal/task does not own or stop execution; reopening after API/worker replacement reads the same run and retained observations, with uncertain external effects reconciled or reported instead of starting a second logical step
+
 ### Requirement: PRD decomposition within the work mandate
 The system SHALL treat a submitted PRD as an Arbeitsmandat, autonomously derive linked issues within its scope, and process eligible issues under the existing per-repository serial queue. Each derived issue SHALL retain its own ImplementationRun and traceable authorization ancestry. The GUI SHALL expose the PRD, derived issues, dependencies and associated runs. Routine decomposition and implementation within the mandate SHALL NOT require another start approval; unresolved product decisions, actionable blockers and human approval gates SHALL surface for human action.
 

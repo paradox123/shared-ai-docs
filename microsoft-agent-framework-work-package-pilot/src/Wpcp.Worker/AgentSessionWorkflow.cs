@@ -5,35 +5,39 @@ using Wpcp.Storage.Postgres;
 
 namespace Wpcp.Worker;
 
-internal sealed class HttpAgentSessionAdapter(HttpClient client, bool readOnly = false, string? runId = null) : IAgentSessionAdapter
+internal sealed class HttpAgentSessionAdapter(HttpClient client, bool readOnly = false, string? runId = null,
+    string resource = "sessions") : IAgentSessionAdapter
 {
     public async Task<AgentAdapterResponse> StartOrReadAsync(string operationKey, string note, CancellationToken token)
     {
         using var body = new StringContent(JsonSerializer.Serialize(new { note, runId }), System.Text.Encoding.UTF8, "application/json");
-        using var response = readOnly ? await client.GetAsync($"sessions/{operationKey}", token) :
-            await client.PutAsync($"sessions/{operationKey}", body, token);
+        using var response = readOnly ? await client.GetAsync($"{resource}/{operationKey}", token) :
+            await client.PutAsync($"{resource}/{operationKey}", body, token);
         return new((int)response.StatusCode, await response.Content.ReadAsStringAsync(token));
     }
 }
 
-internal static class FakeAgentWorkflow
+internal static class AgentSessionWorkflow
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public static async Task ExecuteAsync(PostgresImplementationRunStore store, string runId,
         string origin, string note, string? pauseAt, bool rejectBlocked, int timeoutMs, bool repositoryDelivery = false, bool readOnly = false,
-        string? realPython = null)
+        string? realPython = null, bool submissionAnalysis = false)
     {
         var uri = ControlledHttp.Origin(origin);
         await using var delivery = repositoryDelivery ? null : await store.AcquireAgentDeliveryAsync(runId);
         await using var standalone = repositoryDelivery ? null : await store.AcquireStandaloneAgentAsync(runId);
         using var client = ControlledHttp.Client(origin, timeoutMs);
-        if (realPython is not null && uri.AbsoluteUri == Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_ORIGIN") &&
+        if ((submissionAnalysis || realPython is not null && uri.AbsoluteUri == Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_ORIGIN")) &&
             Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_TOKEN") is { Length: > 0 } adapterToken)
             client.DefaultRequestHeaders.Add("X-Wpcp-Adapter-Token", adapterToken);
-        var prepare = new PrepareExecutor(store, uri.AbsoluteUri, rejectBlocked, realPython is null ? "fake-codex" : "real-codex");
-        var execute = new SessionExecutor(store, new HttpAgentSessionAdapter(client, readOnly, realPython is null ? null : runId), note, pauseAt, realPython);
-        var workflow = new WorkflowBuilder(prepare).WithName(realPython is null ? "FakeCodexAttemptV1" : "RealCodexAttemptV1")
+        var kind = submissionAnalysis ? "submission-analysis" : realPython is null ? "fake-codex" : "real-codex";
+        var prepare = new PrepareExecutor(store, uri.AbsoluteUri, rejectBlocked, kind);
+        var execute = new SessionExecutor(store, new HttpAgentSessionAdapter(client, readOnly,
+            realPython is null && !submissionAnalysis ? null : runId, submissionAnalysis ? "submission-analyses" : "sessions"),
+            note, pauseAt, realPython, submissionAnalysis);
+        var workflow = new WorkflowBuilder(prepare).WithName(submissionAnalysis ? "SubmissionAnalysisV1" : realPython is null ? "FakeCodexAttemptV1" : "RealCodexAttemptV1")
             .AddEdge(prepare, execute).Build();
         await using var run = await InProcessExecution.RunAsync(workflow, runId);
         // Framework errors are events, not necessarily thrown by RunAsync.
@@ -58,15 +62,15 @@ internal static class FakeAgentWorkflow
     }
 
     private sealed class PrepareExecutor(PostgresImplementationRunStore store, string origin, bool rejectBlocked, string kind)
-        : Executor<string, AgentAttemptReceipt>(kind == "real-codex" ? "PrepareRealAttempt" : "PrepareFakeAttempt")
+        : Executor<string, AgentAttemptReceipt>(kind == "submission-analysis" ? "PrepareSubmissionAnalysis" : kind == "real-codex" ? "PrepareRealAttempt" : "PrepareFakeAttempt")
     {
         public override async ValueTask<AgentAttemptReceipt> HandleAsync(string runId, IWorkflowContext context,
             CancellationToken cancellationToken = default) =>
             await store.PrepareAgentAsync(runId, origin, rejectBlocked, cancellationToken, kind);
     }
 
-    private sealed class SessionExecutor(PostgresImplementationRunStore store, IAgentSessionAdapter adapter, string note, string? pauseAt, string? realPython)
-        : Executor<AgentAttemptReceipt, string>(realPython is null ? "ExecuteExternalFakeSession" : "ExecuteRealCodexSession")
+    private sealed class SessionExecutor(PostgresImplementationRunStore store, IAgentSessionAdapter adapter, string note, string? pauseAt, string? realPython, bool submissionAnalysis)
+        : Executor<AgentAttemptReceipt, string>(submissionAnalysis ? "AnalyzeSubmission" : realPython is null ? "ExecuteExternalFakeSession" : "ExecuteRealCodexSession")
     {
         public override async ValueTask<string> HandleAsync(AgentAttemptReceipt receipt, IWorkflowContext context,
             CancellationToken cancellationToken = default)
@@ -116,7 +120,12 @@ internal static class FakeAgentWorkflow
                 }
                 await PauseAsync("after-result-observed", pauseAt, cancellationToken);
                 var result = await store.ReadOriginalAgentResultAsync(receipt, cancellationToken);
-                if (realPython is not null)
+                if (submissionAnalysis)
+                {
+                    if (!terminal || result is null || !SubmissionAnalysisResult.IsValid(result.Value)) throw new JsonException();
+                    category = result.Value.GetProperty("outcome").GetString() == "completed" ? "completed" : "agent-failed";
+                }
+                else if (realPython is not null)
                 {
                     if (!terminal || result is null || !await CanonicalResult.ValidateAsync(realPython, result.Value, cancellationToken))
                         throw new JsonException();

@@ -52,15 +52,22 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
         StartRunCommand command,
         CancellationToken cancellationToken = default)
     {
+        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
+        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
+        var result = await StartInTransactionAsync(command, connection, transaction, cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return result;
+    }
+
+    private async Task<StartRunResult> StartInTransactionAsync(StartRunCommand command,
+        NpgsqlConnection connection, NpgsqlTransaction transaction, CancellationToken cancellationToken)
+    {
         ArgumentNullException.ThrowIfNull(command);
         command.Validate();
         RejectControlledCanaryInCorrelation(command);
 
         var safe = Redact(command);
         var payloadDigest = Digest(safe.Payload);
-
-        await using var connection = await _dataSource.OpenConnectionAsync(cancellationToken);
-        await using var transaction = await connection.BeginTransactionAsync(cancellationToken);
 
         // Cross-process locks make duplicate delivery and issue identity decisions
         // deterministic without relying on a process-local cache.
@@ -77,7 +84,6 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
         {
             if (existingCommand.Correlation.Repository != command.Repository)
                 throw new RepositoryBindingConflictException();
-            await transaction.CommitAsync(cancellationToken);
             var disposition = string.Equals(existingCommand.PayloadDigest, payloadDigest, StringComparison.Ordinal)
                 ? StartRunDisposition.Idempotent
                 : StartRunDisposition.CommandIdConflict;
@@ -94,7 +100,6 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
         {
             if (existingIssue.Correlation.Repository != command.Repository)
                 throw new RepositoryBindingConflictException();
-            await transaction.CommitAsync(cancellationToken);
             return new StartRunResult(StartRunDisposition.IssueAlreadyHasRun, existingIssue.Correlation);
         }
 
@@ -140,7 +145,6 @@ public sealed partial class PostgresImplementationRunStore : IImplementationRunS
 
         await AppendAuditAsync(connection, transaction, runId, "start", "implementation-run-started",
             command.Actor, cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
         return new StartRunResult(StartRunDisposition.Accepted, correlation);
     }
 

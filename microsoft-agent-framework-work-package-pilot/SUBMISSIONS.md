@@ -1,11 +1,12 @@
-# GitHub submissions in the Operator GUI (GUI Ticket 01)
+# GitHub submissions in the Operator GUI
 
 The GUI labels the work inputs **Anforderungen**.
 For the Azure server deployment, see [the pilot operations guide](deploy/azure-vm/README.md).
 The API serves the GUI at `/operator/` and persists actual GitHub issue title/body
 snapshots in PostgreSQL. Admission produces `state: admitted` and `runId: null`.
-It does not start a worker, create a run, claim a lease or write to GitHub.
-Background processing is GUI Ticket 02.
+Choosing **Aufnehmen** does not start a worker, create a run, claim a lease or write to GitHub.
+Choosing **Starten** or **Analyse starten** uses the separately configured
+[background analysis path (GUI Ticket 02)](SUBMISSION-EXECUTION.md).
 
 ## Start the service
 
@@ -62,8 +63,8 @@ origin; there is no wildcard CORS or cookie authentication.
 
 The legacy `--fixture` mode and CLI/run/worker APIs remain available with their
 existing fixture capability and loopback restriction. Choose exactly one of
-`--fixture` and `--submission-config`. In submission mode the legacy synthetic
-start/control routes fail closed; setting `WPCP_FIXTURE_ACCESS_TOKEN` alone does
+`--fixture` and `--submission-config`. In submission mode the shared authorized run/history/artifact/dossier reads are
+available; legacy synthetic start/control routes fail closed; setting `WPCP_FIXTURE_ACCESS_TOKEN` alone does
 not enable them. No live pilot database was migrated for this ticket.
 
 The schema addition is `wpcp_submissions`. Its unique GitHub issue identity

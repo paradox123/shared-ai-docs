@@ -51,7 +51,7 @@ internal static class PublicationWorkflow
                 }
                 // The existing Agent Framework workflow owns canonical result validation.
                 var origin = plan.GetProperty("agentOrigin").GetString()!;
-                await FakeAgentWorkflow.ExecuteAsync(store, runId, origin,
+                await AgentSessionWorkflow.ExecuteAsync(store, runId, origin,
                     "Implement the admitted issue with this evidence plan: " + plan.GetRawText(),
                     null, false, 90000, repositoryDelivery: true, realPython: python);
                 run = (await store.GetProjectionAsync(runId))!;

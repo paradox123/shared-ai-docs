@@ -6,6 +6,14 @@ var jsonOptions = new JsonSerializerOptions(JsonSerializerDefaults.Web);
 
 try
 {
+    if (args.Length == 4 && args[0] == "--submission-config" && args[2] == "--dispatch-submissions" && args[3] == "true")
+    {
+        using var stopping = new CancellationTokenSource();
+        Console.CancelKeyPress += (_, e) => { e.Cancel = true; stopping.Cancel(); };
+        try { await Wpcp.Worker.SubmissionDispatcher.RunAsync(args[1], stopping.Token); }
+        catch (OperationCanceledException) when (stopping.IsCancellationRequested) { }
+        return;
+    }
     if (args.Length == 4 && args[0] == "--restore-dossier" && args[2] == "--fixture")
     {
         var restoreFixture = SyntheticProviderFixture.Load(args[3]);
@@ -53,12 +61,12 @@ try
     else if (options.RepositoryPlanPath is not null)
         await Wpcp.Worker.RepositoryWorkflow.ExecuteAsync(store, options.RunId, options.RepositoryPlanPath, options.PauseAt);
     else if (options.RealAgentOrigin is not null)
-        await Wpcp.Worker.FakeAgentWorkflow.ExecuteAsync(store, options.RunId,
+        await Wpcp.Worker.AgentSessionWorkflow.ExecuteAsync(store, options.RunId,
             options.RealAgentOrigin, options.EvidenceNote ?? "bounded disposable issue",
             options.PauseAt, options.RejectBlocked, options.AgentTimeoutMilliseconds,
             realPython: options.CodexPython);
     else if (options.FakeAgentOrigin is not null)
-        await Wpcp.Worker.FakeAgentWorkflow.ExecuteAsync(store, options.RunId,
+        await Wpcp.Worker.AgentSessionWorkflow.ExecuteAsync(store, options.RunId,
             options.FakeAgentOrigin, options.EvidenceNote ?? "controlled fake attempt",
             options.PauseAt, options.RejectBlocked, options.AgentTimeoutMilliseconds);
     for (var heartbeat = 0; heartbeat < options.HeartbeatCount; heartbeat++)

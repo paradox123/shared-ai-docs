@@ -9,6 +9,25 @@ namespace Wpcp.Storage.Postgres;
 
 public sealed partial class PostgresImplementationRunStore
 {
+    public static async Task<bool> ArtifactStorageReadyAsync(CancellationToken token)
+    {
+        var root = Environment.GetEnvironmentVariable("WPCP_ARTIFACT_ROOT");
+        if (string.IsNullOrWhiteSpace(root) || !Path.IsPathFullyQualified(root)) return false;
+        var probe = Path.Combine(root, ".readiness-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            Directory.CreateDirectory(root);
+            await File.WriteAllTextAsync(probe, "artifact-storage-readiness", token);
+            return await File.ReadAllTextAsync(probe, token) == "artifact-storage-readiness";
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException) { return false; }
+        finally
+        {
+            try { File.Delete(probe); }
+            catch (Exception error) when (error is IOException or UnauthorizedAccessException) { }
+        }
+    }
+
     private string ArtifactPath(string hash)
     {
         if (hash.Length != 64 || hash.Any(c => !char.IsAsciiHexDigit(c)))

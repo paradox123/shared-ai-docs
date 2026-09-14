@@ -66,7 +66,7 @@ app.Use(async (context, next) =>
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.MapGet("/", () => Results.Redirect("/operator/"));
-app.MapSubmissions(submissions, configuration.Repositories, authorization, providerClient);
+app.MapSubmissions(submissions, configuration.Repositories, authorization, providerClient, store, configuration.BackgroundExecution);
 
 app.MapGet("/healthz", () => Results.Text("Healthy"));
 
@@ -141,7 +141,7 @@ app.MapGet(
     "/api/v1/runs/{runId}",
     async (string runId, HttpContext context, CancellationToken cancellationToken) =>
     {
-        if (!HasFixtureAccess(context, options))
+        if (options.FixturePath is not null && !HasFixtureAccess(context, options))
         {
             return JsonError("synthetic-access-denied", StatusCodes.Status403Forbidden);
         }
@@ -167,7 +167,7 @@ app.MapGet(
     "/api/v1/runs/{runId}/events",
     async (string runId, long? after, int? limit, HttpContext context, CancellationToken cancellationToken) =>
     {
-        if (!HasFixtureAccess(context, options))
+        if (options.FixturePath is not null && !HasFixtureAccess(context, options))
         {
             return JsonError("synthetic-access-denied", StatusCodes.Status403Forbidden);
         }
@@ -201,7 +201,7 @@ app.MapGet(
 app.MapGet("/api/v1/runs/{runId}/export",
     async (string runId, HttpContext context, CancellationToken token) =>
     {
-        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        if (options.FixturePath is not null && !HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
         var decision = await store.DecideControlAsync(runId, null, null,
             (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
         if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
@@ -211,7 +211,7 @@ app.MapGet("/api/v1/runs/{runId}/export",
 app.MapGet("/api/v1/runs/{runId}/checksums",
     async (string runId, HttpContext context, CancellationToken token) =>
     {
-        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        if (options.FixturePath is not null && !HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
         var decision = await store.DecideControlAsync(runId, null, null,
             (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
         if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
@@ -221,7 +221,7 @@ app.MapGet("/api/v1/runs/{runId}/checksums",
 app.MapGet("/api/v1/runs/{runId}/artifacts",
     async (string runId, HttpContext context, CancellationToken token) =>
     {
-        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        if (options.FixturePath is not null && !HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
         var decision = await store.DecideControlAsync(runId, null, null,
             (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
         if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
@@ -231,7 +231,7 @@ app.MapGet("/api/v1/runs/{runId}/artifacts",
 app.MapGet("/api/v1/runs/{runId}/artifacts/{artifactId}",
     async (string runId, string artifactId, HttpContext context, CancellationToken token) =>
     {
-        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        if (options.FixturePath is not null && !HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
         var decision = await store.DecideControlAsync(runId, null, null,
             (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
         if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
@@ -247,7 +247,7 @@ app.MapGet("/api/v1/runs/{runId}/artifacts/{artifactId}",
 app.MapGet("/api/v1/runs/{runId}/events/stream",
     async (string runId, HttpContext context, CancellationToken token) =>
     {
-        if (!HasFixtureAccess(context, options))
+        if (options.FixturePath is not null && !HasFixtureAccess(context, options))
         {
             await JsonError("synthetic-access-denied", 403).ExecuteAsync(context);
             return;
@@ -296,7 +296,7 @@ app.MapGet("/api/v1/runs/{runId}/events/stream",
 app.MapGet("/api/v1/runs/{runId}/attempts/{attemptId}",
     async (string runId, string attemptId, HttpContext context, CancellationToken token) =>
     {
-        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        if (options.FixturePath is not null && !HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
         var decision = await store.DecideControlAsync(runId, null, null,
             (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
         if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
@@ -314,7 +314,7 @@ app.MapGet("/api/v1/runs/{runId}/attempts/{attemptId}",
 app.MapGet("/api/v1/runs/{runId}/audit",
     async (string runId, HttpContext context, CancellationToken token) =>
     {
-        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        if (options.FixturePath is not null && !HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
         var decision = await store.DecideControlAsync(runId, null, null,
             (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
         if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));
@@ -324,7 +324,7 @@ app.MapGet("/api/v1/runs/{runId}/audit",
 app.MapGet("/api/v1/runs/{runId}/continuations/{commandId}",
     async (string runId, string commandId, HttpContext context, CancellationToken token) =>
     {
-        if (!HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
+        if (options.FixturePath is not null && !HasFixtureAccess(context, options)) return JsonError("synthetic-access-denied", 403);
         var decision = await store.DecideControlAsync(runId, null, null,
             (repository, ct) => authorization.EvaluateAsync(repository, Credential(context), ct), token);
         if (!decision.Accepted) return Results.Json(decision, statusCode: DecisionStatus(decision));

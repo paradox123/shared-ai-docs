@@ -36,8 +36,9 @@
         <div><span class="section-number">01 / AUFNAHME</span><h2 id="intake-title">Anforderungen aufnehmen</h2><p>Übernimm den freigegebenen Auftrag mit seiner aktuellen Fassung.</p></div>
         <form id="submission-form">
           <label for="source-url">GitHub-Issue-URL</label>
-          <div class="input-row"><input id="source-url" type="url" placeholder="https://github.com/owner/repository/issues/123" required autocomplete="off"><button type="submit" class="primary">Aufnehmen <span aria-hidden="true">↗</span></button></div>
-          <small>Voraussetzung: offenes Issue mit „ready-for-agent“ und Schreibzugriff auf das Repository.</small>
+          <div class="input-row"><input id="source-url" type="url" placeholder="https://github.com/owner/repository/issues/123" required autocomplete="off"></div>
+          <div class="intake-actions"><button type="submit" class="quiet" value="admit">Aufnehmen</button><button type="submit" class="primary" value="start">Starten</button></div>
+          <small>„Starten“ speichert den Auftrag und analysiert seine Anforderungen im Hintergrund. Voraussetzung: offenes Issue mit „ready-for-agent“ und Schreibzugriff.</small>
         </form>
       </section>
       <div class="records">
@@ -52,6 +53,20 @@
   </main>
   <template id="detail-template">
     <div class="detail-heading"><div class="detail-kicker"><span class="section-number">GESPEICHERTE ANFORDERUNGEN</span><span class="badge">● Aufgenommen</span></div><h2 data-field="title" tabindex="-1"></h2><p class="execution-note">Der Auftrag ist aufgenommen. Die Agentenverarbeitung wurde noch nicht gestartet.</p></div>
+    <section class="execution" aria-label="Hintergrundaktivität">
+      <div class="execution-header"><div><span class="section-number">ERSTER AGENTENSCHRITT</span><h3>Anforderungen analysieren</h3></div><button type="button" class="primary" data-execution="start">Analyse starten</button></div>
+      <div data-execution="detail" hidden>
+        <p class="execution-status"><span class="badge" data-execution="state"></span><span data-execution="hint"></span></p>
+        <p class="execution-result" data-execution="result"></p>
+        <ul class="execution-findings" data-execution="findings"></ul>
+        <details class="execution-correlation"><summary>Run und Agentensession</summary><dl>
+          <dt>Run-ID</dt><dd><code data-execution="run-id"></code></dd>
+          <dt>Aktivität</dt><dd><code data-execution="activity-id"></code></dd>
+          <dt>Versuch</dt><dd><code data-execution="attempt-id"></code></dd>
+          <dt>Session</dt><dd><code data-execution="session-id"></code></dd>
+        </dl></details>
+      </div>
+    </section>
     <dl class="metadata">
       <div><dt>Zielrepository</dt><dd data-field="repository"></dd></div>
       <div><dt>Quelle · GitHub</dt><dd><a data-field="source" target="_blank" rel="noopener noreferrer"></a></dd></div>

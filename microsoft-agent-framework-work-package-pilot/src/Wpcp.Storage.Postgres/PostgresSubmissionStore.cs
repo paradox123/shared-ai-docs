@@ -25,6 +25,15 @@ public sealed class PostgresSubmissionStore(string connectionString, ControlledR
             );
             CREATE INDEX IF NOT EXISTS wpcp_submissions_repository
                 ON wpcp_submissions (repository_id, admitted_at DESC);
+            CREATE TABLE IF NOT EXISTS wpcp_submission_dispatch (
+                submission_id uuid PRIMARY KEY REFERENCES wpcp_submissions(submission_id),
+                run_id uuid NOT NULL UNIQUE REFERENCES wpcp_implementation_runs(run_id),
+                configuration jsonb NOT NULL,
+                state text NOT NULL DEFAULT 'queued',
+                code text,
+                queued_at timestamptz NOT NULL,
+                completed_at timestamptz
+            );
             """);
         await command.ExecuteNonQueryAsync();
     }
@@ -61,21 +70,29 @@ public sealed class PostgresSubmissionStore(string connectionString, ControlledR
         existing.Parameters.AddWithValue("issue", source.ProviderIssueId);
         var original = Read((string)(await existing.ExecuteScalarAsync(token))!);
         if (original.Repository != repository) throw new RepositoryBindingConflictException();
-        return new(original, false);
+        return new((await GetAsync(Guid.Parse(original.SubmissionId), token))!, false);
     }
 
     public async Task<Submission?> GetAsync(Guid id, CancellationToken token)
     {
         await using var command = _dataSource.CreateCommand(
-            "SELECT snapshot::text FROM wpcp_submissions WHERE submission_id = @id");
+            "SELECT " + SnapshotProjection + " FROM wpcp_submissions s LEFT JOIN wpcp_submission_dispatch d USING (submission_id) WHERE submission_id = @id");
         command.Parameters.AddWithValue("id", id);
         return await command.ExecuteScalarAsync(token) is string json ? Read(json) : null;
+    }
+
+    public async Task<Submission?> FindBySourceAsync(long providerIssueId, CancellationToken token)
+    {
+        await using var command = _dataSource.CreateCommand(
+            "SELECT submission_id FROM wpcp_submissions WHERE provider_issue_id=@id");
+        command.Parameters.AddWithValue("id", providerIssueId);
+        return await command.ExecuteScalarAsync(token) is Guid id ? await GetAsync(id, token) : null;
     }
 
     public async Task<IReadOnlyList<Submission>> ListAsync(CancellationToken token)
     {
         await using var command = _dataSource.CreateCommand(
-            "SELECT snapshot::text FROM wpcp_submissions ORDER BY admitted_at DESC, submission_id");
+            "SELECT " + SnapshotProjection + " FROM wpcp_submissions s LEFT JOIN wpcp_submission_dispatch d USING (submission_id) ORDER BY admitted_at DESC, submission_id");
         await using var reader = await command.ExecuteReaderAsync(token);
         var result = new List<Submission>();
         while (await reader.ReadAsync(token)) result.Add(Read(reader.GetString(0)));
@@ -83,5 +100,6 @@ public sealed class PostgresSubmissionStore(string connectionString, ControlledR
     }
 
     private static Submission Read(string json) => JsonSerializer.Deserialize<Submission>(json, JsonOptions)!;
+    private const string SnapshotProjection = "(s.snapshot || CASE WHEN d.run_id IS NULL THEN '{}'::jsonb ELSE jsonb_build_object('runId', d.run_id::text, 'state', 'started') END)::text";
     public ValueTask DisposeAsync() => _dataSource.DisposeAsync();
 }

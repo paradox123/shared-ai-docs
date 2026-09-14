@@ -79,7 +79,7 @@ internal static class RepositoryWorkflow
             var existing = await ReadSessionReceiptAsync(agentClient, plan, effect);
             if (existing is null && attempt.Session.SessionId is not null)
                 throw new RepositoryEffectConflict("session-receipt-missing", effect);
-            await FakeAgentWorkflow.ExecuteAsync(store, runId, plan.AgentOrigin,
+            await AgentSessionWorkflow.ExecuteAsync(store, runId, plan.AgentOrigin,
                 $"Repository base {effect.HeadSha}", pauseAt, false, 10000, repositoryDelivery: true, readOnly: existing is not null);
             var sessionReceipt = await ReadSessionReceiptAsync(agentClient, plan, effect)
                 ?? throw new RepositoryEffectConflict("session-receipt-missing", effect);
@@ -114,7 +114,7 @@ internal static class RepositoryWorkflow
             var updated = (await store.GetProjectionAsync(runId))!.RepositoryExecution!;
             if (updated.Effects!.Count != 3 || updated.Effects.Any(e => e.Receipt is null)) return false;
             var session = updated.Effects.Single(e => e.Kind == "session");
-            await FakeAgentWorkflow.ExecuteAsync(store, runId, execution.Plan.AgentOrigin,
+            await AgentSessionWorkflow.ExecuteAsync(store, runId, execution.Plan.AgentOrigin,
                 $"Recover session at repository base {session.HeadSha}", null, false, 10000,
                 repositoryDelivery: true, readOnly: true);
             var run = (await store.GetProjectionAsync(runId))!;
@@ -151,7 +151,7 @@ internal static class RepositoryWorkflow
             if (execution.RequestedAction == "retire")
             {
                 if ((updated.Effects ?? []).Any(e => e.Kind == "session" && e.Receipt is not null))
-                    await FakeAgentWorkflow.ExecuteAsync(store, runId, execution.Plan.AgentOrigin,
+                    await AgentSessionWorkflow.ExecuteAsync(store, runId, execution.Plan.AgentOrigin,
                         "Read existing session for retirement", null, false, 10000, repositoryDelivery: true, readOnly: true);
                 await store.FinishRepositoryAsync(runId, "retired");
             }
