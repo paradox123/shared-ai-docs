@@ -39,7 +39,7 @@ Observed red → green slices:
 - Direct live artifact check: withheld placeholder → actual available artifact bytes.
 - Large result GUI: empty result for an artifact reference → full result including its terminal sentinel.
 - Review timeout finding: terminal `failed/timeout` with lost session → visible reconciliation and eventual original session/tools/result after replacement.
-- Review legacy fixture finding: extracted generated test failed with `IndentationError` → restored indentation compiles; the real Codex/native implementation fixture completed successfully (47.891 seconds).
+- Review legacy fixture finding: extracted generated test failed with `IndentationError` → restored indentation compiles; the real Codex/native implementation fixture completed successfully again after the mode refactoring (45.499 seconds).
 
 The first live stack omitted the already-required artifact directory in its test
 service environment. This produced a persisted worker failure before response
@@ -48,22 +48,44 @@ rejects unavailable storage before admission to execution. This initial attempt
 is not counted as successful execution. No source content or human credential was
 added to the worker environment.
 
-Focused verification: 13 HTTP/browser/intake tests passed. Separate real adapter
-proof passed; both real GitHub/real Codex GUI success and controlled outage proofs
-passed (2 tests, 64.589 seconds). Desktop and mobile screenshots were visually
-inspected. JavaScript/module syntax, .NET compilation, strict OpenSpec validation
-and whitespace checks are part of final verification.
+Focused verification before review: 13 HTTP/browser/intake tests passed. Separate
+real adapter proof passed; both real GitHub/real Codex GUI success and controlled
+outage proofs passed (2 tests, 64.589 seconds). After corrections, all 11 focused
+execution/Chrome tests passed (32.605 seconds), including both new reconciliation
+cases. See [review-regression.log](evidence/issue-02/review-regression.log).
+The existing actual runtime/native implementation path also passed after the
+final mode refactoring ([45.499 seconds](evidence/issue-02/legacy-fixture-runtime.log));
+the [real background session/open descriptor check](evidence/issue-02/legacy-real-runtime.log)
+passed separately (11.252 seconds). Desktop and mobile screenshots were visually
+inspected. JavaScript/module syntax, .NET compilation (zero warnings/errors),
+strict OpenSpec validation and whitespace checks passed.
 
-Full regression is running in the pinned Python environment. Its final outcome
-will be recorded here and in [full-regression.log](evidence/issue-02/full-regression.log).
+The pre-review full regression passed: 216 tests, 192 passed and 24 optional
+integration tests skipped, in 871.952 seconds
+([log](evidence/issue-02/pre-review-regression.log)). Because the review corrections
+touch the shared session worker, the complete discovery suite was rerun against
+corrected commit `565d326`, including the two new tests. **Final result: 218 tests,
+194 passed, 24 optional integration tests skipped, zero failures, 879.671 seconds.**
+See [full-regression.log](evidence/issue-02/full-regression.log). The relevant
+actual GitHub/Codex probes were enabled and passed separately as listed above;
+the default discovery run does not automatically enable external endpoint or
+publication probes. The dossier regression retained/restored 10,015 events,
+verified matching checksums, and found zero raw canary matches across 35 surfaces.
+
+Ticket 02 is implemented and locally verified; its tracker entry is resolved and
+OpenSpec tasks 2.4a–c are complete. This is not a claim of user acceptance of a
+qualified implementation head, a merge to `main`, or completion of the parent change.
 
 ## Review and limits
 
-Two-axis code review uses baseline `a77418a`; final findings and corrections are
-recorded here after review. The refactoring pass shares the session workflow
-between fake, real implementation and analysis modes, retains the existing result
-validators and history boundary, and extracts only the analysis-specific runtime
-adapter and GUI projection.
+Two-axis code review uses baseline `a77418a`. Both independent reviewers confirmed
+the corrections at `565d326`; there are **zero unresolved Standards findings and
+zero unresolved Spec findings**. The [separate review reports](issue-02-review.md)
+retain the original findings and their resolutions. The DRY/SOLID/KISS pass shares
+the session/history workflow, explicitly selects one execution mode and its
+metadata, preserves existing result validators, and keeps the analysis-specific
+runtime adapter and GUI projection separate. No broader workflow rewrite was
+needed.
 
 The retained topology is independent processes on one Mac with disposable
 PostgreSQL in Docker. It proves the first background step and launcher/browser

@@ -25,7 +25,7 @@ Accepted Ticket 01 is extracted into [add-agent-framework-github-intake](../arch
 - [ ] 2.4 Unattended-run slice: connect admission to background execution and monitoring; prove progress to intervention/readiness with all initiating clients closed.
 - [x] 2.4a Ticket 02: atomically link GitHub submissions to runs and durable first-step disposition; preserve authorization, immutable mandate and duplicate-start safety.
 - [x] 2.4b Ticket 02: independent worker performs real requirements analysis through the central agent/history integration; retain session, messages, tools, artifacts and concrete errors.
-- [ ] 2.4c Ticket 02: GUI start and simple status/result view; verify browser closure, restart/replay, controlled failure, regression and two-axis review in issue-02-evidence.md.
+- [x] 2.4c Ticket 02: GUI start and simple status/result view; browser/launcher closure, restart/replay, late-response reconciliation and controlled failure verified; final regression 218 tests (194 passed, 24 optional skipped), both review axes clear. See [issue-02-evidence.md](issue-02-evidence.md).
 - [ ] 2.5 Lifecycle-observation slice: ingest central and local activity/session events, artifacts and actor/host provenance; show workflow, timeline, session detail and pending synchronization; verify replay/readback/export.
 - [ ] 2.6 Workstation-Handover slice: authenticate receiving client, deliver/open the actual local agent, start recorded read-only diagnosis and prove offline/reconnect/duplicate-opening behavior.
 - [ ] 2.7 Human-operation slice: expose GUI and local-agent interventions under common authorization/lease/fencing, retain native session opening and prove explicit current-head human approval.
