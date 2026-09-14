@@ -81,6 +81,13 @@ The graphical Operator Client SHALL list authorized runs and display each run's 
 - **WHEN** an authorized user opens a run with a failed activity
 - **THEN** the user can identify the activity and attempt, its session, retained observable messages and tool results, the failure and any recorded handoff without access to the original foreground task
 
+#### Scenario: Inspect a GUI-started issue across clients (Ticket 03)
+- **WHEN** a human starts an eligible issue through the existing GUI and either that browser or another authenticated browser opens its run
+- **THEN** the run list links the persisted submission to the observed activities, attempts and sessions, and selecting a node exposes the retained assignments/context, user/agent messages, tools with parameters/results/timing/errors, findings and artifacts
+- **AND** bounded history pages advance only to their delivered position, the live tail resumes after the last processed position with stable identities, and reload or API restart preserves correlation and order without duplicate display
+- **AND** partially loaded history, unavailable metadata/content and redaction remain explicit; each new read and live cycle revalidates access, and revocation clears the displayed evidence without a filter or artifact link bypass
+- **AND** acceptance begins with a real controlled GitHub issue and compares two browser clients with public history/artifact responses; nested PRD navigation and workstation ingestion remain later tickets
+
 ### Requirement: Complete graphical human operation
 The first release SHALL provide graphical actions for intervention answers, Resume, Fork, Fresh Retry, Cancel, targeted queue/interrupt, control claim/release, voluntary transfer, Forced Takeover, targeted Open in Codex, and qualified-head human approval according to the existing product contracts. Ordinary Operator actions SHALL NOT require manual CLI commands. Mutations SHALL enforce current repository authorization, the run-wide Control Lease and stale-state fencing and SHALL remain in the same canonical Run History.
 

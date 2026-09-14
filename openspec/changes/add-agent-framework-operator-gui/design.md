@@ -108,3 +108,29 @@ Run the acceptance flow with a server environment and a separate human work mach
 Also exercise the retained local-agent route with the GUI closed: obtain the targeted Handover, retrieve persisted context/evidence, submit an authorized supported intervention and observe its result in the same central run. Reopen the GUI to verify the action and outcome. Prove a stale or unauthorized local agent cannot mutate the run, and that neither access path silently replaces the central session or performs human approval.
 
 Prove automatic agent opening on the receiving machine from a server-triggered Handover with the GUI closed, then repeat the delivery and reconnect the Workstation Client. The same logical Handover must identify one correlated local assistance session. Test offline/pending delivery and an actionable opening failure without treating either as completed intervention. Preserve the central session identity throughout.
+
+### Ticket 03 implementation boundary
+
+Work starts from Git root `shared-ai-docs`, `main` at `dded7d4`. Following the
+isolated Ticket 01/02 delivery workflow, the intended work branch is
+`codex/operator-gui-issue-03` in sibling worktree `shared-ai-docs-operator-issue-03`.
+The original untracked research/coexistence work is preserved. Review baseline:
+`dded7d4`. No merge or archive is implied by implementation.
+
+Reuse the deployed plain-JavaScript portal and public submission/run/event/artifact
+contracts. Render a narrow observed activity → attempt → session graph; no
+speculative future steps or PRD dependencies. The Backstage/React Flow prototype
+informs the workspace composition, but migrating its runtime is not needed for
+this bounded slice. The ADR 0014 target remains a later integration concern.
+History pages retain a contiguous processed cursor separate from the server high
+water mark. Start the live tail only after the loaded pages catch up, reconnect
+from that processed cursor, and keep partial loading visible. Filters operate on
+retained authorized evidence; all content renders as text. Artifact buttons fetch
+through the authenticated public boundary, never source URLs or server paths.
+Revoked access clears the view and cancels pending work. No browser credential or
+history persistence is needed: URL identities and public replay rebuild the view.
+
+TDD seams: production browser against public HTTP with disposable PostgreSQL and
+controlled external GitHub/agent boundaries, followed by a real GitHub/Codex
+read-only analysis. No pre-seeded runs. Separate-machine deployment acceptance
+remains explicit if only independent local browser processes can be verified.

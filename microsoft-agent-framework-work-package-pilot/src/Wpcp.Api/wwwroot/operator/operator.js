@@ -1,4 +1,5 @@
 import {showExecution} from './execution-view.js';
+import {showWorkflow} from './workflow-view.js';
 const $ = id => document.getElementById(id);
 const errors = {
   'invalid-github-issue-url': 'Bitte eine GitHub-Issue-URL im Format https://github.com/owner/repository/issues/123 eingeben.',
@@ -32,6 +33,19 @@ function clearRecords() {
   $('submission-list').replaceChildren();
   $('detail').replaceChildren();
   $('count').textContent = '0';
+  clearWorkflow();
+}
+
+function clearWorkflow() {
+  $('workflow').hidden = true;
+  for (const id of ['workflow-graph', 'session-detail', 'history-list', 'artifact-list', 'artifact-content', 'run-list']) $(id).replaceChildren();
+}
+
+function reportError(error) {
+  if (error.status === 401 || error.status === 403) disconnect();
+  $('error').textContent = error.message === 'Failed to fetch'
+    ? 'Der Server ist nicht erreichbar. Bitte Verbindung prüfen und erneut versuchen.' : error.message;
+  $('error').hidden = false;
 }
 
 function disconnect() {
@@ -47,19 +61,20 @@ function disconnect() {
   $('error').hidden = true;
 }
 
-async function api(path, signal, body, resource = '/api/v1/submissions') {
+async function api(path, signal, body, resource = '/api/v1/submissions', format = 'json') {
   const response = await fetch(resource + path, {
     method: body ? 'POST' : 'GET', signal, cache: 'no-store',
     headers: {Authorization: `Bearer ${credential}`, ...(body ? {'Content-Type': 'application/json'} : {})},
     ...(body ? {body: JSON.stringify(body)} : {}),
   });
-  const payload = await response.json();
   if (!response.ok) {
+    const payload = await response.json();
     const error = new Error(errors[payload.code] || 'Die Anfrage konnte nicht verarbeitet werden. Bitte erneut versuchen.');
     error.status = response.status;
+    error.payload = payload;
     throw error;
   }
-  return payload;
+  return format === 'response' ? response : response.json();
 }
 
 async function perform(work) {
@@ -71,10 +86,7 @@ async function perform(work) {
   try { await work(current.signal); }
   catch (error) {
     if (current.signal.aborted) return;
-    if (error.status === 401) disconnect();
-    $('error').textContent = error.message === 'Failed to fetch'
-      ? 'Der Server ist nicht erreichbar. Bitte Verbindung prüfen und erneut versuchen.' : error.message;
-    $('error').hidden = false;
+    reportError(error);
   } finally {
     if (operation === current) for (const button of document.querySelectorAll('button[type="submit"], [data-execution="start"], #refresh')) button.disabled = false;
   }
@@ -82,6 +94,7 @@ async function perform(work) {
 
 async function showDetail(id, signal, focus = false) {
   $('detail').replaceChildren();
+  clearWorkflow();
   const record = await api('/' + encodeURIComponent(id), signal);
   signal.throwIfAborted();
   const content = $('detail-template').content.cloneNode(true);
@@ -110,7 +123,8 @@ async function showDetail(id, signal, focus = false) {
   if (record.runId) {
     $('detail').querySelector('.execution-note').textContent = 'Der Server bearbeitet die Analyse unabhängig von diesem Fenster. Implementierung und Review folgen in späteren Schritten.';
     $('detail').querySelector('.detail-kicker .badge').textContent = '● Gestartet';
-    await showExecution($('detail').querySelector('.execution'), record, signal, api);
+    await showExecution($('detail').querySelector('.execution'), record, signal, api, reportError);
+    await showWorkflow(record, signal, api, reportError, id => perform(next => showDetail(id, next, true)));
   }
 }
 

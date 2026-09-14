@@ -18,7 +18,7 @@ const failures = {
   'agent-failed': 'Der Agent hat einen Ausführungsfehler protokolliert.',
 };
 
-export async function showExecution(container, submission, signal, api) {
+export async function showExecution(container, submission, signal, api, reportError) {
   const field = name => container.querySelector(`[data-execution="${name}"]`);
   field('start').hidden = true;
   field('detail').hidden = false;
@@ -59,6 +59,7 @@ export async function showExecution(container, submission, signal, api) {
     if (['queued', 'running', 'reconciling'].includes(execution.state)) {
       timer = setTimeout(() => refresh().catch(error => {
         if (signal.aborted || !container.isConnected) return;
+        if (error.status === 401 || error.status === 403) { reportError(error); return; }
         field('state').textContent = 'Verbindung unterbrochen';
         field('hint').textContent = error.message + ' Anforderungen aktualisieren, um den Zustand erneut zu lesen.';
         field('result').textContent = '';

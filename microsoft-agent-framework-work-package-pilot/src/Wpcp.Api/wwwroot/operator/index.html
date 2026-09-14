@@ -48,6 +48,22 @@
         </section>
         <section id="detail" class="detail panel" aria-label="Anforderungsdetails"><div class="empty"><span aria-hidden="true">▤</span><h2>Anforderungen im Detail</h2><p>Wähle die Anforderungen aus der Übersicht.</p></div></section>
       </div>
+      <section id="workflow" class="panel workflow" aria-labelledby="workflow-title" hidden>
+        <div class="section-header"><div><span class="section-number">03 / BEOBACHTUNG</span><h2 id="workflow-title">Workflow und Sessionverlauf</h2></div><span id="workflow-state" class="badge"></span></div>
+        <p class="workflow-intro">Die tatsächlich gestarteten Aktivitäten dieses Runs. Wähle einen Versuch, um seine gespeicherte Session zu untersuchen.</p>
+        <nav id="run-list" aria-label="Gestartete Runs"></nav>
+        <div class="workflow-layout">
+          <section class="workflow-map" aria-label="Workflowgraph"><button id="all-history" class="quiet">Gesamten Run zeigen</button><div id="workflow-graph"></div></section>
+          <section class="session-inspector" aria-label="Sessionverlauf">
+            <div id="session-detail"></div>
+            <div class="history-toolbar"><label for="history-filter">Inhalte</label><select id="history-filter"><option value="all">Alle Ereignisse</option><option value="message">Nachrichten und Aufträge</option><option value="tool">Toolaufrufe und Ergebnisse</option><option value="result">Erkenntnisse und Ergebnisse</option><option value="artifact">Artefakte</option></select></div>
+            <p id="history-status" role="status"></p>
+            <p class="history-note">Reihenfolge: zentral bestätigte Positionen. Nur gespeicherte Beobachtungen; fehlende Inhalte und Metadaten werden nicht ergänzt.</p>
+            <div id="history-list"></div><button id="history-more" class="quiet" hidden>Weitere Ereignisse laden</button>
+            <section id="artifact-panel" aria-label="Gespeicherte Artefakte"><h3>Artefakte</h3><div id="artifact-list"></div><pre id="artifact-content" hidden tabindex="0"></pre></section>
+          </section>
+        </div>
+      </section>
     </section>
     <footer class="page-foot">GITHUB ALS QUELLE <span>Inhalt · Herkunft · gespeicherte Fassung</span></footer>
   </main>

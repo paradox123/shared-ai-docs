@@ -27,6 +27,9 @@ Accepted Ticket 01 is extracted into [add-agent-framework-github-intake](../arch
 - [x] 2.4b Ticket 02: independent worker performs real requirements analysis through the central agent/history integration; retain session, messages, tools, artifacts and concrete errors.
 - [x] 2.4c Ticket 02: GUI start and simple status/result view; browser/launcher closure, restart/replay, late-response reconciliation and controlled failure verified; final regression 218 tests (194 passed, 24 optional skipped), both review axes clear. See [issue-02-evidence.md](../archive/2026-09-14-add-agent-framework-background-start/issue-02-evidence.md).
 - [ ] 2.5 Lifecycle-observation slice: ingest central and local activity/session events, artifacts and actor/host provenance; show workflow, timeline, session detail and pending synchronization; verify replay/readback/export.
+- [x] 2.5a Ticket 03: GUI-started run list, observed activity/attempt/session graph and complete retained detail through public history/artifact reads.
+- [x] 2.5b Ticket 03: confirmed pagination/live cursors, replay/restart, explicit unavailable/redacted evidence and access revocation across filters/artifacts verified through the browser.
+- [ ] 2.5c Ticket 03: real controlled issue GUI start, two-client semantic comparison, visual acceptance, full regression and two-axis review recorded in issue-03-evidence.md.
 - [ ] 2.6 Workstation-Handover slice: authenticate receiving client, deliver/open the actual local agent, start recorded read-only diagnosis and prove offline/reconnect/duplicate-opening behavior.
 - [ ] 2.7 Human-operation slice: expose GUI and local-agent interventions under common authorization/lease/fencing, retain native session opening and prove explicit current-head human approval.
 

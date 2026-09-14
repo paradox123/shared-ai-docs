@@ -136,3 +136,37 @@ remaining proof to Ticket 16 / OpenSpec task 3.2a.
 
 Provider contract: [GitHub issue API](https://docs.github.com/en/rest/issues/issues#get-an-issue).
 Static delivery: [ASP.NET Core static files](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/static-files?view=aspnetcore-10.0).
+
+## Inspect a started run (Operator GUI Ticket 03)
+
+After starting an eligible issue, the **Workflow und Sessionverlauf** section
+lists started runs from persisted submissions. Select a run, then an observed
+activity attempt to inspect its actual session, assignment, messages, tools,
+results and provenance. **Gesamten Run zeigen** restores the shared history.
+The initial graph contains observed activities only; full PRD navigation and
+workstation sessions remain later slices.
+
+History loads 100 events per page. **Weitere Ereignisse laden** advances from
+the delivered position; the displayed committed high-water mark is not an
+acknowledgement. After catching up, the authenticated live stream reconnects
+from the last processed position. Filters retain canonical ordering and expose
+only the loaded evidence. Missing fields were not recorded and are not inferred.
+
+Artifact buttons read verified bytes through the same authenticated run API.
+JSON/text is displayed as text, binary content as hexadecimal. Redacted,
+withheld, missing or corrupt content stays explicit; external source URIs are
+never a fallback. Current repository access is checked by every existing public
+read and stream cycle. Revocation clears the view and its in-memory history.
+The URL retains the submission identity; after reload, authenticate again to
+rebuild the same run from public history. Browser credentials/history are not
+stored in localStorage or sessionStorage.
+
+Run the public browser proof with disposable PostgreSQL and controlled external
+provider boundaries:
+
+```bash
+python3 -m unittest tests.test_workflow_browser -v
+```
+
+The opt-in `tests.test_workflow_live` uses the existing GitHub/Codex probe
+configuration and performs read-only requirements analysis without provider writes.

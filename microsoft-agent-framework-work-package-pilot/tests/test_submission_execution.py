@@ -22,6 +22,7 @@ class AnalysisProvider:
         self.ready = True
         self.failure = None
         self.result_padding = 0
+        self.extra_events = []
         self.release = threading.Event()
         self.release.set()
 
@@ -53,6 +54,9 @@ class AnalysisProvider:
                                 'schemaVersion': 'submission-analysis/v1', 'outcome': 'completed',
                                 'summary': 'Requirements analysis complete.' + (' Detailed criterion.' * owner.result_padding + ' End of analysis.' if owner.result_padding else ''), 'findings': ['Preserve the approved requirements.']}}]}
                 response = owner.requests[operation]
+                if owner.extra_events and len(response['events']) == 4:
+                    expanded = response['events'][:-1] + owner.extra_events + response['events'][-1:]
+                    response['events'] = [{**event, 'sequence': index + 1} for index, event in enumerate(expanded)]
                 if owner.failure:
                     response = {**response, 'events': response['events'][:3] + [
                         {'sequence': 4, 'type': 'process-exit', 'data': {'exitCode': 17}}]}
