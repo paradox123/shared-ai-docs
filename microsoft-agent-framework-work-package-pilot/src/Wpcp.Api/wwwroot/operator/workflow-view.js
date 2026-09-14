@@ -25,6 +25,7 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
   const read = (suffix, format = 'json') => api('/' + submission.runId + suffix, signal, null, '/api/v1/runs', format);
   let run, selected = null, cursor = 0, highWater = 0, hasMore = false, streaming = false;
   let timer, refreshTimer, artifacts = [], artifactGeneration = 0;
+  let projectionPending = false, projectionRefreshing = false;
   const events = new Map();
   signal.addEventListener('abort', () => {
     clearTimeout(timer); clearTimeout(refreshTimer);
@@ -155,7 +156,7 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
     }
   }
   function status(text) {
-    $('history-status').textContent = `${text} · ${cursor} von mindestens ${highWater} Positionen geladen`;
+    $('history-status').textContent = `${text}${projectionPending ? ' · Workflowstand wird abgeglichen' : ''} · ${cursor} von mindestens ${highWater} Positionen geladen`;
     $('history-more').hidden = !hasMore;
   }
   function accept(entry) {
@@ -176,6 +177,25 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
     if (changed) { renderGraph(); renderSelection(); }
     renderArtifacts();
   }
+  function scheduleProjection() {
+    projectionPending = true;
+    if (!refreshTimer && !projectionRefreshing) refreshTimer = setTimeout(refreshProjection, 500);
+  }
+  async function refreshProjection() {
+    refreshTimer = undefined;
+    projectionRefreshing = true;
+    let succeeded = false;
+    try {
+      await projection();
+      projectionPending = run.lastPosition < Math.max(cursor, highWater);
+      succeeded = true;
+      status(hasMore ? 'History teilweise geladen' : streaming ? 'Live verbunden' : 'Verbinde Live-Verlauf');
+    } catch (error) { failed(error); }
+    finally {
+      projectionRefreshing = false;
+      if (active() && projectionPending) refreshTimer = setTimeout(refreshProjection, succeeded ? 500 : 1200);
+    }
+  }
   async function more() {
     $('history-more').disabled = true;
     try {
@@ -184,6 +204,7 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
       for (const entry of page.events) accept(entry);
       if (cursor !== page.nextAfter) throw new Error('Unbestätigte History-Position.');
       highWater = page.lastPosition; hasMore = page.hasMore;
+      if (run.lastPosition < highWater) scheduleProjection();
       renderHistory(); renderArtifacts(); status(hasMore ? 'History teilweise geladen' : 'Verbinde Live-Verlauf');
       if (!hasMore) void stream();
     } catch (error) { failed(error); }
@@ -209,20 +230,17 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
         let boundary;
         while ((boundary = buffer.indexOf('\n\n')) !== -1) {
           const frame = buffer.slice(0, boundary); buffer = buffer.slice(boundary + 2);
-          if (frame.includes('event: access-revoked')) {
+          const fields = frame.split('\n');
+          const eventType = fields.find(line => line.startsWith('event:'))?.slice(6).trim();
+          if (eventType === 'access-revoked') {
             const error = new Error('Dein Repository-Zugriff konnte nicht mehr bestätigt werden. Bitte erneut verbinden.');
             error.status = 403; throw error;
           }
-          const data = frame.split('\n').find(line => line.startsWith('data: '));
-          if (data) accept(JSON.parse(data.slice(6)));
+          const data = fields.find(line => line.startsWith('data: '));
+          if (eventType === 'run-event' && data) accept(JSON.parse(data.slice(6)));
         }
         renderHistory(); status('Live verbunden');
-        if (cursor !== before && !refreshTimer) refreshTimer = setTimeout(async () => {
-          try {
-            do { await projection(); } while (active() && run.lastPosition < cursor);
-          } catch (error) { failed(error); }
-          finally { refreshTimer = undefined; }
-        }, 500);
+        if (cursor !== before) scheduleProjection();
       }
     } catch (error) {
       failed(error);

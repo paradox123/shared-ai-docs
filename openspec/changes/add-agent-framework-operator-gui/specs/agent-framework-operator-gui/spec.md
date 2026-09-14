@@ -85,6 +85,7 @@ The graphical Operator Client SHALL list authorized runs and display each run's 
 - **WHEN** a human starts an eligible issue through the existing GUI and either that browser or another authenticated browser opens its run
 - **THEN** the run list links the persisted submission to the observed activities, attempts and sessions, and selecting a node exposes the retained assignments/context, user/agent messages, tools with parameters/results/timing/errors, findings and artifacts
 - **AND** bounded history pages advance only to their delivered position, the live tail resumes after the last processed position with stable identities, and reload or API restart preserves correlation and order without duplicate display
+- **AND** catching up through pages or recovering from a failed projection read eventually refreshes the workflow state even if no further events arrive; message/tool content cannot be interpreted as a transport control event
 - **AND** partially loaded history, unavailable metadata/content and redaction remain explicit; each new read and live cycle revalidates access, and revocation clears the displayed evidence without a filter or artifact link bypass
 - **AND** acceptance begins with a real controlled GitHub issue and compares two browser clients with public history/artifact responses; nested PRD navigation and workstation ingestion remain later tickets
 

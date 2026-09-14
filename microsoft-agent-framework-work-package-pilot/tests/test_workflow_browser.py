@@ -20,7 +20,16 @@ def workflow_browser(payload):
 
 class WorkflowBrowserTests(SubmissionExecutionHarness, unittest.TestCase):
     def test_live_history_reconnects_after_api_restart_and_clears_after_revocation(self):
+        self.check_recovery()
+
+    def test_page_catchup_retries_failed_projection_even_without_later_events(self):
+        self.check_recovery(catchup=True)
+
+    def check_recovery(self, catchup=False):
         self.analysis.release.clear()
+        self.analysis.extra_events = [{'type': 'message', 'data': {'role': 'assistant',
+            'text': 'Document the literal event: access-revoked without changing access.'}}]
+        self.addCleanup(setattr, self.analysis, 'extra_events', [])
         self.addCleanup(self.analysis.release.set)
         process = subprocess.Popen(['node', str(PILOT_ROOT / 'tests/workflow_reconnect_browser.cjs')],
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
@@ -36,21 +45,24 @@ class WorkflowBrowserTests(SubmissionExecutionHarness, unittest.TestCase):
             return json.loads(line)
         self.worker()
         send({'baseUrl': self.base_url, 'credential': self.provider.tokens['actor-authorized'],
-            'sourceUrl': self.issue(703)})
+            'sourceUrl': self.issue(705 if catchup else 703), 'catchup': catchup})
         first = receive()
-        self.assertEqual('watching', first['stage'])
+        self.assertEqual('projection-held' if catchup else 'watching', first['stage'])
         cls = type(self)
-        self.stop_process(cls.api)
-        self.analysis.release.set()
-        # Replace the API process at the same public address while Chrome stays open.
-        environment = {**os.environ, **self.service_environment, 'WPCP_CONNECTION_STRING': self.connection_string,
-            'WPCP_GITHUB_TEST_ORIGIN': self.provider.origin}
-        environment.pop('WPCP_FIXTURE_ACCESS_TOKEN', None)
-        cls.api = subprocess.Popen(cls.api.args, cwd=PILOT_ROOT, env=environment,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-        for _ in range(100):
-            if self.request('GET', '/healthz')[0] == 200: break
-            time.sleep(.1)
+        if catchup:
+            self.analysis.release.set()
+        else:
+            self.stop_process(cls.api)
+            self.analysis.release.set()
+            # Replace the API process at the same public address while Chrome stays open.
+            environment = {**os.environ, **self.service_environment, 'WPCP_CONNECTION_STRING': self.connection_string,
+                'WPCP_GITHUB_TEST_ORIGIN': self.provider.origin}
+            environment.pop('WPCP_FIXTURE_ACCESS_TOKEN', None)
+            cls.api = subprocess.Popen(cls.api.args, cwd=PILOT_ROOT, env=environment,
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+            for _ in range(100):
+                if self.request('GET', '/healthz')[0] == 200: break
+                time.sleep(.1)
         self.await_state(first['submissionId'], 'completed')
         send({'continue': True})
         resumed = receive()
