@@ -1,0 +1,47 @@
+{
+  "snapshot": {
+    "submissionId": "23d2e174-1cd7-4cb1-94f7-32bf41dfa54d",
+    "state": "admitted",
+    "runId": null,
+    "title": "Extract project facts with source provenance",
+    "body": "## What to build\n\nTurn a captured source into an inspectable project-fact set while preserving uncertainty and provenance. AI or deterministic extraction may propose facts but cannot turn interpretation into confirmed truth.\n\n## Acceptance criteria\n\n- [ ] Extraction covers role and seniority; intermediary, possible end client, and contact; project identifier; start, duration, and deadline; utilization, rate or budget; remote share, on-site location and frequency; contract type, language and time-zone constraints; tasks, must-haves, nice-to-haves, certifications and security requirements; and intended submission channel.\n- [ ] Each extracted fact is marked `explicit`, `inferred`, `missing`, or `contradictory`.\n- [ ] Every non-missing fact links to the source passage or source element that supports it.\n- [ ] Derived facts remain separate from the immutable source.\n- [ ] Provider-specific extraction sits behind an adapter and records enough metadata to trace the result to its source version.\n- [ ] Tests expose explicit, inferred, missing, and contradictory examples through the public workflow.\n\n## Blocked by\n\n- #2 — Capture one GULP project email as a persistent Akquisevorgang\n\n## PRD coverage\n\nUser stories 9-18 and 70; extraction and provenance testing decisions.\n\n## Optional implementation inspiration (non-normative)\n\n[Archived UI and workflow prototype reference](https://github.com/paradox123/probare-crm/blob/main/docs/prototypes/decision-workflow-reference.md) · [fixed archive 88d9068](https://github.com/paradox123/probare-crm/tree/88d9068c0a8c855a687e996cb04a84b8a4444196/src/ProbareCrm.Ui/src/prototype).\n\nFor this ticket: Examples of source passages and uncertainty labels; the demo field set is incomplete and does not narrow this issue's extraction scope.\n\nDaniel positively assessed the general presentation, excluding copy and colors; no individual UI variant was selected. The prototype is optional inspiration, not a requirements source. This issue's acceptance criteria, the MVP PRD and accepted ADRs remain authoritative. Demo behavior, omissions and exploration questions add no requirements, acceptance criteria or dependencies.\n\n",
+    "source": {
+      "provider": "github",
+      "providerIssueId": 5189035892,
+      "issueNumber": 4,
+      "url": "https://github.com/paradox123/probare-crm/issues/4",
+      "updatedAt": "2026-09-14T09:18:50+00:00"
+    },
+    "repository": {
+      "repositoryId": "probare-issue14",
+      "fullName": "paradox123/probare-crm",
+      "providerRepositoryId": 1332818325
+    },
+    "submittedBy": {
+      "kind": "human",
+      "provider": "github",
+      "subjectId": "11044764"
+    },
+    "admittedAt": "2026-09-14T09:55:24.5123307+00:00",
+    "contentSha256": "51e80bf6bee4999efd76b595e64c4b8318fa5b3818d99593b7c524f4708a1049",
+    "redaction": {
+      "occurred": false,
+      "policyVersion": "controlled-canary-v1",
+      "marker": "[REDACTED:CONTROLLED-CANARY]"
+    }
+  },
+  "browserErrors": [],
+  "mobileOverflow": false,
+  "endpoint": "https://wpcp-dh-3c8f1707.swedencentral.cloudapp.azure.com",
+  "topology": "Azure Ubuntu VM in Sweden Central; Chrome on the operator macOS workstation; public HTTPS, no shared filesystem or database access from browser",
+  "sourceProvider": "https://api.github.com",
+  "providerWrites": false,
+  "initialDatabaseEmpty": true,
+  "apiAndDatabaseContainersRecreated": true,
+  "newBrowserReadbackIdentical": true,
+  "anonymousReadStatus": {
+    "/api/v1/submissions": 401,
+    "/api/v1/submissions/23d2e174-1cd7-4cb1-94f7-32bf41dfa54d": 401
+  },
+  "scope": "Deployment smoke proof; remaining Ticket 16 distributed acceptance scenarios stay open"
+}

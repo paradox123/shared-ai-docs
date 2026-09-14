@@ -1,0 +1,11 @@
+{
+	admin off
+}
+{$WPCP_HOSTNAME} {
+	# Access logging is intentionally absent: never record credentials or bodies.
+	header Strict-Transport-Security "max-age=31536000"
+	request_body {
+		max_size 32KB
+	}
+	reverse_proxy 127.0.0.1:5080
+}

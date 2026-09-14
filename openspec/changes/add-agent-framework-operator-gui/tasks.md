@@ -27,6 +27,9 @@
 
 ## 3. Acceptance and completion
 
+- [x] 3.0a Deploy the accepted Ticket 01 GUI/API and durable database to an isolated Azure pilot under the user's credit subscription, retaining the spending limit, HTTPS and current repository authorization. See azure-deployment-evidence.md.
+- [x] 3.0b Verify the deployed GUI, authenticated intake/readback and persistence after service replacement; document URL, resource ownership, cost controls and operating commands. Deployment evidence does not close the remaining Ticket 16 scenarios. See azure-deployment-evidence.md.
+
 - [ ] 3.1 Use TDD through public interfaces for each behavior-bearing slice and rendered browser checks for the GUI.
 - [ ] 3.2 Prove server-to-separate-workstation Handover with GUI closed, complete local diagnostic chat/tool capture and a human-directed continuation; inspect the same lifecycle through another authorized client.
 - [ ] 3.2a Ticket 16 distributed intake acceptance (moved from 2.2b): repeat real GitHub GUI intake into an empty database, authorized readback, redaction/error checks, duplicate delivery and server/browser restart on separate machines; retain the same submission identity/version with no run until explicitly started. Requires a reachable test server and separate browser machine; local Ticket 01 acceptance does not satisfy this gate.

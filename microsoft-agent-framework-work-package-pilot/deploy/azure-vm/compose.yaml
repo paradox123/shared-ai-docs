@@ -1,0 +1,56 @@
+name: wpcp-operator
+services:
+  database:
+    image: postgres:17-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: wpcp
+      POSTGRES_USER: wpcp
+      POSTGRES_PASSWORD: ${WPCP_DATABASE_PASSWORD:?Provide private database password}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wpcp -d wpcp"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    logging:
+      driver: local
+      options: {max-size: "5m", max-file: "2"}
+  api:
+    image: ${WPCP_API_IMAGE:?Provide a built immutable release tag}
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      WPCP_CONNECTION_STRING: "Host=127.0.0.1;Port=5432;Database=wpcp;Username=wpcp;Password=${WPCP_DATABASE_PASSWORD}"
+    volumes:
+      - ./submission.json:/config/submission.json:ro
+    depends_on:
+      database: {condition: service_healthy}
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    logging:
+      driver: local
+      options: {max-size: "5m", max-file: "2"}
+  https:
+    image: caddy:2-alpine@sha256:5f5c8640aae01df9654968d946d8f1a56c497f1dd5c5cda4cf95ab7c14d58648
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      WPCP_HOSTNAME: ${WPCP_HOSTNAME:?Provide Azure public DNS name}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [api]
+    logging:
+      driver: local
+      options: {max-size: "5m", max-file: "2"}
+volumes:
+  postgres:
+  caddy_data:
+  caddy_config:

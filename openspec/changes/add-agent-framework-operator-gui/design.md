@@ -84,6 +84,17 @@ No material product decision remains unresolved. Accepted: full additive GUI, bo
 
 ## Acceptance direction
 
+Before the deferred distributed acceptance, the user requested deployment to Azure
+using their existing credit account on 2026-09-14. Deploy the accepted Ticket 01
+intake surface and its own durable PostgreSQL database in an isolated resource
+group. A small Linux VM provides the initial server boundary and can later host
+the pilot's process-based components. Keep the existing trial spending limit,
+terminate HTTPS at a same-host reverse proxy, bind API/database to loopback, and
+restrict SSH to the operator's current address. Retain database and certificate
+volumes across application replacement. Do not copy local runtime state or
+provider credentials into the server image. A deployment smoke proof does not
+claim the later background execution, workstation handover or identity gates.
+
 On 2026-09-14 the user accepted Ticket 01 locally and moved its separate-machine intake/readback/restart proof to the existing Ticket 16. Ticket 01 is resolved and no longer blocks Ticket 02. The distributed requirement remains unchanged and open for overall acceptance; local evidence does not satisfy it.
 
 Start one controlled input in the GUI, close the UI and initiating Codex task, and observe independent progress to a concrete intervention or a qualified result. Reopen the same run and trace activities, observable messages, tool calls/results, handoffs and outcome through persisted public evidence. This proof supplements, but does not replace, Ticket 14's identity and governance gates.

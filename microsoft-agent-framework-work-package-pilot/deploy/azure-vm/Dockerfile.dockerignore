@@ -1,0 +1,13 @@
+**
+!global.json
+!src/
+!src/Directory.Build.props
+!src/Directory.Packages.props
+!src/Wpcp.Api/
+!src/Wpcp.Api/**
+!src/Wpcp.Domain/
+!src/Wpcp.Domain/**
+!src/Wpcp.Storage.Postgres/
+!src/Wpcp.Storage.Postgres/**
+**/bin/
+**/obj/
