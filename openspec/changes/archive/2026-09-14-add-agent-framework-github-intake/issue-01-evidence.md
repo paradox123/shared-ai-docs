@@ -1,6 +1,6 @@
 # Ticket 01 implementation evidence
 
-**Acceptance decision — 2026-09-14:** The user accepted Ticket 01 locally (`resolved`) and moved its still-unverified separate-machine proof to [Ticket 16](../../../.scratch/agent-framework-operator-gui/issues/16-verteilten-gesamtfall-und-issue-14-gates-nachweisen.md), tracked as task 3.2a. The full GUI change remains open. This changes acceptance ownership, not the recorded test topology or results.
+**Acceptance decision — 2026-09-14:** The user accepted Ticket 01 locally (`resolved`) and moved its still-unverified separate-machine proof to [Ticket 16](../../../../.scratch/agent-framework-operator-gui/issues/16-verteilten-gesamtfall-und-issue-14-gates-nachweisen.md), tracked as task 3.2a. The full GUI change remains open. This changes acceptance ownership, not the recorded test topology or results.
 
 ## Scope and Git ownership
 

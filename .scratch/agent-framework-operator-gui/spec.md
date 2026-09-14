@@ -6,7 +6,8 @@ Die Tickets dieses Features implementieren den bestätigten OpenSpec-Change `add
 
 ## Verbindliche Quellen
 
-- [Vollständige Anforderungen und Szenarien](../../openspec/changes/add-agent-framework-operator-gui/specs/agent-framework-operator-gui/spec.md)
+- [Abgenommene GitHub-Aufnahme](../../openspec/specs/agent-framework-operator-gui/spec.md) — Ticket 01.
+- [Noch umzusetzende Anforderungen und Szenarien](../../openspec/changes/add-agent-framework-operator-gui/specs/agent-framework-operator-gui/spec.md)
 - [Ziel und Umfang](../../openspec/changes/add-agent-framework-operator-gui/proposal.md)
 - [Entscheidungen und Implementierungsannahmen](../../openspec/changes/add-agent-framework-operator-gui/design.md)
 - [Bestehende Pilot-PRD](../distributed-codex-work-package-control-plane/spec.md)

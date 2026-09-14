@@ -26,7 +26,8 @@ Der [Backstage-/React-Flow-Prototyp mit Codeverweis und Session-Einstieg](../pro
 
 Der Nutzer hat [Ticket 01](01-github-issue-eingeben-und-einreichung-wiederfinden.md)
 lokal abgenommen und dessen Mehrrechnertest diesem Ticket zugeordnet. Die
-[lokalen Nachweise](../../../openspec/changes/add-agent-framework-operator-gui/issue-01-evidence.md)
-sind die Ausgangsbasis; der verteilte Nachweis ist weiterhin offen. Dafür werden
-ein erreichbarer Testserver und ein Browser auf einer anderen Maschine benötigt.
+[lokalen Nachweise](../../../openspec/changes/archive/2026-09-14-add-agent-framework-github-intake/issue-01-evidence.md)
+sind die Ausgangsbasis; der verteilte Nachweis ist weiterhin offen. Der inzwischen bereitgestellte Azure-Server und der Mac-Browser liefern einen
+[Betriebsnachweis](../../../openspec/changes/archive/2026-09-14-add-agent-framework-github-intake/azure-deployment-evidence.md)
+für Aufnahme und Containerneustart. Die übrigen Prüfungen dieses Tickets bleiben offen.
 Die oben eingetragenen Blocker dieses Tickets bleiben bestehen.

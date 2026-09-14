@@ -1,3 +1,5 @@
+Accepted Ticket 01 is extracted into [add-agent-framework-github-intake](../archive/2026-09-14-add-agent-framework-github-intake/proposal.md) and archived. This parent remains active for Tickets 02–16; unchecked tasks retain their original scope.
+
 ## Why
 
 The Agent Framework pilot cannot yet be tested as an unattended end-to-end run without a foreground Codex task coordinating its execution. A graphical Operator Client should make admission, workflow progress and persisted session evidence accessible while independent background execution owns the work.

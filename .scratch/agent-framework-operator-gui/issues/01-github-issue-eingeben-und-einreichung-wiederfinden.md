@@ -42,4 +42,11 @@ der Mehrrechnernachweis bleibt offen und ist verbindlich nach
 [Ticket 16](16-verteilten-gesamtfall-und-issue-14-gates-nachweisen.md) verschoben.
 Er blockiert Ticket 01 und dessen Nachfolger nicht mehr. Die verteilte
 Gesamtabnahme und der OpenSpec-Change bleiben offen.
-Details und Reviewstand: [OpenSpec-Nachweise](../../../openspec/changes/add-agent-framework-operator-gui/issue-01-evidence.md).
+Details und Reviewstand: [OpenSpec-Nachweise](../../../openspec/changes/archive/2026-09-14-add-agent-framework-github-intake/issue-01-evidence.md).
+
+### 2026-09-14 — OpenSpec-Abschluss und Integration
+
+Der akzeptierte Ticket-01-Umfang einschließlich Azure-Betriebsnachweis wird als
+`add-agent-framework-github-intake` archiviert. Die Aufnahme-Anforderung wird zur
+kanonischen Spec. Der übergeordnete GUI-Change und Tickets 02–16 bleiben aktiv;
+ihre offenen Aufgaben werden durch diesen Abschluss nicht als erledigt markiert.
