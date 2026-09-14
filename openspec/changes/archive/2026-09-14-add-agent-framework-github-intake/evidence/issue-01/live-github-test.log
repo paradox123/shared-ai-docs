@@ -1,0 +1,6 @@
+test_real_issue_admitted_in_browser_and_read_after_service_restart (tests.test_submission_live_github.LiveGitHubSubmissionTests.test_real_issue_admitted_in_browser_and_read_after_service_restart) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 17.936s
+
+OK

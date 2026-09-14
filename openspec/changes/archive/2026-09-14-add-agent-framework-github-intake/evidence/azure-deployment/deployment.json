@@ -1,0 +1,26 @@
+{
+  "subscriptionId": "3c8f1707-52b9-43cc-9486-30faab0af3f0",
+  "resourceGroup": "rg-wpcp-operator-pilot",
+  "vm": {
+    "id": "/subscriptions/3c8f1707-52b9-43cc-9486-30faab0af3f0/resourceGroups/rg-wpcp-operator-pilot/providers/Microsoft.Compute/virtualMachines/wpcp-operator",
+    "location": "swedencentral",
+    "name": "wpcp-operator",
+    "osDisk": "wpcp-operator_OsDisk_1_4063e908167e426b897f731b8cd3c471",
+    "security": "TrustedLaunch",
+    "size": "Standard_B2als_v2",
+    "state": "Succeeded"
+  },
+  "network": {
+    "fqdn": "wpcp-dh-3c8f1707.swedencentral.cloudapp.azure.com",
+    "ip": "135.225.87.143"
+  },
+  "applicationSourceRevision": "39038d3",
+  "sourceArchiveSha256": "35ab23a4a5cfe05077a2ef2954e716a255d41e9100f76998b802df048175ef14",
+  "imageTag": "wpcp-operator:39038d3-azure-20260914",
+  "runtimeObservation": "sha256:f5ac954f10879f3d918098d199386fe98a9bd4a5d5200d939473fc37eb0bd7a5\nState  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess\nLISTEN 0      4096       127.0.0.1:5432       0.0.0.0:*          \nLISTEN 0      4096         0.0.0.0:22         0.0.0.0:*          \nLISTEN 0      512        127.0.0.1:5080       0.0.0.0:*          \nLISTEN 0      4096               *:443              *:*          \nLISTEN 0      4096               *:80               *:*          \nLISTEN 0      4096            [::]:22            [::]:*          \n600 root:root",
+  "spendingLimit": "On",
+  "quotaId": "FreeTrial_2014-09-01",
+  "creditBalance": "not established",
+  "costEstimateUsdPerMonth": 35,
+  "sshSourceCidr": "92.211.110.7/32"
+}

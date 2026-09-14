@@ -1,0 +1,35 @@
+{
+  "snapshot": {
+    "submissionId": "e5474fbe-423a-4d7d-a163-0a62e92da09b",
+    "state": "admitted",
+    "runId": null,
+    "title": "Retain the provider issue",
+    "body": "Provider content <script>alert(1)</script>\nToken: [REDACTED:CONTROLLED-CANARY]",
+    "source": {
+      "provider": "github",
+      "providerIssueId": 7401,
+      "issueNumber": 401,
+      "url": "https://github.com/pilot/fixture/issues/401",
+      "updatedAt": "2026-09-14T08:00:00+00:00"
+    },
+    "repository": {
+      "repositoryId": "repo-1",
+      "fullName": "pilot/fixture",
+      "providerRepositoryId": 9001
+    },
+    "submittedBy": {
+      "kind": "human",
+      "provider": "github",
+      "subjectId": "101"
+    },
+    "admittedAt": "2026-09-14T09:19:30.736391+00:00",
+    "contentSha256": "c511018146e62427729f721f287c16586dcf2701fc811f8487417a38bf3161fb",
+    "redaction": {
+      "occurred": true,
+      "policyVersion": "controlled-canary-v1",
+      "marker": "[REDACTED:CONTROLLED-CANARY]"
+    }
+  },
+  "browserErrors": [],
+  "mobileOverflow": false
+}

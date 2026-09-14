@@ -20,6 +20,14 @@ _Avoid_: Blankovollmacht, unbegrenzter Agentenauftrag
 Die pro Repository seriell geordnete Menge freigegebener Issues, deren dokumentierte Abhaengigkeiten bereits abgeschlossen sind. Ein Folge-Issue wird erst nach Merge des vorgelagerten Pull Requests und Schliessung des blockierenden Issues gestartet.
 _Avoid_: Parallele Issue-Bearbeitung, gestapelte Pull Requests
 
+**Issue-Quelle**:
+Der durch den Einreichungsweg bestimmte fachliche Ablageort eines Issues oder PRD-Arbeitsmandats: GitHub oder lokale Markdown-Dateien. Aus einer PRD abgeleitete Issues gehoeren derselben Issue-Quelle an; diese ist unabhaengig vom Zielrepository der Implementierung und von der gemeinsamen Run History.
+_Avoid_: Zielrepository, Run History, automatische GitHub-Spiegelung
+
+**Einreichung**:
+Die dauerhaft identifizierbare Aufnahme eines Issues oder PRD-Arbeitsmandats mit seiner eingereichten Fassung, Herkunft und Zielrepository-Zuordnung. Sie verbindet den urspruenglichen Auftrag mit den daraus abgeleiteten Issues und Implementierungslaeufen.
+_Avoid_: Blosser Dateipfad, einzelner Implementierungslauf, Issue-Quelle
+
 **Review-Schleife**:
 Der wiederaufnehmbare Teil eines Implementierungslaufs, in dem Requirements-, Code- und Architekturpruefung Findings erzeugen und der Implementierungsagent diese bis zur erneuten Verifikation bearbeitet. Nach dem Pull Request koennen menschliche Aenderungswuensche dieselbe Schleife erneut starten; der Merge bleibt menschlich.
 _Avoid_: Einmalige Selbstkontrolle, automatischer Merge
@@ -49,8 +57,16 @@ Eine menschliche Lese- und Steuerungsoberflaeche, die sich an einen zentralen Im
 _Avoid_: Operator-Client, Supervisor-Agent, menschliche Agentensession
 
 **Run History**:
-Die dauerhaft geordnete, vollstaendig beobachtbare Ausfuehrung aller Aktivitaeten, Agentensessions, Werkzeugwirkungen und menschlichen Entscheidungen eines Implementierungslaufs. Sie ist weder ein Modellkontext noch eine einzelne Session-Historie.
+Die dauerhaft geordnete, vollstaendig beobachtbare Ausfuehrung aller Aktivitaeten, beteiligten Agentensessions, Werkzeugwirkungen und menschlichen Entscheidungen eines Implementierungslaufs, unabhaengig von Rechner oder bearbeitender Person. Ueber die zugehoerige Einreichung und ihre Ableitungen bleibt sie im gesamten PRD-/Issue-Lebenszyklus nachvollziehbar; sie ist weder ein Modellkontext noch eine einzelne Session-Historie.
 _Avoid_: Laufhistorie, Agenten-Memory, gemeinsamer Chat
+
+**Handover**:
+Die nachvollziehbare Bereitstellung des Kontexts und der berechtigten Zugriffsmoeglichkeiten eines konkreten Implementierungslaufs oder Aktivitaetsversuchs fuer einen Menschen und gegebenenfalls dessen lokalen Agenten. Es bleibt dem urspruenglichen Run zugeordnet und bedeutet fuer sich weder einen Fork der zentralen Agentensession noch einen Wechsel der Control Lease oder des Ausfuehrungsorts.
+_Avoid_: Unkorrelierter Kontextdump, impliziter Handoff-Fork, automatische Steuerungsuebernahme
+
+**Workstation Client**:
+Der dem Menschen zugeordnete lokale Zugang zur Work Package Control Plane, der zugestellte Handover-Auftraege empfaengt und die passende Session in dessen lokalem Agenten oeffnet. Er uebernimmt dadurch weder die zentrale Workflow-Ausfuehrung noch die Control Lease.
+_Avoid_: Zentraler Worker, Operator-Weboberflaeche, Supervisor-Agent
 
 **Control Lease**:
 Das exklusive, sichtbar beanspruchte Recht genau eines Menschen, mutierende Kommandos an einen gesamten Implementierungslauf einschliesslich aller parallelen Aktivitaeten zu senden. Sie ist an die menschliche Identitaet und nicht an eine einzelne Clientverbindung gebunden; ein Verbindungsabbruch gibt sie nicht automatisch frei. Andere verbundene Menschen bleiben lesende Beobachter, bis die Control Lease freigegeben, uebertragen, per Forced Takeover uebernommen oder durch Entzug der erforderlichen Repository Authorization ungueltig wird.
@@ -71,6 +87,14 @@ _Avoid_: Agent Platform, Einzelprompt, lokale Codex-Konfiguration
 **Work Package Control Plane**:
 Das zentrale System, das Implementierungslaeufe, Aktivitaeten, Agentensessions, Run History und menschliche Steuerung orchestriert. Es verwendet versionierte Agent Definition Repositories, besitzt aber deren Prompts, Skills und Tools nicht.
 _Avoid_: Workflow Platform, Agent Platform, Agent Definition Repository
+
+**Workflow-Definition**:
+Der versionierte Bearbeitungsablauf fuer einen fachlichen Auftrag mit seinen Schritten, Uebergaengen sowie erwarteten Eingaben und Ergebnissen. Er ist von den darin verwendeten Agentenfaehigkeiten und den konkreten Ausfuehrungen getrennt.
+_Avoid_: Agent Definition, Workflow-Ausfuehrung, Arbeitsmandat
+
+**Workflow-Ausführung**:
+Die konkrete Instanz einer bestimmten Version einer Workflow-Definition mit ihren Aktivitaeten, Versuchen, Fortschritten und Wartezustaenden fuer einen zugeordneten Auftrag. Sie ist weder der fachliche Auftrag selbst noch eine einzelne Agentensession.
+_Avoid_: Workflow-Definition, Agentensession, Arbeitsmandat
 
 **Agent Evolution Loop**:
 Die wiederkehrende Auswertung abgeschlossener und unterbrochener Implementierungslaeufe, die menschlich freizugebende Aenderungen an Agent Definition Repositories ableiten und ausarbeiten darf. Interventionsanfragen, Control Commands und Forced Takeovers sind dafuer eigene auswertbare Signale.

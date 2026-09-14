@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anforderungen · Work Package Control Plane</title>
+  <link rel="stylesheet" href="/operator/operator.css">
+  <script type="module" src="/operator/operator.js"></script>
+</head>
+<body>
+  <aside class="portal" aria-label="Navigation">
+    <a class="brand" href="/operator/"><span aria-hidden="true">◈</span><span>work package<small>DANIELSVAULT</small></span></a>
+    <p class="eyebrow">OPERATOR</p>
+    <a class="nav-current" href="/operator/" aria-current="page"><span aria-hidden="true">▤</span> Anforderungen</a>
+    <p class="portal-foot">Ein Ort für den Auftrag.<br>Eine nachvollziehbare Fassung.</p>
+  </aside>
+  <main>
+    <header class="page-header">
+      <div><p class="eyebrow">WORK PACKAGE CONTROL PLANE</p><h1>Anforderungen</h1></div>
+      <div class="connection"><span id="connection-label">Nicht verbunden</span><button id="disconnect" class="quiet" hidden>Abmelden</button></div>
+    </header>
+    <div id="notice" role="status" aria-live="polite"></div>
+    <div id="error" role="alert" hidden></div>
+    <section id="sign-in" class="sign-in panel" aria-labelledby="sign-in-title">
+      <span class="section-number">01 / ZUGANG</span>
+      <h2 id="sign-in-title">Mit GitHub verbinden</h2>
+      <p>Verwende deinen persönlichen GitHub-Zugang. Deine aktuellen Repository-Rechte bestimmen, welche Anforderungen du sehen und aufnehmen kannst.</p>
+      <form id="connect-form">
+        <label for="github-token">GitHub-Zugangstoken</label>
+        <div class="input-row"><input id="github-token" type="password" required autocomplete="off" spellcheck="false"><button type="submit" class="primary">Verbinden <span aria-hidden="true">→</span></button></div>
+        <small>Der Zugang gilt für dieses geöffnete Fenster. Beim Neuladen verbindest du dich erneut.</small>
+      </form>
+    </section>
+    <section id="workspace" hidden>
+      <section class="intake panel" aria-labelledby="intake-title">
+        <div><span class="section-number">01 / AUFNAHME</span><h2 id="intake-title">Anforderungen aufnehmen</h2><p>Übernimm den freigegebenen Auftrag mit seiner aktuellen Fassung.</p></div>
+        <form id="submission-form">
+          <label for="source-url">GitHub-Issue-URL</label>
+          <div class="input-row"><input id="source-url" type="url" placeholder="https://github.com/owner/repository/issues/123" required autocomplete="off"><button type="submit" class="primary">Aufnehmen <span aria-hidden="true">↗</span></button></div>
+          <small>Voraussetzung: offenes Issue mit „ready-for-agent“ und Schreibzugriff auf das Repository.</small>
+        </form>
+      </section>
+      <div class="records">
+        <section class="overview panel" aria-labelledby="overview-title">
+          <div class="section-header"><div><span class="section-number">02 / ÜBERSICHT</span><h2 id="overview-title">Gespeicherte Anforderungen <span id="count" class="count">0</span></h2></div><button id="refresh" class="quiet" aria-label="Anforderungen aktualisieren">↻</button></div>
+          <div id="submission-list" aria-label="Gespeicherte Anforderungen"></div>
+        </section>
+        <section id="detail" class="detail panel" aria-label="Anforderungsdetails"><div class="empty"><span aria-hidden="true">▤</span><h2>Anforderungen im Detail</h2><p>Wähle die Anforderungen aus der Übersicht.</p></div></section>
+      </div>
+    </section>
+    <footer class="page-foot">GITHUB ALS QUELLE <span>Inhalt · Herkunft · gespeicherte Fassung</span></footer>
+  </main>
+  <template id="detail-template">
+    <div class="detail-heading"><div class="detail-kicker"><span class="section-number">GESPEICHERTE ANFORDERUNGEN</span><span class="badge">● Aufgenommen</span></div><h2 data-field="title" tabindex="-1"></h2><p class="execution-note">Der Auftrag ist aufgenommen. Die Agentenverarbeitung wurde noch nicht gestartet.</p></div>
+    <dl class="metadata">
+      <div><dt>Zielrepository</dt><dd data-field="repository"></dd></div>
+      <div><dt>Quelle · GitHub</dt><dd><a data-field="source" target="_blank" rel="noopener noreferrer"></a></dd></div>
+      <div><dt>Aufgenommen am</dt><dd data-field="admitted"></dd></div>
+      <div><dt>Quellfassung vom</dt><dd data-field="revision"></dd></div>
+      <div class="full"><dt>Anforderungs-ID</dt><dd><code data-field="id"></code></dd></div>
+    </dl>
+    <div class="content"><div class="content-heading"><h3>Aufgenommener Inhalt</h3><span data-field="redaction"></span></div><pre data-field="body"></pre></div>
+    <details class="provenance"><summary>Herkunft und Fassungsnachweis</summary><dl><dt>GitHub Issue-ID</dt><dd data-field="issue-id"></dd><dt>Aufgenommen durch</dt><dd data-field="actor"></dd><dt>SHA-256 der gespeicherten Fassung</dt><dd><code data-field="sha"></code></dd><dt>Redaktionsregel</dt><dd data-field="policy"></dd></dl></details>
+  </template>
+</body>
+</html>

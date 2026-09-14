@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Headers;
 using System.Text.Json;
 using Wpcp.Domain;
 
@@ -78,15 +77,8 @@ internal sealed class GitHubRepositoryAuthorization(
         }
     }
 
-    private async Task<HttpResponseMessage> SendAsync(string path, string credential, CancellationToken cancellationToken)
-    {
-        using var request = new HttpRequestMessage(HttpMethod.Get, path);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", credential);
-        request.Headers.Accept.ParseAdd("application/vnd.github+json");
-        request.Headers.UserAgent.ParseAdd("Wpcp-Pilot/1.0");
-        request.Headers.Add("X-GitHub-Api-Version", "2026-03-10");
-        return await client.SendAsync(request, cancellationToken);
-    }
+    private Task<HttpResponseMessage> SendAsync(string path, string credential, CancellationToken cancellationToken) =>
+        GitHubRequests.GetAsync(client, path, credential, cancellationToken);
 
     public static HttpClient CreateClient()
     {

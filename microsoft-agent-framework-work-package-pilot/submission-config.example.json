@@ -1,0 +1,19 @@
+{
+  "provider": {
+    "repositories": [
+      {
+        "repositoryId": "probare-issue14",
+        "fullName": "paradox123/probare-crm",
+        "providerRepositoryId": 1332818325
+      }
+    ]
+  },
+  "redactionPolicy": {
+    "version": "controlled-canary-v1",
+    "marker": "[REDACTED:CONTROLLED-CANARY]",
+    "controlledCanaries": [
+      { "value": "wpcp-controlled-secret-canary-v1" },
+      { "value": "wpcp-controlled-token-canary-v1" }
+    ]
+  }
+}

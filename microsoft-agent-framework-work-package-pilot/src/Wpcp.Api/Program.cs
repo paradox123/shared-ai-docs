@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using static OperatorHttp;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
@@ -7,17 +8,21 @@ using Wpcp.Domain;
 using Wpcp.Storage.Postgres;
 
 var options = ApiOptions.Parse(args);
-var fixture = SyntheticProviderFixture.Load(options.FixturePath);
+var fixture = options.FixturePath is null ? null : SyntheticProviderFixture.Load(options.FixturePath);
+var configuration = SubmissionConfiguration.Load(options.SubmissionConfigPath ?? options.FixturePath!);
 using var providerClient = GitHubRepositoryAuthorization.CreateClient();
 IRepositoryAuthorization authorization = new GitHubRepositoryAuthorization(providerClient);
 await using var store = new PostgresImplementationRunStore(
     options.ConnectionString,
-    fixture.RedactionPolicy);
+    configuration.RedactionPolicy);
 await store.EnsureSchemaAsync();
+await using var submissions = new PostgresSubmissionStore(options.ConnectionString, configuration.RedactionPolicy);
+await submissions.EnsureSchemaAsync();
 await RecoverPendingContinuationsAsync(store, CancellationToken.None);
 
 var runtime = new ApiRuntime(Guid.NewGuid().ToString("D"), DateTimeOffset.UtcNow);
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{ Args = args, WebRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot") });
 builder.Logging.ClearProviders();
 builder.WebHost.UseUrls(options.Urls);
 
@@ -51,6 +56,18 @@ app.MapPost("/api/v1/runs/{runId}/agent-commands/{mode}",
         return Results.Json(decision, statusCode: status);
     });
 
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'";
+    context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+    context.Response.Headers["Referrer-Policy"] = "no-referrer";
+    await next(context);
+});
+app.UseDefaultFiles();
+app.UseStaticFiles();
+app.MapGet("/", () => Results.Redirect("/operator/"));
+app.MapSubmissions(submissions, configuration.Repositories, authorization, providerClient);
+
 app.MapGet("/healthz", () => Results.Text("Healthy"));
 
 app.MapPost(
@@ -67,7 +84,7 @@ app.MapPost(
             return JsonError("synthetic-access-denied", StatusCodes.Status403Forbidden);
         }
 
-        if (!TryCreateCommand(fixture, repositoryId, issueNumber, request, out var command))
+        if (fixture is null || !TryCreateCommand(fixture, repositoryId, issueNumber, request, out var command))
         {
             return JsonError("invalid-start-command", StatusCodes.Status400BadRequest);
         }
@@ -554,21 +571,10 @@ static bool TryCreateCommand(
     }
 }
 
-static string? Credential(HttpContext context)
-{
-    var value = context.Request.Headers.Authorization.ToString();
-    return value.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) ? value[7..] : null;
-}
-
-static IResult AccessError(RepositoryAccess access, string fallback) =>
-    JsonError(access.FailureCode ?? fallback,
-        access.FailureCode == "repository-provider-unavailable" ? 503 :
-        access.FailureCode == "provider-authentication-required" ? 401 : 403);
-
 static bool HasFixtureAccess(HttpContext context, ApiOptions options)
 {
     var supplied = context.Request.Headers[FixtureAccessHeader.Name].ToString();
-    if (string.IsNullOrEmpty(supplied))
+    if (options.FixtureAccessToken is null || string.IsNullOrEmpty(supplied))
     {
         return false;
     }
@@ -690,8 +696,9 @@ internal static class FixtureAccessHeader
 
 internal sealed record ApiOptions(
     string ConnectionString,
-    string FixturePath,
-    string FixtureAccessToken,
+    string? FixturePath,
+    string? FixtureAccessToken,
+    string? SubmissionConfigPath,
     string Urls)
 {
     public static ApiOptions Parse(IReadOnlyList<string> arguments)
@@ -700,16 +707,20 @@ internal sealed record ApiOptions(
         var connectionString = Value(values, "--connection-string") ??
             Environment.GetEnvironmentVariable("WPCP_CONNECTION_STRING");
         var fixturePath = Value(values, "--fixture");
+        var submissionConfig = Value(values, "--submission-config");
         var fixtureAccessToken = Environment.GetEnvironmentVariable("WPCP_FIXTURE_ACCESS_TOKEN");
         var urls = Value(values, "--urls") ?? "http://127.0.0.1:5080";
-        if (string.IsNullOrWhiteSpace(connectionString) || string.IsNullOrWhiteSpace(fixturePath) ||
-            string.IsNullOrWhiteSpace(fixtureAccessToken))
-        {
-            throw new ArgumentException("The API requires --connection-string (or WPCP_CONNECTION_STRING), --fixture, and WPCP_FIXTURE_ACCESS_TOKEN.");
-        }
+        if (string.IsNullOrWhiteSpace(connectionString) ||
+            (string.IsNullOrWhiteSpace(fixturePath) == string.IsNullOrWhiteSpace(submissionConfig)) ||
+            (fixturePath is not null && string.IsNullOrWhiteSpace(fixtureAccessToken)))
+            throw new ArgumentException("Supply a connection string and either --submission-config or --fixture with WPCP_FIXTURE_ACCESS_TOKEN.");
 
-        EnsureLoopbackUrls(urls);
-        return new ApiOptions(connectionString, fixturePath, fixtureAccessToken, urls);
+        if (fixturePath is not null) EnsureLoopbackUrls(urls);
+        else if (urls.Split(';').Any(url => !IsLoopbackHttpUrl(url) &&
+            (!Uri.TryCreate(url, UriKind.Absolute, out var parsed) || parsed.Scheme != "https")))
+            throw new ArgumentException("Remote submission listeners require HTTPS; loopback HTTP supports a TLS proxy or SSH tunnel.");
+        return new ApiOptions(connectionString, fixturePath,
+            fixturePath is null ? null : fixtureAccessToken, submissionConfig, urls);
     }
 
     private static Dictionary<string, string> ParseOptions(IReadOnlyList<string> arguments)
