@@ -4,7 +4,7 @@
 
 **Blocked by:** 02: Eingereichtes Issue als erste Hintergrundaktivität starten.
 
-**Status:** claimed
+**Status:** resolved
 
 - [x] Die Run-Liste und Workflow-Ansicht verwenden die über den Eingabe-/Startweg erzeugten Runs. Kein Benutzer muss einen Run vorab in die Datenbank schreiben oder ein Fixture laden.
 - [x] Der erste Graph zeigt gestartete Aktivitäten, Versuche, Sessions und deren beobachteten Zustand; die Auswahl öffnet zugeordnete Benutzer-/Agentennachrichten, Aufträge/Kontext, Toolparameter/-ergebnisse mit Dauer/Fehlern, Erkenntnisse und Artefakte.
@@ -23,6 +23,14 @@ Nachrichten und Ergebnisse, gezielt aufklappbare Werkzeugdetails und Artefakte.
 Die vollständigen Originalereignisse bleiben in der technischen Detailansicht
 erreichbar. Das neue Szenario und Task 2.5d im bestehenden OpenSpec-Change
 halten diese Korrektur fest.
+
+Die korrigierte Darstellung ist implementiert und direkt geprüft: Ergebnis oben,
+lesbarer Sessionverlauf, Werkzeugparameter/-ausgaben mit Fehlern und Dauer,
+Originalereignisse gezielt unter „Alle Ereignisse“. Neun Browserprüfungen und
+der reale GitHub-/Codex-Vergleich nach API-Neustart bestehen; beide Reviewachsen
+sind ohne offene Befunde. [Aktuelle Darstellung und Nachweise](../../../openspec/changes/add-agent-framework-operator-gui/issue-03-readable-evidence.md).
+`resolved` bezeichnet die abgeschlossene lokale Nachbesserung, keine vorweggenommene
+Nutzerabnahme oder Veröffentlichung auf Azure.
 
 ### 2026-09-14 — Unverbindliche Designreferenz
 

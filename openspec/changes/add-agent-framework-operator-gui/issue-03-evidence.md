@@ -1,5 +1,9 @@
 # Ticket 03 — observe a GUI-started run
 
+The user rejected the original JSON-heavy presentation after inspecting its
+screenshot. The technical evidence below remains historical; current usability
+correction and acceptance evidence are in [readable agent work](issue-03-readable-evidence.md).
+
 Implementation branch: `codex/operator-gui-issue-03`, isolated worktree
 `shared-ai-docs-operator-issue-03`, owning Git repository `shared-ai-docs`.
 Baseline `dded7d4` contains accepted Tickets 01–02. OpenSpec routing selected the

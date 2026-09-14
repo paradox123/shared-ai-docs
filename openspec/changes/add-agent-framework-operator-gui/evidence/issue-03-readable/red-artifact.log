@@ -1,0 +1,24 @@
+test_paged_history_and_artifact_bytes_are_complete_in_both_clients (tests.test_workflow_browser.WorkflowBrowserTests.test_paged_history_and_artifact_bytes_are_complete_in_both_clients) ... FAIL
+
+======================================================================
+FAIL: test_paged_history_and_artifact_bytes_are_complete_in_both_clients (tests.test_workflow_browser.WorkflowBrowserTests.test_paged_history_and_artifact_bytes_are_complete_in_both_clients)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/test_workflow_browser.py", line 110, in test_paged_history_and_artifact_bytes_are_complete_in_both_clients
+    result = workflow_browser({'baseUrl': self.base_url,
+        'credential': self.provider.tokens['actor-authorized'],
+        'observer': self.provider.tokens['actor-observer'], 'sourceUrl': self.issue(702), 'artifacts': True, 'paged': True})
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/test_workflow_browser.py", line 17, in workflow_browser
+    raise AssertionError('Workflow browser proof failed: ' + result.stderr)
+AssertionError: Workflow browser proof failed: locator.waitFor: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for locator('#artifact-content').getByText('Sessionereignisse · 209', { exact: true }) to be visible[22m
+
+    at inspect (/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/workflow_browser.cjs:109:163)
+    at async /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/workflow_browser.cjs:121:15
+
+
+----------------------------------------------------------------------
+Ran 1 test in 46.973s
+
+FAILED (failures=1)

@@ -1,0 +1,25 @@
+test_session_presents_messages_and_findings_without_raw_envelopes (tests.test_workflow_browser.WorkflowBrowserTests.test_session_presents_messages_and_findings_without_raw_envelopes) ... FAIL
+
+======================================================================
+FAIL: test_session_presents_messages_and_findings_without_raw_envelopes (tests.test_workflow_browser.WorkflowBrowserTests.test_session_presents_messages_and_findings_without_raw_envelopes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/test_workflow_browser.py", line 27, in test_session_presents_messages_and_findings_without_raw_envelopes
+    workflow_browser({'baseUrl': self.base_url, 'credential': self.provider.tokens['actor-authorized'],
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        'observer': self.provider.tokens['actor-observer'], 'sourceUrl': self.issue(706), 'readable': True})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/test_workflow_browser.py", line 17, in workflow_browser
+    raise AssertionError('Workflow browser proof failed: ' + result.stderr)
+AssertionError: Workflow browser proof failed: locator.waitFor: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for locator('#session-detail').getByRole('heading', { name: 'Anforderungen analysieren', exact: true }) to be visible[22m
+
+    at inspect (/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/workflow_browser.cjs:42:118)
+    at async /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/workflow_browser.cjs:95:15
+
+
+----------------------------------------------------------------------
+Ran 1 test in 29.151s
+
+FAILED (failures=1)

@@ -1,0 +1,25 @@
+test_recorded_runtime_failure_and_terminal_output_are_visible (tests.test_workflow_browser.WorkflowBrowserTests.test_recorded_runtime_failure_and_terminal_output_are_visible) ... FAIL
+
+======================================================================
+FAIL: test_recorded_runtime_failure_and_terminal_output_are_visible (tests.test_workflow_browser.WorkflowBrowserTests.test_recorded_runtime_failure_and_terminal_output_are_visible)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/test_workflow_browser.py", line 32, in test_recorded_runtime_failure_and_terminal_output_are_visible
+    workflow_browser({'baseUrl': self.base_url, 'credential': self.provider.tokens['actor-authorized'],
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        'observer': self.provider.tokens['actor-observer'], 'sourceUrl': self.issue(709), 'runtimeFailure': True})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/test_workflow_browser.py", line 17, in workflow_browser
+    raise AssertionError('Workflow browser proof failed: ' + result.stderr)
+AssertionError: Workflow browser proof failed: locator.waitFor: Timeout 20000ms exceeded.
+Call log:
+[2m  - waiting for locator('#history-list').getByText('Upstream model quota exhausted', { exact: true }) to be visible[22m
+
+    at inspect (/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/workflow_browser.cjs:45:79)
+    at async /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-issue-03/microsoft-agent-framework-work-package-pilot/tests/workflow_browser.cjs:140:15
+
+
+----------------------------------------------------------------------
+Ran 1 test in 28.378s
+
+FAILED (failures=1)
