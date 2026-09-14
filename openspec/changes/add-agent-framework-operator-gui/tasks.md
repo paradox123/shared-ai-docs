@@ -31,6 +31,7 @@ Accepted Ticket 01 is extracted into [add-agent-framework-github-intake](../arch
 - [x] 2.5b Ticket 03: confirmed pagination/live cursors, replay/restart, explicit unavailable/redacted evidence and access revocation across filters/artifacts verified through the browser.
 - [x] 2.5c Ticket 03: real controlled issue GUI start, two-client semantic comparison, visual acceptance, full regression (223 tests: 198 passed, 25 optional skipped; added race case separately green) and two-axis review (0/0 remaining findings). See [issue-03-evidence.md](issue-03-evidence.md).
 - [ ] 2.6 Workstation-Handover slice: authenticate receiving client, deliver/open the actual local agent, start recorded read-only diagnosis and prove offline/reconnect/duplicate-opening behavior.
+- [ ] 2.5d Ticket 03 usability correction: readable workflow/session presentation, named tool and artifact details, complete technical evidence on demand; verify semantic content and desktop/mobile reading paths against controlled and real runs.
 - [ ] 2.7 Human-operation slice: expose GUI and local-agent interventions under common authorization/lease/fencing, retain native session opening and prove explicit current-head human approval.
 
 ## 3. Acceptance and completion

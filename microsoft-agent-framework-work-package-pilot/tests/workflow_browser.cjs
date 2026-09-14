@@ -37,8 +37,29 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
       const headers = {Authorization: 'Bearer ' + token};
       const run = await (await page.request.get(input.baseUrl + '/api/v1/runs/' + runId, {headers})).json();
       const attempt = run.attempts.find(a => a.session);
+      if (input.nativeTools) await page.locator('#session-detail').getByRole('heading', {name: 'Anforderungen analysieren', exact: true}).waitFor();
       await page.locator('[data-attempt-id="' + attempt.attemptId + '"]').click();
+      if (input.nativeTools) {
+        const list = page.locator('#history-list');
+        assert.equal(await list.getByText('Prüfe den Arbeitsstand.', {exact: true}).count(), 1, 'Protocol duplicate appears as a second authored message');
+        await page.getByLabel('Inhalte', {exact: true}).selectOption('tool');
+        const failure = list.locator('article').filter({has: page.getByRole('heading', {name: 'git status --short', exact: true})});
+        await failure.getByText('Fehler · 42 ms', {exact: true}).waitFor();
+        await failure.getByText('Ergebnis und Fehler ansehen', {exact: true}).click();
+        await failure.getByText('Berechtigung fehlt', {exact: true}).waitFor();
+        await failure.getByText('<img src=x onerror="window.untrustedRan=true">', {exact: true}).waitFor();
+        assert.equal(await failure.locator('img').count(), 0);
+        assert.equal(await page.evaluate(() => Boolean(window.untrustedRan)), false);
+      }
+      if (input.readable) {
+        await page.locator('#session-detail').getByRole('heading', {name: 'Anforderungen analysieren', exact: true}).waitFor();
+        await page.locator('#history-list').getByText('Ich prüfe die freigegebenen Anforderungen.', {exact: true}).waitFor();
+        assert.equal(await page.locator('#workflow pre:visible').count(), 0, 'The default view requires decoding JSON');
+        assert.ok(!(await page.locator('#workflow').innerText()).includes(attempt.attemptId), 'Raw identities dominate the default view');
+        await page.locator('#history-list').getByText('Requirements analysis complete.', {exact: true}).waitFor();
+      }
       await page.locator('#session-detail').filter({hasText: attempt.session.sessionId}).waitFor();
+      await page.getByLabel('Inhalte', {exact: true}).selectOption('all');
       if (input.paged) {
         await page.locator('#history-status').filter({hasText: 'History teilweise geladen'}).waitFor();
         assert.equal(await page.locator('#history-list [data-event-id]').count() < 100, true);
@@ -63,8 +84,19 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
         assert.match(text, /REDACTED/);
       }
       for (const event of expected) {
-        const payload = await page.locator('[data-event-id="' + event.eventId + '"] > pre').textContent();
-        assert.deepEqual(JSON.parse(payload), event.payload.data ?? event.payload);
+        const card = page.locator('[data-event-id="' + event.eventId + '"]');
+        if (event.payload.type === 'result' && typeof event.payload.data?.summary === 'string') {
+          assert.equal(await card.locator(':scope > .structured-content > .readable-text').innerText(), event.payload.data.summary);
+          if (event.payload.data.findings.length) {
+            await card.locator('.findings-details > summary').click();
+            assert.deepEqual(await card.locator('.findings-details li').allInnerTexts(), event.payload.data.findings);
+            await card.locator('.findings-details > summary').click();
+          }
+        }
+        await card.locator('.event-raw > summary').click();
+        const payload = await card.locator('.event-raw > pre').textContent();
+        assert.deepEqual(JSON.parse(payload), event);
+        await card.locator('.event-raw > summary').click();
       }
       assert.ok(!text.includes('wpcp-controlled-secret-canary-v1'));
       if (input.artifacts) {
@@ -78,11 +110,21 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
             assert.equal(response.status(), 410);
             continue;
           }
-          await page.waitForFunction(() => { const text = document.getElementById('artifact-content').textContent; try { return !!JSON.parse(text); } catch { return false; } });
+          await page.locator('#artifact-content .artifact-raw > summary').waitFor();
+          if (input.artifacts) {
+            assert.equal(await page.locator('#artifact-content pre:visible').count(), 0, 'Artifact opens as a JSON dump');
+            const original = JSON.parse(await page.locator('#artifact-content .artifact-raw > pre').textContent());
+            if (Array.isArray(original.events)) await page.locator('#artifact-content').getByText('Sessionereignisse · ' + original.events.length, {exact: true}).waitFor();
+          }
+          await page.locator('#artifact-content .artifact-raw > summary').click();
           const bytes = await (await page.request.get(input.baseUrl + '/api/v1/runs/' + runId + '/artifacts/' + artifact.artifactId, {headers})).text();
-          assert.deepEqual(JSON.parse(await page.locator('#artifact-content').textContent()), JSON.parse(bytes));
+          assert.deepEqual(JSON.parse(await page.locator('#artifact-content .artifact-raw > pre').textContent()), JSON.parse(bytes));
+          await page.locator('#artifact-content .artifact-raw > summary').click();
         }
       }
+      await page.locator('#session-detail > details > summary').click();
+      await page.getByLabel('Inhalte', {exact: true}).selectOption('conversation');
+      assert.equal(await page.locator('#history-list .event-raw[open], #session-detail details[open]').count(), 0);
       return {runId, attemptId: attempt.attemptId, sessionId: attempt.session.sessionId, events: actual.length};
     }
     const a = await inspect(first, input.credential);

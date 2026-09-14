@@ -19,6 +19,31 @@ def workflow_browser(payload):
 
 
 class WorkflowBrowserTests(SubmissionExecutionHarness, unittest.TestCase):
+    def test_native_tool_failure_is_readable_and_protocol_duplicates_stay_in_full_history(self):
+        item = {'id': 'recorded-tool-1', 'type': 'mcpToolCall', 'tool': 'execute',
+            'arguments': {'command': ['git', 'status', '--short']}, 'status': 'failed',
+            'error': {'message': 'Berechtigung fehlt'}, 'durationMs': 42,
+            'result': {'content': [{'type': 'text', 'text': '<img src=x onerror="window.untrustedRan=true">'}]}}
+        self.analysis.extra_events = [
+            {'type': 'message', 'data': {'role': 'user', 'text': 'Prüfe den Arbeitsstand.'}},
+            {'type': 'message', 'data': {'runtimeEvent': {'method': 'item/completed', 'params': {
+                'item': {'id': 'user-1', 'type': 'userMessage', 'content': [{'type': 'text', 'text': 'Prüfe den Arbeitsstand.'}]}}}}},
+            {'type': 'message', 'data': {'runtimeEvent': {'method': 'turn/started', 'params': {}}}},
+            {'type': 'tool-result', 'data': {'runtimeEvent': {'method': 'item/completed', 'params': {'item': item}}}},
+        ]
+        self.addCleanup(setattr, self.analysis, 'extra_events', [])
+        self.worker()
+        workflow_browser({'baseUrl': self.base_url, 'credential': self.provider.tokens['actor-authorized'],
+            'observer': self.provider.tokens['actor-observer'], 'sourceUrl': self.issue(707), 'nativeTools': True})
+
+    def test_session_presents_messages_and_findings_without_raw_envelopes(self):
+        self.analysis.extra_events = [{'type': 'message', 'data': {'role': 'assistant',
+            'text': 'Ich prüfe die freigegebenen Anforderungen.'}}]
+        self.addCleanup(setattr, self.analysis, 'extra_events', [])
+        self.worker()
+        workflow_browser({'baseUrl': self.base_url, 'credential': self.provider.tokens['actor-authorized'],
+            'observer': self.provider.tokens['actor-observer'], 'sourceUrl': self.issue(706), 'readable': True})
+
     def test_live_history_reconnects_after_api_restart_and_clears_after_revocation(self):
         self.check_recovery()
 

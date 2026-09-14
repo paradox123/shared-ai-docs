@@ -89,6 +89,13 @@ The graphical Operator Client SHALL list authorized runs and display each run's 
 - **AND** partially loaded history, unavailable metadata/content and redaction remain explicit; each new read and live cycle revalidates access, and revocation clears the displayed evidence without a filter or artifact link bypass
 - **AND** acceptance begins with a real controlled GitHub issue and compares two browser clients with public history/artifact responses; nested PRD navigation and workstation ingestion remain later tickets
 
+#### Scenario: Understand the observed work without decoding protocol data (Ticket 03)
+- **WHEN** a human opens a started run or selects an activity attempt
+- **THEN** the default view shows named workflow steps with observed state and timing, the selected agent's readable assignment/conversation, tool operations, outcome and findings without requiring the human to decode JSON objects, arrays or technical identities
+- **AND** tool details expose recorded parameters, results, duration and errors; artifacts have meaningful names and readable content where supported, with missing or redacted evidence explicitly identified
+- **AND** transport/lifecycle notices and repeated representations of the same recorded message do not overwhelm the default conversation; every canonical event and its complete original payload remain discoverable through the full event view and collapsed technical details
+- **AND** the readable presentation preserves recorded content and attribution, does not invent progress or infer missing results, and remains usable on desktop and mobile after replay or reconnect
+
 ### Requirement: Complete graphical human operation
 The first release SHALL provide graphical actions for intervention answers, Resume, Fork, Fresh Retry, Cancel, targeted queue/interrupt, control claim/release, voluntary transfer, Forced Takeover, targeted Open in Codex, and qualified-head human approval according to the existing product contracts. Ordinary Operator actions SHALL NOT require manual CLI commands. Mutations SHALL enforce current repository authorization, the run-wide Control Lease and stale-state fencing and SHALL remain in the same canonical Run History.
 

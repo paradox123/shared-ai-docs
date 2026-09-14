@@ -44,6 +44,8 @@ const send = data => process.stdout.write(JSON.stringify(data) + '\n');
     await page.locator('#workflow-state').filter({hasText: 'Analyse abgeschlossen'}).waitFor();
     if (input.catchup) assert.ok(refreshFailed, 'The completed projection refresh was not faulted');
     const headers = {Authorization: 'Bearer ' + input.credential};
+    await page.getByRole('button', {name: 'Gesamten Run zeigen', exact: true}).click();
+    await page.getByLabel('Inhalte', {exact: true}).selectOption('all');
     const expected = await (await page.request.get(input.baseUrl + '/api/v1/runs/' + runId + '/events?limit=1000', {headers})).json();
     const ids = await page.locator('#history-list [data-event-id]').evaluateAll(nodes => nodes.map(n => n.dataset.eventId));
     assert.deepEqual(ids, expected.events.map(e => e.eventId));

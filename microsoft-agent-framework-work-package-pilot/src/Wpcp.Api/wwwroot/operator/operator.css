@@ -612,12 +612,15 @@ summary {
   }
 }
 
-.workflow { margin:0 40px 32px; padding:28px; min-width:0; }
+.workflow { margin:28px 0 32px; padding:0; min-width:0; overflow:hidden; }
+.workflow > .section-header { background:#fafcf8; padding:24px; }
+.workflow-intro { padding:0 24px; }
 .workflow-intro,.history-note { color:var(--muted); font-size:12px; margin:12px 0; }
-#run-list { display:flex; gap:8px; flex-wrap:wrap; margin:20px 0; }
+#run-list { display:flex; gap:8px; flex-wrap:wrap; margin:16px 24px 24px; }
+#run-list button { white-space:normal; text-align:left; }
 #run-list [aria-current="true"] { border-color:var(--green); background:#eaf1e6; }
-.workflow-layout { display:grid; grid-template-columns:minmax(220px,1fr) minmax(0,2fr); border-top:1px solid var(--line); }
-.workflow-map { padding:24px 24px 24px 0; border-right:1px solid var(--line); background-image:radial-gradient(#dce4da 1px,transparent 1px); background-size:14px 14px; }
+.workflow-layout { display:grid; grid-template-columns:280px minmax(0,1fr); border-top:1px solid var(--line); }
+.workflow-map { padding:24px; border-right:1px solid var(--line); background-color:#f8faf5; background-image:radial-gradient(#dce4da 1px,transparent 1px); background-size:18px 18px; }
 #workflow-graph { margin-top:20px; }
 .activity-node { position:relative; margin:0 0 24px; padding:18px; border:1px solid #b9cbbc; border-radius:8px; background:var(--paper); }
 .activity-node:not(:last-child)::after { content:""; position:absolute; height:25px; width:1px; background:#89a78f; bottom:-25px; left:28px; }
@@ -625,21 +628,47 @@ summary {
 .attempt-node { display:grid; gap:8px; width:100%; margin-top:16px; padding:12px; background:var(--wash); color:var(--ink); text-align:left; border:1px solid var(--line); border-left:3px solid #89a78f; border-radius:4px; }
 .attempt-node[aria-pressed="true"] { background:#eaf1e6; border-color:var(--green); }
 .attempt-node code,.attempt-node span { font-size:10px; overflow-wrap:anywhere; }
-.session-inspector { padding:24px 0 0 28px; min-width:0; }
+.session-inspector { padding:28px; min-width:0; }
 .session-inspector pre { white-space:pre-wrap; overflow-wrap:anywhere; font:11px/1.65 "SFMono-Regular",Consolas,monospace; margin:10px 0; max-height:400px; overflow:auto; }
 .session-inspector details { margin-top:12px; font-size:12px; }
 #session-detail>p { font-size:12px; overflow-wrap:anywhere; margin-top:8px; }
 .history-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin:24px 0 12px; font-size:12px; }
 .history-toolbar select { font:inherit; padding:8px; border:1px solid var(--line); border-radius:4px; color:var(--ink); background:var(--paper); max-width:100%; }
 #history-status { font-size:12px; color:var(--green); }
-.history-entry { border-top:1px solid var(--line); padding:16px 0; }
+.history-entry { border:1px solid var(--line); border-radius:6px; padding:16px 18px; margin-top:12px; background:var(--paper); }
 .history-entry h4 { margin:0 0 6px; font-size:13px; }
 .history-entry time,.history-entry small { color:var(--muted); font-size:10px; }
 .redaction-note { color:#875d22; font-size:11px; }
 #artifact-panel { border-top:1px solid var(--line); margin-top:24px; padding-top:20px; }
-@media (max-width:1050px) { .workflow-layout { grid-template-columns:1fr; } .workflow-map { border-right:0; padding-right:0; } #workflow-graph { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:20px; } .activity-node:not(:last-child)::after { display:none; } .session-inspector { padding-left:0; } }
-@media (max-width:600px) { .workflow { margin:0 20px 24px; padding:20px; } }
+@media (max-width:1050px) { .workflow-layout { grid-template-columns:1fr; } .workflow-map { border-right:0; border-bottom:1px solid var(--line); } #workflow-graph { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:16px; } .activity-node:not(:last-child)::after { display:none; } }
+@media (max-width:600px) { .workflow { margin:24px 0; } .session-inspector,.workflow-map { padding:20px; } .history-entry { padding:14px; } }
 .artifact-row { border-bottom:1px solid var(--line); padding:14px 0; }
 .artifact-row code { font-size:10px; overflow-wrap:anywhere; }
 .artifact-row p { font-size:11px; color:var(--muted); margin:6px 0; }
 #artifact-content { background:var(--wash); padding:14px; border:1px solid var(--line); }
+.event-heading { display:flex; gap:12px; align-items:baseline; justify-content:space-between; }
+.event-heading time { white-space:nowrap; }
+.event-result { border-left:3px solid var(--green); background:#f4f8ef; }
+.event-message { border-left:3px solid #8aa58f; }
+.event-tool { background:#fafbf8; }
+.event-tool[data-state=failed],.event-error { border-left:3px solid #a35b32; background:#fff6ee; }
+.attempt-node[data-state=failed],#workflow-state[data-state=process-failure] { border-color:#d2a486; background:#fff0e6; color:#8b4224; }
+.tool-status { color:var(--muted); font-size:11px; }
+.readable-text,.structured-content { font-size:13px; line-height:1.8; overflow-wrap:anywhere; }
+.readable-text p + p { margin-top:9px; }
+.readable-text h5,.structured-content h4,.structured-content h5 { font-size:13px; margin:14px 0 6px; }
+.readable-list,.readable-text ul { padding-left:20px; margin:8px 0; }
+.readable-list li + li { margin-top:10px; }
+.readable-fields { margin:12px 0; }
+.readable-fields dt { font-size:11px; margin-top:12px; }
+.readable-fields dd { font-size:12px; }
+.readable-fields .readable-list { padding-left:18px; }
+.session-inspector .technical-details { color:var(--muted); font-size:10px; }
+.technical-details > summary { padding:3px 0; }
+.technical-details[open] { margin-bottom:8px; }
+.tool-details > summary,.assignment-details > summary,.findings-details > summary { color:var(--green); font-weight:600; }
+.session-inspector .section-number { margin-bottom:7px; }
+#session-detail h3 { font-size:23px; letter-spacing:-.5px; }
+.history-entry .readable-text { margin-top:8px; }
+.history-note { font-size:11px; }
+.artifact-row strong { font-size:13px; overflow-wrap:anywhere; }

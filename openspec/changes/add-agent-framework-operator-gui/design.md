@@ -111,6 +111,19 @@ Prove automatic agent opening on the receiving machine from a server-triggered H
 
 ### Ticket 03 implementation boundary
 
+The user's 2026-09-14 review rejected JSON objects and arrays as the primary
+Operator presentation. The purpose is to understand progress, the agent's work,
+results and failure causes (pilot US 27–31). Present a named activity map beside
+a readable session transcript, compact tool disclosures, findings and named
+artifacts. Suppress protocol-only notices and exact duplicate message renderings
+in the default transcript; keep all canonical events in an explicit full-event
+view and complete original payloads in closed technical disclosures. Render
+recorded text safely, interpret only known content shapes, and label unavailable
+fields rather than fabricating actor, timing or success. This corrects Ticket 03
+inside its existing branch/change; review baseline for this correction is
+`8f944c7`. Readable DOM assertions against the production browser/public API are
+the test seam, followed by an actual GitHub/Codex run and visual inspection.
+
 Work starts from Git root `shared-ai-docs`, `main` at `dded7d4`. Following the
 isolated Ticket 01/02 delivery workflow, the intended work branch is
 `codex/operator-gui-issue-03` in sibling worktree `shared-ai-docs-operator-issue-03`.

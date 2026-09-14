@@ -1,3 +1,4 @@
+import {element, disclosure, rawDetails, duration, readable, describe, conversation, eventCard} from './session-content.js';
 const $ = id => document.getElementById(id);
 const labels = {
   admission: 'Aufnahme', 'submission-analysis': 'Anforderungen analysieren',
@@ -8,22 +9,11 @@ const labels = {
   artifact: 'Artefakt', 'process-exit': 'Prozessende',
 };
 const label = value => labels[value] || value;
-const json = value => JSON.stringify(value, null, 2);
-function element(tag, text, className) {
-  const node = document.createElement(tag);
-  if (text !== undefined) node.textContent = text;
-  if (className) node.className = className;
-  return node;
-}
-function details(title, value) {
-  const node = element('details');
-  node.append(element('summary', title), element('pre', json(value)));
-  return node;
-}
 
 export async function showWorkflow(submission, signal, api, reportError, selectRun) {
   const read = (suffix, format = 'json') => api('/' + submission.runId + suffix, signal, null, '/api/v1/runs', format);
   let run, selected = null, cursor = 0, highWater = 0, hasMore = false, streaming = false;
+  let selectionChosen = false;
   let timer, refreshTimer, artifacts = [], artifactGeneration = 0;
   let projectionPending = false, projectionRefreshing = false;
   const events = new Map();
@@ -43,19 +33,22 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
 
   function renderGraph() {
     $('workflow-state').textContent = label(run.state);
+    $('workflow-state').dataset.state = run.state;
     const graph = $('workflow-graph');
     graph.replaceChildren();
     for (const activity of run.activities) {
       const group = element('section', undefined, 'activity-node');
       group.dataset.activityId = activity.activityId;
-      group.append(element('h3', label(activity.activityType)), element('span', label(activity.state), 'badge'));
+      const badge = element('span', label(activity.state), 'badge'); badge.dataset.state = activity.state;
+      group.append(element('h3', label(activity.activityType)), badge);
       for (const attempt of run.attempts.filter(a => a.activityId === activity.activityId)) {
         const node = element('button', undefined, 'attempt-node');
         node.dataset.attemptId = attempt.attemptId;
         node.setAttribute('aria-pressed', String(selected === attempt.attemptId));
         node.append(element('strong', 'Versuch ' + attempt.attemptNumber + ' · ' + label(attempt.state)),
-          element('code', attempt.attemptId), element('span', attempt.session?.sessionId
-            ? 'Session · ' + attempt.session.sessionId : 'Keine bestätigte Agentensession'));
+          element('span', (attempt.session ? 'Agentensession' : 'Ohne Agentensession')
+            + (duration(attempt.startedAt, attempt.completedAt) ? ' · ' + duration(attempt.startedAt, attempt.completedAt) : '')));
+        node.dataset.state = attempt.state;
         node.addEventListener('click', () => select(attempt.attemptId));
         group.append(node);
       }
@@ -64,14 +57,24 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
   }
   function renderSelection() {
     const target = run.attempts.find(a => a.attemptId === selected);
+    const activity = run.activities.find(a => a.activityId === target?.activityId);
     const content = $('session-detail'); content.replaceChildren();
-    content.append(element('h3', target ? 'Versuch ' + target.attemptNumber + ' · ' + label(target.state) : 'Gemeinsame Run History'));
-    content.append(element('p', target?.session?.sessionId ? 'Session · ' + target.session.sessionId
-      : target ? 'Keine bestätigte Agentensession für diesen Versuch.' : 'Alle Aktivitäten und Sessions dieses Runs.'));
-    content.append(details(target ? 'Versuch, Session und Herkunft' : 'Run und Herkunft', target || {
+    content.append(element('span', target ? 'AUSGEWÄHLTER SCHRITT' : 'GESAMTER RUN', 'section-number'),
+      element('h3', activity ? label(activity.activityType) : 'Gemeinsamer Verlauf'));
+    content.append(element('p', target ? 'Versuch ' + target.attemptNumber + ' · ' + label(target.state)
+      + (duration(target.startedAt, target.completedAt) ? ' · ' + duration(target.startedAt, target.completedAt) : '')
+      : 'Alle Aktivitäten und Sessions dieses Runs.'));
+    const actor = element('p', undefined, 'session-actor'); actor.id = 'session-actor'; content.append(actor);
+    const metadata = element('dl', undefined, 'readable-fields');
+    const fields = target ? {'Session': target.session?.sessionId || 'Keine bestätigte Agentensession',
+      'Versuch': target.attemptId, 'Gestartet': target.startedAt ? new Date(target.startedAt).toLocaleString('de-DE') : 'Nicht aufgezeichnet'} : {'Run': run.runId};
+    for (const [key, value] of Object.entries(fields)) metadata.append(element('dt', key), element('dd', value));
+    metadata.append(rawDetails('Originaldaten', target || {
       runId: run.runId, correlation: run.correlation, provenance: run.provenance, executionEvidence: run.executionEvidence}));
+    content.append(disclosure('Session und Herkunft', metadata, 'technical-details'));
   }
   function select(id) {
+    selectionChosen = true;
     selected = id;
     $('artifact-content').hidden = true;
     $('artifact-content').replaceChildren();
@@ -84,8 +87,17 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
   function renderHistory() {
     const filter = $('history-filter').value;
     const list = $('history-list');
-    const relevant = selectedEvents().filter(event => filter === 'all' ||
-      (filter === 'tool' ? event.payload.type?.startsWith('tool-') : event.payload.type === filter));
+    const descriptions = selectedEvents().map(describe);
+    const provenance = descriptions.find(d => d.data.assignment && (d.data.actor || d.data.host))?.data;
+    if ($('session-actor')) $('session-actor').textContent = provenance
+      ? [provenance.actor?.provider === 'codex' ? 'Codex' : provenance.actor?.provider, provenance.host].filter(Boolean).join(' · ')
+      : '';
+    const readableEvents = conversation(descriptions);
+    const relevant = (filter === 'all' ? descriptions : readableEvents.filter(d => filter === 'conversation' ||
+      (filter === 'message' ? ['message', 'assignment'].includes(d.kind) : d.kind === filter))).map(d => d.event);
+    $('history-note').textContent = filter === 'all'
+      ? 'Alle gespeicherten Ereignisse. Technische Details lassen sich einzeln öffnen.'
+      : 'Aufträge, Nachrichten und Werkzeuge in zeitlicher Folge. Protokollmeldungen findest du unter „Alle Ereignisse“.';
     // Retain existing nodes (and their expanded detail) while appending live events.
     const visible = new Set(relevant.map(event => event.eventId));
     for (const node of [...list.children]) if (!visible.has(node.dataset.eventId)) node.remove();
@@ -97,19 +109,18 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
         index++;
         continue;
       }
-      const entry = element('article', undefined, 'history-entry');
-      entry.dataset.eventId = event.eventId; entry.dataset.position = event.position;
-      entry.append(element('h4', `${event.position} · ${label(event.payload.type || event.eventType)}`),
-        element('time', new Date(event.occurredAt).toLocaleString('de-DE')));
-      if (event.redaction.occurred) entry.append(element('p', 'Inhalt redigiert · ' + event.redaction.policyVersion, 'redaction-note'));
-      entry.append(element('pre', json(event.payload.data ?? event.payload)));
-      if (event.payload.type?.startsWith('tool-')) entry.append(element('small',
-        'Nur erfasste Parameter, Ergebnisse, Dauer und Fehler sind enthalten; fehlende Felder wurden nicht aufgezeichnet.'));
-      entry.append(details('Identität, Sessionreihenfolge und Herkunft', event));
+      const entry = eventCard(describe(event), openArtifact);
       list.insertBefore(entry, list.children[index] || null);
       index++;
     }
-    if (!relevant.length) list.append(element('p', 'Keine passenden Ereignisse in den bisher geladenen Seiten.', 'history-empty'));
+    if (!relevant.length) list.append(element('p', 'Noch keine passenden Inhalte geladen.', 'history-empty'));
+  }
+  function artifactName(artifact) {
+    const record = [...events.values()].find(e => e.payload.data?.artifact?.artifactId === artifact.artifactId);
+    if (record?.payload.data?.name) return record.payload.data.name;
+    if ([...events.values()].some(e => e.payload.type === 'result' && e.payload.data?.artifactId === artifact.artifactId)) return 'Analyseergebnis';
+    return ([...events.values()].some(e => e.eventType === 'AgentAdapterResponseObserved'
+      && e.payload.body?.artifactId === artifact.artifactId) ? 'Gespeicherte Agentenantwort' : 'Gespeicherte Datei');
   }
   function artifactIds(value, ids = new Set()) {
     if (!value || typeof value !== 'object') return ids;
@@ -125,8 +136,8 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
       const row = element('div', undefined, 'artifact-row'); row.dataset.artifactId = artifact.artifactId;
       const button = element('button', 'Inhalt öffnen', 'quiet');
       button.onclick = () => openArtifact(artifact);
-      row.append(element('code', artifact.artifactId),
-        element('p', `${artifact.mediaType} · ${artifact.sizeBytes} Bytes · ${artifact.availability}`));
+      row.append(element('strong', artifactName(artifact)),
+        element('p', `${artifact.mediaType} · ${new Intl.NumberFormat('de-DE', {maximumFractionDigits: 1}).format(artifact.sizeBytes / 1024)} KB`));
       if (artifact.redaction.occurred) row.append(element('p', 'Inhalt redigiert · ' + artifact.redaction.policyVersion, 'redaction-note'));
       if (artifact.availability !== 'available') row.append(element('p', 'Inhalt nicht verfügbar · ' + (artifact.reason || artifact.availability)));
       row.append(button); list.append(row);
@@ -146,7 +157,8 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
       const text = artifact.mediaType === 'application/octet-stream'
         ? 'Binärinhalt (Hexadezimal):\n' + Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join(' ')
         : new TextDecoder().decode(bytes);
-      content.textContent = artifact.mediaType === 'application/json' ? json(JSON.parse(text)) : text;
+      content.replaceChildren(element('h4', artifactName(artifact)), readable(artifact.mediaType === 'application/json' ? JSON.parse(text) : text),
+        rawDetails('Originalinhalt', artifact.mediaType === 'application/json' ? JSON.parse(text) : text, 'technical-details artifact-raw'));
       content.focus();
     } catch (error) {
       if (!active() || generation !== artifactGeneration) return;
@@ -156,7 +168,7 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
     }
   }
   function status(text) {
-    $('history-status').textContent = `${text}${projectionPending ? ' · Workflowstand wird abgeglichen' : ''} · ${cursor} von mindestens ${highWater} Positionen geladen`;
+    $('history-status').textContent = `${text}${projectionPending ? ' · Workflowstand wird abgeglichen' : ''} · ${cursor} von ${highWater} gespeicherten Ereignissen geladen`;
     $('history-more').hidden = !hasMore;
   }
   function accept(entry) {
@@ -174,6 +186,7 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
     signal.throwIfAborted();
     const changed = !run || run.lastPosition !== current.lastPosition;
     run = current; artifacts = manifest.artifacts;
+    if (!selectionChosen) selected = run.attempts.findLast(a => a.session)?.attemptId || run.attempts.at(-1)?.attemptId || null;
     if (changed) { renderGraph(); renderSelection(); }
     renderArtifacts();
   }
@@ -250,7 +263,7 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
       if (reader) await reader.cancel().catch(() => {});
     }
   }
-  $('history-filter').value = 'all';
+  $('history-filter').value = 'conversation';
   $('history-filter').onchange = renderHistory;
   $('history-more').onclick = more;
   $('all-history').onclick = () => select(null);
