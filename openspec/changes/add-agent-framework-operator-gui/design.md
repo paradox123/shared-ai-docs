@@ -86,24 +86,7 @@ No material product decision remains unresolved. Accepted: full additive GUI, bo
 
 ### Ticket 02 implementation boundary
 
-Continue the matching parent change for GUI Ticket 02 only. Owning Git root:
-`shared-ai-docs`; starting point `a77418a` on `main` after accepted Ticket 01.
-The delivery branch is `codex/operator-gui-issue-02`, following the isolated feature
-branch workflow of Ticket 01. Existing untracked research and three-identity work
-remain untouched. Review compares this delivery against `a77418a`.
-
-The first real step analyzes the immutable admitted GitHub issue requirements in
-a service-owned read-only agent workspace. Its result describes scope, acceptance
-criteria and potential blockers; it is not implementation or head qualification.
-The complete implementation/evidence/review/repair chain remains Ticket 09, local
-file intake remains Ticket 11, and detailed graph/history rendering remains
-Ticket 03. Reuse the Agent Framework worker and central AgentSessionAdapter/v1
-observation boundary with a distinct analysis result contract, leaving the
-existing worker-result-v3 implementation contract unchanged. Store start and
-dispatch atomically in PostgreSQL and run polling in a separate service process.
-Runtime prerequisites are checked by the configured authenticated adapter; client
-credentials never become worker credentials. Public run/history/dossier read
-contracts remain shared with the CLI.
+Ticket 02 was accepted by the user on 2026-09-14. Its completed design, first-step contract and evidence are archived in [add-agent-framework-background-start](../archive/2026-09-14-add-agent-framework-background-start/design.md). The remaining workflow and distributed acceptance stay in this parent change.
 
 Before the deferred distributed acceptance, the user requested deployment to Azure
 using their existing credit account on 2026-09-14. Deploy the accepted Ticket 01

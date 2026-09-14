@@ -4,8 +4,8 @@ Baseline: `a77418a82e7746918853f339ae566c5ac0090735`, the accepted Ticket 01
 checkout. Initial implementation: `2cb7451`; corrections: `565d326`.
 Both reviewers independently inspected `git diff a77418a...565d326` without
 editing files or duplicating the full regression. Scope is the supplied
-[Ticket 02](../../../.scratch/agent-framework-operator-gui/issues/02-eingereichtes-issue-als-hintergrundaktivitaet-starten.md)
-and its explicit scenarios in the active OpenSpec change. Later ticket features
+[Ticket 02](../../../../.scratch/agent-framework-operator-gui/issues/02-eingereichtes-issue-als-hintergrundaktivitaet-starten.md)
+and its explicit scenarios, now retained in this archived OpenSpec change. Later ticket features
 are excluded.
 
 ## Standards

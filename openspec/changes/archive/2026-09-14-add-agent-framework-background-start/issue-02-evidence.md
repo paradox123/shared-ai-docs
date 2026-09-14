@@ -73,8 +73,35 @@ publication probes. The dossier regression retained/restored 10,015 events,
 verified matching checksums, and found zero raw canary matches across 35 surfaces.
 
 Ticket 02 is implemented and locally verified; its tracker entry is resolved and
-OpenSpec tasks 2.4a–c are complete. This is not a claim of user acceptance of a
-qualified implementation head, a merge to `main`, or completion of the parent change.
+OpenSpec tasks 2.4a–c are complete. On 2026-09-14 the user accepted this slice and
+authorized its archive, commit, push and merge to `main`. This acceptance concerns
+the first background analysis; the parent change remains open for Tickets 03–16.
+
+## Accepted proof and archive closeout
+
+Immediately before acceptance, the five-case proof was repeated successfully in
+92.541 seconds ([protocol](evidence/issue-02/acceptance-proof.log)). The real GitHub
+input produced run `2763c4a0-ccd0-44ad-bbaf-95b75208dd7c` and actual Codex session
+`01a09fcb-e025-7181-a8fb-38097fe5e697` with browser/API/launcher closed and all
+result artifacts available. The new browser read the same run; the controlled
+adapter outage likewise remained inspectable after restart. Concurrent starts
+and both uncertain-delivery cases passed with a controlled external adapter.
+
+- [Fresh actual run/history/artifact readback](evidence/issue-02/acceptance-live.json)
+- [Fresh actual GUI success](evidence/issue-02/acceptance-success.png)
+- [Fresh failure readback](evidence/issue-02/acceptance-failure.json) and [GUI](evidence/issue-02/acceptance-failure.png)
+
+The closeout DRY/SOLID/KISS pass rechecked the reviewed workflow, dispatch/storage
+and nearby result logic. The existing shared mode mapping and history boundary
+remain sufficient; no runtime code changed. The accepted scenarios and evidence
+are extracted into `add-agent-framework-background-start` and synced with the
+standard OpenSpec archive path. Remaining GUI tasks retain their original scope.
+All 11 focused public HTTP/browser checks passed again after that pass in 35.453
+seconds ([closeout-regression.log](evidence/issue-02/closeout-regression.log)).
+Archive schema: `spec-driven`; standard CLI archive updated the canonical spec.
+All eight slice tasks are complete, without an incomplete-task exception.
+Repository-wide post-archive validation passed all 52 items; moved document links
+and whitespace checks passed.
 
 ## Review and limits
 

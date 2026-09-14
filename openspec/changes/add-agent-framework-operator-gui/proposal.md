@@ -1,4 +1,4 @@
-Accepted Ticket 01 is extracted into [add-agent-framework-github-intake](../archive/2026-09-14-add-agent-framework-github-intake/proposal.md) and archived. This parent remains active for Tickets 02–16; unchecked tasks retain their original scope.
+Accepted Ticket 01 is extracted into [add-agent-framework-github-intake](../archive/2026-09-14-add-agent-framework-github-intake/proposal.md) and archived. Accepted Ticket 02 is extracted into [add-agent-framework-background-start](../archive/2026-09-14-add-agent-framework-background-start/proposal.md). This parent remains active for Tickets 03–16; unchecked tasks retain their original scope.
 
 ## Why
 

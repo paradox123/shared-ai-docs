@@ -1,6 +1,6 @@
 # Agent Framework Operator GUI
 
-Die vom Nutzer bestätigte Aufteilung ist als 16 einzelne lokale Tickets veröffentlicht. Ticket 01 ist einschließlich echter GitHub-Aufnahme lokal abgenommen und `resolved`. Ticket 02 ist implementiert, mit echter Hintergrundanalyse lokal verifiziert und `resolved`; siehe [Nachweis](../../openspec/changes/add-agent-framework-operator-gui/issue-02-evidence.md). Der weiterhin offene Mehrrechnertest gehört zu Ticket 16. Die übrigen Tickets sind `ready-for-agent`; ausführbar ist jeweils nur ein Ticket, dessen Blocker abgeschlossen sind.
+Die vom Nutzer bestätigte Aufteilung ist als 16 einzelne lokale Tickets veröffentlicht. Ticket 01 ist einschließlich echter GitHub-Aufnahme lokal abgenommen und `resolved`. Ticket 02 ist nach erneutem Live-Nachweis vom Nutzer lokal abgenommen, archiviert und `resolved`; siehe [Nachweis](../../openspec/changes/archive/2026-09-14-add-agent-framework-background-start/issue-02-evidence.md). Der weiterhin offene Mehrrechnertest gehört zu Ticket 16. Die übrigen Tickets sind `ready-for-agent`; ausführbar ist jeweils nur ein Ticket, dessen Blocker abgeschlossen sind.
 
 Die ersten drei Tickets liefern nacheinander Einreichung, ersten Hintergrundstart und Run-Beobachtung. Danach wird der lokale Handover-Pfad früh real geprüft. Server-/Client-Betrieb, vollständige zentrale Historie und die bisherigen Pilot-Zugangswege bleiben verbindlich.
 

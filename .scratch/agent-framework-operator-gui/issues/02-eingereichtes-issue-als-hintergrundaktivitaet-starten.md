@@ -41,9 +41,21 @@ Finale Gesamtregression: **218 Tests, 194 bestanden, 24 optionale Tests
 aktiviert und bestanden. Standards-Review: **0 offene Findings**; Spec-Review:
 **0 offene Findings**. Strikte OpenSpec-Validierung und Build sind grün.
 
-Die [Abnahmeübersicht mit Belegen](../../../openspec/changes/add-agent-framework-operator-gui/issue-02-evidence.md)
+Die [Abnahmeübersicht mit Belegen](../../../openspec/changes/archive/2026-09-14-add-agent-framework-background-start/issue-02-evidence.md)
 ordnet jedem Kriterium erwartetes Verhalten, beobachtetes Ergebnis und Nachweis zu;
-das [Review](../../../openspec/changes/add-agent-framework-operator-gui/issue-02-review.md)
+das [Review](../../../openspec/changes/archive/2026-09-14-add-agent-framework-background-start/issue-02-review.md)
 dokumentiert auch die behobenen Befunde. Status `resolved` bezeichnet die
 implementierte und lokal verifizierte Ticketscheibe. Azure bleibt auf Ticket 01;
 die verteilte Gesamtabnahme bleibt in Ticket 16 offen.
+
+### 2026-09-14 — Nutzerabnahme und Abschluss
+
+Der Nutzer akzeptiert Ticket 02 nach dem erneut ausgeführten direkten Nachweis:
+5/5 Tests bestanden, einschließlich echter GitHub-/Codex-Hintergrundanalyse,
+lesbarem kontrolliertem Ausfall, parallelen Starts und Wiederaufnahme nach Timeout
+beziehungsweise Worker-Abbruch. Er beauftragt Archivierung, Commit, Push und Merge
+nach `main` sowie Bereinigung des erledigten Arbeitszweigs.
+
+Der akzeptierte Umfang wird als
+[add-agent-framework-background-start](../../../openspec/changes/archive/2026-09-14-add-agent-framework-background-start/proposal.md)
+archiviert. Der GUI-Sammelchange bleibt für die offenen Tickets 03–16 aktiv.

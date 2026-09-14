@@ -1,0 +1,10 @@
+test_gui_background_analysis_and_artifact_survive_closed_browser_and_api (tests.test_submission_execution_live.LiveSubmissionExecutionTests.test_gui_background_analysis_and_artifact_survive_closed_browser_and_api) ... ok
+test_gui_recovers_controlled_adapter_failure_after_browser_is_closed (tests.test_submission_execution_live.LiveSubmissionFailureTests.test_gui_recovers_controlled_adapter_failure_after_browser_is_closed) ... ok
+test_saved_issue_starts_once_and_retains_durable_run_after_restart (tests.test_submission_execution.SubmissionExecutionTests.test_saved_issue_starts_once_and_retains_durable_run_after_restart) ... ok
+test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt (tests.test_submission_execution.SubmissionExecutionTests.test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt) ... ok
+test_disconnected_adapter_after_worker_crash_preserves_uncertainty_until_receipt_returns (tests.test_submission_execution.SubmissionExecutionTests.test_disconnected_adapter_after_worker_crash_preserves_uncertainty_until_receipt_returns) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 92.541s
+
+OK
