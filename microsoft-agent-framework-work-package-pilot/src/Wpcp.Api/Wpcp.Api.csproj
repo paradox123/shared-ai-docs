@@ -4,6 +4,7 @@
     <RootNamespace>Wpcp.Api</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Content Update="wwwroot/**" CopyToOutputDirectory="PreserveNewest" />
     <ProjectReference Include="../Wpcp.Domain/Wpcp.Domain.csproj" />
     <ProjectReference Include="../Wpcp.Storage.Postgres/Wpcp.Storage.Postgres.csproj" />
   </ItemGroup>

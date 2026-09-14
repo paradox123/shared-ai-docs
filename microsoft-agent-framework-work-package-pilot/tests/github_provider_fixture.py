@@ -19,6 +19,7 @@ class GitHubProviderFixture:
         self.identities['same-human-other-client'] = self.identities['actor-authorized']
         self.failure = None
         self.repository_id = 9001
+        self.issues = {}
         fixture = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -36,6 +37,10 @@ class GitHubProviderFixture:
                 elif self.path == '/repos/pilot/fixture' and identity['read']:
                     status, payload = 200, {'id': fixture.repository_id, 'permissions': {
                         'pull': identity['read'], 'push': identity['push']}}
+                elif self.path.startswith('/repos/pilot/fixture/issues/') and identity['read']:
+                    issue = fixture.issues.get(self.path.rsplit('/', 1)[-1])
+                    if issue is not None:
+                        status, payload = 200, issue
                 elif self.path.startswith('/repos/pilot/fixture/collaborators/') and self.path.endswith('/permission'):
                     target = fixture.identities.get(self.path.split('/')[-2])
                     if target:

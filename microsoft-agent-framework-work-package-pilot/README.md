@@ -48,7 +48,8 @@ on completion.
 
 ## Repository authorization and exclusive control (Ticket 03)
 
-The API remains a loopback-only pilot with synthetic **issues**. Authorization
+The legacy `--fixture` API mode remains loopback-only with synthetic **issues**.
+Live submission intake uses the separate mode in [SUBMISSIONS.md](SUBMISSIONS.md). Authorization
 now uses the caller's GitHub credential on every request; fixture actor IDs and
 local membership lists no longer grant access. `IRepositoryAuthorization` is the
 provider-neutral boundary. GitHub `/user` supplies the immutable human ID and
@@ -114,7 +115,8 @@ using a human's own credential.
 Run the full isolated regression suite:
 
 ```bash
-python3 -m unittest discover -s tests -v
+uv run --python 3.14 --with-requirements codex-requirements.txt \
+  python -m unittest discover -s tests -v
 ```
 
 The proof uses separate API, CLI and worker processes, real disposable PostgreSQL,
@@ -807,3 +809,9 @@ See the [acceptance overview](../openspec/changes/archive/2026-09-13-prove-real-
 
 See [PUBLICATION.md](PUBLICATION.md) for the trusted executable plan, readiness
 gates, native continuation, publication/reconciliation command and verification.
+
+## Operator GUI: GitHub submission intake
+
+[SUBMISSIONS.md](SUBMISSIONS.md) documents the live GitHub intake, deployment
+configuration, GUI and authenticated public submission reads. GUI Ticket 01
+stores an immutable admitted snapshot without starting an agent run.

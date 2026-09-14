@@ -1,0 +1,39 @@
+{
+  "snapshot": {
+    "submissionId": "7d14b477-9d93-425c-9415-aa070fbf04c9",
+    "state": "admitted",
+    "runId": null,
+    "title": "Extract project facts with source provenance",
+    "body": "## What to build\n\nTurn a captured source into an inspectable project-fact set while preserving uncertainty and provenance. AI or deterministic extraction may propose facts but cannot turn interpretation into confirmed truth.\n\n## Acceptance criteria\n\n- [ ] Extraction covers role and seniority; intermediary, possible end client, and contact; project identifier; start, duration, and deadline; utilization, rate or budget; remote share, on-site location and frequency; contract type, language and time-zone constraints; tasks, must-haves, nice-to-haves, certifications and security requirements; and intended submission channel.\n- [ ] Each extracted fact is marked `explicit`, `inferred`, `missing`, or `contradictory`.\n- [ ] Every non-missing fact links to the source passage or source element that supports it.\n- [ ] Derived facts remain separate from the immutable source.\n- [ ] Provider-specific extraction sits behind an adapter and records enough metadata to trace the result to its source version.\n- [ ] Tests expose explicit, inferred, missing, and contradictory examples through the public workflow.\n\n## Blocked by\n\n- #2 \u2014 Capture one GULP project email as a persistent Akquisevorgang\n\n## PRD coverage\n\nUser stories 9-18 and 70; extraction and provenance testing decisions.",
+    "source": {
+      "provider": "github",
+      "providerIssueId": 5189035892,
+      "issueNumber": 4,
+      "url": "https://github.com/paradox123/probare-crm/issues/4",
+      "updatedAt": "2026-08-19T04:50:28+00:00"
+    },
+    "repository": {
+      "repositoryId": "github-1332818325",
+      "fullName": "paradox123/probare-crm",
+      "providerRepositoryId": 1332818325
+    },
+    "submittedBy": {
+      "kind": "human",
+      "provider": "github",
+      "subjectId": "11044764"
+    },
+    "admittedAt": "2026-09-14T09:16:57.260194+00:00",
+    "contentSha256": "95a4197d29e599b748b85dc10bc2623c041d0366120c5da8739d4535f43e620f",
+    "redaction": {
+      "occurred": false,
+      "policyVersion": "controlled-canary-v1",
+      "marker": "[REDACTED:CONTROLLED-CANARY]"
+    }
+  },
+  "browserErrors": [],
+  "mobileOverflow": false,
+  "newBrowserAndRestartReadbackIdentical": true,
+  "topology": "Separate processes on one macOS host; not a separate-machine acceptance proof",
+  "sourceProvider": "https://api.github.com",
+  "providerWrites": false
+}

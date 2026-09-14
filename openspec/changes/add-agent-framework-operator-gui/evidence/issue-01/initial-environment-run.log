@@ -1,0 +1,164 @@
+test_api_replacement_before_response_read_preserves_accepted_command (test_active_agent_control.ActiveAgentControlTests.test_api_replacement_before_response_read_preserves_accepted_command) ... ok
+test_cancel_scopes_preserve_parallel_attempt_without_automatic_retry (test_active_agent_control.ActiveAgentControlTests.test_cancel_scopes_preserve_parallel_attempt_without_automatic_retry) ... ok
+test_conflicting_reconciliation_is_visible_and_blocks_delivery (test_active_agent_control.ActiveAgentControlTests.test_conflicting_reconciliation_is_visible_and_blocks_delivery) ... ok
+test_delayed_running_receipt_cannot_regress_completed_operation (test_active_agent_control.ActiveAgentControlTests.test_delayed_running_receipt_cannot_regress_completed_operation) ... ok
+test_interrupt_stops_reconciles_and_runs_next_before_queue (test_active_agent_control.ActiveAgentControlTests.test_interrupt_stops_reconciles_and_runs_next_before_queue) ... ok
+test_invalid_commands_preserve_history_and_human_attribution (test_active_agent_control.ActiveAgentControlTests.test_invalid_commands_preserve_history_and_human_attribution) ... ok
+test_live_attempt_cannot_acquire_fabricated_repository_provenance (test_active_agent_control.ActiveAgentControlTests.test_live_attempt_cannot_acquire_fabricated_repository_provenance) ... ok
+test_parallel_attempts_require_explicit_authorized_target (test_active_agent_control.ActiveAgentControlTests.test_parallel_attempts_require_explicit_authorized_target) ... ok
+test_queue_delivers_one_response_at_a_time_after_completion (test_active_agent_control.ActiveAgentControlTests.test_queue_delivers_one_response_at_a_time_after_completion) ... ok
+test_queue_replay_retains_order_and_redacts_cli_readback (test_active_agent_control.ActiveAgentControlTests.test_queue_replay_retains_order_and_redacts_cli_readback) ... ok
+test_repository_registration_waits_for_live_process_even_after_worker_exit (test_active_agent_control.ActiveAgentControlTests.test_repository_registration_waits_for_live_process_even_after_worker_exit) ... ok
+test_stop_before_delayed_start_and_late_output_are_history_only (test_active_agent_control.ActiveAgentControlTests.test_stop_before_delayed_start_and_late_output_are_history_only) ... ok
+test_stop_receipt_must_match_the_bound_process (test_active_agent_control.ActiveAgentControlTests.test_stop_receipt_must_match_the_bound_process) ... ok
+test_unavailable_attempt_does_not_block_parallel_command_delivery (test_active_agent_control.ActiveAgentControlTests.test_unavailable_attempt_does_not_block_parallel_command_delivery) ... ok
+test_worker_replacement_adopts_process_and_command_receipts_once (test_active_agent_control.ActiveAgentControlTests.test_worker_replacement_adopts_process_and_command_receipts_once) ... ok
+test_completed_result_without_evidence_is_rejected (test_codex_contract.CodexContractTests.test_completed_result_without_evidence_is_rejected) ... ERROR
+test_endpoint_projection_preserves_fields_without_canonical_conditionals (test_codex_contract.CodexContractTests.test_endpoint_projection_preserves_fields_without_canonical_conditionals) ... ok
+test_gate_failure_survives_worker_replay_and_api_replacement (test_codex_preflight_operator.CodexPreflightOperatorTests.test_gate_failure_survives_worker_replay_and_api_replacement) ... ok
+test_missing_interpreter_is_a_visible_terminal_prerequisite_failure (test_codex_preflight_operator.CodexPreflightOperatorTests.test_missing_interpreter_is_a_visible_terminal_prerequisite_failure) ... ok
+test_real_capabilities_and_no_go_are_readable_under_the_original_run (test_codex_preflight_operator.CodexPreflightOperatorTests.test_real_capabilities_and_no_go_are_readable_under_the_original_run) ... skipped 'explicit authenticated endpoint probe'
+test_invalid_configuration_is_a_visible_preflight_failure (test_codex_runtime_gate.CodexRuntimeGateTests.test_invalid_configuration_is_a_visible_preflight_failure) ... ok
+test_real_endpoint_schema_and_completed_session_continuations (test_codex_runtime_gate.CodexRuntimeGateTests.test_real_endpoint_schema_and_completed_session_continuations) ... skipped 'explicit authenticated endpoint probe'
+test_real_prompt_hook_blocks_input_with_correlated_session_and_turn (test_codex_runtime_gate.CodexRuntimeGateTests.test_real_prompt_hook_blocks_input_with_correlated_session_and_turn) ... skipped 'explicit real-runtime probe'
+test_real_session_capabilities_are_reported_without_enabling_unsafe_open (test_codex_runtime_gate.CodexRuntimeGateTests.test_real_session_capabilities_are_reported_without_enabling_unsafe_open) ... skipped 'explicit real-runtime probe'
+test_replay_returns_original_probe_without_creating_another_session (test_codex_runtime_gate.CodexRuntimeGateTests.test_replay_returns_original_probe_without_creating_another_session) ... skipped 'explicit real-runtime probe'
+test_runtime_drift_stops_before_executable_is_started (test_codex_runtime_gate.CodexRuntimeGateTests.test_runtime_drift_stops_before_executable_is_started) ... ok
+test_session_start_crash_stops_owned_process_and_replay_never_restarts (test_codex_runtime_gate.CodexRuntimeGateTests.test_session_start_crash_stops_owned_process_and_replay_never_restarts) ... skipped 'explicit real-runtime probe'
+test_version_drift_stops_before_session_creation (test_codex_runtime_gate.CodexRuntimeGateTests.test_version_drift_stops_before_session_creation) ... ok
+test_authorized_issue_is_one_redacted_observable_run_across_restarts (test_control_plane_black_box.ObservableRunBlackBoxTests.test_authorized_issue_is_one_redacted_observable_run_across_restarts) ... ok
+test_concurrent_claim_is_exclusive_and_release_requires_holder (test_control_plane_black_box.ObservableRunBlackBoxTests.test_concurrent_claim_is_exclusive_and_release_requires_holder) ... ok
+test_each_stale_or_missing_fence_rejects_without_mutation (test_control_plane_black_box.ObservableRunBlackBoxTests.test_each_stale_or_missing_fence_rejects_without_mutation) ... ok
+test_existing_run_cannot_follow_a_changed_repository_binding (test_control_plane_black_box.ObservableRunBlackBoxTests.test_existing_run_cannot_follow_a_changed_repository_binding) ... ok
+test_human_history_and_security_audit_are_distinct_from_worker_evidence (test_control_plane_black_box.ObservableRunBlackBoxTests.test_human_history_and_security_audit_are_distinct_from_worker_evidence) ... ok
+test_lease_survives_all_clients_and_api_restart_with_same_human_new_token (test_control_plane_black_box.ObservableRunBlackBoxTests.test_lease_survives_all_clients_and_api_restart_with_same_human_new_token) ... ok
+test_read_and_control_permissions_fail_closed_at_each_provider_boundary (test_control_plane_black_box.ObservableRunBlackBoxTests.test_read_and_control_permissions_fail_closed_at_each_provider_boundary) ... ok
+test_reader_cannot_impersonate_contributor_in_start_payload (test_control_plane_black_box.ObservableRunBlackBoxTests.test_reader_cannot_impersonate_contributor_in_start_payload) ... ok
+test_revoked_permission_invalidates_lease_and_regrant_requires_new_claim (test_control_plane_black_box.ObservableRunBlackBoxTests.test_revoked_permission_invalidates_lease_and_regrant_requires_new_claim) ... ok
+test_api_sigkill_then_takeover_fences_inflight_adapter_write (test_control_transfer.ControlTransferTests.test_api_sigkill_then_takeover_fences_inflight_adapter_write) ... ok
+test_approval_moves_lease_once_and_revalidates_recipient (test_control_transfer.ControlTransferTests.test_approval_moves_lease_once_and_revalidates_recipient) ... ok
+test_closed_transfer_request_identity_cannot_be_reused (test_control_transfer.ControlTransferTests.test_closed_transfer_request_identity_cannot_be_reused) ... ok
+test_invalid_external_reconciliation_does_not_append_partial_history (test_control_transfer.ControlTransferTests.test_invalid_external_reconciliation_does_not_append_partial_history) ... ok
+test_pending_continuation_settles_before_responsibility_only_change (test_control_transfer.ControlTransferTests.test_pending_continuation_settles_before_responsibility_only_change) ... ok
+test_pending_live_delivery_rejects_transfer_without_partial_session_fencing (test_control_transfer.ControlTransferTests.test_pending_live_delivery_rejects_transfer_without_partial_session_fencing) ... ok
+test_release_expires_pending_request_and_new_holder_can_request_again (test_control_transfer.ControlTransferTests.test_release_expires_pending_request_and_new_holder_can_request_again) ... ok
+test_request_survives_restart_and_only_holder_can_reject (test_control_transfer.ControlTransferTests.test_request_survives_restart_and_only_holder_can_reject) ... ok
+test_restart_adopts_applied_write_after_adapter_fence_success_gap (test_control_transfer.ControlTransferTests.test_restart_adopts_applied_write_after_adapter_fence_success_gap) ... ok
+test_takeover_fences_pending_opened_session_write_across_restart (test_control_transfer.ControlTransferTests.test_takeover_fences_pending_opened_session_write_across_restart) ... ok
+test_takeover_invalidates_queue_but_preserves_running_operation (test_control_transfer.ControlTransferTests.test_takeover_invalidates_queue_but_preserves_running_operation) ... ok
+test_takeover_reconciles_accepted_write_before_preserving_it (test_control_transfer.ControlTransferTests.test_takeover_reconciles_accepted_write_before_preserving_it) ... ok
+test_transfer_permissions_fences_and_redacted_reason (test_control_transfer.ControlTransferTests.test_transfer_permissions_fences_and_redacted_reason) ... ok
+test_twenty_takeovers_across_two_api_hosts_have_one_winner_per_epoch (test_control_transfer.ControlTransferTests.test_twenty_takeovers_across_two_api_hosts_have_one_winner_per_epoch) ... ok
+test_voluntary_transfer_fences_old_window_and_new_holder_writes_same_session (test_control_transfer.ControlTransferTests.test_voluntary_transfer_fences_old_window_and_new_holder_writes_same_session) ... ok
+test_exhausted_capture_is_terminal_on_replay_and_releases_successor (test_evidence_recovery.EvidenceRecoveryTests.test_exhausted_capture_is_terminal_on_replay_and_releases_successor) ... FAIL
+test_failed_capture_that_mutates_source_branch_or_head_blocks_immediately (test_evidence_recovery.EvidenceRecoveryTests.test_failed_capture_that_mutates_source_branch_or_head_blocks_immediately) ...
+  test_failed_capture_that_mutates_source_branch_or_head_blocks_immediately (test_evidence_recovery.EvidenceRecoveryTests.test_failed_capture_that_mutates_source_branch_or_head_blocks_immediately) (mutation='source') ... FAIL
+  test_failed_capture_that_mutates_source_branch_or_head_blocks_immediately (test_evidence_recovery.EvidenceRecoveryTests.test_failed_capture_that_mutates_source_branch_or_head_blocks_immediately) (mutation='branch') ... FAIL
+  test_failed_capture_that_mutates_source_branch_or_head_blocks_immediately (test_evidence_recovery.EvidenceRecoveryTests.test_failed_capture_that_mutates_source_branch_or_head_blocks_immediately) (mutation='head') ... FAIL
+test_missing_evidence_is_captured_in_numbered_activity_on_same_head (test_evidence_recovery.EvidenceRecoveryTests.test_missing_evidence_is_captured_in_numbered_activity_on_same_head) ... FAIL
+test_persisted_drift_remains_terminal_after_crash_and_repository_restore (test_evidence_recovery.EvidenceRecoveryTests.test_persisted_drift_remains_terminal_after_crash_and_repository_restore) ... FAIL
+/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=8 encoding='UTF-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=6 encoding='UTF-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+test_replacement_counts_interruption_and_finishes_same_head (test_evidence_recovery.EvidenceRecoveryTests.test_replacement_counts_interruption_and_finishes_same_head) ... FAIL
+/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=8 encoding='UTF-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=6 encoding='UTF-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+test_second_capture_recovers_transient_surface_failure (test_evidence_recovery.EvidenceRecoveryTests.test_second_capture_recovers_transient_surface_failure) ... FAIL
+test_two_interrupted_rounds_cannot_restart_or_hold_repository (test_evidence_recovery.EvidenceRecoveryTests.test_two_interrupted_rounds_cannot_restart_or_hold_repository) ... FAIL
+/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=8 encoding='UTF-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.TextIOWrapper name=6 encoding='UTF-8'>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+test_valid_worker_result_reports_exact_missing_phases_separately (test_evidence_recovery.EvidenceRecoveryTests.test_valid_worker_result_reports_exact_missing_phases_separately) ... FAIL
+test_worker_death_during_capture_stops_its_tool_before_replacement (test_evidence_recovery.EvidenceRecoveryTests.test_worker_death_during_capture_stops_its_tool_before_replacement) ... FAIL
+/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.BufferedReader name=8>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/case.py:704: ResourceWarning: unclosed file <_io.BufferedReader name=6>
+  function, args, kwargs = self._cleanups.pop()
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+test_recovery_adoption_exhaustion_and_successor_on_real_github (test_evidence_recovery_live_github.LiveGitHubEvidenceRecoveryTests.test_recovery_adoption_exhaustion_and_successor_on_real_github) ... skipped 'real GitHub acceptance is opt-in'
+test_adapter_capability_is_redacted_before_public_session_projection (test_fake_codex_attempt.FakeCodexTests.test_adapter_capability_is_redacted_before_public_session_projection) ... ok
+test_api_replacement_adopts_a_continuation_success_gap_once (test_fake_codex_attempt.FakeCodexTests.test_api_replacement_adopts_a_continuation_success_gap_once) ... ok
+test_api_replacement_adopts_an_interaction_success_gap_once (test_fake_codex_attempt.FakeCodexTests.test_api_replacement_adopts_an_interaction_success_gap_once) ... ok
+test_attempt_selection_is_authorized_and_open_capability_is_truthful (test_fake_codex_attempt.FakeCodexTests.test_attempt_selection_is_authorized_and_open_capability_is_truthful) ... ok
+test_blocked_attempt_persists_human_request_across_api_restart (test_fake_codex_attempt.FakeCodexTests.test_blocked_attempt_persists_human_request_across_api_restart) ... ok
+test_blocked_original_survives_downstream_rejection_and_capture_crash (test_fake_codex_attempt.FakeCodexTests.test_blocked_original_survives_downstream_rejection_and_capture_crash) ... ok
+test_completion_receipts_require_the_adapter_contract_version (test_fake_codex_attempt.FakeCodexTests.test_completion_receipts_require_the_adapter_contract_version) ... ok
+test_concurrent_api_schema_replacements_remain_available (test_fake_codex_attempt.FakeCodexTests.test_concurrent_api_schema_replacements_remain_available) ... ok
+test_continuation_adapter_receipts_are_bound_to_the_operation_and_new_session (test_fake_codex_attempt.FakeCodexTests.test_continuation_adapter_receipts_are_bound_to_the_operation_and_new_session) ... ok
+test_external_attempt_has_ordered_redacted_transcript (test_fake_codex_attempt.FakeCodexTests.test_external_attempt_has_ordered_redacted_transcript) ... ok
+test_failure_categories_are_public_and_preserve_originals (test_fake_codex_attempt.FakeCodexTests.test_failure_categories_are_public_and_preserve_originals) ... ok
+test_inconsistent_adapter_correlation_and_transcript_fail_closed (test_fake_codex_attempt.FakeCodexTests.test_inconsistent_adapter_correlation_and_transcript_fail_closed) ... ok
+test_open_and_write_receipts_must_match_the_durable_operation (test_fake_codex_attempt.FakeCodexTests.test_open_and_write_receipts_must_match_the_durable_operation) ... ok
+test_open_limitation_requires_a_separate_fenced_handoff (test_fake_codex_attempt.FakeCodexTests.test_open_limitation_requires_a_separate_fenced_handoff) ... ok
+test_opening_and_writing_the_selected_same_session_are_truthful_and_fenced (test_fake_codex_attempt.FakeCodexTests.test_opening_and_writing_the_selected_same_session_are_truthful_and_fenced) ... ok
+test_redelivery_cannot_change_durable_adapter_assignment (test_fake_codex_attempt.FakeCodexTests.test_redelivery_cannot_change_durable_adapter_assignment) ... ok
+test_replacement_adopts_one_session_before_and_after_mapping (test_fake_codex_attempt.FakeCodexTests.test_replacement_adopts_one_session_before_and_after_mapping) ... Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/__main__.py", line 18, in <module>
+    main(module=None)
+    ~~~~^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/main.py", line 104, in __init__
+    self.runTests()
+    ~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/main.py", line 270, in runTests
+    self.result = testRunner.run(self.test)
+                  ~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/runner.py", line 257, in run
+    test(result)
+    ~~~~^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/suite.py", line 84, in __call__
+    return self.run(*args, **kwds)
+           ~~~~~~~~^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/suite.py", line 122, in run
+    test(result)
+    ~~~~^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/suite.py", line 84, in __call__
+    return self.run(*args, **kwds)
+           ~~~~~~~~^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/suite.py", line 122, in run
+    test(result)
+    ~~~~^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/suite.py", line 84, in __call__
+    return self.run(*args, **kwds)
+           ~~~~~~~~^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/suite.py", line 122, in run
+    test(result)
+    ~~~~^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/case.py", line 725, in __call__
+    return self.run(*args, **kwds)
+           ~~~~~~~~^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/case.py", line 669, in run
+    self._callTestMethod(testMethod)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/unittest/case.py", line 615, in _callTestMethod
+    result = method()
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-issue-01/microsoft-agent-framework-work-package-pilot/tests/test_fake_codex_attempt.py", line 159, in test_replacement_adopts_one_session_before_and_after_mapping
+    _, history, _ = self.request('GET', f'/api/v1/runs/{run_id}/events')
+                    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-issue-01/microsoft-agent-framework-work-package-pilot/tests/test_control_plane_black_box.py", line 266, in request
+    response = connection.getresponse()
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 1478, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 343, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/http/client.py", line 304, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+               ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.14/3.14.7/Frameworks/Python.framework/Versions/3.14/lib/python3.14/socket.py", line 729, in readinto
+    return self._sock.recv_into(b)
+           ~~~~~~~~~~~~~~~~~~~~^^^
+KeyboardInterrupt

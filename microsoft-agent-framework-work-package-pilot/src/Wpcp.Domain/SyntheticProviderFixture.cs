@@ -37,7 +37,6 @@ public sealed class SyntheticProviderFixture
 
         var fixtureVersion = Required(document.FixtureVersion, "fixtureVersion");
         ArgumentNullException.ThrowIfNull(document.Provider);
-        ArgumentNullException.ThrowIfNull(document.RedactionPolicy);
 
         var repositories = document.Provider.Repositories?
             .Select(repository => new SyntheticRepository(
@@ -52,21 +51,8 @@ public sealed class SyntheticProviderFixture
             .ToArray()
             ?? [];
 
-        var bindings = (document.Provider.Repositories ?? []).Select(repository =>
-            new RepositoryBinding(Required(repository.RepositoryId, "repositoryId"),
-                Required(repository.FullName, "fullName"), repository.ProviderRepositoryId)).ToArray();
-        if (bindings.Any(binding => binding.ProviderRepositoryId <= 0 ||
-            binding.FullName.Split('/').Length != 2 || binding.FullName.Split('/').Any(string.IsNullOrWhiteSpace)))
-            throw new ArgumentException("Invalid repository provider binding.");
-
-        var policy = new ControlledRedactionPolicy(
-            Required(document.RedactionPolicy.Version, "redactionPolicy.version"),
-            Required(document.RedactionPolicy.Marker, "redactionPolicy.marker"),
-            (document.RedactionPolicy.ControlledCanaries ?? [])
-                .Select(canary => Required(canary.Value, "redactionPolicy.controlledCanaries.value"))
-                .ToArray());
-
-        return new SyntheticProviderFixture(fixtureVersion, repositories, bindings, policy);
+        var configuration = SubmissionConfiguration.Load(fixturePath);
+        return new SyntheticProviderFixture(fixtureVersion, repositories, configuration.Repositories, configuration.RedactionPolicy);
     }
 
     public SyntheticIssue? FindIssue(string repositoryId, int issueNumber) =>
@@ -103,8 +89,6 @@ public sealed class SyntheticProviderFixture
         public string? FixtureVersion { get; init; }
 
         public ProviderDocument? Provider { get; init; }
-
-        public RedactionPolicyDocument? RedactionPolicy { get; init; }
     }
 
     private sealed class ProviderDocument
@@ -117,8 +101,6 @@ public sealed class SyntheticProviderFixture
     private sealed class RepositoryDocument
     {
         public string? RepositoryId { get; init; }
-        public string? FullName { get; init; }
-        public long ProviderRepositoryId { get; init; }
 
         public List<IssueDocument>? Issues { get; init; }
     }
@@ -132,19 +114,6 @@ public sealed class SyntheticProviderFixture
         public string? Title { get; init; }
     }
 
-    private sealed class RedactionPolicyDocument
-    {
-        public string? Version { get; init; }
-
-        public string? Marker { get; init; }
-
-        public List<CanaryDocument>? ControlledCanaries { get; init; }
-    }
-
-    private sealed class CanaryDocument
-    {
-        public string? Value { get; init; }
-    }
 }
 
 /// <summary>One deterministic repository issue from the controlled fixture.</summary>
