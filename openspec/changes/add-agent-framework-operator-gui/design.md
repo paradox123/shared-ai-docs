@@ -18,6 +18,10 @@ The existing PRD already requires work across human machines, full observable me
 - The user selected the complete human Operator surface for the first release. Routine intervention, continuation, control ownership/transfer and qualified-head approval must be possible through the GUI; targeted Open in Codex remains an explicit path for detailed session work.
 - The GUI is additive. The user explicitly retains access through their local agent and the existing pilot Handover route; central session management does not make the GUI mandatory for diagnosis or supported intervention.
 
+## User-facing terminology
+
+On 2026-09-14 the user requested “Featureidee”, “Anforderungen” or “Spec” instead of “Einreichung”. The GUI uses **Anforderungen** consistently for the navigation, overview, retained content and messages. The persisted intake identity continues to identify the admitted version; this copy correction does not change admission or execution behavior.
+
 ## First-release operator scope
 
 Expose the existing product actions: answer an intervention; Resume, Fork, Fresh Retry or Cancel an explicit attempt/run as appropriate; send targeted queue/interrupt commands; claim/release control, request/approve a transfer or perform an audited Forced Takeover; open the selected attempt in Codex; and explicitly approve the currently qualified head as an authenticated human. Show the current controller, target attempt/session, head and actionable rejection reasons. All actions retain their existing authorization, fencing, identity and history semantics.

@@ -1,5 +1,6 @@
 # GitHub submissions in the Operator GUI (GUI Ticket 01)
 
+The GUI labels the work inputs **Anforderungen**.
 The API serves the GUI at `/operator/` and persists actual GitHub issue title/body
 snapshots in PostgreSQL. Admission produces `state: admitted` and `runId: null`.
 It does not start a worker, create a run, claim a lease or write to GitHub.

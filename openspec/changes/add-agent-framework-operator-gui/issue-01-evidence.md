@@ -67,4 +67,9 @@ The large history scenario committed 10,015 events, reconnected for 9,765 events
 
 Final source checks: zero-warning/zero-error .NET solution build, JavaScript syntax validation, `git diff --check`, and `openspec validate add-agent-framework-operator-gui --strict`. The initial environment run is retained separately as [initial-environment-run.log](evidence/issue-01/initial-environment-run.log); it is not counted as a product regression or acceptance evidence.
 
-The final refactored code also passed the explicit real GitHub GUI/restart proof again (1 test in 18.741 seconds): [live-github-test.log](evidence/issue-01/live-github-test.log). The live screenshots and snapshot were refreshed from this final run.
+The final refactored code also passed the explicit real GitHub GUI/restart proof again (1 test): [live-github-test.log](evidence/issue-01/live-github-test.log). The live screenshots and snapshot were refreshed from this final run.
+
+
+## User-requested terminology correction
+
+The user requested a product-facing name such as Featureidee, Anforderungen or Spec instead of Einreichung. The GUI now consistently uses **Anforderungen** in navigation, page/title/detail labels, accessible labels and error/empty-state messages. This is a copy-only follow-up in the same change. Two focused existing checks passed (rendered browser/restart and public GUI route), followed by the real GitHub GUI proof (1 passed in 17.936 seconds). Desktop/mobile screenshots and readback snapshots were refreshed. No full regression rerun was needed for these text changes; strict OpenSpec validation and diff checks passed.

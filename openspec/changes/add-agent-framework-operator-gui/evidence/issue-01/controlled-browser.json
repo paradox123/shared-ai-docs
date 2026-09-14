@@ -1,6 +1,6 @@
 {
   "snapshot": {
-    "submissionId": "d4302b7b-bcb3-4c6e-b23c-8b138b3ccef1",
+    "submissionId": "e5474fbe-423a-4d7d-a163-0a62e92da09b",
     "state": "admitted",
     "runId": null,
     "title": "Retain the provider issue",
@@ -22,7 +22,7 @@
       "provider": "github",
       "subjectId": "101"
     },
-    "admittedAt": "2026-09-14T08:53:46.952635+00:00",
+    "admittedAt": "2026-09-14T09:19:30.736391+00:00",
     "contentSha256": "c511018146e62427729f721f287c16586dcf2701fc811f8487417a38bf3161fb",
     "redaction": {
       "occurred": true,

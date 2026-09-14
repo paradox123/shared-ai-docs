@@ -10,13 +10,13 @@ const errors = {
   'repository-provider-unavailable': 'GitHub konnte deine Repository-Rechte nicht bestätigen. Bitte erneut versuchen.',
   'github-source-unavailable': 'GitHub konnte das Issue nicht zuverlässig liefern. Bitte erneut versuchen.',
   'github-issue-not-found': 'Das GitHub-Issue wurde nicht gefunden oder dein Zugang darf es nicht lesen.',
-  'github-source-is-pull-request': 'Diese Quelle ist ein Pull Request. Bitte ein Issue einreichen.',
+  'github-source-is-pull-request': 'Diese Quelle ist ein Pull Request. Bitte Anforderungen aus einem Issue aufnehmen.',
   'github-source-identity-mismatch': 'Die GitHub-Antwort gehört nicht zum angefragten Issue.',
   'github-issue-closed': 'Das Issue ist geschlossen. Nur offene Issues können aufgenommen werden.',
   'implementation-authorization-required': 'Dem Issue fehlt die Implementierungsfreigabe „ready-for-agent“.',
   'submission-correlation-rejected': 'Die Herkunft enthält einen durch die Redaktionsregel gesperrten Wert.',
-  'submission-not-found': 'Diese Einreichung wurde nicht gefunden.',
-  'run-store-unavailable': 'Der Server kann die Einreichungen gerade nicht speichern oder lesen. Bitte erneut versuchen.',
+  'submission-not-found': 'Diese Anforderungen wurden nicht gefunden.',
+  'run-store-unavailable': 'Der Server kann die Anforderungen gerade nicht speichern oder lesen. Bitte erneut versuchen.',
 };
 let credential = '';
 let operation;
@@ -121,7 +121,7 @@ async function overview(signal, selected = location.hash.slice(1)) {
     await showDetail(id, signal);
   } else {
     const empty = document.createElement('div'); empty.className = 'empty';
-    empty.textContent = 'Noch keine sichtbaren Einreichungen. Nimm oben dein erstes freigegebenes GitHub-Issue auf.';
+    empty.textContent = 'Noch keine sichtbaren Anforderungen. Nimm oben dein erstes freigegebenes GitHub-Issue auf.';
     $('submission-list').append(empty);
     $('detail').textContent = 'Die gespeicherte Fassung erscheint hier nach der Aufnahme.';
   }

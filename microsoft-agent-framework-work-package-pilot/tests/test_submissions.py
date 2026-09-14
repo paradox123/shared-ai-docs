@@ -165,6 +165,6 @@ class SubmissionTests(SubmissionProcessHarness, unittest.TestCase):
     def test_operator_gui_is_served_without_fixture_capability(self):
         status, _, raw = self.request('GET', '/operator/', include_fixture_access=False)
         self.assertEqual(200, status)
-        self.assertIn('<title>Einreichungen', raw)
+        self.assertIn('<title>Anforderungen', raw)
         self.assertIn('GitHub-Issue-URL', raw)
         self.assertIn('type="module"', raw)
