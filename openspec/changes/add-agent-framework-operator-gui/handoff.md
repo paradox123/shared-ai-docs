@@ -1,8 +1,8 @@
 # Operator GUI and complete distributed lifecycle: delivery handoff
 
-The design interview is complete. Ticket 01 intake is implemented and locally verified against real GitHub; its separate-machine acceptance remains open. See [issue-01-evidence.md](issue-01-evidence.md). Other implementation and end-to-end acceptance remain pending. The deliverable combines a full graphical Operator Client with unattended execution and a Workstation Client that opens local-agent Handovers. Existing CLI/native/local-agent access and the pilot's distributed history contract remain in force.
+The design interview is complete. Ticket 01 intake is implemented and locally accepted by the user on 2026-09-14, including real GitHub verification. Its separate-machine proof remains open under Ticket 16. See [issue-01-evidence.md](issue-01-evidence.md). Other implementation and end-to-end acceptance remain pending. The deliverable combines a full graphical Operator Client with unattended execution and a Workstation Client that opens local-agent Handovers. Existing CLI/native/local-agent access and the pilot's distributed history contract remain in force.
 
-The user approved the [ticket plan](ticket-plan.md): 16 vertical slices with explicit blocking edges and requirement coverage are [published in the local tracker](../../../.scratch/agent-framework-operator-gui/README.md), with their current state recorded in each ticket. Ticket 01 is needs-info for its separate-machine acceptance; later tickets remain ready-for-agent subject to blockers.
+The user approved the [ticket plan](ticket-plan.md): 16 vertical slices with explicit blocking edges and requirement coverage are [published in the local tracker](../../../.scratch/agent-framework-operator-gui/README.md), with their current state recorded in each ticket. Ticket 01 is resolved; Ticket 02 is unblocked. Later tickets remain ready-for-agent subject to blockers. Ticket 16 owns the transferred distributed intake proof (task 3.2a).
 
 ## Existing requirements and selected extensions
 
@@ -38,6 +38,7 @@ The matrix below covers the full change and remains open. The narrower Ticket 01
 
 | Scenario | Expected behavior | Required evidence |
 | --- | --- | --- |
+| GitHub intake on separate machines (Ticket 16, transferred from 01) | Starting with an empty database, actual GitHub content is admitted without a run; its identity/version/provenance survive server and browser restart, and redelivery creates no duplicate. Current authorization, actionable errors and redaction apply across the connection. | GUI input and public readback from a different machine, retained topology and restart evidence; no server filesystem or database access from the client. Local Ticket 01 evidence is a baseline only. |
 | GitHub and file intake; service restart | Admitted content/version and issue/run associations survive restart; file input is the intended remote file. | Public readback plus rendered overview for both input types. |
 | PRD decomposition; interruption during child creation | Correct source-specific issues, parent/dependency links and no duplicate child on recovery. | Source readback, decomposition session history and GUI links. |
 | Predecessor qualified but not merged | Dependent work stays waiting until human merge and source issue closure. | Run/queue state before and after the actual gates. |

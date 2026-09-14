@@ -84,6 +84,8 @@ No material product decision remains unresolved. Accepted: full additive GUI, bo
 
 ## Acceptance direction
 
+On 2026-09-14 the user accepted Ticket 01 locally and moved its separate-machine intake/readback/restart proof to the existing Ticket 16. Ticket 01 is resolved and no longer blocks Ticket 02. The distributed requirement remains unchanged and open for overall acceptance; local evidence does not satisfy it.
+
 Start one controlled input in the GUI, close the UI and initiating Codex task, and observe independent progress to a concrete intervention or a qualified result. Reopen the same run and trace activities, observable messages, tool calls/results, handoffs and outcome through persisted public evidence. This proof supplements, but does not replace, Ticket 14's identity and governance gates.
 
 Run the acceptance flow with a server environment and a separate human work machine, without shared localhost, an assumed shared filesystem or direct database access. Show that the addressed human receives actionable notice and opens the corresponding run/session from their own client. Read the admitted input and PRD/issue/run relationships after client/server restart. A same-machine demonstration cannot satisfy this distributed acceptance criterion.

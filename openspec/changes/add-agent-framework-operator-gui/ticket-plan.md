@@ -1,6 +1,6 @@
 # Bestätigte Ticketaufteilung
 
-Der Nutzer hat die Aufteilung mit 16 Tickets bestätigt. Die Tickets sind einzeln mit ihren Akzeptanzkriterien und Blockern im lokalen Tracker veröffentlicht und tragen den Status `ready-for-agent`. Die fachlichen Entscheidungen bleiben im bestehenden Change; Parent-Issue und bestehende Pilot-Tickets wurden nicht geändert.
+Der Nutzer hat die Aufteilung mit 16 Tickets bestätigt. Die Tickets sind einzeln mit ihren Akzeptanzkriterien und Blockern im lokalen Tracker veröffentlicht. Ticket 01 ist lokal abgenommen und `resolved`; die übrigen Tickets tragen den Status `ready-for-agent` unter ihren jeweiligen Blockern. Die fachlichen Entscheidungen bleiben im bestehenden Change; Parent-Issue und bestehende Pilot-Tickets wurden nicht geändert.
 
 ## Drei kleine benutzbare Einstiegsschritte
 
@@ -8,7 +8,7 @@ Der Nutzer hat die Aufteilung mit 16 Tickets bestätigt. Die Tickets sind einzel
 2. **Starten und Ergebnis sehen:** Den eingegebenen Auftrag in einen Run überführen, die erste echte Hintergrundaktivität automatisch ausführen und Zustand/Ergebnis in einer einfachen Run-Ansicht sehen. Noch kein aufwendiger Graph nötig.
 3. **Workflow und Details verfolgen:** Genau den selbst gestarteten Run mit Aktivitäten, vollständigen Sessiondetails und Live-Ereignissen als schmalen Workflow untersuchen, auch von einem anderen berechtigten Client.
 
-Jedes Ticket beginnt an einer realen Benutzerhandlung und liefert einen nutzbaren Fortschritt. Kein Beobachtungsticket setzt einen manuell vorbereiteten Datenbank-Run voraus. Der Server-/Client-Fall bleibt vom ersten Eingabeschritt an Bestandteil der Architektur und Abnahme; diese Aufteilung führt keine lokale Betriebsabkürzung ein. Im fertigen Startweg kann eine neue Quelle weiterhin in einer Aktion eingereicht und gestartet werden, ohne doppelte fachliche Freigabe.
+Jedes Ticket beginnt an einer realen Benutzerhandlung und liefert einen nutzbaren Fortschritt. Kein Beobachtungsticket setzt einen manuell vorbereiteten Datenbank-Run voraus. Der Server-/Client-Fall bleibt vom ersten Eingabeschritt an Bestandteil der Architektur. Der Nutzer hat Ticket 01 am 2026-09-14 lokal abgenommen und dessen Mehrrechnertest in Ticket 16 zur verteilten Gesamtabnahme verschoben; der verteilte Nachweis bleibt verbindlich und offen. Im fertigen Startweg kann eine neue Quelle weiterhin in einer Aktion eingereicht und gestartet werden, ohne doppelte fachliche Freigabe.
 
 Das bisherige große Einstiegsticket wird durch diese drei Slices ersetzt. Die übrigen Tickets bleiben inhaltlich erhalten und rücken um zwei Nummern nach hinten: Handover ist jetzt 04, vollständige Hintergrundkette 09, PRD-Gesamtgraph 15 und Gesamt-Abnahme 16.
 
@@ -25,7 +25,7 @@ Das bisherige große Einstiegsticket wird durch diese drei Slices ersetzt. Die �
 
 1. **[GitHub Issue eingeben und gespeicherte Einreichung wiederfinden](../../../.scratch/agent-framework-operator-gui/issues/01-github-issue-eingeben-und-einreichung-wiederfinden.md)**
 
-   **Blocked by:** Keine.
+   **Blocked by:** Keine. **Status:** `resolved` — lokal abgenommen; Mehrrechnertest in Ticket 16.
 
    **Lieferergebnis:** Ein Mensch gibt in einer minimalen servergestützten GUI eine GitHub-Issue-URL ein und sieht den tatsächlich aufgenommenen Auftrag mit Inhalt, Herkunft und Repository in seiner Einreichungsübersicht.
 
@@ -117,6 +117,8 @@ Das bisherige große Einstiegsticket wird durch diese drei Slices ersetzt. Die �
 
    **Blocked by:** 08, 10, 14, 15.
 
+   **Übernommener Prüfpunkt aus 01:** Echte GitHub-Aufnahme aus leerer Datenbank mit Server und Browser auf unterschiedlichen Rechnern; dieselbe Anforderungs-ID und Fassung nach beiden Neustarts, keine Duplikate, aktuelle Berechtigung, Redaktion und konkrete Fehler. Aufnahme allein startet keinen Run.
+
    **Lieferergebnis:** Ein reproduzierbarer Abnahmelauf zeigt Einreichung, autonome Bearbeitung, Übergabe zwischen Menschen und Rechnern, vollständige Historie und menschliche Freigabe als zusammenhängendes Verhalten und ordnet die verbleibenden Pilot-Gates ehrlich ein.
 
 ## Abhängigkeiten und sinnvolle Bearbeitungsfolge
@@ -145,7 +147,7 @@ React Flow bleibt ein geprüfter bevorzugter Kandidat für die Workflow-Darstell
 | Preserve the submitted issue source | 11, 12, 13, 14 |
 | Execution is independent of the observing client | 02, 09, 14 |
 | Submissions and run relationships are database-backed | 01, 02, 11, 12, 13, 15 |
-| The pilot exercises the server and separate human clients | 01, 03, 04, 05, 16 |
+| The pilot exercises the server and separate human clients | 01 (Implementierung/lokale Abnahme), 03, 04, 05, 16 (einschließlich Mehrrechnertest aus 01) |
 | Workflow and persisted run inspection | 02, 03, 15 |
 | Complete graphical human operation | 06, 07, 08, 10 |
 | Interactive human approval in the GUI | 10 |

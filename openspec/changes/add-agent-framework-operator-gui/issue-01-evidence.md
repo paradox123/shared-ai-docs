@@ -1,5 +1,7 @@
 # Ticket 01 implementation evidence
 
+**Acceptance decision — 2026-09-14:** The user accepted Ticket 01 locally (`resolved`) and moved its still-unverified separate-machine proof to [Ticket 16](../../../.scratch/agent-framework-operator-gui/issues/16-verteilten-gesamtfall-und-issue-14-gates-nachweisen.md), tracked as task 3.2a. The full GUI change remains open. This changes acceptance ownership, not the recorded test topology or results.
+
 ## Scope and Git ownership
 
 - Owning Git root at intake: `/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs`; initial branch `main`, HEAD `f6f5d15`.
@@ -8,7 +10,7 @@
 - OpenSpec routing: `openspec list --json` matched `add-agent-framework-operator-gui`; local apply skill, spec-driven schema, originally 14/25 tasks. Ticket 01 is only the GitHub intake portion of 2.2; background execution and file ingestion remain later tickets.
 - Review baseline: `f6f5d15`; review the implementation and its accepted context against this fixed point.
 
-## Verification in progress
+## Verification scope
 
 The stable behavior seam is the public submission HTTP API, exercised with separate API processes and disposable PostgreSQL. GitHub is the controlled external boundary for deterministic cases. Rendered GUI and real GitHub readback supplement those tests; neither a health response nor a fabricated run establishes acceptance.
 
@@ -21,7 +23,7 @@ The stable behavior seam is the public submission HTTP API, exercised with separ
 | Durable content and provenance, immutable version, no duplicates | New Chrome process after API restart read the identical live snapshot. Controlled source edit preserved original title/body/revision. Twelve concurrent deliveries produced one 201 and eleven 200 results with one identity. | [Controlled browser snapshot](evidence/issue-01/controlled-browser.json), `tests.test_submissions`. |
 | Redaction before storage and display; current read authorization | Controlled body token was replaced by the existing policy marker. Public browser read and supplementary PostgreSQL dump contained no canary or user credential. Provider `<script>` text remained inert. Revoked/unauthorized readers received no content. | [Controlled desktop](evidence/issue-01/controlled-desktop.png), [controlled mobile](evidence/issue-01/controlled-mobile.png); browser and HTTP tests. |
 | Browser/service restart, no agent processing | Fresh browser authenticates again, retrieves the persisted submission and displays “Aufgenommen” and that agent processing has not started. Test harness starts API and database only. Existing synthetic admission/CLI restart contract still passes. | Live/controlled browser evidence; `test_authorized_issue_is_one_redacted_observable_run_across_restarts`. |
-| Server and separate human workstation | **Not yet verified.** HTTPS-capable server listener and same-origin authenticated browser contract are implemented. All retained browser tests ran as separate processes on this Mac, with PostgreSQL in a disposable container. No separate reachable test server was provided; an asynchronous question for its SSH target or URL is pending. | Explicit `topology` limitation in live proof; do not count this as separate-machine acceptance. |
+| Server and separate human workstation | **Not yet verified.** HTTPS-capable server listener and same-origin authenticated browser contract are implemented. All retained browser tests ran as separate processes on this Mac, with PostgreSQL in a disposable container. A reachable test server and a browser on another machine remain prerequisites for Ticket 16; they no longer block local Ticket 01 acceptance. | Explicit `topology` limitation in live proof; do not count this as separate-machine acceptance. |
 
 The feature uses the prototype's green portal/overview/detail direction in a minimal
 server-delivered HTML/CSS/module client. It does not import the prototype's
@@ -55,9 +57,9 @@ No confirmed documented-standard violations or correctness/security defects. One
 
 ### Spec
 
-No additional implementation mismatch or scope creep. One partial requirement: separate-machine GUI/service acceptance remains pending. Ticket 01 explicitly stays `needs-info`; it is not accepted or archived. Implementation subtask 2.2a is complete, and separate acceptance subtask 2.2b remains open. File input, run start and the wider GUI change are not marked complete.
+The implementation review found no additional mismatch or scope creep and identified one evidence gap: separate-machine GUI/service acceptance. Following the user's subsequent acceptance decision, Ticket 01 is resolved on its local evidence; the outstanding gap is assigned to Ticket 16 / task 3.2a (formerly 2.2b). File input, run start and the wider GUI change remain open.
 
-Final review count: Standards 0 unresolved; Spec 1 evidence gap (separate-machine proof).
+Review findings: Standards 0 unresolved; Spec 1 evidence gap (separate-machine proof), now owned by Ticket 16. No distributed success is claimed.
 
 ## Full regression
 

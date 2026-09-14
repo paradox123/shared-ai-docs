@@ -1,6 +1,6 @@
 # Agent Framework Operator GUI
 
-Die vom Nutzer bestätigte Aufteilung ist als 16 einzelne lokale Tickets veröffentlicht. Ticket 01 ist implementiert und lokal einschließlich echter GitHub-Aufnahme geprüft; für die Abnahme auf getrennten Rechnern steht es auf `needs-info`. Die übrigen Tickets sind `ready-for-agent`; ausführbar ist jeweils nur ein Ticket, dessen Blocker abgeschlossen sind.
+Die vom Nutzer bestätigte Aufteilung ist als 16 einzelne lokale Tickets veröffentlicht. Ticket 01 ist einschließlich echter GitHub-Aufnahme lokal abgenommen und `resolved`. Der weiterhin offene Mehrrechnertest gehört zu Ticket 16. Die übrigen Tickets sind `ready-for-agent`; ausführbar ist jeweils nur ein Ticket, dessen Blocker abgeschlossen sind.
 
 Die ersten drei Tickets liefern nacheinander Einreichung, ersten Hintergrundstart und Run-Beobachtung. Danach wird der lokale Handover-Pfad früh real geprüft. Server-/Client-Betrieb, vollständige zentrale Historie und die bisherigen Pilot-Zugangswege bleiben verbindlich.
 
@@ -33,6 +33,6 @@ Die ersten drei Tickets liefern nacheinander Einreichung, ersten Hintergrundstar
 | 15 | [Gesamten PRD-Lebenszyklus als Workflow erkunden](issues/15-gesamten-prd-lebenszyklus-als-workflow-erkunden.md) | 05, 13 |
 | 16 | [Verteilten Gesamtfall und verbleibende Issue-14-Gates nachweisen](issues/16-verteilten-gesamtfall-und-issue-14-gates-nachweisen.md) | 08, 10, 14, 15 |
 
-Initial ist nur Ticket 01 ohne Blocker. Die Blocker in den einzelnen Ticketdateien sind maßgeblich; Nummerierung allein bedeutet keine vollständig lineare Bearbeitungsreihenfolge.
+Ticket 02 ist nach der lokalen Abnahme von Ticket 01 als nächstes ausführbar. Die Blocker in den einzelnen Ticketdateien sind maßgeblich; Nummerierung allein bedeutet keine vollständig lineare Bearbeitungsreihenfolge.
 
 Jedes Ticket wird in frischem Implementierungskontext mit den Quellen aus dem Feature-Einstieg bearbeitet. Die Repository-Regeln für TDD, öffentliche Verhaltensnachweise und Review gelten. Die bisherige Pilot-Abnahme zu Issue 14 und deren offener Change bleiben separat und unverändert.

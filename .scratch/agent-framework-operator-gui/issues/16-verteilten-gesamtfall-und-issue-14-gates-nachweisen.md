@@ -6,6 +6,7 @@
 
 **Status:** ready-for-agent
 
+- [ ] Der aus Ticket 01 übernommene Mehrrechnertest beginnt mit leerer Anwendungsdatenbank: Eine berechtigte Person nimmt eine echte GitHub-Issue-URL über die GUI auf einer vom Server getrennten Maschine auf. Nach Server- und Browserneustart zeigen GUI und öffentliches Readback dieselbe Anforderungs-ID, Fassung, Herkunft und Repositorybindung; erneute Übermittlung erzeugt kein Duplikat. Aktuelle menschliche Repository-Berechtigung, konkrete Zugriffs-/Quellfehler und Redaktion vor Speicherung und Anzeige gelten auch über diese Verbindung. Die Aufnahme allein startet keinen Run. Der Browser benötigt weder Serverdateisystem- noch Datenbankzugriff; ein Nachweis mit beiden Prozessen auf demselben Rechner genügt nicht.
 - [ ] GitHub- und Datei-Einreichung sowie beide PRD-Zerlegungswege werden durch bereits erstellte Belege und einen zusammenhängenden verteilten Lauf abgedeckt; die Startclients sind während zentraler Arbeit geschlossen.
 - [ ] Ein kontrollierter Fehler öffnet auf einer vom Server getrennten Workstation den lokalen Agenten; vollständige Diagnose-/Chat-/Toolereignisse erscheinen als Workflow-Schritt zentral, und eine menschlich angewiesene Intervention setzt denselben Run fort.
 - [ ] Eine weitere berechtigte Person kann den gesamten Zusammenhang lesen und die Steuerung nach geltenden Regeln übernehmen; eine echte interaktive Freigabe betrifft exakt den qualifizierten Head.
@@ -20,3 +21,12 @@
 ### 2026-09-14 — Unverbindliche Designreferenz
 
 Der [Backstage-/React-Flow-Prototyp mit Codeverweis und Session-Einstieg](../prototype.md) dient als visuelle Orientierung. Texte, Beispieldaten und simulierte Abläufe sind vorläufig und definieren keine zusätzlichen Anforderungen. Maßgeblich bleiben dieses Ticket und die zugehörige OpenSpec-Spezifikation. Abweichungen vom Prototyp sind zulässig; erkennbare Anforderungslücken sind zu benennen, statt sie aus den Screens abzuleiten.
+
+### 2026-09-14 — Mehrrechnernachweis aus Ticket 01 übernommen
+
+Der Nutzer hat [Ticket 01](01-github-issue-eingeben-und-einreichung-wiederfinden.md)
+lokal abgenommen und dessen Mehrrechnertest diesem Ticket zugeordnet. Die
+[lokalen Nachweise](../../../openspec/changes/add-agent-framework-operator-gui/issue-01-evidence.md)
+sind die Ausgangsbasis; der verteilte Nachweis ist weiterhin offen. Dafür werden
+ein erreichbarer Testserver und ein Browser auf einer anderen Maschine benötigt.
+Die oben eingetragenen Blocker dieses Tickets bleiben bestehen.

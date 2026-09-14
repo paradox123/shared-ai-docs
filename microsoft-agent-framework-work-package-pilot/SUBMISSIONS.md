@@ -128,7 +128,9 @@ reads the public snapshot, closes Chrome and restarts the API, then reads the sa
 snapshot from a new Chrome process. It performs no GitHub writes and removes its
 database/container. Retained proof contains sanitized snapshot JSON and screenshots.
 Running this on one host does **not** establish the required separate-machine
-acceptance; that requires a reachable test server and another human workstation.
+acceptance in Ticket 16; that requires a reachable test server and another human
+workstation. The user accepted Ticket 01 locally on 2026-09-14 and moved this
+remaining proof to Ticket 16 / OpenSpec task 3.2a.
 
 Provider contract: [GitHub issue API](https://docs.github.com/en/rest/issues/issues#get-an-issue).
 Static delivery: [ASP.NET Core static files](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/static-files?view=aspnetcore-10.0).
