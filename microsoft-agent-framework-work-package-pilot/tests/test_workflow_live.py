@@ -1,5 +1,7 @@
 """Opt-in real issue → real analysis → two authenticated production browsers."""
 import json
+import hashlib
+import urllib.request
 import os
 from pathlib import Path
 import unittest
@@ -27,6 +29,14 @@ class LiveWorkflowTests(LiveSubmissionExecutionHarness, unittest.TestCase):
                 actor_id='live-human', include_fixture_access=False)
             self.assertEqual(200, status)
             public[name] = body
+        for artifact in public['artifacts']['artifacts']:
+            self.assertEqual('available', artifact['availability'])
+            request = urllib.request.Request(self.base_url + '/api/v1/runs/' + run_id + '/artifacts/' + artifact['artifactId'],
+                headers={'Authorization': 'Bearer ' + self.provider.tokens['live-human']})
+            with urllib.request.urlopen(request, timeout=15) as response:
+                content = response.read()
+            self.assertEqual(artifact['sha256'], hashlib.sha256(content).hexdigest())
+            (evidence / ('live-artifact-' + artifact['artifactId'] + '.json')).write_bytes(content)
         self.stop_detached_worker(worker)
         self.stop_process(self.api)
         self.start_api()
