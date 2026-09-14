@@ -20,8 +20,9 @@ export function duration(start, end) {
 }
 function parsed(value) {
   if (typeof value !== 'string') return value;
-  try { return JSON.parse(value); } catch { return value; }
+  try { const result = JSON.parse(value); return result && typeof result === 'object' ? result : value; } catch { return value; }
 }
+const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 
 // A small safe text renderer: no HTML insertion, links, scripts or remote assets.
 export function prose(text) {
@@ -63,7 +64,8 @@ export function readable(value) {
     return list;
   }
   const block = element('div', undefined, 'structured-content');
-  if (typeof value.contractVersion === 'string' && Array.isArray(value.events)) {
+  if (value.contractVersion === 'AgentSessionAdapter/v1' && Array.isArray(value.events)
+    && value.events.every(event => object(event) && typeof event.type === 'string' && object(event.data))) {
     block.append(element('h4', 'Sessionereignisse · ' + value.events.length));
     for (const event of value.events) {
       const d = describe({payload: event, eventType: event.type});
@@ -81,7 +83,7 @@ export function readable(value) {
     block.append(element('h4', source.title), prose(source.body));
     return block;
   }
-  if (Array.isArray(value.content)) {
+  if (Array.isArray(value.content) && value.content.every(part => object(part) && typeof part.type === 'string')) {
     for (const part of value.content) block.append(typeof part.text === 'string' ? readable(part.text) : readable(part));
     if (value.structuredContent != null) block.append(readable(value.structuredContent));
     return block;
@@ -104,7 +106,14 @@ const systemLabels = {
 };
 const roleLabels = {user: 'Auftrag an den Agenten', assistant: 'Agent', system: 'Systemnachricht'};
 function contentText(item) {
-  return item.text ?? item.content?.filter(c => typeof c.text === 'string').map(c => c.text).join('\n');
+  return typeof item.text === 'string' ? item.text : Array.isArray(item.content)
+    ? item.content.filter(c => object(c) && typeof c.text === 'string').map(c => c.text).join('\n') : undefined;
+}
+function toolObservation(item, data) {
+  if (item?.type === 'commandExecution') return {...item, tool: item.command || 'Terminal',
+    arguments: item.command == null ? null : {command: item.command}, result: item.aggregatedOutput};
+  if (item?.type === 'dynamicToolCall') return {...item, result: item.contentItems == null ? null : {content: item.contentItems}, isError: item.success === false};
+  return item || data;
 }
 export function describe(event) {
   const p = event.payload, data = p.data ?? p;
@@ -113,12 +122,12 @@ export function describe(event) {
   if (p.type === 'result') return {...base, kind: 'result', title: data.outcome === 'failed' ? 'Analyse fehlgeschlagen' : 'Analyseergebnis', visible: true, value: data};
   if (p.type === 'artifact') return {...base, kind: 'artifact', title: 'Datei gespeichert', visible: true, value: data.name || 'Artefakt'};
   if (p.type?.startsWith('tool-')) {
-    const tool = item || data;
+    const tool = toolObservation(item, data);
     const command = tool.arguments?.command ?? tool.parameters?.command;
     const name = Array.isArray(command) ? command.join(' ') : tool.tool || tool.name || 'Werkzeug';
     const finished = p.type === 'tool-result';
     return {...base, kind: 'tool', title: name === 'read-admitted-issue' ? 'Aufgenommene Anforderungen lesen' : name,
-      visible: true, tool, finished, failed: tool.error != null || tool.isError === true || tool.result?.isError === true || (tool.exitCode != null && tool.exitCode !== 0),
+      visible: true, tool, finished, failed: tool.status === 'failed' || tool.error != null || tool.isError === true || tool.result?.isError === true || (tool.exitCode != null && tool.exitCode !== 0),
       value: finished ? tool.result ?? (item ? null : data.body ?? data.output) : tool.arguments ?? tool.parameters};
   }
   if (p.type === 'process-exit') return {...base, kind: 'error', title: 'Agentenprozess beendet', visible: true, value: data};
@@ -130,7 +139,15 @@ export function describe(event) {
       visible: runtime.method === 'item/completed' && Boolean(text), value: text,
       role: item.type === 'agentMessage' ? 'assistant' : 'user', native: true};
   }
-  if (runtime) return {...base, title: {'turn/started': 'Agent beginnt die Bearbeitung', 'turn/completed': 'Agent hat die Bearbeitung beendet'}[runtime.method] || 'Agentenprotokoll'};
+  if (runtime) {
+    const error = runtime.params?.error ?? runtime.params?.turn?.error;
+    if (runtime.method === 'error' || error != null || runtime.params?.turn?.status === 'failed') {
+      return {...base, kind: 'error', title: 'Fehler während der Agentenarbeit', visible: true,
+        value: error ?? runtime.params?.message ?? 'Keine Fehlerbeschreibung aufgezeichnet.'};
+    }
+    if (['wpcp/runtimeExited', 'wpcp/processStopped'].includes(runtime.method)) return {...base, kind: 'error', title: 'Agentenprozess beendet', visible: true, value: runtime.params};
+    return {...base, title: {'turn/started': 'Agent beginnt die Bearbeitung', 'turn/completed': 'Agent hat die Bearbeitung beendet'}[runtime.method] || 'Agentenprotokoll'};
+  }
   if (data.phase === 'analysis-finished') return {...base, title: 'Analyse beendet'};
   if (p.type === 'message') return {...base, title: 'Weitere Sessionbeobachtung', visible: true};
   return base;
@@ -159,7 +176,7 @@ export function eventCard(d, openStored) {
   header.append(element('h4', d.title), element('time', new Date(d.event.occurredAt).toLocaleTimeString('de-DE', {hour: '2-digit', minute: '2-digit', second: '2-digit'})));
   entry.append(header);
   if (d.event.redaction?.occurred) entry.append(element('p', 'Inhalt redigiert', 'redaction-note'));
-  if (d.data.artifactId) {
+  if (typeof d.data.artifactId === 'string' && typeof d.data.mediaType === 'string') {
     entry.append(element('p', 'Der vollständige Inhalt ist als Datei gespeichert.'));
     const button = element('button', 'Vollständigen Inhalt öffnen', 'quiet');
     button.onclick = () => openStored(d.data);
@@ -173,6 +190,7 @@ export function eventCard(d, openStored) {
     if (d.finished && d.tool.arguments != null) body.append(element('h5', 'Parameter'), readable(d.tool.arguments));
     body.append(element('h5', d.finished ? 'Ergebnis' : 'Parameter'), readable(d.value));
     if (d.tool.error != null) body.append(element('h5', 'Fehler'), readable(d.tool.error));
+    if (d.tool.exitCode != null) body.append(element('p', 'Exit-Code: ' + d.tool.exitCode));
     entry.append(disclosure(d.finished ? 'Ergebnis und Fehler ansehen' : 'Parameter ansehen', body, 'tool-details'));
   } else if (d.kind === 'assignment' || (d.kind === 'message' && d.role === 'user')) {
     entry.append(disclosure(d.kind === 'assignment' ? 'Vollständigen Auftrag lesen' : 'Anweisung lesen', readable(d.value), 'assignment-details'));

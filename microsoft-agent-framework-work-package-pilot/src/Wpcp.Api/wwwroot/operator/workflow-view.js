@@ -65,6 +65,16 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
       + (duration(target.startedAt, target.completedAt) ? ' · ' + duration(target.startedAt, target.completedAt) : '')
       : 'Alle Aktivitäten und Sessions dieses Runs.'));
     const actor = element('p', undefined, 'session-actor'); actor.id = 'session-actor'; content.append(actor);
+    const result = target?.session?.originalResult;
+    if (result) {
+      const outcome = element('div', undefined, 'outcome-summary'); outcome.dataset.state = result.outcome || target.state;
+      outcome.append(element('span', 'ERGEBNIS', 'section-number'));
+      if (typeof result.summary === 'string') outcome.append(readable(result.summary));
+      else if (result.artifactId) {
+        const open = element('button', 'Vollständiges Ergebnis öffnen', 'quiet'); open.onclick = () => openArtifact(result); outcome.append(open);
+      } else outcome.append(element('p', 'Ergebnis ohne Zusammenfassung. Details im Verlauf.'));
+      content.append(outcome);
+    }
     const metadata = element('dl', undefined, 'readable-fields');
     const fields = target ? {'Session': target.session?.sessionId || 'Keine bestätigte Agentensession',
       'Versuch': target.attemptId, 'Gestartet': target.startedAt ? new Date(target.startedAt).toLocaleString('de-DE') : 'Nicht aufgezeichnet'} : {'Run': run.runId};
@@ -87,11 +97,12 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
   function renderHistory() {
     const filter = $('history-filter').value;
     const list = $('history-list');
+    list.dataset.view = filter;
     const descriptions = selectedEvents().map(describe);
     const provenance = descriptions.find(d => d.data.assignment && (d.data.actor || d.data.host))?.data;
-    if ($('session-actor')) $('session-actor').textContent = provenance
-      ? [provenance.actor?.provider === 'codex' ? 'Codex' : provenance.actor?.provider, provenance.host].filter(Boolean).join(' · ')
-      : '';
+    if ($('session-actor')) $('session-actor').textContent = !selected ? '' : provenance
+      ? [provenance.actor?.provider === 'codex' ? 'Codex' : provenance.actor?.provider || 'Agent nicht angegeben', provenance.host || 'Ausführungsort nicht angegeben'].join(' · ')
+      : 'Agent und Ausführungsort in der geladenen Historie nicht angegeben.';
     const readableEvents = conversation(descriptions);
     const relevant = (filter === 'all' ? descriptions : readableEvents.filter(d => filter === 'conversation' ||
       (filter === 'message' ? ['message', 'assignment'].includes(d.kind) : d.kind === filter))).map(d => d.event);

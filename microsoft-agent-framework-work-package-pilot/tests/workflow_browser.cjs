@@ -39,6 +39,16 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
       const attempt = run.attempts.find(a => a.session);
       if (input.nativeTools) await page.locator('#session-detail').getByRole('heading', {name: 'Anforderungen analysieren', exact: true}).waitFor();
       await page.locator('[data-attempt-id="' + attempt.attemptId + '"]').click();
+      if (input.unknownShapes) await page.locator('#history-list').getByText('Der Verlauf bleibt lesbar.', {exact: true}).waitFor();
+      if (input.runtimeFailure) {
+        const list = page.locator('#history-list');
+        await list.getByText('Upstream model quota exhausted', {exact: true}).waitFor();
+        const failure = list.locator('article').filter({has: page.getByRole('heading', {name: 'git status --short', exact: true})});
+        await failure.getByText('Fehler · 42 ms', {exact: true}).waitFor();
+        await failure.getByText('Ergebnis und Fehler ansehen', {exact: true}).click();
+        await failure.getByText('fatal: cannot open repository', {exact: true}).waitFor();
+        await page.locator('#session-detail .outcome-summary').getByText('Requirements analysis complete.', {exact: true}).waitFor();
+      }
       if (input.nativeTools) {
         const list = page.locator('#history-list');
         assert.equal(await list.getByText('Prüfe den Arbeitsstand.', {exact: true}).count(), 1, 'Protocol duplicate appears as a second authored message');

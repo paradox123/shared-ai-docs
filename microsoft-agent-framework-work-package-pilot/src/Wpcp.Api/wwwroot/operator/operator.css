@@ -635,7 +635,7 @@ summary {
 .history-toolbar { display:flex; align-items:center; flex-wrap:wrap; gap:10px; margin:24px 0 12px; font-size:12px; }
 .history-toolbar select { font:inherit; padding:8px; border:1px solid var(--line); border-radius:4px; color:var(--ink); background:var(--paper); max-width:100%; }
 #history-status { font-size:12px; color:var(--green); }
-.history-entry { border:1px solid var(--line); border-radius:6px; padding:16px 18px; margin-top:12px; background:var(--paper); }
+.history-entry { border:1px solid var(--line); border-radius:6px; padding:12px 16px; margin-top:12px; background:var(--paper); }
 .history-entry h4 { margin:0 0 6px; font-size:13px; }
 .history-entry time,.history-entry small { color:var(--muted); font-size:10px; }
 .redaction-note { color:#875d22; font-size:11px; }
@@ -672,3 +672,11 @@ summary {
 .history-entry .readable-text { margin-top:8px; }
 .history-note { font-size:11px; }
 .artifact-row strong { font-size:13px; overflow-wrap:anywhere; }
+.outcome-summary { margin:16px 0; padding:14px 16px; background:#f2f7eb; border-left:3px solid var(--green); }
+.outcome-summary[data-state=failed] { background:#fff0e6; border-left-color:#a35b32; }
+#history-list:not([data-view=all]) .event-raw { display:none; }
+@media (max-width:600px) {
+  #workflow-graph { display:flex; overflow-x:auto; padding-bottom:8px; }
+  .workflow-map { min-width:0; }
+  .activity-node { flex:0 0 195px; margin-bottom:0; }
+}

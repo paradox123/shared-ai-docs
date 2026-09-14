@@ -4,7 +4,7 @@
 
 **Blocked by:** 02: Eingereichtes Issue als erste Hintergrundaktivität starten.
 
-**Status:** resolved
+**Status:** claimed
 
 - [x] Die Run-Liste und Workflow-Ansicht verwenden die über den Eingabe-/Startweg erzeugten Runs. Kein Benutzer muss einen Run vorab in die Datenbank schreiben oder ein Fixture laden.
 - [x] Der erste Graph zeigt gestartete Aktivitäten, Versuche, Sessions und deren beobachteten Zustand; die Auswahl öffnet zugeordnete Benutzer-/Agentennachrichten, Aufträge/Kontext, Toolparameter/-ergebnisse mit Dauer/Fehlern, Erkenntnisse und Artefakte.
@@ -13,6 +13,16 @@
 - [x] Die Abnahme beginnt mit Eingabe und Start eines echten kontrollierten Issues und verfolgt denselben Run über zwei Clients bis zum Ergebnis oder konkreten Fehler. Browserprüfung und Vergleich mit öffentlichen History-/Artifact-Antworten beweisen den fachlichen Inhalt; die vollständige verschachtelte PRD-Graphnavigation folgt später.
 
 ## Comments
+
+### 2026-09-14 — Darstellungsziel nach Nutzerfeedback korrigieren
+
+Der Nutzer konnte die gezeigten JSON-Objekte und Arrays nicht sinnvoll nutzen.
+Die bisherige technische Vollständigkeit genügt daher nicht als visuelle Abnahme.
+Ticket 03 wird auf demselben Branch nachgebessert: benannte Schritte, lesbare
+Nachrichten und Ergebnisse, gezielt aufklappbare Werkzeugdetails und Artefakte.
+Die vollständigen Originalereignisse bleiben in der technischen Detailansicht
+erreichbar. Das neue Szenario und Task 2.5d im bestehenden OpenSpec-Change
+halten diese Korrektur fest.
 
 ### 2026-09-14 — Unverbindliche Designreferenz
 

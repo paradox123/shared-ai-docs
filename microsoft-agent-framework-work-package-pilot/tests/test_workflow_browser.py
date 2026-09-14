@@ -19,6 +19,28 @@ def workflow_browser(payload):
 
 
 class WorkflowBrowserTests(SubmissionExecutionHarness, unittest.TestCase):
+    def test_recorded_runtime_failure_and_terminal_output_are_visible(self):
+        self.analysis.extra_events = [
+            {'type': 'message', 'data': {'runtimeEvent': {'method': 'error',
+                'params': {'error': {'message': 'Upstream model quota exhausted'}}}}},
+            {'type': 'tool-result', 'data': {'runtimeEvent': {'method': 'item/completed', 'params': {'item': {
+                'id': 'command-1', 'type': 'commandExecution', 'command': 'git status --short',
+                'aggregatedOutput': 'fatal: cannot open repository', 'exitCode': 128, 'durationMs': 42, 'status': 'completed'}}}}},
+        ]
+        self.addCleanup(setattr, self.analysis, 'extra_events', [])
+        self.worker()
+        workflow_browser({'baseUrl': self.base_url, 'credential': self.provider.tokens['actor-authorized'],
+            'observer': self.provider.tokens['actor-observer'], 'sourceUrl': self.issue(709), 'runtimeFailure': True})
+
+    def test_unrecognized_json_messages_do_not_break_readable_history(self):
+        self.analysis.extra_events = [{'type': 'message', 'data': {'role': 'assistant', 'text': text}} for text in (
+            '{"content":[null]}', '{"contractVersion":"example/v1","events":[null]}',
+            'Der Verlauf bleibt lesbar.')]
+        self.addCleanup(setattr, self.analysis, 'extra_events', [])
+        self.worker()
+        workflow_browser({'baseUrl': self.base_url, 'credential': self.provider.tokens['actor-authorized'],
+            'observer': self.provider.tokens['actor-observer'], 'sourceUrl': self.issue(708), 'unknownShapes': True})
+
     def test_native_tool_failure_is_readable_and_protocol_duplicates_stay_in_full_history(self):
         item = {'id': 'recorded-tool-1', 'type': 'mcpToolCall', 'tool': 'execute',
             'arguments': {'command': ['git', 'status', '--short']}, 'status': 'failed',
