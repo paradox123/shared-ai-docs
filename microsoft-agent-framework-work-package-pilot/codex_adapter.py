@@ -55,6 +55,8 @@ class Adapter:
         self.hook_configuration = {}
         self.active_turn = None
         self.qualification_operation = None
+        self.analysis_operation = None
+        self.analysis_mode = False
         self.turn_started_at = None
         self.outbox = self.root / 'observations'
         self.outbox.mkdir(exist_ok=True, mode=0o700)
@@ -152,21 +154,14 @@ WPCP_EXECUTION_TOKEN = %s
         if not (self.repository / '.git').exists():
             subprocess.run(['git', 'init', '-q', '--initial-branch=codex/disposable-issue', '--template=', str(self.repository)],
                            env=env, check=True, capture_output=True, timeout=5)
-            (self.repository / 'greeting.py').write_text('def greet(name):\n    return "Hello," + name\n')
-            (self.repository / 'test_greeting.py').write_text('''import unittest
-from greeting import greet
-class GreetingTests(unittest.TestCase):
-    def test_named_greeting(self): self.assertEqual('Hello, Ada!', greet(' Ada '))
-    def test_empty_name(self):
-        with self.assertRaises(ValueError): greet('   ')
-if __name__ == '__main__': unittest.main()
-''')
-            (self.repository / 'ISSUE.md').write_text('Fix greet: trim the name, return Hello, NAME!; reject blank names with ValueError.\nRun the supplied unittest before and after the change. Do not change tests.\n')
-            subprocess.run(['git', '-C', str(self.repository), 'add', 'ISSUE.md', 'greeting.py', 'test_greeting.py'],
-                           env=env, check=True, capture_output=True, timeout=5)
-            subprocess.run(['git', '-C', str(self.repository), '-c', 'user.name=Codex Pilot',
-                '-c', 'user.email=pilot@localhost', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Disposable issue fixture'],
-                env=env, check=True, capture_output=True, timeout=5)
+            if self.analysis_mode:
+                (self.repository / 'README.md').write_text('Service-owned read-only requirements analysis workspace. No implementation checkout.\n')
+                subprocess.run(['git', '-C', str(self.repository), 'add', 'README.md'], env=env, check=True, capture_output=True, timeout=5)
+                subprocess.run(['git', '-C', str(self.repository), '-c', 'user.name=Codex Pilot',
+                    '-c', 'user.email=pilot@localhost', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Analysis workspace'],
+                    env=env, check=True, capture_output=True, timeout=5)
+            else:
+                self.prepare_disposable_issue(env)
         self.runtime = Connection(self.config['executable'], str(self.repository), env, self.observe)
         hooks = self.runtime.request('hooks/list', {'cwds': [str(self.repository)]})['data'][0]['hooks']
         if len(hooks) != 1 or hooks[0]['command'] != command:
@@ -196,6 +191,23 @@ if __name__ == '__main__': unittest.main()
         self.ready = True
         threading.Thread(target=self.watchdog, daemon=True).start()
 
+    def prepare_disposable_issue(self, env):
+        (self.repository / 'greeting.py').write_text('def greet(name):\n    return "Hello," + name\n')
+        (self.repository / 'test_greeting.py').write_text('''import unittest
+from greeting import greet
+class GreetingTests(unittest.TestCase):
+    def test_named_greeting(self): self.assertEqual('Hello, Ada!', greet(' Ada '))
+    def test_empty_name(self):
+        with self.assertRaises(ValueError): greet('   ')
+if __name__ == '__main__': unittest.main()
+''')
+        (self.repository / 'ISSUE.md').write_text('Fix greet: trim the name, return Hello, NAME!; reject blank names with ValueError.\nRun the supplied unittest before and after the change. Do not change tests.\n')
+        subprocess.run(['git', '-C', str(self.repository), 'add', 'ISSUE.md', 'greeting.py', 'test_greeting.py'],
+                       env=env, check=True, capture_output=True, timeout=5)
+        subprocess.run(['git', '-C', str(self.repository), '-c', 'user.name=Codex Pilot',
+            '-c', 'user.email=pilot@localhost', '-c', 'commit.gpgsign=false', 'commit', '-qm', 'Disposable issue fixture'],
+            env=env, check=True, capture_output=True, timeout=5)
+
     def watchdog(self):
         while self.runtime is not None and self.runtime.owned.process.poll() is None:
             operation = self.qualification_operation
@@ -218,6 +230,8 @@ if __name__ == '__main__': unittest.main()
             time.sleep(.2)
 
     def observe(self, event):
+        if self.analysis_operation is not None:
+            self.analysis_operation.observe(event)
         params = event.get('params', {})
         if event.get('method') == 'wpcp/runtimeExited' and self.active_turn:
             params.update(threadId=self.active_turn[0], turnId=self.active_turn[1])
@@ -402,6 +416,8 @@ if __name__ == '__main__': unittest.main()
             return body
 
     def execute(self, command):
+        if self.analysis_operation is not None:
+            return self.analysis_operation.execute(command)
         if self.qualification_operation is not None:
             self.authorize_qualification_tool(self.qualification_operation['sessionId'])
             return self.runtime.request('command/exec', {'command': command, 'cwd': str(self.repository),
@@ -414,6 +430,10 @@ if __name__ == '__main__': unittest.main()
         return contexts[0].write({'kind': 'execute', 'command': command})
 
     def authorize_tool(self, tool):
+        if self.analysis_operation is not None:
+            self.analysis_operation.authorize(tool.get('session_id'))
+            if tool.get('tool_name') != 'mcp__wpcp__execute': raise ValueError('analysis-tool-denied')
+            return {'allowed': True}
         if self.qualification_operation is not None:
             self.authorize_qualification_tool(tool.get('session_id'))
             if tool.get('tool_name') != 'mcp__wpcp__execute': raise ValueError('qualification-tool-denied')
@@ -455,6 +475,14 @@ def main():
             self.end_headers(); self.wfile.write(data)
         def do_GET(self):
             if self.path == '/health': return self.reply(200, {'status': 'ready'})
+            if self.path == '/submission-readiness':
+                if not secrets.compare_digest(self.headers.get('X-Wpcp-Adapter-Token', ''), adapter.service_token):
+                    return self.reply(403, {'code': 'adapter-access-denied'})
+                try:
+                    from submission_analysis import readiness
+                    return self.reply(200, readiness(adapter))
+                except Exception:
+                    return self.reply(503, {'code': 'agent-readiness-unavailable'})
             if self.path == '/publication-readiness':
                 if not secrets.compare_digest(self.headers.get('X-Wpcp-Adapter-Token', ''), adapter.service_token):
                     return self.reply(403, {'code': 'adapter-access-denied'})
@@ -475,6 +503,9 @@ def main():
                 if self.path not in ('/execute', '/authorize-tool') and not secrets.compare_digest(
                         self.headers.get('X-Wpcp-Adapter-Token', ''), adapter.service_token):
                     return self.reply(403, {'code': 'adapter-access-denied'})
+                if self.command == 'PUT' and len(parts) == 2 and parts[0] == 'submission-analyses':
+                    from submission_analysis import analyze
+                    return self.reply(200, analyze(adapter, parts[1], body))
                 if self.command == 'PUT' and len(parts) == 2 and parts[0] == 'sessions':
                     return self.reply(200, adapter.start(parts[1], body))
                 if self.command == 'PUT' and len(parts) == 2 and parts[0] in ('qualification-reviews', 'qualification-repairs'):

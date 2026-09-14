@@ -5,7 +5,8 @@ namespace Wpcp.Domain;
 
 /// <summary>Deployment repository bindings and redaction policy; never an issue catalogue or member list.</summary>
 public sealed record SubmissionConfiguration(
-    IReadOnlyList<RepositoryBinding> Repositories, ControlledRedactionPolicy RedactionPolicy)
+    IReadOnlyList<RepositoryBinding> Repositories, ControlledRedactionPolicy RedactionPolicy,
+    SubmissionExecutionConfiguration? BackgroundExecution = null)
 {
     public static SubmissionConfiguration Load(string path)
     {
@@ -27,6 +28,27 @@ public sealed record SubmissionConfiguration(
                 .Select(c => c.GetProperty("value").GetString()!));
         if (policy.ContainsControlledCanary(JsonSerializer.Serialize(repositories)))
             throw new ArgumentException("Repository bindings contain redacted values.");
-        return new(repositories, policy);
+        SubmissionExecutionConfiguration? execution = null;
+        if (root.TryGetProperty("backgroundExecution", out var configured))
+        {
+            execution = configured.Deserialize<SubmissionExecutionConfiguration>(new JsonSerializerOptions(JsonSerializerDefaults.Web))
+                ?? throw new ArgumentException("Invalid background execution configuration.");
+            execution.Validate();
+            if (policy.ContainsControlledCanary(JsonSerializer.Serialize(execution)))
+                throw new ArgumentException("Execution configuration contains redacted values.");
+        }
+        return new(repositories, policy, execution);
+    }
+}
+
+public sealed record SubmissionExecutionConfiguration(string AdapterOrigin, int TimeoutSeconds = 180)
+{
+    public const string Step = "submission-analysis/v1";
+    public void Validate()
+    {
+        if (!Uri.TryCreate(AdapterOrigin, UriKind.Absolute, out var uri) || !uri.IsLoopback || uri.Scheme != "http" ||
+            uri.AbsolutePath != "/" || uri.UserInfo.Length != 0 || uri.Query.Length != 0 || uri.Fragment.Length != 0 ||
+            TimeoutSeconds is < 10 or > 600)
+            throw new ArgumentException("Background execution requires a loopback adapter and a bounded timeout.");
     }
 }

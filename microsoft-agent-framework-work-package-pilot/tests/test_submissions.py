@@ -19,6 +19,7 @@ class SubmissionProcessHarness(ControlPlaneProcessHarness):
         config_path.write_text(json.dumps(configuration))
         environment = {**os.environ, 'WPCP_CONNECTION_STRING': cls.connection_string,
             'WPCP_GITHUB_TEST_ORIGIN': cls.provider.origin}
+        environment.update(getattr(cls, 'service_environment', {}))
         environment.pop('WPCP_FIXTURE_ACCESS_TOKEN', None)
         if getattr(cls, 'live_github', False):
             environment.pop('WPCP_GITHUB_TEST_ORIGIN', None)

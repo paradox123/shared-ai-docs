@@ -9,26 +9,30 @@ from tests.test_submissions import SubmissionProcessHarness
 from tests import test_submission_browser as browser_proof
 
 
+
+def live_configuration(url):
+    match = re.fullmatch(r'https://github.com/([\w.-]+/[\w.-]+)/issues/(\d+)', url)
+    if not match:
+        raise ValueError('The live proof requires a GitHub issue URL')
+    name, number = match.groups()
+    issue = json.loads(subprocess.check_output(['gh', 'api', f'repos/{name}/issues/{number}'], text=True))
+    repository = json.loads(subprocess.check_output(['gh', 'api', f'repos/{name}'], text=True))
+    configuration = {
+        'provider': {'repositories': [{'repositoryId': f'github-{repository["id"]}',
+            'fullName': repository['full_name'], 'providerRepositoryId': repository['id']}]},
+        'redactionPolicy': {'version': 'controlled-canary-v1', 'marker': '[REDACTED:CONTROLLED-CANARY]',
+            'controlledCanaries': [{'value': 'wpcp-controlled-secret-canary-v1'},
+                {'value': 'wpcp-controlled-token-canary-v1'}]},
+    }
+    return issue, configuration
+
 @unittest.skipUnless(os.environ.get('WPCP_LIVE_GITHUB_SUBMISSION_URL'), 'Set an eligible GitHub issue URL for live intake')
 class LiveGitHubSubmissionTests(SubmissionProcessHarness, unittest.TestCase):
     live_github = True
 
     @classmethod
     def setUpClass(cls):
-        url = os.environ['WPCP_LIVE_GITHUB_SUBMISSION_URL']
-        match = re.fullmatch(r'https://github.com/([\w.-]+/[\w.-]+)/issues/(\d+)', url)
-        if not match:
-            raise ValueError('The live proof requires a GitHub issue URL')
-        name, number = match.groups()
-        cls.live_issue = json.loads(subprocess.check_output(['gh', 'api', f'repos/{name}/issues/{number}'], text=True))
-        repository = json.loads(subprocess.check_output(['gh', 'api', f'repos/{name}'], text=True))
-        cls.deployment_configuration = {
-            'provider': {'repositories': [{'repositoryId': f'github-{repository["id"]}',
-                'fullName': repository['full_name'], 'providerRepositoryId': repository['id']}]},
-            'redactionPolicy': {'version': 'controlled-canary-v1', 'marker': '[REDACTED:CONTROLLED-CANARY]',
-                'controlledCanaries': [{'value': 'wpcp-controlled-secret-canary-v1'},
-                    {'value': 'wpcp-controlled-token-canary-v1'}]},
-        }
+        cls.live_issue, cls.deployment_configuration = live_configuration(os.environ['WPCP_LIVE_GITHUB_SUBMISSION_URL'])
         super().setUpClass()
 
     def test_real_issue_admitted_in_browser_and_read_after_service_restart(self):

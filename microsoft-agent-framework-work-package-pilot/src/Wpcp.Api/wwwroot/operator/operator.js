@@ -1,3 +1,4 @@
+import {showExecution} from './execution-view.js';
 const $ = id => document.getElementById(id);
 const errors = {
   'invalid-github-issue-url': 'Bitte eine GitHub-Issue-URL im Format https://github.com/owner/repository/issues/123 eingeben.',
@@ -17,6 +18,11 @@ const errors = {
   'submission-correlation-rejected': 'Die Herkunft enthält einen durch die Redaktionsregel gesperrten Wert.',
   'submission-not-found': 'Diese Anforderungen wurden nicht gefunden.',
   'run-store-unavailable': 'Der Server kann die Anforderungen gerade nicht speichern oder lesen. Bitte erneut versuchen.',
+  'background-execution-not-configured': 'Der Server ist noch nicht für Hintergrundanalysen eingerichtet. Die gespeicherten Anforderungen bleiben erhalten.',
+  'agent-credentials-unavailable': 'Dem Server fehlt der Zugang zum Agentendienst. Die Analyse wurde nicht gestartet.',
+  'artifact-storage-unavailable': 'Der gemeinsame Ergebnisspeicher ist nicht verfügbar. Bitte die Serverkonfiguration prüfen lassen; es wurde kein Run gestartet.',
+  'agent-readiness-unavailable': 'Der Agentendienst ist nicht ausführungsbereit. Bitte dessen Runtime und Zugang prüfen lassen; es wurde kein Run gestartet.',
+  'issue-already-has-run': 'Für dieses Issue existiert bereits ein Run aus einem anderen Startweg. Er wird nicht durch einen neuen Auftrag ersetzt.',
 };
 let credential = '';
 let operation;
@@ -41,8 +47,8 @@ function disconnect() {
   $('error').hidden = true;
 }
 
-async function api(path, signal, body) {
-  const response = await fetch('/api/v1/submissions' + path, {
+async function api(path, signal, body, resource = '/api/v1/submissions') {
+  const response = await fetch(resource + path, {
     method: body ? 'POST' : 'GET', signal, cache: 'no-store',
     headers: {Authorization: `Bearer ${credential}`, ...(body ? {'Content-Type': 'application/json'} : {})},
     ...(body ? {body: JSON.stringify(body)} : {}),
@@ -61,7 +67,7 @@ async function perform(work) {
   const current = operation = new AbortController();
   $('error').hidden = true;
   $('notice').textContent = '';
-  for (const button of document.querySelectorAll('button[type="submit"], #refresh')) button.disabled = true;
+  for (const button of document.querySelectorAll('button[type="submit"], [data-execution="start"], #refresh')) button.disabled = true;
   try { await work(current.signal); }
   catch (error) {
     if (current.signal.aborted) return;
@@ -70,7 +76,7 @@ async function perform(work) {
       ? 'Der Server ist nicht erreichbar. Bitte Verbindung prüfen und erneut versuchen.' : error.message;
     $('error').hidden = false;
   } finally {
-    if (operation === current) for (const button of document.querySelectorAll('button[type="submit"], #refresh')) button.disabled = false;
+    if (operation === current) for (const button of document.querySelectorAll('button[type="submit"], [data-execution="start"], #refresh')) button.disabled = false;
   }
 }
 
@@ -95,6 +101,17 @@ async function showDetail(id, signal, focus = false) {
   history.replaceState(null, '', '#' + record.submissionId);
   for (const row of $('submission-list').children) row.setAttribute('aria-current', String(row.dataset.id === id));
   if (focus) $('detail').querySelector('h2').focus();
+  const start = $('detail').querySelector('[data-execution="start"]');
+  start.addEventListener('click', () => perform(async next => {
+    await api('/' + record.submissionId + '/start', next, {});
+    await overview(next, record.submissionId);
+    $('notice').textContent = 'Gestartet · Der Server übernimmt die Analyse. Du kannst dieses Fenster schließen.';
+  }));
+  if (record.runId) {
+    $('detail').querySelector('.execution-note').textContent = 'Der Server bearbeitet die Analyse unabhängig von diesem Fenster. Implementierung und Review folgen in späteren Schritten.';
+    $('detail').querySelector('.detail-kicker .badge').textContent = '● Gestartet';
+    await showExecution($('detail').querySelector('.execution'), record, signal, api);
+  }
 }
 
 async function overview(signal, selected = location.hash.slice(1)) {
@@ -110,7 +127,7 @@ async function overview(signal, selected = location.hash.slice(1)) {
     source.textContent = `${record.repository.fullName} / #${record.source.issueNumber}`;
     const title = document.createElement('strong'); title.textContent = record.title;
     const bottom = document.createElement('span'); bottom.className = 'row-bottom';
-    const status = document.createElement('span'); status.className = 'badge'; status.textContent = '● Aufgenommen';
+    const status = document.createElement('span'); status.className = 'badge'; status.textContent = record.runId ? '● Gestartet' : '● Aufgenommen';
     const time = document.createElement('span'); time.textContent = date(record.admittedAt);
     bottom.append(status, time); row.append(source, title, bottom);
     row.addEventListener('click', () => perform(signal => showDetail(record.submissionId, signal, true)));
@@ -141,11 +158,14 @@ $('connect-form').addEventListener('submit', event => {
 $('submission-form').addEventListener('submit', event => {
   event.preventDefault();
   const sourceUrl = $('source-url').value.trim();
+  const start = event.submitter?.value === 'start';
   perform(async signal => {
-    const record = await api('', signal, {sourceUrl});
+    const record = await api('', signal, {sourceUrl, start});
     await overview(signal, record.submissionId);
     $('source-url').value = '';
-    $('notice').textContent = 'Aufgenommen · Die gespeicherte Fassung ist in deiner Übersicht verfügbar.';
+    $('notice').textContent = start
+      ? 'Gestartet · Der Server übernimmt die Analyse. Du kannst dieses Fenster schließen.'
+      : 'Aufgenommen · Die gespeicherte Fassung ist in deiner Übersicht verfügbar.';
   });
 });
 $('refresh').addEventListener('click', () => perform(signal => overview(signal)));

@@ -84,6 +84,10 @@ No material product decision remains unresolved. Accepted: full additive GUI, bo
 
 ## Acceptance direction
 
+### Ticket 02 implementation boundary
+
+Ticket 02 was accepted by the user on 2026-09-14. Its completed design, first-step contract and evidence are archived in [add-agent-framework-background-start](../archive/2026-09-14-add-agent-framework-background-start/design.md). The remaining workflow and distributed acceptance stay in this parent change.
+
 Before the deferred distributed acceptance, the user requested deployment to Azure
 using their existing credit account on 2026-09-14. Deploy the accepted Ticket 01
 intake surface and its own durable PostgreSQL database in an isolated resource

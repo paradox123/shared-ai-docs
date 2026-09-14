@@ -815,3 +815,6 @@ gates, native continuation, publication/reconciliation command and verification.
 [SUBMISSIONS.md](SUBMISSIONS.md) documents the live GitHub intake, deployment
 configuration, GUI and authenticated public submission reads. GUI Ticket 01
 stores an immutable admitted snapshot without starting an agent run.
+
+For GUI Ticket 02, see [background requirements analysis](SUBMISSION-EXECUTION.md):
+atomic start, independent dispatcher, real agent history and GUI result/failure readback.

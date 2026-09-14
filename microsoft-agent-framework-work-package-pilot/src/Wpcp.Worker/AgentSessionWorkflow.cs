@@ -5,35 +5,43 @@ using Wpcp.Storage.Postgres;
 
 namespace Wpcp.Worker;
 
-internal sealed class HttpAgentSessionAdapter(HttpClient client, bool readOnly = false, string? runId = null) : IAgentSessionAdapter
+internal enum AgentSessionMode { Fake, Real, SubmissionAnalysis }
+
+internal sealed class HttpAgentSessionAdapter(HttpClient client, bool readOnly = false, string? runId = null,
+    string resource = "sessions") : IAgentSessionAdapter
 {
     public async Task<AgentAdapterResponse> StartOrReadAsync(string operationKey, string note, CancellationToken token)
     {
         using var body = new StringContent(JsonSerializer.Serialize(new { note, runId }), System.Text.Encoding.UTF8, "application/json");
-        using var response = readOnly ? await client.GetAsync($"sessions/{operationKey}", token) :
-            await client.PutAsync($"sessions/{operationKey}", body, token);
+        using var response = readOnly ? await client.GetAsync($"{resource}/{operationKey}", token) :
+            await client.PutAsync($"{resource}/{operationKey}", body, token);
         return new((int)response.StatusCode, await response.Content.ReadAsStringAsync(token));
     }
 }
 
-internal static class FakeAgentWorkflow
+internal static class AgentSessionWorkflow
 {
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
 
     public static async Task ExecuteAsync(PostgresImplementationRunStore store, string runId,
         string origin, string note, string? pauseAt, bool rejectBlocked, int timeoutMs, bool repositoryDelivery = false, bool readOnly = false,
-        string? realPython = null)
+        string? realPython = null, AgentSessionMode mode = AgentSessionMode.Fake)
     {
+        if ((mode == AgentSessionMode.Real) != (realPython is not null))
+            throw new ArgumentException("Only real implementation mode requires the canonical Python validator.");
+        var settings = ModeSettings.For(mode);
         var uri = ControlledHttp.Origin(origin);
         await using var delivery = repositoryDelivery ? null : await store.AcquireAgentDeliveryAsync(runId);
         await using var standalone = repositoryDelivery ? null : await store.AcquireStandaloneAgentAsync(runId);
         using var client = ControlledHttp.Client(origin, timeoutMs);
-        if (realPython is not null && uri.AbsoluteUri == Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_ORIGIN") &&
+        if ((mode == AgentSessionMode.SubmissionAnalysis || mode == AgentSessionMode.Real && uri.AbsoluteUri == Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_ORIGIN")) &&
             Environment.GetEnvironmentVariable("WPCP_REAL_ADAPTER_TOKEN") is { Length: > 0 } adapterToken)
             client.DefaultRequestHeaders.Add("X-Wpcp-Adapter-Token", adapterToken);
-        var prepare = new PrepareExecutor(store, uri.AbsoluteUri, rejectBlocked, realPython is null ? "fake-codex" : "real-codex");
-        var execute = new SessionExecutor(store, new HttpAgentSessionAdapter(client, readOnly, realPython is null ? null : runId), note, pauseAt, realPython);
-        var workflow = new WorkflowBuilder(prepare).WithName(realPython is null ? "FakeCodexAttemptV1" : "RealCodexAttemptV1")
+        var prepare = new PrepareExecutor(store, uri.AbsoluteUri, rejectBlocked, settings);
+        var execute = new SessionExecutor(store, new HttpAgentSessionAdapter(client, readOnly,
+            mode == AgentSessionMode.Fake ? null : runId, settings.Resource),
+            note, pauseAt, realPython, mode, settings.ExecuteName);
+        var workflow = new WorkflowBuilder(prepare).WithName(settings.WorkflowName)
             .AddEdge(prepare, execute).Build();
         await using var run = await InProcessExecution.RunAsync(workflow, runId);
         // Framework errors are events, not necessarily thrown by RunAsync.
@@ -57,16 +65,27 @@ internal static class FakeAgentWorkflow
         await Task.Delay(Timeout.InfiniteTimeSpan, token);
     }
 
-    private sealed class PrepareExecutor(PostgresImplementationRunStore store, string origin, bool rejectBlocked, string kind)
-        : Executor<string, AgentAttemptReceipt>(kind == "real-codex" ? "PrepareRealAttempt" : "PrepareFakeAttempt")
+    private sealed record ModeSettings(string Kind, string Resource, string WorkflowName, string PrepareName, string ExecuteName)
+    {
+        public static ModeSettings For(AgentSessionMode mode) => mode switch
+        {
+            AgentSessionMode.Fake => new("fake-codex", "sessions", "FakeCodexAttemptV1", "PrepareFakeAttempt", "ExecuteExternalFakeSession"),
+            AgentSessionMode.Real => new("real-codex", "sessions", "RealCodexAttemptV1", "PrepareRealAttempt", "ExecuteRealCodexSession"),
+            AgentSessionMode.SubmissionAnalysis => new("submission-analysis", "submission-analyses", "SubmissionAnalysisV1", "PrepareSubmissionAnalysis", "AnalyzeSubmission"),
+            _ => throw new ArgumentException("Unknown agent session mode.")
+        };
+    }
+
+    private sealed class PrepareExecutor(PostgresImplementationRunStore store, string origin, bool rejectBlocked, ModeSettings settings)
+        : Executor<string, AgentAttemptReceipt>(settings.PrepareName)
     {
         public override async ValueTask<AgentAttemptReceipt> HandleAsync(string runId, IWorkflowContext context,
             CancellationToken cancellationToken = default) =>
-            await store.PrepareAgentAsync(runId, origin, rejectBlocked, cancellationToken, kind);
+            await store.PrepareAgentAsync(runId, origin, rejectBlocked, cancellationToken, settings.Kind);
     }
 
-    private sealed class SessionExecutor(PostgresImplementationRunStore store, IAgentSessionAdapter adapter, string note, string? pauseAt, string? realPython)
-        : Executor<AgentAttemptReceipt, string>(realPython is null ? "ExecuteExternalFakeSession" : "ExecuteRealCodexSession")
+    private sealed class SessionExecutor(PostgresImplementationRunStore store, IAgentSessionAdapter adapter, string note, string? pauseAt,
+        string? realPython, AgentSessionMode mode, string executorName) : Executor<AgentAttemptReceipt, string>(executorName)
     {
         public override async ValueTask<string> HandleAsync(AgentAttemptReceipt receipt, IWorkflowContext context,
             CancellationToken cancellationToken = default)
@@ -116,9 +135,14 @@ internal static class FakeAgentWorkflow
                 }
                 await PauseAsync("after-result-observed", pauseAt, cancellationToken);
                 var result = await store.ReadOriginalAgentResultAsync(receipt, cancellationToken);
-                if (realPython is not null)
+                if (mode == AgentSessionMode.SubmissionAnalysis)
                 {
-                    if (!terminal || result is null || !await CanonicalResult.ValidateAsync(realPython, result.Value, cancellationToken))
+                    if (!terminal || result is null || !SubmissionAnalysisResult.IsValid(result.Value)) throw new JsonException();
+                    category = result.Value.GetProperty("outcome").GetString() == "completed" ? "completed" : "agent-failed";
+                }
+                else if (mode == AgentSessionMode.Real)
+                {
+                    if (!terminal || result is null || !await CanonicalResult.ValidateAsync(realPython!, result.Value, cancellationToken))
                         throw new JsonException();
                     category = result.Value.GetProperty("outcome").GetString() == "completed" ? "completed" :
                         receipt.RejectBlocked ? "semantic-rejection" : "blocked";
@@ -137,7 +161,17 @@ internal static class FakeAgentWorkflow
             catch (ArgumentException) { category = "schema-failure"; }
             catch (System.ComponentModel.Win32Exception) { category = "infrastructure-failure"; }
             catch (IOException) { category = "infrastructure-failure"; }
+            catch (HttpRequestException error) when (mode == AgentSessionMode.SubmissionAnalysis)
+            {
+                throw new AgentResponseUnavailableException("transport-failure",
+                    error.GetBaseException() is not System.Net.Sockets.SocketException
+                        { SocketErrorCode: System.Net.Sockets.SocketError.ConnectionRefused });
+            }
             catch (HttpRequestException) { category = "transport-failure"; }
+            catch (OperationCanceledException) when (mode == AgentSessionMode.SubmissionAnalysis && !cancellationToken.IsCancellationRequested)
+            {
+                throw new AgentResponseUnavailableException("timeout", true);
+            }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested) { category = "timeout"; }
             receipt = await store.CompleteAgentAsync(receipt.RunId, category,
                 category is "blocked" or "semantic-rejection" ? "blocked" :
@@ -154,4 +188,10 @@ internal static class FakeAgentWorkflow
     {
         public string Category { get; } = category;
     }
+}
+
+internal sealed class AgentResponseUnavailableException(string category, bool deliveryUncertain) : Exception
+{
+    public string Category { get; } = category;
+    public bool DeliveryUncertain { get; } = deliveryUncertain;
 }

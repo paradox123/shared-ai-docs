@@ -26,7 +26,7 @@ public sealed partial class PostgresImplementationRunStore
         CancellationToken token = default, string kind = "fake-codex") =>
         ChangeAgentAsync(runId, async (connection, transaction, run, receipt) =>
         {
-            if (kind is not ("fake-codex" or "real-codex-preflight" or "real-codex")) throw new ArgumentException("Unknown agent kind.");
+            if (kind is not ("fake-codex" or "real-codex-preflight" or "real-codex" or "submission-analysis")) throw new ArgumentException("Unknown agent kind.");
             if (receipt is not null)
             {
                 if (receipt.AdapterOrigin != origin || receipt.RejectBlocked != rejectBlocked || receipt.Kind != kind)
@@ -233,7 +233,7 @@ public sealed partial class PostgresImplementationRunStore
               FROM wpcp_agent_sessions session
               JOIN wpcp_activity_attempts attempt ON attempt.attempt_id=session.attempt_id
               JOIN wpcp_run_activities activity ON activity.activity_id=attempt.activity_id
-             WHERE session.run_id=@id AND activity.activity_type IN ('fake-codex', 'real-codex-preflight', 'real-codex')
+             WHERE session.run_id=@id AND activity.activity_type IN ('fake-codex', 'real-codex-preflight', 'real-codex', 'submission-analysis')
              ORDER BY attempt.started_at, attempt.attempt_id
              LIMIT 1
             """, connection, transaction);

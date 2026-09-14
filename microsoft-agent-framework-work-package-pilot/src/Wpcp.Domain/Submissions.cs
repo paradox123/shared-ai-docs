@@ -9,6 +9,6 @@ public sealed record Submission(
     SubmissionSource Source, RepositoryBinding Repository, ActorIdentity SubmittedBy,
     DateTimeOffset AdmittedAt, string ContentSha256, RedactionMetadata Redaction);
 
-public sealed record SubmitGitHubIssueRequest(string? SourceUrl);
+public sealed record SubmitGitHubIssueRequest(string? SourceUrl, bool Start = false);
 
 public sealed record SubmissionAdmission(Submission Submission, bool Created);

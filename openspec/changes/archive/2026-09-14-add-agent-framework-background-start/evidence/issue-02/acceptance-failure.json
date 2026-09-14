@@ -1,0 +1,26 @@
+{
+  "start": {
+    "submissionId": "d0f3af94-5d2f-4fc1-a7c2-13ebf6c4cf8b",
+    "runId": "490ad02b-ff85-4fd4-ba4a-10d459f714f4",
+    "state": "Wartend",
+    "result": "",
+    "browserErrors": []
+  },
+  "readback": {
+    "submissionId": "d0f3af94-5d2f-4fc1-a7c2-13ebf6c4cf8b",
+    "runId": "490ad02b-ff85-4fd4-ba4a-10d459f714f4",
+    "state": "Fehlgeschlagen",
+    "result": "Die Verbindung zum Agentendienst ist fehlgeschlagen. (transport-failure)",
+    "browserErrors": []
+  },
+  "state": {
+    "submissionId": "d0f3af94-5d2f-4fc1-a7c2-13ebf6c4cf8b",
+    "runId": "490ad02b-ff85-4fd4-ba4a-10d459f714f4",
+    "state": "failed",
+    "code": "transport-failure"
+  },
+  "fault": "Stopped the real adapter after successful preflight, before worker delivery",
+  "browserClosed": true,
+  "apiRestarted": true,
+  "workerLauncherExited": true
+}
