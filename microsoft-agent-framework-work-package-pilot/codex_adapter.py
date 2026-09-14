@@ -196,9 +196,9 @@ WPCP_EXECUTION_TOKEN = %s
         (self.repository / 'test_greeting.py').write_text('''import unittest
 from greeting import greet
 class GreetingTests(unittest.TestCase):
-def test_named_greeting(self): self.assertEqual('Hello, Ada!', greet(' Ada '))
-def test_empty_name(self):
-    with self.assertRaises(ValueError): greet('   ')
+    def test_named_greeting(self): self.assertEqual('Hello, Ada!', greet(' Ada '))
+    def test_empty_name(self):
+        with self.assertRaises(ValueError): greet('   ')
 if __name__ == '__main__': unittest.main()
 ''')
         (self.repository / 'ISSUE.md').write_text('Fix greet: trim the name, return Hello, NAME!; reject blank names with ValueError.\nRun the supplied unittest before and after the change. Do not change tests.\n')

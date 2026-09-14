@@ -24,18 +24,25 @@ internal static class SubmissionDispatcher
             {
                 await using var delivery = await store.ClaimSubmissionAsync(token);
                 if (delivery is null) { await Task.Delay(500, token); continue; }
+                // Preparation is durable before PUT. Even a worker that died before recording
+                // a timeout may have delivered the request; a replacement cannot assume otherwise.
+                var previous = (await store.GetProjectionAsync(delivery.RunId, token))!;
+                var wasStarted = previous.Attempts.Any(a => a.Session is not null);
                 if (!await PostgresImplementationRunStore.ArtifactStorageReadyAsync(token))
                 {
-                    await store.SetSubmissionExecutionAsync(delivery, "failed", "artifact-storage-unavailable", token);
+                    await store.SetSubmissionExecutionAsync(delivery, wasStarted ? "reconciling" : "failed", "artifact-storage-unavailable", token);
+                    if (wasStarted) await Task.Delay(1000, token);
                     continue;
                 }
                 if (delivery.Configuration != configuration.BackgroundExecution ||
                     !configuration.Repositories.Contains(delivery.Submission.Repository))
                 {
-                    await store.SetSubmissionExecutionAsync(delivery, "failed", "execution-configuration-changed", token);
+                    await store.SetSubmissionExecutionAsync(delivery, wasStarted ? "reconciling" : "failed", "execution-configuration-changed", token);
+                    if (wasStarted) await Task.Delay(1000, token);
                     continue;
                 }
-                await store.SetSubmissionExecutionAsync(delivery, "running", null, token);
+                if (!wasStarted) await store.SetSubmissionExecutionAsync(delivery, "running", null, token);
+                var reconcile = false;
                 var processId = $"submission-worker:{Environment.ProcessId}:{Guid.NewGuid():N}";
                 await store.RecordLifecycleAsync(new(delivery.RunId, LifecycleObservationKind.ProcessStarted,
                     "worker", processId, DateTimeOffset.UtcNow, AgentFrameworkWorkflowId: "SubmissionAnalysisV1"), token);
@@ -43,13 +50,19 @@ internal static class SubmissionDispatcher
                 {
                     await AgentSessionWorkflow.ExecuteAsync(store, delivery.RunId, delivery.Configuration.AdapterOrigin,
                         JsonSerializer.Serialize(delivery.Submission, new JsonSerializerOptions(JsonSerializerDefaults.Web)),
-                        null, false, delivery.Configuration.TimeoutSeconds * 1000, submissionAnalysis: true);
+                        null, false, delivery.Configuration.TimeoutSeconds * 1000, mode: AgentSessionMode.SubmissionAnalysis);
                     var projection = (await store.GetProjectionAsync(delivery.RunId, token))!;
                     var attempt = projection.Attempts.Single(a => a.Session is not null);
                     await store.SetSubmissionExecutionAsync(delivery, attempt.State == "completed" ? "completed" : "failed",
                         attempt.State == "completed" ? null : attempt.Session!.FailureCategory ?? attempt.State, token);
                 }
                 catch (Npgsql.NpgsqlException) { throw; } // Recovery must reread receipts after database replacement.
+                catch (AgentResponseUnavailableException error)
+                {
+                    reconcile = wasStarted || error.DeliveryUncertain;
+                    if (!reconcile) await store.CompleteAgentAsync(delivery.RunId, error.Category, "unknown", token);
+                    await store.SetSubmissionExecutionAsync(delivery, reconcile ? "reconciling" : "failed", error.Category, token);
+                }
                 catch (Exception error) when (error is not OperationCanceledException)
                 {
                     var code = error is RepositoryExecutionRequiredException ? "repository-execution-required" : "worker-execution-failed";
@@ -61,6 +74,7 @@ internal static class SubmissionDispatcher
                 }
                 await store.RecordLifecycleAsync(new(delivery.RunId, LifecycleObservationKind.ProcessStopped,
                     "worker", processId, DateTimeOffset.UtcNow), token);
+                if (reconcile) await Task.Delay(1000, token);
             }
             catch (Npgsql.NpgsqlException)
             {

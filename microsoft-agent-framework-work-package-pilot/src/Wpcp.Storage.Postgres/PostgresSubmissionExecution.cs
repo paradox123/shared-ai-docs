@@ -56,11 +56,11 @@ public sealed partial class PostgresImplementationRunStore
     public async Task<SubmissionDelivery?> ClaimSubmissionAsync(CancellationToken token)
     {
         // The repository lock belongs to the worker connection, so process death releases it.
-        // Running dispositions remain eligible for receipt reconciliation by a replacement.
+        // Running and uncertain dispositions remain eligible for receipt reconciliation by a replacement.
         await using var read = _dataSource.CreateCommand("""
             SELECT s.snapshot::text, d.run_id::text, d.configuration::text
             FROM wpcp_submission_dispatch d JOIN wpcp_submissions s USING(submission_id)
-            WHERE d.state IN ('queued', 'running') ORDER BY d.queued_at, d.submission_id
+            WHERE d.state IN ('queued', 'running', 'reconciling') ORDER BY d.queued_at, d.submission_id
             """);
         var candidates = new List<(Submission Submission, string RunId, SubmissionExecutionConfiguration Configuration)>();
         await using (var reader = await read.ExecuteReaderAsync(token))
@@ -77,7 +77,7 @@ public sealed partial class PostgresImplementationRunStore
                 if (await gate.ExecuteScalarAsync(token) is true)
                 {
                     var current = await GetSubmissionExecutionAsync(Guid.Parse(candidate.Submission.SubmissionId), token);
-                    if (current?.State is "queued" or "running")
+                    if (current?.State is "queued" or "running" or "reconciling")
                         return new(candidate.Submission, candidate.RunId, candidate.Configuration, lease);
                 }
             }
@@ -90,7 +90,7 @@ public sealed partial class PostgresImplementationRunStore
     public async Task SetSubmissionExecutionAsync(SubmissionDelivery delivery, string state, string? code,
         CancellationToken token)
     {
-        if (state is not ("running" or "completed" or "failed")) throw new ArgumentException("Unknown execution state.");
+        if (state is not ("running" or "reconciling" or "completed" or "failed")) throw new ArgumentException("Unknown execution state.");
         await using var connection = await _dataSource.OpenConnectionAsync(token);
         await using var transaction = await connection.BeginTransactionAsync(token);
         await using var rowLock = new NpgsqlCommand(
@@ -99,7 +99,7 @@ public sealed partial class PostgresImplementationRunStore
         await rowLock.ExecuteScalarAsync(token);
         await using var command = new NpgsqlCommand("""
             UPDATE wpcp_submission_dispatch SET state=@state, code=@code,
-                completed_at=CASE WHEN @state='running' THEN NULL ELSE now() END
+                completed_at=CASE WHEN @state IN ('running', 'reconciling') THEN NULL ELSE now() END
             WHERE submission_id=@id AND (state<>@state OR code IS DISTINCT FROM @code);
             """, connection, transaction);
         command.Parameters.AddWithValue("id", Guid.Parse(delivery.Submission.SubmissionId));

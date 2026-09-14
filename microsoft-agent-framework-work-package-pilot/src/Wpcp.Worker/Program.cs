@@ -64,7 +64,7 @@ try
         await Wpcp.Worker.AgentSessionWorkflow.ExecuteAsync(store, options.RunId,
             options.RealAgentOrigin, options.EvidenceNote ?? "bounded disposable issue",
             options.PauseAt, options.RejectBlocked, options.AgentTimeoutMilliseconds,
-            realPython: options.CodexPython);
+            realPython: options.CodexPython, mode: Wpcp.Worker.AgentSessionMode.Real);
     else if (options.FakeAgentOrigin is not null)
         await Wpcp.Worker.AgentSessionWorkflow.ExecuteAsync(store, options.RunId,
             options.FakeAgentOrigin, options.EvidenceNote ?? "controlled fake attempt",

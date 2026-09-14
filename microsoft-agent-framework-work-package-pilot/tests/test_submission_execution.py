@@ -41,7 +41,7 @@ class AnalysisProvider:
                 request = json.loads(self.rfile.read(int(self.headers['Content-Length'])))
                 operation = self.path.rsplit('/', 1)[-1]
                 owner.started.set()
-                owner.release.wait(20)
+                owner.release.wait(60)
                 if operation not in owner.requests:
                     assignment = json.loads(request['note'])
                     owner.requests[operation] = {'contractVersion': 'AgentSessionAdapter/v1',
@@ -63,14 +63,21 @@ class AnalysisProvider:
                 try: self.wfile.write(data)
                 except (BrokenPipeError, ConnectionResetError): pass
 
-        self.server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
-        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        self.handler = Handler
+        self.listen(('127.0.0.1', 0))
         self.origin = f'http://127.0.0.1:{self.server.server_port}/'
+
+    def listen(self, address):
+        self.server = ThreadingHTTPServer(address, self.handler)
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+    def disconnect(self):
+        self.server.shutdown()
+        self.server.server_close()
 
     def close(self):
         self.release.set()
-        self.server.shutdown()
-        self.server.server_close()
+        self.disconnect()
 
 
 class SubmissionExecutionHarness(SubmissionProcessHarness):
@@ -87,7 +94,7 @@ class SubmissionExecutionHarness(SubmissionProcessHarness):
             return super().start_api(**kwargs)
         cls.deployment_configuration = json.loads(cls.fixture_path.read_text())
         cls.deployment_configuration['backgroundExecution'] = {
-            'adapterOrigin': cls.analysis.origin, 'timeoutSeconds': 180}
+            'adapterOrigin': cls.analysis.origin, 'timeoutSeconds': getattr(cls, 'execution_timeout', 180)}
         cls.service_environment.setdefault('WPCP_ARTIFACT_ROOT', str(Path(cls.scratch.name) / 'artifacts'))
         super().start_api(**kwargs)
 
@@ -279,3 +286,68 @@ class SubmissionExecutionTests(SubmissionExecutionHarness, unittest.TestCase):
             self.service_environment['WPCP_ARTIFACT_ROOT'] = original
             self.stop_process(self.api)
             self.start_api()
+
+    def test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt(self):
+        self.__class__.execution_timeout = 10
+        self.addCleanup(delattr, self.__class__, 'execution_timeout')
+        self.stop_process(self.api)
+        self.start_api()
+        self.analysis.started.clear()
+        self.analysis.release.clear()
+        self.addCleanup(self.analysis.release.set)
+        status, submission, raw = self.post('', {'sourceUrl': self.issue(508), 'start': True})
+        self.assertEqual(202, status, raw)
+        first = self.worker()
+        self.assertTrue(self.analysis.started.wait(10))
+        state = self.await_state(submission['submissionId'], 'reconciling')
+        self.assertEqual('timeout', state['code'])
+        self.stop_process(first)
+        from tests.test_submission_execution_browser import browser
+        browser({'baseUrl': self.base_url, 'credential': self.provider.tokens['actor-authorized'],
+            'submissionId': submission['submissionId'], 'runId': state['runId'], 'mode': 'read',
+            'expectedState': 'Ergebnis wird abgeglichen', 'summary': 'HTTP-Antwortfrist'})
+        self.analysis.release.set()
+        replacement = self.worker()
+        self.await_state(submission['submissionId'], 'completed')
+        _, run, raw = self.request('GET', '/api/v1/runs/' + state['runId'], include_fixture_access=False)
+        attempts = [a for a in run['attempts'] if a.get('session')]
+        self.assertEqual(1, len(attempts), raw)
+        self.assertEqual('completed', attempts[0]['state'])
+        receipt = self.analysis.requests[attempts[0]['session']['operationKey']]
+        self.assertEqual(receipt['sessionId'], attempts[0]['session']['sessionId'])
+        self.assertEqual(receipt['events'][-1]['data'], attempts[0]['session']['originalResult'])
+        _, history, _ = self.request('GET', '/api/v1/runs/' + state['runId'] + '/events', include_fixture_access=False)
+        self.assertEqual(1, sum(e['eventType'] == 'AgentSessionStarted' for e in history['events']))
+        self.assertEqual(1, sum(e['eventType'] == 'AgentResultObserved' for e in history['events']))
+        self.assertEqual({'message', 'tool-call', 'tool-result'},
+            {e['payload']['type'] for e in history['events'] if e['eventType'] == 'AgentObservationReceived'})
+        self.stop_process(replacement)
+
+    def test_disconnected_adapter_after_worker_crash_preserves_uncertainty_until_receipt_returns(self):
+        self.analysis.started.clear()
+        self.analysis.release.clear()
+        self.addCleanup(self.analysis.release.set)
+        status, submission, raw = self.post('', {'sourceUrl': self.issue(509), 'start': True})
+        self.assertEqual(202, status, raw)
+        first = self.worker()
+        self.assertTrue(self.analysis.started.wait(10))
+        self.stop_process(first)
+        address = self.analysis.server.server_address
+        self.analysis.disconnect()
+        try:
+            replacement = self.worker()
+            state = self.await_state(submission['submissionId'], 'reconciling')
+            self.assertEqual('transport-failure', state['code'])
+            _, run, _ = self.request('GET', '/api/v1/runs/' + state['runId'], include_fixture_access=False)
+            attempt = next(a for a in run['attempts'] if a.get('session'))
+            self.assertEqual('running', attempt['state'])
+        finally:
+            self.analysis.listen(address)
+            self.analysis.release.set()
+        self.await_state(submission['submissionId'], 'completed')
+        _, run, _ = self.request('GET', '/api/v1/runs/' + state['runId'], include_fixture_access=False)
+        attempts = [a for a in run['attempts'] if a.get('session')]
+        self.assertEqual([attempt['attemptId']], [a['attemptId'] for a in attempts])
+        receipt = self.analysis.requests[attempts[0]['session']['operationKey']]
+        self.assertEqual(receipt['sessionId'], attempts[0]['session']['sessionId'])
+        self.stop_process(replacement)

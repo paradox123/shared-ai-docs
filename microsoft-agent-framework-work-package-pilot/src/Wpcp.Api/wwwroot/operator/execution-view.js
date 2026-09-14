@@ -1,13 +1,14 @@
 const states = {
   queued: ['Wartend', 'Der Auftrag ist dauerhaft vorgemerkt und wartet auf einen Worker.'],
   running: ['Läuft', 'Der Worker verarbeitet die Anforderungen.'],
+  reconciling: ['Ergebnis wird abgeglichen', 'Der Ausgang ist noch unbestätigt. Der Worker fragt dieselbe Operation erneut ab und übernimmt ihr gespeichertes Ergebnis.'],
   completed: ['Abgeschlossen', 'Die Anforderungsanalyse ist abgeschlossen.'],
   failed: ['Fehlgeschlagen', 'Der erste Schritt konnte nicht erfolgreich abgeschlossen werden.'],
 };
 const failures = {
   'artifact-storage-unavailable': 'Der Worker kann den gemeinsamen Ergebnisspeicher nicht lesen und beschreiben.',
   'transport-failure': 'Die Verbindung zum Agentendienst ist fehlgeschlagen.',
-  timeout: 'Der Agentendienst hat nicht innerhalb der Ausführungsfrist geantwortet.',
+  timeout: 'Der Agentendienst hat nicht innerhalb der HTTP-Antwortfrist geantwortet.',
   'process-failure': 'Der Agentenprozess ist mit einem Fehler beendet worden.',
   'schema-failure': 'Die Agentenantwort entspricht nicht dem vereinbarten Ergebnisformat.',
   'infrastructure-failure': 'Der Agentendienst meldet einen Infrastrukturfehler.',
@@ -55,7 +56,7 @@ export async function showExecution(container, submission, signal, api) {
       const item = document.createElement('li'); item.textContent = finding;
       field('findings').append(item);
     }
-    if (execution.state === 'queued' || execution.state === 'running') {
+    if (['queued', 'running', 'reconciling'].includes(execution.state)) {
       timer = setTimeout(() => refresh().catch(error => {
         if (signal.aborted || !container.isConnected) return;
         field('state').textContent = 'Verbindung unterbrochen';

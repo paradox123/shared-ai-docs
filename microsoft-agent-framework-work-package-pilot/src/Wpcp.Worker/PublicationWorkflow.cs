@@ -53,7 +53,7 @@ internal static class PublicationWorkflow
                 var origin = plan.GetProperty("agentOrigin").GetString()!;
                 await AgentSessionWorkflow.ExecuteAsync(store, runId, origin,
                     "Implement the admitted issue with this evidence plan: " + plan.GetRawText(),
-                    null, false, 90000, repositoryDelivery: true, realPython: python);
+                    null, false, 90000, repositoryDelivery: true, realPython: python, mode: AgentSessionMode.Real);
                 run = (await store.GetProjectionAsync(runId))!;
                 var completed = await GetCompletedResultAsync(store, run, python);
                 if (completed is null)

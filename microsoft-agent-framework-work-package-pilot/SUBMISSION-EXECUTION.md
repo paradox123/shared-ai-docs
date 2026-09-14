@@ -3,8 +3,9 @@
 The Operator can **Starten** a new GitHub URL or choose **Analyse starten** on
 saved requirements. One atomic database transaction links the immutable admission
 to an ImplementationRun and a durable dispatch record. A separate worker performs
-a real requirements analysis. The GUI distinguishes waiting, running, completed
-analysis and failure, with the actual result and run/activity/attempt/session IDs.
+a real requirements analysis. The GUI distinguishes waiting, running, pending
+receipt reconciliation, completed analysis and failure, with the actual result
+and run/activity/attempt/session IDs.
 Analysis completion is `analysis-completed` on the run, not implementation,
 publication, qualification or human approval. The full workflow is GUI Ticket 09.
 
@@ -21,10 +22,12 @@ and private redaction inventory. Add this optional deployment configuration:
 ```
 
 The adapter origin must be loopback HTTP, without credentials, path, query or
-fragment. Redirects are disabled. Timeout is bounded to 10–600 seconds. No browser
+fragment. Redirects are disabled. The HTTP response timeout is bounded to 10–600 seconds. No browser
 request supplies adapter configuration, a checkout path or an execution plan.
 The selected configuration is stored with the disposition; a changed binding or
-execution configuration produces a visible failure instead of rerouting old work.
+execution configuration produces a visible failure before dispatch. If an attempt
+already exists, reconciliation remains pending until the original binding is
+restored; old work is never silently rerouted.
 
 Configure these values privately in the service manager's environment:
 
@@ -100,7 +103,7 @@ the implementation repository or turn source text into extra authority.
 | --- | --- |
 | `POST /api/v1/submissions` with `sourceUrl` and `start: true` | Resolve/admit and queue in one user action. Returns the submission with `state: started`, `runId`, HTTP 202 for a new run or 200 for replay. |
 | `POST /api/v1/submissions/{id}/start` with `{}` | Start the saved version. Replay returns its existing run, including if the runtime has since gone offline. |
-| `GET /api/v1/submissions/{id}/execution` | Persistent dispatch status: `submissionId`, `runId`, `state` (`queued`, `running`, `completed`, `failed`) and a concrete error `code` when applicable. |
+| `GET /api/v1/submissions/{id}/execution` | Persistent dispatch status: `submissionId`, `runId`, `state` (`queued`, `running`, `reconciling`, `completed`, `failed`) and a concrete diagnostic `code` when applicable. |
 | `GET /api/v1/runs/{runId}` and existing history/artifact/dossier reads | Shared authorized public contracts, also available in submission mode without the synthetic fixture capability. |
 
 Intake without `start: true` still creates no run. A pre-existing run from another
@@ -143,9 +146,18 @@ service does not invent a session ID. This first-step recovery does not claim th
 full workflow's automatic repair/continuation behavior.
 
 A queued run remains queued while no dispatcher is available. A running worker
-continues without a browser or API connection. Runtime/transport/process failures
-become durable failures. These diagnostics acknowledge delivery and preserved
-history, not successful issue implementation.
+continues without a browser or API connection. A lost response or HTTP timeout
+keeps the attempt open with a `reconciling` disposition and a visible diagnostic.
+The worker requests the same operation receipt again; an eventual response fills
+the original session/history/result. Durable preparation happens before delivery,
+so even a worker killed before recording a timeout leaves a reconcilable attempt.
+A later connection refusal cannot erase that uncertainty. Reconciliation retries
+continue with a delay while the service is unavailable; the GUI does not imply
+that the agent is still running or that a new logical step was started.
+
+A confirmed connection refusal on the first delivery, or a terminal agent/process
+response, becomes a durable failure. These diagnostics acknowledge delivery and
+preserved history, not successful issue implementation.
 
 ## Verification
 
@@ -165,7 +177,8 @@ launcher. The launcher exits and the worker is adopted by PID 1. A new browser
 reads the completed analysis and its artifacts from the same run. A separate
 fresh database proves a controlled outage after preflight and later GUI failure
 readback. There are no GitHub writes. Fixtures cover concurrency, worker
-replacement, authorization/mandate checks, process errors and large result reads.
+replacement, late-response reconciliation after timeout, adapter outage after
+worker death, authorization/mandate checks, process errors and large result reads.
 
 Protocol reference: [official Codex app-server documentation](https://learn.chatgpt.com/docs/app-server).
 The executable-generated schema and the repository's pinned protocol are the

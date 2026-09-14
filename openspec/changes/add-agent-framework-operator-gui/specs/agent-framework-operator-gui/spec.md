@@ -18,6 +18,11 @@ The graphical Operator Client SHALL accept a GitHub issue URL or a local issue o
 - **AND** the GUI distinguishes waiting, running, completed first-step analysis and failed execution, without claiming implementation, qualification or full workflow completion from a completed analysis
 - **AND** closing the browser or initiating terminal/task does not own or stop execution; reopening after API/worker replacement reads the same run and retained observations, with uncertain external effects reconciled or reported instead of starting a second logical step
 
+#### Scenario: Retain a late first-step response after transport timeout (Ticket 02)
+- **WHEN** the worker loses or times out the adapter response after possible delivery
+- **THEN** the attempt remains reconcilable, the GUI reports the uncertain outcome, and a replacement worker requests the same operation receipt without starting a second logical step
+- **AND** an eventual response supplies the original real session, observations and result to Run History before the step becomes terminal; a later connection refusal does not erase the previously uncertain delivery
+
 ### Requirement: PRD decomposition within the work mandate
 The system SHALL treat a submitted PRD as an Arbeitsmandat, autonomously derive linked issues within its scope, and process eligible issues under the existing per-repository serial queue. Each derived issue SHALL retain its own ImplementationRun and traceable authorization ancestry. The GUI SHALL expose the PRD, derived issues, dependencies and associated runs. Routine decomposition and implementation within the mandate SHALL NOT require another start approval; unresolved product decisions, actionable blockers and human approval gates SHALL surface for human action.
 
