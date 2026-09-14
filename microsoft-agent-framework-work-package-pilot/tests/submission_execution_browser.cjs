@@ -15,6 +15,7 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
     await page.getByRole('button', {name: 'Verbinden', exact: true}).click();
     await page.getByText('Mit GitHub verbunden', {exact: true}).waitFor();
     if (input.mode === 'start') {
+      if (!await page.locator('.intake-disclosure').evaluate(node => node.open)) await page.locator('.intake-disclosure > summary').click();
       await page.getByLabel('GitHub-Issue-URL').fill(input.sourceUrl);
       await page.getByRole('button', {name: 'Starten', exact: true}).click();
     } else if (input.mode === 'start-saved') {
@@ -24,7 +25,7 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
     await page.locator('[data-execution="state"]').filter({hasText: /\S/}).waitFor();
     if (input.expectedState) {
       await page.locator('[data-execution="state"]').filter({hasText: input.expectedState}).waitFor({timeout: 180000});
-      if (input.summary) assert.match(await page.locator('[data-execution="result"]').textContent(), new RegExp(input.summary));
+      if (input.summary) await page.locator('[data-execution="result"]').filter({hasText: input.summary}).waitFor();
     }
     const submissionId = await page.locator('#detail [data-field="id"]').textContent();
     const runId = await page.locator('[data-execution="run-id"]').textContent();

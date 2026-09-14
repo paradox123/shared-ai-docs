@@ -137,14 +137,33 @@ remaining proof to Ticket 16 / OpenSpec task 3.2a.
 Provider contract: [GitHub issue API](https://docs.github.com/en/rest/issues/issues#get-an-issue).
 Static delivery: [ASP.NET Core static files](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/static-files?view=aspnetcore-10.0).
 
-## Inspect a started run (Operator GUI Ticket 03)
+## Inspect a saved run (Operator GUI Tickets 03 and UX-01)
 
-After starting an eligible issue, the **Workflow und Sessionverlauf** section
-lists started runs from persisted submissions. Select a run, then an observed
-activity attempt to inspect its actual session, assignment, messages, tools,
-results and provenance. **Gesamten Run zeigen** restores the shared history.
+Select saved requirements in the list to open **Ergebnis**. The common header
+shows the stored title, source and confirmed analysis state. The four views
+**Ergebnis**, **Verlauf**, **Dateien** and **Anforderungen** share the selected
+run. Full requirements and provenance remain in **Anforderungen**; the complete
+analysis findings are expandable in **Ergebnis**. Expand **Anforderungen aufnehmen**
+to admit or start another issue.
+
+The list and header observe the same public execution response: **Aufgenommen**
+without a run, **Wartend**, **Läuft**, **Ergebnisabgleich**, **Analyse abgeschlossen**,
+**Fehlgeschlagen**, or **Unbekannt** for an unrecognized state. A completed analysis
+does not claim implementation, review or completion of the entire workflow.
+During a failed status read, the last confirmed state is labelled **zuletzt bestätigt**
+and observation retries automatically. Read failures are distinct from execution
+failures. Status observation continues while switching views and after completion;
+a five-second request deadline keeps an unresponsive status read from hanging forever.
+
+In **Verlauf**, select an observed activity attempt to inspect its actual session,
+assignment, messages, tools, results and provenance. **Gesamten Run zeigen** restores the shared history.
 The initial graph contains observed activities only; full PRD navigation and
 workstation sessions remain later slices.
+
+Use arrow keys or Home/End within the tab bar; Tab moves into the chosen view.
+Live updates retain the active view, session disclosure and focused control.
+Selecting another requirement cancels obsolete detail reads. Repository access
+revocation clears the workspace, including if it arrives during initial loading.
 
 History loads 100 events per page. **Weitere Ereignisse laden** advances from
 the delivered position; the displayed committed high-water mark is not an
@@ -170,3 +189,25 @@ python3 -m unittest tests.test_workflow_browser -v
 
 The opt-in `tests.test_workflow_live` uses the existing GitHub/Codex probe
 configuration and performs read-only requirements analysis without provider writes.
+
+Shared-view checks cover persisted state transitions, API restart, keyboard
+navigation and targeted transport/race faults through the production browser UI:
+
+```bash
+uv run --python 3.14 --with-requirements codex-requirements.txt \
+  python -m unittest tests.test_shared_run_browser -v
+```
+
+For the same flow with actual GitHub and Codex, including 1024/390-pixel screenshots
+and comparisons against public responses after API restart:
+
+```bash
+WPCP_CODEX_ENDPOINT_PROBE=1 \
+WPCP_LIVE_GITHUB_SUBMISSION_URL=https://github.com/paradox123/probare-crm/issues/4 \
+WPCP_SUBMISSION_PROOF_DIR=/tmp/wpcp-shared-run-proof \
+  uv run --python 3.14 --with-requirements codex-requirements.txt \
+  python -m unittest tests.test_shared_run_live -v
+```
+
+See the [UX-01 acceptance evidence](../openspec/changes/add-agent-framework-operator-gui/ux-01-evidence.md)
+for observed results and the remaining deployment/accessibility verification limits.

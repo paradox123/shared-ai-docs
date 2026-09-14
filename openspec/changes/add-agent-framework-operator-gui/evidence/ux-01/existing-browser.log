@@ -1,0 +1,17 @@
+test_browser_intake_and_reconnect_show_the_persisted_provider_content (tests.test_submission_browser.SubmissionBrowserTests) ... ok
+test_saved_issue_start_reads_large_result_through_the_artifact_boundary (tests.test_submission_execution_browser.SubmissionExecutionBrowserTests) ... ok
+test_start_close_browser_and_reopen_real_persisted_result_view (tests.test_submission_execution_browser.SubmissionExecutionBrowserTests) ... ok
+test_gui_started_run_exposes_correlated_session_history_to_second_client (tests.test_workflow_browser.WorkflowBrowserTests) ... ok
+test_live_history_reconnects_after_api_restart_and_clears_after_revocation (tests.test_workflow_browser.WorkflowBrowserTests) ... ok
+test_missing_artifact_remains_explicit_without_source_link_fallback (tests.test_workflow_browser.WorkflowBrowserTests) ... ok
+test_native_tool_failure_is_readable_and_protocol_duplicates_stay_in_full_history (tests.test_workflow_browser.WorkflowBrowserTests) ... ok
+test_page_catchup_retries_failed_projection_even_without_later_events (tests.test_workflow_browser.WorkflowBrowserTests) ... ok
+test_paged_history_and_artifact_bytes_are_complete_in_both_clients (tests.test_workflow_browser.WorkflowBrowserTests) ... ok
+test_recorded_runtime_failure_and_terminal_output_are_visible (tests.test_workflow_browser.WorkflowBrowserTests) ... ok
+test_session_presents_messages_and_findings_without_raw_envelopes (tests.test_workflow_browser.WorkflowBrowserTests) ... ok
+test_unrecognized_json_messages_do_not_break_readable_history (tests.test_workflow_browser.WorkflowBrowserTests) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 134.996s
+
+OK

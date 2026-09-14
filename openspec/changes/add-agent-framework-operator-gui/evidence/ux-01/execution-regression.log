@@ -1,0 +1,14 @@
+test_controlled_process_failure_retains_session_and_observed_tools (tests.test_submission_execution.SubmissionExecutionTests.test_controlled_process_failure_retains_session_and_observed_tools) ... ok
+test_disconnected_adapter_after_worker_crash_preserves_uncertainty_until_receipt_returns (tests.test_submission_execution.SubmissionExecutionTests.test_disconnected_adapter_after_worker_crash_preserves_uncertainty_until_receipt_returns) ... ok
+test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt (tests.test_submission_execution.SubmissionExecutionTests.test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt) ... ok
+test_new_issue_executes_with_clients_closed_and_keeps_session_history (tests.test_submission_execution.SubmissionExecutionTests.test_new_issue_executes_with_clients_closed_and_keeps_session_history) ... ok
+test_replacement_worker_reconciles_external_session_after_worker_crash (tests.test_submission_execution.SubmissionExecutionTests.test_replacement_worker_reconciles_external_session_after_worker_crash) ... ok
+test_saved_issue_starts_once_and_retains_durable_run_after_restart (tests.test_submission_execution.SubmissionExecutionTests.test_saved_issue_starts_once_and_retains_durable_run_after_restart) ... ok
+test_start_revalidates_authorization_mandate_identity_and_runtime (tests.test_submission_execution.SubmissionExecutionTests.test_start_revalidates_authorization_mandate_identity_and_runtime) ... ok
+test_unavailable_artifact_storage_rejects_start_before_creating_a_run (tests.test_submission_execution.SubmissionExecutionTests.test_unavailable_artifact_storage_rejects_start_before_creating_a_run) ... ok
+test_url_redelivery_returns_original_run_when_runtime_is_unavailable (tests.test_submission_execution.SubmissionExecutionTests.test_url_redelivery_returns_original_run_when_runtime_is_unavailable) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 23.457s
+
+OK

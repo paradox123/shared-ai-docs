@@ -13,7 +13,7 @@ const label = value => labels[value] || value;
 export async function showWorkflow(submission, signal, api, reportError, selectRun) {
   const read = (suffix, format = 'json') => api('/' + submission.runId + suffix, signal, null, '/api/v1/runs', format);
   let run, selected = null, cursor = 0, highWater = 0, hasMore = false, streaming = false;
-  let selectionChosen = false;
+  let selectionChosen = false, renderedSelection;
   let timer, refreshTimer, artifacts = [], artifactGeneration = 0;
   let projectionPending = false, projectionRefreshing = false;
   const events = new Map();
@@ -35,6 +35,7 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
     $('workflow-state').textContent = label(run.state);
     $('workflow-state').dataset.state = run.state;
     const graph = $('workflow-graph');
+    const focusedAttempt = graph.contains(document.activeElement) ? document.activeElement.dataset.attemptId : null;
     graph.replaceChildren();
     for (const activity of run.activities) {
       const group = element('section', undefined, 'activity-node');
@@ -54,11 +55,19 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
       }
       graph.append(group);
     }
+    if (focusedAttempt) graph.querySelector(`[data-attempt-id="${focusedAttempt}"]`)?.focus({preventScroll: true});
   }
   function renderSelection() {
     const target = run.attempts.find(a => a.attemptId === selected);
     const activity = run.activities.find(a => a.activityId === target?.activityId);
-    const content = $('session-detail'); content.replaceChildren();
+    const signature = JSON.stringify([selected, target || run.runId]);
+    if (signature === renderedSelection) return;
+    renderedSelection = signature;
+    const host = $('session-detail');
+    const focusedOutcome = host.querySelector('.outcome-summary button') === document.activeElement;
+    const sameSelection = host.dataset.selection === (selected || 'all');
+    host.dataset.selection = selected || 'all';
+    const content = element('div');
     content.append(element('span', target ? 'AUSGEWÄHLTER SCHRITT' : 'GESAMTER RUN', 'section-number'),
       element('h3', activity ? label(activity.activityType) : 'Gemeinsamer Verlauf'));
     content.append(element('p', target ? 'Versuch ' + target.attemptNumber + ' · ' + label(target.state)
@@ -81,7 +90,20 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
     for (const [key, value] of Object.entries(fields)) metadata.append(element('dt', key), element('dd', value));
     metadata.append(rawDetails('Originaldaten', target || {
       runId: run.runId, correlation: run.correlation, provenance: run.provenance, executionEvidence: run.executionEvidence}));
-    content.append(disclosure('Session und Herkunft', metadata, 'technical-details'));
+    const details = disclosure('Session und Herkunft', metadata, 'technical-details');
+    const retained = sameSelection && host.querySelector(':scope > details');
+    if (retained) {
+      // Keep the actual focused disclosures connected while updating their values.
+      const values = retained.querySelectorAll('dd');
+      metadata.querySelectorAll('dd').forEach((value, index) => { values[index].textContent = value.textContent; });
+      retained.querySelector('pre').textContent = metadata.querySelector('pre').textContent;
+      for (const child of [...host.children]) if (child !== retained) child.remove();
+      for (const child of [...content.children]) host.insertBefore(child, retained);
+    } else {
+      content.append(details);
+      host.replaceChildren(...content.children);
+    }
+    if (sameSelection && focusedOutcome) host.querySelector('.outcome-summary button')?.focus({preventScroll: true});
   }
   function select(id) {
     selectionChosen = true;
@@ -142,20 +164,33 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
   function renderArtifacts() {
     const ids = artifactIds([selectedEvents(), run.attempts.find(a => a.attemptId === selected)?.session]);
     const visible = artifacts.filter(artifact => !selected || ids.has(artifact.artifactId));
-    const list = $('artifact-list'); list.replaceChildren();
+    const list = $('artifact-list');
+    const visibleIds = new Set(visible.map(artifact => artifact.artifactId));
+    for (const node of [...list.children]) if (!visibleIds.has(node.dataset.artifactId)) node.remove();
     for (const artifact of visible) {
-      const row = element('div', undefined, 'artifact-row'); row.dataset.artifactId = artifact.artifactId;
-      const button = element('button', 'Inhalt öffnen', 'quiet');
+      let row = list.querySelector(`[data-artifact-id="${artifact.artifactId}"]`);
+      const signature = JSON.stringify([artifact, artifactName(artifact)]);
+      if (row?.dataset.content === signature) continue;
+      const button = row?.querySelector('button') || element('button', 'Inhalt öffnen', 'quiet');
+      if (!row) {
+        row = element('div', undefined, 'artifact-row');
+        row.dataset.artifactId = artifact.artifactId;
+        row.append(button); list.append(row);
+      }
+      row.dataset.content = signature;
+      for (const child of [...row.children]) if (child !== button) child.remove();
+      const description = element('div');
       button.onclick = () => openArtifact(artifact);
-      row.append(element('strong', artifactName(artifact)),
+      description.append(element('strong', artifactName(artifact)),
         element('p', `${artifact.mediaType} · ${new Intl.NumberFormat('de-DE', {maximumFractionDigits: 1}).format(artifact.sizeBytes / 1024)} KB`));
-      if (artifact.redaction.occurred) row.append(element('p', 'Inhalt redigiert · ' + artifact.redaction.policyVersion, 'redaction-note'));
-      if (artifact.availability !== 'available') row.append(element('p', 'Inhalt nicht verfügbar · ' + (artifact.reason || artifact.availability)));
-      row.append(button); list.append(row);
+      if (artifact.redaction.occurred) description.append(element('p', 'Inhalt redigiert · ' + artifact.redaction.policyVersion, 'redaction-note'));
+      if (artifact.availability !== 'available') description.append(element('p', 'Inhalt nicht verfügbar · ' + (artifact.reason || artifact.availability)));
+      row.insertBefore(description, button);
     }
     if (!visible.length) list.append(element('p', 'Keine Artefaktreferenzen in der geladenen Auswahl. Weitere History-Seiten oder den gesamten Run öffnen.'));
   }
   async function openArtifact(artifact) {
+    document.getElementById('run-tab-files').click();
     const generation = ++artifactGeneration;
     const content = $('artifact-content');
     content.hidden = false; content.textContent = 'Artefakt wird geladen …';
@@ -288,6 +323,5 @@ export async function showWorkflow(submission, signal, api, reportError, selectR
     button.onclick = () => selectRun(record.submissionId);
     $('run-list').append(button);
   }
-  $('workflow').hidden = false;
   await more();
 }

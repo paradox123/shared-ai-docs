@@ -1,0 +1,137 @@
+{
+  "focus": {
+    "tag": "BUTTON",
+    "text": "Versuch 1 · Abgeschlossen\nOhne Agentensession · 0 s"
+  },
+  "graph": {
+    "clientWidth": 308,
+    "scrollLeft": 0,
+    "scrollWidth": 406
+  },
+  "page": {
+    "height": 7860,
+    "width": 390
+  },
+  "scrollY": 5238,
+  "targets": [
+    {
+      "height": 32.5,
+      "id": "disconnect",
+      "text": "Abmelden",
+      "width": 82.359375
+    },
+    {
+      "height": 46,
+      "id": "",
+      "text": "Aufnehmen",
+      "width": 88.78125
+    },
+    {
+      "height": 46,
+      "id": "",
+      "text": "Starten",
+      "width": 88.8984375
+    },
+    {
+      "height": 32.5,
+      "id": "refresh",
+      "text": "↻",
+      "width": 31.2265625
+    },
+    {
+      "height": 126.1953125,
+      "id": "",
+      "text": "paradox123/probare-crm / #4\nExtract project facts with sourc",
+      "width": 348
+    },
+    {
+      "height": 15,
+      "id": "",
+      "text": "Run und Agentensession",
+      "width": 304
+    },
+    {
+      "height": 15,
+      "id": "",
+      "text": "Herkunft und Fassungsnachweis",
+      "width": 294
+    },
+    {
+      "height": 32.5,
+      "id": "",
+      "text": "Extract project facts with source provenance",
+      "width": 268.359375
+    },
+    {
+      "height": 32.5,
+      "id": "all-history",
+      "text": "Gesamten Run zeigen",
+      "width": 145.4453125
+    },
+    {
+      "height": 91.5,
+      "id": "",
+      "text": "Versuch 1 · Abgeschlossen\nOhne Agentensession · 0 s",
+      "width": 157
+    },
+    {
+      "height": 91.5,
+      "id": "",
+      "text": "Versuch 1 · Abgeschlossen\nAgentensession · 36 s",
+      "width": 157
+    },
+    {
+      "height": 19.5,
+      "id": "",
+      "text": "Session und Herkunft",
+      "width": 308
+    },
+    {
+      "height": 36.5,
+      "id": "history-filter",
+      "text": "Sessionverlauf\nNachrichten und Aufträge\nWerkzeuge\nErkenntnis",
+      "width": 196
+    },
+    {
+      "height": 16.5,
+      "id": "",
+      "text": "Vollständigen Auftrag lesen",
+      "width": 278
+    },
+    {
+      "height": 16.5,
+      "id": "",
+      "text": "Anweisung lesen",
+      "width": 276
+    },
+    {
+      "height": 16.5,
+      "id": "",
+      "text": "Ergebnis und Fehler ansehen",
+      "width": 278
+    },
+    {
+      "height": 21.59375,
+      "id": "",
+      "text": "Erkenntnisse · 13",
+      "width": 276
+    },
+    {
+      "height": 32.5,
+      "id": "",
+      "text": "Inhalt öffnen",
+      "width": 93.9765625
+    },
+    {
+      "height": 32.5,
+      "id": "",
+      "text": "Inhalt öffnen",
+      "width": 93.9765625
+    }
+  ],
+  "viewport": {
+    "height": 844,
+    "width": 390
+  },
+  "workflowY": 5363.734375
+}

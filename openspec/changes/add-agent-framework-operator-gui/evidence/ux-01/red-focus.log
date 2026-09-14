@@ -1,0 +1,21 @@
+test_real_worker_updates_and_api_reopening_preserve_run_view_and_step_focus (tests.test_shared_run_browser.SharedRunBrowserTests) ... FAIL
+
+======================================================================
+FAIL: test_real_worker_updates_and_api_reopening_preserve_run_view_and_step_focus (tests.test_shared_run_browser.SharedRunBrowserTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/test_shared_run_browser.py", line 38, in test_real_worker_updates_and_api_reopening_preserve_run_view_and_step_focus
+    self.assertEqual('running', receive()['stage'])
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/test_shared_run_browser.py", line 32, in receive
+    if not line: self.fail(process.stderr.read())
+AssertionError: AssertionError [ERR_ASSERTION]: A live workflow update lost keyboard focus
+
+false !== true
+
+    at /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/shared_observation_browser.cjs:50:12
+
+
+----------------------------------------------------------------------
+Ran 1 test in 5.994s
+
+FAILED (failures=1)

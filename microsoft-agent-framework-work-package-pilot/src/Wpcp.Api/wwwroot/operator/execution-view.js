@@ -1,10 +1,4 @@
-const states = {
-  queued: ['Wartend', 'Der Auftrag ist dauerhaft vorgemerkt und wartet auf einen Worker.'],
-  running: ['Läuft', 'Der Worker verarbeitet die Anforderungen.'],
-  reconciling: ['Ergebnis wird abgeglichen', 'Der Ausgang ist noch unbestätigt. Der Worker fragt dieselbe Operation erneut ab und übernimmt ihr gespeichertes Ergebnis.'],
-  completed: ['Abgeschlossen', 'Die Anforderungsanalyse ist abgeschlossen.'],
-  failed: ['Fehlgeschlagen', 'Der erste Schritt konnte nicht erfolgreich abgeschlossen werden.'],
-};
+import {analysisState, statusLabel} from './analysis-state.js';
 const failures = {
   'artifact-storage-unavailable': 'Der Worker kann den gemeinsamen Ergebnisspeicher nicht lesen und beschreiben.',
   'transport-failure': 'Die Verbindung zum Agentendienst ist fehlgeschlagen.',
@@ -18,54 +12,61 @@ const failures = {
   'agent-failed': 'Der Agent hat einen Ausführungsfehler protokolliert.',
 };
 
-export async function showExecution(container, submission, signal, api, reportError) {
+export function showExecution(container, submission, signal, api, reportError) {
   const field = name => container.querySelector(`[data-execution="${name}"]`);
-  field('start').hidden = true;
-  field('detail').hidden = false;
-  field('run-id').textContent = submission.runId;
-  let timer;
-  signal.addEventListener('abort', () => clearTimeout(timer), {once: true});
+  let refreshing = false, renderedResult, latest;
+  const active = () => !signal.aborted && container.isConnected;
 
-  async function refresh() {
-    const execution = await api('/' + submission.submissionId + '/execution', signal);
-    const run = await api('/' + submission.runId, signal, null, '/api/v1/runs');
-    const activity = run.activities.find(a => a.activityType === 'submission-analysis');
-    const attempt = run.attempts.find(a => a.activityId === activity?.activityId);
-    let result = attempt?.session?.originalResult;
-    if (result?.artifactId) {
-      try {
-        result = await api('/' + submission.runId + '/artifacts/' + encodeURIComponent(result.artifactId), signal, null, '/api/v1/runs');
-      } catch (error) {
-        if (error.status !== 410 && error.status !== 404) throw error;
-        result = {summary: 'Das gespeicherte Ergebnisartefakt ist nicht verfügbar. Der Run behält den Nachweis seiner fehlenden Inhalte.', findings: []};
+  return async snapshot => {
+    if (!active()) return;
+    latest = snapshot;
+    const execution = snapshot.execution;
+    field('state').textContent = statusLabel(snapshot);
+    field('state').dataset.state = execution?.state || 'unknown';
+    field('state').dataset.stale = String(snapshot.stale);
+    field('freshness').textContent = snapshot.stale ? 'Verbindung unterbrochen · Erneuter Versuch läuft.' : '';
+    field('hint').textContent = (snapshot.stale ? 'Zuletzt bestätigter Stand: ' : '') + analysisState(execution?.state)[1];
+    field('start').hidden = Boolean(execution?.runId || submission.runId);
+    field('detail').hidden = !execution?.runId;
+    if (snapshot.stale || !execution?.runId || refreshing) return;
+    field('run-id').textContent = execution.runId;
+    refreshing = true;
+    try {
+      const run = await api('/' + execution.runId, signal, null, '/api/v1/runs');
+      const activity = run.activities.find(a => a.activityType === 'submission-analysis');
+      const attempt = run.attempts.findLast(a => a.activityId === activity?.activityId);
+      let result = attempt?.session?.originalResult;
+      if (result?.artifactId) {
+        try {
+          result = await api('/' + execution.runId + '/artifacts/' + encodeURIComponent(result.artifactId), signal, null, '/api/v1/runs');
+        } catch (error) {
+          if (error.status !== 410 && error.status !== 404) throw error;
+          result = {summary: 'Das gespeicherte Ergebnisartefakt ist nicht verfügbar. Der Run behält den Nachweis seiner fehlenden Inhalte.', findings: []};
+        }
       }
-    }
-    signal.throwIfAborted();
-    if (!container.isConnected) return;
-    const [label, hint] = states[execution.state] || ['Unbekannt', 'Der Zustand kann nicht sicher bestimmt werden.'];
-    field('state').textContent = label;
-    field('state').dataset.state = execution.state;
-    field('hint').textContent = hint;
-    field('activity-id').textContent = activity?.activityId || 'Noch nicht angelegt';
-    field('attempt-id').textContent = attempt?.attemptId || 'Noch nicht angelegt';
-    field('session-id').textContent = attempt?.session?.sessionId || 'Noch keine bestätigte Session';
-    field('result').textContent = result?.summary || (execution.code
-      ? `${failures[execution.code] || 'Die Verarbeitung wurde mit einem Fehler beendet.'} (${execution.code})` : '');
-    field('findings').replaceChildren();
-    for (const finding of result?.findings || []) {
-      const item = document.createElement('li'); item.textContent = finding;
-      field('findings').append(item);
-    }
-    if (['queued', 'running', 'reconciling'].includes(execution.state)) {
-      timer = setTimeout(() => refresh().catch(error => {
-        if (signal.aborted || !container.isConnected) return;
-        if (error.status === 401 || error.status === 403) { reportError(error); return; }
-        field('state').textContent = 'Verbindung unterbrochen';
-        field('hint').textContent = error.message + ' Anforderungen aktualisieren, um den Zustand erneut zu lesen.';
-        field('result').textContent = '';
-        field('findings').replaceChildren();
-      }), 1200);
-    }
-  }
-  await refresh();
+      if (!active() || latest.stale || latest.execution?.state !== execution.state) return;
+      field('result-status').textContent = '';
+      field('activity-id').textContent = activity?.activityId || 'Noch nicht angelegt';
+      field('attempt-id').textContent = attempt?.attemptId || 'Noch nicht angelegt';
+      field('session-id').textContent = attempt?.session?.sessionId || 'Noch keine bestätigte Session';
+      const signature = JSON.stringify([result, execution.code, execution.state]);
+      if (signature === renderedResult) return;
+      renderedResult = signature;
+      const diagnostic = execution.code
+        ? `${failures[execution.code] || 'Gemeldeter Diagnosecode:'} (${execution.code})` : '';
+      field('result').textContent = execution.state === 'failed'
+        ? diagnostic || 'Die Verarbeitung wurde mit einem Fehler beendet.'
+        : result?.summary || diagnostic || 'Noch kein Analyseergebnis gespeichert.';
+      field('findings').replaceChildren();
+      for (const finding of result?.findings || []) {
+        const item = document.createElement('li'); item.textContent = finding;
+        field('findings').append(item);
+      }
+      field('findings').parentElement.hidden = !field('findings').children.length;
+    } catch (error) {
+      if (!active()) return;
+      if (error.status === 401 || error.status === 403) { reportError(error); return; }
+      field('result-status').textContent = 'Ergebnis derzeit nicht lesbar · Ein vorhandener Inhalt zeigt den zuletzt geladenen Stand. Erneuter Versuch läuft.';
+    } finally { refreshing = false; }
+  };
 }

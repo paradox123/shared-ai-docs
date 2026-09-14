@@ -1,0 +1,21 @@
+test_unrelated_hanging_status_read_does_not_block_opening_a_saved_run (tests.test_shared_run_browser.SharedRunBrowserTests) ... FAIL
+
+======================================================================
+FAIL: test_unrelated_hanging_status_read_does_not_block_opening_a_saved_run (tests.test_shared_run_browser.SharedRunBrowserTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/test_shared_run_browser.py", line 59, in test_unrelated_hanging_status_read_does_not_block_opening_a_saved_run
+    shared_browser({'baseUrl': self.base_url,
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/test_shared_run_browser.py", line 14, in shared_browser
+    raise AssertionError('Shared run browser proof failed: ' + result.stderr)
+AssertionError: Shared run browser proof failed: locator.waitFor: Timeout 7000ms exceeded.
+Call log:
+[2m  - waiting for getByText('Mit GitHub verbunden', { exact: true }) to be visible[22m
+
+    at /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/shared_run_browser.cjs:15:65
+
+
+----------------------------------------------------------------------
+Ran 1 test in 12.456s
+
+FAILED (failures=1)

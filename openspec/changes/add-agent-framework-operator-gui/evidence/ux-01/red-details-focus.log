@@ -1,0 +1,28 @@
+test_live_events_preserve_session_disclosure_and_artifact_button_focus (tests.test_shared_run_browser.SharedRunFaultBrowserTests) ... FAIL
+
+======================================================================
+FAIL: test_live_events_preserve_session_disclosure_and_artifact_button_focus (tests.test_shared_run_browser.SharedRunFaultBrowserTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/test_shared_run_browser.py", line 126, in test_live_events_preserve_session_disclosure_and_artifact_button_focus
+    self.check_fault('focus')
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/test_shared_run_browser.py", line 120, in check_fault
+    self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+AssertionError: 0 != 1 : [{"case":"session_before","focused":"Session und Herkunft","expanded":true},{"case":"session_after","focusedTag":"BODY","nodeStillConnected":false,"expanded":false},{"case":"artifact_after","focusedTag":"BODY","nodeStillConnected":false,"selectedTab":"Dateien"},{"case":"rejected_intake_then_state_change","header":"Analyse abgeschlossen","row":"Analyse abgeschlossen","freshness":""}]
+AssertionError [ERR_ASSERTION]: Live update replaced focused session disclosure
+
+false !== true
+
+    at /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/shared_focus_browser.cjs:59:11 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: 'strictEqual'
+}
+
+
+----------------------------------------------------------------------
+Ran 1 test in 5.501s
+
+FAILED (failures=1)

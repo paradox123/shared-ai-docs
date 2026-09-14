@@ -31,9 +31,11 @@ const send = data => process.stdout.write(JSON.stringify(data) + '\n');
         await route.fulfill({status: 503, contentType: 'application/json', body: JSON.stringify({code: 'run-store-unavailable'})});
       } else await route.fulfill({response});
     });
-    await page.getByLabel('GitHub-Issue-URL').fill(input.sourceUrl);
+    if (!await page.locator('.intake-disclosure').evaluate(node => node.open)) await page.locator('.intake-disclosure > summary').click();
+      await page.getByLabel('GitHub-Issue-URL').fill(input.sourceUrl);
     await page.getByRole('button', {name: 'Starten', exact: true}).click();
       await page.locator('[data-field="source"]').filter({hasText: input.sourceUrl}).waitFor();
+    await page.getByRole('tab', {name: 'Verlauf', exact: true}).click();
     await page.locator('#history-status').filter({hasText: 'Live verbunden'}).waitFor();
     const runId = await page.locator('[data-execution="run-id"]').textContent();
     if (!input.catchup) {

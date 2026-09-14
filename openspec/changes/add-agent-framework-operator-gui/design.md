@@ -147,3 +147,16 @@ TDD seams: production browser against public HTTP with disposable PostgreSQL and
 controlled external GitHub/agent boundaries, followed by a real GitHub/Codex
 read-only analysis. No pre-seeded runs. Separate-machine deployment acceptance
 remains explicit if only independent local browser processes can be verified.
+
+### UX-01 shared run entry
+
+UX-01 applies the approved shared-view hierarchy from `ux-ticket-plan.md` within
+this change. The saved submission opens on Result; History, Files and Requirements
+are labelled keyboard tabs beneath one title, source and confirmed analysis state.
+Existing readable history/artifact renderers and immutable content are reused.
+The GUI reads analysis disposition from the public submission execution endpoint,
+not from run identity or the broader workflow state. A lost connection marks the
+last confirmed disposition as stale and retries; it does not manufacture execution
+failure. Selection-scoped reads are cancelled and fenced, and observation updates
+retain the selected tab, expanded evidence and keyboard focus. No persistence or
+wire-contract change is needed for this slice.

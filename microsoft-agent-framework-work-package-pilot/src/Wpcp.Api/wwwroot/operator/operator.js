@@ -1,3 +1,5 @@
+import {runTabs} from './run-tabs.js';
+import {analysisState, statusLabel, watchAnalysis} from './analysis-state.js';
 import {showExecution} from './execution-view.js';
 import {showWorkflow} from './workflow-view.js';
 const $ = id => document.getElementById(id);
@@ -27,9 +29,16 @@ const errors = {
 };
 let credential = '';
 let operation;
+let selectedId, selectedView = 'result';
+let observation, detailOperation, updateSelected;
+const analyses = new Map();
 const date = value => new Date(value).toLocaleString('de-DE', {dateStyle: 'medium', timeStyle: 'short'});
 
 function clearRecords() {
+  observation?.abort();
+  detailOperation?.abort();
+  analyses.clear();
+  updateSelected = null;
   $('submission-list').replaceChildren();
   $('detail').replaceChildren();
   $('count').textContent = '0';
@@ -38,6 +47,11 @@ function clearRecords() {
 
 function clearWorkflow() {
   $('workflow').hidden = true;
+  $('artifact-panel').hidden = true;
+  $('workflow-state').textContent = '';
+  $('workflow-state').removeAttribute('data-state');
+  $('history-note').textContent = '';
+  $('history-more').hidden = true;
   for (const id of ['workflow-graph', 'session-detail', 'history-list', 'artifact-list', 'artifact-content', 'run-list']) $(id).replaceChildren();
 }
 
@@ -92,10 +106,16 @@ async function perform(work) {
   }
 }
 
-async function showDetail(id, signal, focus = false) {
+async function showDetail(id, requestSignal, focus = false) {
+  detailOperation?.abort();
+  const signal = (detailOperation = new AbortController()).signal;
+  updateSelected = null;
+  const view = selectedId === id ? selectedView : 'result';
+  selectedId = id;
   $('detail').replaceChildren();
   clearWorkflow();
-  const record = await api('/' + encodeURIComponent(id), signal);
+  const record = await api('/' + encodeURIComponent(id), requestSignal);
+  requestSignal.throwIfAborted();
   signal.throwIfAborted();
   const content = $('detail-template').content.cloneNode(true);
   const fields = {
@@ -111,6 +131,9 @@ async function showDetail(id, signal, focus = false) {
   source.textContent = record.source.url;
   source.href = record.source.url;
   $('detail').append(content);
+  runTabs($('detail'), view, selected => { selectedView = selected; });
+  $('history-status').textContent = record.runId ? 'Verlauf wird geladen …' : 'Noch kein Run gestartet.';
+  $('artifact-list').textContent = record.runId ? 'Dateien werden geladen …' : 'Noch keine Dateien: Die Analyse wurde nicht gestartet.';
   history.replaceState(null, '', '#' + record.submissionId);
   for (const row of $('submission-list').children) row.setAttribute('aria-current', String(row.dataset.id === id));
   if (focus) $('detail').querySelector('h2').focus();
@@ -118,14 +141,32 @@ async function showDetail(id, signal, focus = false) {
   start.addEventListener('click', () => perform(async next => {
     await api('/' + record.submissionId + '/start', next, {});
     await overview(next, record.submissionId);
-    $('notice').textContent = 'Gestartet · Der Server übernimmt die Analyse. Du kannst dieses Fenster schließen.';
+    $('notice').textContent = 'Analyse angefordert · Der bestätigte Zustand steht am Run. Du kannst dieses Fenster schließen.';
   }));
-  if (record.runId) {
-    $('detail').querySelector('.execution-note').textContent = 'Der Server bearbeitet die Analyse unabhängig von diesem Fenster. Implementierung und Review folgen in späteren Schritten.';
-    $('detail').querySelector('.detail-kicker .badge').textContent = '● Gestartet';
-    await showExecution($('detail').querySelector('.execution'), record, signal, api, reportError);
-    await showWorkflow(record, signal, api, reportError, id => perform(next => showDetail(id, next, true)));
-  }
+  const display = showExecution($('detail'), record, signal, api, reportError);
+  let workflowStarted = false;
+  const update = async snapshot => {
+    if (signal.aborted) return;
+    const result = display(snapshot);
+    if (snapshot.execution?.runId && !workflowStarted) {
+      workflowStarted = true;
+      try {
+        await showWorkflow({...record, runId: snapshot.execution.runId}, signal, api, reportError,
+          id => perform(next => showDetail(id, next, true)));
+      } catch (error) {
+        if (!signal.aborted) {
+          workflowStarted = false;
+          $('history-status').textContent = 'Verbindung unterbrochen · Verlauf wird erneut geladen.';
+          if (error.status === 401 || error.status === 403) reportError(error);
+        }
+      }
+    }
+    await result;
+  };
+  updateSelected = update;
+  signal.addEventListener('abort', () => { if (updateSelected === update) updateSelected = null; }, {once: true});
+  await update(analyses.get(id) || {execution: record.runId ? undefined : {state: 'admitted'}, stale: false});
+
 }
 
 async function overview(signal, selected = location.hash.slice(1)) {
@@ -133,6 +174,7 @@ async function overview(signal, selected = location.hash.slice(1)) {
   const result = await api('', signal);
   signal.throwIfAborted();
   $('count').textContent = String(result.submissions.length);
+  const observing = observation = new AbortController();
   for (const record of result.submissions) {
     const row = document.createElement('button');
     row.className = 'submission-row';
@@ -141,12 +183,20 @@ async function overview(signal, selected = location.hash.slice(1)) {
     source.textContent = `${record.repository.fullName} / #${record.source.issueNumber}`;
     const title = document.createElement('strong'); title.textContent = record.title;
     const bottom = document.createElement('span'); bottom.className = 'row-bottom';
-    const status = document.createElement('span'); status.className = 'badge'; status.textContent = record.runId ? '● Gestartet' : '● Aufgenommen';
+    const status = document.createElement('span'); status.className = 'badge'; status.textContent = analysisState(record.runId ? undefined : 'admitted')[0];
     const time = document.createElement('span'); time.textContent = date(record.admittedAt);
     bottom.append(status, time); row.append(source, title, bottom);
     row.addEventListener('click', () => perform(signal => showDetail(record.submissionId, signal, true)));
     $('submission-list').append(row);
+    void watchAnalysis(record, observing.signal, api, snapshot => {
+      analyses.set(record.submissionId, snapshot);
+      status.textContent = statusLabel(snapshot);
+      status.dataset.state = snapshot.execution?.state || 'unknown';
+      status.dataset.stale = String(snapshot.stale);
+      if (selectedId === record.submissionId) void updateSelected?.(snapshot);
+    }, reportError);
   }
+  signal.throwIfAborted();
   if (result.submissions.length) {
     const id = result.submissions.some(s => s.submissionId === selected) ? selected : result.submissions[0].submissionId;
     await showDetail(id, signal);
@@ -165,6 +215,7 @@ $('connect-form').addEventListener('submit', event => {
   clearRecords();
   perform(async signal => {
     await overview(signal);
+    signal.throwIfAborted();
     $('sign-in').hidden = true; $('workspace').hidden = false; $('disconnect').hidden = false;
     $('connection-label').textContent = 'Mit GitHub verbunden';
   });
@@ -178,7 +229,7 @@ $('submission-form').addEventListener('submit', event => {
     await overview(signal, record.submissionId);
     $('source-url').value = '';
     $('notice').textContent = start
-      ? 'Gestartet · Der Server übernimmt die Analyse. Du kannst dieses Fenster schließen.'
+      ? 'Analyse angefordert · Der bestätigte Zustand steht am Run. Du kannst dieses Fenster schließen.'
       : 'Aufgenommen · Die gespeicherte Fassung ist in deiner Übersicht verfügbar.';
   });
 });

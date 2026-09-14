@@ -110,7 +110,7 @@ class LiveSubmissionExecutionTests(LiveSubmissionExecutionHarness, unittest.Test
         evidence = Path(os.environ.get('WPCP_SUBMISSION_PROOF_DIR', self.scratch.name))
         evidence.mkdir(parents=True, exist_ok=True)
         second = browser({**payload, **first, 'baseUrl': self.base_url, 'mode': 'read',
-            'expectedState': 'Abgeschlossen', 'screenshot': str(evidence / 'live-execution-desktop.png'),
+            'expectedState': 'Analyse abgeschlossen', 'screenshot': str(evidence / 'live-execution-desktop.png'),
             'mobileScreenshot': str(evidence / 'live-execution-mobile.png')})
         self.assertEqual(first['runId'], second['runId'])
         self.stop_detached_worker(worker)

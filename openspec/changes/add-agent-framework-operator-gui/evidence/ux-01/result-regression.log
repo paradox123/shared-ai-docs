@@ -1,0 +1,8 @@
+test_public_states_and_transport_recovery_keep_navigation_and_focus (tests.test_shared_run_browser.SharedRunBrowserTests.test_public_states_and_transport_recovery_keep_navigation_and_focus) ... ok
+test_saved_issue_start_reads_large_result_through_the_artifact_boundary (tests.test_submission_execution_browser.SubmissionExecutionBrowserTests.test_saved_issue_start_reads_large_result_through_the_artifact_boundary) ... ok
+test_start_close_browser_and_reopen_real_persisted_result_view (tests.test_submission_execution_browser.SubmissionExecutionBrowserTests.test_start_close_browser_and_reopen_real_persisted_result_view) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 27.095s
+
+OK

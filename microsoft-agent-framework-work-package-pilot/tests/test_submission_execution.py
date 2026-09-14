@@ -309,7 +309,7 @@ class SubmissionExecutionTests(SubmissionExecutionHarness, unittest.TestCase):
         from tests.test_submission_execution_browser import browser
         browser({'baseUrl': self.base_url, 'credential': self.provider.tokens['actor-authorized'],
             'submissionId': submission['submissionId'], 'runId': state['runId'], 'mode': 'read',
-            'expectedState': 'Ergebnis wird abgeglichen', 'summary': 'HTTP-Antwortfrist'})
+            'expectedState': 'Ergebnisabgleich', 'summary': 'HTTP-Antwortfrist'})
         self.analysis.release.set()
         replacement = self.worker()
         self.await_state(submission['submissionId'], 'completed')

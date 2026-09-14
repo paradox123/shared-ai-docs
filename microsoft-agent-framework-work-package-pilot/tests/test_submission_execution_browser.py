@@ -30,7 +30,7 @@ class SubmissionExecutionBrowserTests(SubmissionExecutionHarness, unittest.TestC
         evidence = Path(os.environ.get('WPCP_SUBMISSION_PROOF_DIR', self.scratch.name))
         evidence.mkdir(parents=True, exist_ok=True)
         second = browser({**payload, **first, 'baseUrl': self.base_url, 'mode': 'read',
-            'expectedState': 'Abgeschlossen', 'summary': 'Requirements analysis complete.',
+            'expectedState': 'Analyse abgeschlossen', 'summary': 'Requirements analysis complete.',
             'screenshot': str(evidence / 'execution-completed-desktop.png'),
             'mobileScreenshot': str(evidence / 'execution-completed-mobile.png')})
         self.assertEqual(first['runId'], second['runId'])
@@ -42,5 +42,5 @@ class SubmissionExecutionBrowserTests(SubmissionExecutionHarness, unittest.TestC
         _, submission, _ = self.post('', {'sourceUrl': self.issue(602)})
         result = browser({'baseUrl': self.base_url, 'credential': self.provider.tokens['actor-authorized'],
             'submissionId': submission['submissionId'], 'mode': 'start-saved',
-            'expectedState': 'Abgeschlossen', 'summary': 'End of analysis.'})
+            'expectedState': 'Analyse abgeschlossen', 'summary': 'End of analysis.'})
         self.assertIn('End of analysis.', result['result'])

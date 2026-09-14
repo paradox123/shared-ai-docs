@@ -17,9 +17,10 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
     assert.equal(await page.getByLabel('GitHub-Zugangstoken').inputValue(), '');
     if (input.admit) {
       assert.equal(await page.locator('#count').textContent(), '0', 'Acceptance must start with empty overview');
+      if (!await page.locator('.intake-disclosure').evaluate(node => node.open)) await page.locator('.intake-disclosure > summary').click();
       await page.getByLabel('GitHub-Issue-URL').fill(input.sourceUrl);
       await page.getByRole('button', {name: 'Aufnehmen', exact: false}).click();
-      await page.getByRole('status').filter({hasText: 'Aufgenommen'}).waitFor();
+      await page.locator('#notice').filter({hasText: 'Aufgenommen'}).waitFor();
     }
     await page.locator('#detail [data-field="title"]').filter({hasText: input.title}).waitFor();
     assert.equal(await page.locator('#detail [data-field="title"]').textContent(), input.title);
@@ -38,9 +39,10 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
     assert.equal(snapshot.body, input.body);
     if (input.expectedSnapshot) assert.deepEqual(snapshot, input.expectedSnapshot);
     // A second submission takes the actual UI path and must rediscover the same identity.
-    await page.getByLabel('GitHub-Issue-URL').fill(input.sourceUrl);
+    if (!await page.locator('.intake-disclosure').evaluate(node => node.open)) await page.locator('.intake-disclosure > summary').click();
+      await page.getByLabel('GitHub-Issue-URL').fill(input.sourceUrl);
     await page.getByRole('button', {name: 'Aufnehmen', exact: false}).click();
-    await page.getByRole('status').filter({hasText: 'Aufgenommen'}).waitFor();
+    await page.locator('#notice').filter({hasText: 'Aufgenommen'}).waitFor();
     assert.equal(await page.locator('#count').textContent(), '1');
     assert.equal(await page.locator('#detail [data-field="id"]').textContent(), id);
     assert.deepEqual(await page.evaluate(() => ({local: Object.keys(localStorage), session: Object.keys(sessionStorage)})), {local: [], session: []});

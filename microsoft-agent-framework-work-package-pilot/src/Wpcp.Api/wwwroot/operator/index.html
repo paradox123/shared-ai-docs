@@ -8,21 +8,15 @@
   <script type="module" src="/operator/operator.js"></script>
 </head>
 <body>
-  <aside class="portal" aria-label="Navigation">
-    <a class="brand" href="/operator/"><span aria-hidden="true">◈</span><span>work package<small>DANIELSVAULT</small></span></a>
-    <p class="eyebrow">OPERATOR</p>
-    <a class="nav-current" href="/operator/" aria-current="page"><span aria-hidden="true">▤</span> Anforderungen</a>
-    <p class="portal-foot">Ein Ort für den Auftrag.<br>Eine nachvollziehbare Fassung.</p>
-  </aside>
   <main>
     <header class="page-header">
-      <div><p class="eyebrow">WORK PACKAGE CONTROL PLANE</p><h1>Anforderungen</h1></div>
+      <div><h1>Anforderungen</h1></div>
       <div class="connection"><span id="connection-label">Nicht verbunden</span><button id="disconnect" class="quiet" hidden>Abmelden</button></div>
     </header>
     <div id="notice" role="status" aria-live="polite"></div>
     <div id="error" role="alert" hidden></div>
     <section id="sign-in" class="sign-in panel" aria-labelledby="sign-in-title">
-      <span class="section-number">01 / ZUGANG</span>
+
       <h2 id="sign-in-title">Mit GitHub verbinden</h2>
       <p>Verwende deinen persönlichen GitHub-Zugang. Deine aktuellen Repository-Rechte bestimmen, welche Anforderungen du sehen und aufnehmen kannst.</p>
       <form id="connect-form">
@@ -32,8 +26,8 @@
       </form>
     </section>
     <section id="workspace" hidden>
-      <section class="intake panel" aria-labelledby="intake-title">
-        <div><span class="section-number">01 / AUFNAHME</span><h2 id="intake-title">Anforderungen aufnehmen</h2><p>Übernimm den freigegebenen Auftrag mit seiner aktuellen Fassung.</p></div>
+      <details class="intake-disclosure panel"><summary>Anforderungen aufnehmen</summary><section class="intake" aria-labelledby="intake-title">
+        <div><h2 id="intake-title">Anforderungen aufnehmen</h2><p>Übernimm den freigegebenen Auftrag mit seiner aktuellen Fassung.</p></div>
         <form id="submission-form">
           <label for="source-url">GitHub-Issue-URL</label>
           <div class="input-row"><input id="source-url" type="url" placeholder="https://github.com/owner/repository/issues/123" required autocomplete="off"></div>
@@ -41,15 +35,15 @@
           <small>„Starten“ speichert den Auftrag und analysiert seine Anforderungen im Hintergrund. Voraussetzung: offenes Issue mit „ready-for-agent“ und Schreibzugriff.</small>
         </form>
       </section>
+      </details>
       <div class="records">
         <section class="overview panel" aria-labelledby="overview-title">
-          <div class="section-header"><div><span class="section-number">02 / ÜBERSICHT</span><h2 id="overview-title">Gespeicherte Anforderungen <span id="count" class="count">0</span></h2></div><button id="refresh" class="quiet" aria-label="Anforderungen aktualisieren">↻</button></div>
+          <div class="section-header"><div><h2 id="overview-title">Gespeicherte Anforderungen <span id="count" class="count">0</span></h2></div><button id="refresh" class="quiet" aria-label="Anforderungen aktualisieren"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5M19 12a7 7 0 0 0-12-5L4 10M5 12a7 7 0 0 0 12 5l3-3"/></svg></button></div>
           <div id="submission-list" aria-label="Gespeicherte Anforderungen"></div>
         </section>
-        <section id="detail" class="detail panel" aria-label="Anforderungsdetails"><div class="empty"><span aria-hidden="true">▤</span><h2>Anforderungen im Detail</h2><p>Wähle die Anforderungen aus der Übersicht.</p></div></section>
-      </div>
-      <section id="workflow" class="panel workflow" aria-labelledby="workflow-title" hidden>
-        <div class="section-header"><div><span class="section-number">03 / BEOBACHTUNG</span><h2 id="workflow-title">Workflow und Sessionverlauf</h2></div><span id="workflow-state" class="badge"></span></div>
+        <article id="run-view" class="detail panel"><section id="detail" aria-label="Anforderungsdetails"><div class="empty"><span aria-hidden="true">▤</span><h2>Anforderungen im Detail</h2><p>Wähle die Anforderungen aus der Übersicht.</p></div></section>
+      <section id="workflow" class="workflow" role="tabpanel" aria-labelledby="run-tab-history" tabindex="0" hidden>
+        <div class="section-header"><div><h2 id="workflow-title">Workflow und Sessionverlauf</h2></div><span id="workflow-state" class="badge"></span></div>
         <p class="workflow-intro">Verfolge die Arbeit am Auftrag. Wähle links einen Schritt, um Nachrichten, Werkzeuge und Ergebnisse zu lesen.</p>
         <nav id="run-list" aria-label="Gestartete Runs"></nav>
         <div class="workflow-layout">
@@ -60,21 +54,34 @@
             <p id="history-status" role="status"></p>
             <p id="history-note" class="history-note"></p>
             <div id="history-list"></div><button id="history-more" class="quiet" hidden>Weitere Ereignisse laden</button>
-            <section id="artifact-panel" aria-label="Gespeicherte Artefakte"><h3>Dateien und Artefakte</h3><div id="artifact-list"></div><div id="artifact-content" hidden tabindex="0"></div></section>
           </section>
         </div>
       </section>
+      <section id="artifact-panel" role="tabpanel" aria-labelledby="run-tab-files" tabindex="0" hidden><h3>Dateien und Artefakte</h3><div id="artifact-list"></div><div id="artifact-content" hidden tabindex="0"></div></section>
+        </article>
+      </div>
     </section>
     <footer class="page-foot">GITHUB ALS QUELLE <span>Inhalt · Herkunft · gespeicherte Fassung</span></footer>
   </main>
   <template id="detail-template">
-    <div class="detail-heading"><div class="detail-kicker"><span class="section-number">GESPEICHERTE ANFORDERUNGEN</span><span class="badge">● Aufgenommen</span></div><h2 data-field="title" tabindex="-1"></h2><p class="execution-note">Der Auftrag ist aufgenommen. Die Agentenverarbeitung wurde noch nicht gestartet.</p></div>
-    <section class="execution" aria-label="Hintergrundaktivität">
-      <div class="execution-header"><div><span class="section-number">ERSTER AGENTENSCHRITT</span><h3>Anforderungen analysieren</h3></div><button type="button" class="primary" data-execution="start">Analyse starten</button></div>
+    <div class="detail-heading">
+      <h2 data-field="title" tabindex="-1"></h2>
+      <p class="run-source"><a data-field="source" target="_blank" rel="noopener noreferrer"></a></p>
+      <p class="execution-status" role="status"><span class="badge" data-execution="state">Aufgenommen</span><span data-execution="freshness"></span></p>
+      <p class="execution-note" data-execution="hint">Der Auftrag ist aufgenommen. Die Analyse wurde noch nicht gestartet.</p>
+    </div>
+    <div class="run-tabs" role="tablist" aria-label="Ansichten dieses Runs">
+      <button id="run-tab-result" type="button" role="tab" data-view="result" aria-controls="run-result" aria-selected="true">Ergebnis</button>
+      <button id="run-tab-history" type="button" role="tab" data-view="history" aria-controls="workflow" aria-selected="false" tabindex="-1">Verlauf</button>
+      <button id="run-tab-files" type="button" role="tab" data-view="files" aria-controls="artifact-panel" aria-selected="false" tabindex="-1">Dateien</button>
+      <button id="run-tab-requirements" type="button" role="tab" data-view="requirements" aria-controls="run-requirements" aria-selected="false" tabindex="-1">Anforderungen</button>
+    </div>
+    <section id="run-result" class="execution" role="tabpanel" aria-labelledby="run-tab-result" tabindex="0">
+      <div class="execution-header"><h3>Analyseergebnis</h3><button type="button" class="primary" data-execution="start">Analyse starten</button></div>
       <div data-execution="detail" hidden>
-        <p class="execution-status"><span class="badge" data-execution="state"></span><span data-execution="hint"></span></p>
+        <p data-execution="result-status" role="status">Ergebnis wird geladen …</p>
         <p class="execution-result" data-execution="result"></p>
-        <ul class="execution-findings" data-execution="findings"></ul>
+        <details class="findings-details"><summary>Erkenntnisse ansehen</summary><ul class="execution-findings" data-execution="findings"></ul></details>
         <details class="execution-correlation"><summary>Run und Agentensession</summary><dl>
           <dt>Run-ID</dt><dd><code data-execution="run-id"></code></dd>
           <dt>Aktivität</dt><dd><code data-execution="activity-id"></code></dd>
@@ -83,15 +90,16 @@
         </dl></details>
       </div>
     </section>
+    <section id="run-requirements" role="tabpanel" aria-labelledby="run-tab-requirements" tabindex="0" hidden>
     <dl class="metadata">
       <div><dt>Zielrepository</dt><dd data-field="repository"></dd></div>
-      <div><dt>Quelle · GitHub</dt><dd><a data-field="source" target="_blank" rel="noopener noreferrer"></a></dd></div>
       <div><dt>Aufgenommen am</dt><dd data-field="admitted"></dd></div>
       <div><dt>Quellfassung vom</dt><dd data-field="revision"></dd></div>
       <div class="full"><dt>Anforderungs-ID</dt><dd><code data-field="id"></code></dd></div>
     </dl>
     <div class="content"><div class="content-heading"><h3>Aufgenommener Inhalt</h3><span data-field="redaction"></span></div><pre data-field="body"></pre></div>
     <details class="provenance"><summary>Herkunft und Fassungsnachweis</summary><dl><dt>GitHub Issue-ID</dt><dd data-field="issue-id"></dd><dt>Aufgenommen durch</dt><dd data-field="actor"></dd><dt>SHA-256 der gespeicherten Fassung</dt><dd><code data-field="sha"></code></dd><dt>Redaktionsregel</dt><dd data-field="policy"></dd></dl></details>
+    </section>
   </template>
 </body>
 </html>

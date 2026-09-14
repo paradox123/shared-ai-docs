@@ -22,11 +22,13 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
     }
     let first = await connect(input.credential, input.submissionId ? '#' + input.submissionId : '');
     if (!input.submissionId) {
+      if (!await first.locator('.intake-disclosure').evaluate(node => node.open)) await first.locator('.intake-disclosure > summary').click();
       await first.getByLabel('GitHub-Issue-URL').fill(input.sourceUrl);
       await first.getByRole('button', {name: 'Starten', exact: true}).click();
       await first.locator('[data-field="source"]').filter({hasText: input.sourceUrl}).waitFor();
     }
-    await first.locator('[data-execution="state"]').filter({hasText: 'Abgeschlossen'}).waitFor({timeout: input.live ? 180000 : 20000});
+    await first.locator('[data-execution="state"]').filter({hasText: 'Analyse abgeschlossen'}).waitFor({timeout: input.live ? 180000 : 20000});
+    await first.getByRole('tab', {name: 'Verlauf', exact: true}).click();
     await first.getByRole('heading', {name: 'Workflow und Sessionverlauf', exact: true}).waitFor();
     if (input.live) console.error('Real analysis completed; inspecting workflow.');
     const runId = await first.locator('[data-execution="run-id"]').textContent();
@@ -34,6 +36,7 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
     if (input.artifacts) { await first.context().close(); first = await connect(input.credential, '#' + submissionId); }
     const second = await connect(input.observer, '#' + submissionId);
     async function inspect(page, token) {
+      await page.getByRole('tab', {name: 'Verlauf', exact: true}).click();
       const headers = {Authorization: 'Bearer ' + token};
       const run = await (await page.request.get(input.baseUrl + '/api/v1/runs/' + runId, {headers})).json();
       const attempt = run.attempts.find(a => a.session);
@@ -112,6 +115,7 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
       if (input.artifacts) {
         const manifest = await (await page.request.get(input.baseUrl + '/api/v1/runs/' + runId + '/artifacts', {headers})).json();
         assert.ok(manifest.artifacts.length > 0);
+        await page.getByRole('tab', {name: 'Dateien', exact: true}).click();
         for (const artifact of manifest.artifacts) {
           await page.locator('[data-artifact-id="' + artifact.artifactId + '"] button').click();
           if (artifact.availability !== 'available') {
@@ -132,6 +136,7 @@ const input = JSON.parse(fs.readFileSync(0, 'utf8'));
           await page.locator('#artifact-content .artifact-raw > summary').click();
         }
       }
+      await page.getByRole('tab', {name: 'Verlauf', exact: true}).click();
       await page.locator('#session-detail > details > summary').click();
       await page.getByLabel('Inhalte', {exact: true}).selectOption('conversation');
       assert.equal(await page.locator('#history-list .event-raw[open], #session-detail details[open]').count(), 0);

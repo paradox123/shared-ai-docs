@@ -1,0 +1,26 @@
+test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt (tests.test_submission_execution.SubmissionExecutionTests.test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt) ... FAIL
+
+======================================================================
+FAIL: test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt (tests.test_submission_execution.SubmissionExecutionTests.test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/test_submission_execution.py", line 310, in test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt
+    browser({'baseUrl': self.base_url, 'credential': self.provider.tokens['actor-authorized'],
+    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        'submissionId': submission['submissionId'], 'runId': state['runId'], 'mode': 'read',
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        'expectedState': 'Ergebnisabgleich', 'summary': 'HTTP-Antwortfrist'})
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/test_submission_execution_browser.py", line 13, in browser
+    if result.returncode: raise AssertionError('Browser proof failed: ' + result.stderr)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Browser proof failed: locator.waitFor: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('[data-execution="result"]').filter({ hasText: 'HTTP-Antwortfrist' }) to be visible[22m
+
+
+
+----------------------------------------------------------------------
+Ran 1 test in 45.631s
+
+FAILED (failures=1)

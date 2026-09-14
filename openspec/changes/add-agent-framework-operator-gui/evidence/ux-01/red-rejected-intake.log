@@ -1,0 +1,30 @@
+test_rejected_intake_does_not_stop_the_selected_run_observation (tests.test_shared_run_browser.SharedRunFaultBrowserTests) ... FAIL
+
+======================================================================
+FAIL: test_rejected_intake_does_not_stop_the_selected_run_observation (tests.test_shared_run_browser.SharedRunFaultBrowserTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/test_shared_run_browser.py", line 123, in test_rejected_intake_does_not_stop_the_selected_run_observation
+    self.check_fault('rejection')
+  File "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/test_shared_run_browser.py", line 120, in check_fault
+    self.assertEqual(0, result.returncode, result.stdout + result.stderr)
+AssertionError: 0 != 1 : [{"case":"session_before","focused":"Session und Herkunft","expanded":true},{"case":"session_after","focusedTag":"BODY","nodeStillConnected":false,"expanded":false},{"case":"artifact_after","focusedTag":"BODY","nodeStillConnected":false,"selectedTab":"Dateien"},{"case":"rejected_intake_then_state_change","header":"Läuft","row":"Analyse abgeschlossen","freshness":""}]
+AssertionError [ERR_ASSERTION]: Rejected intake froze the selected header
++ actual - expected
+
++ 'Läuft'
+- 'Analyse abgeschlossen'
+
+    at /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs-operator-gui-ux-01/microsoft-agent-framework-work-package-pilot/tests/shared_focus_browser.cjs:57:11 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'Läuft',
+  expected: 'Analyse abgeschlossen',
+  operator: 'strictEqual'
+}
+
+
+----------------------------------------------------------------------
+Ran 1 test in 5.407s
+
+FAILED (failures=1)
