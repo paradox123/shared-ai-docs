@@ -1,11 +1,12 @@
 # Gemeinsame Run-Ansicht: Spezifikationseinstieg
 
-Die Ticketaufteilung und ihre Abhängigkeiten sind am 14.09.2026 vom Nutzer freigegeben. Diese Ergänzung bleibt im bestehenden Change `add-agent-framework-operator-gui`; sie plant die UX-Verbesserung der vorhandenen Aufnahme, Hintergrundanalyse und Run-Beobachtung.
+Die Ticketaufteilung und ihre Abhängigkeiten sind am 14.09.2026 vom Nutzer freigegeben. UX-01 wurde am 15.09.2026 akzeptiert und als `add-agent-framework-shared-run-view` archiviert. Die übrige UX-Planung bleibt im bestehenden Change `add-agent-framework-operator-gui`.
 
 ## Maßgebliche Quellen
 
 - [Bestätigte UX-Entscheidungen und Anforderungszuordnung](../../openspec/changes/add-agent-framework-operator-gui/ux-ticket-plan.md)
-- [Kanonische Anforderungen zu Aufnahme und Hintergrundstart](../../openspec/specs/agent-framework-operator-gui/spec.md)
+- [Akzeptierter UX-01-Abschluss](../../openspec/changes/archive/2026-09-15-add-agent-framework-shared-run-view/proposal.md)
+- [Kanonische Anforderungen zu Aufnahme, Hintergrundstart und gemeinsamer Run-Ansicht](../../openspec/specs/agent-framework-operator-gui/spec.md)
 - [Aktive Anforderungen zur Workflow- und Run-Beobachtung](../../openspec/changes/add-agent-framework-operator-gui/specs/agent-framework-operator-gui/spec.md)
 - [Vorhandene Designentscheidungen und UI-Begriff „Anforderungen“](../../openspec/changes/add-agent-framework-operator-gui/design.md)
 - [Domänenbegriffe](../../CONTEXT.md), [Operator Client und zentrale Run History](../../docs/adr/0002-operator-clients-instead-of-human-agent-sessions.md), [Repository Authorization](../../docs/adr/0007-derive-operator-access-from-repository-permissions.md)

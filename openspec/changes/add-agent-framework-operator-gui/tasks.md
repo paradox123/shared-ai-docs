@@ -1,4 +1,4 @@
-Accepted Ticket 01 is extracted into [add-agent-framework-github-intake](../archive/2026-09-14-add-agent-framework-github-intake/proposal.md) and archived. Accepted Ticket 02 is extracted into [add-agent-framework-background-start](../archive/2026-09-14-add-agent-framework-background-start/proposal.md). This parent remains active for Tickets 03–16; unchecked tasks retain their original scope.
+Accepted Ticket 01 is extracted into [add-agent-framework-github-intake](../archive/2026-09-14-add-agent-framework-github-intake/proposal.md) and archived. Accepted Ticket 02 is extracted into [add-agent-framework-background-start](../archive/2026-09-14-add-agent-framework-background-start/proposal.md). Accepted UX-01 is extracted into [add-agent-framework-shared-run-view](../archive/2026-09-15-add-agent-framework-shared-run-view/proposal.md) after user acceptance on 2026-09-15. This parent remains active for Tickets 03–16 and UX-02–04; unchecked tasks retain their original scope.
 
 ## 1. Design interview
 
@@ -49,7 +49,7 @@ Accepted Ticket 01 is extracted into [add-agent-framework-github-intake](../arch
 ## 4. UX refinement
 
 - [x] 4.0 User approved the four UX slices and blocking edges on 2026-09-14; publish individual local tickets and record the priority between original Tickets 03 and 04 in [ux-ticket-plan.md](ux-ticket-plan.md).
-- [x] 4.1 UX-01: shared run view with consistent confirmed analysis state, immediate result access and retained existing navigation; implemented on the GUI-03 baseline and verified through public browser contracts and actual GitHub/Codex execution. See [UX-01 evidence](ux-01-evidence.md).
+- [x] 4.1 UX-01: shared run view with consistent confirmed analysis state, immediate result access and retained existing navigation; accepted by the user on 2026-09-15, canonically specified and archived after public browser and actual GitHub/Codex verification. See [UX-01 evidence](../archive/2026-09-15-add-agent-framework-shared-run-view/ux-01-evidence.md).
 - [ ] 4.2 UX-02: readable complete analysis results, artifacts and immutable admitted requirements; implement and verify after UX-01.
 - [ ] 4.3 UX-03: readable agent work and targeted failure inspection with stable keyboard focus, live updates and mobile step selection; implement and verify after UX-01.
 - [ ] 4.4 UX-04: compact real intake/start flows into the shared view with actionable errors and preserved identities; implement and verify after UX-01.

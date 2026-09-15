@@ -33,7 +33,8 @@ Die Planungsfreigabe allein startete keine Implementierung und schloss weder bes
 
 UX-01 ist am 14.09.2026 auf `codex/operator-gui-ux-01`, basierend auf dem lokal
 geprüften GUI-03-Stand `a46a133`, umgesetzt und technisch verifiziert.
-[Öffentliche Verhaltensnachweise und Browserbilder](../../openspec/changes/add-agent-framework-operator-gui/ux-01-evidence.md)
-dokumentieren den Abschluss. Menschliche Abnahme und Integration in `main` werden
-damit nicht vorweggenommen. UX-02 bis UX-04 bleiben offen und können auf dieser
-gemeinsamen Implementierungsbasis fortgesetzt werden.
+[Öffentliche Verhaltensnachweise und Browserbilder](../../openspec/changes/archive/2026-09-15-add-agent-framework-shared-run-view/ux-01-evidence.md)
+dokumentieren den Abschluss. Der Nutzer hat UX-01 am **15.09.2026 akzeptiert**;
+der Umfang ist separat in OpenSpec abgeschlossen und archiviert. Die Lieferung
+erfolgt auf `codex/operator-gui-ux-01`. UX-02 bis UX-04 bleiben offen und können
+auf dieser gemeinsamen Implementierungsbasis fortgesetzt werden.

@@ -1,0 +1,16 @@
+test_admitted_requirements_remain_truthful_when_another_client_starts_them (tests.test_shared_run_browser.SharedRunBrowserTests.test_admitted_requirements_remain_truthful_when_another_client_starts_them) ... ok
+test_completed_run_list_and_header_agree_with_public_execution (tests.test_shared_run_browser.SharedRunBrowserTests.test_completed_run_list_and_header_agree_with_public_execution) ... ok
+test_late_previous_run_reads_cannot_replace_the_current_selection (tests.test_shared_run_browser.SharedRunBrowserTests.test_late_previous_run_reads_cannot_replace_the_current_selection) ... ok
+test_public_states_and_transport_recovery_keep_navigation_and_focus (tests.test_shared_run_browser.SharedRunBrowserTests.test_public_states_and_transport_recovery_keep_navigation_and_focus) ... ok
+test_real_worker_updates_and_api_reopening_preserve_run_view_and_step_focus (tests.test_shared_run_browser.SharedRunBrowserTests.test_real_worker_updates_and_api_reopening_preserve_run_view_and_step_focus) ... ok
+test_revocation_during_initial_hydration_cannot_reconnect_the_cleared_workspace (tests.test_shared_run_browser.SharedRunBrowserTests.test_revocation_during_initial_hydration_cannot_reconnect_the_cleared_workspace) ... ok
+test_saved_run_opens_result_with_keyboard_access_to_all_four_views (tests.test_shared_run_browser.SharedRunBrowserTests.test_saved_run_opens_result_with_keyboard_access_to_all_four_views) ... ok
+test_unrelated_hanging_status_read_does_not_block_opening_a_saved_run (tests.test_shared_run_browser.SharedRunBrowserTests.test_unrelated_hanging_status_read_does_not_block_opening_a_saved_run) ... ok
+test_live_events_preserve_session_disclosure_and_artifact_button_focus (tests.test_shared_run_browser.SharedRunFaultBrowserTests.test_live_events_preserve_session_disclosure_and_artifact_button_focus) ... ok
+test_rejected_intake_does_not_stop_the_selected_run_observation (tests.test_shared_run_browser.SharedRunFaultBrowserTests.test_rejected_intake_does_not_stop_the_selected_run_observation) ... ok
+test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt (tests.test_submission_execution.SubmissionExecutionTests.test_late_response_after_timeout_is_reconciled_by_replacement_without_new_attempt) ... ok
+
+----------------------------------------------------------------------
+Ran 11 tests in 83.926s
+
+OK

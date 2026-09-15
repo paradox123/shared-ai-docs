@@ -77,17 +77,6 @@ The pilot SHALL support and directly verify a server-hosted control plane access
 ### Requirement: Workflow and persisted run inspection
 The graphical Operator Client SHALL list authorized runs and display each run's workflow progress and persisted correlated history, including observable session messages, tool calls/results, activity attempts, handoffs and outcomes. Missing or redacted evidence SHALL be explicit rather than represented as complete content.
 
-#### Scenario: Open and observe one shared run view (UX-01)
-- **WHEN** a human opens saved requirements, observes their analysis, changes the selection or reopens the same run
-- **THEN** a common title, source and analysis state precede the selected result view; result, history, files and immutable requirements are directly selectable views of the same run
-- **AND** list and header use confirmed public execution states: admitted without a run, queued, running, reconciling, completed analysis or failed; an unknown state remains unknown and a run ID alone never means running or started
-- **AND** completed analysis claims neither implementation, review nor overall workflow completion; retained results or concrete failures are available without scrolling through the full requirements or long findings lists
-- **AND** a reconciling execution retains its recorded diagnostic code and explanation until a result is available, without presenting the uncertain outcome as a terminal failure
-- **AND** execution changes and reconnects update both displays consistently; connection loss labels the last confirmed state as stale, remains distinct from execution failure and result reconciliation, and retries without requiring a new selection
-- **AND** late responses from a previous selection cannot replace the current run's contents; intake/start, all existing session/history/artifact/source data, the selected view and keyboard focus remain accessible through updates
-- **AND** keyboard navigation has understandable names, and title, state and navigation remain readable at 390 and 1024 pixels without horizontal page scrolling
-- **AND** acceptance compares real persisted public responses with browser opening, state transition and reopening on both viewports; controlled transport/state cases supplement rather than replace persisted-data evidence
-
 #### Scenario: Inspect a background failure
 - **WHEN** an authorized user opens a run with a failed activity
 - **THEN** the user can identify the activity and attempt, its session, retained observable messages and tool results, the failure and any recorded handoff without access to the original foreground task

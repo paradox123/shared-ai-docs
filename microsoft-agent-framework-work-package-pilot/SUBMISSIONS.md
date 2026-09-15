@@ -209,5 +209,5 @@ WPCP_SUBMISSION_PROOF_DIR=/tmp/wpcp-shared-run-proof \
   python -m unittest tests.test_shared_run_live -v
 ```
 
-See the [UX-01 acceptance evidence](../openspec/changes/add-agent-framework-operator-gui/ux-01-evidence.md)
+See the [UX-01 acceptance evidence](../openspec/changes/archive/2026-09-15-add-agent-framework-shared-run-view/ux-01-evidence.md)
 for observed results and the remaining deployment/accessibility verification limits.

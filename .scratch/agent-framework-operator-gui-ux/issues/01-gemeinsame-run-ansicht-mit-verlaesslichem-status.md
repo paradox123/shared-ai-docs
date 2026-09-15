@@ -28,6 +28,12 @@ Der finale Gesamtlauf besteht mit 213 erfolgreichen Tests und 26 bewusst
 Beobachten und Wiederöffnen nach API-Neustart bei 1024 und 390 px. Die getrennten
 Standards-/Spec-Reviews und der visuelle Verdict Pass sind abgeschlossen.
 
-[Abnahmeübersicht, Grenzen und Nachweise](../../../openspec/changes/add-agent-framework-operator-gui/ux-01-evidence.md).
-Dies ist der technische Abschluss auf dem Featurezweig; menschliche Abnahme,
-Integration in `main` und Archivierung des übergeordneten Changes sind nicht erfolgt.
+[Abnahmeübersicht, Grenzen und Nachweise](../../../openspec/changes/archive/2026-09-15-add-agent-framework-shared-run-view/ux-01-evidence.md).
+Der Nutzer hat UX-01 am **15.09.2026 akzeptiert**. Der abgeschlossene Umfang ist
+im separaten Change `add-agent-framework-shared-run-view` archiviert. Der übergeordnete
+Change bleibt für seine übrigen Tickets aktiv; Lieferung auf dem Featurezweig.
+
+## Comments
+
+- 15.09.2026: Nutzerabnahme „akzeptiert, schließe spec / openspec, commit und push“.
+  UX-01 bleibt `resolved`; der akzeptierte Vertrag und die Nachweise sind archiviert.
