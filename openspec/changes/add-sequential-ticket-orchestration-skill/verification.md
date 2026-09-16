@@ -1,5 +1,7 @@
 # Acceptance evidence — sequential ticket orchestration skill
 
+Historical v1 report. For the current parallel extension, see [parallel-verification.md](parallel-verification.md).
+
 Verified 2026-09-16. Scope: new shared `orchestrate-ticket-batch` skill, its metadata recovery helper, prompt/state references, catalog entry and targeted Codex discovery link. Product code, vendor implement skill and active orchestration automations were not changed. Existing unrelated shared-ai-docs changes were preserved.
 
 ## Requirement outcomes

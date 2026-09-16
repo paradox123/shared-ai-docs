@@ -1,44 +1,89 @@
 ## ADDED Requirements
 
-### Requirement: Finite sequential batch
-The skill SHALL resolve and freeze a user-selected batch, use one dedicated Codex task per ticket and avoid implementing product changes in the coordinator. User invocation for batch execution SHALL select the documented implementation-to-merge workflow subject to actual runtime permissions.
+### Requirement: Finite batch with explicit target
+The skill SHALL freeze a user-selected finite batch, use dedicated implementation tasks and keep product implementation out of the coordinator. It SHALL require an explicit user target branch before dispatch and SHALL NOT infer main, the default branch or current checkout. Batch execution SHALL include documented delivery and owned-resource cleanup subject to actual permissions and narrower user scope.
 
-#### Scenario: Minimal invocation
-- **WHEN** the user supplies only the skill and a repository ticket range
-- **THEN** the coordinator resolves the project, dependencies and target branch and dispatches only the first eligible ticket using implement and repository OpenSpec policy
+#### Scenario: Missing target
+- **WHEN** the user supplies the skill and ticket range without a target
+- **THEN** the coordinator asks for that required input and may perform read-only preparation, but creates no worker until it is supplied
+
+#### Scenario: Non-default target
+- **WHEN** the user names an existing release branch
+- **THEN** workers start from and deliver to that branch, and delivered issues are explicitly closed if automatic closure did not run
+
+### Requirement: Bounded independent parallelism
+The coordinator SHALL allow up to three in-flight tickets by default with a positive user override. Pending registration and candidates awaiting integration SHALL count. Functional dependencies and foreseeable file/interface or mutable-resource conflicts SHALL prevent simultaneous work. Confirmed delivery SHALL unlock dependents independently of cleanup. Blockers SHALL affect only their dependency/conflict scope unless demonstrably batch-wide.
+
+#### Scenario: Refill while another worker runs
+- **WHEN** one of three workers is delivered and another independent eligible ticket exists
+- **THEN** the coordinator dispatches it without waiting for the remaining workers or the next heartbeat
+
+#### Scenario: Unresolved creation and overlapping tickets
+- **WHEN** a creation is unresolved or an undelivered ticket overlaps a queued ticket
+- **THEN** the unresolved creation retains its slot and the overlapping ticket waits, while unrelated eligible tickets may use remaining slots
+
+#### Scenario: Blocked worker
+- **WHEN** a worker has an external blocker
+- **THEN** it releases its slot only after verified quiescence, keeps its conflict/dependency reservations, and needs a free slot to resume
+
+### Requirement: Isolated implementation
+Every new implementation task SHALL use a dedicated worktree and owned branch based on the user target. Workers SHALL verify the fresh remote base and isolate mutable test resources. Unexpected overlap SHALL cause safe checkpointing and serialization without discarding work.
+
+#### Scenario: Two independent implementations
+- **WHEN** two independent tickets are dispatched
+- **THEN** their worktrees and working branches are distinct and shared mutable ports/databases/output resources are isolated or explicitly serialized
 
 ### Requirement: Confirmed identity and recovery
-The coordinator SHALL distinguish client IDs from confirmed task IDs, persist dispatch intent and verify candidates through task tools before adopting them. Missing listings SHALL NOT establish task absence.
+The coordinator SHALL distinguish provisional client IDs from real task IDs, persist dispatch intent and directly verify candidates. Missing listings SHALL NOT establish absence. Recovery SHALL remain bounded and read-only until identity is confirmed.
 
 #### Scenario: Missing listing
 - **WHEN** asynchronous creation returns a client ID and listing omits the worker
-- **THEN** bounded exact-title local metadata recovery yields candidates for direct verification without creating a replacement or requiring a pasted user link as the first fallback
+- **THEN** exact-title metadata recovery supplies candidates for direct verification without creating a replacement or requiring a pasted link as first fallback
 
 #### Scenario: Ambiguous or malformed metadata
-- **WHEN** the metadata helper encounters multiple exact-title IDs or malformed metadata
-- **THEN** it returns a bounded ambiguous/error result rather than a silently selected identity or false empty success
+- **WHEN** the helper encounters multiple exact-title IDs or malformed metadata
+- **THEN** it returns a bounded ambiguous/error result rather than a selected identity or false empty success
 
 ### Requirement: Evidence-bound acceptance
-The coordinator SHALL request a separate critical verification and inspect actual screenshots or readable measured results against acceptance criteria for the identified implementation state. Prototypes SHALL provide visual inspiration only.
+The coordinator SHALL request separate critical verification and inspect actual screenshots or readable measured outcomes against ticket criteria. Prototypes SHALL provide visual inspiration only. Acceptance SHALL identify contents and the target revision used for integration verification.
 
-#### Scenario: Green test counts without adequate proof
-- **WHEN** the worker reports passing tests but supplies no inspectable behavioral evidence
-- **THEN** the coordinator requests missing evidence and withholds acceptance
+#### Scenario: Green counts without behavioral proof
+- **WHEN** a worker supplies only passing test counts
+- **THEN** the coordinator requests inspectable evidence and withholds acceptance
 
-### Requirement: Verified delivery and authorization
-The coordinator SHALL advance only after verifying remote merge, included accepted contents and ticket closure. A runtime approval denial SHALL be reported accurately without routing around it.
+### Requirement: Serialized verified integration
+Only one worker SHALL hold the target integration reservation. Acceptance/preparation SHALL be separate from a specific final merge grant. A changed head or target SHALL trigger relevant revalidation; substantive candidate changes SHALL require renewed acceptance. Remote merge, accepted-content inclusion and ticket closure SHALL be verified. Runtime approval denials SHALL NOT be bypassed.
+
+#### Scenario: Target advances after acceptance
+- **WHEN** a different ticket or external writer advances the target before merge
+- **THEN** the holder revalidates against the current target and obtains a matching grant before merging; combined behavior is verified if an external change races with the merge
 
 #### Scenario: Delegated approval rejected
-- **WHEN** automatic review rejects the merge because direct user authority is missing
-- **THEN** the batch preserves the open PR and asks for the exact required approval without starting the next ticket or retrying through another identity
+- **WHEN** automatic review requires direct user authority for a merge
+- **THEN** the coordinator preserves the PR, requests the concrete required approval, holds dependent integration and permits unrelated authorized work without retrying through another identity; a ticket-specific holder may release integration only after acknowledged grant cancellation, verified quiescence and reconciliation of any uncertain mutation
 
 ### Requirement: Durable continuation
-The coordinator SHALL checkpoint phase, identity, cursor, pending actions and next action and reconcile fresh state on resume. Completed transitions SHALL be handled in the same active run when possible.
+The coordinator SHALL checkpoint every ticket's phase, identity, cursor, evidence, pending operation and next action plus slot and integration reservations. Resume SHALL reconcile workers, remote state and owned worktrees before mutations. Completed transitions SHALL be processed during the same active run when possible.
 
-#### Scenario: Resume after uncertain creation
-- **WHEN** a checkpoint records pending task creation without a confirmed response
-- **THEN** the coordinator searches for that existing dispatch before considering any new creation
+#### Scenario: Interrupted create or merge
+- **WHEN** a checkpoint has an unresolved creation or merge
+- **THEN** the coordinator reconciles that operation before retrying or releasing its reservation
 
-#### Scenario: Merge completes during a wait
-- **WHEN** a worker finishes delivery while the coordinator is actively waiting
-- **THEN** it verifies delivery and starts the next eligible ticket without intentionally deferring the transition to the next heartbeat
+#### Scenario: Older ledger adoption
+- **WHEN** a sequential ledger is adopted
+- **THEN** its known IDs, authority, evidence and pending operations are preserved as per-ticket records, without assuming cleanup or inferring an absent user target
+
+### Requirement: Evidence preservation and guarded cleanup
+After verified delivery the coordinator SHALL preserve inspectable evidence outside worker worktrees, verify idle workers and exact ownership, and remove only integrated owned worktrees/working branches before archiving worker tasks. Target/protected/foreign refs and unintegrated changes SHALL be preserved. Cleanup SHALL be checkpointed and idempotently reconciled; failures SHALL remain explicit unfinished work without undoing confirmed delivery.
+
+#### Scenario: Cleanup after squash
+- **WHEN** a PR was squash-merged and the worktree is clean
+- **THEN** retained evidence is verified and PR-head-to-merge mapping plus unchanged owned heads establishes safe conditional cleanup; ancestry failure alone neither proves unmerged work nor permits blind force deletion
+
+#### Scenario: New work or missing evidence
+- **WHEN** an owned branch gained unintegrated commits or evidence still exists only in the worktree
+- **THEN** deletion waits until the work is preserved/reconciled and evidence is durably verified; unrelated eligible batch work continues
+
+#### Scenario: Interrupted cleanup
+- **WHEN** the worktree was removed but archival was interrupted
+- **THEN** the coordinator verifies completed cleanup items and resumes remaining ones without recreating resources or repeating unchecked deletions

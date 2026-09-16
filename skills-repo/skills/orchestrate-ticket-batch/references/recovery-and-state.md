@@ -4,19 +4,27 @@
 
 Use one ledger for one batch. Prefer `~/.codex/automations/<actual-automation-id>/memory.md` beside the existing heartbeat; for a run without scheduling use `~/.codex/batches/<confirmed-coordinator-id>/memory.md`. Normalize `CODEX_HOME` with `~/.codex` as fallback. Do not assume shell variables survive tool calls. If the current task ID is unavailable, use a recorded unique local batch directory and resolve the coordinator identity through supported tools; never guess an ID.
 
-Read the current ledger before deciding or writing. Keep one compact current-state header, followed by completed-ticket rows and a short transition history. Store:
+Read the current ledger before deciding or writing. Keep one compact batch header, one state row/record per ticket and a short transition history. Never collapse concurrent workers into a single current-ticket field. Store:
 
-- Batch identity: original user task/request reference, repository/remote, Codex projectId/hostId, confirmed target branch, fixed ordered ticket list, scope/permission limits, optional prototype, automation ID.
-- Current ticket: issue URL, requested title, UTC dispatch time, clientThreadId separately from threadId, worker host/worktree/branch, phase, wait cursor, last observation and concrete next action.
-- Evidence: critical verification requested/completed, artifact paths, inspected results, accepted SHA/manifest, material limitations.
-- Delivery: PR URL/number/head, remote merge commit and closed-ticket verification.
+- Batch identity: original user task/request reference, repository/remote, Codex projectId/hostId, explicit user target branch and provenance, concurrency limit (default 3), dependency/conflict graph, fixed ordered ticket list, scope/permission limits, optional prototype, automation ID.
+- Each ticket: issue URL, requested title, UTC dispatch time, clientThreadId separately from threadId, worker host/worktree/owned local and remote branch refs, starting target SHA, change areas, dependencies, slot reservation/parked status, phase, wait cursor, last observation and concrete next action.
+- Evidence: critical verification requested/completed, artifact paths, inspected results, accepted SHA/manifest and tested target SHA, material limitations, durable copied evidence paths/hash verification.
+- Integration reservation: one holder, candidate PR/head, tested target SHA, preparation/merge-grant status and unresolved merge outcome. Never release an uncertain mutation just because the worker is idle.
+- Delivery per ticket: PR URL/number/head/base, remote merge commit and accepted-content mapping, combined checks and closed-ticket verification.
+- Cleanup per ticket: evidence preservation, worktree removal, local/remote branch removal and worker archival, each with pending/outcome status and verified ownership/head. Preserve exact retained refs/paths and causes for cleanup-blocked items.
 - Pending action: operation, destination, payload/brief intent, timestamp, dispatch outcome; plus any unresolved rejection and required recovery event.
 
 Write checkpoints atomically (temporary file in the same directory then replace). Only the coordinator updates the ledger; workers return facts through task results. Re-read before update and avoid overlapping coordinators. Do not rewrite stable automation instructions with thousands of characters of new runtime history at every poll. Store its real ledger path in the heartbeat prompt and point it to this skill.
 
 Create/update the heartbeat via `automation_update` using `build-codex-automations` and current tool schema. Ten minutes is a reasonable recovery default if the user provided no interval; it is not a latency guarantee. Reuse an existing batch heartbeat, preserve notification settings, and stay quiet on unchanged state. Persistent scheduling does not replace processing actionable completions during a running turn.
 
-Before create/send, save `pending_action`. After a response, save returned IDs or outcome. If the response is lost, use identity recovery or inspect the destination's latest messages before retrying. Do not claim exactly-once dispatch when tools cannot guarantee it. If whether a mutating action happened remains uncertain, preserve that uncertainty and stop the dependent step.
+Before each create/send/merge/cleanup mutation, save its ticket-specific `pending_action`; one global field must not overwrite another worker's pending operation. After a response, save returned IDs or outcome. If the response is lost, use identity recovery or inspect the destination's latest messages before retrying. Do not claim exactly-once dispatch when tools cannot guarantee it. If whether a mutating action happened remains uncertain, preserve that uncertainty and stop the dependent step.
+
+## Adopt an older sequential ledger
+
+Migrate its known current ticket into one ticket record and completed tickets into verified delivery records; preserve IDs, original authority, artifacts and uncertain actions. Do not invent cleanup success for previously delivered work. Reconcile actual worktrees/branches before adopting cleanup. If the original user explicitly named the target, retain it; an inferred old main/default value is insufficient and requires user input before new dispatch. Existing shared-checkout workers need safe isolation before concurrent writing. Do not restart them merely to obtain worktree setup.
+
+Update only this batch's heartbeat definition when adopting the new workflow. Reconcile pending delivery before introducing parallel dispatch. Never upgrade an unrelated live batch or pilot automatically merely because its shared skill file changed.
 
 ## Resolve asynchronous creation
 
@@ -44,6 +52,6 @@ The helper uses only Python's standard library, never writes to the index and ne
 
 Record the exact denied operation, PR/head/target, reviewing tool's stated reason and original authorization provenance. Do not reinterpret an automatic denial as a code failure or a missing acceptance artifact.
 
-If direct approval is required, make the result reviewable and present an executable instruction containing actual values, for example: “Ich autorisiere PR #18, Head 3645542…, nach main in owner/repo zu mergen und das zugehörige Ticket zu schließen.” Link the specific worker where approval is required. Preserve the open PR and wait. Do not route the same denied action through another task/tool, change account identities, disable review or promise that another prompt will always fix the runtime policy.
+If direct approval is required, make the result reviewable and present an executable instruction containing actual values, for example: “Ich autorisiere PR [tatsächliche Nummer], Head [tatsächlicher SHA], nach [expliziter Nutzer-Zielbranch] in [Repository] zu mergen und das zugehörige Ticket zu schließen.” Replace these fields with real values before presenting it. Link the specific worker where approval is required. Preserve the open PR and park the affected ticket. Follow the integration reference to revoke any outstanding grant and release its reservation only after confirmed quiescence and no uncertain mutation; unrelated authorized delivery may then continue. Do not route the same denied action through another task/tool, change account identities, disable review or promise that another prompt will always fix the runtime policy.
 
 Fresh evidence may justify a bounded retry when it addresses the reason (for example, proving the already-authorized destination repository). An unchanged refusal needs new authority or an external-state change, not repeated rewording. On resume, verify actual PR state before retrying because the user may have merged it manually.

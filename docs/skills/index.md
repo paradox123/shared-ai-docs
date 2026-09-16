@@ -19,7 +19,7 @@ Aktuell gepflegte, weiterhin aktive Skills in diesem Repo:
 - `documentation`
 - `frontend-design`
 - `improve-skills`
-- [orchestrate-ticket-batch](../../skills-repo/skills/orchestrate-ticket-batch/SKILL.md) — sequenzielle Codex-Ticket-Batches mit Verifikation, Abnahme und Merge.
+- [orchestrate-ticket-batch](../../skills-repo/skills/orchestrate-ticket-batch/SKILL.md) — parallele Codex-Ticket-Batches in Worktrees mit explizitem Zielbranch, Verifikation, seriellen Merges und Bereinigung.
 - `qmd`
 - `qmd-release`
 - `rag-documentation-research`

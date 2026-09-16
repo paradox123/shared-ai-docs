@@ -124,6 +124,12 @@ _Avoid_: Startnachweis, Health-Check als Feature-Evidence, "keine Fehler gesehen
 Ein lokaler, persistierter Strukturindex eines explizit freigegebenen Code-Workspaces fuer Symbol-, Aufruf- und Auswirkungsnavigation. Er ist weder eine Dokumentensuche noch eine globale Inhaltskopie.
 _Avoid_: Vollindex, Wiki-Index, RAG-Ersatz
 
+## Codex-Ticket-Orchestrierung
+
+**Ticket-Batch**:
+Eine vom Nutzer festgelegte, endliche Menge von Tickets, deren Bearbeitung und Abnahme eine Orchestrierungsaufgabe bis zur Lieferung auf einen ausdruecklich benannten Zielbranch koordiniert. Unabhaengige Tickets koennen gleichzeitig bearbeitet werden; der Begriff ist von der seriellen Implementierungswarteschlange der Agent-Piloten getrennt.
+_Avoid_: Implementierungswarteschlange, unbegrenzter Backlog-Auftrag
+
 ## LLM-Wiki
 
 **Fachquelle**:

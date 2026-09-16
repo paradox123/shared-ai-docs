@@ -1,4 +1,4 @@
 interface:
   display_name: "Ticket-Batch orchestrieren"
-  short_description: "Tickets sequenziell umsetzen, prüfen und ausliefern"
-  default_prompt: "Nutze $orchestrate-ticket-batch, um die angegebenen Tickets sequenziell bis zum geprüften Merge abzuarbeiten."
+  short_description: "Tickets parallel umsetzen, prüfen, mergen und aufräumen"
+  default_prompt: "Nutze $orchestrate-ticket-batch für die angegebenen Tickets und meinen ausdrücklich genannten Zielbranch, mit bis zu drei unabhängigen Worktree-Aufgaben parallel."
