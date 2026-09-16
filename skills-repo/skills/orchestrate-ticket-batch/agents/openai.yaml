@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ticket-Batch orchestrieren"
+  short_description: "Tickets sequenziell umsetzen, prüfen und ausliefern"
+  default_prompt: "Nutze $orchestrate-ticket-batch, um die angegebenen Tickets sequenziell bis zum geprüften Merge abzuarbeiten."

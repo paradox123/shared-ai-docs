@@ -1,0 +1,49 @@
+# Identity recovery and durable batch state
+
+## Ledger and heartbeat
+
+Use one ledger for one batch. Prefer `~/.codex/automations/<actual-automation-id>/memory.md` beside the existing heartbeat; for a run without scheduling use `~/.codex/batches/<confirmed-coordinator-id>/memory.md`. Normalize `CODEX_HOME` with `~/.codex` as fallback. Do not assume shell variables survive tool calls. If the current task ID is unavailable, use a recorded unique local batch directory and resolve the coordinator identity through supported tools; never guess an ID.
+
+Read the current ledger before deciding or writing. Keep one compact current-state header, followed by completed-ticket rows and a short transition history. Store:
+
+- Batch identity: original user task/request reference, repository/remote, Codex projectId/hostId, confirmed target branch, fixed ordered ticket list, scope/permission limits, optional prototype, automation ID.
+- Current ticket: issue URL, requested title, UTC dispatch time, clientThreadId separately from threadId, worker host/worktree/branch, phase, wait cursor, last observation and concrete next action.
+- Evidence: critical verification requested/completed, artifact paths, inspected results, accepted SHA/manifest, material limitations.
+- Delivery: PR URL/number/head, remote merge commit and closed-ticket verification.
+- Pending action: operation, destination, payload/brief intent, timestamp, dispatch outcome; plus any unresolved rejection and required recovery event.
+
+Write checkpoints atomically (temporary file in the same directory then replace). Only the coordinator updates the ledger; workers return facts through task results. Re-read before update and avoid overlapping coordinators. Do not rewrite stable automation instructions with thousands of characters of new runtime history at every poll. Store its real ledger path in the heartbeat prompt and point it to this skill.
+
+Create/update the heartbeat via `automation_update` using `build-codex-automations` and current tool schema. Ten minutes is a reasonable recovery default if the user provided no interval; it is not a latency guarantee. Reuse an existing batch heartbeat, preserve notification settings, and stay quiet on unchanged state. Persistent scheduling does not replace processing actionable completions during a running turn.
+
+Before create/send, save `pending_action`. After a response, save returned IDs or outcome. If the response is lost, use identity recovery or inspect the destination's latest messages before retrying. Do not claim exactly-once dispatch when tools cannot guarantee it. If whether a mutating action happened remains uncertain, preserve that uncertainty and stop the dependent step.
+
+## Resolve asynchronous creation
+
+1. Record the exact create_thread response and dispatch time. A real threadId can be checked directly. A clientThreadId is only a UI creation reference.
+2. Try the worker's available callback or one bounded `list_threads` call. Missing listing is inconclusive. Do not require a callback: it can be unavailable or denied.
+3. If still unresolved, perform a read-only, batch-scoped metadata lookup with the bundled helper. This recovery is part of locating this batch's created tasks; respect higher-priority filesystem/privacy limits. Read only the exact metadata index, filter by the exact requested title and a lower timestamp bound just before dispatch, and emit matching fields only.
+
+Resolve the actual skill directory and assign real values before running this example:
+
+```sh
+CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}"
+python3 "$SKILL_DIR/scripts/find_task_candidates.py" \
+  --index "$CODEX_HOME_RESOLVED/session_index.jsonl" \
+  --title "$RECORDED_TASK_TITLE" \
+  --not-before "$DISPATCH_LOWER_BOUND_RFC3339"
+```
+
+The helper uses only Python's standard library, never writes to the index and never opens rollouts. It snapshots the file once, matches exact `thread_name`, deduplicates IDs and emits at most ten candidates. Exit 0 = one **candidate**, 2 = none/multiple, 3 = malformed/unreadable input. Inspect `status`, `count` and `omitted`; a candidate is never a confirmed identity. Later `updated_at` values must remain eligible because update time is not creation time.
+
+4. Check candidates with `read_thread`. Confirm actual ticket assignment, repository/worktree context and creation time near dispatch, not just a matching title. For multiple candidates, do not select the most recent merely by ordering. If two valid workers exist, record the duplicate and reconcile ownership without starting more work or merging both.
+5. If the title was normalized/renamed, the index is unavailable or no candidate validates, use the **bounded** session review workflow owned by `improve-skills` only when authorized and tools cannot supply the needed identity. Its `references/codex-desktop-session-review.md` owns resolver/evidence parsing; do not create inline raw-rollout scanners. Restrict to dispatch window, repository and recorded identity clues; do not search the whole home directory. This deeper fallback is conditional, not startup work on every heartbeat.
+6. Metadata may lag creation. Record the attempt and permit one later check after a bounded wait. After an unchanged failure, report the specific unavailable/ambiguous source and recovery condition once. Do not repeatedly ask the user for a link, declare the task nonexistent, or create a substitute. If user input is ultimately essential, ask for the smallest missing fact without sending a placeholder-filled repair prompt.
+
+## Approval failure recovery
+
+Record the exact denied operation, PR/head/target, reviewing tool's stated reason and original authorization provenance. Do not reinterpret an automatic denial as a code failure or a missing acceptance artifact.
+
+If direct approval is required, make the result reviewable and present an executable instruction containing actual values, for example: “Ich autorisiere PR #18, Head 3645542…, nach main in owner/repo zu mergen und das zugehörige Ticket zu schließen.” Link the specific worker where approval is required. Preserve the open PR and wait. Do not route the same denied action through another task/tool, change account identities, disable review or promise that another prompt will always fix the runtime policy.
+
+Fresh evidence may justify a bounded retry when it addresses the reason (for example, proving the already-authorized destination repository). An unchanged refusal needs new authority or an external-state change, not repeated rewording. On resume, verify actual PR state before retrying because the user may have merged it manually.
