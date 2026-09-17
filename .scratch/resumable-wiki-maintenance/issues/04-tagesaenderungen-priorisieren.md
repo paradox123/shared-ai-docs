@@ -1,6 +1,6 @@
 # 04: Tagesaenderungen vor dem Erstimport verarbeiten
 
-Status: ready-for-agent
+Status: closed
 
 **Parent:** [Wiederaufnehmbare Wiki-Pflege](../spec.md)
 
@@ -24,3 +24,7 @@ Status: ready-for-agent
 **Verification:** Oeffentlichen Helper wiederholt gegen ein dauerhaftes isoliertes Testinventar ausfuehren, zwischen Laeufen neue/geaenderte Quellen einbringen und die Auswahl ueber beobachtete Provideranfragen sowie veroeffentlichte WikiQuery-Ergebnisse nachweisen. Gemeinsame Konzepte aus mindestens zwei Fachrepos, ein unabhaengiges Kontrollthema, Restarbeit und eine kontrollierte Fristverletzung abdecken.
 
 **Boundary:** Dieses Ticket prueft Veroeffentlichung begrenzter Pakete bei stabilen Quellen. Das gezielte Verhalten bei Quellenabweichung waehrend eines laufenden Pakets folgt in Ticket 05. Bestehende Aktualitaetssperren bleiben bis dahin konservativ wirksam. Keine Aenderung an Tageszeit, Modell, Quellenumfang oder Live-Automation.
+
+## Implementierungsnachweis
+
+Ticket 04 wurde nach separater kritischer Verifikation und Koordinator-Abnahme am 17.09.2026 mit [PR #8](https://github.com/paradox123/shared-ai-docs/pull/8) nach `main` geliefert. Verifizierter Merge: [`e7cdde429ebc450edc24858ee7a8ab514088fc97`](https://github.com/paradox123/shared-ai-docs/commit/e7cdde429ebc450edc24858ee7a8ab514088fc97). Alle 17 akzeptierten Dateihashes des Inhaltsmanifests `c100ea0c3c9772b9da8e4f2e7351c70ba96347d6c0a963211a23029dce89e7d3` wurden am Remote-Merge bestätigt. [Gemessene Ergebnisse, kritische Gegenfälle, konkrete dauerhafte Rohbelege und Grenzen](../../../contextual-llm-wiki/evidence/resumable-maintenance-04.md). Tickets 05–06 und die produktive Aktivierung bleiben offen; der gemeinsame OpenSpec-Change wird nicht archiviert.
