@@ -148,3 +148,18 @@ Migration MUST be repeatable from its verified snapshot after interruption or in
 - **WHEN** migration is interrupted or indexing fails
 - **THEN** retry uses the verified snapshot and finishes without duplicate active answers or lost saved content
 - **AND** later source correction reaches imported concepts and dependent answer chains while an independent answer remains byte-identical
+
+#### Scenario: A daily statement is available while initial concept membership is unknown
+- **WHEN** a bounded run processes a new daily source while other initial sources have not yet been extracted
+- **THEN** it MAY publish explicitly source-bounded, model-processed wiki statements with validated current provenance in the common wiki
+- **AND** it MUST NOT present these as a complete cross-source synthesis or mark dependent daily/global work complete
+- **AND** unknown concept membership continues to block global synthesis until the common dependency closure is known
+- **AND** a persistent queue retains original age, reserves initial-backlog progress and exposes capacity or freshness failures
+
+
+#### Scenario: Daily work exhausts the budget before the reserved initial attempt
+- **WHEN** two started extraction rounds make no durable progress on still-selected initial versions
+- **THEN** the next mixed round explicitly reports initial-recovery and first attempts one oldest initial source
+- **AND** the following round returns to daily-first even if recovery failed
+- **AND** crash recovery derives progress from persisted extraction versions rather than requiring a final report
+- **AND** daily pending work, overdue targets and actual time-capacity failures remain visible without a throughput guarantee

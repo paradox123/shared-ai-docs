@@ -24,6 +24,7 @@ export function maintenanceControl(file: string, progress: any) {
       modelErrors: failed,
       extractions: progress.extractions || { saved: 0, reused: 0, invalid: 0 },
       sourceIndex: progress.sourceIndex,
+      maintenance: progress.maintenance,
       remaining: (progress.remaining || [{ phase: "scan" }]).map(
         (item: any) => ({
           phase: item.phase || "pending",
@@ -53,6 +54,12 @@ export function maintenanceControl(file: string, progress: any) {
   };
   const stop = (reason: string) => {
     stopped ||= reason;
+    if (
+      reason === "budget-exhausted" &&
+      (progress.maintenance?.daily.pending ||
+        progress.maintenance?.initial.pending)
+    )
+      progress.maintenance.capacity.insufficientTimeCapacity = true;
     emit();
   };
   const interrupted = () => stop("budget-exhausted");

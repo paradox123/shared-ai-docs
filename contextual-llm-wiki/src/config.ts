@@ -55,6 +55,14 @@ export async function loadConfig(file: string) {
     !Array.isArray(c.repos)
   )
     throw Error("Invalid context configuration");
+  if (
+    c.maintenance?.maxExtractionSources !== undefined &&
+    (!Number.isSafeInteger(c.maintenance.maxExtractionSources) ||
+      c.maintenance.maxExtractionSources < 2)
+  )
+    throw Error(
+      "maintenance.maxExtractionSources must be an integer of at least 2",
+    );
   c.scope ||= "common";
   if (c.scope !== "common")
     throw Error(
