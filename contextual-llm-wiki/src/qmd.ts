@@ -25,9 +25,19 @@ export async function runProcess(
     p.stdin.end(input);
   });
 }
-export async function qmd(config: any, operation: string, question?: string) {
+export const sourceIndexRoot = (c: any) =>
+  path.join(c.output, ".state/source-index/files");
+export const sourceCollectionName = (c: any) => collectionName(c) + "-sources";
+export async function qmd(
+  config: any,
+  operation: string,
+  question?: string,
+  sources = false,
+) {
   const q = config.qmd || {};
-  const root = path.join(config.output, "wiki");
+  const root = sources
+    ? sourceIndexRoot(config)
+    : path.join(config.output, "wiki");
   await mkdir(root, { recursive: true });
   const env = {
     ...process.env,
@@ -40,13 +50,22 @@ export async function qmd(config: any, operation: string, question?: string) {
   const node =
     q.node || execFileSync("which", ["node"], { env, encoding: "utf8" }).trim();
   if ((operation === "update" || operation === "register") && !q.isolated) {
+    await mkdir(path.join(config.output, "wiki"), { recursive: true });
+    await mkdir(sourceIndexRoot(config), { recursive: true });
     const manifest = path.join(config.output, ".state/qmd-collections.json");
     await writeJson(manifest, {
       version: 1,
       collections: [
         {
           name: collectionName(config),
-          path: root,
+          path: path.join(config.output, "wiki"),
+          pattern: "**/*.md",
+          scopes: ["wiki", config.context],
+          private: false,
+        },
+        {
+          name: sourceCollectionName(config),
+          path: sourceIndexRoot(config),
           pattern: "**/*.md",
           scopes: ["wiki", config.context],
           private: false,
@@ -81,7 +100,9 @@ export async function qmd(config: any, operation: string, question?: string) {
       dbPath,
       isolated: q.isolated,
       root,
-      collection: collectionName(config),
+      collection: sources
+        ? sourceCollectionName(config)
+        : collectionName(config),
       question,
     }),
     env,

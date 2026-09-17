@@ -3,6 +3,7 @@ import { evidenceEligibility, type EvidenceLimits } from "./evidence-limits.ts";
 import { readFile } from "node:fs/promises";
 import { checkConfig } from "./config.ts";
 import { qmd, collectionName } from "./qmd.ts";
+import { sourceMatches } from "./source-index.ts";
 import { entry, renderAnswer, normalizeLinks } from "./publish.ts";
 import { answer, relevantEvidence } from "./completion.ts";
 import { readState, saveState, reviewPages } from "./state.ts";
@@ -22,6 +23,8 @@ export async function query(
   const ineligible = new Set(review.map((p) => p.id));
   const results = await qmd(config, "search", question);
   let evidence: any[] = [];
+  let indexed: any[] = [];
+  let sourceRetrieval: string | undefined;
   for (const hit of results) {
     const uri = hit.file || hit.filepath || hit.displayPath;
     const prefix = "qmd://" + collectionName(config) + "/";
@@ -38,14 +41,33 @@ export async function query(
     });
   }
   evidence = await relevantEvidence(question, evidence);
-  if (!evidence.length) {
+  const covered = new Set(
+    evidence.flatMap((e) => Object.keys(e.sourceVersions)),
+  );
+  if (
+    Object.keys(sources).some((id) => eligible.source(id) && !covered.has(id))
+  ) {
     const terms = question.toLowerCase().match(/[\p{L}\p{N}]{3,}/gu) || [];
-    for (const source of Object.values<any>(sources))
+    indexed = (await sourceMatches(config, question, sources)).filter(
+      (hit: any) => eligible.source(hit.id),
+    );
+    sourceRetrieval = indexed.length
+      ? "qmd-source-index"
+      : "current-source-scan";
+    const indexedIds = new Set(indexed.map((hit) => hit.id));
+    const candidates = [
+      ...indexed.map((hit) => sources[hit.id]),
+      ...Object.values<any>(sources).filter((s) => !indexedIds.has(s.id)),
+    ];
+    const originals: any[] = [];
+    for (const source of candidates)
       if (
         eligible.source(source.id) &&
-        terms.some((t) => source.text.toLowerCase().includes(t))
+        !covered.has(source.id) &&
+        (indexedIds.has(source.id) ||
+          terms.some((t) => source.text.toLowerCase().includes(t)))
       ) {
-        evidence.push({
+        originals.push({
           id: "sources/" + source.id,
           hash: source.hash,
           kind: "source",
@@ -54,7 +76,18 @@ export async function query(
           pageVersions: {},
         });
       }
-    evidence = await relevantEvidence(question, evidence);
+    // Uncompiled originals must not be crowded out by the five-page wiki budget.
+    evidence = await relevantEvidence(question, [...originals, ...evidence]);
+    const indexedEvidence = evidence.filter((e) =>
+      indexedIds.has(e.id.slice(8)),
+    ).length;
+    sourceRetrieval =
+      indexedEvidence === evidence.filter((e) => e.kind === "source").length &&
+      indexedEvidence > 0
+        ? "qmd-source-index"
+        : indexedEvidence
+          ? "qmd-source-index-and-current-scan"
+          : "current-source-scan";
   }
   const text = await answer(question, evidence);
   await checkConfig(config);
@@ -99,6 +132,10 @@ export async function query(
     })),
     review,
     saved,
+    sourceRetrieval,
+    sourceMatches: indexed.filter((hit) =>
+      evidence.some((e) => e.id === "sources/" + hit.id),
+    ),
     fallback: evidence.some((e) => e.kind === "source"),
   };
 }

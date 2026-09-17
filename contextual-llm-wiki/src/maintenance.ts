@@ -14,6 +14,7 @@ import {
 } from "./publish.ts";
 import { answer } from "./completion.ts";
 import { qmd } from "./qmd.ts";
+import { indexSources } from "./source-index.ts";
 import { lint } from "./inspection.ts";
 import { checkConfig } from "./config.ts";
 import { preflight } from "./runtime.ts";
@@ -27,6 +28,7 @@ export async function maintain(config: any) {
     unchanged: [],
     failures: [],
     pages: [],
+    sourceIndex: { ok: false, status: "blocked" },
   };
   try {
     report = await maintainRun(config, artifacts, progress);
@@ -48,6 +50,11 @@ export async function maintain(config: any) {
   }
   report = {
     ...report,
+    sourceIndex: progress.sourceIndex,
+    wiki: {
+      ok: report.ok,
+      status: report.ok ? (report.noop ? "noop" : "completed") : "incomplete",
+    },
     artifacts,
     report: path.join(artifacts, "report.json"),
   };
@@ -56,11 +63,25 @@ export async function maintain(config: any) {
 }
 
 async function maintainRun(config: any, artifacts: string, progress: any) {
-  const runtime = preflight(),
-    sources = await scan(config),
+  const sources = await scan(config),
     state = await readState(config);
   const delta = changes(state, sources),
     review = await reviewPages(config, state, sources);
+  progress.changes = delta;
+  const changedIds = new Set(review.map((p) => p.id));
+  if (state.publicationVersion !== 2)
+    for (const id of Object.keys(state.pages)) changedIds.add(id);
+  // Withdraw stale wiki files before any index mutation, including a global update.
+  for (const id of changedIds) {
+    state.pages[id].withdrawn = true;
+    await rm(path.join(config.output, "wiki", id + ".md"), { force: true });
+  }
+  if (changedIds.size) {
+    await saveState(config, state);
+    await entry(config, state);
+  }
+  progress.sourceIndex = await indexSources(config, sources);
+  const runtime = preflight();
   const work =
     delta.added.length +
     delta.changed.length +
@@ -84,9 +105,6 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     root = path.join(stage, "compiler");
   const baseline = path.join(config.output, ".state/compiler");
   await mkdir(stage, { recursive: true });
-  const changedIds = new Set(review.map((p) => p.id));
-  if (state.publicationVersion !== 2)
-    for (const id of Object.keys(state.pages)) changedIds.add(id);
   try {
     state.pending = [
       {
@@ -95,11 +113,6 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
         review: review.map((p) => ({ id: p.id, reasons: p.reasons })),
       },
     ];
-    // Withdraw invalid pages before model/index work; metadata remains for resumption.
-    for (const id of changedIds) {
-      state.pages[id].withdrawn = true;
-      await rm(path.join(config.output, "wiki", id + ".md"), { force: true });
-    }
     await saveState(config, state);
     await entry(config, state);
     try {

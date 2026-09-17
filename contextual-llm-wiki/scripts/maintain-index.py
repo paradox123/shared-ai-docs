@@ -111,6 +111,14 @@ def main():
             if value.get('status') != 'ok':
                 raise RuntimeError(name + ': reconciliation not successful')
         elif name.startswith('maintain-'):
+            # Retain independently completed source work even when wiki safety validation blocks later steps.
+            if (isinstance(value.get('sourceIndex'), dict) and value.get('report')
+                    and json.loads(Path(value['report']).read_text()) == value):
+                report['contexts'].append({
+                    'context': name.removeprefix('maintain-'),
+                    'sourceIndex': value['sourceIndex'], 'wiki': value.get('wiki'),
+                    'ok': value.get('ok'), 'report': value['report'],
+                    'pending': value.get('pending', [])})
             validate_maintenance(value)
             if (value['ok'] is True) != (code == 0):
                 raise RuntimeError(name + ': exit status contradicts result')
@@ -134,13 +142,13 @@ def main():
         if any(not isinstance(n, str) or not re.fullmatch(r'[a-z0-9][a-z0-9-]*', n) for n in names) or len(set(names)) != len(names):
             raise ValueError('Context names must be valid and unique')
         run('reconcile', [sys.executable, str(Path(args.reconcile).absolute()), '--apply'], True)
-        run('preflight', [args.wiki, 'preflight'], True)
         for file, config in configs:
             context = config['context']
             maintained = run('maintain-' + context, [args.wiki, 'maintain', '--config', file], True)
             partial = maintained if maintained.get('ok') is False else None
             checked = run('status-' + context, [args.wiki, 'status', '--config', file], True, partial)
             run('lint-' + context, [args.wiki, 'lint', '--config', file], True, partial)
+            report['contexts'] = [item for item in report['contexts'] if item['context'] != context]
             report['contexts'].append({'context': context, 'config': file,
                                        'scope': config.get('scope', 'general'),
                                        'noop': maintained.get('noop', False),
@@ -148,6 +156,8 @@ def main():
                                        'sources': checked['sourceCount'],
                                        'lastCompleted': checked['lastCompleted'],
                                        'ok': maintained['ok'],
+                                       'sourceIndex': maintained.get('sourceIndex'),
+                                       'wiki': maintained.get('wiki'),
                                        'completed': maintained.get('completed', []),
                                        'unchanged': maintained.get('unchanged', []),
                                        'failures': maintained.get('failures', []),

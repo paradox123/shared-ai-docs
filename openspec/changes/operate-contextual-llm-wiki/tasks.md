@@ -3,6 +3,18 @@
 - [x] 1.2 Wartungshelfer über öffentliche Prozessgrenze mit Rot→Grün-Slices implementieren.
 - [x] 1.3 Echten begrenzten Wiki-/QMD-Lauf einschließlich No-op nachweisen.
 - [x] 1.4 Bestehende Automation aktualisieren und gespeicherte Definition prüfen.
+
+## 1a. Pflegefortschreibung vom 17.09.2026
+
+Dieser Abschnitt ergaenzt den bisherigen Betriebsstand; abgeschlossene Implementierungen unten belegen noch nicht das hier beschlossene Zielverhalten.
+
+- [x] Aktualitaetsziel und unabhaengige Fachquellen-Indexpflege im Interview klaeren; Glossar, ADR 0016, Proposal, Design und Requirement-Delta abgleichen.
+- [x] [Umsetzbare Spec](../../../.scratch/resumable-wiki-maintenance/spec.md) im lokalen Tracker als `ready-for-agent` veroeffentlichen, einschliesslich Testgrenzen, Abnahmeszenarien und Scope.
+- [x] Fachquellen-Indexpflege von erfolgreicher Wiki-Generierung entkoppeln und ueber WikiQuery den gekennzeichneten Rueckgriff auf aktuelle Originale bei ausstehender oder fehlgeschlagener Generierung nachweisen.
+- [ ] Laufende Aenderungen vor Erstimport-Rueckstand priorisieren; dauerhaft wiederverwendbare Zwischenstaende und begrenzte Arbeitseinheiten umsetzen. Neustart darf unveraenderte erfolgreiche Extraktionen nicht erneut ausfuehren.
+- [ ] Fortschritt, Fehler, kontrolliertes Laufende und Wiederaufnahme ueber die oeffentliche Prozessgrenze pruefen; keine unbegrenzte agentische Warteschleife. Abhaengige Modellarbeit bei gemeinsamem Providerfehler stoppen.
+- [ ] Quellenaenderung waehrend der Verarbeitung, stale Wiki-Evidenz, gemeinsam genutzte Konzepte, Indexfehler, verpasste Tagesfrist und anschliessenden No-op isoliert verifizieren; nur nachweislich gueltige Ergebnisse wiederverwenden oder veroeffentlichen.
+- [ ] Live-Prompt, QMD-Wartungsreferenz und Betriebsanleitung nach Implementierung konsistent aktualisieren; Produktivabnahme mit separaten Ergebnissen fuer Suchindex, Tagesaenderungen und Erstimport dokumentieren.
 ## 2. Einführung und Abnahme
 - [x] 2.1 Tatsächliche Skills und Kontextdateien priorisiert katalogisieren.
 - [x] 2.2 Betriebsanleitung und unmittelbare Wartungsreferenzen aktualisieren.
@@ -52,3 +64,6 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 - [x] 5.4 Kanal „veröffentlichte Releases“ bestätigen und drei freigegebene [Umsetzungstickets](../../../.scratch/update-llm-wiki-releases/spec.md) mit Abhängigkeiten 01 → 02 → 03 veröffentlichen.
 
 [Ticket-04-Zwischenstand](../../../contextual-llm-wiki/evidence/production-04.md): bestehender Live-Job auf gemeinsame Konfiguration umgestellt, Einstellungen erhalten; WikiQuery-first in zentralen Skills und tatsächlichem Agentenablauf samt aktuellem Quellen-Fallback nachgewiesen. Vollimport und produktive Gesamtabnahme (4.6) sind wegen wiederholter paralleler Originalquellenänderungen blockiert; Meetings-Verbleib ist offen. Keine Archivierung.
+
+
+[Abnahme Wiederaufnehmbare Pflege, Ticket 01](../../../contextual-llm-wiki/evidence/resumable-maintenance-01.md): unabhängiger Originalquellenindex, verifiziertes WikiQuery-Fallback, explizite Quellenbegrenzung, Scan-/Indexfehler und unveränderter No-op isoliert umgesetzt. Andere Schritte des neuen Sechs-Ticket-Batches sowie Live-Aktivierung und produktive Gesamtabnahme bleiben offen; Change nicht archivieren.
