@@ -1,0 +1,160 @@
+--- a/src/compiler/extraction-phase.ts
++++ b/src/compiler/extraction-phase.ts
+@@ -10,12 +10,14 @@
+  * results feed the page-generation phase in the orchestration spine.
+  */
+ 
++import Ajv from "ajv";
+ import { readFile } from "fs/promises";
+ import path from "path";
+ import {
+   readConfinedWikiFile,
+   warnDroppedWikiReadIfPresent,
+ } from "./confined-wiki-read.js";
++import { resolveActiveModelId } from "../utils/provider.js";
+ import { callClaude } from "../utils/llm.js";
+ import {
+   CONCEPT_EXTRACTION_TOOL,
+@@ -30,6 +32,7 @@
+ import { verbose } from "../utils/output.js";
+ import { INDEX_FILE, SOURCES_DIR } from "../utils/constants.js";
+ import pLimit from "p-limit";
++const validateExtractionSchema = new Ajv({ strict: false }).compile(CONCEPT_EXTRACTION_TOOL.input_schema);
+ import type {
+   ExtractedConcept,
+   SourceChange,
+@@ -52,12 +55,13 @@
+   files: string[],
+   limit: ReturnType<typeof pLimit>,
+   onFailure?: import("../utils/types.js").CompileOptions["onBoundedFailure"],
++  cache?: import("../utils/types.js").CompileOptions["extractionCache"],
+ ): Promise<ExtractionResult[]> {
+   let aborted = false;
+   return Promise.all(files.map((file) => limit(async () => {
+     if (aborted) throw new Error(`extraction skipped for ${file}: a prior source failed`);
+     try {
+-      return await extractForSource(root, file, onFailure);
++      return await extractForSource(root, file, onFailure, cache);
+     } catch (err) {
+       aborted = true;
+       throw err;
+@@ -91,9 +95,10 @@
+   changeSets: ChangeSets,
+   concurrency: number,
+   onFailure?: import("../utils/types.js").CompileOptions["onBoundedFailure"],
++  cache?: import("../utils/types.js").CompileOptions["extractionCache"],
+ ): Promise<ExtractionResult[]> {
+   const limit = pLimit(concurrency);
+-  const extractions = await extractSourcesLimited(root, toCompile.map((c) => c.file), limit, onFailure);
++  const extractions = await extractSourcesLimited(root, toCompile.map((c) => c.file), limit, onFailure, cache);
+ 
+   while (true) {
+     const extracted = new Set(extractions.map((result) => result.sourceFile));
+@@ -104,7 +109,7 @@
+     for (const file of lateAffected) {
+       output.status("~", output.info(`${file} [shares concept with new source]`));
+     }
+-    const batch = await extractSourcesLimited(root, lateAffected, limit, onFailure);
++    const batch = await extractSourcesLimited(root, lateAffected, limit, onFailure, cache);
+     extractions.push(...batch);
+   }
+ 
+@@ -119,6 +124,7 @@
+   root: string,
+   sourceFile: string,
+   onFailure?: import("../utils/types.js").CompileOptions["onBoundedFailure"],
++  cache?: import("../utils/types.js").CompileOptions["extractionCache"],
+ ): Promise<ExtractionResult> {
+   output.status("*", output.info(`Extracting: ${sourceFile}`));
+ 
+@@ -130,9 +136,9 @@
+   const existingIndex = await readConfinedExtractionIndex(root);
+   let concepts: ExtractedConcept[];
+   try {
+-    concepts = await extractConcepts(sourceContent, existingIndex);
++    concepts = await extractConcepts(sourceContent, existingIndex, sourceFile, cache);
+   } catch (error) {
+-    if (!onFailure) throw error;
++    if (!onFailure || (error as { sharedExtractionCache?: boolean }).sharedExtractionCache) throw error;
+     onFailure({ phase: "extract", id: sourceFile, sources: [sourceFile], error: String(error) });
+     concepts = [];
+   }
+@@ -176,13 +182,29 @@
+ async function extractConcepts(
+   sourceContent: string,
+   existingIndex: string,
++  sourceFile: string,
++  cache?: import("../utils/types.js").CompileOptions["extractionCache"],
+ ): Promise<ExtractedConcept[]> {
+   const system = buildExtractionPrompt(sourceContent, existingIndex);
+-  const rawOutput = await callClaude({
++  const request = {
+     system,
+-    messages: [{ role: "user", content: "Extract the key concepts from this source." }],
++    messages: [{ role: "user" as const, content: "Extract the key concepts from this source." }],
+     tools: [CONCEPT_EXTRACTION_TOOL],
+-  });
+-
+-  return parseConcepts(rawOutput);
+-}
++  };
++  // Reject partial/malformed replies rather than persisting the parser's filtered subset.
++  const validate = (raw: string): boolean => {
++    try {
++      const value = JSON.parse(raw);
++      const concepts = typeof value.concepts === "string" ? JSON.parse(value.concepts) : value.concepts;
++      return Array.isArray(concepts) && concepts.length > 0 &&
++        validateExtractionSchema({ ...value, concepts }) &&
++        parseConcepts(raw).length === concepts.length;
++    } catch { return false; }
++  };
++  const generate = () => callClaude(request);
++  const rawOutput = cache
++    ? await cache({ sourceFile, model: resolveActiveModelId(), ...request }, generate, validate)
++    : await generate();
++
++  return cache && !validate(rawOutput) ? [] : parseConcepts(rawOutput);
++}
+--- a/src/compiler/index.ts
++++ b/src/compiler/index.ts
+@@ -475,7 +475,7 @@
+   // extraction and page-generation fan-outs identically.
+   const concurrency = resolveCompileConcurrency(options.concurrency);
+   const extractions = await runExtractionPhases(
+-    root, buckets.toCompile, state, { scoped: changes, detected }, concurrency, options.onBoundedFailure,
++    root, buckets.toCompile, state, { scoped: changes, detected }, concurrency, options.onBoundedFailure, options.extractionCache,
+   );
+   if (!options.review) {
+     freezeFailedExtractions(draft, extractions, frozenSlugs);
+--- a/src/utils/types.ts
++++ b/src/utils/types.ts
+@@ -176,6 +176,13 @@
+ 
+ /** Optional behaviour controls for the compile pipeline. */
+ export interface CompileOptions {
++  /** Host-owned durable extraction storage; receives the exact prompt and tool contract. */
++  extractionCache?: (
++    request: { sourceFile: string; model: string; system: string; messages: { role: string; content: string }[]; tools: unknown[] },
++    generate: () => Promise<string>,
++    validate: (raw: string) => boolean,
++  ) => Promise<string>;
++
+   /** Host opts into bounded provider failures; shared filesystem/runtime errors still throw. */
+   onBoundedFailure?: (failure: { phase: "extract" | "page"; id: string; sources: string[]; error: string }) => void;
+ 
+--- a/src/sdk/types.ts
++++ b/src/sdk/types.ts
+@@ -77,6 +77,13 @@
+ 
+ /** Compile options exposed through the SDK. A public subset of the core CompileOptions shape. */
+ export interface SdkCompileOptions {
++  /** Host-owned durable extraction storage; receives the exact prompt and tool contract. */
++  extractionCache?: (
++    request: { sourceFile: string; model: string; system: string; messages: { role: string; content: string }[]; tools: unknown[] },
++    generate: () => Promise<string>,
++    validate: (raw: string) => boolean,
++  ) => Promise<string>;
++
+   /** Host opts into bounded provider failures; shared filesystem/runtime errors still throw. */
+   onBoundedFailure?: (failure: { phase: "extract" | "page"; id: string; sources: string[]; error: string }) => void;
+ 

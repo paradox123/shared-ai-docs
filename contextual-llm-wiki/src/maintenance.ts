@@ -18,6 +18,7 @@ import { indexSources } from "./source-index.ts";
 import { lint } from "./inspection.ts";
 import { checkConfig } from "./config.ts";
 import { preflight } from "./runtime.ts";
+import { extractionCache } from "./extraction-cache.ts";
 import { failureScope } from "./failure-scope.ts";
 export async function maintain(config: any) {
   const artifacts = path.join(config.output, ".state/runs", randomUUID());
@@ -51,6 +52,7 @@ export async function maintain(config: any) {
   report = {
     ...report,
     sourceIndex: progress.sourceIndex,
+    extractions: progress.extractions || { saved: 0, reused: 0, invalid: 0 },
     wiki: {
       ok: report.ok,
       status: report.ok ? (report.noop ? "noop" : "completed") : "incomplete",
@@ -140,9 +142,12 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     }
     await rm(path.join(root, "wiki"), { recursive: true, force: true });
     const failures: any[] = progress.failures;
+    const cache = await extractionCache(config, sources);
+    progress.extractions = cache.stats;
     const wiki = createWiki({ root });
     const result = await wiki.compile({
       embeddings: false,
+      extractionCache: cache.run,
       concurrency: config.concurrency || 2,
       onBoundedFailure: (failure) => failures.push(failure),
     });
