@@ -105,6 +105,18 @@ export async function extractionCache(
     const source = sources[request.sourceFile];
     if (!source)
       throw Error("Unknown extraction source: " + request.sourceFile);
+    // A queued request may reach the cache long after the initial scan. Never
+    // label its old snapshot reusable after the authoritative original changed.
+    let current: string;
+    try {
+      current = await readFile(source.original, "utf8");
+    } catch (error) {
+      throw Error("Extraction source unavailable before reuse: " + source.id, {
+        cause: error,
+      });
+    }
+    if (hash(current) !== source.hash)
+      throw Error("Source changed before extraction reuse: " + source.id);
     const key = hash(
       JSON.stringify({
         contract,

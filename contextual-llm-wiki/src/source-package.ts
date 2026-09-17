@@ -1,9 +1,10 @@
 import path from "node:path";
 import { mkdir, rm } from "node:fs/promises";
+import { maintenanceInventory } from "./maintenance-inventory.ts";
 import { validatePublication } from "./publication-validation.ts";
 import { hash } from "./storage.ts";
 import { renderConcept, publishPage, entry } from "./publish.ts";
-import { saveState } from "./state.ts";
+import { saveState, reviewPages } from "./state.ts";
 import { qmd } from "./qmd.ts";
 
 export function sourceStatements(extracted: Map<string, any>, sources: any) {
@@ -45,13 +46,32 @@ export async function publishSourcePackage(
 ) {
   progress.phase = "validate-publication";
   progress.notify();
-  await validatePublication(config, state, sources);
+  const { latest, drift } = await validatePublication(config, state, sources);
+  if (drift.length) {
+    // This scan already observed the new versions. Preserve that observation
+    // now, including in the caller's later failure report, not at next restart.
+    Object.assign(inventory, await maintenanceInventory(config, latest));
+    progress.maintenance = inventory.report(state);
+    progress.sourceIndex = {
+      ...progress.sourceIndex,
+      ok: false,
+      status: "stale",
+      drift,
+    };
+    progress.failures.push({
+      phase: "source-drift",
+      sources: drift,
+      error:
+        "Sources changed during generation; current concept membership remains unknown",
+    });
+  }
   // Unknown membership can expand any global concept. Retain only explicitly
   // source-bounded evidence; propagate this hold through saved answer chains.
   const blocked = new Set(
     Object.values<any>(state.pages)
       .filter((p) => p.kind === "concept" || p.migration)
-      .map((p) => p.id),
+      .map((p) => p.id)
+      .concat((await reviewPages(config, state, latest)).map((p) => p.id)),
   );
   let changed = true;
   while (changed) {
@@ -71,7 +91,10 @@ export async function publishSourcePackage(
   }
   progress.phase = "publish";
   progress.notify();
-  const statements = sourceStatements(extracted, sources);
+  const validExtractions = new Map(
+    [...extracted].filter(([id]) => latest[id]?.hash === sources[id]?.hash),
+  );
+  const statements = sourceStatements(validExtractions, sources);
   for (const page of Object.values<any>(statements.pages)) {
     const old = state.pages[page.id];
     if (
@@ -96,7 +119,12 @@ export async function publishSourcePackage(
     {
       phase: "dependency-discovery",
       sources: [
-        ...new Set([...delta.added, ...delta.changed, ...delta.removed]),
+        ...new Set([
+          ...delta.added,
+          ...delta.changed,
+          ...delta.removed,
+          ...drift,
+        ]),
       ],
       pages: Object.values<any>(state.pages)
         .filter((p) => p.withdrawn)
@@ -121,6 +149,9 @@ export async function publishSourcePackage(
     ok: false,
     qmdSafe: true,
     packageCompleted: true,
+    error: progress.failures.length
+      ? progress.failures.map((f: any) => f.error).join("; ")
+      : undefined,
     failures: progress.failures,
     pending: state.pending,
     completed: Object.keys(statements.pages),

@@ -163,3 +163,10 @@ Migration MUST be repeatable from its verified snapshot after interruption or in
 - **AND** the following round returns to daily-first even if recovery failed
 - **AND** crash recovery derives progress from persisted extraction versions rather than requiring a final report
 - **AND** daily pending work, overdue targets and actual time-capacity failures remain visible without a throughput guarantee
+
+#### Scenario: Source drift preserves independently verified source statements
+- **WHEN** a source changes during a bounded generation run and its current concept membership has not yet been discovered
+- **THEN** global concepts and their transitive saved answers remain withheld while source-bounded statements with individually current originals may publish
+- **AND** compatible saved source answers retain their bytes and remain searchable, and retained extractions are revalidated against their originals before queued reuse
+- **AND** versions first observed by this completed publication scan immediately enter the persistent daily inventory with this observation time and its next-day deadline; later restart does not reset either
+- **AND** source-index freshness is not claimed for the changed snapshot; a later run discovers current membership and restores verified common synthesis without re-extracting compatible unaffected sources
