@@ -8,6 +8,10 @@ import argparse
 from datetime import datetime, timezone
 import fcntl
 import json
+import math
+import os
+import time
+from bounded_process import execute, persist, snapshot
 import re
 from pathlib import Path
 import subprocess
@@ -33,8 +37,13 @@ def validate_maintenance(value):
     for field in ['failures', 'pending', 'completed', 'unchanged']:
         if not isinstance(value.get(field), list):
             raise RuntimeError('incomplete maintenance result: ' + field)
+    if value.get('packageCompleted') is True:
+        maintenance = value.get('maintenance')
+        if (not isinstance(maintenance, dict) or maintenance.get('globalComplete') is not False
+                or not any(item.get('phase') == 'dependency-discovery' for item in value['pending'])):
+            raise RuntimeError('package result without explicit incomplete dependency discovery')
     if value.get('ok') is False:
-        if not value['failures'] or not value['pending']:
+        if (not value['failures'] and value.get('packageCompleted') is not True) or not value['pending']:
             raise RuntimeError('partial result without failed or pending work')
     elif value.get('ok') is not True:
         raise RuntimeError('missing successful result')
@@ -67,6 +76,13 @@ def validate_audit(name, value, partial):
             raise RuntimeError(name + ': affected page is still active')
 
 
+def finite_seconds(value):
+    number = float(value)
+    if not math.isfinite(number) or number <= 0:
+        raise argparse.ArgumentTypeError("must be finite and greater than zero")
+    return number
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', action='append', required=True)
@@ -75,9 +91,14 @@ def main():
     parser.add_argument('--qmd', required=True, help='Resolved QMD executable')
     parser.add_argument('--reconcile', required=True, help='Existing sync-qmd-collections.py')
     parser.add_argument('--lock-file', help='Shared by all scheduled/manual runs; defaults beside artifacts')
+    parser.add_argument('--budget-seconds', type=finite_seconds, default=1200, help='Whole helper wall-clock budget (default: 1200)')
+    parser.add_argument('--termination-grace-seconds', type=finite_seconds, default=10, help='Owned process termination grace (default: 10)')
     args = parser.parse_args()
+    deadline = time.monotonic() + args.budget_seconds
+    epoch_deadline = time.time() + args.budget_seconds
     artifacts = Path(args.artifacts).resolve()
-    report = {'ok': False, 'startedAt': stamp(), 'artifacts': str(artifacts), 'steps': [], 'contexts': []}
+    report = {'ok': False, 'startedAt': stamp(), 'artifacts': str(artifacts), 'steps': [], 'contexts': [],
+              'limits': {'budgetSeconds': args.budget_seconds, 'terminationGraceSeconds': args.termination_grace_seconds}}
     try:
         artifacts.mkdir(parents=True, exist_ok=False, mode=0o700)
     except OSError as error:
@@ -85,24 +106,59 @@ def main():
         return 1
     print(json.dumps({'event': 'artifacts', 'path': str(artifacts)}), flush=True)
 
+    remaining_steps = []
+    active_step = None
+
     def run(name, command, structured=False, partial=None):
+        nonlocal active_step
+        active_step = name
+        if time.monotonic() >= deadline:
+            report['outcome'] = 'budget-exhausted'
+            raise RuntimeError('Maintenance budget exhausted before next step')
         stem = artifacts / ('%02d-%s' % (len(report['steps']) + 1, name))
         step = {'name': name, 'command': command, 'startedAt': stamp()}
         report['steps'].append(step)
+        progress = artifacts / (name + '.progress.json')
+        registry = artifacts / (name + '.children')
+        persist(artifacts / 'progress.json', {'phase': name, 'active': True, 'lastProgressAt': stamp(), 'detail': str(progress)})
+        env = dict(os.environ, WIKI_MAINTENANCE_DEADLINE_MS=str(int(epoch_deadline * 1000)),
+                   WIKI_MAINTENANCE_PROGRESS=str(progress), WIKI_MAINTENANCE_CHILDREN=str(registry),
+                   WIKI_MAINTENANCE_LOCK_FILE=str(lock_path), WIKI_MAINTENANCE_LOCK_FD=str(lock.fileno()))
         with Path(str(stem) + '.stdout').open('w') as out, Path(str(stem) + '.stderr').open('w') as err:
             try:
-                result = subprocess.run(command, cwd='/', stdout=out, stderr=err)
-                code = result.returncode
+                code, stopped, forced, owner = execute(command, out, err, deadline, args.termination_grace_seconds, progress, registry, env)
+                if stopped:
+                    report['outcome'] = stopped
+                    step.update(terminated=True, forced=forced)
+                    detail = snapshot(progress)
+                    if name.startswith('maintain-'):
+                        context = name.removeprefix('maintain-')
+                        report['contexts'].append({'context': context, 'ok': False,
+                            'sourceIndex': detail.get('sourceIndex', {'ok': False, 'status': 'unknown'}),
+                            'wiki': {'ok': False, 'status': 'incomplete'},
+                            'maintenance': detail.get('maintenance'),
+                            'progress': str(progress), 'pending': detail.get('remaining', [{'phase': name}]),
+                            'extractions': detail.get('extractions', {})})
+                    # Only the terminated command's own context lock can be removed.
+                    for config_file, configuration in configs:
+                        output = configuration.get('output')
+                        if output:
+                            writer = Path(config_file).parent / output / '.state/writer.lock'
+                            if snapshot(writer).get('pid') == owner:
+                                writer.unlink(missing_ok=True)
             except OSError as error:
                 err.write(str(error))
                 code = 127
         Path(str(stem) + '.exitcode').write_text(str(code) + '\n')
         step.update(exitCode=code, completedAt=stamp(), output=str(stem) + '.stdout')
         step['outcome'] = 'failed' if code else 'completed'
+        if report.get('outcome') in ('budget-exhausted', 'shared-provider-failure'):
+            raise RuntimeError('Maintenance stopped: ' + report['outcome'])
         allowed_failure = structured and code == 1 and (name.startswith('maintain-') or partial)
         if code and not allowed_failure:
             raise RuntimeError('%s exited %s; see %s.stderr' % (name, code, stem))
         if not structured:
+            remaining_steps.remove(name)
             return None
         value = json.loads(Path(str(stem) + '.stdout').read_text())
         if not isinstance(value, dict):
@@ -111,6 +167,15 @@ def main():
             if value.get('status') != 'ok':
                 raise RuntimeError(name + ': reconciliation not successful')
         elif name.startswith('maintain-'):
+            # Retain independently completed source work even when wiki safety validation blocks later steps.
+            if (isinstance(value.get('sourceIndex'), dict) and value.get('report')
+                    and json.loads(Path(value['report']).read_text()) == value):
+                report['contexts'].append({
+                    'context': name.removeprefix('maintain-'),
+                    'sourceIndex': value['sourceIndex'], 'wiki': value.get('wiki'),
+                    'ok': value.get('ok'), 'report': value['report'],
+                    'maintenance': value.get('maintenance'), 'packageCompleted': value.get('packageCompleted', False),
+                    'pending': value.get('pending', [])})
             validate_maintenance(value)
             if (value['ok'] is True) != (code == 0):
                 raise RuntimeError(name + ': exit status contradicts result')
@@ -122,6 +187,7 @@ def main():
             raise RuntimeError(name + ': missing successful result')
         if name.startswith(('status-', 'lint-')):
             validate_audit(name, value, partial)
+        remaining_steps.remove(name)
         return value
 
     lock = None
@@ -129,18 +195,21 @@ def main():
         lock_path = Path(args.lock_file).resolve() if args.lock_file else artifacts.parent / 'maintenance.lock'
         lock = lock_path.open('a')
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        if Path(str(lock_path) + '.blocked.json').exists():
+            raise RuntimeError('Unresolved process custody blocks new maintenance: ' + str(lock_path) + '.blocked.json')
         configs = [(str(Path(p).resolve()), json.loads(Path(p).read_text())) for p in args.config]
         names = [c.get('context') for _, c in configs]
         if any(not isinstance(n, str) or not re.fullmatch(r'[a-z0-9][a-z0-9-]*', n) for n in names) or len(set(names)) != len(names):
             raise ValueError('Context names must be valid and unique')
+        remaining_steps = ['reconcile', *[phase + '-' + name for name in names for phase in ('maintain', 'status', 'lint')], 'qmd-update', 'qmd-embed', 'qmd-status']
         run('reconcile', [sys.executable, str(Path(args.reconcile).absolute()), '--apply'], True)
-        run('preflight', [args.wiki, 'preflight'], True)
         for file, config in configs:
             context = config['context']
             maintained = run('maintain-' + context, [args.wiki, 'maintain', '--config', file], True)
             partial = maintained if maintained.get('ok') is False else None
             checked = run('status-' + context, [args.wiki, 'status', '--config', file], True, partial)
             run('lint-' + context, [args.wiki, 'lint', '--config', file], True, partial)
+            report['contexts'] = [item for item in report['contexts'] if item['context'] != context]
             report['contexts'].append({'context': context, 'config': file,
                                        'scope': config.get('scope', 'general'),
                                        'noop': maintained.get('noop', False),
@@ -148,6 +217,10 @@ def main():
                                        'sources': checked['sourceCount'],
                                        'lastCompleted': checked['lastCompleted'],
                                        'ok': maintained['ok'],
+                                       'sourceIndex': maintained.get('sourceIndex'),
+                                       'wiki': maintained.get('wiki'),
+                                       'maintenance': maintained.get('maintenance'),
+                                       'packageCompleted': maintained.get('packageCompleted', False),
                                        'completed': maintained.get('completed', []),
                                        'unchanged': maintained.get('unchanged', []),
                                        'failures': maintained.get('failures', []),
@@ -161,15 +234,35 @@ def main():
             report['remaining'] = [item for context in report['contexts'] for item in context['pending']]
     except Exception as error:
         report['error'] = str(error)
-        if report['steps']:
+        report['failedStep'] = active_step or 'preflight-or-lock'
+        if report['steps'] and report['steps'][-1]['name'] == active_step:
             report['steps'][-1]['outcome'] = 'failed'
-        report['remaining'] = ['Resolve failed prerequisite and repeat maintenance; dependent steps were not completed']
-        report['failedStep'] = report['steps'][-1]['name'] if report['steps'] else 'preflight-or-lock'
+        report['remaining'] = ([item for context in report['contexts'] for item in context.get('pending', [])]
+                               + [{'phase': name} for name in remaining_steps]) or [{'phase': report['failedStep']}]
     finally:
         if lock:
             lock.close()
     report['completedAt'] = stamp()
-    (artifacts / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
+    final_progress = {'phase': 'finished', 'active': False, 'lastProgressAt': stamp(), 'ok': report['ok'],
+                      'outcome': report.get('outcome'),
+                      'remaining': [{key: item[key] for key in ('phase', 'sources', 'pages') if key in item}
+                                    if isinstance(item, dict) else {'phase': 'pending'} for item in report.get('remaining', [])]}
+    # A broken artifact destination must not suppress the structured stdout contract.
+    # Try report persistence even when the separate progress artifact is unavailable.
+    for name, value in [('progress.json', final_progress), ('report.json', report)]:
+        try:
+            persist(artifacts / name, value)
+        except OSError:
+            report['ok'] = False
+            report.setdefault('outcome', 'shared-storage-failure')
+            report.setdefault('artifactErrors', []).append({'artifact': name, 'code': 'persist-failed'})
+            report.setdefault('remaining', []).append({'phase': 'artifact-persistence', 'artifact': name})
+    if report.get('artifactErrors'):
+        final_progress.update(ok=False, outcome=report.get('outcome'), artifactErrors=report['artifactErrors'])
+        try:
+            persist(artifacts / 'progress.json', final_progress)
+        except OSError:
+            pass  # Already recorded above; stdout remains the available failure channel.
     print(json.dumps(report), flush=True)
     return 0 if report['ok'] else 1
 

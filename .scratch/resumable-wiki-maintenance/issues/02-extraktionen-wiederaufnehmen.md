@@ -1,6 +1,6 @@
 # 02: Erfolgreiche Extraktionen nach Neustart wiederverwenden
 
-Status: ready-for-agent
+Status: closed
 
 **Parent:** [Wiederaufnehmbare Wiki-Pflege](../spec.md)
 
@@ -23,3 +23,7 @@ Status: ready-for-agent
 **Verification:** Bestehenden oeffentlichen Pflegeaufruf mit kontrolliertem Provider ausfuehren, nach nachweisbar gesicherter Arbeit den eigenen Testprozess beenden und einen frischen Prozess starten. Wiederverwendung anhand beobachteter Provideranfragen fuer die kontrollierten Quellen und der anschliessenden WikiQuery-Ergebnisse pruefen. Der Test besitzt eine kurze Frist und raeumt ausschliesslich eigene Prozesse auf.
 
 **Boundary:** Kein Scheduling- oder Prioritaetsmodell vorwegnehmen. Noch kein kontrolliertes Produktionsbudget; das liefert Ticket 03. Der Cache ist abgeleitete Modellarbeit, kein zweiter Suchspeicher. Aenderungen am Compiler werden ueber die bestehende lokale Integrationsmechanik geliefert, ohne eigenstaendiges Upstream-/Dependency-Upgrade. Live-Automation bleibt unveraendert.
+
+## Implementierungsnachweis
+
+Ticket 02 wurde nach separater kritischer Verifikation und Koordinator-Abnahme am 17.09.2026 mit [PR #4](https://github.com/paradox123/shared-ai-docs/pull/4) nach `main` geliefert. Verifizierter Merge: [`2c73bb72d22eda046788ae90115caa21d466cb45`](https://github.com/paradox123/shared-ai-docs/commit/2c73bb72d22eda046788ae90115caa21d466cb45). Alle neun akzeptierten Dateihashes des Inhaltsmanifests `81a70b813fe791266a0412f03837af9bcb98100cae81a05ca8a5dc3cd8ae995e` wurden auf Remote-`main` bestätigt. [Gemessene Ergebnisse, konkrete dauerhafte Rohbelege und Grenzen](../../../contextual-llm-wiki/evidence/resumable-maintenance-02.md). Die restlichen vier Tickets und die produktive Aktivierung bleiben offen; der gemeinsame OpenSpec-Change wird nicht archiviert.

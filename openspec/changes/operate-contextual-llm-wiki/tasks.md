@@ -10,10 +10,11 @@ Dieser Abschnitt ergaenzt den bisherigen Betriebsstand; abgeschlossene Implement
 
 - [x] Aktualitaetsziel und unabhaengige Fachquellen-Indexpflege im Interview klaeren; Glossar, ADR 0016, Proposal, Design und Requirement-Delta abgleichen.
 - [x] [Umsetzbare Spec](../../../.scratch/resumable-wiki-maintenance/spec.md) im lokalen Tracker als `ready-for-agent` veroeffentlichen, einschliesslich Testgrenzen, Abnahmeszenarien und Scope.
-- [ ] Fachquellen-Indexpflege von erfolgreicher Wiki-Generierung entkoppeln und ueber WikiQuery den gekennzeichneten Rueckgriff auf aktuelle Originale bei ausstehender oder fehlgeschlagener Generierung nachweisen.
-- [ ] Laufende Aenderungen vor Erstimport-Rueckstand priorisieren; dauerhaft wiederverwendbare Zwischenstaende und begrenzte Arbeitseinheiten umsetzen. Neustart darf unveraenderte erfolgreiche Extraktionen nicht erneut ausfuehren.
-- [ ] Fortschritt, Fehler, kontrolliertes Laufende und Wiederaufnahme ueber die oeffentliche Prozessgrenze pruefen; keine unbegrenzte agentische Warteschleife. Abhaengige Modellarbeit bei gemeinsamem Providerfehler stoppen.
-- [ ] Quellenaenderung waehrend der Verarbeitung, stale Wiki-Evidenz, gemeinsam genutzte Konzepte, Indexfehler, verpasste Tagesfrist und anschliessenden No-op isoliert verifizieren; nur nachweislich gueltige Ergebnisse wiederverwenden oder veroeffentlichen.
+- [x] Fachquellen-Indexpflege von erfolgreicher Wiki-Generierung entkoppeln und ueber WikiQuery den gekennzeichneten Rueckgriff auf aktuelle Originale bei ausstehender oder fehlgeschlagener Generierung nachweisen.
+- [x] Validierte Extraktionen außerhalb des Publikations-Stagings dauerhaft sichern; kompatible Arbeit nach echtem Prozessneustart wiederverwenden und lokale Invalidierung verifizieren (Ticket 02, Evidenz wird separat abgenommen).
+- [x] Laufende Aenderungen vor Erstimport-Rueckstand priorisieren; dauerhaft wiederverwendbare Zwischenstaende und begrenzte Arbeitseinheiten umsetzen. Neustart darf unveraenderte erfolgreiche Extraktionen nicht erneut ausfuehren.
+- [x] Fortschritt, Fehler, kontrolliertes Laufende und Wiederaufnahme ueber die oeffentliche Prozessgrenze pruefen; keine unbegrenzte agentische Warteschleife. Abhaengige Modellarbeit bei gemeinsamem Providerfehler stoppen (Ticket 03: isolierte Umsetzung; separate Batch-Abnahme vor Integration).
+- [x] Quellenaenderung waehrend der Verarbeitung, stale Wiki-Evidenz, gemeinsam genutzte Konzepte, Indexfehler, verpasste Tagesfrist und anschliessenden No-op isoliert verifizieren; nur nachweislich gueltige Ergebnisse wiederverwenden oder veroeffentlichen.
 - [ ] Live-Prompt, QMD-Wartungsreferenz und Betriebsanleitung nach Implementierung konsistent aktualisieren; Produktivabnahme mit separaten Ergebnissen fuer Suchindex, Tagesaenderungen und Erstimport dokumentieren.
 ## 2. Einführung und Abnahme
 - [x] 2.1 Tatsächliche Skills und Kontextdateien priorisiert katalogisieren.
@@ -64,3 +65,23 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 - [x] 5.4 Kanal „veröffentlichte Releases“ bestätigen und drei freigegebene [Umsetzungstickets](../../../.scratch/update-llm-wiki-releases/spec.md) mit Abhängigkeiten 01 → 02 → 03 veröffentlichen.
 
 [Ticket-04-Zwischenstand](../../../contextual-llm-wiki/evidence/production-04.md): bestehender Live-Job auf gemeinsame Konfiguration umgestellt, Einstellungen erhalten; WikiQuery-first in zentralen Skills und tatsächlichem Agentenablauf samt aktuellem Quellen-Fallback nachgewiesen. Vollimport und produktive Gesamtabnahme (4.6) sind wegen wiederholter paralleler Originalquellenänderungen blockiert; Meetings-Verbleib ist offen. Keine Archivierung.
+
+
+[Abnahme Wiederaufnehmbare Pflege, Ticket 01](../../../contextual-llm-wiki/evidence/resumable-maintenance-01.md): unabhängiger Originalquellenindex, verifiziertes WikiQuery-Fallback, explizite Quellenbegrenzung, Scan-/Indexfehler und unveränderter No-op isoliert umgesetzt. Andere Schritte des neuen Sechs-Ticket-Batches sowie Live-Aktivierung und produktive Gesamtabnahme bleiben offen; Change nicht archivieren.
+
+[Ticket 03: begrenzte Pflege](../../../contextual-llm-wiki/evidence/resumable-maintenance-03.md) ergänzt endlichen Helper-/Prozessbesitz, Fortschritt und Provider-Gates. Live-Aktivierung, Tagespriorität und produktive Gesamtabnahme bleiben offen; Change nicht archivieren.
+
+[Ticket 04: Tagespakete](../../../contextual-llm-wiki/evidence/resumable-maintenance-04.md) ergänzt persistentes Ausgangsinventar, priorisierte begrenzte Extraktion, explizit quellgebundene Zwischenpublikation und getrennte Berliner Frist-/Rückstandsberichte. Globale Synthese bleibt bis zur gemeinsamen Abhängigkeitsprüfung offen. Isolierte Umsetzung und Gegenproben sind dokumentiert; separate Batch-Abnahme, Driftisolation (05), Live-Aktivierung und produktive Gesamtnachweise bleiben offen. Nicht archivieren.
+
+[Ticket 05: Driftisolation](../../../contextual-llm-wiki/evidence/resumable-maintenance-05.md) prüft Originalversionen vor wartender Cachewiederverwendung und vor Publikation. Unbekannte aktuelle Konzeptzugehörigkeit sperrt gemeinsame Synthesen samt Antwortketten; die bestehende quellgebundene Einheit erhält nachweisbar unabhängige Veröffentlichung und unveränderte gültige Quellantworten. Wiederaufnahme, tatsächliche Providerrequests und Indexreparatur sind isoliert geprüft. Separate Batch-Abnahme und produktive Nachweise bleiben offen; nicht archivieren.
+
+
+## Ticket06: zweistufige Aktivierung
+
+- [x] Einmaligen Runner mit eigener endlicher Beobachtung, dauerhaften Prozess-/Exit-/Diagnoseartefakten und Nicht-Erfolg bei fehlendem Abschluss isoliert umsetzen.
+- [x] Vorgängerverhalten gemeinsam über öffentlichen Helper, echte isolierte QMD-Suche und WikiQuery prüfen; Grenzen und kanonischen Prompt mit Betriebsreferenzen abgleichen.
+- [ ] Nach Code-Merge gesicherte produktive Bereitstellung und unveränderte Automationdefinition über vorgesehenes Tool aktivieren/zurücklesen; kontrollierten Produktivlauf mit getrennten Dimensionen abnehmen.
+- [ ] Tatsächlichen nachfolgenden täglichen Schedulerlauf anhand seiner Artefakte nachweisen (späteres externes Ereignis).
+- [ ] Mehrtägigen produktiven Erstimport und anschließenden No-op separat nachweisen (späteres externes Ereignis).
+
+[Ticket06-Nachweis](../../../contextual-llm-wiki/evidence/resumable-maintenance-06.md) trennt die Stufen. Kein Archiv vor tatsächlicher Gesamtabnahme.

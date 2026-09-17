@@ -50,7 +50,7 @@ test("concurrent writers are serialized and a mid-generation source change stays
   }
 });
 
-test("provider failure preserves pending corrections and index failure retries without recompilation", async () => {
+test("provider failure preserves pending corrections and source index failure defers compilation", async () => {
   const f = await fixture();
   try {
     assert.equal((await f.run("maintain")).ok, true);
@@ -74,15 +74,16 @@ test("provider failure preserves pending corrections and index failure retries w
     );
     (f.config.qmd as any).module = path.join(f.dir, "missing-qmd-module.mjs");
     await f.saveConfig();
+    const count = f.calls.length;
     const indexFailure = await f.run("maintain");
     assert.equal(indexFailure.ok, false);
     assert.match(indexFailure.error, /QMD|qmd|module/i);
-    const count = f.calls.length;
+    assert.equal(f.calls.length, count);
     delete (f.config.qmd as any).module;
     await f.saveConfig();
     const resumed = await f.run("maintain");
     assert.equal(resumed.ok, true, JSON.stringify(resumed));
-    assert.equal(f.calls.length, count);
+    assert.ok(f.calls.length > count);
   } finally {
     await f.close();
   }

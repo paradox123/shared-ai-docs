@@ -1,0 +1,33 @@
+--- a/src/sdk/types.ts
++++ b/src/sdk/types.ts
+@@ -77,6 +77,7 @@
+ 
+ /** Compile options exposed through the SDK. A public subset of the core CompileOptions shape. */
+ export interface SdkCompileOptions {
++  sourceOrder?: string[];
+   /** Host-owned durable extraction storage; receives the exact prompt and tool contract. */
+   extractionCache?: (
+     request: { sourceFile: string; model: string; system: string; messages: { role: string; content: string }[]; tools: unknown[] },
+--- a/src/utils/types.ts
++++ b/src/utils/types.ts
+@@ -176,6 +176,7 @@
+ 
+ /** Optional behaviour controls for the compile pipeline. */
+ export interface CompileOptions {
++  sourceOrder?: string[];
+   /** Host-owned durable extraction storage; receives the exact prompt and tool contract. */
+   extractionCache?: (
+     request: { sourceFile: string; model: string; system: string; messages: { role: string; content: string }[]; tools: unknown[] },
+--- a/src/compiler/index.ts
++++ b/src/compiler/index.ts
+@@ -418,6 +418,10 @@
+   augmentWithAffectedSources(changes, findAffectedSources(state, changes, detected));
+   const reconciliationSlugs = findReconciliationSlugs(state, changes);
+ 
++  if (options.sourceOrder) {
++    const rank = new Map(options.sourceOrder.map((id, i) => [id, i]));
++    changes.sort((a, b) => (rank.get(a.file) ?? Infinity) - (rank.get(b.file) ?? Infinity));
++  }
+   const buckets = bucketChanges(changes);
+   if (buckets.toCompile.length === 0 && buckets.deleted.length === 0) {
+     output.status("✓", output.success("Nothing to compile — all sources up to date."));

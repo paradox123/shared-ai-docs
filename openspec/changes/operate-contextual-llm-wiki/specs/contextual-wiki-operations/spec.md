@@ -24,6 +24,13 @@ The automation MUST observe its owned run for a bounded period and use durable p
 - **AND** incomplete or incompatible results are not treated as reusable successes
 - **AND** the report distinguishes source-index completion, ongoing updates and initial-import backlog
 
+#### Scenario: Validate extraction compatibility independently of publication
+- **WHEN** a fresh process considers a previously saved extraction
+- **THEN** it checks the source identity and content, resolved model/provider contract, actual prompt and tool schema including supplied context, and installed compiler contract
+- **AND** a corrupt, incomplete or incompatible entry causes local recomputation without discarding other compatible entries
+- **AND** every supplied field of a successful extraction satisfies the actual tool schema before durable storage or publication
+- **AND** saved work survives a later source-drift or indexing failure without advancing the completed maintenance timestamp
+
 #### Scenario: Source changes while work is running
 - **WHEN** one source changes during generation and unrelated successful work can be proven independent
 - **THEN** affected statements are withheld until revalidated against current evidence
@@ -38,6 +45,14 @@ The automation MUST observe its owned run for a bounded period and use durable p
 - **WHEN** the automation reaches its finite observation bound without a final report
 - **THEN** it uses the known durable progress location for a bounded diagnosis and reports an incomplete or failed outcome
 - **AND** it neither launches a duplicate collector nor enters another unbounded polling loop
+
+#### Scenario: Public helper terminates held work and retains custody after owner death
+- **WHEN** the public helper exhausts its finite wall-clock budget while a provider or owned subprocess is held
+- **THEN** it stops dependent dispatch, terminates only its owned process groups within its finite grace and emits a non-success report with pending work
+- **AND** the already persisted progress remains readable before termination without provider error payloads or document text
+- **AND** abrupt death of the outer helper does not leave an unowned mutating compiler or detached provider process
+- **AND** a fresh process reuses compatible durable extractions without moving the completed-maintenance timestamp for partial work
+
 
 ### Requirement: Automatically adopt verified upstream wiki revisions
 The local wiki installation MUST follow published releases of the upstream LLM Wiki repository as a whole, resolving each adopted release to an exact commit and using the dependency versions defined by that revision's manifest and lockfile. It MUST NOT independently update compiler libraries or re-resolve their locked versions ahead of upstream. Independent Node, QMD and wrapper dependency updates are outside this update scope. A required build MUST reproduce the adopted upstream revision with the existing integration patch rather than introduce new dependency versions.
@@ -133,3 +148,33 @@ Migration MUST be repeatable from its verified snapshot after interruption or in
 - **WHEN** migration is interrupted or indexing fails
 - **THEN** retry uses the verified snapshot and finishes without duplicate active answers or lost saved content
 - **AND** later source correction reaches imported concepts and dependent answer chains while an independent answer remains byte-identical
+
+#### Scenario: A daily statement is available while initial concept membership is unknown
+- **WHEN** a bounded run processes a new daily source while other initial sources have not yet been extracted
+- **THEN** it MAY publish explicitly source-bounded, model-processed wiki statements with validated current provenance in the common wiki
+- **AND** it MUST NOT present these as a complete cross-source synthesis or mark dependent daily/global work complete
+- **AND** unknown concept membership continues to block global synthesis until the common dependency closure is known
+- **AND** a persistent queue retains original age, reserves initial-backlog progress and exposes capacity or freshness failures
+
+
+#### Scenario: Daily work exhausts the budget before the reserved initial attempt
+- **WHEN** two started extraction rounds make no durable progress on still-selected initial versions
+- **THEN** the next mixed round explicitly reports initial-recovery and first attempts one oldest initial source
+- **AND** the following round returns to daily-first even if recovery failed
+- **AND** crash recovery derives progress from persisted extraction versions rather than requiring a final report
+- **AND** daily pending work, overdue targets and actual time-capacity failures remain visible without a throughput guarantee
+
+#### Scenario: Source drift preserves independently verified source statements
+- **WHEN** a source changes during a bounded generation run and its current concept membership has not yet been discovered
+- **THEN** global concepts and their transitive saved answers remain withheld while source-bounded statements with individually current originals may publish
+- **AND** compatible saved source answers retain their bytes and remain searchable, and retained extractions are revalidated against their originals before queued reuse
+- **AND** versions first observed by this completed publication scan immediately enter the persistent daily inventory with this observation time and its next-day deadline; later restart does not reset either
+- **AND** source-index freshness is not claimed for the changed snapshot; a later run discovers current membership and restores verified common synthesis without re-extracting compatible unaffected sources
+
+
+#### Scenario: Capture and observe one owned scheduled helper
+- **WHEN** the daily job starts its own maintenance run
+- **THEN** a repository-owned runner captures exactly one helper, its exit status and durable artifact directory
+- **AND** observation has an explicit deadline independent of the final report, with one bounded diagnosis of absent progress
+- **AND** missing or contradictory completion evidence yields non-success with process and remaining-work evidence, without launching a second collector
+- **AND** configuration, a manual productive run, actual scheduled execution and complete multi-day import with no-op remain separate acceptance facts

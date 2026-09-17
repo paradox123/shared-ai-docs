@@ -1,7 +1,10 @@
 import { readFile, mkdir, cp, rm, rename } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { createWiki } from "../.runtime/compiler/dist/index.js";
+import { maintenanceInventory } from "./maintenance-inventory.ts";
+import { publishSourcePackage, sourceStatements } from "./source-package.ts";
+import { maintenanceControl } from "./maintenance-control.ts";
+import { createWiki, modelWork } from "../.runtime/compiler/dist/index.js";
 import { scan } from "./sources.ts";
 import { atomic, json, hash, writeJson } from "./storage.ts";
 import { readState, saveState, changes, reviewPages } from "./state.ts";
@@ -14,9 +17,11 @@ import {
 } from "./publish.ts";
 import { answer } from "./completion.ts";
 import { qmd } from "./qmd.ts";
+import { indexSources } from "./source-index.ts";
 import { lint } from "./inspection.ts";
-import { checkConfig } from "./config.ts";
+import { validatePublication } from "./publication-validation.ts";
 import { preflight } from "./runtime.ts";
+import { extractionCache } from "./extraction-cache.ts";
 import { failureScope } from "./failure-scope.ts";
 export async function maintain(config: any) {
   const artifacts = path.join(config.output, ".state/runs", randomUUID());
@@ -27,9 +32,18 @@ export async function maintain(config: any) {
     unchanged: [],
     failures: [],
     pages: [],
+    sourceIndex: { ok: false, status: "blocked" },
   };
+  const control = maintenanceControl(
+    process.env.WIKI_MAINTENANCE_PROGRESS ||
+      path.join(artifacts, "progress.json"),
+    progress,
+  );
+  progress.notify = control.emit;
   try {
-    report = await maintainRun(config, artifacts, progress);
+    report = await modelWork.run(control.run, () =>
+      maintainRun(config, artifacts, progress),
+    );
   } catch (error) {
     const message = String((error as Error).message);
     const pending = await readState(config)
@@ -46,8 +60,29 @@ export async function maintain(config: any) {
         : [{ phase: "blocked", error: message }],
     };
   }
+  await control.close();
+  progress.maintenance = report.maintenance || progress.maintenance;
+  if (
+    control.reason === "budget-exhausted" &&
+    (progress.maintenance?.daily.pending ||
+      progress.maintenance?.initial.pending)
+  ) {
+    progress.maintenance.capacity.insufficientTimeCapacity = true;
+    report.maintenance = progress.maintenance;
+  }
+  progress.phase = "finished";
+  progress.remaining = report.pending || [];
+  control.emit();
+  delete report.notify;
   report = {
     ...report,
+    outcome: control.reason || (report.ok ? "completed" : "incomplete"),
+    sourceIndex: progress.sourceIndex,
+    extractions: progress.extractions || { saved: 0, reused: 0, invalid: 0 },
+    wiki: {
+      ok: report.ok,
+      status: report.ok ? (report.noop ? "noop" : "completed") : "incomplete",
+    },
     artifacts,
     report: path.join(artifacts, "report.json"),
   };
@@ -56,11 +91,39 @@ export async function maintain(config: any) {
 }
 
 async function maintainRun(config: any, artifacts: string, progress: any) {
-  const runtime = preflight(),
-    sources = await scan(config),
+  const sources = await scan(config),
     state = await readState(config);
+  const inventory = await maintenanceInventory(config, sources);
+  progress.maintenance = inventory.report(state);
   const delta = changes(state, sources),
     review = await reviewPages(config, state, sources);
+  progress.changes = delta;
+  progress.remaining = [
+    {
+      phase: "compile",
+      sources: [...delta.added, ...delta.changed],
+      removed: delta.removed,
+      pages: review.map((p) => p.id),
+    },
+  ];
+  progress.phase = "source-index";
+  progress.notify();
+  const changedIds = new Set(review.map((p) => p.id));
+  if (state.publicationVersion !== 2)
+    for (const id of Object.keys(state.pages))
+      if (state.pages[id].publicationVersion !== 2) changedIds.add(id);
+  // Withdraw stale wiki files before any index mutation, including a global update.
+  for (const id of changedIds) {
+    state.pages[id].withdrawn = true;
+    await rm(path.join(config.output, "wiki", id + ".md"), { force: true });
+  }
+  if (changedIds.size) {
+    await saveState(config, state);
+    await entry(config, state);
+  }
+  progress.sourceIndex = await indexSources(config, sources);
+  progress.notify();
+  const runtime = preflight();
   const work =
     delta.added.length +
     delta.changed.length +
@@ -78,15 +141,13 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       unchanged: Object.keys(state.pages),
       failures: [],
       pending: [],
+      maintenance: inventory.report(state),
     };
   await qmd(config, "register");
   const stage = path.join(artifacts, "staging"),
     root = path.join(stage, "compiler");
   const baseline = path.join(config.output, ".state/compiler");
   await mkdir(stage, { recursive: true });
-  const changedIds = new Set(review.map((p) => p.id));
-  if (state.publicationVersion !== 2)
-    for (const id of Object.keys(state.pages)) changedIds.add(id);
   try {
     state.pending = [
       {
@@ -95,11 +156,6 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
         review: review.map((p) => ({ id: p.id, reasons: p.reasons })),
       },
     ];
-    // Withdraw invalid pages before model/index work; metadata remains for resumption.
-    for (const id of changedIds) {
-      state.pages[id].withdrawn = true;
-      await rm(path.join(config.output, "wiki", id + ".md"), { force: true });
-    }
     await saveState(config, state);
     await entry(config, state);
     try {
@@ -127,12 +183,72 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     }
     await rm(path.join(root, "wiki"), { recursive: true, force: true });
     const failures: any[] = progress.failures;
+    const cache = await extractionCache(config, sources, () =>
+      progress.notify(),
+    );
+    progress.extractions = cache.stats;
+    const extracted = new Map<string, any>();
+    let requests = 0;
+    const maxSources = config.maintenance?.maxExtractionSources || 20;
+    const runExtraction = async (
+      request: any,
+      generate: () => Promise<string>,
+      validate: (raw: string) => boolean,
+    ) => {
+      const raw = await cache.run(
+        request,
+        async () => {
+          if (requests >= maxSources)
+            throw Object.assign(Error("Extraction package complete"), {
+              packageBoundary: true,
+              sharedExtractionCache: true,
+            });
+          requests++;
+          return generate();
+        },
+        validate,
+      );
+      if (validate(raw)) {
+        extracted.set(request.sourceFile, JSON.parse(raw));
+        inventory.value.sources[request.sourceFile].extractedHash =
+          sources[request.sourceFile].hash;
+        try {
+          await inventory.save();
+        } catch (error) {
+          throw Object.assign(error as Error, { sharedExtractionCache: true });
+        }
+        progress.maintenance = inventory.report(state);
+      }
+      return raw;
+    };
+    const sourceOrder = await inventory.order(maxSources);
+    progress.maintenance = inventory.report(state);
+    progress.notify();
     const wiki = createWiki({ root });
-    const result = await wiki.compile({
-      embeddings: false,
-      concurrency: config.concurrency || 2,
-      onBoundedFailure: (failure) => failures.push(failure),
-    });
+    let result;
+    try {
+      result = await wiki.compile({
+        embeddings: false,
+        extractionCache: runExtraction,
+        sourceOrder,
+        concurrency:
+          Object.keys(sources).length > maxSources
+            ? 1
+            : config.concurrency || 2,
+        onBoundedFailure: (failure) => failures.push(failure),
+      });
+    } catch (error: any) {
+      if (!error.packageBoundary) throw error;
+      return await publishSourcePackage(
+        config,
+        state,
+        sources,
+        extracted,
+        inventory,
+        progress,
+        delta,
+      );
+    }
     await writeJson(path.join(artifacts, "compiler-result.json"), {
       result,
       failures,
@@ -157,6 +273,18 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     );
     if (unclassified.length)
       throw Error("Unclassified compiler failure: " + unclassified.join("; "));
+    // Reuse validation can detect drift during queued extraction. Preserve safe
+    // source-bounded work before interpreting missing ownership as a full abort.
+    if ((await validatePublication(config, state, sources)).drift.length)
+      return await publishSourcePackage(
+        config,
+        state,
+        sources,
+        extracted,
+        inventory,
+        progress,
+        delta,
+      );
     if (
       failures.some(
         (f) =>
@@ -218,6 +346,21 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       bodies[page.id] = normalizeLinks(bodies[page.id], page.id, pages);
       page.hash = hash(bodies[page.id]);
     }
+    const statements = sourceStatements(extracted, sources);
+    for (const old of Object.values<any>(state.pages).filter(
+      (p) => p.kind === "source-summary",
+    )) {
+      if (statements.pages[old.id]) {
+        pages[old.id] = statements.pages[old.id];
+        bodies[old.id] = statements.bodies[old.id];
+      } else if (!changedIds.has(old.id)) {
+        pages[old.id] = old;
+        bodies[old.id] = await readFile(
+          path.join(config.output, "wiki", old.id + ".md"),
+          "utf8",
+        );
+      }
+    }
     // Revalidate saved syntheses in dependency order, including answers on answers.
     const remaining = Object.values<any>(state.pages).filter(
       (p) => p.kind === "answer" || p.migration,
@@ -272,6 +415,7 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
         try {
           text = await answer(question, evidence);
         } catch (error) {
+          if ((error as any).sharedMaintenance) throw error;
           failures.push({
             phase: "answer",
             id: old.id,
@@ -306,25 +450,21 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       if (!progressed)
         throw Error("Saved answer dependency cycle; restore a valid backup");
     }
-    await checkConfig(config);
-    const latest = await scan(config);
-    if (
-      Object.keys(latest).length !== Object.keys(sources).length ||
-      Object.keys(sources).some((id) => latest[id]?.hash !== sources[id].hash)
-    )
-      throw Error(
-        "Sources changed during generation; latest state remains pending",
+    progress.phase = "validate-publication";
+    progress.notify();
+    const validation = await validatePublication(config, state, sources);
+    if (validation.drift.length)
+      return await publishSourcePackage(
+        config,
+        state,
+        sources,
+        extracted,
+        inventory,
+        progress,
+        delta,
       );
-    for (const page of Object.values<any>(state.pages).filter(
-      (p) => !p.withdrawn,
-    )) {
-      const actual = await readFile(
-        path.join(config.output, "wiki", page.id + ".md"),
-        "utf8",
-      );
-      if (hash(actual) !== page.hash)
-        throw Error("Page changed during generation: " + page.id);
-    }
+    progress.phase = "publish";
+    progress.notify();
     for (const id of Object.keys(state.pages))
       if (!pages[id])
         await rm(path.join(config.output, "wiki", id + ".md"), { force: true });
@@ -386,6 +526,9 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     progress.pages = Object.keys(pages).filter((id) => !pages[id].withdrawn);
     await rm(baseline, { recursive: true, force: true });
     await rename(root, baseline);
+    progress.phase = "lint";
+    progress.remaining = next.pending;
+    progress.notify();
     const audit = await lint(config);
     if (audit.activeIssues.length || audit.unresolvedCompilerErrors.length)
       throw Error(
@@ -395,6 +538,8 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
             ...audit.unresolvedCompilerErrors,
           ]),
       );
+    progress.phase = "wiki-index";
+    progress.notify();
     const index = await qmd(config, "update");
     if (!pending.length) next.lastCompleted = new Date().toISOString();
     next.pending = pending;
@@ -420,11 +565,13 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       lint: { ...audit, ok: !pending.length, pending },
       changes: delta,
       review,
+      maintenance: inventory.report(next),
       pages: Object.keys(pages).filter((id) => !pages[id].withdrawn),
     };
   } catch (error) {
     const actual = await readState(config);
     actual.pending.push({ error: (error as Error).message });
+    progress.maintenance = inventory.report(actual);
     await saveState(config, actual);
     await entry(config, actual);
     throw error;

@@ -13,20 +13,36 @@ export async function invoke(
   args: string[],
   env: Record<string, string> = {},
   onSpawn?: (pid: number) => void,
+  timeoutMs?: number,
 ) {
   return await new Promise<any>((resolve, reject) => {
     const p = spawn(
       process.execPath,
       [new URL("../src/cli.ts", import.meta.url).pathname, ...args],
-      { env: { ...process.env, ...env } },
+      { env: { ...process.env, ...env }, detached: !!timeoutMs },
     );
+    const timer = timeoutMs
+      ? setTimeout(() => {
+          if (p.pid) {
+            try {
+              process.kill(-p.pid, "SIGKILL");
+            } catch (error: any) {
+              if (error.code !== "ESRCH") reject(error);
+            }
+          }
+        }, timeoutMs)
+      : undefined;
     onSpawn?.(p.pid!);
     let out = "",
       err = "";
     p.stdout.on("data", (b) => (out += b));
     p.stderr.on("data", (b) => (err += b));
-    p.on("error", reject);
+    p.on("error", (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
     p.on("close", (code) => {
+      clearTimeout(timer);
       try {
         resolve({ code, ...JSON.parse(out.trim()), stderr: err });
       } catch {
@@ -35,7 +51,10 @@ export async function invoke(
     });
   });
 }
-export async function fixture(respond?: (body: any) => any) {
+export async function fixture(
+  respond?: (body: any) => any,
+  options: { timeoutMs?: number } = {},
+) {
   const dir = await realpath(
     await mkdtemp(
       path.join(process.env.WIKI_TEST_ROOT || os.tmpdir(), "wiki-behavior-"),
@@ -83,6 +102,8 @@ export async function fixture(respond?: (body: any) => any) {
   let calls: any[] = [];
   let failure: boolean | ((body: any) => boolean) = false;
   let delay = 0;
+  let failureStatus = 400;
+  let failureCode = "source_error";
   let held: Promise<void> | undefined;
   const server = http.createServer(async (req, res) => {
     let raw = "";
@@ -92,9 +113,11 @@ export async function fixture(respond?: (body: any) => any) {
     if (held) await held;
     if (delay) await new Promise((r) => setTimeout(r, delay));
     if (typeof failure === "function" ? failure(body) : failure) {
-      res.writeHead(400, { "Content-Type": "application/json" });
+      res.writeHead(failureStatus, { "Content-Type": "application/json" });
       res.end(
-        JSON.stringify({ error: { message: "controlled provider failure" } }),
+        JSON.stringify({
+          error: { message: "controlled provider failure", code: failureCode },
+        }),
       );
       return;
     }
@@ -165,7 +188,7 @@ export async function fixture(respond?: (body: any) => any) {
         }),
       };
     }
-    if (respond) message = respond(body) ?? message;
+    if (respond) message = (await respond(body)) ?? message;
     if (body.stream) {
       res.writeHead(200, { "Content-Type": "text/event-stream" });
       res.end(
@@ -199,7 +222,15 @@ export async function fixture(respond?: (body: any) => any) {
     configPath,
     env,
     calls,
-    fail: (value: boolean | ((body: any) => boolean)) => (failure = value),
+    fail: (
+      value: boolean | ((body: any) => boolean),
+      status = 400,
+      code = "source_error",
+    ) => {
+      failureStatus = status;
+      failureCode = code;
+      failure = value;
+    },
     delay: (ms: number) => (delay = ms),
     hold: () => {
       let release!: () => void;
@@ -213,7 +244,12 @@ export async function fixture(respond?: (body: any) => any) {
     },
     close: () => new Promise<void>((r) => server.close(() => r())),
     run: (command: string, ...args: string[]) =>
-      invoke([command, "--config", configPath, ...args], env),
+      invoke(
+        [command, "--config", configPath, ...args],
+        env,
+        undefined,
+        options.timeoutMs,
+      ),
     saveConfig: () => writeFile(configPath, JSON.stringify(config)),
   };
 }
