@@ -1,0 +1,34 @@
+# Ticket 03: endliche und beobachtbare Pflege
+
+Implementierung gegen `main` (Basis `2c73bb7`); Abnahme noch durch Koordinator. Der aktive Change `operate-contextual-llm-wiki` bleibt offen. Keine Produktivruntime, Originalquelle oder Live-Automation geändert. Priorisierung/Teilpaketpublikation gehören zu Ticket 04.
+
+## Vertrag
+
+`maintain-index.py` akzeptiert `--budget-seconds` (Default 1200) und `--termination-grace-seconds` (Default 10), jeweils endlich und positiv. Das Budget gilt für den **gesamten Helper**, einschließlich Reconciliation, Quellensuche, Modellarbeit, Prüfung und QMD. Jede weitere Modellanfrage prüft zusätzlich die absolute Frist unmittelbar vor Dispatch. Die unveränderte Defaultparallelität ist 2.
+
+1200 Sekunden ist eine vorsichtige betriebliche Obergrenze von 20 Minuten; die bekannten mehrstündigen Erstimporte sind kein akzeptables Einzelaufrufbudget. Sie garantiert keine Tageskapazität. Die isolierten Messungen mit 4 Sekunden und 0,5 Sekunden Grace zeigen kontrollierte Rückkehr einschließlich eines TERM-ignorierenden eigenen Codex-Kindbaums in unter 6,5 Sekunden. 10 Sekunden Default-Grace geben realen CLI-/Dateisystemprozessen mehr Auslauf; die unabhängige harte Abnahmefrist berücksichtigt zusätzlich Start, Signalzustellung und Reaping. Last-/Produktivmessung und Aktivierung bleiben Ticket 06; die Defaults behaupten weder tatsächliche Tagesleistung noch vollständigen Erstimport.
+
+Unmittelbar nach Start nennt stdout das Artefaktverzeichnis. `<artifacts>/progress.json` zeigt den Helper-Schritt und verlinkt `<artifacts>/maintain-<context>.progress.json`. Dort stehen Phase, aktive Modellanfragen, empfangene Modellantworten (`modelResponses`, **keine** gespeicherten Erfolge), Fehlerzähler, dauerhaft gespeicherte bzw. wiederverwendete Extraktionen, sichere Restarbeitsidentitäten und `lastProgressAt`. Keine Providertexte, Zugangsdaten oder Dokumentinhalte gehören in diese Fortschrittsdateien. `lastProgressAt` bleibt während einer gehaltenen Anfrage stehen; ein Heartbeat wird nicht als fachlicher Fortschritt ausgegeben.
+
+Budgetende verhindert neue Arbeit und sendet TERM an eigene Prozesse, nach Grace KILL. Der unabhängige Guardian hält Prozessbesitz auch beim SIGKILL des äußeren Helpers; seine Besitzpipe endet dann und beendet die Wiki-Prozessgruppe sowie registrierte eigene detached Codex-Gruppen. Registrierung enthält Startidentität und Freigabeereignisse; keine ungezielten `pkill`-/systemweiten Aufräumoperationen. Der Writer-Lock wird nur bei passender beendeter PID entfernt; ein Prozessneustart kann auch verwaiste tote Besitzer kontrolliert erkennen.
+
+Der Helper gibt weiterhin ein finales JSON-Objekt aus und schreibt identische Daten nach `report.json`. Restarbeit hat `ok:false`, Exit 1 und `outcome:budget-exhausted` oder `shared-provider-failure`. Quellensuchindexerfolg bleibt getrennt von `wiki.ok:false`. QMD-Folgeschritte beginnen nach gestoppter Arbeit nicht mehr. Bestehende vollständige Erfolge verlangen weiterhin Exit 0, `ok:true` und keine angeforderte Restarbeit. Der vollständige Pflegezeitpunkt bleibt bei Teilfortschritt unverändert.
+
+Providerfehler werden vor SDK-Retries abgegrenzt: Authentifizierung, Providerkonfiguration, Rate-Limit, Transport und Dienstausfall stoppen abhängige Requests. Nur explizite requestlokale Codes (`context_length_exceeded`, `input_too_long`, `content_filter`, `source_error`) bei 400/422 sowie HTTP413 gelten als begrenzte Quellenfehler. Unbekannte 400/422 bleiben gemeinsam; eine bloße HTTP-Klasse belegt keine Quellenisolation. Bereits gestartete Requests werden innerhalb derselben Grace begrenzt. Ein Cachetreffer ist weiterhin keine Publikationserlaubnis.
+
+## Isolierte Nachweise
+
+Die zusätzliche Suite `test/maintenance-budget.test.ts` verwendet echte öffentliche Python-Helperprozesse, Core und Compiler, temporäre Git-Quellen und echte isolierte QMD-Datenbanken. Nur Modellantworten und die maschinenweite QMD-CLI/Reconciliation sind kontrollierte Gegenstellen; originale Suche und WikiQuery verwenden den echten QMD-Bridgepfad. Alle Prozesse besitzen unabhängige harte Testfristen. Rohartefakte entstehen direkt unter `/Users/dh/.codex/batches/01a0af21-127f-7833-b0c1-136e653dc476/ticket03/` und bleiben außerhalb des Worktrees erhalten.
+
+Soll/Ist-Messwerte und die vollständige Nachweiszuordnung stehen in `/Users/dh/.codex/batches/01a0af21-127f-7833-b0c1-136e653dc476/ticket03/acceptance.json` und `/Users/dh/.codex/batches/01a0af21-127f-7833-b0c1-136e653dc476/ticket03/acceptance.md`. Gemessen: Helperbudgetende nach 4.657ms; eigener Codex-Kindbaum nach 4.718ms vollständig weg; gemeinsamer Fehler mit gehaltener Parallel-Anfrage nach 1.680ms bei genau zwei Requests. 88 Gesamttests grün; nach letzten Reparaturen die 19 betroffenen Tests auf endgültigem Stand erneut grün, dazu 8 Pythonparser- und 59 Upstreamtests. Beide getrennten Engineering-Reviews ohne offene Funde. Keine Aussage über bereits erfolgte Batch-Abnahme oder Integration.
+
+
+## Separate kritische Verifikation
+
+Die kritische Runde ergänzte gehaltene Reconciliation/QMD-Kindbäume, einen per SIGSTOP angehaltenen Guardian nach Helper-SIGKILL und eine erst nach Budgetende freigegebene Modellanfrage. Gemessen: Reconciliation samt Kind nach1.645ms bei1s+0,5s beendet; finales QMD samt Kind nach5.634ms bei5s+0,5s. Beim nach Budgetende innerhalb Grace abgeschlossenen Modellaufruf wurden zwei gültige Extraktionen gesichert und keine der zwei wartenden Quellen angefordert; der frische Prozess berechnete ausschließlich diese Restquellen.
+
+Die Runde fand und schloss eine Artefaktfehler-Lücke: nicht mehr schreibbarer äußerer Fortschritt darf keinen fehlenden stdout-Endbericht verursachen; nicht mehr schreibbarer finaler Report darf keine erfolgreiche Fortschrittsdatei zurücklassen. Beide Fälle wurden durch echte Verzeichnisfehler rot→grün reproduziert. Die stdout-Ausgabe bleibt nicht-erfolgreiches JSON mit `artifactErrors`; verfügbare alternative Artefaktziele werden weiterhin geschrieben. Die Providerfrist wird unmittelbar nach Fortschrittspersistierung erneut geprüft.
+
+Bei bereits vollständig abgeschlossener innerer Wiki-Pflege kann ein nachfolgender äußerer QMD-Schritt scheitern. Dann bleiben `wiki.ok` und der **wiki-bezogene** `lastCompleted` korrekt erfolgreich, der äußere Helper aber Exit1/`ok:false` mit explizit offenen QMD-Schritten. Ein No-op-Folgelauf erhält diesen inneren Zeitstempel. `completedAt` ist lediglich der äußere Endzeitpunkt und kein vollständiger Pflegeerfolgszeitpunkt.
+
+Elf eindeutige Budget-/Prozessfälle und8 Helperparserfälle auf dem abschließenden Produktstand grün. Vollständige Zuordnung: `/Users/dh/.codex/batches/01a0af21-127f-7833-b0c1-136e653dc476/ticket03/critical-acceptance.json`. Keine offenen Befunde der kritischen Runde; Koordinator-Abnahme, Integration und produktive Abnahme sind damit nicht vorweggenommen.

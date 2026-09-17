@@ -1,0 +1,146 @@
+--- a/src/utils/llm.ts
++++ b/src/utils/llm.ts
+@@ -5,6 +5,10 @@
+  * active LLMProvider while preserving retry logic with exponential backoff.
+  * The provider is selected via LLMWIKI_PROVIDER env var (see provider.ts).
+  */
++
++import { AsyncLocalStorage } from "node:async_hooks";
++
++export const modelWork = new AsyncLocalStorage<(phase: string, invoke: () => Promise<string>) => Promise<string>>();
+ 
+ import { RETRY_COUNT, RETRY_BASE_MS, RETRY_MULTIPLIER } from "./constants.js";
+ import { getProvider } from "./provider.js";
+@@ -79,6 +83,7 @@
+ 
+   for (let attempt = 0; attempt <= RETRY_COUNT; attempt++) {
+     try {
++      const invoke = async () => {
+       if (stream) {
+         return await provider.stream(system, messages, maxTokens, onToken);
+       }
+@@ -88,7 +93,11 @@
+       }
+ 
+       return await provider.complete(system, messages, maxTokens);
++      };
++      const boundary = modelWork.getStore();
++      return await (boundary ? boundary(tools?.length ? "extract" : "generate", invoke) : invoke());
+     } catch (error) {
++      if ((error as { sharedMaintenance?: boolean })?.sharedMaintenance) throw error;
+       if (attempt === RETRY_COUNT || isNonRetriable(error)) throw error;
+ 
+       const delayMs = computeBackoffMs(attempt);
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -123,3 +123,5 @@
+ 
+ // Host-supplied evidence: no native retrieval, persistence, or embeddings.
+ export { completeText } from "./sdk/completion.js";
++
++export { modelWork } from "./utils/llm.js";
+--- a/src/compiler/extraction-phase.ts
++++ b/src/compiler/extraction-phase.ts
+@@ -58,7 +58,7 @@
+   cache?: import("../utils/types.js").CompileOptions["extractionCache"],
+ ): Promise<ExtractionResult[]> {
+   let aborted = false;
+-  return Promise.all(files.map((file) => limit(async () => {
++  const outcomes = await Promise.allSettled(files.map((file) => limit(async () => {
+     if (aborted) throw new Error(`extraction skipped for ${file}: a prior source failed`);
+     try {
+       return await extractForSource(root, file, onFailure, cache);
+@@ -67,6 +67,9 @@
+       throw err;
+     }
+   })));
++  const failed = outcomes.find((outcome) => outcome.status === "rejected");
++  if (failed?.status === "rejected") throw failed.reason;
++  return outcomes.map((outcome) => (outcome as PromiseFulfilledResult<ExtractionResult>).value);
+ }
+ 
+ /**
+@@ -138,6 +141,7 @@
+   try {
+     concepts = await extractConcepts(sourceContent, existingIndex, sourceFile, cache);
+   } catch (error) {
++    if ((error as { sharedMaintenance?: boolean }).sharedMaintenance) throw error;
+     if (!onFailure || (error as { sharedExtractionCache?: boolean }).sharedExtractionCache) throw error;
+     onFailure({ phase: "extract", id: sourceFile, sources: [sourceFile], error: String(error) });
+     concepts = [];
+--- a/src/compiler/page-renderer.ts
++++ b/src/compiler/page-renderer.ts
+@@ -72,7 +72,7 @@
+   });
+ 
+   } catch (error) {
+-    if (!onFailure) throw error;
++    if (!onFailure || (error as { sharedMaintenance?: boolean }).sharedMaintenance) throw error;
+     onFailure({ phase: "page", id: entry.slug, sources: entry.sourceFiles, error: String(error) });
+     return "";
+   }
+--- a/src/providers/codex-agent-lifecycle.ts
++++ b/src/providers/codex-agent-lifecycle.ts
+@@ -11,7 +11,7 @@
+   spawnSync,
+   type ChildProcessWithoutNullStreams,
+ } from "node:child_process";
+-import { rmSync } from "node:fs";
++import { appendFileSync, rmSync } from "node:fs";
+ import { rm } from "node:fs/promises";
+ 
+ interface ActiveCodexProcess {
+@@ -131,7 +131,16 @@
+   const closed = new Promise<void>((resolve) => child.once("close", () => resolve()));
+   activeProcesses.set(pid, { child, closed, cwd, graceMs });
+   installHandlers();
++  try {
++  if (process.env.WIKI_MAINTENANCE_CHILDREN)
++    appendFileSync(process.env.WIKI_MAINTENANCE_CHILDREN, JSON.stringify({ pid, started: spawnSync("ps", ["-o", "lstart=", "-p", String(pid)], {encoding: "utf8"}).stdout.trim() }) + "\n", { mode: 0o600 });
++  } catch (error) {
++    signalCodexTree(child, "SIGKILL");
++    throw error;
++  }
+   return () => {
++    if (process.env.WIKI_MAINTENANCE_CHILDREN)
++      appendFileSync(process.env.WIKI_MAINTENANCE_CHILDREN, JSON.stringify({pid, released: true}) + "\n", { mode: 0o600 });
+     activeProcesses.delete(pid);
+     removeHandlers();
+   };
+--- a/src/providers/openai.ts
++++ b/src/providers/openai.ts
+@@ -163,6 +163,7 @@
+       apiKey: resolvedKey,
+       baseURL: options.baseURL ?? null,
+       timeout,
++      maxRetries: process.env.WIKI_MAINTENANCE_DEADLINE_MS ? 0 : undefined,
+     });
+     this.embeddingsClient = this.buildEmbeddingsClient(options, resolvedKey, timeout);
+   }
+@@ -185,6 +186,7 @@
+       // endpoint is unchanged.
+       baseURL: options.embeddingsBaseURL ?? options.baseURL ?? null,
+       timeout,
++      maxRetries: process.env.WIKI_MAINTENANCE_DEADLINE_MS ? 0 : undefined,
+     });
+   }
+ 
+--- a/src/compiler/index.ts
++++ b/src/compiler/index.ts
+@@ -179,12 +179,15 @@
+   // Collect per-outcome errors and candidate info into the ordered outcomes array
+   // AFTER Promise.all, then derive candidates/review by iterating outcomes in source order.
+   // This ensures stable, source-order ordering regardless of parallel completion timing.
+-  const outcomes = await Promise.all(
++  const settled = await Promise.allSettled(
+     merged.map((entry) => limit(async () => {
+       const result = await generateMergedPage(root, entry, schema, options, sourceStates, policy);
+       return { entry, result };
+     })),
+   );
++  const failed = settled.find((outcome) => outcome.status === "rejected");
++  if (failed?.status === "rejected") throw failed.reason;
++  const outcomes = settled.map((outcome) => (outcome as PromiseFulfilledResult<any>).value);
+   const errors: string[] = [];
+   const candidates: string[] = [];
+   const review = { held: [] as ReviewedCandidateRef[], forced: [] as ReviewedCandidateRef[] };

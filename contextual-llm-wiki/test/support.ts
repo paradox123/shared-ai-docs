@@ -102,6 +102,8 @@ export async function fixture(
   let calls: any[] = [];
   let failure: boolean | ((body: any) => boolean) = false;
   let delay = 0;
+  let failureStatus = 400;
+  let failureCode = "source_error";
   let held: Promise<void> | undefined;
   const server = http.createServer(async (req, res) => {
     let raw = "";
@@ -111,9 +113,11 @@ export async function fixture(
     if (held) await held;
     if (delay) await new Promise((r) => setTimeout(r, delay));
     if (typeof failure === "function" ? failure(body) : failure) {
-      res.writeHead(400, { "Content-Type": "application/json" });
+      res.writeHead(failureStatus, { "Content-Type": "application/json" });
       res.end(
-        JSON.stringify({ error: { message: "controlled provider failure" } }),
+        JSON.stringify({
+          error: { message: "controlled provider failure", code: failureCode },
+        }),
       );
       return;
     }
@@ -218,7 +222,15 @@ export async function fixture(
     configPath,
     env,
     calls,
-    fail: (value: boolean | ((body: any) => boolean)) => (failure = value),
+    fail: (
+      value: boolean | ((body: any) => boolean),
+      status = 400,
+      code = "source_error",
+    ) => {
+      failureStatus = status;
+      failureCode = code;
+      failure = value;
+    },
     delay: (ms: number) => (delay = ms),
     hold: () => {
       let release!: () => void;

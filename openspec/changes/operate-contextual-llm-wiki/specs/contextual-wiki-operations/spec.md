@@ -46,6 +46,14 @@ The automation MUST observe its owned run for a bounded period and use durable p
 - **THEN** it uses the known durable progress location for a bounded diagnosis and reports an incomplete or failed outcome
 - **AND** it neither launches a duplicate collector nor enters another unbounded polling loop
 
+#### Scenario: Public helper terminates held work and retains custody after owner death
+- **WHEN** the public helper exhausts its finite wall-clock budget while a provider or owned subprocess is held
+- **THEN** it stops dependent dispatch, terminates only its owned process groups within its finite grace and emits a non-success report with pending work
+- **AND** the already persisted progress remains readable before termination without provider error payloads or document text
+- **AND** abrupt death of the outer helper does not leave an unowned mutating compiler or detached provider process
+- **AND** a fresh process reuses compatible durable extractions without moving the completed-maintenance timestamp for partial work
+
+
 ### Requirement: Automatically adopt verified upstream wiki revisions
 The local wiki installation MUST follow published releases of the upstream LLM Wiki repository as a whole, resolving each adopted release to an exact commit and using the dependency versions defined by that revision's manifest and lockfile. It MUST NOT independently update compiler libraries or re-resolve their locked versions ahead of upstream. Independent Node, QMD and wrapper dependency updates are outside this update scope. A required build MUST reproduce the adopted upstream revision with the existing integration patch rather than introduce new dependency versions.
 
