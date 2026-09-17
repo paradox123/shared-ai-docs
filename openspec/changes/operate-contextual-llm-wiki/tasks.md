@@ -15,7 +15,7 @@ Dieser Abschnitt ergaenzt den bisherigen Betriebsstand; abgeschlossene Implement
 - [x] Laufende Aenderungen vor Erstimport-Rueckstand priorisieren; dauerhaft wiederverwendbare Zwischenstaende und begrenzte Arbeitseinheiten umsetzen. Neustart darf unveraenderte erfolgreiche Extraktionen nicht erneut ausfuehren.
 - [x] Fortschritt, Fehler, kontrolliertes Laufende und Wiederaufnahme ueber die oeffentliche Prozessgrenze pruefen; keine unbegrenzte agentische Warteschleife. Abhaengige Modellarbeit bei gemeinsamem Providerfehler stoppen (Ticket 03: isolierte Umsetzung; separate Batch-Abnahme vor Integration).
 - [x] Quellenaenderung waehrend der Verarbeitung, stale Wiki-Evidenz, gemeinsam genutzte Konzepte, Indexfehler, verpasste Tagesfrist und anschliessenden No-op isoliert verifizieren; nur nachweislich gueltige Ergebnisse wiederverwenden oder veroeffentlichen.
-- [ ] Live-Prompt, QMD-Wartungsreferenz und Betriebsanleitung nach Implementierung konsistent aktualisieren; Produktivabnahme mit separaten Ergebnissen fuer Suchindex, Tagesaenderungen und Erstimport dokumentieren.
+- [x] Live-Prompt, QMD-Wartungsreferenz und Betriebsanleitung nach Implementierung konsistent aktualisieren; Produktivabnahme mit separaten Ergebnissen fuer Suchindex, Tagesaenderungen und Erstimport dokumentieren.
 ## 2. Einführung und Abnahme
 - [x] 2.1 Tatsächliche Skills und Kontextdateien priorisiert katalogisieren.
 - [x] 2.2 Betriebsanleitung und unmittelbare Wartungsreferenzen aktualisieren.
@@ -80,8 +80,10 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 
 - [x] Einmaligen Runner mit eigener endlicher Beobachtung, dauerhaften Prozess-/Exit-/Diagnoseartefakten und Nicht-Erfolg bei fehlendem Abschluss isoliert umsetzen.
 - [x] Vorgängerverhalten gemeinsam über öffentlichen Helper, echte isolierte QMD-Suche und WikiQuery prüfen; Grenzen und kanonischen Prompt mit Betriebsreferenzen abgleichen.
-- [ ] Nach Code-Merge gesicherte produktive Bereitstellung und unveränderte Automationdefinition über vorgesehenes Tool aktivieren/zurücklesen; kontrollierten Produktivlauf mit getrennten Dimensionen abnehmen.
+- [x] Nach Code-Merge gesicherte produktive Bereitstellung und unveränderte Automationdefinition über vorgesehenes Tool aktivieren/zurücklesen; kontrollierten Produktivlauf mit getrennten Dimensionen abnehmen.
 - [ ] Tatsächlichen nachfolgenden täglichen Schedulerlauf anhand seiner Artefakte nachweisen (späteres externes Ereignis).
 - [ ] Mehrtägigen produktiven Erstimport und anschließenden No-op separat nachweisen (späteres externes Ereignis).
 
 [Ticket06-Nachweis](../../../contextual-llm-wiki/evidence/resumable-maintenance-06.md) trennt die Stufen. Kein Archiv vor tatsächlicher Gesamtabnahme.
+
+Produktivnachweis vom 17.09.2026: bestehende Automation mit erhaltenen Feldern aktiviert; ein kontrollierter Lauf endete nach 121,295s mit frischem Originalindex (2047 Quellen), vier gesicherten Extraktionen und offenem Erstimport (2044 pending). Tatsächliche aktuelle Originalsuche über den QMD-Quellenindex und Ende aller eigenen Prozesse belegt. `globalComplete:false`, äußeres QMD update/embed/status offen. Formale Ticketabnahme und Abschluss der gelieferten Aktivierung sind bestätigt; die beiden späteren Ereignisabnahmen bleiben unverändert offen. Frühere Zwischenstandsabschnitte sind historische Nachweise und behaupten keine heutige Vollabnahme.
