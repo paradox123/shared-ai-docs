@@ -1,0 +1,1585 @@
+{
+  "runId": "0f9245e0-3d4f-4c04-9fba-342ccf4b95d1",
+  "state": "awaiting-agent",
+  "correlation": {
+    "runId": "0f9245e0-3d4f-4c04-9fba-342ccf4b95d1",
+    "repositoryId": "probare-issue14",
+    "issueId": "5189035785",
+    "issueNumber": 3,
+    "commandId": "8988f4df-7ceb-4c2e-ac5b-c5e60ed43c44",
+    "repository": {
+      "repositoryId": "probare-issue14",
+      "fullName": "paradox123/probare-crm",
+      "providerRepositoryId": 1332818325
+    }
+  },
+  "runStartedAt": "2026-09-13T17:10:40.531619+00:00",
+  "activities": [
+    {
+      "activityId": "ffbbe516-a10e-42d3-a2ca-3419bfbcad19",
+      "activityType": "admission",
+      "state": "completed",
+      "startedAt": "2026-09-13T17:10:40.531619+00:00",
+      "completedAt": "2026-09-13T17:10:40.531619+00:00"
+    },
+    {
+      "activityId": "20f58eba-777f-486d-846f-07d3417ea1f6",
+      "activityType": "real-codex",
+      "state": "blocked",
+      "startedAt": "2026-09-13T17:10:53.327415+00:00",
+      "completedAt": "2026-09-13T17:11:00.23198+00:00"
+    }
+  ],
+  "attempts": [
+    {
+      "attemptId": "84d2f539-e91b-4008-8ed0-6527cb61d565",
+      "activityId": "ffbbe516-a10e-42d3-a2ca-3419bfbcad19",
+      "attemptNumber": 1,
+      "state": "completed",
+      "startedAt": "2026-09-13T17:10:40.531619+00:00",
+      "completedAt": "2026-09-13T17:10:40.531619+00:00",
+      "session": null,
+      "liveOperation": null
+    },
+    {
+      "attemptId": "1a0f0f4b-d090-42f8-8844-e341eedb0c27",
+      "activityId": "20f58eba-777f-486d-846f-07d3417ea1f6",
+      "attemptNumber": 1,
+      "state": "blocked",
+      "startedAt": "2026-09-13T17:10:53.327415+00:00",
+      "completedAt": "2026-09-13T17:11:00.23198+00:00",
+      "session": {
+        "operationKey": "1a0f0f4b-d090-42f8-8844-e341eedb0c27",
+        "sessionId": "01a09bc0-1d97-7673-9b46-f1c5ccc803dc",
+        "status": "blocked",
+        "contractVersion": "AgentSessionAdapter/v1",
+        "startedEventId": "6e445e42-95c5-463d-9f97-4ee6bbfe2164",
+        "lastSequence": 8,
+        "lastEventId": "686f1a8c-4656-4eed-bad2-8c3d03accad4",
+        "originalResult": {
+          "outcome": "blocked",
+          "summary": "Disposable greeting issue is ready for the human continuation.",
+          "evidence": [],
+          "findings": [],
+          "intervention": null,
+          "verification": [],
+          "changed_files": [],
+          "schema_version": "3",
+          "red_green_slices": []
+        },
+        "originalResultEventId": "686f1a8c-4656-4eed-bad2-8c3d03accad4",
+        "failureCategory": "blocked",
+        "openInCodex": {
+          "mode": "same-session",
+          "sameSession": true,
+          "appTaskVisible": false,
+          "reason": "native-codex-tui-via-fenced-gateway; desktop-sidebar-not-used",
+          "url": "ws://127.0.0.1:64209/sessions/01a09bc0-1d97-7673-9b46-f1c5ccc803dc"
+        },
+        "openedInCodex": true,
+        "observedResponse": {
+          "reason": null,
+          "sha256": "717ce90f459bf9ba36400ed26e018e7af2479d9ff8cc1b3429e8aef90cb7f66b",
+          "mediaType": "application/json",
+          "redaction": {
+            "marker": "[REDACTED:CONTROLLED-CANARY]",
+            "occurred": false,
+            "policyVersion": "controlled-canary-v1"
+          },
+          "sizeBytes": 19544,
+          "artifactId": "505237d2de345148ecaba2488d781a1cfdeff35b2779c056c6761178a5f1b4a8",
+          "availability": "available"
+        },
+        "responseStatus": 200,
+        "responseEventId": "bc0bfc10-918b-4655-8d08-e82dbd8e6678",
+        "humanRequest": {
+          "requestId": "dd592319-4f75-4a8e-aa72-d5d2078dcff3",
+          "attemptId": "1a0f0f4b-d090-42f8-8844-e341eedb0c27",
+          "sessionId": "01a09bc0-1d97-7673-9b46-f1c5ccc803dc",
+          "phase": "awaiting-human",
+          "expectedHeadSha": null,
+          "problem": "Disposable greeting issue is ready for the human continuation.",
+          "evidence": [
+            "686f1a8c-4656-4eed-bad2-8c3d03accad4"
+          ],
+          "allowedActions": [
+            "resume",
+            "fork",
+            "fresh-retry",
+            "open",
+            "write"
+          ],
+          "state": "open",
+          "createdEventId": "59e9de2a-fcc1-4bbd-9177-96400fb49833",
+          "expectedRunVersion": 17,
+          "leaseEpoch": 0
+        },
+        "lineage": null
+      },
+      "liveOperation": null
+    }
+  ],
+  "processes": [
+    {
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "processKind": "api",
+      "processStartedAt": "2026-09-13T17:10:34.67063+00:00",
+      "processStoppedAt": null,
+      "actor": {
+        "kind": "service",
+        "provider": "wpcp-api",
+        "subjectId": "017dabf3-8fc2-495a-9252-c11e72844311"
+      }
+    },
+    {
+      "processId": "issue14-rehearsal:21cfcc3438644e0ca7726c04b661bd1e",
+      "processKind": "worker",
+      "processStartedAt": "2026-09-13T17:10:49.00531+00:00",
+      "processStoppedAt": "2026-09-13T17:11:00.361016+00:00",
+      "actor": {
+        "kind": "service",
+        "provider": "wpcp-worker",
+        "subjectId": "issue14-rehearsal:21cfcc3438644e0ca7726c04b661bd1e"
+      }
+    }
+  ],
+  "heartbeats": [
+    {
+      "heartbeatId": "53c9ffc6-2d23-4a27-866f-a4df6bd39ae7",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:10:40.596774+00:00"
+    },
+    {
+      "heartbeatId": "ada95f2d-dace-4666-bc40-7622a117334f",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:10:41.218964+00:00"
+    },
+    {
+      "heartbeatId": "eada2851-9863-435b-9858-44865c67059f",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:10:41.911556+00:00"
+    },
+    {
+      "heartbeatId": "8b8a15ec-aa9a-406d-9c34-e543f1e03de0",
+      "processId": "issue14-rehearsal:21cfcc3438644e0ca7726c04b661bd1e",
+      "heartbeatAt": "2026-09-13T17:11:00.313193+00:00"
+    },
+    {
+      "heartbeatId": "ec8d3525-f6c5-47de-b091-7bfe6cd845de",
+      "processId": "issue14-rehearsal:21cfcc3438644e0ca7726c04b661bd1e",
+      "heartbeatAt": "2026-09-13T17:11:00.34887+00:00"
+    },
+    {
+      "heartbeatId": "a4cfc453-486a-4e22-997a-3f29e28b0401",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:01.165129+00:00"
+    },
+    {
+      "heartbeatId": "2c1db7e3-bac7-44b6-9426-5e793e91cdd2",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:01.806466+00:00"
+    },
+    {
+      "heartbeatId": "f4fd63fc-7547-4055-83d9-763c22de2a96",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:28.209402+00:00"
+    },
+    {
+      "heartbeatId": "4b8375ce-7760-4cbf-b466-a2b83ef1862b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:29.552203+00:00"
+    },
+    {
+      "heartbeatId": "5470b5b8-80e1-4fe5-9b44-41138d634256",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:30.881821+00:00"
+    },
+    {
+      "heartbeatId": "e190153d-3650-4264-a8c4-5cfeea05b5b9",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:31.578094+00:00"
+    },
+    {
+      "heartbeatId": "61f5d45a-c8d8-4666-85b6-b7d274653f40",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:32.47295+00:00"
+    },
+    {
+      "heartbeatId": "f34c2238-e303-46ce-91a5-8744e82f9e41",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:33.140632+00:00"
+    },
+    {
+      "heartbeatId": "31230589-fdae-4ab2-9bd2-d1a94df78e81",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:34.161668+00:00"
+    },
+    {
+      "heartbeatId": "747a6851-33f3-4875-80ed-e8ebdd7521d2",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:38.265828+00:00"
+    },
+    {
+      "heartbeatId": "a492952c-b693-4da9-aa16-abbd8dbc26d8",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:40.924632+00:00"
+    },
+    {
+      "heartbeatId": "e17952d3-b7b2-4481-b19b-427ec2033820",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:43.465587+00:00"
+    },
+    {
+      "heartbeatId": "03f487dc-b662-49f2-9af9-ebc9f082c02e",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:46.365488+00:00"
+    },
+    {
+      "heartbeatId": "5c97bb16-92d6-4789-b3a8-59b0cf10dcea",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:51.581445+00:00"
+    },
+    {
+      "heartbeatId": "00089ade-53a8-43f7-85a0-9a1b703163b5",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:55.601106+00:00"
+    },
+    {
+      "heartbeatId": "df14e6d8-23b2-4d0e-9527-645ff5058aed",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:11:58.307403+00:00"
+    },
+    {
+      "heartbeatId": "b59c9e5a-32d6-4743-b62b-827a400431e2",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:02.321603+00:00"
+    },
+    {
+      "heartbeatId": "aad1e9bb-9e8d-43cc-aafb-48f75981a6cf",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:06.494657+00:00"
+    },
+    {
+      "heartbeatId": "a0e86ceb-983b-46a3-ad36-838d71316c7d",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:08.615225+00:00"
+    },
+    {
+      "heartbeatId": "c55aa4bc-a16c-466b-875e-b20ecfb4cb98",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:13.261542+00:00"
+    },
+    {
+      "heartbeatId": "e4f8c794-7442-4451-bdce-e2f515bc7ebc",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:17.916719+00:00"
+    },
+    {
+      "heartbeatId": "0826f82e-61bb-460c-8b26-485b76dbee70",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:21.509857+00:00"
+    },
+    {
+      "heartbeatId": "cf1ecee0-9f6a-42f9-9594-3396143b18fb",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:25.811998+00:00"
+    },
+    {
+      "heartbeatId": "b4ef9258-ade8-44a2-8a7b-5b0ced30bd3a",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:28.639087+00:00"
+    },
+    {
+      "heartbeatId": "271e0d07-4883-4078-ad4e-5dcdba32ffc4",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:31.534021+00:00"
+    },
+    {
+      "heartbeatId": "7875394f-d4ef-4e6f-ad56-09432839e15c",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:35.486806+00:00"
+    },
+    {
+      "heartbeatId": "9665d5fa-686e-4038-a857-4844031a27ac",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:39.434703+00:00"
+    },
+    {
+      "heartbeatId": "2caa990f-f054-427e-bc2e-3491dc2cb401",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:41.167835+00:00"
+    },
+    {
+      "heartbeatId": "1178805f-0b19-4f70-904b-ff8aef4e7d08",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:42.368263+00:00"
+    },
+    {
+      "heartbeatId": "2be4abcc-61e9-4eff-8bc1-ab8e2f9f90e3",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:42.8112+00:00"
+    },
+    {
+      "heartbeatId": "cf7f457c-ec23-4b95-b2c2-82ba77cf2412",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:45.348589+00:00"
+    },
+    {
+      "heartbeatId": "e957a7a5-9f85-45d3-b804-81d4a5a62ef0",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:49.870412+00:00"
+    },
+    {
+      "heartbeatId": "252c2dba-841a-4b89-ad82-a6b652ad9757",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:53.434536+00:00"
+    },
+    {
+      "heartbeatId": "0d0bf680-bb35-4d8f-80ec-fbd8eb73204c",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:12:55.95644+00:00"
+    },
+    {
+      "heartbeatId": "dee7d29c-b0b9-4340-829c-c085577a24de",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:01.089207+00:00"
+    },
+    {
+      "heartbeatId": "51ff675a-d4da-46dc-8b58-b1b6ba65ceca",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:05.109435+00:00"
+    },
+    {
+      "heartbeatId": "3921a35c-2918-4477-8fb2-a3d635b9a6ea",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:07.528901+00:00"
+    },
+    {
+      "heartbeatId": "02b11741-e372-40be-bab9-bbbe6b7b2289",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:09.836606+00:00"
+    },
+    {
+      "heartbeatId": "74c03f43-f629-4eea-aa55-30fb079ccacf",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:12.400626+00:00"
+    },
+    {
+      "heartbeatId": "1eda2468-b069-43b5-9378-2ba63bf290cf",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:14.80422+00:00"
+    },
+    {
+      "heartbeatId": "7e54258a-e599-430c-b172-750c4420a346",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:17.065863+00:00"
+    },
+    {
+      "heartbeatId": "28651168-e0c1-400f-bd5a-8a16942faeb7",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:19.721631+00:00"
+    },
+    {
+      "heartbeatId": "805ce55a-54e4-45b1-a7e5-a3d1525ba1b2",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:22.153685+00:00"
+    },
+    {
+      "heartbeatId": "6064ebae-af71-4db3-baf5-57e11ca53de2",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:24.859021+00:00"
+    },
+    {
+      "heartbeatId": "d9c2519d-0752-4462-89f1-cbe289966584",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:28.085796+00:00"
+    },
+    {
+      "heartbeatId": "17f31f2c-4229-4a7b-8af7-2f8a8d12189e",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:30.471258+00:00"
+    },
+    {
+      "heartbeatId": "dee4079b-4c2a-4020-8072-dd195d1b51ab",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:33.075785+00:00"
+    },
+    {
+      "heartbeatId": "4468ec89-7322-4d07-acd0-5933b543bb71",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:35.925717+00:00"
+    },
+    {
+      "heartbeatId": "d958343a-d9ae-4ec4-b1c8-0d907eabf3ca",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:38.333144+00:00"
+    },
+    {
+      "heartbeatId": "c5c10085-4456-4776-b195-9a69e28fe69d",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:40.665863+00:00"
+    },
+    {
+      "heartbeatId": "854935f5-31a7-4b2f-aa88-cccf4287746c",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:43.097979+00:00"
+    },
+    {
+      "heartbeatId": "840beaf6-08b6-4640-b4ae-bc226e455947",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:45.235348+00:00"
+    },
+    {
+      "heartbeatId": "fe78b763-8f24-469b-9f5e-30c1287cb874",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:47.519024+00:00"
+    },
+    {
+      "heartbeatId": "3bab433c-4c93-40cb-92d4-c2eea2107f7a",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:49.946912+00:00"
+    },
+    {
+      "heartbeatId": "75f44a53-1f67-49d4-8fe2-431504617c04",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:52.43619+00:00"
+    },
+    {
+      "heartbeatId": "26493351-f0bc-4f65-8796-13068099b110",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:54.849542+00:00"
+    },
+    {
+      "heartbeatId": "5f832793-bd58-47c3-bffe-8827e34e7eb7",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:57.067942+00:00"
+    },
+    {
+      "heartbeatId": "1d55283e-cb48-47c9-9b09-c7e1cd17231e",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:13:59.843959+00:00"
+    },
+    {
+      "heartbeatId": "7b50e7c3-811e-42d5-b62d-9a98537cb5b0",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:02.031231+00:00"
+    },
+    {
+      "heartbeatId": "b6715cff-933b-4eec-aad8-ea58f7bf83c6",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:04.455159+00:00"
+    },
+    {
+      "heartbeatId": "1e677918-439d-47d7-b194-a52739d28eab",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:06.655955+00:00"
+    },
+    {
+      "heartbeatId": "93b18660-720a-4c29-a9e5-409228703554",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:08.84888+00:00"
+    },
+    {
+      "heartbeatId": "c22b7872-8a0c-47a6-95f7-13b90745c9a4",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:11.554647+00:00"
+    },
+    {
+      "heartbeatId": "5d078458-7b1c-48f7-a78c-babdc1b9acc8",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:14.032241+00:00"
+    },
+    {
+      "heartbeatId": "d02fc771-c9ee-4ca7-999f-9b6f542e9903",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:15.352743+00:00"
+    },
+    {
+      "heartbeatId": "7bd9c5e0-a61f-4191-bd6c-31a2676a5505",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:16.436619+00:00"
+    },
+    {
+      "heartbeatId": "4dcddc85-b590-4014-b740-1d279dcf6560",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:17.837746+00:00"
+    },
+    {
+      "heartbeatId": "647feeb7-c60a-4b93-8975-0069ff000be4",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:18.425334+00:00"
+    },
+    {
+      "heartbeatId": "6d19aa4c-a4ad-4d61-b92c-4956babb9c2b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:19.128515+00:00"
+    },
+    {
+      "heartbeatId": "a8f07fdd-9390-4e25-953d-ebe1d12e877b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:47.535188+00:00"
+    },
+    {
+      "heartbeatId": "2208fc1d-e333-476b-8f37-850e81bdcd8b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:48.315056+00:00"
+    },
+    {
+      "heartbeatId": "ec708c06-e0c8-44c6-873e-e9afbd30ffa1",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:49.116868+00:00"
+    },
+    {
+      "heartbeatId": "b0e2141f-40d1-44ee-8925-e1d8827bc950",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:53.322313+00:00"
+    },
+    {
+      "heartbeatId": "690ed3d5-f683-47e1-853e-0b5ca9faee8b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:56.034129+00:00"
+    },
+    {
+      "heartbeatId": "3438ef9a-84fc-4936-b8aa-99e46f609b37",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:14:58.214859+00:00"
+    },
+    {
+      "heartbeatId": "b6ffecb0-2bf2-43c5-9e22-be6f199b3bb4",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:03.329437+00:00"
+    },
+    {
+      "heartbeatId": "1d208f4a-9482-4bfe-a7ff-fe98ce5d4445",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:06.715744+00:00"
+    },
+    {
+      "heartbeatId": "3fad20bc-cf60-4c33-adf8-2b0685572ab5",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:09.057587+00:00"
+    },
+    {
+      "heartbeatId": "cd249f1f-2c9b-4b79-9cbf-97f9279b7e58",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:13.215892+00:00"
+    },
+    {
+      "heartbeatId": "4e253af3-1e01-4c66-a97b-d992dd1bf995",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:17.267386+00:00"
+    },
+    {
+      "heartbeatId": "bfb38895-320a-4d80-b492-d5613ecb3ba0",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:19.631636+00:00"
+    },
+    {
+      "heartbeatId": "27755363-f341-41a9-b653-fac73922fc99",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:23.540016+00:00"
+    },
+    {
+      "heartbeatId": "86511ea8-8eb2-4281-a584-8d7471b350a0",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:28.4467+00:00"
+    },
+    {
+      "heartbeatId": "f6e381a2-487d-406a-89e0-067f29355dab",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:31.783317+00:00"
+    },
+    {
+      "heartbeatId": "17175e59-51ce-457b-be7c-368c531ae880",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:35.890932+00:00"
+    },
+    {
+      "heartbeatId": "f4dd44b4-e3af-4867-ad7e-b4d48d6d7411",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:38.074829+00:00"
+    },
+    {
+      "heartbeatId": "a93dcbed-a21f-4186-9c15-13f46bd93ea4",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:40.624242+00:00"
+    },
+    {
+      "heartbeatId": "38e00762-e96e-4dca-bc8b-67de12894b0b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:41.861103+00:00"
+    },
+    {
+      "heartbeatId": "93aba78a-2dbd-4b04-bdaf-761e6e6d5fb2",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:42.893112+00:00"
+    },
+    {
+      "heartbeatId": "c9eabce0-55b4-443a-8043-a3f52616f592",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:43.921103+00:00"
+    },
+    {
+      "heartbeatId": "891b34ea-27a0-420a-b6f0-da0fcde28d7e",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:46.339487+00:00"
+    },
+    {
+      "heartbeatId": "6ce863c5-5371-484f-b436-9ab6e88af172",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:48.417946+00:00"
+    },
+    {
+      "heartbeatId": "af07692b-e261-416a-bdcf-29afcf8f129c",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:50.793348+00:00"
+    },
+    {
+      "heartbeatId": "95a90a0e-5baf-438d-b179-75c78f3bf03b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:52.933605+00:00"
+    },
+    {
+      "heartbeatId": "a156e708-2ff7-45c8-b3a5-38e464eaa5eb",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:15:57.490994+00:00"
+    },
+    {
+      "heartbeatId": "65175cb1-beaa-4bc1-b1a4-21ba3e5eea6b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:02.746613+00:00"
+    },
+    {
+      "heartbeatId": "c338979b-df20-4aae-bf72-0e3b93ad17db",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:05.929337+00:00"
+    },
+    {
+      "heartbeatId": "cdfb4e79-8d32-4597-af0a-5cf5be08641b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:10.174621+00:00"
+    },
+    {
+      "heartbeatId": "23c4ac4c-f779-41cc-97d6-4e3f2f9fb393",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:12.90282+00:00"
+    },
+    {
+      "heartbeatId": "7813d0e3-a32d-4a44-bd16-f6de66ddcd67",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:15.245788+00:00"
+    },
+    {
+      "heartbeatId": "5e9b7a87-b3e8-4e0e-9069-f1deb93458a5",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:19.203429+00:00"
+    },
+    {
+      "heartbeatId": "2cdcd38d-a4ee-4b8c-a9af-34452cb5d297",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:25.48713+00:00"
+    },
+    {
+      "heartbeatId": "0b2b5757-2a2e-4cd4-a8fb-dddbbbd6474d",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:27.628557+00:00"
+    },
+    {
+      "heartbeatId": "aaf6f67b-7221-436d-9260-9d6028a8af25",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:31.341275+00:00"
+    },
+    {
+      "heartbeatId": "5322df42-2d5e-4529-883b-c8f225b638a9",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:35.419877+00:00"
+    },
+    {
+      "heartbeatId": "b0556bb7-04a8-4aed-a060-96826172c53a",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:37.961869+00:00"
+    },
+    {
+      "heartbeatId": "5f019059-a5a9-47e3-a6de-868892314725",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:40.939202+00:00"
+    },
+    {
+      "heartbeatId": "81e73061-f6b0-49ef-ae65-061246d74e30",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:43.136928+00:00"
+    },
+    {
+      "heartbeatId": "d089e13e-81cc-4bca-ab14-550e5fc36b38",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:45.439781+00:00"
+    },
+    {
+      "heartbeatId": "9d5c602f-dd3a-4f65-a04f-51bd625b2f73",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:47.94085+00:00"
+    },
+    {
+      "heartbeatId": "6ba481a2-7b6b-4402-93c6-773bb2c99c29",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:50.226545+00:00"
+    },
+    {
+      "heartbeatId": "011b9795-3b39-4c4a-acbf-da3ba6573bd0",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:52.829153+00:00"
+    },
+    {
+      "heartbeatId": "95a82f5d-55ae-42a0-bdd8-bb08c6481b09",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:55.183726+00:00"
+    },
+    {
+      "heartbeatId": "7c09fef1-1873-4da6-b8eb-ba7911234a1d",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:57.402704+00:00"
+    },
+    {
+      "heartbeatId": "992b7caa-9e17-4466-be85-98f942a5ef33",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:16:59.759051+00:00"
+    },
+    {
+      "heartbeatId": "59d676f2-b611-424c-96f4-62f58039b42e",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:17:01.896352+00:00"
+    },
+    {
+      "heartbeatId": "57447d5f-bfd1-4493-a50b-f4bacd035cba",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:17:04.420238+00:00"
+    },
+    {
+      "heartbeatId": "92ca28eb-041f-4825-baaf-2b5998af8158",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:17:06.641016+00:00"
+    },
+    {
+      "heartbeatId": "c95c24b5-a6b6-4fae-ad09-6131ed1abf6f",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:17:09.634677+00:00"
+    },
+    {
+      "heartbeatId": "11b0986a-3c18-4598-b97e-b229a17d443f",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:17:12.042658+00:00"
+    },
+    {
+      "heartbeatId": "639028b6-f99d-45ba-9bcd-594e0f4327ea",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:17:14.38304+00:00"
+    },
+    {
+      "heartbeatId": "daa90ae6-9b64-43e2-b176-5c7d59e25e59",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:17:16.55087+00:00"
+    },
+    {
+      "heartbeatId": "27d15c80-4e0b-46f9-b607-124869d1930b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:17:18.883254+00:00"
+    },
+    {
+      "heartbeatId": "ec7b8918-aa27-4875-b1b3-352a39825f7a",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:17:19.684303+00:00"
+    },
+    {
+      "heartbeatId": "79d4dadd-865d-45f1-a42c-6b37df3cfa96",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:17:20.324794+00:00"
+    },
+    {
+      "heartbeatId": "b275853e-f950-461d-be8f-ef67cde40bda",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:21.110027+00:00"
+    },
+    {
+      "heartbeatId": "cd44d02a-e99c-4980-b556-9e28027bd153",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:21.785125+00:00"
+    },
+    {
+      "heartbeatId": "ce64c909-dff4-4588-b041-022afe6b71dc",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:22.398461+00:00"
+    },
+    {
+      "heartbeatId": "6d613684-9456-4ada-b814-cd7c471e3a10",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:26.890723+00:00"
+    },
+    {
+      "heartbeatId": "4f52c0cd-35df-48a5-9f25-158e03a18924",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:29.451778+00:00"
+    },
+    {
+      "heartbeatId": "1d5c6c3d-c918-462b-af7a-f40fa05f4982",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:33.622765+00:00"
+    },
+    {
+      "heartbeatId": "e9e720da-c2b9-4c74-9602-b5fc72496880",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:37.660136+00:00"
+    },
+    {
+      "heartbeatId": "75c5d23b-1d34-4720-bb4f-02e9282c4c8b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:39.911515+00:00"
+    },
+    {
+      "heartbeatId": "1c7ba64c-0388-48fb-9c91-63146dc50e91",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:43.966671+00:00"
+    },
+    {
+      "heartbeatId": "b76e2705-d748-45ed-b914-ea1cba48471d",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:47.936946+00:00"
+    },
+    {
+      "heartbeatId": "80f15952-910b-43c7-bc2f-8f3cfebfe7e2",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:52.743405+00:00"
+    },
+    {
+      "heartbeatId": "92f5dced-6dc0-45ae-8753-973e4f31a4bb",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:56.52497+00:00"
+    },
+    {
+      "heartbeatId": "a3fb7e4a-67c3-48ab-a504-bbe43928abf1",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:18:59.178493+00:00"
+    },
+    {
+      "heartbeatId": "1cf68274-6d22-4d7d-8c1b-c03a50ad319f",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:01.845337+00:00"
+    },
+    {
+      "heartbeatId": "9181a790-8af7-4781-b5ff-09a6670fa0ce",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:06.837116+00:00"
+    },
+    {
+      "heartbeatId": "540cbe34-f8ed-4db7-8519-f95b45615c41",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:10.346669+00:00"
+    },
+    {
+      "heartbeatId": "ccf90617-e0ca-41e7-91d2-08cb154bfcd3",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:12.660113+00:00"
+    },
+    {
+      "heartbeatId": "5f0a4e09-b32b-4898-8fe8-2bbd0759bc81",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:14.858516+00:00"
+    },
+    {
+      "heartbeatId": "b3f51d57-a7cd-423b-b992-cf03931d82a9",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:19.433569+00:00"
+    },
+    {
+      "heartbeatId": "9ade15dd-1826-498e-be58-c2c6bb11f2e0",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:22.914466+00:00"
+    },
+    {
+      "heartbeatId": "600ce924-ec73-4781-86b7-227c99c5c07f",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:25.542063+00:00"
+    },
+    {
+      "heartbeatId": "2413b755-4b07-4910-a32f-2c79721f3573",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:28.23179+00:00"
+    },
+    {
+      "heartbeatId": "99954c6f-129d-4b6d-9956-f39de10dab77",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:30.700602+00:00"
+    },
+    {
+      "heartbeatId": "8272b2f8-f266-468f-ba11-a9ab8c2d948b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:33.40902+00:00"
+    },
+    {
+      "heartbeatId": "54964a18-75d7-49d6-aca8-4cab3a5ad208",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:35.745236+00:00"
+    },
+    {
+      "heartbeatId": "a8ef991e-4af0-4212-8956-90e0fb27015f",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:37.955064+00:00"
+    },
+    {
+      "heartbeatId": "bf57b48e-e4fc-4e20-b673-b7fd96cb7bb7",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:40.204033+00:00"
+    },
+    {
+      "heartbeatId": "c00e2b4b-b17e-4de7-96aa-a56b7086c106",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:42.895607+00:00"
+    },
+    {
+      "heartbeatId": "89e404ca-6684-474d-a1cb-98cff9dbf99f",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:45.342415+00:00"
+    },
+    {
+      "heartbeatId": "4fce26a9-1259-4520-af29-26b650c14dc7",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:47.916858+00:00"
+    },
+    {
+      "heartbeatId": "4d862245-c85b-47cd-bef1-99b7080a2b24",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:52.309226+00:00"
+    },
+    {
+      "heartbeatId": "5fab63c9-7157-4dda-b153-6c2d88c76c26",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:55.937539+00:00"
+    },
+    {
+      "heartbeatId": "73e96099-06b3-4e10-8865-bb545f04f169",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:19:58.530159+00:00"
+    },
+    {
+      "heartbeatId": "2921d78e-078f-4f75-98bd-3e8a44d6501f",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:02.778278+00:00"
+    },
+    {
+      "heartbeatId": "9346ddd5-58f2-42cb-83cc-8c56bf259816",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:05.467173+00:00"
+    },
+    {
+      "heartbeatId": "131b3ee5-3bdc-4930-aa1a-3ac40e1f5dcd",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:06.510979+00:00"
+    },
+    {
+      "heartbeatId": "6ba61f18-b985-4a2c-ae7b-f74862a67470",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:07.700162+00:00"
+    },
+    {
+      "heartbeatId": "53770d39-194a-4ddc-8472-5c6c4f613db3",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:11.570498+00:00"
+    },
+    {
+      "heartbeatId": "f4e36d0b-cad0-4d8e-81a7-74f76fb0129c",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:16.184817+00:00"
+    },
+    {
+      "heartbeatId": "ab4e5a72-1bfa-4f85-9be8-09e2045e1294",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:18.563163+00:00"
+    },
+    {
+      "heartbeatId": "0c51c1c0-b796-4d1e-8a96-01b3cfa494c3",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:20.91642+00:00"
+    },
+    {
+      "heartbeatId": "4ada43c9-11b4-4cb8-a983-a347c84de0b1",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:23.115676+00:00"
+    },
+    {
+      "heartbeatId": "cc905d03-51ca-44fe-b448-c86554bbb75e",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:25.608481+00:00"
+    },
+    {
+      "heartbeatId": "0b9b6e1b-2e55-434b-b678-679f755348e5",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:27.905489+00:00"
+    },
+    {
+      "heartbeatId": "d8f543b4-26a6-4879-8b74-9d5df043ca92",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:30.663815+00:00"
+    },
+    {
+      "heartbeatId": "81733c7e-bceb-4ac8-af84-a3467a0fc4d8",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:32.961879+00:00"
+    },
+    {
+      "heartbeatId": "69ca70aa-b330-463b-aa01-dc5b249ca118",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:35.431018+00:00"
+    },
+    {
+      "heartbeatId": "2d9e3810-d7a4-498a-81fc-9a893a9850a2",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:38.820224+00:00"
+    },
+    {
+      "heartbeatId": "40650905-2cbd-4e05-9a1e-519547e20ef7",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:41.510433+00:00"
+    },
+    {
+      "heartbeatId": "cbdf53df-c3cf-4050-8492-381504e95f2e",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:43.666367+00:00"
+    },
+    {
+      "heartbeatId": "7d5541d4-0054-4033-8335-26cf772ca1d1",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:45.918534+00:00"
+    },
+    {
+      "heartbeatId": "5d71f114-07d6-4056-a6f4-0a5efad7971a",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:48.504738+00:00"
+    },
+    {
+      "heartbeatId": "678883e2-6c90-4d9c-8037-f9c8b2dfcea5",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:50.630879+00:00"
+    },
+    {
+      "heartbeatId": "6c8717ab-6812-4784-896d-a5e863809cc0",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:53.435682+00:00"
+    },
+    {
+      "heartbeatId": "ba4f2ddf-9de2-471c-b5dc-064ac6fc2adb",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:55.675517+00:00"
+    },
+    {
+      "heartbeatId": "89fa7f57-faa6-4aa4-9792-dea6247ceef5",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:20:58.012362+00:00"
+    },
+    {
+      "heartbeatId": "e633c7e3-a712-4e5e-afb3-dd23d22f4045",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:21:00.468431+00:00"
+    },
+    {
+      "heartbeatId": "0920b892-8f02-49a3-8a05-4031e28152b0",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:21:02.776238+00:00"
+    },
+    {
+      "heartbeatId": "326db347-e1e8-46a6-af6d-db6edfdad874",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:21:03.496591+00:00"
+    },
+    {
+      "heartbeatId": "18e50044-b6da-43b7-afeb-7b49c0b20556",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:21:04.141544+00:00"
+    },
+    {
+      "heartbeatId": "5c5e35ce-12bd-4245-b41f-9691141c8b62",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:22:49.497263+00:00"
+    },
+    {
+      "heartbeatId": "cb62c2d1-96d0-4571-87f8-e81dc2c3ae65",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:22:50.155813+00:00"
+    },
+    {
+      "heartbeatId": "ffd8a527-736d-4cab-8022-c925c110192f",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:22:50.918352+00:00"
+    },
+    {
+      "heartbeatId": "ab8ae64c-c31d-4ff7-8c91-bd3aa1ca255b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:22:54.813373+00:00"
+    },
+    {
+      "heartbeatId": "36cdb85b-c00d-47c5-931c-e82e0fdd0900",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:22:57.881188+00:00"
+    },
+    {
+      "heartbeatId": "ae59cfa7-952a-4775-85ba-45ef3b6bb993",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:02.110795+00:00"
+    },
+    {
+      "heartbeatId": "d9bd3399-c76b-406c-8c3a-f78f33770569",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:05.505174+00:00"
+    },
+    {
+      "heartbeatId": "9ef6885d-b9a9-40ca-b8b2-0b3663b3cc55",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:10.192844+00:00"
+    },
+    {
+      "heartbeatId": "ecf0f05b-79ef-4652-a59d-9943204c2291",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:13.856631+00:00"
+    },
+    {
+      "heartbeatId": "166e088f-27da-4d06-96d4-a1a834c9a64e",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:16.479748+00:00"
+    },
+    {
+      "heartbeatId": "6262cb60-d100-4a11-936e-d1c50e65779e",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:20.404219+00:00"
+    },
+    {
+      "heartbeatId": "4aec541c-c92f-4f43-84ec-8f69366ea953",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:24.563775+00:00"
+    },
+    {
+      "heartbeatId": "ca61d0f0-ed39-45f0-8c5c-a58385d43b35",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:29.32048+00:00"
+    },
+    {
+      "heartbeatId": "d808d081-c178-41db-bd67-35bceb1e547b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:32.528421+00:00"
+    },
+    {
+      "heartbeatId": "97237886-445e-4583-a5ce-8d46152d5d0b",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:35.010802+00:00"
+    },
+    {
+      "heartbeatId": "824ca4a3-8f8d-4e96-bc43-95a4d847ac1d",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:37.243166+00:00"
+    },
+    {
+      "heartbeatId": "e05c5cd8-7c19-48c2-8123-0a9d2e94894d",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:40.12827+00:00"
+    },
+    {
+      "heartbeatId": "ee288895-d2d9-4d14-91ec-148dff6a6f40",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:44.375278+00:00"
+    },
+    {
+      "heartbeatId": "c4276084-da99-460b-9835-5c9c4cdd89b0",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:49.144576+00:00"
+    },
+    {
+      "heartbeatId": "7fe357be-f654-4885-a316-0d2dade89641",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:53.43252+00:00"
+    },
+    {
+      "heartbeatId": "12425aa6-2fe6-4923-9840-9665b660c7e4",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:57.161672+00:00"
+    },
+    {
+      "heartbeatId": "2460de63-8ef4-49ca-9f04-87085b6925ac",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:23:59.8969+00:00"
+    },
+    {
+      "heartbeatId": "328f85bc-14a4-45d2-91e6-5b6529c00b7a",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:03.397912+00:00"
+    },
+    {
+      "heartbeatId": "6ed7b85e-e65a-4e65-9fb9-9c2f65f371f5",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:07.118119+00:00"
+    },
+    {
+      "heartbeatId": "9a7cf048-ec9a-4205-a57a-dc083d5e5b5a",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:11.792106+00:00"
+    },
+    {
+      "heartbeatId": "5f9985c6-0b02-4fde-9f9a-0b62aeb2e659",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:15.770778+00:00"
+    },
+    {
+      "heartbeatId": "f7245dab-e635-4e09-9ef6-292a329a8bd4",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:19.186052+00:00"
+    },
+    {
+      "heartbeatId": "5601a493-8a09-4926-8bbc-df81a41fdbf9",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:21.64399+00:00"
+    },
+    {
+      "heartbeatId": "ed9d8d8b-97d8-4e9b-95b4-efc465a33549",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:24.341782+00:00"
+    },
+    {
+      "heartbeatId": "a37d6e5b-b045-4d6b-b769-936ffd6eabcd",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:27.023085+00:00"
+    },
+    {
+      "heartbeatId": "1c4cf3d9-5385-4d9c-b5bb-3409d6ef23bb",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:29.385767+00:00"
+    },
+    {
+      "heartbeatId": "e97350cb-467e-4950-b6c6-da03aa42817a",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:29.898612+00:00"
+    },
+    {
+      "heartbeatId": "bf934a4d-7d1e-404a-a855-b95ac10f2a84",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:31.210014+00:00"
+    },
+    {
+      "heartbeatId": "4827c42c-9174-4170-8259-8771e27875b8",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:32.282848+00:00"
+    },
+    {
+      "heartbeatId": "b7e5462f-afc4-44a2-ad09-67d3d3f0179f",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:33.341899+00:00"
+    },
+    {
+      "heartbeatId": "8fcf839b-7b9a-4057-a70a-a2fbffebb39d",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:36.053296+00:00"
+    },
+    {
+      "heartbeatId": "f0d69ed8-f296-4471-8497-ec7e470d6612",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:38.439523+00:00"
+    },
+    {
+      "heartbeatId": "a31db544-ebc4-46f8-9e1d-dac50187dda5",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:40.968847+00:00"
+    },
+    {
+      "heartbeatId": "1513cce3-6dab-481f-b162-c1b4511e5bf9",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:43.417376+00:00"
+    },
+    {
+      "heartbeatId": "28ae8e6c-20ea-49c3-802d-39e38c167121",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:45.729063+00:00"
+    },
+    {
+      "heartbeatId": "b57cb603-669c-45f2-a8b9-a256014020b4",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:48.113402+00:00"
+    },
+    {
+      "heartbeatId": "6e1c9a7a-16e4-4c55-87b6-38439440f336",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:50.387816+00:00"
+    },
+    {
+      "heartbeatId": "fcbbeebd-5ac8-47d2-a4e7-baac0010a6c6",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:52.988249+00:00"
+    },
+    {
+      "heartbeatId": "60d9a93b-f4e4-40e8-a840-2abcece5da00",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:55.25349+00:00"
+    },
+    {
+      "heartbeatId": "e4db38a9-772a-425b-b20a-4c06d64834ba",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:57.527195+00:00"
+    },
+    {
+      "heartbeatId": "30ba28bd-8dc4-4271-b34f-80d49ebf97d4",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:24:59.999016+00:00"
+    },
+    {
+      "heartbeatId": "44f0a16e-41dd-4fa1-9708-0fd005401972",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:02.349595+00:00"
+    },
+    {
+      "heartbeatId": "c9206b05-b8f7-46b5-ae21-0c8d7c9bb307",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:04.664701+00:00"
+    },
+    {
+      "heartbeatId": "bf420233-7879-4209-b0a6-569516fa9db1",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:06.834199+00:00"
+    },
+    {
+      "heartbeatId": "c2121183-187d-4ee4-84f9-8416d6c62792",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:09.166369+00:00"
+    },
+    {
+      "heartbeatId": "51bf38ef-5f2a-4fc5-9c8d-53ab4b1e75d3",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:11.570757+00:00"
+    },
+    {
+      "heartbeatId": "b0795035-9bc3-427c-90df-b3255921a73e",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:13.83331+00:00"
+    },
+    {
+      "heartbeatId": "fa978285-bb4a-4a9e-a752-2131d17bf85c",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:15.995389+00:00"
+    },
+    {
+      "heartbeatId": "983387ce-ef8a-417d-b4c9-69db8cb0027c",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:18.371843+00:00"
+    },
+    {
+      "heartbeatId": "62b72610-6aab-4f9d-bcee-690185e601c2",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:20.690515+00:00"
+    },
+    {
+      "heartbeatId": "fdfd763a-c958-4bce-93d7-c5696be6431d",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:22.822929+00:00"
+    },
+    {
+      "heartbeatId": "e3d4baf5-2803-4190-94c6-a6335a106b55",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:25.045095+00:00"
+    },
+    {
+      "heartbeatId": "acfeb323-5c62-4602-ba82-1fcb0bf29aed",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:25.693657+00:00"
+    },
+    {
+      "heartbeatId": "384fe16b-adcc-4589-a909-1297db5ec9ea",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:26.452774+00:00"
+    },
+    {
+      "heartbeatId": "c434ac21-06b3-4448-8f4c-78cf3b5fd600",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:25:27.106017+00:00"
+    },
+    {
+      "heartbeatId": "7fd23582-ad02-47f2-b1c1-7840203e3743",
+      "processId": "017dabf3-8fc2-495a-9252-c11e72844311",
+      "heartbeatAt": "2026-09-13T17:45:42.220243+00:00"
+    }
+  ],
+  "executionEvidence": [],
+  "provenance": {
+    "sourceRevision": "f6f5d15677dc4cb0a11cdc12f0738b51492f2f18",
+    "packageRevision": "issue14-rehearsal",
+    "configurationRevision": "isolated-probare-issue3",
+    "contractRevision": "AgentSessionAdapter/v1"
+  },
+  "redaction": {
+    "occurred": true,
+    "policyVersion": "controlled-canary-v1",
+    "marker": "[REDACTED:CONTROLLED-CANARY]"
+  },
+  "lastPosition": 1113,
+  "control": {
+    "runVersion": 1113,
+    "targetAttemptId": "1a0f0f4b-d090-42f8-8844-e341eedb0c27",
+    "headSha": null,
+    "leaseEpoch": 1,
+    "holder": {
+      "kind": "human",
+      "provider": "github",
+      "subjectId": "11044764"
+    },
+    "claimedAt": "2026-09-13T17:11:30.201101+00:00",
+    "transferRequest": null
+  },
+  "authorization": {
+    "code": "observed",
+    "access": {
+      "actor": {
+        "kind": "human",
+        "provider": "github",
+        "subjectId": "11044764"
+      },
+      "canRead": true,
+      "canContribute": true,
+      "failureCode": null,
+      "login": "paradox123",
+      "isHuman": true
+    },
+    "current": {
+      "runVersion": 1113,
+      "targetAttemptId": "1a0f0f4b-d090-42f8-8844-e341eedb0c27",
+      "headSha": null,
+      "leaseEpoch": 1,
+      "holder": {
+        "kind": "human",
+        "provider": "github",
+        "subjectId": "11044764"
+      },
+      "claimedAt": "2026-09-13T17:11:30.201101+00:00",
+      "transferRequest": null
+    },
+    "continuation": null,
+    "historical": false,
+    "accepted": true,
+    "canClaim": false,
+    "canRequestTransfer": false,
+    "canForceTakeover": false,
+    "canDecideTransfer": false,
+    "canRelease": true
+  },
+  "repositoryExecution": null,
+  "publication": {
+    "assignmentHash": "462bc277a71cbb7c66929240626e7160de3fe7e5fbb257129726db31d16bcf9d",
+    "state": "awaiting-agent",
+    "blocker": "agent-completion-required",
+    "report": {
+      "base": {
+        "local": "c32e056f3d242008d15f6e0c7b5333c7572ed186",
+        "remote": "c32e056f3d242008d15f6e0c7b5333c7572ed186",
+        "expected": "c32e056f3d242008d15f6e0c7b5333c7572ed186",
+        "provider": "c32e056f3d242008d15f6e0c7b5333c7572ed186"
+      },
+      "plan": [
+        {
+          "id": "AC1-AC5",
+          "kind": "command",
+          "phases": [
+            {
+              "name": "read-back",
+              "probe": {
+                "argv": [
+                  "/Users/dh/.local/state/wpcp-issue14-20260913/python/bin/python",
+                  "/Users/dh/.local/state/wpcp-issue14-20260913/verify.py",
+                  "--probe"
+                ],
+                "expected": "CRM test surface available"
+              },
+              "execute": {
+                "argv": [
+                  "/Users/dh/.local/state/wpcp-issue14-20260913/python/bin/python",
+                  "/Users/dh/.local/state/wpcp-issue14-20260913/verify.py"
+                ],
+                "expected": "CRM issue 3: filtering, replay, semantic duplicates, distinct roles and restart passed"
+              }
+            }
+          ],
+          "surface": "HTTP InboxIngestion acceptance suite with isolated SQLite and synthetic MIME",
+          "description": "Issue 3 filtering, idempotency, semantic duplicate separation and persistent observable inbox",
+          "expectedReadBack": "CRM issue 3: filtering, replay, semantic duplicates, distinct roles and restart passed"
+        }
+      ],
+      "state": "ready",
+      "probes": [
+        {
+          "argv": [
+            "/Users/dh/.local/state/wpcp-issue14-20260913/python/bin/python",
+            "/Users/dh/.local/state/wpcp-issue14-20260913/verify.py",
+            "--probe"
+          ],
+          "expected": "CRM test surface available",
+          "observed": "CRM test surface available",
+          "prerequisite": "contract"
+        },
+        {
+          "argv": [
+            "/Users/dh/.local/state/wpcp-issue14-20260913/python/bin/python",
+            "/Users/dh/.local/state/wpcp-issue14-20260913/verify.py",
+            "--probe"
+          ],
+          "expected": "CRM test surface available",
+          "observed": "CRM test surface available",
+          "prerequisite": "tools"
+        },
+        {
+          "argv": [
+            "/Users/dh/.local/state/wpcp-issue14-20260913/python/bin/python",
+            "/Users/dh/.local/state/wpcp-issue14-20260913/verify.py",
+            "--probe"
+          ],
+          "expected": "CRM test surface available",
+          "observed": "CRM test surface available",
+          "prerequisite": "dependencies"
+        },
+        {
+          "argv": [
+            "/Users/dh/.local/state/wpcp-issue14-20260913/python/bin/python",
+            "/Users/dh/.local/state/wpcp-issue14-20260913/verify.py",
+            "--probe"
+          ],
+          "expected": "CRM test surface available",
+          "observed": "CRM test surface available",
+          "prerequisite": "access"
+        },
+        {
+          "argv": [
+            "/Users/dh/.local/state/wpcp-issue14-20260913/python/bin/python",
+            "/Users/dh/.local/state/wpcp-issue14-20260913/verify.py",
+            "--probe"
+          ],
+          "expected": "CRM test surface available",
+          "observed": "CRM test surface available",
+          "prerequisite": "sandbox"
+        },
+        {
+          "argv": [
+            "/Users/dh/.local/state/wpcp-issue14-20260913/python/bin/python",
+            "/Users/dh/.local/state/wpcp-issue14-20260913/verify.py",
+            "--probe"
+          ],
+          "phase": "read-back",
+          "expected": "CRM test surface available",
+          "observed": "CRM test surface available",
+          "criterion": "AC1-AC5"
+        }
+      ],
+      "adapter": {
+        "localPath": "/Users/dh/.local/state/wpcp-issue14-20260913/adapter/repository",
+        "activeTurn": false,
+        "runtimeReady": true,
+        "sandboxReady": true,
+        "contractVersion": "AgentSessionAdapter/v1"
+      }
+    },
+    "intent": null,
+    "dispatched": false,
+    "qualification": null,
+    "captureHeadSha": null,
+    "capture": null,
+    "headQualification": null
+  }
+}

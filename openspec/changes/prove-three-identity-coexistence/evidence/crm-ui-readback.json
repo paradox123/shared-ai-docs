@@ -1,0 +1,92 @@
+{
+  "caseCount": 2,
+  "ledgerCount": 5,
+  "allOriginalMimeByteHashesMatchFixtures": true,
+  "caseEventCounts": [
+    1,
+    1
+  ],
+  "inbox": [
+    {
+      "id": "985f88e8-dfa8-4180-b9a8-c5f499df7740",
+      "messageId": "<architect@gulp.example>",
+      "subject": "Project 4711: Senior .NET Architect",
+      "receivedAtUtc": "2026-09-13T13:00:00+00:00"
+    },
+    {
+      "id": "d8854723-3ea8-438e-bfb3-108f22398c27",
+      "messageId": "<developer@gulp.example>",
+      "subject": "Project 4711: Senior .NET Developer",
+      "receivedAtUtc": "2026-09-13T13:00:00+00:00"
+    }
+  ],
+  "ledger": [
+    {
+      "id": "feea7d2c-a21c-4cd2-83db-7f7420e671ee",
+      "messageId": "<developer@gulp.example>",
+      "subject": "Project 4711: Senior .NET Developer",
+      "receivedAtUtc": "2026-09-13T13:00:00+00:00",
+      "capturedAtUtc": "2026-09-13T17:36:12.558009+00:00",
+      "disposition": "accepted",
+      "reason": "Als eigenst\u00e4ndige Projektchance erfasst.",
+      "akquisevorgangId": "d8854723-3ea8-438e-bfb3-108f22398c27",
+      "sourceSha256": "c94b14c3712f487ecdbedd792f790456967787d6b93d09fb6a454a1ddc8fdc1d"
+    },
+    {
+      "id": "1433276c-e792-4106-8eed-dcbb2fe7b7a8",
+      "messageId": "<architect-forward@gulp.example>",
+      "subject": "Fwd: Project 4711: Senior .NET Architect",
+      "receivedAtUtc": "2026-09-13T13:00:00+00:00",
+      "capturedAtUtc": "2026-09-13T17:36:12.557891+00:00",
+      "disposition": "likely-duplicate",
+      "reason": "Betreff einschlie\u00dflich Rolle und Projekttext stimmen nach Normalisierung \u00fcberein; Quelle separat aufbewahrt.",
+      "akquisevorgangId": "985f88e8-dfa8-4180-b9a8-c5f499df7740",
+      "sourceSha256": "8ecaf8a788ac7e80e9698a1d79f524167beb02b2aff35371cfa9f6709fc4247c"
+    },
+    {
+      "id": "7a182eac-3601-4665-8562-b5f004d0332e",
+      "messageId": "<notice@gulp.example>",
+      "subject": "Platform notification: profile updated",
+      "receivedAtUtc": "2026-09-13T13:00:00+00:00",
+      "capturedAtUtc": "2026-09-13T17:36:12.557667+00:00",
+      "disposition": "excluded",
+      "reason": "Allgemeine Rundmail ohne erkennbares einzelnes Projekt.",
+      "akquisevorgangId": null,
+      "sourceSha256": "293c33670af3523a864061fe47686b46d328ba6e5e885eed2ffb8b244af89ff4"
+    },
+    {
+      "id": "60883b3b-49f9-4a10-b318-25c3838915bf",
+      "messageId": "<architect@gulp.example>",
+      "subject": "Project 4711: Senior .NET Architect",
+      "receivedAtUtc": "2026-09-13T13:00:00+00:00",
+      "capturedAtUtc": "2026-09-13T17:36:12.531366+00:00",
+      "disposition": "accepted",
+      "reason": "Als eigenst\u00e4ndige Projektchance erfasst.",
+      "akquisevorgangId": "985f88e8-dfa8-4180-b9a8-c5f499df7740",
+      "sourceSha256": "ac3e160a1bb017299b5330b4ebe330285c49159b29f020dcbddc0b919bf98a5d"
+    },
+    {
+      "id": "034896be-89f0-4722-b779-ecc2fba6a167",
+      "messageId": "<news@gulp.example>",
+      "subject": "GULP Newsletter: Neuigkeiten der Plattform",
+      "receivedAtUtc": "2026-09-13T13:00:00+00:00",
+      "capturedAtUtc": "2026-09-13T17:36:12.49939+00:00",
+      "disposition": "excluded",
+      "reason": "Allgemeine Rundmail ohne erkennbares einzelnes Projekt.",
+      "akquisevorgangId": null,
+      "sourceSha256": "9785d4407d2774f1edfc466c0a47627e8a1f03c72b04827fce5d10815ae7103d"
+    }
+  ],
+  "restart": {
+    "retainedCaseIds": true,
+    "retainedLedgerIds": true,
+    "refreshResult": {
+      "read": 5,
+      "created": 0,
+      "alreadyKnown": 5,
+      "excluded": 0,
+      "likelyDuplicates": 0
+    }
+  },
+  "source": "Actual loopback application with synthetic EMLX cache; no real mailbox"
+}

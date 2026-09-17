@@ -1,5 +1,7 @@
 # Bestätigte Ticketaufteilung
 
+Ergänzung vom 14.09.2026: Die [vier freigegebenen UX-Tickets zur gemeinsamen Run-Ansicht](ux-ticket-plan.md) sind separat veröffentlicht und werden nach Ticket 03 vor Ticket 04 priorisiert. Die unten stehenden ursprünglichen Tickets und ihre Blocking-Kanten bleiben unverändert.
+
 Der Nutzer hat die Aufteilung mit 16 Tickets bestätigt. Die Tickets sind einzeln mit ihren Akzeptanzkriterien und Blockern im lokalen Tracker veröffentlicht. Ticket 01 ist lokal abgenommen und `resolved`; Ticket 02 ist lokal abgenommen, archiviert und `resolved` ([Nachweis](../archive/2026-09-14-add-agent-framework-background-start/issue-02-evidence.md)). Die übrigen Tickets tragen den Status `ready-for-agent` unter ihren jeweiligen Blockern. Die fachlichen Entscheidungen bleiben im bestehenden Change; Parent-Issue und bestehende Pilot-Tickets wurden nicht geändert.
 
 ## Drei kleine benutzbare Einstiegsschritte

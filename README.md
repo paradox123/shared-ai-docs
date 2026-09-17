@@ -4,6 +4,7 @@ This repository contains AI-related documentation, prompts, skills, hooks, and w
 
 ## Contents
 
+- **Agent Control Plane**: [Use and compose existing platforms](docs/adr/0015-compose-existing-agent-platforms-for-use.md), [vision and pilot reference](docs/agent-control-plane/product-vision.md), and [platform comparison](docs/research/agent-control-plane-platform-comparison-2026-09-15.md)
 - **Repository maintenance**: [Renovate in each owning GitHub repository](docs/renovate-repository-standard.md) and [ADR 0011](docs/adr/0011-renovate-in-each-owning-github-repository.md)
 - **contextual-llm-wiki/**: [Context-scoped Markdown wiki with Atomicstrata and QMD](contextual-llm-wiki/README.md), [daily Mac operations](contextual-llm-wiki/OPERATIONS.md), and [agent-context adoption catalog](docs/rag/llm-wiki-context-adoption-catalog.md)
 - **n8n/**: Workflow automation engine setup

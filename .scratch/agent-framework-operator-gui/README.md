@@ -6,6 +6,7 @@ Die ersten drei Tickets liefern nacheinander Einreichung, ersten Hintergrundstar
 
 ## Einstieg
 
+- [Freigegebene UX-Ergänzung: vier Tickets zur gemeinsamen Run-Ansicht](../agent-framework-operator-gui-ux/README.md) — empfohlen nach 03 und vor 04; eigene UX-Kennungen und Blocker.
 - [Maßgebliche Anforderungen und Quellen](spec.md)
 - [Unverbindlicher Backstage-/React-Flow-Prototyp und Einstieg für Implementierungs-Sessions](prototype.md)
 - [Bestätigte Aufteilung mit Anforderungsabdeckung](../../openspec/changes/add-agent-framework-operator-gui/ticket-plan.md)

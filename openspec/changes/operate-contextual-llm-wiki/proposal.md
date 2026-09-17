@@ -2,9 +2,13 @@
 
 Das akzeptierte Wiki kompiliert nur auf ausdrücklichen Aufruf. Die tägliche QMD-Wartung aktualisiert Suchdaten, aber keine Wiki-Aussagen. Der Mac braucht einen bestehenden, nachvollziehbaren Auslöser und einen Katalog der künftigen Agent-Einstiege.
 
+Ergaenzung vom 17.09.2026: Der inzwischen aktivierte gemeinsame Erstimport kann mehrere Stunden laufen und wurde noch nicht vollstaendig abgeschlossen. Die Kopplung an seinen Erfolg blockiert auch die Fachquellen-Indexpflege. Das bestaetigte Ziel trennt die Aktualitaet der Originalquellensuche von der Wiki-Aufbereitung und priorisiert laufende Aenderungen vor dem Erstimport-Rueckstand; siehe [ADR 0016](../../../docs/adr/0016-decouple-source-index-freshness-from-wiki-compilation.md).
+
+Die umsetzbare [Tracker-Spec zur wiederaufnehmbaren Wiki-Pflege](../../../.scratch/resumable-wiki-maintenance/spec.md) ist mit `Status: ready-for-agent` veroeffentlicht. Sie konkretisiert dieses Betriebs-Delta mit User Stories, Umsetzungsannahmen und Abnahme ueber Wartungshelper und WikiQuery; die Ticketzerlegung steht noch aus.
+
 ## What Changes
 
-- Bestehende lokale Automation `update-qmd-index-daily` um Wiki-Pflege vor QMD update/embed erweitern; Zeitplan und Modell beibehalten.
+- Bestehende lokale Automation `update-qmd-index-daily` fuer unabhaengige Fachquellen-Indexpflege und schrittweise Wiki-Pflege weiterentwickeln; Zeitplan und Modell beibehalten. Neue und geaenderte Quellen erhalten Vorrang und sollen spaetestens am naechsten Tag im Wiki verarbeitet sein; der Erstimport darf mehrere Tage dauern.
 - Bestehende allgemeine/private Wissensbestände in den mit Ticket 01 bereitgestellten gemeinsamen Wiki-Vertrag migrieren.
 - Den mit Ticket 03 akzeptierten Vertrag für begrenzte Pflegefehler im produktiven Betrieb aktivieren; die Implementierung selbst ist separat abgeschlossen.
 - Einen ausführbaren Wartungshelfer mit expliziten Kontextkonfigurationen, serieller Ausführung, überprüften Ergebnissen und dauerhaften Laufartefakten bereitstellen.

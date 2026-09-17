@@ -1071,6 +1071,26 @@ def parse_max_total_chars(raw: str) -> int:
     return value
 
 
+def parse_nonnegative_int(raw: str) -> int:
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("must be an integer") from exc
+    if value < 0:
+        raise argparse.ArgumentTypeError("must be non-negative")
+    return value
+
+
+def parse_positive_int(raw: str) -> int:
+    try:
+        value = int(raw)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("must be an integer") from exc
+    if value < 1:
+        raise argparse.ArgumentTypeError("must be positive")
+    return value
+
+
 def parse_clone_suffix_starts(raw_values: List[str]) -> Dict[str, int]:
     starts: Dict[str, int] = {}
     for raw in raw_values:
@@ -1288,6 +1308,22 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_MAX_TOTAL_CHARS,
     )
     parser.add_argument(
+        "--session-offset",
+        type=parse_nonnegative_int,
+        help=(
+            "Zero-based offset into manifest-order sessions after path "
+            "selection; requires --session-limit and summary mode."
+        ),
+    )
+    parser.add_argument(
+        "--session-limit",
+        type=parse_positive_int,
+        help=(
+            "Maximum manifest-order sessions to inspect from "
+            "--session-offset; requires --session-offset and summary mode."
+        ),
+    )
+    parser.add_argument(
         "--list-clone-boundaries",
         action="store_true",
         help=(
@@ -1346,9 +1382,10 @@ def output_document(
     selected_session_count: int,
     filtered_out_session_count: int,
     skipped_unresolved_count: int,
+    selection_window: Optional[dict] = None,
 ) -> dict:
     omitted = len(projections) - len(emitted)
-    return {
+    document = {
         "schema_version": 1,
         "counts": {
             "manifest_sessions": manifest_session_count,
@@ -1365,6 +1402,9 @@ def output_document(
         },
         "sessions": emitted,
     }
+    if selection_window is not None:
+        document["selection_window"] = selection_window
+    return document
 
 
 def fit_output(
@@ -1375,6 +1415,7 @@ def fit_output(
     skipped_unresolved_count: int,
     max_total_chars: int,
     pretty: bool,
+    selection_window: Optional[dict] = None,
 ) -> str:
     emitted: List[dict] = []
     for projection in projections:
@@ -1386,6 +1427,7 @@ def fit_output(
             selected_session_count,
             filtered_out_session_count,
             skipped_unresolved_count,
+            selection_window,
         )
         if len(serialize(document, pretty)) <= max_total_chars:
             emitted = candidate
@@ -1397,6 +1439,7 @@ def fit_output(
         selected_session_count,
         filtered_out_session_count,
         skipped_unresolved_count,
+        selection_window,
     )
     rendered = serialize(document, pretty)
     while len(rendered) > max_total_chars and emitted:
@@ -1408,6 +1451,7 @@ def fit_output(
             selected_session_count,
             filtered_out_session_count,
             skipped_unresolved_count,
+            selection_window,
         )
         rendered = serialize(document, pretty)
     if len(rendered) > max_total_chars:
@@ -1636,6 +1680,24 @@ def run(args: argparse.Namespace) -> str:
     has_path_selectors = bool(cwd_roots or worktree_tails)
     clone_suffix_starts = parse_clone_suffix_starts(args.clone_suffix_start)
     tool_call_targets = parse_tool_call_targets(args.tool_call_projection)
+    pagination_requested = (
+        args.session_offset is not None or args.session_limit is not None
+    )
+    if (args.session_offset is None) != (args.session_limit is None):
+        raise EvidenceError(
+            "--session-offset and --session-limit must be used together"
+        )
+    if pagination_requested and (
+        requested_ids
+        or args.structural_projection
+        or tool_call_targets
+        or args.list_clone_boundaries
+        or clone_suffix_starts
+    ):
+        raise EvidenceError(
+            "session pagination is available only in summary mode without "
+            "exact --session-id or projection/clone modes"
+        )
     if tool_call_targets and not requested_ids:
         raise EvidenceError(
             "--tool-call-projection requires exact --session-id filters"
@@ -1763,6 +1825,33 @@ def run(args: argparse.Namespace) -> str:
             index
             for index, session in enumerate(sessions)
             if matches_path_selectors(session, cwd_roots, worktree_tails)
+        }
+
+    selection_window = None
+    if pagination_requested:
+        eligible_indexes = sorted(
+            selected_indexes
+            if selected_indexes is not None
+            else range(len(sessions))
+        )
+        offset = args.session_offset
+        limit = args.session_limit
+        if offset > len(eligible_indexes):
+            raise EvidenceError(
+                f"session offset {offset} exceeds {len(eligible_indexes)} "
+                "eligible manifest sessions"
+            )
+        page_indexes = eligible_indexes[offset : offset + limit]
+        selected_indexes = set(page_indexes)
+        next_offset = offset + len(page_indexes)
+        has_more = next_offset < len(eligible_indexes)
+        selection_window = {
+            "offset": offset,
+            "limit": limit,
+            "eligible_sessions": len(eligible_indexes),
+            "page_sessions": len(page_indexes),
+            "has_more": has_more,
+            "next_offset": next_offset if has_more else None,
         }
 
     if tool_call_targets:
@@ -1927,6 +2016,7 @@ def run(args: argparse.Namespace) -> str:
         skipped_unresolved_count,
         args.max_total_chars,
         args.pretty,
+        selection_window,
     )
 
 

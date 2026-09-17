@@ -4,6 +4,8 @@ Status: ready-for-agent
 
 Die Tickets dieses Features implementieren den bestätigten OpenSpec-Change `add-agent-framework-operator-gui`. Dieser Einstieg verweist auf die maßgeblichen Anforderungen und führt keine abweichende Kopie davon ein.
 
+**Richtungsentscheidung 2026-09-15:** [Vorhandene Plattformen nutzen und zusammensetzen](../../docs/adr/0015-compose-existing-agent-platforms-for-use.md). Die folgenden Anforderungen und Tickets dienen als Referenz für die Plattformauswahl; sie sind keine aktuelle Roadmap zum weiteren Eigenbau. Das Nutzungsziel steht in der [Produktvision](../../docs/agent-control-plane/product-vision.md).
+
 ## Verbindliche Quellen
 
 - [Abgenommene GitHub-Aufnahme](../../openspec/specs/agent-framework-operator-gui/spec.md) — Ticket 01.

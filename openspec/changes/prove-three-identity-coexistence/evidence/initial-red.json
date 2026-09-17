@@ -1,0 +1,15 @@
+{
+  "repository": "paradox123/probare-crm",
+  "branch": "codex/probare-issue-3-issue14-test",
+  "runId": "0f9245e0-3d4f-4c04-9fba-342ccf4b95d1",
+  "sessionId": "01a09bc0-1d97-7673-9b46-f1c5ccc803dc",
+  "test": "ProbareCrm.Api.Tests.IngestionDecisionTests.A_general_newsletter_creates_no_actionable_Akquisevorgang",
+  "command": "dotnet test ProbareCrm.sln --no-restore --filter FullyQualifiedName~IngestionDecisionTests -v minimal",
+  "executor": "trusted operator process outside the native agent sandbox",
+  "observed": "Assert.Empty() Failure: Collection was not empty; one case for <newsletter-1@gulp.example> with the newsletter subject remained in the HTTP inbox",
+  "exitCode": 1,
+  "passed": 0,
+  "failed": 1,
+  "testDiscoveredAndExecuted": true,
+  "earlierNativeAttempt": "VSTest socket permission denial before assertion; explicitly not counted as behavioral red"
+}

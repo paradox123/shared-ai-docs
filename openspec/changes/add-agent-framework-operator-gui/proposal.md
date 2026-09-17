@@ -1,5 +1,7 @@
 Accepted Ticket 01 is extracted into [add-agent-framework-github-intake](../archive/2026-09-14-add-agent-framework-github-intake/proposal.md) and archived. Accepted Ticket 02 is extracted into [add-agent-framework-background-start](../archive/2026-09-14-add-agent-framework-background-start/proposal.md). This parent remains active for Tickets 03–16; unchecked tasks retain their original scope.
 
+**Direction update, 2026-09-15:** [ADR 0015](../../../docs/adr/0015-compose-existing-agent-platforms-for-use.md) establishes use and integration of existing platforms as the goal. The GUI backlog remains requirements and evidence reference; its open expansion tickets are not the current delivery roadmap.
+
 ## Why
 
 The Agent Framework pilot cannot yet be tested as an unattended end-to-end run without a foreground Codex task coordinating its execution. A graphical Operator Client should make admission, workflow progress and persisted session evidence accessible while independent background execution owns the work.

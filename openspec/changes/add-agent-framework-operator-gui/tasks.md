@@ -41,3 +41,11 @@ Accepted Ticket 01 is extracted into [add-agent-framework-github-intake](../arch
 - [ ] 3.3 Execute the acceptance matrix in handoff.md; record expected behavior, observations and retained evidence, including capability gaps.
 - [ ] 3.4 Keep Ticket 14 identity, approval, external-definition governance and coexistence gates separate; document remaining unverified gates honestly.
 - [ ] 3.5 Refactor touched code/skills/specs for DRY/SOLID/KISS before archive, rerun relevant verification and strict OpenSpec validation.
+
+## 4. Approved UX refinement of Tickets 01–03
+
+- [x] 4.0 User approved the four UX slices and blocking edges on 2026-09-14; publish individual local tickets and record the priority between original Tickets 03 and 04 in [ux-ticket-plan.md](ux-ticket-plan.md).
+- [ ] 4.1 UX-01: shared run view with consistent confirmed analysis state, immediate result access and retained existing navigation; implement and verify after original Ticket 03 is available in the shared implementation baseline.
+- [ ] 4.2 UX-02: readable complete analysis results, artifacts and immutable admitted requirements; implement and verify after UX-01.
+- [ ] 4.3 UX-03: readable agent work and targeted failure inspection with stable keyboard focus, live updates and mobile step selection; implement and verify after UX-01.
+- [ ] 4.4 UX-04: compact real intake/start flows into the shared view with actionable errors and preserved identities; implement and verify after UX-01.

@@ -187,13 +187,26 @@ Codex Desktop session files usually use:
 - corresponding outputs with `payload.type` equal to `function_call_output` or `custom_tool_call_output`
 - assistant final messages with `phase` equal to either `final` or `final_answer`; normalize both instead of sampling raw files when one spelling returns no finals
 
-Do not rebuild these parsing rules in an inline script. Persist the successful resolver's compact JSON stdout once, then run the bundled evidence extractor:
+Do not rebuild these parsing rules in an inline script. Persist the successful resolver's compact JSON stdout once, then run the bundled evidence extractor. Choose the scope before the first extraction: for a repository-scoped review, skip the unfiltered form and use the path-selector form below. Never parse the manifest inline to derive an exact-id allowlist from `meta.cwd`:
 
 ```bash
 RESOLVER_MANIFEST='<exact printed resolver_artifact_dir>/resolver.stdout.json'
 python3 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/extract_codex_session_evidence.py \
-  --manifest "$RESOLVER_MANIFEST"
+  --manifest "$RESOLVER_MANIFEST" \
+  --session-offset 0 \
+  --session-limit 12
 ```
+
+For a general summary with more eligible sessions, follow the returned
+`selection_window.next_offset` through the same immutable manifest, keeping
+`--session-limit` fixed and replacing only `--session-offset`. Stop only when
+`selection_window.has_more` is `false`. Every page must report
+`omitted_sessions.count: 0`; if a page does not fit, rerun that same offset
+with a smaller limit (or a deliberately larger `--max-total-chars`) before
+continuing. Do not advance by `emitted_sessions`, derive an exact-id allowlist,
+or claim complete review coverage from a truncated page. Session pagination is
+summary-only and cannot be combined with exact `--session-id`, structural,
+tool-call, or clone modes.
 
 For a repository/privacy allowlist, let the helper select from manifest `meta.cwd` values instead of writing an inline parser. `--cwd-root` accepts a repeatable absolute, existing repository root with a `.git` file or directory and matches that root or descendants. `--worktree-tail` accepts a repeatable single repository directory name and matches `~/.codex/worktrees/<slot>/<repo-tail>` or descendants. The two selector kinds use union semantics. Resolve the root from an explicit configured or prompt-provided repository candidate, never from an automation's incidental cwd:
 
@@ -204,10 +217,12 @@ TARGET_REPO_TAIL="$(basename "$TARGET_REPO_ROOT")"
 python3 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/extract_codex_session_evidence.py \
   --manifest "$RESOLVER_MANIFEST" \
   --cwd-root "$TARGET_REPO_ROOT" \
-  --worktree-tail "$TARGET_REPO_TAIL"
+  --worktree-tail "$TARGET_REPO_TAIL" \
+  --session-offset 0 \
+  --session-limit 12
 ```
 
-Repeat either selector for multiple configured roots or repo tails. A valid zero-match result is a no-change result with `selected_sessions: 0` and an empty `sessions` array; do not widen the read. Relative, filesystem/home-wide, missing, or non-repository cwd roots and malformed tails fail closed. This intentionally excludes vanished historical roots whose scope can no longer be verified; use a valid `--worktree-tail` or trusted exact positive ids rather than relaxing the root to a parent directory. Path selectors cannot be combined with `--session-id`, `--list-clone-boundaries`, or `--clone-suffix-start`. Use repeatable exact `--session-id <id>` only when the task already supplies exact positive ids or when following up selected clone ids with the boundary/suffix modes below. Unknown, duplicate, or unresolved exact ids fail closed. In every mode, the helper opens only resolved selected sessions and the exact inclusive `review_line_start`/`review_line_end` ranges advertised by the manifest.
+Repeat either selector for multiple configured roots or repo tails, and page the filtered set by following the same `selection_window` contract above. A valid zero-match result is a no-change result with `selected_sessions: 0` and an empty `sessions` array; do not widen the read. Relative, filesystem/home-wide, missing, or non-repository cwd roots and malformed tails fail closed. This intentionally excludes vanished historical roots whose scope can no longer be verified; use a valid `--worktree-tail` or trusted exact positive ids rather than relaxing the root to a parent directory. Path selectors cannot be combined with `--session-id`, `--list-clone-boundaries`, or `--clone-suffix-start`. Use repeatable exact `--session-id <id>` only when the task already supplies exact positive ids or when following up selected clone ids with the boundary/suffix modes below. Unknown, duplicate, or unresolved exact ids fail closed. In every mode, the helper opens only resolved selected sessions and the exact inclusive `review_line_start`/`review_line_end` ranges advertised by the manifest.
 
 The helper emits at most one 240-character substantive user summary, 12 normalized tool names, and one 240-character final per session, with no tool arguments or outputs, and caps the combined JSON near 20,000 characters. It normalizes direct and nested payloads, unwraps custom-recorder tool names, strips injected wrappers, and aggregates repeated `<heartbeat>` control inputs by bounded automation/state/decision/status fields instead of rendering every heartbeat as a task.
 

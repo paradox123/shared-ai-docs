@@ -1,3 +1,5 @@
+**Direction update, 2026-09-15:** [ADR 0015](../../../docs/adr/0015-compose-existing-agent-platforms-for-use.md) establishes use and integration of existing platforms as the goal. This pilot material remains requirements and evidence reference; its open expansion work is not the current delivery roadmap.
+
 ## Why
 
 The distributed Work Package Control Plane needs one technology-independent product contract and a separate Microsoft Agent Framework architecture spike. The current drafts mix product requirements, LangGraph-specific pilot behavior, Microsoft package choices, and a Temporal fallback that has now been explicitly excluded, making future ticket slicing ambiguous.

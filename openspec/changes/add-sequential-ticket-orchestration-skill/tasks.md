@@ -12,3 +12,6 @@
 - [x] 4.2 Update skill, references, prompts and specification for bounded parallel work, serialized delivery and cleanup.
 - [x] 4.3 Forward-test scheduling and cleanup scenarios; complete independent review and coherence checks.
 - [x] 4.4 Validate and publish scoped skill changes to the shared repository.
+
+## 5. Script support design
+- [ ] 5.1 Clarify first-release scope and adoption requirements in scripted-batch-design.md; record accepted decisions before specifying implementation.

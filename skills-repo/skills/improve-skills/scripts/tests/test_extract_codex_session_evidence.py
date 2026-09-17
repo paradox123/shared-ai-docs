@@ -1525,6 +1525,137 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
             self.assertIn("unknown requested session", unknown.stderr)
             self.assertEqual(unknown.stdout, "")
 
+    def test_summary_pagination_covers_manifest_order_without_omissions(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            sessions = []
+            for number in range(5):
+                rollout = root / f"session-{number}.jsonl"
+                rollout.write_text(
+                    json.dumps(
+                        response_item(message("user", f"request {number}"))
+                    )
+                    + "\n"
+                )
+                sessions.append(
+                    {
+                        "id": f"session-{number}",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "state": "complete",
+                            "review_line_start": 1,
+                            "review_line_end": 1,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                )
+            manifest = self.write_manifest(root, sessions)
+
+            seen = []
+            for offset, expected_ids, expected_next in (
+                (0, ["session-0", "session-1"], 2),
+                (2, ["session-2", "session-3"], 4),
+                (4, ["session-4"], None),
+            ):
+                result = self.run_script(
+                    manifest,
+                    "--session-offset",
+                    str(offset),
+                    "--session-limit",
+                    "2",
+                )
+                self.assertEqual(result.returncode, 0, result.stderr)
+                output = json.loads(result.stdout)
+                ids = [session["id"] for session in output["sessions"]]
+                self.assertEqual(ids, expected_ids)
+                seen.extend(ids)
+                self.assertEqual(output["counts"]["omitted_sessions"], 0)
+                self.assertEqual(
+                    output["selection_window"],
+                    {
+                        "offset": offset,
+                        "limit": 2,
+                        "eligible_sessions": 5,
+                        "page_sessions": len(expected_ids),
+                        "has_more": expected_next is not None,
+                        "next_offset": expected_next,
+                    },
+                )
+
+            self.assertEqual(seen, [f"session-{number}" for number in range(5)])
+
+    def test_summary_pagination_fails_closed_for_invalid_combinations(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "session.jsonl"
+            rollout.write_text(
+                json.dumps(response_item(message("user", "request"))) + "\n"
+            )
+            manifest = self.write_manifest(
+                root,
+                [
+                    {
+                        "id": "session",
+                        "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {
+                            "state": "complete",
+                            "review_line_start": 1,
+                            "review_line_end": 1,
+                            "embedded_session_metas": [],
+                        },
+                    }
+                ],
+            )
+
+            invocations = (
+                (("--session-offset", "0"), "must be used together"),
+                (("--session-limit", "1"), "must be used together"),
+                (
+                    (
+                        "--session-offset",
+                        "0",
+                        "--session-limit",
+                        "1",
+                        "--session-id",
+                        "session",
+                    ),
+                    "summary mode",
+                ),
+                (
+                    (
+                        "--session-offset",
+                        "2",
+                        "--session-limit",
+                        "1",
+                    ),
+                    "exceeds 1 eligible",
+                ),
+            )
+            for invocation, error_text in invocations:
+                with self.subTest(invocation=invocation):
+                    result = self.run_script(manifest, *invocation)
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(error_text, result.stderr)
+                    self.assertEqual(result.stdout, "")
+
+            for flag, value, error_text in (
+                ("--session-offset", "-1", "non-negative"),
+                ("--session-limit", "0", "positive"),
+            ):
+                with self.subTest(flag=flag, value=value):
+                    result = self.run_script(
+                        manifest,
+                        "--session-offset",
+                        "0" if flag == "--session-limit" else value,
+                        "--session-limit",
+                        value if flag == "--session-limit" else "1",
+                    )
+                    self.assertNotEqual(result.returncode, 0)
+                    self.assertIn(error_text, result.stderr)
+                    self.assertEqual(result.stdout, "")
+
     def test_path_selectors_union_repeated_roots_and_worktree_tails(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -1596,6 +1727,53 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
             self.assertEqual(output["counts"]["selected_sessions"], 4)
             self.assertEqual(output["counts"]["filtered_out_sessions"], 1)
             self.assertNotIn("request blocked", result.stdout)
+
+            paged_ids = []
+            for offset, expected_ids, expected_next in (
+                (0, ["cwd-exact", "cwd-descendant"], 2),
+                (2, ["worktree-exact", "worktree-descendant"], None),
+            ):
+                page = self.run_script(
+                    manifest,
+                    "--cwd-root",
+                    str(cwd_roots[0]),
+                    "--cwd-root",
+                    str(cwd_roots[1]),
+                    "--worktree-tail",
+                    "repo-a",
+                    "--worktree-tail",
+                    "repo-b",
+                    "--session-offset",
+                    str(offset),
+                    "--session-limit",
+                    "2",
+                )
+                self.assertEqual(page.returncode, 0, page.stderr)
+                page_output = json.loads(page.stdout)
+                ids = [session["id"] for session in page_output["sessions"]]
+                self.assertEqual(ids, expected_ids)
+                paged_ids.extend(ids)
+                self.assertEqual(page_output["counts"]["omitted_sessions"], 0)
+                self.assertEqual(
+                    page_output["selection_window"],
+                    {
+                        "offset": offset,
+                        "limit": 2,
+                        "eligible_sessions": 4,
+                        "page_sessions": 2,
+                        "has_more": expected_next is not None,
+                        "next_offset": expected_next,
+                    },
+                )
+            self.assertEqual(
+                paged_ids,
+                [
+                    "cwd-exact",
+                    "cwd-descendant",
+                    "worktree-exact",
+                    "worktree-descendant",
+                ],
+            )
 
             no_match_root = root / "missing-repo"
             (no_match_root / ".git").mkdir(parents=True)

@@ -1,5 +1,10 @@
 # Microsoft Agent Framework managed durability pilot
 
+Product direction: [Use and compose existing platforms](../docs/adr/0015-compose-existing-agent-platforms-for-use.md),
+with the [Agent Control Plane vision](../docs/agent-control-plane/product-vision.md)
+as the outcome. This pilot supplies requirements and evidence; its open expansion
+tickets are not a current mandate to build an owned platform.
+
 This sibling probe proves the operator-approved Azure DTS exception without
 changing the historical OSS gate result. It starts one durable Agent Framework
 workflow, kills worker one inside the second activity, and requires worker two

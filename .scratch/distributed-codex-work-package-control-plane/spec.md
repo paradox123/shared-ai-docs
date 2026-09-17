@@ -2,6 +2,8 @@
 
 Status: ready-for-agent
 
+**Richtungsentscheidung 2026-09-15:** [Vorhandene Plattformen nutzen und zusammensetzen](../../docs/adr/0015-compose-existing-agent-platforms-for-use.md). Diese Pilot-PRD bleibt Anforderungs- und Erfahrungsreferenz; ihre offenen Ausbau-Tickets sind keine aktuelle Roadmap zum weiteren Eigenbau. Das Nutzungsziel steht in der [Produktvision](../../docs/agent-control-plane/product-vision.md).
+
 ## Problem Statement
 
 Ein komplexer Implementierungslauf besteht nicht nur aus einer einzelnen Codex-Unterhaltung. Aus einem freigegebenen GitHub Issue entstehen Implementierung, deterministische Tests, Verhaltensnachweise, mehrere unabhängige Reviews, Behebungsrunden, menschliche Rückfragen, Freigabe und Abschluss. In einer einzigen durchgehenden Agentensession wächst der Kontext über diese Tätigkeiten hinweg so stark, dass Context Drift, überholte Annahmen und schwer nachvollziehbare Entscheidungen wahrscheinlich werden. Werden die Tätigkeiten dagegen nur als voneinander getrennte Tasks oder verlustbehaftete Handovers ausgeführt, fehlt dem eingreifenden Menschen die Historie, die er zur Diagnose des Fehlerfalls benötigt.

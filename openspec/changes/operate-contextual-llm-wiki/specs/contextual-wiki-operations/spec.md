@@ -1,5 +1,44 @@
 ## ADDED Requirements
 
+### Requirement: Prioritize ongoing wiki maintenance over the initial backlog
+Scheduled maintenance MUST prioritize newly arriving and changed source documents over the unprocessed initial source inventory, with the freshness target of processing those updates in the wiki by the next day. The initial import MAY span multiple days. Outstanding initial work MUST remain visible and MUST NOT be reported as a completed production import. Existing source freshness checks and dependency validation remain required; this prioritization does not authorize publishing unverified or stale wiki evidence.
+
+#### Scenario: Source updates arrive during the initial import
+- **WHEN** the initial import still has unprocessed sources and new or changed sources arrive
+- **THEN** ongoing updates receive priority over the initial backlog
+- **AND** maintenance distinguishes completion of ongoing updates from completion of the initial import
+
+#### Scenario: The freshness target is missed
+- **WHEN** ongoing updates cannot be processed by the next day
+- **THEN** the unprocessed updates and the missed freshness target remain visible
+- **AND** the run does not claim those updates were completed on time
+
+### Requirement: Bounded observable maintenance with durable resumption
+Maintenance MUST execute with explicit finite work or time bounds and a finite termination grace period. It MUST persist validated reusable extraction results across process restarts, binding reuse to relevant source versions and generation inputs. It MUST NOT equate saved extraction work with published current wiki knowledge. A resumed run MUST reuse compatible successful work and retry only missing, invalidated or failed work and its required dependencies. Progress and failures MUST be durably observable before compilation returns. A run ending with pending requested work MUST remain distinguishable from complete success and MUST NOT advance the fully completed maintenance timestamp.
+
+The automation MUST observe its owned run for a bounded period and use durable progress evidence for diagnosis; it MUST NOT keep polling indefinitely because a final report is absent. Shared provider failures MUST stop further dependent model dispatch while allowing independent safe work to retain progress. Source drift MUST invalidate affected work without discarding demonstrably independent reusable results. Unknown dependencies MUST block unsupported publication.
+
+#### Scenario: Resume after a bounded or interrupted run
+- **WHEN** a run ends after successful extraction results have been durably saved and work remains pending
+- **THEN** a fresh process reuses those results when their evidence and generation inputs remain compatible
+- **AND** incomplete or incompatible results are not treated as reusable successes
+- **AND** the report distinguishes source-index completion, ongoing updates and initial-import backlog
+
+#### Scenario: Source changes while work is running
+- **WHEN** one source changes during generation and unrelated successful work can be proven independent
+- **THEN** affected statements are withheld until revalidated against current evidence
+- **AND** the independent successful work remains reusable after restart
+
+#### Scenario: Shared provider failure during queued work
+- **WHEN** maintenance detects a shared provider failure with further model work queued
+- **THEN** no additional work depending on that failed provider is dispatched
+- **AND** already running work is settled or terminated within the finite grace period with durable failure and pending-work evidence
+
+#### Scenario: No final report is available within the observation bound
+- **WHEN** the automation reaches its finite observation bound without a final report
+- **THEN** it uses the known durable progress location for a bounded diagnosis and reports an incomplete or failed outcome
+- **AND** it neither launches a duplicate collector nor enters another unbounded polling loop
+
 ### Requirement: Automatically adopt verified upstream wiki revisions
 The local wiki installation MUST follow published releases of the upstream LLM Wiki repository as a whole, resolving each adopted release to an exact commit and using the dependency versions defined by that revision's manifest and lockfile. It MUST NOT independently update compiler libraries or re-resolve their locked versions ahead of upstream. Independent Node, QMD and wrapper dependency updates are outside this update scope. A required build MUST reproduce the adopted upstream revision with the existing integration patch rather than introduce new dependency versions.
 
@@ -25,13 +64,19 @@ After a successful build and all required compatibility tests, the verified upst
 - **THEN** the update is not adopted and any integration PR does not merge
 - **AND** the previous working installation is retained and the incomplete or failed verification remains visible
 
-### Requirement: Scheduled wiki maintenance before global retrieval maintenance
-The existing local daily QMD automation MUST maintain one common production wiki over all selected source repositories, including `private`, `Projects/Private`, Meetings and Projects, before subsequent QMD retrieval maintenance. It MUST preserve the existing schedule, model, project and notification settings. The name `private` MUST describe a subject domain only and MUST NOT cause a separate wiki, a maintenance exclusion, a special query approval or a confidentiality classification. The automation MUST NOT substitute acceptance fixtures for the full production inventory. No additional scheduler or watcher SHALL be installed.
+### Requirement: Scheduled source indexing independent of wiki compilation
+The existing local daily QMD automation MUST maintain the source retrieval index independently of successful wiki compilation and MUST maintain one common production wiki over all selected source repositories, including `private`, `Projects/Private`, Meetings and Projects. Pending or failed wiki generation alone MUST NOT prevent current original sources from becoming searchable through WikiQuery. Source indexing MUST NOT expose stale or unverified generated wiki content as current evidence; shared scan, storage or index failures MUST still block the operations that depend on them. It MUST preserve the existing schedule, model, project and notification settings. The name `private` MUST describe a subject domain only and MUST NOT cause a separate wiki, a maintenance exclusion, a special query approval or a confidentiality classification. The automation MUST NOT substitute acceptance fixtures for the full production inventory. No additional scheduler or watcher SHALL be installed.
 
 #### Scenario: Successful daily run
 - **WHEN** source reconciliation and wiki maintenance succeed
-- **THEN** the common wiki is maintained and checked before global QMD update, embed and status
-- **AND** the report distinguishes compiled content, no-op work and retrieval maintenance
+- **THEN** current original sources and verified generated wiki content are available through the managed retrieval interface
+- **AND** the report distinguishes source index freshness, ongoing wiki updates, initial-import backlog, no-op work and failures
+
+#### Scenario: Original source is searchable before wiki generation completes
+- **WHEN** a new or changed original source has been indexed but its wiki generation is pending or has failed
+- **THEN** WikiQuery can retrieve the relevant current original evidence with verified references and an explicit fallback indication
+- **AND** it does not present outdated dependent wiki statements as current
+- **AND** successful source indexing does not imply successful wiki generation or a completed initial import
 
 #### Scenario: Personal and professional sources participate together
 - **WHEN** scheduled maintenance encounters relevant sources in `private`, `Projects/Private` and another selected repository

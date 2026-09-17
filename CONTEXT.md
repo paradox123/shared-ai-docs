@@ -155,6 +155,18 @@ _Avoid_: Beliebiger Querverweis, reine Themengleichheit
 Die Menge der Fachquellen, deren abgeleitete Inhalte im gemeinsamen Wiki regelmaessig aktualisiert werden sollen. Sie ist unabhaengig davon, welche Quellen fuer eine einzelne Abfrage fachlich relevant sind.
 _Avoid_: Abfragefreigabe, nur der gerade abgefragte Kontext
 
+**Wiki-Erstimport**:
+Die erstmalige Verarbeitung des bereits vorhandenen Fachquellenbestands in das gemeinsame Wiki. Noch nicht verarbeitete Quellen dieses Ausgangsbestands bilden den Erstimport-Rueckstand.
+_Avoid_: Taeglicher Vollimport, erneute Verarbeitung aller Quellen bei jeder Pflege
+
+**Laufende Wiki-Nachpflege**:
+Die Verarbeitung neu hinzukommender, geaenderter oder bestaetigt entfernter Fachquellen samt ihrer betroffenen abgeleiteten Aussagen. Sie ist vom noch offenen Wiki-Erstimport zu unterscheiden.
+_Avoid_: Vollimport, reine Suchindex-Aktualisierung
+
+**Fachquellen-Indexpflege**:
+Die Aktualisierung der Suchdaten fuer vorhandene Fachquellen, unabhaengig von deren Aufbereitung zu Wiki-Aussagen. Ein aktueller Fachquellenindex belegt fuer sich keine abgeschlossene Wiki-Nachpflege.
+_Avoid_: Wiki-Kompilierung, vollstaendiger Wiki-Erstimport
+
 **Privater Tätigkeitsbereich**:
 Der Lebens- und Aufgabenbereich fuer persoenliche Belange wie Vermietung oder Portfoliopflege. Die Bezeichnung „privat“ ordnet Informationen fachlich zu und begruendet fuer sich keine Zugriffs-, Verknuepfungs- oder Sichtbarkeitsbeschraenkung.
 _Avoid_: Vertraulichkeitsstufe, gesperrter Wissensbestand, separates Privat-Wiki

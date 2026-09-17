@@ -1,9 +1,11 @@
 ---
-status: accepted
+status: superseded by ADR-0015
 date: 2026-09-14
 ---
 
 # Bestehende Control Plane als Backend mit versionierten Workflows weiterentwickeln
+
+**Abgelöst am 2026-09-15:** [ADR 0015](0015-compose-existing-agent-platforms-for-use.md) legt die Nutzung und Integration vorhandener Plattformen fest. Der folgende Text dokumentiert die frühere Entscheidung zum eigenen Backend und dient als Referenz für den Piloten.
 
 Der Microsoft-Agent-Framework-Pilot wird schrittweise zum Backend des Operator Clients ausgebaut. Seine bestehenden Run-, History-, Steuerungs- und Agentenverträge werden weiterverwendet und gezielt refaktoriert. Perspektivisch unterstützt die Work Package Control Plane unterschiedliche versionierte Workflow-Definitionen; ihre fachlichen Regeln bleiben unabhängig vom konkreten Ablauf. Das erhält die bereits erarbeiteten Berechtigungs-, Wiederaufnahme- und Nachweisgrenzen und vermeidet eine feste Kopplung aller Clients an die heutige Implementierungs-/Review-/Reparaturfolge.
 

@@ -1,0 +1,9 @@
+{
+  "runId": "0f9245e0-3d4f-4c04-9fba-342ccf4b95d1",
+  "exportEventCount": 1113,
+  "cursorRepeatedPageIdentical": true,
+  "firstNextAfter": 17,
+  "secondNextAfter": 34,
+  "allExportManifestHashesMatch": true,
+  "credentialScan": "No exact runtime secrets or supported provider-token patterns found in archive contents; not a complete redaction-canary test."
+}

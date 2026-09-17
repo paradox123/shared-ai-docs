@@ -1,0 +1,40 @@
+{
+  "baseRefName": "main",
+  "headRefName": "codex/probare-issue-3-issue14-test",
+  "headRefOid": "71d9fb7c7eefefbdba32c99995a624f3ef2416d1",
+  "isDraft": true,
+  "number": 16,
+  "reviewDecision": "",
+  "state": "OPEN",
+  "statusCheckRollup": [],
+  "url": "https://github.com/paradox123/probare-crm/pull/16",
+  "publisher": "outer Codex task, not native pilot qualification",
+  "files": [
+    "A\tISSUE.md",
+    "M\tREADME.md",
+    "A\tdocs/issue-3-ingestion.md",
+    "A\tsrc/ProbareCrm.Api/Intake/GeneralMailingFilter.cs",
+    "A\tsrc/ProbareCrm.Api/Intake/PostingFingerprint.cs",
+    "M\tsrc/ProbareCrm.Api/Persistence/WorkflowDatabase.cs",
+    "M\tsrc/ProbareCrm.Api/Persistence/WorkflowDbContext.cs",
+    "M\tsrc/ProbareCrm.Api/ProbareCrmApplication.cs",
+    "M\tsrc/ProbareCrm.Api/Workflow/IMandatWorkflow.cs",
+    "A\tsrc/ProbareCrm.Api/Workflow/IngestionEndpoints.cs",
+    "A\tsrc/ProbareCrm.Api/Workflow/IngestionEntry.cs",
+    "M\tsrc/ProbareCrm.Api/Workflow/MandatWorkflow.cs",
+    "D\tsrc/ProbareCrm.Api/wwwroot/assets/index-B6H0GnHY.js",
+    "A\tsrc/ProbareCrm.Api/wwwroot/assets/index-CS8Wl7QJ.js",
+    "R071\tsrc/ProbareCrm.Api/wwwroot/assets/index-USHx7itH.css\tsrc/ProbareCrm.Api/wwwroot/assets/index-mu_a0cEE.css",
+    "M\tsrc/ProbareCrm.Api/wwwroot/index.html",
+    "M\tsrc/ProbareCrm.Ui/src/App.test.tsx",
+    "A\tsrc/ProbareCrm.Ui/src/IngestionLedger.tsx",
+    "M\tsrc/ProbareCrm.Ui/src/main.tsx",
+    "M\tsrc/ProbareCrm.Ui/src/styles.css",
+    "A\ttests/ProbareCrm.Api.Tests/IngestionDecisionTests.cs"
+  ],
+  "commits": [
+    "71d9fb7c7eefefbdba32c99995a624f3ef2416d1 Preserve MIME role differences and exclude numbered newsletters",
+    "9deaa83f42a4a61c69c90b0b470c85f2702a865b Filter general mail and retain duplicate ingestion decisions",
+    "f5d1a878343589594cd438346368d2302706310b Document issue 3 test branch scope"
+  ]
+}

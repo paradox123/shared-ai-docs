@@ -1,0 +1,27 @@
+{
+  "boundaries": {
+    "langgraph-source": "9f3ef272e7494fa0093aadaf5df77cea149dd3d8fcbf64046fb007396676e1fe",
+    "cloudflare-relay-source": "66bf92b05668b87ce4508fdb77cd457fe66e4a35a99d6ccaff0532c1477e40f0",
+    "macos-operations-source": "8b85674c073e9956a2171bb4c3dbbb95172e59a8c0dd4fca82475e912aa5ac95",
+    "langgraph-runtime": "fabb4e78e571f7fc79f0d9cb14ca51ef41efba7b38d511d154b0925c7a1d32f8",
+    "langgraph-launch-agent": "07ec25459b32754999dd2dff2392a8d4d681b378c2a29a04767183c4c3cb38ce",
+    "langgraph-managed-worktrees": "4404ddb036ce3a840dd23cdcf8c77f37824be59ccbf2b9afd93c4e6174713647",
+    "github-repository-config": "cd50f79e9b455bfa00e67cec11a7bf544977d45e837308085e7575035bd06834",
+    "probara-crm": "d95d900c6520103ab023e8aa82028d5b73447f5d361c50cc261aa7bd8ba6d420"
+  },
+  "failures": [],
+  "provider": {
+    "crm-main": "c32e056f3d242008d15f6e0c7b5333c7572ed186",
+    "crm-hooks": "e43bcaf7f332b7dce4469120671886ac1b9501d3bb3f83a2b869722a0c18d340",
+    "crm-rulesets": {
+      "available": false
+    },
+    "crm-issue3": {
+      "state": "open",
+      "labels": [
+        "ready-for-agent",
+        "agent-running"
+      ]
+    }
+  }
+}

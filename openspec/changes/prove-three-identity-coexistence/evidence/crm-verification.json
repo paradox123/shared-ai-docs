@@ -1,0 +1,287 @@
+{
+  "review-red": {
+    "counters": {
+      "total": "6",
+      "executed": "6",
+      "passed": "3",
+      "failed": "3",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "tests": [
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"GULP Newsletter: Projekt 4711 und Projekt 4712\")",
+        "outcome": "Failed",
+        "message": "Assert.Empty() Failure: Collection was not empty\nCollection: [{\"id\":\"6f896d42-a44b-4aff-bec5-44aa85126c71\",\"messageId\":\"<general@gulp.example>\",\"subject\":\"GULP Newsletter: Projekt 4711 und Projekt 4712\",\"receivedAtUtc\":\"2026-09-13T17:43:30+00:00\"}]"
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"Ihr GULP Profil wurde aktualisiert\")",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.Distinct_roles_in_attachments_or_html_remain_separate_after_restart(html: True)",
+        "outcome": "Failed",
+        "message": "Assert.Equal() Failure: Values differ\nExpected: 2\nActual:   1"
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"Platform notification: profile updated\")",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"GULP Newsletter: Project opportunities this week\")",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.Distinct_roles_in_attachments_or_html_remain_separate_after_restart(html: False)",
+        "outcome": "Failed",
+        "message": "Assert.Equal() Failure: Values differ\nExpected: 2\nActual:   1"
+      }
+    ]
+  },
+  "review-green": {
+    "counters": {
+      "total": "9",
+      "executed": "9",
+      "passed": "9",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "tests": [
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.Distinct_roles_in_attachments_or_html_remain_separate_after_restart(html: False)",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.Filtering_and_likely_duplicates_remain_observable_after_replay_and_restart",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.A_general_newsletter_creates_no_actionable_Akquisevorgang",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"GULP Newsletter: Project opportunities this week\")",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"GULP Newsletter: Projekt 4711 und Projekt 4712\")",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"Ihr GULP Profil wurde aktualisiert\")",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.A_pre_ledger_database_keeps_its_source_and_recognizes_a_repeated_posting",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.Distinct_roles_in_attachments_or_html_remain_separate_after_restart(html: True)",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"Platform notification: profile updated\")",
+        "outcome": "Passed",
+        "message": null
+      }
+    ]
+  },
+  "issue3-final": {
+    "counters": {
+      "total": "23",
+      "executed": "23",
+      "passed": "23",
+      "failed": "0",
+      "error": "0",
+      "timeout": "0",
+      "aborted": "0",
+      "inconclusive": "0",
+      "passedButRunAborted": "0",
+      "notRunnable": "0",
+      "notExecuted": "0",
+      "disconnected": "0",
+      "warning": "0",
+      "completed": "0",
+      "inProgress": "0",
+      "pending": "0"
+    },
+    "tests": [
+      {
+        "name": "ProbareCrm.Api.Tests.OriginalSourceImmutabilityTests.A_persisted_original_source_cannot_be_rewritten",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"GULP Newsletter: Project opportunities this week\")",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"Platform notification: profile updated\")",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.Filtering_and_likely_duplicates_remain_observable_after_replay_and_restart",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.OriginalSourceImmutabilityTests.Captured_source_bytes_and_collections_cannot_be_mutated_through_the_domain_model",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.InboxRefreshTests.Concurrent_refreshes_are_idempotent",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.InboxRefreshTests.The_application_accepts_only_the_configured_GULP_folder",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.InboxRefreshTests.Multipart_links_are_derived_without_becoming_part_of_the_original_source_model",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.Distinct_roles_in_attachments_or_html_remain_separate_after_restart(html: True)",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.InboxRefreshTests.Reingestion_and_restart_preserve_one_Akquisevorgang_and_its_unchanged_source",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.A_general_newsletter_creates_no_actionable_Akquisevorgang",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.InboxRefreshTests.A_captured_source_exposes_unchanged_message_fields_attachments_links_and_separate_derived_content",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.Distinct_roles_in_attachments_or_html_remain_separate_after_restart(html: False)",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"Ihr GULP Profil wurde aktualisiert\")",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.InboxRefreshTests.Duplicate_Message_IDs_within_one_refresh_create_exactly_one_Akquisevorgang",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.WorkflowJournalTests.A_persisted_journal_event_cannot_be_rewritten",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.InboxRefreshTests.A_project_message_creates_one_Akquisevorgang_with_its_Message_ID_and_initial_event",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.A_pre_ledger_database_keeps_its_source_and_recognizes_a_repeated_posting",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.InboxRefreshTests.The_original_MIME_source_can_be_downloaded_byte_for_byte_after_a_restart",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.InboxRefreshTests.Daniel_can_manually_refresh_the_configured_GULP_folder",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.MailAppCacheMailboxTests.The_production_adapter_reads_the_one_configured_Mail_app_folder_without_changing_its_source",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.InboxRefreshTests.Daniel_can_inspect_a_captured_source_attachment_without_changing_it",
+        "outcome": "Passed",
+        "message": null
+      },
+      {
+        "name": "ProbareCrm.Api.Tests.IngestionDecisionTests.General_platform_mail_does_not_create_a_case(subject: \"GULP Newsletter: Projekt 4711 und Projekt 4712\")",
+        "outcome": "Passed",
+        "message": null
+      }
+    ]
+  },
+  "crmBase": "c32e056f3d242008d15f6e0c7b5333c7572ed186",
+  "crmHead": "71d9fb7c7eefefbdba32c99995a624f3ef2416d1",
+  "frontend": {
+    "source": "Observed commands earlier in this Codex task; frontend unchanged by final backend review fix",
+    "tests": 2,
+    "passed": 2,
+    "productionBuild": "TypeScript and Vite passed"
+  },
+  "browser": {
+    "source": "CUA browser interaction observed in this task, using actual app and synthetic EMLX",
+    "firstRefresh": {
+      "read": 5,
+      "created": 2,
+      "alreadyKnown": 0,
+      "excluded": 2,
+      "likelyDuplicates": 1
+    },
+    "replay": {
+      "read": 5,
+      "created": 0,
+      "alreadyKnown": 5
+    },
+    "ledgerDuplicateOpenedOriginalMessageId": "<architect@gulp.example>",
+    "responsive": {
+      "viewportWidth": 390,
+      "scrollWidth": 390
+    },
+    "consoleErrorsObserved": 0
+  }
+}
