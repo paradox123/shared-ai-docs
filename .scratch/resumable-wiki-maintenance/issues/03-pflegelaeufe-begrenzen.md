@@ -1,6 +1,6 @@
 # 03: Pflegelaeufe begrenzen und Fortschritt sichtbar machen
 
-Status: ready-for-agent
+Status: closed
 
 **Parent:** [Wiederaufnehmbare Wiki-Pflege](../spec.md)
 
@@ -24,3 +24,8 @@ Status: ready-for-agent
 **Verification:** Den echten Wartungshelper mit kurzen Testbudgets, kontrolliert gehaltenem Provider und frischen Folgeprozessen pruefen. Behauptungen betreffen sichtbaren Fortschritt vor Ende, endliche Prozessdauer, keine neue abhaengige Provideranfrage nach erkanntem gemeinsamen Fehler, korrekten Endbericht und erfolgreiche Wiederaufnahme. Die Tests haben unabhaengige harte Fristen und verwenden keine Produktionsprozesse.
 
 **Boundary:** Keine Abhaengigkeit von Ticket 01: Begrenzung und Wiederaufnahme sind am bestehenden Pflegepfad separat nachweisbar. Fachquellen-Indexpflege wird bei gemeinsamer Integration nach dem Vertrag von Ticket 01 behandelt. Tagesprioritaet und Veroeffentlichung begrenzter Tagespakete folgen in Ticket 04. Der gespeicherte Automationsprompt wird erst in Ticket 06 aktiviert.
+
+
+## Implementierungsnachweis
+
+Ticket 03 wurde nach separater kritischer Verifikation und Koordinator-Abnahme am 17.09.2026 mit [PR #6](https://github.com/paradox123/shared-ai-docs/pull/6) nach `main` geliefert. Verifizierter Merge: [`5d67dd46c7883aca8402ac34fa8ca164c4a6d9c6`](https://github.com/paradox123/shared-ai-docs/commit/5d67dd46c7883aca8402ac34fa8ca164c4a6d9c6). Alle zwölf akzeptierten Dateihashes des Inhaltsmanifests `2123485de9c7f3e76678362c0e41c9187fd1f4ed55704b3b0f9f2d63f70e6a69` wurden am Remote-Merge bestätigt. [Gemessene Ergebnisse, kritische Gegenfälle, konkrete dauerhafte Rohbelege und Grenzen](../../../contextual-llm-wiki/evidence/resumable-maintenance-03.md). Tickets 04–06 und die produktive Aktivierung bleiben offen; der gemeinsame OpenSpec-Change wird nicht archiviert.
