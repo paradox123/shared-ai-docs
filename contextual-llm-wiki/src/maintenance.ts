@@ -1,6 +1,8 @@
 import { readFile, mkdir, cp, rm, rename } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { maintenanceInventory } from "./maintenance-inventory.ts";
+import { publishSourcePackage, sourceStatements } from "./source-package.ts";
 import { maintenanceControl } from "./maintenance-control.ts";
 import { createWiki, modelWork } from "../.runtime/compiler/dist/index.js";
 import { scan } from "./sources.ts";
@@ -17,7 +19,7 @@ import { answer } from "./completion.ts";
 import { qmd } from "./qmd.ts";
 import { indexSources } from "./source-index.ts";
 import { lint } from "./inspection.ts";
-import { checkConfig } from "./config.ts";
+import { validatePublication } from "./publication-validation.ts";
 import { preflight } from "./runtime.ts";
 import { extractionCache } from "./extraction-cache.ts";
 import { failureScope } from "./failure-scope.ts";
@@ -59,6 +61,15 @@ export async function maintain(config: any) {
     };
   }
   await control.close();
+  progress.maintenance = report.maintenance || progress.maintenance;
+  if (
+    control.reason === "budget-exhausted" &&
+    (progress.maintenance?.daily.pending ||
+      progress.maintenance?.initial.pending)
+  ) {
+    progress.maintenance.capacity.insufficientTimeCapacity = true;
+    report.maintenance = progress.maintenance;
+  }
   progress.phase = "finished";
   progress.remaining = report.pending || [];
   control.emit();
@@ -82,6 +93,8 @@ export async function maintain(config: any) {
 async function maintainRun(config: any, artifacts: string, progress: any) {
   const sources = await scan(config),
     state = await readState(config);
+  const inventory = await maintenanceInventory(config, sources);
+  progress.maintenance = inventory.report(state);
   const delta = changes(state, sources),
     review = await reviewPages(config, state, sources);
   progress.changes = delta;
@@ -97,7 +110,8 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
   progress.notify();
   const changedIds = new Set(review.map((p) => p.id));
   if (state.publicationVersion !== 2)
-    for (const id of Object.keys(state.pages)) changedIds.add(id);
+    for (const id of Object.keys(state.pages))
+      if (state.pages[id].publicationVersion !== 2) changedIds.add(id);
   // Withdraw stale wiki files before any index mutation, including a global update.
   for (const id of changedIds) {
     state.pages[id].withdrawn = true;
@@ -127,6 +141,7 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       unchanged: Object.keys(state.pages),
       failures: [],
       pending: [],
+      maintenance: inventory.report(state),
     };
   await qmd(config, "register");
   const stage = path.join(artifacts, "staging"),
@@ -172,13 +187,68 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       progress.notify(),
     );
     progress.extractions = cache.stats;
+    const extracted = new Map<string, any>();
+    let requests = 0;
+    const maxSources = config.maintenance?.maxExtractionSources || 20;
+    const runExtraction = async (
+      request: any,
+      generate: () => Promise<string>,
+      validate: (raw: string) => boolean,
+    ) => {
+      const raw = await cache.run(
+        request,
+        async () => {
+          if (requests >= maxSources)
+            throw Object.assign(Error("Extraction package complete"), {
+              packageBoundary: true,
+              sharedExtractionCache: true,
+            });
+          requests++;
+          return generate();
+        },
+        validate,
+      );
+      if (validate(raw)) {
+        extracted.set(request.sourceFile, JSON.parse(raw));
+        inventory.value.sources[request.sourceFile].extractedHash =
+          sources[request.sourceFile].hash;
+        try {
+          await inventory.save();
+        } catch (error) {
+          throw Object.assign(error as Error, { sharedExtractionCache: true });
+        }
+        progress.maintenance = inventory.report(state);
+      }
+      return raw;
+    };
+    const sourceOrder = await inventory.order(maxSources);
+    progress.maintenance = inventory.report(state);
+    progress.notify();
     const wiki = createWiki({ root });
-    const result = await wiki.compile({
-      embeddings: false,
-      extractionCache: cache.run,
-      concurrency: config.concurrency || 2,
-      onBoundedFailure: (failure) => failures.push(failure),
-    });
+    let result;
+    try {
+      result = await wiki.compile({
+        embeddings: false,
+        extractionCache: runExtraction,
+        sourceOrder,
+        concurrency:
+          Object.keys(sources).length > maxSources
+            ? 1
+            : config.concurrency || 2,
+        onBoundedFailure: (failure) => failures.push(failure),
+      });
+    } catch (error: any) {
+      if (!error.packageBoundary) throw error;
+      return await publishSourcePackage(
+        config,
+        state,
+        sources,
+        extracted,
+        inventory,
+        progress,
+        delta,
+      );
+    }
     await writeJson(path.join(artifacts, "compiler-result.json"), {
       result,
       failures,
@@ -263,6 +333,21 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     for (const page of Object.values<any>(pages)) {
       bodies[page.id] = normalizeLinks(bodies[page.id], page.id, pages);
       page.hash = hash(bodies[page.id]);
+    }
+    const statements = sourceStatements(extracted, sources);
+    for (const old of Object.values<any>(state.pages).filter(
+      (p) => p.kind === "source-summary",
+    )) {
+      if (statements.pages[old.id]) {
+        pages[old.id] = statements.pages[old.id];
+        bodies[old.id] = statements.bodies[old.id];
+      } else if (!changedIds.has(old.id)) {
+        pages[old.id] = old;
+        bodies[old.id] = await readFile(
+          path.join(config.output, "wiki", old.id + ".md"),
+          "utf8",
+        );
+      }
     }
     // Revalidate saved syntheses in dependency order, including answers on answers.
     const remaining = Object.values<any>(state.pages).filter(
@@ -355,25 +440,7 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     }
     progress.phase = "validate-publication";
     progress.notify();
-    await checkConfig(config);
-    const latest = await scan(config);
-    if (
-      Object.keys(latest).length !== Object.keys(sources).length ||
-      Object.keys(sources).some((id) => latest[id]?.hash !== sources[id].hash)
-    )
-      throw Error(
-        "Sources changed during generation; latest state remains pending",
-      );
-    for (const page of Object.values<any>(state.pages).filter(
-      (p) => !p.withdrawn,
-    )) {
-      const actual = await readFile(
-        path.join(config.output, "wiki", page.id + ".md"),
-        "utf8",
-      );
-      if (hash(actual) !== page.hash)
-        throw Error("Page changed during generation: " + page.id);
-    }
+    await validatePublication(config, state, sources);
     progress.phase = "publish";
     progress.notify();
     for (const id of Object.keys(state.pages))
@@ -476,11 +543,13 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       lint: { ...audit, ok: !pending.length, pending },
       changes: delta,
       review,
+      maintenance: inventory.report(next),
       pages: Object.keys(pages).filter((id) => !pages[id].withdrawn),
     };
   } catch (error) {
     const actual = await readState(config);
     actual.pending.push({ error: (error as Error).message });
+    progress.maintenance = inventory.report(actual);
     await saveState(config, actual);
     await entry(config, actual);
     throw error;

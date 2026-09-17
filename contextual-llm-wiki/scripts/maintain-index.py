@@ -37,8 +37,13 @@ def validate_maintenance(value):
     for field in ['failures', 'pending', 'completed', 'unchanged']:
         if not isinstance(value.get(field), list):
             raise RuntimeError('incomplete maintenance result: ' + field)
+    if value.get('packageCompleted') is True:
+        maintenance = value.get('maintenance')
+        if (not isinstance(maintenance, dict) or maintenance.get('globalComplete') is not False
+                or not any(item.get('phase') == 'dependency-discovery' for item in value['pending'])):
+            raise RuntimeError('package result without explicit incomplete dependency discovery')
     if value.get('ok') is False:
-        if not value['failures'] or not value['pending']:
+        if (not value['failures'] and value.get('packageCompleted') is not True) or not value['pending']:
             raise RuntimeError('partial result without failed or pending work')
     elif value.get('ok') is not True:
         raise RuntimeError('missing successful result')
@@ -131,6 +136,7 @@ def main():
                         report['contexts'].append({'context': context, 'ok': False,
                             'sourceIndex': detail.get('sourceIndex', {'ok': False, 'status': 'unknown'}),
                             'wiki': {'ok': False, 'status': 'incomplete'},
+                            'maintenance': detail.get('maintenance'),
                             'progress': str(progress), 'pending': detail.get('remaining', [{'phase': name}]),
                             'extractions': detail.get('extractions', {})})
                     # Only the terminated command's own context lock can be removed.
@@ -168,6 +174,7 @@ def main():
                     'context': name.removeprefix('maintain-'),
                     'sourceIndex': value['sourceIndex'], 'wiki': value.get('wiki'),
                     'ok': value.get('ok'), 'report': value['report'],
+                    'maintenance': value.get('maintenance'), 'packageCompleted': value.get('packageCompleted', False),
                     'pending': value.get('pending', [])})
             validate_maintenance(value)
             if (value['ok'] is True) != (code == 0):
@@ -212,6 +219,8 @@ def main():
                                        'ok': maintained['ok'],
                                        'sourceIndex': maintained.get('sourceIndex'),
                                        'wiki': maintained.get('wiki'),
+                                       'maintenance': maintained.get('maintenance'),
+                                       'packageCompleted': maintained.get('packageCompleted', False),
                                        'completed': maintained.get('completed', []),
                                        'unchanged': maintained.get('unchanged', []),
                                        'failures': maintained.get('failures', []),

@@ -196,6 +196,7 @@ export async function saveAnswer(
   const page = {
     id,
     kind: "answer",
+    publicationVersion: 2,
     question,
     sourceVersions,
     pageVersions,
