@@ -333,14 +333,14 @@ test("the public job reports a real wiki partial failure while safe retrieval st
     );
     assert.match(
       await readFile(
-        path.join(f.dir, "partial-job/03-maintain-test.stdout"),
+        path.join(f.dir, "partial-job/02-maintain-test.stdout"),
         "utf8",
       ),
       /controlled provider failure/,
     );
     assert.equal(
       await readFile(
-        path.join(f.dir, "partial-job/03-maintain-test.exitcode"),
+        path.join(f.dir, "partial-job/02-maintain-test.exitcode"),
         "utf8",
       ),
       "1\n",
@@ -416,7 +416,7 @@ test("older publication provenance is rebuilt once before independent reuse is c
   }
 });
 
-test("a shared index failure reports completed content and the remaining retrieval work", async () => {
+test("a shared source index failure blocks dependent compilation and reports remaining work", async () => {
   const f = await fixture();
   try {
     assert.equal((await f.run("maintain")).ok, true);
@@ -429,11 +429,9 @@ test("a shared index failure reports completed content and the remaining retriev
     const failed = await f.run("maintain");
     assert.equal(failed.ok, false);
     assert.equal(failed.qmdSafe, false);
-    assert.ok(
-      failed.completed?.includes("concepts/freigabe"),
-      JSON.stringify(failed),
-    );
-    assert.ok(failed.pending.some((p: any) => p.phase === "qmd"));
+    assert.deepEqual(failed.completed, []);
+    assert.equal(failed.sourceIndex.ok, false);
+    assert.ok(failed.pending.length);
   } finally {
     await f.close();
   }

@@ -1,5 +1,7 @@
 ## Context
 
+Stand der Fortschreibung: Das Pflegeinterview vom 17.09.2026 und [ADR 0016](../../../docs/adr/0016-decouple-source-index-freshness-from-wiki-compilation.md) definieren das neue Ziel fuer die Pflegefolge. Aeltere Ticket- und Interviewabschnitte unten dokumentieren ihre jeweiligen Integrationsstaende. Der Live-Job verwendet zum Interviewabschluss weiterhin die bisherige Reihenfolge; die neue Pflege ist noch nicht implementiert.
+
 Die ursprüngliche Integration ist archiviert. Der erste Betriebsstand verwendet den bestehenden täglichen QMD-Job, einen seriellen Wartungshelfer und getrennte allgemeine/private Wiki-Konfigurationen. Der Live-Job pflegt bisher nur den allgemeinen Bestand. Dieser frühere Code partitionierte Quellen nach Scope. Ticket 01 hat die gemeinsame CLI inzwischen implementiert und isoliert verifiziert; bestehende produktive Bestände und der Live-Job sind noch nicht migriert.
 
 Daniel hat im Interview klargestellt: „privat“ bezeichnet seinen persönlichen Tätigkeitsbereich, keine Schutzklasse. Die bisherige Architektur leitete daraus eine nicht beabsichtigte Wissensgrenze ab. [ADR 0010](../../../docs/adr/0010-shared-wiki-across-personal-and-professional-domains.md) korrigiert diese Annahme.
@@ -26,7 +28,7 @@ Die zentrale Einführung richtet bestehende Recherche-Skills auf WikiQuery aus. 
 
 ### Automatische Pflege
 
-Der bestehende lokale Job bleibt täglich um 07:00 mit den vorhandenen Modell-, Projekt- und Benachrichtigungseinstellungen aktiv. Er pflegt den vollständigen gemeinsamen Bestand und danach QMD. Merge und Query sind keine zusätzlichen Auslöser. Ein unveränderter erfolgreicher Lauf vermeidet neue Modellkompilierung.
+Der bestehende lokale Job bleibt taeglich um 07:00 mit den vorhandenen Modell-, Projekt- und Benachrichtigungseinstellungen aktiv. Die Fachquellen-Indexpflege darf unabhaengig von ausstehender oder fehlgeschlagener Wiki-Generierung abschliessen. Das Wiki behaelt den vollstaendigen gemeinsamen Pflegeumfang; neue und geaenderte Quellen haben Vorrang vor dem ueber mehrere Tage verteilbaren Erstimport. Indexaktualitaet, laufende Nachpflege und Erstimport-Abschluss werden getrennt ausgewiesen. Merge und Query sind keine zusaetzlichen Ausloeser. Ein unveraenderter erfolgreicher Lauf vermeidet neue Modellkompilierung.
 
 ### Upstream-Stand automatisch übernehmen
 
@@ -55,6 +57,20 @@ Jeder Wiki-Aufruf behält einen lokalen JSON-Laufbericht, der Compiler zusätzli
 Originalrepos bleiben Fachquellen an ihren bestehenden Orten. Generated Wiki-Seiten sind abgeleitete Evidenz, keine neuen Agent-Anweisungen und kein Ersatz für gültige Anforderungen oder ADRs. Die verwaltete Query prüft relevante Originalstände, nutzt passende aktuelle Wiki-Evidenz und fällt bei Lücken auf aktuelle Quellen zurück. Skills und Repo-Einstiege erhalten später kurze Verweise gemäß dem aktualisierten Katalog.
 
 ## Implementation Assumptions
+
+### Pflegeinterview vom 17.09.2026: Aktualitaet und Erstimport
+
+Daniel hat bestaetigt: Neue und geaenderte Fachquellen sollen spaetestens am naechsten Tag im Wiki verarbeitet sein und erhalten Vorrang vor dem Erstimport-Rueckstand. Der Wiki-Erstimport darf sich ueber mehrere Tage verteilen. Ein taeglich vollstaendig nachgezogener Gesamtbestand ist waehrend dieses Aufbaus kein Erfolgskriterium fuer jede einzelne Tagesausfuehrung; der offene Bestand bleibt sichtbar und die produktive Gesamtabnahme verlangt weiterhin den vollstaendigen Erstimport.
+
+Die bestehende hashbasierte Aenderungserkennung bleibt Ausgangspunkt. Wiederverwendbare Zwischenstaende und begrenzte Arbeitseinheiten sind vorgeschlagene Implementierungsmittel; konkrete Mengen und Laufzeitbudgets sind noch nicht festgelegt. Mac-Verfuegbarkeit, Providerfehler und ein grosser Aenderungsumfang koennen das Aktualitaetsziel gefaehrden und duerfen nicht als fristgerechte Verarbeitung gemeldet werden.
+
+Daniel hat ausserdem die unabhaengige Fachquellen-Indexpflege bestaetigt: Aktuelle Originalquellen sollen bereits auffindbar sein, wenn ihre Wiki-Aufbereitung noch aussteht oder scheitert. Dies ersetzt die bisherige Vorgabe „Wiki-Pflege vor globaler QMD-Pflege“ im Zielverhalten. WikiQuery bleibt gemaess ADR 0010 der gemeinsame Agenteneinstieg und kennzeichnet den Rueckgriff auf gepruefte aktuelle Originalquellen. Die Begruendung und Folgen stehen in ADR 0016.
+
+Der Interview-Ausgang ist geklaert; weitere offene Punkte sind Implementierungsentscheidungen. Vorgeschlagen sind dauerhaft wiederverwendbare Extraktionsergebnisse, eine priorisierte Warteschlange und begrenzte Arbeitseinheiten. Zwischenstaende muessen an Quellversion sowie relevante Modell-, Prompt- und Compilerparameter gebunden sein. Ein Ausgangsinventar trennt Erstimport-Rueckstand von spaeter eintreffenden Aenderungen; noch nicht kompilierte Quellen duerfen nicht bei jedem Lauf erneut als neue Tagesaenderungen eingeordnet werden. Bestaetigte Entfernungen und ihre abhaengigen Aussagen behalten die bestehenden Aktualitaets- und Sperrregeln.
+
+Ein kontrolliertes Laufende sichert wiederaufnehmbare Arbeit und einen Bericht; laufende Fortschritts- und Fehlermeldungen ersetzen das alleinige Warten auf den Abschlussbericht. Konkrete Arbeitspaketgroessen, Zeitgrenzen und Parallelitaet werden anhand isolierter Tests und Messungen gewaehlt. Bei gemeinsamem Providerfehler werden neue abhaengige Modellauftraege gestoppt. QMD-Schreibzugriffe bleiben serialisiert; die Entkopplung rechtfertigt weder konkurrierende Schreiber noch die Indexierung ungepruefter Wiki-Ausgaben.
+
+Offene Risiken fuer die Umsetzung: Dauernder Aenderungsnachschub kann den Erstimport verdraengen; Priorisierung braucht deshalb Fortschritt fuer den Rueckstand, ohne das Aktualitaetsziel still aufzugeben. Mac-Ausfall und Providergrenzen koennen die Tagesfrist verletzen. Quellenuebergreifende Konzepte koennen groessere Arbeitseinheiten erfordern; bei unbekannten Abhaengigkeiten darf keine unabhaengige Wiki-Veroeffentlichung behauptet werden. Wiederaufnahme und Quellen-Fallback muessen ueber die echte oeffentliche Schnittstelle mit einem isolierten Provider nachgewiesen werden.
 
 Quellen-IDs und Hash-/Abhängigkeitsverfolgung werden beibehalten. Der bestehende Compiler und QMD bleiben gesetzt. Gemeinsame Konfiguration, genaue Ausgabepfade, Collection-Migration und sichere Arbeitseinheiten bei Teilfehlern werden in der Umsetzung bestimmt; das sind keine weiteren Interviewfragen.
 

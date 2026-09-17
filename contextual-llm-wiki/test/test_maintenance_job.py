@@ -79,15 +79,15 @@ if step == 'wiki:maintain' and os.environ.get('PARTIAL'): sys.exit(1)
         self.assertTrue(report['ok'])
         self.assertTrue(report['contexts'][0]['noop'])
         self.assertEqual((self.root / 'calls').read_text().splitlines(), [
-            'reconcile', 'wiki:preflight', 'wiki:maintain', 'wiki:status', 'wiki:lint',
+            'reconcile', 'wiki:maintain', 'wiki:status', 'wiki:lint',
             'qmd:update', 'qmd:embed', 'qmd:status'])
         self.assertEqual(json.loads((self.root / 'run/report.json').read_text()), report)
-        self.assertTrue((self.root / 'run/03-maintain-test.exitcode').exists())
+        self.assertTrue((self.root / 'run/02-maintain-test.exitcode').exists())
 
     def test_success_exit_cannot_hide_pending_work_or_invalid_contract(self):
         for i, (step, response) in enumerate([
             ('reconcile', {}), ('reconcile', {'status':'blocked'}),
-            ('wiki:preflight', {'ok':None}), ('wiki:maintain', {'ok':True}),
+            ('wiki:maintain', {'ok':True}),
             ('wiki:status', {'ok':True, 'pending':[{'phase':'compile'}]}),
             ('wiki:lint', {'ok':True, 'activeIssues':['broken link']}),
         ]):
@@ -107,16 +107,16 @@ if step == 'wiki:maintain' and os.environ.get('PARTIAL'): sys.exit(1)
         self.assertIn('qmd:embed', (self.root / 'calls').read_text())
         self.assertEqual(report['contexts'][0]['pending'][0]['sources'], ['alpha.md'])
         self.assertEqual(report['contexts'][0]['completed'], ['concepts/control'])
-        self.assertEqual((self.root / 'run/03-maintain-test.exitcode').read_text(), '1\n')
-        self.assertIn('broken branch', (self.root / 'run/03-maintain-test.stdout').read_text())
+        self.assertEqual((self.root / 'run/02-maintain-test.exitcode').read_text(), '1\n')
+        self.assertIn('broken branch', (self.root / 'run/02-maintain-test.stdout').read_text())
 
     def test_failed_command_retains_exit_and_stderr_and_blocks_embed(self):
         self.env['FAIL'] = 'qmd:update'
         p, report = self.run_job()
         self.assertNotEqual(p.returncode, 0)
         self.assertEqual(report['failedStep'], 'qmd-update')
-        self.assertEqual((self.root / 'run/06-qmd-update.exitcode').read_text(), '7\n')
-        self.assertIn('forced failure', (self.root / 'run/06-qmd-update.stderr').read_text())
+        self.assertEqual((self.root / 'run/05-qmd-update.exitcode').read_text(), '7\n')
+        self.assertIn('forced failure', (self.root / 'run/05-qmd-update.stderr').read_text())
         self.assertNotIn('qmd:embed', (self.root / 'calls').read_text())
 
     def test_missing_result_fields_or_run_reports_never_authorize_qmd(self):

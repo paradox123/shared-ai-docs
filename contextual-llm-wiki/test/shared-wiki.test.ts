@@ -372,10 +372,12 @@ test("common QMD registration stays in default retrieval and leaves an unrelated
     const before = qmd("collection", "show", "unrelated");
     f.config.qmd.isolated = false;
     Object.assign(f.config.qmd, {
-      reconcileScript: new URL(
-        "../../../danielsvault-rag/scripts/sync-qmd-collections.py",
-        import.meta.url,
-      ).pathname,
+      reconcileScript:
+        process.env.WIKI_RECONCILE_SCRIPT ||
+        new URL(
+          "../../../danielsvault-rag/scripts/sync-qmd-collections.py",
+          import.meta.url,
+        ).pathname,
     });
     await f.saveConfig();
     const maintained = await f.run("maintain");
@@ -395,7 +397,7 @@ test("common QMD registration stays in default retrieval and leaves an unrelated
     );
     assert.deepEqual(
       manifest.collections.map((c: any) => c.name),
-      ["contextual-wiki-test"],
+      ["contextual-wiki-test", "contextual-wiki-test-sources"],
     );
     assert.equal(manifest.collections[0].private, false);
     assert.match(
