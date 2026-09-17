@@ -279,9 +279,18 @@ test(
       assert.equal((await f.run("status")).lastCompleted, null);
       await rm(f.config.qmd.dbPath, { recursive: true });
       await rename(f.config.qmd.dbPath + ".preserved", f.config.qmd.dbPath);
+      const beforeRecovery = f.calls.length;
       const recovered = await f.run("maintain");
       assert.equal(recovered.ok, true, JSON.stringify(recovered));
+      assert.equal(
+        f.calls.length,
+        beforeRecovery,
+        "index repair must reuse published compiler work without any model requests",
+      );
       assert.equal(extractions(f).length, 3);
+      const noop = await f.run("maintain");
+      assert.equal(noop.noop, true);
+      assert.equal(f.calls.length, beforeRecovery);
       const query = await f.run("query", "--question", "Freigabe");
       assert.equal(query.fallback, false);
       assert.match(query.answer, /Alpha verlangt vier/);
@@ -292,6 +301,7 @@ test(
             drift,
             indexFailed,
             recovered,
+            noop,
             query,
             extractionRequests: extractions(f),
           },

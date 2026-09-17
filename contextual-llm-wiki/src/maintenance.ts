@@ -273,6 +273,18 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     );
     if (unclassified.length)
       throw Error("Unclassified compiler failure: " + unclassified.join("; "));
+    // Reuse validation can detect drift during queued extraction. Preserve safe
+    // source-bounded work before interpreting missing ownership as a full abort.
+    if ((await validatePublication(config, state, sources)).drift.length)
+      return await publishSourcePackage(
+        config,
+        state,
+        sources,
+        extracted,
+        inventory,
+        progress,
+        delta,
+      );
     if (
       failures.some(
         (f) =>
@@ -440,7 +452,17 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     }
     progress.phase = "validate-publication";
     progress.notify();
-    await validatePublication(config, state, sources);
+    const validation = await validatePublication(config, state, sources);
+    if (validation.drift.length)
+      return await publishSourcePackage(
+        config,
+        state,
+        sources,
+        extracted,
+        inventory,
+        progress,
+        delta,
+      );
     progress.phase = "publish";
     progress.notify();
     for (const id of Object.keys(state.pages))
