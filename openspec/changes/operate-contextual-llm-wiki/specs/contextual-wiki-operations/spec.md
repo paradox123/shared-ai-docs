@@ -24,6 +24,13 @@ The automation MUST observe its owned run for a bounded period and use durable p
 - **AND** incomplete or incompatible results are not treated as reusable successes
 - **AND** the report distinguishes source-index completion, ongoing updates and initial-import backlog
 
+#### Scenario: Validate extraction compatibility independently of publication
+- **WHEN** a fresh process considers a previously saved extraction
+- **THEN** it checks the source identity and content, resolved model/provider contract, actual prompt and tool schema including supplied context, and installed compiler contract
+- **AND** a corrupt, incomplete or incompatible entry causes local recomputation without discarding other compatible entries
+- **AND** every supplied field of a successful extraction satisfies the actual tool schema before durable storage or publication
+- **AND** saved work survives a later source-drift or indexing failure without advancing the completed maintenance timestamp
+
 #### Scenario: Source changes while work is running
 - **WHEN** one source changes during generation and unrelated successful work can be proven independent
 - **THEN** affected statements are withheld until revalidated against current evidence
