@@ -1,6 +1,6 @@
 # 01: Aktuelle Fachquellen unabhaengig vom Wiki auffindbar machen
 
-Status: ready-for-agent
+Status: closed
 
 **Parent:** [Wiederaufnehmbare Wiki-Pflege](../spec.md)
 
@@ -26,4 +26,4 @@ Status: ready-for-agent
 
 ## Implementierungsnachweis
 
-Ticket 01 ist im isolierten Worktree implementiert; die separate kritische Verifikation ist abgeschlossen, die Koordinator-Abnahme steht vor der Lieferung. [Verhalten, gemessene Ergebnisse und Grenzen](../../../contextual-llm-wiki/evidence/resumable-maintenance-01.md). Der Ticketstatus wird erst nach bestätigter Lieferung nach `main` abgeschlossen. Die übrigen fünf Tickets und die produktive Aktivierung bleiben offen.
+Ticket 01 wurde nach separater kritischer Verifikation und Koordinator-Abnahme am 17.09.2026 mit [PR #2](https://github.com/paradox123/shared-ai-docs/pull/2) nach `main` geliefert. Verifizierter Merge: [`48e2c848d211145197622d5942a3ae9322c26b08`](https://github.com/paradox123/shared-ai-docs/commit/48e2c848d211145197622d5942a3ae9322c26b08); alle 26 akzeptierten Dateihashes wurden auf Remote-`main` bestätigt. [Verhalten, gemessene Ergebnisse und Grenzen](../../../contextual-llm-wiki/evidence/resumable-maintenance-01.md). Die übrigen fünf Tickets und die produktive Aktivierung bleiben offen.
