@@ -170,3 +170,11 @@ Migration MUST be repeatable from its verified snapshot after interruption or in
 - **AND** compatible saved source answers retain their bytes and remain searchable, and retained extractions are revalidated against their originals before queued reuse
 - **AND** versions first observed by this completed publication scan immediately enter the persistent daily inventory with this observation time and its next-day deadline; later restart does not reset either
 - **AND** source-index freshness is not claimed for the changed snapshot; a later run discovers current membership and restores verified common synthesis without re-extracting compatible unaffected sources
+
+
+#### Scenario: Capture and observe one owned scheduled helper
+- **WHEN** the daily job starts its own maintenance run
+- **THEN** a repository-owned runner captures exactly one helper, its exit status and durable artifact directory
+- **AND** observation has an explicit deadline independent of the final report, with one bounded diagnosis of absent progress
+- **AND** missing or contradictory completion evidence yields non-success with process and remaining-work evidence, without launching a second collector
+- **AND** configuration, a manual productive run, actual scheduled execution and complete multi-day import with no-op remain separate acceptance facts

@@ -74,3 +74,14 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 [Ticket 04: Tagespakete](../../../contextual-llm-wiki/evidence/resumable-maintenance-04.md) ergänzt persistentes Ausgangsinventar, priorisierte begrenzte Extraktion, explizit quellgebundene Zwischenpublikation und getrennte Berliner Frist-/Rückstandsberichte. Globale Synthese bleibt bis zur gemeinsamen Abhängigkeitsprüfung offen. Isolierte Umsetzung und Gegenproben sind dokumentiert; separate Batch-Abnahme, Driftisolation (05), Live-Aktivierung und produktive Gesamtnachweise bleiben offen. Nicht archivieren.
 
 [Ticket 05: Driftisolation](../../../contextual-llm-wiki/evidence/resumable-maintenance-05.md) prüft Originalversionen vor wartender Cachewiederverwendung und vor Publikation. Unbekannte aktuelle Konzeptzugehörigkeit sperrt gemeinsame Synthesen samt Antwortketten; die bestehende quellgebundene Einheit erhält nachweisbar unabhängige Veröffentlichung und unveränderte gültige Quellantworten. Wiederaufnahme, tatsächliche Providerrequests und Indexreparatur sind isoliert geprüft. Separate Batch-Abnahme und produktive Nachweise bleiben offen; nicht archivieren.
+
+
+## Ticket06: zweistufige Aktivierung
+
+- [x] Einmaligen Runner mit eigener endlicher Beobachtung, dauerhaften Prozess-/Exit-/Diagnoseartefakten und Nicht-Erfolg bei fehlendem Abschluss isoliert umsetzen.
+- [x] Vorgängerverhalten gemeinsam über öffentlichen Helper, echte isolierte QMD-Suche und WikiQuery prüfen; Grenzen und kanonischen Prompt mit Betriebsreferenzen abgleichen.
+- [ ] Nach Code-Merge gesicherte produktive Bereitstellung und unveränderte Automationdefinition über vorgesehenes Tool aktivieren/zurücklesen; kontrollierten Produktivlauf mit getrennten Dimensionen abnehmen.
+- [ ] Tatsächlichen nachfolgenden täglichen Schedulerlauf anhand seiner Artefakte nachweisen (späteres externes Ereignis).
+- [ ] Mehrtägigen produktiven Erstimport und anschließenden No-op separat nachweisen (späteres externes Ereignis).
+
+[Ticket06-Nachweis](../../../contextual-llm-wiki/evidence/resumable-maintenance-06.md) trennt die Stufen. Kein Archiv vor tatsächlicher Gesamtabnahme.
