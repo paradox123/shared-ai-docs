@@ -58,6 +58,7 @@ async function persist(file: string, value: unknown) {
 export async function extractionCache(
   config: any,
   sources: Record<string, Source>,
+  notify: () => void = () => {},
 ) {
   const provider = process.env.LLMWIKI_PROVIDER!;
   // Hash request-affecting settings only; never persist credentials or prompts.
@@ -125,6 +126,7 @@ export async function extractionCache(
         validate(stored.raw)
       ) {
         stats.reused++;
+        notify();
         return stored.raw;
       }
       stats.invalid++;
@@ -148,6 +150,7 @@ export async function extractionCache(
         throw Object.assign(error as Error, { sharedExtractionCache: true });
       }
       stats.saved++;
+      notify();
     }
     return raw;
   };

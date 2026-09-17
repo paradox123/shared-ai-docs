@@ -13,7 +13,7 @@ Dieser Abschnitt ergaenzt den bisherigen Betriebsstand; abgeschlossene Implement
 - [x] Fachquellen-Indexpflege von erfolgreicher Wiki-Generierung entkoppeln und ueber WikiQuery den gekennzeichneten Rueckgriff auf aktuelle Originale bei ausstehender oder fehlgeschlagener Generierung nachweisen.
 - [x] Validierte Extraktionen außerhalb des Publikations-Stagings dauerhaft sichern; kompatible Arbeit nach echtem Prozessneustart wiederverwenden und lokale Invalidierung verifizieren (Ticket 02, Evidenz wird separat abgenommen).
 - [ ] Laufende Aenderungen vor Erstimport-Rueckstand priorisieren; dauerhaft wiederverwendbare Zwischenstaende und begrenzte Arbeitseinheiten umsetzen. Neustart darf unveraenderte erfolgreiche Extraktionen nicht erneut ausfuehren.
-- [ ] Fortschritt, Fehler, kontrolliertes Laufende und Wiederaufnahme ueber die oeffentliche Prozessgrenze pruefen; keine unbegrenzte agentische Warteschleife. Abhaengige Modellarbeit bei gemeinsamem Providerfehler stoppen.
+- [x] Fortschritt, Fehler, kontrolliertes Laufende und Wiederaufnahme ueber die oeffentliche Prozessgrenze pruefen; keine unbegrenzte agentische Warteschleife. Abhaengige Modellarbeit bei gemeinsamem Providerfehler stoppen (Ticket 03: isolierte Umsetzung; separate Batch-Abnahme vor Integration).
 - [ ] Quellenaenderung waehrend der Verarbeitung, stale Wiki-Evidenz, gemeinsam genutzte Konzepte, Indexfehler, verpasste Tagesfrist und anschliessenden No-op isoliert verifizieren; nur nachweislich gueltige Ergebnisse wiederverwenden oder veroeffentlichen.
 - [ ] Live-Prompt, QMD-Wartungsreferenz und Betriebsanleitung nach Implementierung konsistent aktualisieren; Produktivabnahme mit separaten Ergebnissen fuer Suchindex, Tagesaenderungen und Erstimport dokumentieren.
 ## 2. Einführung und Abnahme
@@ -68,3 +68,5 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 
 
 [Abnahme Wiederaufnehmbare Pflege, Ticket 01](../../../contextual-llm-wiki/evidence/resumable-maintenance-01.md): unabhängiger Originalquellenindex, verifiziertes WikiQuery-Fallback, explizite Quellenbegrenzung, Scan-/Indexfehler und unveränderter No-op isoliert umgesetzt. Andere Schritte des neuen Sechs-Ticket-Batches sowie Live-Aktivierung und produktive Gesamtabnahme bleiben offen; Change nicht archivieren.
+
+[Ticket 03: begrenzte Pflege](../../../contextual-llm-wiki/evidence/resumable-maintenance-03.md) ergänzt endlichen Helper-/Prozessbesitz, Fortschritt und Provider-Gates. Live-Aktivierung, Tagespriorität und produktive Gesamtabnahme bleiben offen; Change nicht archivieren.

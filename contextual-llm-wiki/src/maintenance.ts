@@ -1,7 +1,8 @@
 import { readFile, mkdir, cp, rm, rename } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import { createWiki } from "../.runtime/compiler/dist/index.js";
+import { maintenanceControl } from "./maintenance-control.ts";
+import { createWiki, modelWork } from "../.runtime/compiler/dist/index.js";
 import { scan } from "./sources.ts";
 import { atomic, json, hash, writeJson } from "./storage.ts";
 import { readState, saveState, changes, reviewPages } from "./state.ts";
@@ -31,8 +32,16 @@ export async function maintain(config: any) {
     pages: [],
     sourceIndex: { ok: false, status: "blocked" },
   };
+  const control = maintenanceControl(
+    process.env.WIKI_MAINTENANCE_PROGRESS ||
+      path.join(artifacts, "progress.json"),
+    progress,
+  );
+  progress.notify = control.emit;
   try {
-    report = await maintainRun(config, artifacts, progress);
+    report = await modelWork.run(control.run, () =>
+      maintainRun(config, artifacts, progress),
+    );
   } catch (error) {
     const message = String((error as Error).message);
     const pending = await readState(config)
@@ -49,8 +58,14 @@ export async function maintain(config: any) {
         : [{ phase: "blocked", error: message }],
     };
   }
+  await control.close();
+  progress.phase = "finished";
+  progress.remaining = report.pending || [];
+  control.emit();
+  delete report.notify;
   report = {
     ...report,
+    outcome: control.reason || (report.ok ? "completed" : "incomplete"),
     sourceIndex: progress.sourceIndex,
     extractions: progress.extractions || { saved: 0, reused: 0, invalid: 0 },
     wiki: {
@@ -70,6 +85,16 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
   const delta = changes(state, sources),
     review = await reviewPages(config, state, sources);
   progress.changes = delta;
+  progress.remaining = [
+    {
+      phase: "compile",
+      sources: [...delta.added, ...delta.changed],
+      removed: delta.removed,
+      pages: review.map((p) => p.id),
+    },
+  ];
+  progress.phase = "source-index";
+  progress.notify();
   const changedIds = new Set(review.map((p) => p.id));
   if (state.publicationVersion !== 2)
     for (const id of Object.keys(state.pages)) changedIds.add(id);
@@ -83,6 +108,7 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     await entry(config, state);
   }
   progress.sourceIndex = await indexSources(config, sources);
+  progress.notify();
   const runtime = preflight();
   const work =
     delta.added.length +
@@ -142,7 +168,9 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     }
     await rm(path.join(root, "wiki"), { recursive: true, force: true });
     const failures: any[] = progress.failures;
-    const cache = await extractionCache(config, sources);
+    const cache = await extractionCache(config, sources, () =>
+      progress.notify(),
+    );
     progress.extractions = cache.stats;
     const wiki = createWiki({ root });
     const result = await wiki.compile({
@@ -290,6 +318,7 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
         try {
           text = await answer(question, evidence);
         } catch (error) {
+          if ((error as any).sharedMaintenance) throw error;
           failures.push({
             phase: "answer",
             id: old.id,
@@ -324,6 +353,8 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       if (!progressed)
         throw Error("Saved answer dependency cycle; restore a valid backup");
     }
+    progress.phase = "validate-publication";
+    progress.notify();
     await checkConfig(config);
     const latest = await scan(config);
     if (
@@ -343,6 +374,8 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       if (hash(actual) !== page.hash)
         throw Error("Page changed during generation: " + page.id);
     }
+    progress.phase = "publish";
+    progress.notify();
     for (const id of Object.keys(state.pages))
       if (!pages[id])
         await rm(path.join(config.output, "wiki", id + ".md"), { force: true });
@@ -404,6 +437,9 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     progress.pages = Object.keys(pages).filter((id) => !pages[id].withdrawn);
     await rm(baseline, { recursive: true, force: true });
     await rename(root, baseline);
+    progress.phase = "lint";
+    progress.remaining = next.pending;
+    progress.notify();
     const audit = await lint(config);
     if (audit.activeIssues.length || audit.unresolvedCompilerErrors.length)
       throw Error(
@@ -413,6 +449,8 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
             ...audit.unresolvedCompilerErrors,
           ]),
       );
+    progress.phase = "wiki-index";
+    progress.notify();
     const index = await qmd(config, "update");
     if (!pending.length) next.lastCompleted = new Date().toISOString();
     next.pending = pending;
