@@ -1,0 +1,40 @@
+[
+  {
+    "utc": "2026-09-20T08:41:34.075279+00:00",
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "skills-repo/skills/orchestrate-ticket-batch/scripts/tests",
+      "-v"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": "test_changed_source_never_publishes_retained_evidence (test_batch_state.BatchStateCliTests) ... ok\ntest_checkpoint_preserves_other_tickets_and_pending_actions (test_batch_state.BatchStateCliTests) ... ok\ntest_concurrent_checkpoints_keep_exactly_one_writer (test_batch_state.BatchStateCliTests) ... ok\ntest_cursor_only_change_does_not_request_followup (test_batch_state.BatchStateCliTests) ... ok\ntest_invalid_json_and_unsupported_manifest_have_structured_errors (test_batch_state.BatchStateCliTests) ... ok\ntest_malformed_existing_ledger_is_not_repaired_by_overwriting_it (test_batch_state.BatchStateCliTests) ... ok\ntest_malformed_observation_status_returns_structured_blocker (test_batch_state.BatchStateCliTests) ... ok\ntest_manifest_identifies_explicit_artifacts_by_bytes (test_batch_state.BatchStateCliTests) ... ok\ntest_manifest_rejects_empty_duplicate_escaping_and_symlink_paths (test_batch_state.BatchStateCliTests) ... ok\ntest_manifest_verification_detects_changed_and_missing_artifacts (test_batch_state.BatchStateCliTests) ... ok\ntest_readiness_requires_matching_assignment_and_complete_observation (test_batch_state.BatchStateCliTests) ... ok\ntest_retention_is_verified_repeatable_and_never_overwrites_different_evidence (test_batch_state.BatchStateCliTests) ... ok\ntest_stale_locked_or_invalid_checkpoint_leaves_ledger_untouched (test_batch_state.BatchStateCliTests) ... ok\ntest_duplicate_rows_do_not_hide_multiple_distinct_candidates (test_find_task_candidates.CandidateCliTests) ... ok\ntest_finds_exact_title_even_after_later_activity_without_leaking_other_rows (test_find_task_candidates.CandidateCliTests) ... ok\ntest_invalid_title_metadata_is_an_error_even_before_title_filtering (test_find_task_candidates.CandidateCliTests) ... ok\ntest_malformed_matching_metadata_returns_error_not_a_safe_empty_result (test_find_task_candidates.CandidateCliTests) ... ok\ntest_no_recent_exact_match_does_not_infer_absence_of_the_task (test_find_task_candidates.CandidateCliTests) ... ok\ntest_output_is_bounded_without_hiding_ambiguity (test_find_task_candidates.CandidateCliTests) ... ok\ntest_provisional_id_is_not_a_task_candidate (test_find_task_candidates.CandidateCliTests) ... ok\ntest_repeated_index_entries_for_one_id_are_one_candidate (test_find_task_candidates.CandidateCliTests) ... ok\n\n----------------------------------------------------------------------\nRan 21 tests in 1.761s\n\nOK\n"
+  },
+  {
+    "utc": "2026-09-20T08:41:34.895390+00:00",
+    "command": [
+      "openspec",
+      "validate",
+      "add-sequential-ticket-orchestration-skill",
+      "--strict"
+    ],
+    "exit_code": 0,
+    "stdout": "Change 'add-sequential-ticket-orchestration-skill' is valid\n",
+    "stderr": ""
+  },
+  {
+    "utc": "2026-09-20T08:41:34.917820+00:00",
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit_code": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

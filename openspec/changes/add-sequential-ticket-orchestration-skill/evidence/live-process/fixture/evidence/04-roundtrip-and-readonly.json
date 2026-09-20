@@ -1,0 +1,23 @@
+{
+  "agent_id": "/root/live_completion",
+  "started_utc": "2026-09-20T08:15:09.126241+00:00",
+  "ended_utc": "2026-09-20T08:15:09.271606+00:00",
+  "cwd": "/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "-v",
+    "test_ticket_export.ExportTests.test_unfiltered_formats_preserve_quoted_multiline_titles_and_numeric_order"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "test_unfiltered_formats_preserve_quoted_multiline_titles_and_numeric_order (test_ticket_export.ExportTests.test_unfiltered_formats_preserve_quoted_multiline_titles_and_numeric_order) ... ok\n\n----------------------------------------------------------------------\nRan 1 test in 0.080s\n\nOK\n",
+  "files": {
+    "ticket_export.py": "1882b09dc5832eebdab623b6c011bd9fdf2e5bf26f1a0200b5d627fdd7628f99",
+    "test_ticket_export.py": "195d0e9dd0b3f3a5dd836d7df43a28fc70ac8f30ac41dc8601bc649d0e7e88e3",
+    "REQUIREMENTS.md": "123aa6dbdb976557bd4d6970b27e0b04672a63b516b4cf2822987c6b5e86fc67",
+    "AGENTS.md": "41a6c98e5bf1b9ea44299771456d6ccd27f3febf552f97a31f5ed5f618dacda2",
+    "README.md": "61b5dc2cd5e567defe82cbeae6d2b876fedad81d2ae76ede990d6f0e6a84cdee"
+  }
+}

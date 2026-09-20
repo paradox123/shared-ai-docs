@@ -1,0 +1,51 @@
+diff --git a/evidence/snapshots/pre-review/ticket_export.py b/ticket_export.py
+index 17c7e53..0a3fd64 100644
+--- a/evidence/snapshots/pre-review/ticket_export.py
++++ b/ticket_export.py
+@@ -5,12 +5,17 @@ import json
+ from pathlib import Path
+ 
+ 
+-def export_csv(tickets, status):
++def prepare_rows(tickets, status):
+     rows = []
+     for ticket in tickets:
+-        if status is None or ticket["status"].strip().lower() == status:
+-            rows.append({"id": ticket["id"], "title": ticket["title"].strip(), "status": ticket["status"].strip().lower()})
++        normalized_status = ticket["status"].strip().lower()
++        if status is None or normalized_status == status:
++            rows.append({"id": ticket["id"], "title": ticket["title"].strip(), "status": normalized_status})
+     rows.sort(key=lambda row: row["id"])
++    return rows
++
++
++def export_csv(rows):
+     stream = io.StringIO(newline="")
+     writer = csv.DictWriter(stream, fieldnames=["id", "title", "status"])
+     writer.writeheader()
+@@ -18,15 +23,6 @@ def export_csv(tickets, status):
+     return stream.getvalue()
+ 
+ 
+-def export_json(tickets, status):
+-    rows = []
+-    for ticket in tickets:
+-        if status is None or ticket["status"].strip().lower() == status:
+-            rows.append({"id": ticket["id"], "title": ticket["title"].strip(), "status": ticket["status"].strip().lower()})
+-    rows.sort(key=lambda row: row["id"])
+-    return json.dumps(rows)
+-
+-
+ def main():
+     parser = argparse.ArgumentParser()
+     parser.add_argument("input", type=Path)
+@@ -34,7 +30,8 @@ def main():
+     parser.add_argument("--status", choices=["todo", "done"])
+     args = parser.parse_args()
+     tickets = json.loads(args.input.read_text())
+-    output = export_csv(tickets, args.status) if args.format == "csv" else export_json(tickets, args.status)
++    rows = prepare_rows(tickets, args.status)
++    output = export_csv(rows) if args.format == "csv" else json.dumps(rows)
+     print(output, end="" if args.format == "csv" else "\n")
+ 
+ 

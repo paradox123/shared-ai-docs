@@ -1,0 +1,90 @@
+{
+  "method": "Public CLI subprocesses, synthetic temporary workspace; no live task or Git effects",
+  "observations": [
+    {
+      "scenario": "Cursor changed, worker unchanged",
+      "exit_code": 0,
+      "observed": {
+        "status": "unchanged",
+        "changed_fields": []
+      }
+    },
+    {
+      "scenario": "Ready worker with a different branch",
+      "exit_code": 2,
+      "observed": {
+        "status": "diverged",
+        "changed_fields": [
+          "branch",
+          "status"
+        ]
+      }
+    },
+    {
+      "scenario": "Initialize revisioned ledger",
+      "exit_code": 0,
+      "observed": {
+        "status": "ready",
+        "revision": 1
+      }
+    },
+    {
+      "scenario": "Checkpoint cursor preserves uncertain send",
+      "exit_code": 0,
+      "observed": {
+        "status": "ready",
+        "revision": 2
+      }
+    },
+    {
+      "scenario": "Reject stale checkpoint",
+      "exit_code": 2,
+      "observed": {
+        "status": "blocked",
+        "reason": "stale revision",
+        "revision": 2
+      }
+    },
+    {
+      "scenario": "Manifest explicit measured report",
+      "exit_code": 0,
+      "observed": {
+        "status": "ready",
+        "schema_version": 1,
+        "files": {
+          "acceptance.md": {
+            "sha256": "7686b920e24baf67ecf1464b48090322a425c96ec16d93a8174ed7d9f9d9949b",
+            "size": 58
+          }
+        }
+      }
+    },
+    {
+      "scenario": "Retain verified report outside worker",
+      "exit_code": 0,
+      "observed": {
+        "status": "ready",
+        "mismatches": [],
+        "file_count": 1
+      }
+    },
+    {
+      "scenario": "Detect changed source",
+      "exit_code": 2,
+      "observed": {
+        "status": "diverged",
+        "mismatches": [
+          "acceptance.md"
+        ]
+      }
+    },
+    {
+      "scenario": "Retained report still matches approved bytes",
+      "exit_code": 0,
+      "observed": {
+        "status": "ready",
+        "mismatches": []
+      }
+    }
+  ]
+}

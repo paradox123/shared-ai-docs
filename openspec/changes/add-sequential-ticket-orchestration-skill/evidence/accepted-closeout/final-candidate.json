@@ -1,0 +1,164 @@
+{
+  "reviewed_candidate_id": "0fb7150329f2e1321d1bd934ca4284c1e19804dc95d61ddd7baa8f1f201e4ed1",
+  "candidate_id": "7ba9e85c9cfeb0f9e3e4b11a7da9d6b1ff445802c7627315412edb117ce2960d",
+  "files": [
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/.codex/skills/openspec-archive-change/SKILL.md",
+      "sha256": "416ddad2617130872648334c47de580b9aee094c66f5b0624ce0dd0ee4c63be6"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/AGENTS.md",
+      "sha256": "5c9647db5161823ec2e40309b4f5b6f7b95f6ca92aa5321ba7a2ae19eb20f426"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/adr/0017-three-sequential-refactoring-checks.md",
+      "sha256": "b3d3e38cd3c485cac9a497c446bab198ba40c47a7c5503ef1f75c7f5a7a80fb4"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/technical-completion.md",
+      "sha256": "946b439a3b74b3dda31dec270e4244739614b4f78c3342163848c52e4f9cdffb"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/completion-contract-design.md",
+      "sha256": "624585d9cead539c2d88e9f4a8af8749346a2d8300052dbb5015f6d46db8759b"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/design.md",
+      "sha256": "b7db48d13b72baa0870ba4878250ae563ce8658d7ff82ac9c78e8a58a504a570"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/proposal.md",
+      "sha256": "608c4f3ba1274dc400a9776af9363bfbb6e9c55314f60cc3e81e744bae6e1e87"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/scripted-batch-design.md",
+      "sha256": "f6259f32a31b1ab138342d2ae5855ec38cdfe011370203a059f2337375800dc3"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/specs/sequential-ticket-orchestration/spec.md",
+      "sha256": "baaf26ddc6a4d1c300ecd68bfdbb7080b47e68d66341a16fced1816a4f838c48"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/specs/technical-change-completion/spec.md",
+      "sha256": "2b563f048fb12926cc6e6f7c3d1a42f505a0267e584076df774c1bc6536d3e2f"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/tasks.md",
+      "sha256": "1606c63e90b4eb897948ff4b9a835f70eeba49f005aa85c9a7c85c359d302f14"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/ask-matt/SKILL.md",
+      "sha256": "6ba88a16450087c28337b1b3848006dbfec29e24be209fefc958b091e0d4ed4a"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/change-accepted/SKILL.md",
+      "sha256": "dc3a71a673e2e8cab9aaad7b63039deaf8313ff98ee03dd7d6cb9afbdac604d5"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/change-accepted/references/requirements-verification.md",
+      "sha256": "e48cfc8bd57730f927a875c79e3fcac7b5184270cf13553e4e3f4310dac37f32"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/SKILL.md",
+      "sha256": "74ce2fdfdcf72522ee3cf6290c6bc6b59ceb02cf5369521308425900d45623f4"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/references/completion-record.md",
+      "sha256": "a9400c2ed280219900cb6ae29852b822ee5711d5ed70fb4cbb3e8dc9d9df3b14"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/references/review-criteria.md",
+      "sha256": "926c01435b1ffcc2db3bde3735d20fee6e79e1e70b30953129cdc108a3b0836b"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/implement/SKILL.md",
+      "sha256": "b0da46ed1f3e911ee00c80ac372bc3eac4b1c435dfd91d62db502b79ecdc9ea3"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/SKILL.md",
+      "sha256": "b4bd64aecb52d6ac8000e154722e3d034eb5787904f41facbf079aee9f513552"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/agents/openai.yaml",
+      "sha256": "aa753da80c5963d77af32a5adcf5b8317e25139663c956e4ecd02dd76cd41d50"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/efficient-execution.md",
+      "sha256": "1e271d1bfe45ac4d88c0433f7dd74082ddc7dbcd16b482678c0406d4f1dfe3e0"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/local-helpers.md",
+      "sha256": "2c2c0a5cba1bf29b4e4511d2d1b4b9080759a7109a89fa36f0323fcfa6e468bd"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/messages.md",
+      "sha256": "1e64041c4a341f048889eb999b4f514a9d3c87d218ba871e3ad5a1153986854b"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/parallel-delivery.md",
+      "sha256": "8ef6557b8a8a3c4cc84af95fcafa550a8f87ecd9a8b7485195b006d1546378e9"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/recovery-and-state.md",
+      "sha256": "069a4eb8c97429e914e25880bc1ab7180cca00a942c18be1881c4dc40c5b762c"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/scripts/batch_state.py",
+      "sha256": "f089b9f764a9f1ac8eb94a193c60c54c17bfbb2d47af462863a467e33276cf8c"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/scripts/find_task_candidates.py",
+      "sha256": "3cb10e281aa5d6f41f51c96891d612079b395d55881aebb0dd104d35f6e9b89c"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/scripts/tests/test_batch_state.py",
+      "sha256": "e242d1b192a0a9ca1234d9d2013430f4827dc9afd4b5ab653443c4fe4af8665f"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/scripts/tests/test_find_task_candidates.py",
+      "sha256": "a42cd93f4294709a27c4eb8bfbc425d1bbc77fb642be02e712bee862007acc3e"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/write-agents-md/SKILL.md",
+      "sha256": "f0237a3e62eac34b4d742192eaff0ebb7df9c4e6f89ad641342c9c16955cf6be"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/ki-fuer-kmu/.codex/skills/change-accepted-closeout/SKILL.md",
+      "sha256": "c21bf4ef6b23dcd745533592773a8a0ce7334d4c3c558ce02c771bf8a1d23990"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/ki-fuer-kmu/.codex/skills/openspec-archive-change/SKILL.md",
+      "sha256": "5f77f4aba5302c486a0dc4447bf178916b617cc71c99684f6036724b587eb0db"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/ki-fuer-kmu/.codex/skills/repo-issue-operating-flow/SKILL.md",
+      "sha256": "66ed5960bbcd6f4a0ee8495134ff0d97e8019a941729fa7fc1b84c81aeb47e76"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/ki-fuer-kmu/AGENTS.md",
+      "sha256": "bbc05008f5f95e13be2e91bb48fa50778aa454e70dbda5aa1b1128c763622ebf"
+    },
+    {
+      "path": "/Users/dh/Documents/DanielsVault/probare-crm/AGENTS.md",
+      "sha256": "bf83c54a67c1844dad01e2ec547afafd7993ec72b1f12da35a98a715d8dde11e"
+    },
+    {
+      "path": "/Users/dh/Documents/Dev/NCG/ncg-backend/AGENTS.md",
+      "sha256": "90da70f5b7601621a0fb10b8f631e942ccaf0e356d98a83d0a5d408520969072"
+    },
+    {
+      "path": "/Users/dh/Documents/Dev/NCG/ncg-backend/backend/AGENTS.md",
+      "sha256": "27d0b2d9351fce53f27598237364ed521de063076fba92adaa9a2d1242e6515d"
+    }
+  ],
+  "metadata_only_mapping": [
+    {
+      "path": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/tasks.md",
+      "old": "690d557a3da2b573a468fe92395f0139ee657eefc72adaa681715b91cb785280",
+      "new": "1606c63e90b4eb897948ff4b9a835f70eeba49f005aa85c9a7c85c359d302f14",
+      "mapping": "Only task 7.7 checkbox changed from pending to complete after all reviews; requirement text unchanged."
+    }
+  ],
+  "behavior_changed": false,
+  "state": "technically-complete"
+}

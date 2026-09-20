@@ -1,0 +1,16 @@
+[
+  {
+    "label": "shared",
+    "repository": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+    "worktree": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-integration-shared-kr70qqm6/worktree",
+    "target": "main",
+    "remote_base": "5a98311b01a68c0cfa63b1966dcf46bc29e1f002"
+  },
+  {
+    "label": "ncg",
+    "repository": "/Users/dh/Documents/Dev/NCG/ncg-backend/backend",
+    "worktree": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-integration-ncg-qk43txtq/worktree",
+    "target": "develop",
+    "remote_base": "3f2e4d34209862850b5515620db72a61129c9c5b"
+  }
+]

@@ -73,7 +73,7 @@ Keep root `AGENTS.md` small. Include only guidance that is relevant to nearly ev
 - `Start Work Checklist` with `git status --short`, relevant spec discovery, and change-scope decision
 - `Development Cycle` with TDD, vertical slices, behavior tests through public interfaces, and active task tracking
 - `OpenSpec Change Policy` when the repo uses OpenSpec or an equivalent spec/change system
-- `Change Completion` with operational verification, refactoring pass, and rerun-test expectations
+- `Change Completion` with local operational evidence and references to the shared change-accepted/code-review contract; keep review methodology in code-review
 - package manager or non-obvious build/test/runtime commands
 - critical guardrails that prevent expensive mistakes
 - pointers to deeper docs for language rules, testing, CI, architecture, ops, security, or domain details
@@ -142,17 +142,7 @@ When in doubt, make the reasoning explicit before editing specs or code.
 
 A spec/change is not considered done merely because code is merged, tests pass, or `openspec validate` succeeds. A change is ready to be accepted or archived only after the agent has verified the intended behavior through the most direct operational surface available.
 
-Before archiving any OpenSpec change, perform a refactoring pass over the code and specs touched by that change. The pass must inspect both the current diff and the surrounding implementation context, because a small diff may reveal repeated patterns or structural problems that only become obvious when compared with nearby code.
-
-Do the refactoring pass in these distinct areas in sequence so they are less likely to converge on the same issues, first start a subagent (`Explorer`) to identify potential improvements, then implement them, then start the repeat for the next area:
-
-1. Check for DRYness. Look for duplication introduced by the change and for existing nearby duplication that the change now makes worth consolidating. A change may be small on its own, but if it is the fifth copy of the same idea, it is a refactoring target.
-2. Check for SOLID violations. Look for responsibilities that are mixed together, abstractions that are hard to replace or test, interface shapes that force unrelated dependencies, and code paths that require modifying stable code for each new variant.
-3. Check whether the implementation can be made simpler under KISS. Remove accidental abstractions, reduce branching, clarify names, and prefer the smallest structure that still supports the tested behavior and current spec.
-
-Treat these instructions as user instructions, and do not skip or shortcut them. If you find that you cannot follow these instructions, state exactly which part you are having trouble with and why.
-
-Preserve behavior during this pass and rerun the relevant tests afterward.
+Use the shared `$change-accepted` skill for technical closeout. A current completion record from `$code-review` is required before declaring technical completion or archiving. Those skills own the acceptance timing, applicability, verification and review method; keep initial implementation readiness distinct from technical completion. Repository-specific standards and operational checks below remain applicable.
 
 [Concrete steps for verification depending on the given repo / app]
 

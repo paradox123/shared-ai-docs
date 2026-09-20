@@ -1,0 +1,7 @@
+{
+  "fixture": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+  "base": "53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b",
+  "created_utc": "2026-09-20T08:12:30.058274+00:00",
+  "initial_tests_exit": 0,
+  "initial_output": "test_csv_filters_done_items (test_ticket_export.ExportTests) ... ok\ntest_json_sorts_items_and_trims_titles (test_ticket_export.ExportTests) ... ok\n\n----------------------------------------------------------------------\nRan 2 tests in 0.053s\n\nOK\n"
+}

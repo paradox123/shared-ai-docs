@@ -1,0 +1,24 @@
+{
+  "recorded_utc": "2026-09-20T08:16:37.749457+00:00",
+  "agent_id": "/root/live_completion",
+  "base": "53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b",
+  "head": "53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b",
+  "candidate_id": "c9657ec045a79c7ad1dfe90bc17c363d79a7ac1084385caa54ea70e2845d4ad3",
+  "write_set": [
+    "ticket_export.py",
+    "test_ticket_export.py"
+  ],
+  "context_sources": [
+    "REQUIREMENTS.md",
+    "AGENTS.md",
+    "README.md"
+  ],
+  "files": {
+    "ticket_export.py": "1882b09dc5832eebdab623b6c011bd9fdf2e5bf26f1a0200b5d627fdd7628f99",
+    "test_ticket_export.py": "bc23ad577ab7c5ce3d032a2e1f311d1e7b145233e56d9037f597715ae834ce6a",
+    "REQUIREMENTS.md": "123aa6dbdb976557bd4d6970b27e0b04672a63b516b4cf2822987c6b5e86fc67",
+    "AGENTS.md": "41a6c98e5bf1b9ea44299771456d6ccd27f3febf552f97a31f5ed5f618dacda2",
+    "README.md": "61b5dc2cd5e567defe82cbeae6d2b876fedad81d2ae76ede990d6f0e6a84cdee"
+  },
+  "excluded": "evidence/ and __pycache__/ are generated evidence/cache, not reviewed behavior; no unrelated fixture changes"
+}

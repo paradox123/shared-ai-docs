@@ -45,13 +45,7 @@ For feature/spec work, keep active `tasks.md` files current enough that another 
 ## Change Completion
 A spec/change is not done only because files were edited, checks pass, or OpenSpec validation succeeds. It is ready for acceptance/archive only after the intended behavior has been verified through the most direct surface available: skill invocation behavior, script output, generated docs, RAG/QMD results, n8n workflow behavior, or automation logs.
 
-Before archiving any OpenSpec change, perform a refactoring pass over the code, skills, and specs touched by that change. Inspect both the current diff and nearby context for:
-
-1. DRYness: duplication introduced by the change or nearby repeated patterns now worth consolidating.
-2. SOLID issues: mixed responsibilities, hard-to-test boundaries, or abstractions that are difficult to replace.
-3. KISS issues: accidental complexity, unclear names, needless branching, or structure larger than the current spec requires.
-
-Preserve behavior during this pass and rerun the relevant tests or checks afterward.
+Use the shared `$change-accepted` skill for technical closeout. A current completion record from `$code-review` is required before declaring technical completion or archiving. Those skills own the acceptance timing, applicability, verification and review method; keep initial implementation readiness distinct from technical completion. Repository-specific standards and operational checks below remain applicable.
 
 For langgraph-github-issue-pilot and other applications developed in this repo, prefer verification through:
 - local application endpoints
