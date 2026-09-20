@@ -485,7 +485,9 @@ class ResolveCodexSessionsCliTests(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, result.stderr)
             output = json.loads(result.stdout)
-            sessions = {session["id"]: session for session in output["sessions"]}
+            sessions = {
+                session["id"]: session for session in output["sessions"]
+            }
             self.assertEqual(
                 sessions["session-open"]["rollout_window"]["state"], "open"
             )
@@ -607,6 +609,112 @@ class ResolveCodexSessionsCliTests(unittest.TestCase):
                         "carry_forward_to_persist"
                     ]
                 ],
+            )
+
+    def test_recovers_carry_memory_session_pruned_from_index(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            codex_home = root / ".codex"
+            old_day = codex_home / "sessions" / "2026" / "07" / "26"
+            new_day = codex_home / "sessions" / "2026" / "07" / "27"
+            old_day.mkdir(parents=True)
+            new_day.mkdir(parents=True)
+            current_row = {
+                "id": "session-new",
+                "thread_name": "New session",
+                "updated_at": "2026-07-27T08:00:00Z",
+            }
+            (codex_home / "session_index.jsonl").write_text(
+                json.dumps(current_row) + "\n"
+            )
+            (new_day / "rollout-session-new.jsonl").write_text(
+                json.dumps(
+                    {
+                        "timestamp": current_row["updated_at"],
+                        "type": "session_meta",
+                        "payload": {
+                            "id": current_row["id"],
+                            "timestamp": current_row["updated_at"],
+                            "cwd": str(root / current_row["id"]),
+                        },
+                    }
+                )
+                + "\n"
+            )
+            carried_records = [
+                {
+                    "timestamp": "2026-07-26T06:00:00Z",
+                    "type": "session_meta",
+                    "payload": {
+                        "id": "session-pruned",
+                        "timestamp": "2026-07-26T06:00:00Z",
+                        "cwd": str(root / "session-pruned"),
+                    },
+                },
+                {
+                    "timestamp": "2026-07-27T07:30:00Z",
+                    "type": "response_item",
+                    "payload": {
+                        "type": "message",
+                        "role": "assistant",
+                        "phase": "final",
+                        "content": [],
+                    },
+                },
+            ]
+            (old_day / "rollout-session-pruned.jsonl").write_text(
+                "".join(
+                    json.dumps(record) + "\n" for record in carried_records
+                )
+            )
+            memory = root / "memory.md"
+            memory.write_text(
+                "Last review: 2026-07-27T07:00:00Z\n"
+                "Processed window end: 2026-07-27T07:00:00Z\n"
+                "Carry-forward sessions: "
+                '[{"id":"session-pruned","line_count":1,'
+                '"last_activity_at":"2026-07-26T06:00:00Z"}]\n'
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(SCRIPT),
+                    "--codex-home",
+                    str(codex_home),
+                    "--memory",
+                    str(memory),
+                ],
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads(result.stdout)
+            sessions = {session["id"]: session for session in output["sessions"]}
+            self.assertEqual(
+                sessions["session-pruned"]["selection_reasons"],
+                ["carry_forward"],
+            )
+            self.assertEqual(
+                sessions["session-pruned"]["source"],
+                "updated-day",
+            )
+            self.assertNotIn(
+                "session-pruned",
+                [
+                    entry["id"]
+                    for entry in output["window"][
+                        "carry_forward_to_persist"
+                    ]
+                ],
+            )
+            self.assertIn(
+                {
+                    "code": "carry_forward_index_row_missing_recovered",
+                    "session_ids": ["session-pruned"],
+                },
+                output["diagnostics"],
             )
 
     def test_unchanged_carry_retires_and_exact_exclusion_precedes_resolution(self):

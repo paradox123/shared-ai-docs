@@ -226,7 +226,7 @@ other = Datei aus neuem Upstream-Ref
 Nur konfliktfreie Ergebnisse in den Staging-Baum uebernehmen. Bei Konflikten, Upstream-Loeschungen lokal veraenderter Dateien oder uneindeutigen Renames anhalten und die beabsichtigte Anpassung klaeren.
 
 5. Die neue Lockdatei nach ihrer bestehenden Semantik erzeugen. Wenn ihre Hashes kanonischen Upstream abbilden, aus dem unmodifizierten neuen Upstream-Baum hashen; lokale Overlays separat durch einen erwarteten Vendor/Upstream-Diff pruefen.
-6. Neue, entfernte und umbenannte Skills ermitteln. Unter `skills-repo/skills` nur Links aendern, deren bestehendes Ziel nachweislich zu diesem Vendor gehoert. Vor dem Entfernen das exakte erwartete Linkziel pruefen; Daniel-eigene Ordner und Links anderer Vendoren erhalten.
+6. Neue, entfernte und umbenannte Skills sowie direkte Skill-Abhaengigkeiten ermitteln. Fuer jeden neuen oder aktualisierten Einstiegspunkt dessen direkte Skill-Aufrufe und verlinkte Referenzen pruefen. Formulierungen wie "always call", "requires" oder ein namentlich verwendetes Primitiv gelten als notwendige Abhaengigkeit; rein beschreibende Beispiele nicht. Jede notwendige Abhaengigkeit muss im gestagten Vendor-Snapshot vorhanden und bei Aufruf ueber den Skillnamen unter `skills-repo/skills` aktiv sein, oder der Einstiegspunkt muss einen dokumentierten eigenstaendigen Ersatz enthalten. Bei fehlender notwendiger Abhaengigkeit vor der Aktivierung anhalten und Vendor-Version, fehlenden Link oder eine ausdruecklich Daniel-eigene Adaption klaeren. Unter `skills-repo/skills` nur Links aendern, deren bestehendes Ziel nachweislich zu diesem Vendor gehoert. Vor dem Entfernen das exakte erwartete Linkziel pruefen; Daniel-eigene Ordner und Links anderer Vendoren erhalten.
 7. Erst nach erfolgreichen Merge-, Lock- und Link-Pruefungen den Staging-Baum auf den exakt validierten Vendor-Zielpfad anwenden. Destruktive Synchronisierung wie `rsync --delete` nie direkt aus einer ungeprueften Quelle oder gegen einen breiten beziehungsweise unaufgeloesten Zielpfad ausfuehren.
 8. Danach `sync-codex-skill-links.sh` ausfuehren und mindestens Folgendes verifizieren:
 
@@ -234,6 +234,7 @@ Nur konfliktfreie Ergebnisse in den Staging-Baum uebernehmen. Bei Konflikten, Up
 - Lock-Hashes entsprechen dem kanonischen Upstream nach der dokumentierten Semantik
 - Vendor/Upstream-Differenzen bestehen nur aus den inventarisierten lokalen Overlays
 - aktive Vendor-Skillnamen entsprechen dem erwarteten neuen Set
+- notwendige direkte Skill-Abhaengigkeiten aktiver Vendor-Einstiegspunkte sind geschlossen oder der eigenstaendige Ersatz ist dokumentiert
 - entfernte Runtime-Links fehlen, neue Links zeigen auf vorhandene `SKILL.md` Dateien
 - Broken-Link-Pruefungen bleiben leer und `git diff --check` ist erfolgreich
 
@@ -299,3 +300,4 @@ Erwartung:
 4. Alle global aktivierten Matt-Pocock-Vendor-Skills sind unter `skills-repo/skills` aktiv und zeigen per Link auf `skills-repo/vendor/mattpocock/.agents/skills/...`.
 5. `skills-repo/active-skills` existiert nicht.
 6. Die Dokumentation beschreibt denselben Zustand, den die lokalen Pfade tatsaechlich verwenden.
+7. Aktive Vendor-Einstiegspunkte verweisen nicht auf fehlende notwendige Skill-Primitive; jede Ausnahme ist als eigenstaendige lokale Adaption dokumentiert.

@@ -65,13 +65,20 @@ Use a normal directory in `skills-repo/skills` only for Daniel-owned global skil
 
 7. If the vendor has multiple agent-specific entrypoints, choose the Codex-specific entrypoint for Codex-facing `SKILL.md` when one exists. Example: `council/SKILL.md` points to the vendor's `SKILL.codex.md`.
 
-8. After changing `skills-repo/skills`, synchronize Codex:
+8. Before activating or synchronizing a new or updated vendor entrypoint, validate its required sibling-skill dependency closure:
+
+- Follow direct skill invocations and links in the entrypoint and its bundled references. Treat wording such as "always call", "requires", or a named primitive used by the workflow as required; do not promote merely descriptive examples to dependencies.
+- Every required sibling must exist in the staged vendor snapshot and be active under `skills-repo/skills` when runtime dispatch addresses it by skill name, or the entrypoint must contain and document a self-contained replacement.
+- If a required sibling is absent, stop before activation. Reconcile the vendor version, activate the missing sibling, or create an explicitly Daniel-owned adaptation; do not leave a router active with a known missing primitive and do not silently rewrite vendor-managed files through active symlinks.
+- Record the checked dependency set and any optional-versus-required judgment in the update evidence.
+
+9. After changing `skills-repo/skills`, synchronize Codex:
 
 ```bash
 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
 ```
 
-9. If hooks are missing or the setup was freshly cloned, install them:
+10. If hooks are missing or the setup was freshly cloned, install them:
 
 ```bash
 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/install-git-hooks.sh
@@ -99,7 +106,7 @@ Use this branch when `skills-repo/vendor/<vendor-name>/` contains copied vendor 
 3. Compare the current vendored tree with the old pinned upstream ref before changing anything. Inventory every local divergence and preserve unrelated parent-repo changes.
 4. Build the new upstream snapshot in a staging directory. For each local divergence, use old pinned upstream as the merge base, the current vendored file as local, and the new upstream file as other. Stop for conflicts, ambiguous renames, or locally changed files deleted upstream.
 5. Generate provenance hashes from the canonical new upstream tree when the existing lock defines hashes that way. Verify local overlays separately; do not redefine a lock field silently to hash the merged overlay.
-6. Review upstream skill additions, removals, and renames. Change only active symlinks already managed by that vendor, and validate their expected old targets before unlinking them.
+6. Review upstream skill additions, removals, renames, and direct sibling-skill dependencies. Validate required dependency closure in the staged snapshot before changing active links. Change only active symlinks already managed by that vendor, and validate their expected old targets before unlinking them.
 7. Apply the staged snapshot to the exact validated vendor directory only after merge and link checks pass. Never run `rsync --delete` or an equivalent destructive copy directly from an unvalidated source or against a broad/unresolved target.
 8. Verify the pinned ref, canonical hashes, expected overlay-only differences, active vendor skill-name set, removed and added runtime links, broken links, and `git diff --check` before finishing.
 
@@ -132,6 +139,7 @@ Expected:
 - `active-skills` is absent.
 - `.agents/skills` and `.claude/skills` point to `skills-repo/skills`.
 - Codex-visible skill names match the active list in `skills-repo/skills`.
+- Required sibling skills referenced by active vendor routers exist and are active when invoked by skill name, or the router documents a self-contained replacement.
 - Broken-link checks print nothing.
 
 ## References

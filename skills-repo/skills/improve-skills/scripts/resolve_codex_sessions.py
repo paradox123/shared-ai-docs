@@ -741,13 +741,23 @@ def main() -> int:
             selected = dict(row)
             selected["_selection_reasons"] = ["window"]
             selected_by_id[row["id"]] = selected
-    missing_carry_ids: List[str] = []
-    for session_id in carry_by_id:
+    recovered_carry_ids: List[str] = []
+    for session_id, carry_entry in carry_by_id.items():
         if session_id in excluded_session_ids:
             continue
         row = latest_by_id.get(session_id)
         if row is None:
-            missing_carry_ids.append(session_id)
+            routing_updated_at = carry_entry.get(
+                "last_activity_at"
+            ) or format_timestamp(cutoff)
+            selected_by_id[session_id] = {
+                "id": session_id,
+                "thread_name": None,
+                "updated_at": routing_updated_at,
+                "_updated": parse_timestamp(routing_updated_at),
+                "_selection_reasons": ["carry_forward"],
+            }
+            recovered_carry_ids.append(session_id)
             continue
         if session_id in selected_by_id:
             selected_by_id[session_id]["_selection_reasons"].append(
@@ -757,11 +767,11 @@ def main() -> int:
             selected = dict(row)
             selected["_selection_reasons"] = ["carry_forward"]
             selected_by_id[session_id] = selected
-    if missing_carry_ids:
+    if recovered_carry_ids:
         diagnostics.append(
             {
-                "code": "carry_forward_sessions_missing_from_index",
-                "session_ids": missing_carry_ids,
+                "code": "carry_forward_index_row_missing_recovered",
+                "session_ids": recovered_carry_ids,
             }
         )
     excluded_sessions = []
@@ -801,7 +811,6 @@ def main() -> int:
     safe_to_persist = (
         not index_diagnostics
         and not carry_diagnostics
-        and not missing_carry_ids
         and len(selected_rows) <= args.max_sessions
     )
     resolved: List[dict] = []
