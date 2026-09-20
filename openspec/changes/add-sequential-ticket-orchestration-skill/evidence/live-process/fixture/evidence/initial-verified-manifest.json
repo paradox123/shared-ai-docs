@@ -1,0 +1,12 @@
+{
+  "recorded_utc": "2026-09-20T08:14:01.630197+00:00",
+  "agent_id": "/root/live_completion",
+  "base": "53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b",
+  "files": {
+    "ticket_export.py": "4b8dfa515856b2573f2c4495e72d736605381d36c187cd4dab060f48fb3e11ba",
+    "test_ticket_export.py": "92812a8d079f50b5f4cd96df21ea26e647d5438431fc900a0d44b32d25891fca",
+    "REQUIREMENTS.md": "123aa6dbdb976557bd4d6970b27e0b04672a63b516b4cf2822987c6b5e86fc67",
+    "AGENTS.md": "41a6c98e5bf1b9ea44299771456d6ccd27f3febf552f97a31f5ed5f618dacda2",
+    "README.md": "61b5dc2cd5e567defe82cbeae6d2b876fedad81d2ae76ede990d6f0e6a84cdee"
+  }
+}

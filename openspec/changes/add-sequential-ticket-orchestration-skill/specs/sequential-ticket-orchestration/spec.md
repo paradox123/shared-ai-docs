@@ -87,3 +87,51 @@ After verified delivery the coordinator SHALL preserve inspectable evidence outs
 #### Scenario: Interrupted cleanup
 - **WHEN** the worktree was removed but archival was interrupted
 - **THEN** the coordinator verifies completed cleanup items and resumes remaining ones without recreating resources or repeating unchecked deletions
+
+### Requirement: Review after critical verification
+Workers SHALL implement and establish behavioral evidence before a separate critical verification. The worker SHALL use change-accepted for technical completion and code-review for structural review after that verification and its repairs; orchestration SHALL reference their contracts rather than redefine the review method. Local checkpoint commits on the owned working branch SHALL be allowed before acceptance; push, merge, closure and archive gates SHALL remain unchanged. Review records SHALL identify reviewer, axis, base, reviewed contents, covered requirements, findings and outcome.
+
+#### Scenario: Critical verification repairs behavior
+- **WHEN** critical verification finds a defect before final review
+- **THEN** the worker repairs it and refreshes affected evidence before invoking code-review for structural review
+
+#### Scenario: Repair after review
+- **WHEN** a review finding is repaired
+- **THEN** the same reviewer checks the delta and affected behavior, retaining earlier coverage; a full repeat requires a recorded reason such as changed requirements, a broad behavioral change or an unusable review baseline
+
+### Requirement: Compact coordination and context
+The skill SHALL use bounded context packets for workers and independent reviewers, with explicit fresh context for subagents. It SHALL define a role profile of Sol/medium for coordination and routine structural review, Astra/high for implementation and critical requirements verification, with focused escalation of difficult structural findings, subject to explicit user model choices and actual runtime support. It SHALL NOT silently change global model defaults or claim that text instructions switched a running coordinator's model. Unchanged observations SHALL NOT trigger extra detail reads, filesystem probes or follow-up prompts; recovery and required pre-mutation checks remain mandatory.
+
+#### Scenario: Unchanged worker snapshot
+- **WHEN** only a wait cursor or observation timestamp changes
+- **THEN** the coordinator saves the cursor and continues a bounded wait without redundant messages or file reads
+
+#### Scenario: Scoped reviewer context
+- **WHEN** a reviewer is launched
+- **THEN** it receives the fixed base/head, relevant requirements and standards, file scope and review brief without the full batch conversation or the other reviewer's conclusions
+
+### Requirement: Local mechanical helpers
+The skill SHALL provide standard-library CLI helpers for atomic revision-checked JSON ledger updates, compact observation comparison, recorded identity comparison, explicit file manifests and verified evidence retention. Helpers SHALL NOT execute task APIs, Git mutations, scheduling, acceptance or cleanup. They SHALL preserve unknown ledger fields, reject stale writes and invalid inputs without replacing the ledger, and retain uncertain actions for coordinator reconciliation. Existing batches SHALL be adopted explicitly rather than silently rewritten.
+
+#### Scenario: Stale ledger writer
+- **WHEN** a checkpoint uses an outdated revision
+- **THEN** the helper reports blocked and leaves the current ledger unchanged
+
+#### Scenario: Identity mismatch
+- **WHEN** an observed task, worktree, branch or target differs from the recorded assignment
+- **THEN** comparison reports divergence without rebinding ownership or authorizing an action
+
+#### Scenario: Changed manifest or unsafe retention
+- **WHEN** evidence differs from its recorded manifest, a path escapes its root, or a retention destination contains different content
+- **THEN** the helper reports the problem without overwriting existing evidence or reporting successful preservation
+
+### Requirement: Consolidated closeout and stable verification
+Ticket delivery and merge evidence SHALL be recorded in the ledger immediately. Pure status and archival documentation SHALL be consolidated into at most one batch closeout change when repository policy permits. Required per-ticket operational activation evidence and pre-merge specification validation SHALL remain per ticket. Workers SHALL establish representative fixtures early, run focused checks during repairs and run the relevant full suite after the last behavioral repair, while retaining required CI checks.
+
+#### Scenario: Six ticket deliveries
+- **WHEN** six tickets have been merged and only status/archival bookkeeping remains
+- **THEN** their merge facts remain individually recorded and one closeout change collects the versioned bookkeeping, instead of six routine follow-up PRs
+
+#### Scenario: Activation and final repair
+- **WHEN** a ticket includes productive activation or a final behavioral repair
+- **THEN** its own activation proof remains required and the final suite covers the repaired contents before delivery; a changed target triggers relevant integration checks

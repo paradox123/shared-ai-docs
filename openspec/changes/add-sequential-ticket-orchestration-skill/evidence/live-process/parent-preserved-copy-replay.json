@@ -1,0 +1,15 @@
+{
+  "observer": "/root",
+  "started_utc": "2026-09-20T08:37:47.860953+00:00",
+  "purpose": "Confirm preserved final snapshot is executable without original temporary Git repository",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "-v"
+  ],
+  "cwd": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/evidence/live-process/fixture/evidence/snapshots/final",
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "test_csv_filters_done_items (test_ticket_export.ExportTests) ... ok\ntest_empty_input_and_nonmatching_filter_have_empty_results (test_ticket_export.ExportTests) ... ok\ntest_filter_matches_normalized_status_in_both_formats (test_ticket_export.ExportTests) ... ok\ntest_json_sorts_items_and_trims_titles (test_ticket_export.ExportTests) ... ok\ntest_todo_filter_matches_normalized_input_in_both_formats (test_ticket_export.ExportTests) ... ok\ntest_unfiltered_formats_preserve_quoted_multiline_titles_and_numeric_order (test_ticket_export.ExportTests) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.335s\n\nOK\n"
+}

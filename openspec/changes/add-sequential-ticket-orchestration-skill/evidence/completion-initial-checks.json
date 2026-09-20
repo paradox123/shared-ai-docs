@@ -1,0 +1,137 @@
+{
+  "checks": [
+    {
+      "check": "skill:code-review",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "check": "skill:change-accepted",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "check": "skill:implement",
+      "exit_code": 1,
+      "output": "Unexpected key(s) in SKILL.md frontmatter: disable-model-invocation. Allowed properties are: allowed-tools, description, license, metadata, name"
+    },
+    {
+      "check": "skill:ask-matt",
+      "exit_code": 1,
+      "output": "Unexpected key(s) in SKILL.md frontmatter: disable-model-invocation. Allowed properties are: allowed-tools, description, license, metadata, name"
+    },
+    {
+      "check": "skill:orchestrate-ticket-batch",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "check": "skill:write-agents-md",
+      "exit_code": 0,
+      "output": "Skill is valid!"
+    },
+    {
+      "check": "diff:/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "check": "diff:/Users/dh/Documents/DanielsVault/ki-fuer-kmu",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "check": "diff:/Users/dh/Documents/DanielsVault/probare-crm",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "check": "diff:/Users/dh/Documents/Dev/NCG/ncg-backend/backend",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "check": "openspec",
+      "exit_code": 0,
+      "output": "Change 'add-sequential-ticket-orchestration-skill' is valid"
+    }
+  ],
+  "runtime_links": [
+    {
+      "skill": "code-review",
+      "runtime_target": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review",
+      "matches": true,
+      "exists": true
+    },
+    {
+      "skill": "change-accepted",
+      "runtime_target": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/change-accepted",
+      "matches": true,
+      "exists": true
+    },
+    {
+      "skill": "implement",
+      "runtime_target": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/implement",
+      "matches": true,
+      "exists": true
+    },
+    {
+      "skill": "ask-matt",
+      "runtime_target": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/ask-matt",
+      "matches": true,
+      "exists": true
+    },
+    {
+      "skill": "orchestrate-ticket-batch",
+      "runtime_target": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch",
+      "matches": true,
+      "exists": true
+    },
+    {
+      "skill": "write-agents-md",
+      "runtime_target": "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/write-agents-md",
+      "matches": true,
+      "exists": true
+    }
+  ],
+  "broken_skill_links": [],
+  "missing_relative_references": [],
+  "vendor_sources": [
+    {
+      "skill": "code-review",
+      "vendor_path": "skills-repo/vendor/mattpocock/.agents/skills/code-review",
+      "source_sha256": "47f4e52c21694def9c7c11cbfbf891ca35eac7a93e395797515be3c8a409ae50",
+      "vendor_unchanged": true
+    },
+    {
+      "skill": "implement",
+      "vendor_path": "skills-repo/vendor/mattpocock/.agents/skills/implement",
+      "source_sha256": "a83f5eeb80700628c6af781ba1d4ec6b220de2a4cb93d426929c180ae268a1d1",
+      "vendor_unchanged": true
+    },
+    {
+      "skill": "ask-matt",
+      "vendor_path": "skills-repo/vendor/mattpocock/.agents/skills/ask-matt",
+      "source_sha256": "b25d86fb36b1d294eeead5d7db529f86135f9671f2afcd607579a63bb2213769",
+      "vendor_unchanged": true
+    }
+  ],
+  "existing_validator_compatibility": [
+    {
+      "skill": "implement",
+      "original_vendor_validator_exit": 1,
+      "original_vendor_validator_output": "Unexpected key(s) in SKILL.md frontmatter: disable-model-invocation. Allowed properties are: allowed-tools, description, license, metadata, name",
+      "remaining_schema_exit": 0,
+      "remaining_schema_output": "Skill is valid!",
+      "limitation": "Validator rejects the existing cross-runtime disable-model-invocation field. It is preserved in real files. A temporary adapter omitted only this field to check the remaining schema; this is not raw-validator success."
+    },
+    {
+      "skill": "ask-matt",
+      "original_vendor_validator_exit": 1,
+      "original_vendor_validator_output": "Unexpected key(s) in SKILL.md frontmatter: disable-model-invocation. Allowed properties are: allowed-tools, description, license, metadata, name",
+      "remaining_schema_exit": 0,
+      "remaining_schema_output": "Skill is valid!",
+      "limitation": "Validator rejects the existing cross-runtime disable-model-invocation field. It is preserved in real files. A temporary adapter omitted only this field to check the remaining schema; this is not raw-validator success."
+    }
+  ]
+}

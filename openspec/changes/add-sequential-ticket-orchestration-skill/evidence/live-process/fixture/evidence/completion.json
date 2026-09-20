@@ -1,0 +1,64 @@
+{
+  "state": "technically-complete",
+  "completed_utc": "2026-09-20T08:29:08.719101+00:00",
+  "coordinator": "/root/live_completion",
+  "base": "53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b",
+  "candidate_id": "051676c8052090e73a27a1123e65977a2f46ef40fe6f5831a9b6c346a9c8f875",
+  "manifest": "candidate-final.json",
+  "requirements": [
+    "requirements-pre-review.md",
+    "requirements-after-dry.md"
+  ],
+  "standards_coverage": "requirements-pre-review.md#repository-standards-ownership",
+  "reviewers": {
+    "DRY": {
+      "agent_id": "/root/live_completion/dry_reviewer",
+      "receipts": [
+        "dry-initial-receipt.md",
+        "dry-delta-receipt.md"
+      ],
+      "finding_disposition": {
+        "DRY-001": "resolved"
+      },
+      "result": "clean"
+    },
+    "SOLID": {
+      "agent_id": "/root/live_completion/solid_reviewer",
+      "receipts": [
+        "solid-receipt.md"
+      ],
+      "result": "clean",
+      "findings": []
+    },
+    "KISS": {
+      "agent_id": "/root/live_completion/kiss_reviewer",
+      "receipts": [
+        "kiss-receipt.md"
+      ],
+      "result": "clean",
+      "findings": []
+    }
+  },
+  "final_checks": [
+    "10-after-dry-repair-tests.json",
+    "11-after-dry-safe-import.json",
+    "12-final-tracked-diff-check.json",
+    "13-final-source-diff-check.json",
+    "14-final-tests-diff-check.json",
+    "15-final-evidence-correspondence.json"
+  ],
+  "open_findings": [],
+  "delivery": {
+    "authorized": [
+      "local technical completion",
+      "local evidence capture"
+    ],
+    "performed": []
+  },
+  "limitations": [
+    "Isolated local standard-library fixture with synthetic ticket data",
+    "Invalid inputs are explicitly out of contract",
+    "No production/deployment claim",
+    "Verification and review commands are logged; initial bootstrap and evidence-authoring commands are not a complete captured shell transcript"
+  ]
+}

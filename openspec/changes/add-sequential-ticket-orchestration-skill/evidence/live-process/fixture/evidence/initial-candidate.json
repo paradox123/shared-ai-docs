@@ -1,0 +1,8 @@
+{
+  "base": "53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b",
+  "files": {
+    "ticket_export.py": "4b8dfa515856b2573f2c4495e72d736605381d36c187cd4dab060f48fb3e11ba",
+    "test_ticket_export.py": "92812a8d079f50b5f4cd96df21ea26e647d5438431fc900a0d44b32d25891fca",
+    "REQUIREMENTS.md": "123aa6dbdb976557bd4d6970b27e0b04672a63b516b4cf2822987c6b5e86fc67"
+  }
+}

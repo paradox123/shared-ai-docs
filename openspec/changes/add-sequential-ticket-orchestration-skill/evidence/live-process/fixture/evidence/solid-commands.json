@@ -1,0 +1,268 @@
+{
+  "agent_id": "/root/live_completion/solid_reviewer",
+  "commands": [
+    {
+      "argv": [
+        "git",
+        "status",
+        "--short"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.460839+00:00",
+      "finished_utc": "2026-09-20T08:22:43.472661+00:00",
+      "stdout": "?? __pycache__/\n?? evidence/\n?? test_ticket_export.py\n?? ticket_export.py\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cat",
+        "README.md"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.472698+00:00",
+      "finished_utc": "2026-09-20T08:22:43.474571+00:00",
+      "stdout": "# Ticket export fixture\n\nSmall isolated Python standard-library CLI used to exercise technical completion. Run `python3 -m unittest -v` locally. No network or delivery.\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cat",
+        "AGENTS.md"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.474608+00:00",
+      "finished_utc": "2026-09-20T08:22:43.476320+00:00",
+      "stdout": "# Fixture guidance\nRead REQUIREMENTS.md. This is an isolated example, not application production code.\nUse Python standard library only, explicit readable names and a CLI entrypoint safe to import.\nTests must execute the public CLI. Preserve required behavior; avoid speculative abstractions.\nUse the active shared change-accepted and code-review skills for technical completion.\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cat",
+        "REQUIREMENTS.md"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.476357+00:00",
+      "finished_utc": "2026-09-20T08:22:43.477989+00:00",
+      "stdout": "# Ticket export requirements\n\nThe public interface is `python3 ticket_export.py <input.json> --format csv|json [--status todo|done]`.\n\nR1. Input is a JSON array of objects with positive integer id, string title and status. Preserve ids; trim surrounding title whitespace. Status values use todo or done, ignoring case and surrounding whitespace. Normalize output status to lowercase. Input validation outside these documented valid inputs is out of scope.\nR2. Without a status filter, export every input item sorted by numeric id. With --status, export only items matching the normalized status. Both formats must yield the same selected values and ordering, including normalized input statuses.\nR3. CSV uses the header id,title,status and standard CSV quoting so commas, quotes and line breaks survive a CSV-reader round trip. JSON is an array containing those same three fields. Empty results have a CSV header only or an empty JSON array.\nR4. Reading input and producing output must not change the input file. No network, external dependencies or extra business fields are needed.\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cat",
+        "evidence/candidate-after-dry.json"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.478018+00:00",
+      "finished_utc": "2026-09-20T08:22:43.479575+00:00",
+      "stdout": "{\n  \"recorded_utc\": \"2026-09-20T08:20:13.247149+00:00\",\n  \"agent_id\": \"/root/live_completion\",\n  \"base\": \"53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b\",\n  \"candidate_id\": \"051676c8052090e73a27a1123e65977a2f46ef40fe6f5831a9b6c346a9c8f875\",\n  \"previous_candidate_id\": \"c9657ec045a79c7ad1dfe90bc17c363d79a7ac1084385caa54ea70e2845d4ad3\",\n  \"write_set\": [\n    \"ticket_export.py\",\n    \"test_ticket_export.py\"\n  ],\n  \"files\": {\n    \"ticket_export.py\": \"a0e03cd9905822c12f7150275e2a56d56c4a60f324842c5015b021b583edbe28\",\n    \"test_ticket_export.py\": \"bc23ad577ab7c5ce3d032a2e1f311d1e7b145233e56d9037f597715ae834ce6a\",\n    \"REQUIREMENTS.md\": \"123aa6dbdb976557bd4d6970b27e0b04672a63b516b4cf2822987c6b5e86fc67\",\n    \"AGENTS.md\": \"41a6c98e5bf1b9ea44299771456d6ccd27f3febf552f97a31f5ed5f618dacda2\",\n    \"README.md\": \"61b5dc2cd5e567defe82cbeae6d2b876fedad81d2ae76ede990d6f0e6a84cdee\"\n  },\n  \"excluded\": \"evidence/ and __pycache__/ are generated evidence/cache; no unrelated fixture work\"\n}\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cat",
+        "evidence/candidate-after-dry.diff"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.479606+00:00",
+      "finished_utc": "2026-09-20T08:22:43.481169+00:00",
+      "stdout": "diff --git a/ticket_export.py b/ticket_export.py\nnew file mode 100644\nindex 0000000..0a3fd64\n--- /dev/null\n+++ b/ticket_export.py\n@@ -0,0 +1,39 @@\n+import argparse\n+import csv\n+import io\n+import json\n+from pathlib import Path\n+\n+\n+def prepare_rows(tickets, status):\n+    rows = []\n+    for ticket in tickets:\n+        normalized_status = ticket[\"status\"].strip().lower()\n+        if status is None or normalized_status == status:\n+            rows.append({\"id\": ticket[\"id\"], \"title\": ticket[\"title\"].strip(), \"status\": normalized_status})\n+    rows.sort(key=lambda row: row[\"id\"])\n+    return rows\n+\n+\n+def export_csv(rows):\n+    stream = io.StringIO(newline=\"\")\n+    writer = csv.DictWriter(stream, fieldnames=[\"id\", \"title\", \"status\"])\n+    writer.writeheader()\n+    writer.writerows(rows)\n+    return stream.getvalue()\n+\n+\n+def main():\n+    parser = argparse.ArgumentParser()\n+    parser.add_argument(\"input\", type=Path)\n+    parser.add_argument(\"--format\", choices=[\"csv\", \"json\"], required=True)\n+    parser.add_argument(\"--status\", choices=[\"todo\", \"done\"])\n+    args = parser.parse_args()\n+    tickets = json.loads(args.input.read_text())\n+    rows = prepare_rows(tickets, args.status)\n+    output = export_csv(rows) if args.format == \"csv\" else json.dumps(rows)\n+    print(output, end=\"\" if args.format == \"csv\" else \"\\n\")\n+\n+\n+if __name__ == \"__main__\":\n+    main()\ndiff --git a/test_ticket_export.py b/test_ticket_export.py\nnew file mode 100644\nindex 0000000..5f5a735\n--- /dev/null\n+++ b/test_ticket_export.py\n@@ -0,0 +1,70 @@\n+import csv\n+import io\n+import json\n+from pathlib import Path\n+import subprocess\n+import sys\n+import tempfile\n+import unittest\n+\n+\n+SCRIPT = Path(__file__).with_name(\"ticket_export.py\")\n+\n+\n+class ExportTests(unittest.TestCase):\n+    def run_export(self, tickets, format, status=None):\n+        with tempfile.TemporaryDirectory() as folder:\n+            source = Path(folder) / \"tickets.json\"\n+            source.write_text(json.dumps(tickets))\n+            args = [sys.executable, str(SCRIPT), str(source), \"--format\", format]\n+            if status is not None:\n+                args += [\"--status\", status]\n+            original_bytes = source.read_bytes()\n+            result = subprocess.run(args, capture_output=True, check=True)\n+            self.assertEqual(source.read_bytes(), original_bytes)\n+            return result.stdout.decode()\n+\n+    def test_json_sorts_items_and_trims_titles(self):\n+        tickets = [{\"id\": 2, \"title\": \" Second \", \"status\": \"todo\"}, {\"id\": 1, \"title\": \"First\", \"status\": \"done\"}]\n+        self.assertEqual(json.loads(self.run_export(tickets, \"json\")), [{\"id\": 1, \"title\": \"First\", \"status\": \"done\"}, {\"id\": 2, \"title\": \"Second\", \"status\": \"todo\"}])\n+\n+    def test_csv_filters_done_items(self):\n+        tickets = [{\"id\": 1, \"title\": \"First\", \"status\": \"todo\"}, {\"id\": 2, \"title\": \"Second\", \"status\": \"done\"}]\n+        self.assertEqual(list(csv.DictReader(io.StringIO(self.run_export(tickets, \"csv\", \"done\")))), [{\"id\": \"2\", \"title\": \"Second\", \"status\": \"done\"}])\n+\n+    def test_filter_matches_normalized_status_in_both_formats(self):\n+        tickets = [{\"id\": 10, \"title\": \" Tenth \", \"status\": \" DONE \"}, {\"id\": 3, \"title\": \"Later\", \"status\": \" ToDo \"}, {\"id\": 2, \"title\": \" Second \", \"status\": \"Done\"}]\n+        for format in (\"csv\", \"json\"):\n+            with self.subTest(format=format):\n+                output = self.run_export(tickets, format, \"done\")\n+                if format == \"json\":\n+                    self.assertEqual(json.loads(output), [{\"id\": 2, \"title\": \"Second\", \"status\": \"done\"}, {\"id\": 10, \"title\": \"Tenth\", \"status\": \"done\"}])\n+                else:\n+                    self.assertEqual(list(csv.DictReader(io.StringIO(output))), [{\"id\": \"2\", \"title\": \"Second\", \"status\": \"done\"}, {\"id\": \"10\", \"title\": \"Tenth\", \"status\": \"done\"}])\n+\n+    def test_unfiltered_formats_preserve_quoted_multiline_titles_and_numeric_order(self):\n+        tickets = [{\"id\": 10, \"title\": \" Tenth \", \"status\": \" ToDo \"}, {\"id\": 2, \"title\": '  First, \"quoted\"\\r\\nsecond line  ', \"status\": \" DONE \"}]\n+        expected = [{\"id\": 2, \"title\": 'First, \"quoted\"\\r\\nsecond line', \"status\": \"done\"}, {\"id\": 10, \"title\": \"Tenth\", \"status\": \"todo\"}]\n+        self.assertEqual(json.loads(self.run_export(tickets, \"json\")), expected)\n+        csv_output = self.run_export(tickets, \"csv\")\n+        self.assertEqual(next(csv.reader(io.StringIO(csv_output, newline=\"\"))), [\"id\", \"title\", \"status\"])\n+        csv_rows = list(csv.DictReader(io.StringIO(csv_output, newline=\"\")))\n+        for row in csv_rows:\n+            row[\"id\"] = int(row[\"id\"])\n+        self.assertEqual(csv_rows, expected)\n+\n+    def test_empty_input_and_nonmatching_filter_have_empty_results(self):\n+        cases = [([], None), ([{\"id\": 1, \"title\": \"First\", \"status\": \"done\"}], \"todo\")]\n+        for tickets, status in cases:\n+            with self.subTest(tickets=tickets, status=status):\n+                self.assertEqual(self.run_export(tickets, \"csv\", status), \"id,title,status\\r\\n\")\n+                self.assertEqual(json.loads(self.run_export(tickets, \"json\", status)), [])\n+\n+    def test_todo_filter_matches_normalized_input_in_both_formats(self):\n+        tickets = [{\"id\": 10, \"title\": \" Later \", \"status\": \" ToDo \"}, {\"id\": 2, \"title\": \"First\", \"status\": \"DONE\"}]\n+        self.assertEqual(json.loads(self.run_export(tickets, \"json\", \"todo\")), [{\"id\": 10, \"title\": \"Later\", \"status\": \"todo\"}])\n+        self.assertEqual(list(csv.DictReader(io.StringIO(self.run_export(tickets, \"csv\", \"todo\")))), [{\"id\": \"10\", \"title\": \"Later\", \"status\": \"todo\"}])\n+\n+\n+if __name__ == \"__main__\":\n+    unittest.main()\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "nl",
+        "-ba",
+        "ticket_export.py"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.481227+00:00",
+      "finished_utc": "2026-09-20T08:22:43.482789+00:00",
+      "stdout": "     1\timport argparse\n     2\timport csv\n     3\timport io\n     4\timport json\n     5\tfrom pathlib import Path\n     6\t\n     7\t\n     8\tdef prepare_rows(tickets, status):\n     9\t    rows = []\n    10\t    for ticket in tickets:\n    11\t        normalized_status = ticket[\"status\"].strip().lower()\n    12\t        if status is None or normalized_status == status:\n    13\t            rows.append({\"id\": ticket[\"id\"], \"title\": ticket[\"title\"].strip(), \"status\": normalized_status})\n    14\t    rows.sort(key=lambda row: row[\"id\"])\n    15\t    return rows\n    16\t\n    17\t\n    18\tdef export_csv(rows):\n    19\t    stream = io.StringIO(newline=\"\")\n    20\t    writer = csv.DictWriter(stream, fieldnames=[\"id\", \"title\", \"status\"])\n    21\t    writer.writeheader()\n    22\t    writer.writerows(rows)\n    23\t    return stream.getvalue()\n    24\t\n    25\t\n    26\tdef main():\n    27\t    parser = argparse.ArgumentParser()\n    28\t    parser.add_argument(\"input\", type=Path)\n    29\t    parser.add_argument(\"--format\", choices=[\"csv\", \"json\"], required=True)\n    30\t    parser.add_argument(\"--status\", choices=[\"todo\", \"done\"])\n    31\t    args = parser.parse_args()\n    32\t    tickets = json.loads(args.input.read_text())\n    33\t    rows = prepare_rows(tickets, args.status)\n    34\t    output = export_csv(rows) if args.format == \"csv\" else json.dumps(rows)\n    35\t    print(output, end=\"\" if args.format == \"csv\" else \"\\n\")\n    36\t\n    37\t\n    38\tif __name__ == \"__main__\":\n    39\t    main()\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "nl",
+        "-ba",
+        "test_ticket_export.py"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.482821+00:00",
+      "finished_utc": "2026-09-20T08:22:43.484323+00:00",
+      "stdout": "     1\timport csv\n     2\timport io\n     3\timport json\n     4\tfrom pathlib import Path\n     5\timport subprocess\n     6\timport sys\n     7\timport tempfile\n     8\timport unittest\n     9\t\n    10\t\n    11\tSCRIPT = Path(__file__).with_name(\"ticket_export.py\")\n    12\t\n    13\t\n    14\tclass ExportTests(unittest.TestCase):\n    15\t    def run_export(self, tickets, format, status=None):\n    16\t        with tempfile.TemporaryDirectory() as folder:\n    17\t            source = Path(folder) / \"tickets.json\"\n    18\t            source.write_text(json.dumps(tickets))\n    19\t            args = [sys.executable, str(SCRIPT), str(source), \"--format\", format]\n    20\t            if status is not None:\n    21\t                args += [\"--status\", status]\n    22\t            original_bytes = source.read_bytes()\n    23\t            result = subprocess.run(args, capture_output=True, check=True)\n    24\t            self.assertEqual(source.read_bytes(), original_bytes)\n    25\t            return result.stdout.decode()\n    26\t\n    27\t    def test_json_sorts_items_and_trims_titles(self):\n    28\t        tickets = [{\"id\": 2, \"title\": \" Second \", \"status\": \"todo\"}, {\"id\": 1, \"title\": \"First\", \"status\": \"done\"}]\n    29\t        self.assertEqual(json.loads(self.run_export(tickets, \"json\")), [{\"id\": 1, \"title\": \"First\", \"status\": \"done\"}, {\"id\": 2, \"title\": \"Second\", \"status\": \"todo\"}])\n    30\t\n    31\t    def test_csv_filters_done_items(self):\n    32\t        tickets = [{\"id\": 1, \"title\": \"First\", \"status\": \"todo\"}, {\"id\": 2, \"title\": \"Second\", \"status\": \"done\"}]\n    33\t        self.assertEqual(list(csv.DictReader(io.StringIO(self.run_export(tickets, \"csv\", \"done\")))), [{\"id\": \"2\", \"title\": \"Second\", \"status\": \"done\"}])\n    34\t\n    35\t    def test_filter_matches_normalized_status_in_both_formats(self):\n    36\t        tickets = [{\"id\": 10, \"title\": \" Tenth \", \"status\": \" DONE \"}, {\"id\": 3, \"title\": \"Later\", \"status\": \" ToDo \"}, {\"id\": 2, \"title\": \" Second \", \"status\": \"Done\"}]\n    37\t        for format in (\"csv\", \"json\"):\n    38\t            with self.subTest(format=format):\n    39\t                output = self.run_export(tickets, format, \"done\")\n    40\t                if format == \"json\":\n    41\t                    self.assertEqual(json.loads(output), [{\"id\": 2, \"title\": \"Second\", \"status\": \"done\"}, {\"id\": 10, \"title\": \"Tenth\", \"status\": \"done\"}])\n    42\t                else:\n    43\t                    self.assertEqual(list(csv.DictReader(io.StringIO(output))), [{\"id\": \"2\", \"title\": \"Second\", \"status\": \"done\"}, {\"id\": \"10\", \"title\": \"Tenth\", \"status\": \"done\"}])\n    44\t\n    45\t    def test_unfiltered_formats_preserve_quoted_multiline_titles_and_numeric_order(self):\n    46\t        tickets = [{\"id\": 10, \"title\": \" Tenth \", \"status\": \" ToDo \"}, {\"id\": 2, \"title\": '  First, \"quoted\"\\r\\nsecond line  ', \"status\": \" DONE \"}]\n    47\t        expected = [{\"id\": 2, \"title\": 'First, \"quoted\"\\r\\nsecond line', \"status\": \"done\"}, {\"id\": 10, \"title\": \"Tenth\", \"status\": \"todo\"}]\n    48\t        self.assertEqual(json.loads(self.run_export(tickets, \"json\")), expected)\n    49\t        csv_output = self.run_export(tickets, \"csv\")\n    50\t        self.assertEqual(next(csv.reader(io.StringIO(csv_output, newline=\"\"))), [\"id\", \"title\", \"status\"])\n    51\t        csv_rows = list(csv.DictReader(io.StringIO(csv_output, newline=\"\")))\n    52\t        for row in csv_rows:\n    53\t            row[\"id\"] = int(row[\"id\"])\n    54\t        self.assertEqual(csv_rows, expected)\n    55\t\n    56\t    def test_empty_input_and_nonmatching_filter_have_empty_results(self):\n    57\t        cases = [([], None), ([{\"id\": 1, \"title\": \"First\", \"status\": \"done\"}], \"todo\")]\n    58\t        for tickets, status in cases:\n    59\t            with self.subTest(tickets=tickets, status=status):\n    60\t                self.assertEqual(self.run_export(tickets, \"csv\", status), \"id,title,status\\r\\n\")\n    61\t                self.assertEqual(json.loads(self.run_export(tickets, \"json\", status)), [])\n    62\t\n    63\t    def test_todo_filter_matches_normalized_input_in_both_formats(self):\n    64\t        tickets = [{\"id\": 10, \"title\": \" Later \", \"status\": \" ToDo \"}, {\"id\": 2, \"title\": \"First\", \"status\": \"DONE\"}]\n    65\t        self.assertEqual(json.loads(self.run_export(tickets, \"json\", \"todo\")), [{\"id\": 10, \"title\": \"Later\", \"status\": \"todo\"}])\n    66\t        self.assertEqual(list(csv.DictReader(io.StringIO(self.run_export(tickets, \"csv\", \"todo\")))), [{\"id\": \"10\", \"title\": \"Later\", \"status\": \"todo\"}])\n    67\t\n    68\t\n    69\tif __name__ == \"__main__\":\n    70\t    unittest.main()\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cat",
+        "evidence/requirements-pre-review.md"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.484368+00:00",
+      "finished_utc": "2026-09-20T08:22:43.486103+00:00",
+      "stdout": "# Requirements verification before structural review\n\nVerifier: `/root/live_completion`. Scope and exact source versions: [candidate-pre-review.json](candidate-pre-review.json). Base: `53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b`. Candidate is uncommitted; both Python files are additions. `REQUIREMENTS.md`, `AGENTS.md`, and `README.md` are unchanged context and included in its identity. Evidence files are excluded from the reviewed identity.\n\nThe stable public seam is the documented Python CLI: tests create actual JSON files, execute actual subprocesses, parse actual stdout and compare independently specified literal values. There are no mocked interfaces or providers. The initial two passing tests were insufficient: a counterexample returned no rows for padded/mixed-case `done` values. [02-normalized-filter-red.json](02-normalized-filter-red.json) records two behavioral failures and exit 1 before the repair. [snapshots/red](snapshots/red) preserves that exact reproducible state. The minimal repair normalizes before comparing status, in each existing format path. [03-normalized-filter-green.json](03-normalized-filter-green.json) proves the affected behavior then passed.\n\n| Requirement | Expected versus directly observed | Evidence and limits |\n| --- | --- | --- |\n| R1 | Original positive IDs 2 and 10 are preserved; padded titles become `Second`/`Tenth`; ` DONE `, `Done`, and ` ToDo ` become lowercase statuses. Observed CLI output matches literals for JSON and CSV. | Tests `test_filter_matches_normalized_status_in_both_formats`, `test_todo_filter_matches_normalized_input_in_both_formats`, and `test_unfiltered_formats_preserve_quoted_multiline_titles_and_numeric_order`. [06-requirements-suite.json](06-requirements-suite.json), exact implementation/test hashes included. Invalid input is explicitly out of scope. |\n| R2 | Unfiltered output includes both statuses, with numeric order 2 before 10. The done filter returns only 2 and 10 from an unsorted three-item input; the todo filter returns only 10 from mixed-case statuses. Both serializers select equal values/order. All expected literal results observed. | The preceding three tests exercise no filter, done, todo and nonlexical numeric ordering. Initial red demonstrated that normalized matching is meaningfully checked. |\n| R3 | CSV has exactly `id,title,status`; commas, double quotes and embedded CRLF in a title survive parsing. JSON has exactly the three documented fields and the same values. Empty input and a nonmatching filter yield exactly the CSV header or `[]`. All assertions passed. | Roundtrip and empty-result tests in [06-requirements-suite.json](06-requirements-suite.json). Binary subprocess capture prevents test harness newline conversion from hiding CRLF loss. Exact expected strings are in the tests. |\n| R4 | Input bytes before/after each public CLI invocation are identical, across both formats and filter paths. Inspected implementation imports only argparse/csv/io/json/pathlib, reads the input once and writes stdout; it performs no network operation or file write. JSON/CSV output contains no additional business fields. | `run_export` checks original bytes after each execution. Same suite is passing. No production service exists in this isolated fixture; inspection plus local process execution establish the bounded no-network/dependency constraint. |\n\nAll required fixture coverage is verified. This is an isolated standard-library example, not evidence of production operation. There is no input validation, external-service, performance, permission or deployment requirement to invent. No OpenSpec material exists in this fixture; the explicit local requirement document is unchanged.\n\n## Repository standards ownership\n\n| Rule source | Assigned owner/evidence |\n| --- | --- |\n| AGENTS: preserve behavior and execute public CLI tests | Requirements verification above; reviewers report any new defect and reopen affected coverage. |\n| AGENTS: standard library only; no network/dependencies (also R4) | SOLID inspects dependency/ownership contracts; requirements inspection above. |\n| AGENTS: safe-to-import CLI entrypoint | SOLID; [07-safe-import.json](07-safe-import.json) shows actual `python3 -c 'import ticket_export'` exit 0 with empty stdout/stderr. |\n| AGENTS: explicit readable names, avoid speculative abstractions | KISS. |\n| Shared code-review criteria: repeated domain decisions | DRY. |\n| AGENTS: use actual shared change-accepted/code-review skills | Coordinator process evidence and separate sequential receipts, not a code smell. |\n| README: local `python3 -m unittest -v`; no delivery | Actual suite above; no delivery authorized or performed. |\n| Whitespace/change integrity | Final diff checks, including both untracked source additions explicitly. |\n\nApplicability is substantive: new executable CLI code and behavior tests require the full DRY \u2192 SOLID \u2192 KISS workflow. Reviewers receive the fixed candidate and their own criteria; no approval or finding is predetermined.\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cat",
+        "evidence/requirements-after-dry.md"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.486162+00:00",
+      "finished_utc": "2026-09-20T08:22:43.487677+00:00",
+      "stdout": "# Requirements evidence after DRY repair\n\nVerifier `/root/live_completion`; exact current contents and source versions in [candidate-after-dry.json](candidate-after-dry.json). This supplements [requirements-pre-review.md](requirements-pre-review.md) without replacing its historical observations.\n\nAccepted DRY-001: the two serializers duplicated the same normalization, selection, projection and sorting policy. [dry-repair.delta.diff](dry-repair.delta.diff) records the only production change: `prepare_rows` now computes each normalized status once, selects and projects the rows, then sorts them. `main` computes those rows once before choosing CSV serialization or `json.dumps`. The internal `export_json` wrapper is removed; only the documented CLI is a public contract. All tests, README, requirements and local standards remain byte-identical.\n\nAffected coverage was reopened before the same DRY reviewer was asked to inspect the delta:\n\n| Coverage | Current observed result |\n| --- | --- |\n| R1 normalization, title trimming and original IDs | Known literal outputs still match for both formats, mixed-case/padded statuses and IDs 2/10. |\n| R2 shared selection and numeric ordering | Both done/todo filters and unfiltered output return the expected literal values and numeric order. |\n| R3 serializer contracts | Exact header/three fields, comma/quote/CRLF title roundtrip and both empty-result paths still pass. Serializers retain standard-library handling. |\n| R4 input integrity/no external dependencies | All CLI calls still assert unchanged input bytes. The inspected delta adds no dependency, network or write path. |\n| Safe-import standard | A fresh actual `python3 -c 'import ticket_export'` exits 0, stdout/stderr empty. |\n\n[10-after-dry-repair-tests.json](10-after-dry-repair-tests.json) records the six real CLI tests against the new source hash, all passing (exit 0). [11-after-dry-safe-import.json](11-after-dry-safe-import.json) records the import result. The same expected/observed details and explicit limits in the preceding requirement map remain applicable; the assertions and source requirements are unchanged. No required coverage is unverified. The DRY delta receipt is still required before the next reviewer can start.\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cat",
+        "evidence/10-after-dry-repair-tests.json"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.487714+00:00",
+      "finished_utc": "2026-09-20T08:22:43.489219+00:00",
+      "stdout": "{\n  \"agent_id\": \"/root/live_completion\",\n  \"started_utc\": \"2026-09-20T08:19:34.187762+00:00\",\n  \"ended_utc\": \"2026-09-20T08:19:34.607680+00:00\",\n  \"cwd\": \"/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix\",\n  \"command\": [\n    \"python3\",\n    \"-m\",\n    \"unittest\",\n    \"-v\"\n  ],\n  \"exit_code\": 0,\n  \"stdout\": \"\",\n  \"stderr\": \"test_csv_filters_done_items (test_ticket_export.ExportTests.test_csv_filters_done_items) ... ok\\ntest_empty_input_and_nonmatching_filter_have_empty_results (test_ticket_export.ExportTests.test_empty_input_and_nonmatching_filter_have_empty_results) ... ok\\ntest_filter_matches_normalized_status_in_both_formats (test_ticket_export.ExportTests.test_filter_matches_normalized_status_in_both_formats) ... ok\\ntest_json_sorts_items_and_trims_titles (test_ticket_export.ExportTests.test_json_sorts_items_and_trims_titles) ... ok\\ntest_todo_filter_matches_normalized_input_in_both_formats (test_ticket_export.ExportTests.test_todo_filter_matches_normalized_input_in_both_formats) ... ok\\ntest_unfiltered_formats_preserve_quoted_multiline_titles_and_numeric_order (test_ticket_export.ExportTests.test_unfiltered_formats_preserve_quoted_multiline_titles_and_numeric_order) ... ok\\n\\n----------------------------------------------------------------------\\nRan 6 tests in 0.368s\\n\\nOK\\n\",\n  \"files\": {\n    \"ticket_export.py\": \"a0e03cd9905822c12f7150275e2a56d56c4a60f324842c5015b021b583edbe28\",\n    \"test_ticket_export.py\": \"bc23ad577ab7c5ce3d032a2e1f311d1e7b145233e56d9037f597715ae834ce6a\",\n    \"REQUIREMENTS.md\": \"123aa6dbdb976557bd4d6970b27e0b04672a63b516b4cf2822987c6b5e86fc67\",\n    \"AGENTS.md\": \"41a6c98e5bf1b9ea44299771456d6ccd27f3febf552f97a31f5ed5f618dacda2\",\n    \"README.md\": \"61b5dc2cd5e567defe82cbeae6d2b876fedad81d2ae76ede990d6f0e6a84cdee\"\n  }\n}\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cat",
+        "evidence/11-after-dry-safe-import.json"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:22:43.489250+00:00",
+      "finished_utc": "2026-09-20T08:22:43.490808+00:00",
+      "stdout": "{\n  \"agent_id\": \"/root/live_completion\",\n  \"started_utc\": \"2026-09-20T08:19:34.635329+00:00\",\n  \"ended_utc\": \"2026-09-20T08:19:34.656986+00:00\",\n  \"cwd\": \"/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix\",\n  \"command\": [\n    \"python3\",\n    \"-c\",\n    \"import ticket_export\"\n  ],\n  \"exit_code\": 0,\n  \"stdout\": \"\",\n  \"stderr\": \"\",\n  \"files\": {\n    \"ticket_export.py\": \"a0e03cd9905822c12f7150275e2a56d56c4a60f324842c5015b021b583edbe28\",\n    \"test_ticket_export.py\": \"bc23ad577ab7c5ce3d032a2e1f311d1e7b145233e56d9037f597715ae834ce6a\",\n    \"REQUIREMENTS.md\": \"123aa6dbdb976557bd4d6970b27e0b04672a63b516b4cf2822987c6b5e86fc67\",\n    \"AGENTS.md\": \"41a6c98e5bf1b9ea44299771456d6ccd27f3febf552f97a31f5ed5f618dacda2\",\n    \"README.md\": \"61b5dc2cd5e567defe82cbeae6d2b876fedad81d2ae76ede990d6f0e6a84cdee\"\n  }\n}\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cat",
+        "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/SKILL.md"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:23:18.900654+00:00",
+      "finished_utc": "2026-09-20T08:23:18.902858+00:00",
+      "stdout": "---\nname: code-review\ndescription: Review a fixed change through separate sequential DRY, SOLID and KISS reviewers, including repository standards, after critical requirements verification. Use for branch, PR or work-in-progress review and technical completion; reuse current evidence and review only affected deltas after repairs.\n---\n\n# Code Review\n\nThis skill is the single owner of structural review, standards coverage and review follow-up. Callers reference it instead of copying the method. Requirements verification precedes structural review; there is no additional blanket Spec/Standards review afterward.\n\n## Scope and inputs\n\nThe complete review applies to substantive code, requirements, effective configuration and binding workflow rules, including skills and AGENTS.md. Pure spelling, formatting and editorial link corrections need appropriate document checks, with a recorded `not-required` scope rationale. Classify by effect, not filename; mixed changes use the complete review for their substantive scope.\n\nResolve the repository, relevant instructions, requirement sources and exact write set. Pin the supplied base to a commit SHA; infer an unambiguous existing change baseline when available, otherwise ask for the missing baseline. Never assume HEAD represents uncommitted work. For a committed branch use the resolved merge-base and head; for work in progress include the scoped staged, unstaged and relevant untracked contents. Preserve unrelated dirty work. Record a content manifest when no commit identifies the candidate. No commit is required solely to review it.\n\nRead the actual requirements verification for this candidate, not just test totals or a worker's approval claim. Missing, stale or incomplete evidence must be completed using [requirements-verification.md](../change-accepted/references/requirements-verification.md) before starting a structural reviewer. A standalone review request authorizes this verification without an Accepted trigger; it does not authorize delivery. Report unavailable verification honestly and do not claim completion.\n\nRead [review-criteria.md](references/review-criteria.md) and the applicable repository standards. Assign each relevant standard to one review dimension or an existing automated check. Keep a coverage map so standards outside the three principle names are still checked. Record tooling results once rather than asking reviewers to repeat enforced checks.\n\n## Three sequential reviews\n\nRun **DRY \u2192 SOLID \u2192 KISS**, each with its own independent reviewer. Do not combine or parallelize the three passes. Use a fresh context (`fork_turns=\"none\"` where available), the exact scoped diff/current content identity, nearby-context paths, requirements, assigned standards and that dimension's brief from the criteria reference. Follow an explicitly authorized model profile; otherwise retain runtime defaults. The reviewing agent reports findings; the implementing agent owns repairs.\n\nFor each dimension:\n\n1. Ask its reviewer to inspect both the diff and surrounding context. Require actionable findings with file/line, affected rule or heuristic, expected improvement and material risk. Distinguish binding rules from judgment calls. Keep the result concise; do not mandate abstractions or edits merely to produce a finding.\n2. Address justified findings within scope, preserve required behavior and run affected checks. Record the reason for any disputed or inapplicable finding; unresolved binding failures prevent completion.\n3. Send the same reviewer the old-to-new delta, its prior findings and affected coverage. Obtain a current result before starting the next dimension. Carry unaffected coverage forward. Replace an unavailable reviewer only with the same bounded packet and recorded provenance.\n\nA later repair may affect an earlier dimension or a behavioral requirement: reopen that affected coverage and refresh its evidence, not the entire sequence automatically. A complete restart needs a recorded reason such as broad changed behavior, changed requirements or an unusable baseline. If separate reviewers cannot be run, report the specific limitation rather than label self-review independent.\n\n## Result and reuse\n\nAfter the last repair, run the relevant final suite and required checks; reuse existing results when their inputs have not changed. Any new repair reopens affected verification/review. Do not rerun the whole suite merely because a status note changed.\n\nSave the compact [completion record](references/completion-record.md) with requirements evidence and the three reviewer receipts. For repeated invocations, check content, requirements and coverage and perform only missing or invalidated checks. Path-only archive moves can retain evidence through an explicit content/path mapping; changed rules or behavior cannot.\n\nReport the reviewed scope, per-dimension outcome, current evidence and remaining limitations. Review alone grants no commit, push, merge, archive or issue-close authority.\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "cat",
+        "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/references/review-criteria.md"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:23:18.902911+00:00",
+      "finished_utc": "2026-09-20T08:23:18.904780+00:00",
+      "stdout": "# Structural review criteria\n\nRepository rules override these design heuristics. Treat code smells as hypotheses requiring a concrete benefit, not automatic violations. Inspect adjacent code as well as changed lines; preserve tested behavior and stay within the change's relevant context.\n\n| Pass | Primary question | Typical observations |\n| --- | --- | --- |\n| DRY | Is knowledge or logic repeated in ways that create inconsistent maintenance? | Duplicated Code; repeated domain decisions or Switches; Data Clumps that repeatedly travel together. Consolidate only when the shared meaning and change reasons agree. |\n| SOLID | Are responsibilities, contracts and dependencies coherent and replaceable? | Divergent Change; Shotgun Surgery; Feature Envy; Message Chains; Refused Bequest; interfaces forcing unrelated dependencies; type/contract and substitution violations. Deepen useful boundaries without inventing future requirements. |\n| KISS | Is this the smallest clear structure supporting current requirements? | Mysterious Name; Speculative Generality; needless Middle Man; unnecessary branches or abstractions; Primitive Obsession where a small domain type simplifies actual behavior. Do not add a type solely because a primitive exists. |\n\nBefore dispatch, map applicable repository standards to the best fitting pass. Examples: duplicated domain constants to DRY; ownership, dependency, interface and error-handling contracts to SOLID; naming, readability and unused abstractions to KISS. Put remaining manually checked code standards explicitly in KISS's packet so they are not silently omitted. Formatting, typechecking and other tooling-enforced rules point to their actual check results. Behavioral/security requirements belong in preceding requirements verification; reviewers still report any concrete defect they discover and reopen that coverage.\n\nGive each reviewer its assigned criteria and standards, not the other reviewers' conclusions as a desired answer. Require separate rule-backed violations and heuristic suggestions, with actionable evidence. A clean result is valid. If a finding concerns another dimension, identify that dimension for the implementing agent to route to its owner instead of launching another broad review.\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "git",
+        "rev-parse",
+        "53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b^{commit}"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:23:18.904815+00:00",
+      "finished_utc": "2026-09-20T08:23:18.915600+00:00",
+      "stdout": "53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b",
+        "--",
+        "README.md",
+        "AGENTS.md",
+        "REQUIREMENTS.md"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:23:18.915655+00:00",
+      "finished_utc": "2026-09-20T08:23:18.926136+00:00",
+      "stdout": "",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "rg",
+        "--files",
+        "evidence/snapshots/after-dry"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:23:18.926198+00:00",
+      "finished_utc": "2026-09-20T08:23:18.940401+00:00",
+      "stdout": "evidence/snapshots/after-dry/test_ticket_export.py\nevidence/snapshots/after-dry/ticket_export.py\nevidence/snapshots/after-dry/AGENTS.md\nevidence/snapshots/after-dry/README.md\nevidence/snapshots/after-dry/REQUIREMENTS.md\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "python3",
+        "-c",
+        "from pathlib import Path\nimport hashlib,json,subprocess\nrepo=Path.cwd()\nmanifest=json.loads(Path('evidence/candidate-after-dry.json').read_text())\nobserved={name:hashlib.sha256(Path(name).read_bytes()).hexdigest() for name in manifest['files']}\nassert observed==manifest['files'], (observed,manifest['files'])\nsnapshot=Path('evidence/snapshots/after-dry')\nfor name in manifest['write_set']:\n    assert Path(name).read_bytes()==(snapshot/name).read_bytes(), name\nfor path in ['evidence/10-after-dry-repair-tests.json','evidence/11-after-dry-safe-import.json']:\n    evidence=json.loads(Path(path).read_text())\n    assert evidence['files']==observed, path\n    assert evidence['exit_code']==0, path\nparts=[]\nfor name in manifest['write_set']:\n    result=subprocess.run(['git','diff','--no-index','--','/dev/null',name],text=True,capture_output=True)\n    assert result.returncode==1 and not result.stderr, name\n    parts.append(result.stdout)\nassert ''.join(parts)==Path('evidence/candidate-after-dry.diff').read_text()\nprint(json.dumps({'file_hashes':observed,'snapshot_matches':True,'existing_suite_and_import_evidence_matches':True,'current_diff_matches_pinned_diff':True,'candidate_id':manifest['candidate_id']},indent=2))\n"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:23:18.940450+00:00",
+      "finished_utc": "2026-09-20T08:23:18.984970+00:00",
+      "stdout": "{\n  \"file_hashes\": {\n    \"ticket_export.py\": \"a0e03cd9905822c12f7150275e2a56d56c4a60f324842c5015b021b583edbe28\",\n    \"test_ticket_export.py\": \"bc23ad577ab7c5ce3d032a2e1f311d1e7b145233e56d9037f597715ae834ce6a\",\n    \"REQUIREMENTS.md\": \"123aa6dbdb976557bd4d6970b27e0b04672a63b516b4cf2822987c6b5e86fc67\",\n    \"AGENTS.md\": \"41a6c98e5bf1b9ea44299771456d6ccd27f3febf552f97a31f5ed5f618dacda2\",\n    \"README.md\": \"61b5dc2cd5e567defe82cbeae6d2b876fedad81d2ae76ede990d6f0e6a84cdee\"\n  },\n  \"snapshot_matches\": true,\n  \"existing_suite_and_import_evidence_matches\": true,\n  \"current_diff_matches_pinned_diff\": true,\n  \"candidate_id\": \"051676c8052090e73a27a1123e65977a2f46ef40fe6f5831a9b6c346a9c8f875\"\n}\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--no-index",
+        "--",
+        "/dev/null",
+        "ticket_export.py"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:24:30.724621+00:00",
+      "finished_utc": "2026-09-20T08:24:30.736370+00:00",
+      "stdout": "diff --git a/ticket_export.py b/ticket_export.py\nnew file mode 100644\nindex 0000000..0a3fd64\n--- /dev/null\n+++ b/ticket_export.py\n@@ -0,0 +1,39 @@\n+import argparse\n+import csv\n+import io\n+import json\n+from pathlib import Path\n+\n+\n+def prepare_rows(tickets, status):\n+    rows = []\n+    for ticket in tickets:\n+        normalized_status = ticket[\"status\"].strip().lower()\n+        if status is None or normalized_status == status:\n+            rows.append({\"id\": ticket[\"id\"], \"title\": ticket[\"title\"].strip(), \"status\": normalized_status})\n+    rows.sort(key=lambda row: row[\"id\"])\n+    return rows\n+\n+\n+def export_csv(rows):\n+    stream = io.StringIO(newline=\"\")\n+    writer = csv.DictWriter(stream, fieldnames=[\"id\", \"title\", \"status\"])\n+    writer.writeheader()\n+    writer.writerows(rows)\n+    return stream.getvalue()\n+\n+\n+def main():\n+    parser = argparse.ArgumentParser()\n+    parser.add_argument(\"input\", type=Path)\n+    parser.add_argument(\"--format\", choices=[\"csv\", \"json\"], required=True)\n+    parser.add_argument(\"--status\", choices=[\"todo\", \"done\"])\n+    args = parser.parse_args()\n+    tickets = json.loads(args.input.read_text())\n+    rows = prepare_rows(tickets, args.status)\n+    output = export_csv(rows) if args.format == \"csv\" else json.dumps(rows)\n+    print(output, end=\"\" if args.format == \"csv\" else \"\\n\")\n+\n+\n+if __name__ == \"__main__\":\n+    main()\n",
+      "stderr": "",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "note": "New untracked file has a nonempty diff; exit 1 is expected."
+    },
+    {
+      "argv": [
+        "git",
+        "diff",
+        "--no-index",
+        "--",
+        "/dev/null",
+        "test_ticket_export.py"
+      ],
+      "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+      "started_utc": "2026-09-20T08:24:30.736391+00:00",
+      "finished_utc": "2026-09-20T08:24:30.746258+00:00",
+      "stdout": "diff --git a/test_ticket_export.py b/test_ticket_export.py\nnew file mode 100644\nindex 0000000..5f5a735\n--- /dev/null\n+++ b/test_ticket_export.py\n@@ -0,0 +1,70 @@\n+import csv\n+import io\n+import json\n+from pathlib import Path\n+import subprocess\n+import sys\n+import tempfile\n+import unittest\n+\n+\n+SCRIPT = Path(__file__).with_name(\"ticket_export.py\")\n+\n+\n+class ExportTests(unittest.TestCase):\n+    def run_export(self, tickets, format, status=None):\n+        with tempfile.TemporaryDirectory() as folder:\n+            source = Path(folder) / \"tickets.json\"\n+            source.write_text(json.dumps(tickets))\n+            args = [sys.executable, str(SCRIPT), str(source), \"--format\", format]\n+            if status is not None:\n+                args += [\"--status\", status]\n+            original_bytes = source.read_bytes()\n+            result = subprocess.run(args, capture_output=True, check=True)\n+            self.assertEqual(source.read_bytes(), original_bytes)\n+            return result.stdout.decode()\n+\n+    def test_json_sorts_items_and_trims_titles(self):\n+        tickets = [{\"id\": 2, \"title\": \" Second \", \"status\": \"todo\"}, {\"id\": 1, \"title\": \"First\", \"status\": \"done\"}]\n+        self.assertEqual(json.loads(self.run_export(tickets, \"json\")), [{\"id\": 1, \"title\": \"First\", \"status\": \"done\"}, {\"id\": 2, \"title\": \"Second\", \"status\": \"todo\"}])\n+\n+    def test_csv_filters_done_items(self):\n+        tickets = [{\"id\": 1, \"title\": \"First\", \"status\": \"todo\"}, {\"id\": 2, \"title\": \"Second\", \"status\": \"done\"}]\n+        self.assertEqual(list(csv.DictReader(io.StringIO(self.run_export(tickets, \"csv\", \"done\")))), [{\"id\": \"2\", \"title\": \"Second\", \"status\": \"done\"}])\n+\n+    def test_filter_matches_normalized_status_in_both_formats(self):\n+        tickets = [{\"id\": 10, \"title\": \" Tenth \", \"status\": \" DONE \"}, {\"id\": 3, \"title\": \"Later\", \"status\": \" ToDo \"}, {\"id\": 2, \"title\": \" Second \", \"status\": \"Done\"}]\n+        for format in (\"csv\", \"json\"):\n+            with self.subTest(format=format):\n+                output = self.run_export(tickets, format, \"done\")\n+                if format == \"json\":\n+                    self.assertEqual(json.loads(output), [{\"id\": 2, \"title\": \"Second\", \"status\": \"done\"}, {\"id\": 10, \"title\": \"Tenth\", \"status\": \"done\"}])\n+                else:\n+                    self.assertEqual(list(csv.DictReader(io.StringIO(output))), [{\"id\": \"2\", \"title\": \"Second\", \"status\": \"done\"}, {\"id\": \"10\", \"title\": \"Tenth\", \"status\": \"done\"}])\n+\n+    def test_unfiltered_formats_preserve_quoted_multiline_titles_and_numeric_order(self):\n+        tickets = [{\"id\": 10, \"title\": \" Tenth \", \"status\": \" ToDo \"}, {\"id\": 2, \"title\": '  First, \"quoted\"\\r\\nsecond line  ', \"status\": \" DONE \"}]\n+        expected = [{\"id\": 2, \"title\": 'First, \"quoted\"\\r\\nsecond line', \"status\": \"done\"}, {\"id\": 10, \"title\": \"Tenth\", \"status\": \"todo\"}]\n+        self.assertEqual(json.loads(self.run_export(tickets, \"json\")), expected)\n+        csv_output = self.run_export(tickets, \"csv\")\n+        self.assertEqual(next(csv.reader(io.StringIO(csv_output, newline=\"\"))), [\"id\", \"title\", \"status\"])\n+        csv_rows = list(csv.DictReader(io.StringIO(csv_output, newline=\"\")))\n+        for row in csv_rows:\n+            row[\"id\"] = int(row[\"id\"])\n+        self.assertEqual(csv_rows, expected)\n+\n+    def test_empty_input_and_nonmatching_filter_have_empty_results(self):\n+        cases = [([], None), ([{\"id\": 1, \"title\": \"First\", \"status\": \"done\"}], \"todo\")]\n+        for tickets, status in cases:\n+            with self.subTest(tickets=tickets, status=status):\n+                self.assertEqual(self.run_export(tickets, \"csv\", status), \"id,title,status\\r\\n\")\n+                self.assertEqual(json.loads(self.run_export(tickets, \"json\", status)), [])\n+\n+    def test_todo_filter_matches_normalized_input_in_both_formats(self):\n+        tickets = [{\"id\": 10, \"title\": \" Later \", \"status\": \" ToDo \"}, {\"id\": 2, \"title\": \"First\", \"status\": \"DONE\"}]\n+        self.assertEqual(json.loads(self.run_export(tickets, \"json\", \"todo\")), [{\"id\": 10, \"title\": \"Later\", \"status\": \"todo\"}])\n+        self.assertEqual(list(csv.DictReader(io.StringIO(self.run_export(tickets, \"csv\", \"todo\")))), [{\"id\": \"10\", \"title\": \"Later\", \"status\": \"todo\"}])\n+\n+\n+if __name__ == \"__main__\":\n+    unittest.main()\n",
+      "stderr": "",
+      "exit_code": 1,
+      "expected_exit_code": 1,
+      "note": "New untracked file has a nonempty diff; exit 1 is expected."
+    }
+  ]
+}

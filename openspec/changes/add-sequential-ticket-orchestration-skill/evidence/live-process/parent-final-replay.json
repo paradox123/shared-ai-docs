@@ -1,0 +1,22 @@
+{
+  "observer": "/root",
+  "started_utc": "2026-09-20T08:29:23.865427+00:00",
+  "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "-v"
+  ],
+  "exit_code": 0,
+  "stdout": "",
+  "stderr": "test_csv_filters_done_items (test_ticket_export.ExportTests) ... ok\ntest_empty_input_and_nonmatching_filter_have_empty_results (test_ticket_export.ExportTests) ... ok\ntest_filter_matches_normalized_status_in_both_formats (test_ticket_export.ExportTests) ... ok\ntest_json_sorts_items_and_trims_titles (test_ticket_export.ExportTests) ... ok\ntest_todo_filter_matches_normalized_input_in_both_formats (test_ticket_export.ExportTests) ... ok\ntest_unfiltered_formats_preserve_quoted_multiline_titles_and_numeric_order (test_ticket_export.ExportTests) ... ok\n\n----------------------------------------------------------------------\nRan 6 tests in 0.276s\n\nOK\n",
+  "files": {
+    "ticket_export.py": "a0e03cd9905822c12f7150275e2a56d56c4a60f324842c5015b021b583edbe28",
+    "test_ticket_export.py": "bc23ad577ab7c5ce3d032a2e1f311d1e7b145233e56d9037f597715ae834ce6a",
+    "REQUIREMENTS.md": "123aa6dbdb976557bd4d6970b27e0b04672a63b516b4cf2822987c6b5e86fc67",
+    "AGENTS.md": "41a6c98e5bf1b9ea44299771456d6ccd27f3febf552f97a31f5ed5f618dacda2",
+    "README.md": "61b5dc2cd5e567defe82cbeae6d2b876fedad81d2ae76ede990d6f0e6a84cdee"
+  },
+  "unchanged_during_run": true
+}

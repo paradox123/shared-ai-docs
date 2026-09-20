@@ -1,0 +1,115 @@
+{
+  "base": "d6898ead386a36f2439b09326c25418f9578c695",
+  "candidate_kind": "scoped working tree including untracked new files; no commit created",
+  "initial_manifest": {
+    "status": "ready",
+    "schema_version": 1,
+    "files": {
+      "openspec/changes/add-sequential-ticket-orchestration-skill/design.md": {
+        "sha256": "b48092210a718638bffb2aa722b7aa2698f95044c076671bb8d2c36751e27704",
+        "size": 4723
+      },
+      "openspec/changes/add-sequential-ticket-orchestration-skill/proposal.md": {
+        "sha256": "144f4e49b73f26beede2b287261d147dcaf974b1fa9ded722a457df2afc48bf1",
+        "size": 2361
+      },
+      "openspec/changes/add-sequential-ticket-orchestration-skill/scripted-batch-design.md": {
+        "sha256": "c3c2c72783ddb4b423725e4ef278e8bb1b8c19fd836d33eece69a52006befc50",
+        "size": 3678
+      },
+      "openspec/changes/add-sequential-ticket-orchestration-skill/specs/sequential-ticket-orchestration/spec.md": {
+        "sha256": "0457de3716a233cc5e2928cb4502b3f8f306a0e346ba765d974e9f237121b259",
+        "size": 12177
+      },
+      "openspec/changes/add-sequential-ticket-orchestration-skill/tasks.md": {
+        "sha256": "a2fd4e53aeba2ddbc88b8375b3bf74aa2144729ab61640b5af7a10015bf0b517",
+        "size": 1651
+      },
+      "skills-repo/skills/orchestrate-ticket-batch/SKILL.md": {
+        "sha256": "f71d5b31925b8b48dadfb89c505e1b20d0a24eeb61322ad0b1301f9cea724e99",
+        "size": 13737
+      },
+      "skills-repo/skills/orchestrate-ticket-batch/references/efficient-execution.md": {
+        "sha256": "ee94ca0ccfb7e644a2af932cea25750ccb5b070b5cfe1098fb47b165b9afe169",
+        "size": 6545
+      },
+      "skills-repo/skills/orchestrate-ticket-batch/references/local-helpers.md": {
+        "sha256": "2c2c0a5cba1bf29b4e4511d2d1b4b9080759a7109a89fa36f0323fcfa6e468bd",
+        "size": 5980
+      },
+      "skills-repo/skills/orchestrate-ticket-batch/references/messages.md": {
+        "sha256": "869d16a7a82f44725de216b70bc4d7cf65a91ab4277f5e8bb674426a5ba0b16e",
+        "size": 11699
+      },
+      "skills-repo/skills/orchestrate-ticket-batch/references/parallel-delivery.md": {
+        "sha256": "8ef6557b8a8a3c4cc84af95fcafa550a8f87ecd9a8b7485195b006d1546378e9",
+        "size": 10089
+      },
+      "skills-repo/skills/orchestrate-ticket-batch/references/recovery-and-state.md": {
+        "sha256": "bfe269426e0727b82af1e97dec082f3d0102c6165cd2cc256f77881fb3f80c86",
+        "size": 10008
+      },
+      "skills-repo/skills/orchestrate-ticket-batch/scripts/batch_state.py": {
+        "sha256": "0819edba1729ca993483e155e06abc9ddc8e9e47bf5b95921dd7636cec08ae56",
+        "size": 10449
+      },
+      "skills-repo/skills/orchestrate-ticket-batch/scripts/tests/test_batch_state.py": {
+        "sha256": "1cfb9fa66f7a7bd7a05589b8a16b9469612c44cddadd1276873a5e9f76cf96fd",
+        "size": 12492
+      }
+    }
+  },
+  "final_code_sha256": {
+    "skills-repo/skills/orchestrate-ticket-batch/scripts/batch_state.py": "f089b9f764a9f1ac8eb94a193c60c54c17bfbb2d47af462863a467e33276cf8c",
+    "skills-repo/skills/orchestrate-ticket-batch/scripts/tests/test_batch_state.py": "e242d1b192a0a9ca1234d9d2013430f4827dc9afd4b5ab653443c4fe4af8665f"
+  },
+  "post_review_bookkeeping": [
+    "tasks.md completion checkbox",
+    "token-efficiency-verification.md acceptance overview",
+    "evidence/token-efficiency-*.json and forward-check.md"
+  ],
+  "reviews": [
+    {
+      "axis": "Standards",
+      "reviewer_id": "/root/standards_review",
+      "model": "gpt-5.6-sol",
+      "reasoning": "medium",
+      "fork_turns": "none",
+      "requirements": [
+        "AGENTS.md",
+        "skill-creator principles",
+        "code-review smell baseline"
+      ],
+      "initial_outcome": "pass",
+      "findings": [],
+      "delta": "String guard for malformed observation status plus public CLI regression test; synthetic acceptance evidence",
+      "final_outcome": "pass; prior coverage retained; no new Standards issues or actionable smells"
+    },
+    {
+      "axis": "Spec",
+      "reviewer_id": "/root/spec_review",
+      "model": "gpt-6-astra",
+      "reasoning": "high",
+      "fork_turns": "none",
+      "requirements": [
+        "Review after critical verification",
+        "Compact coordination and context",
+        "Local mechanical helpers",
+        "Consolidated closeout and stable verification",
+        "Preservation of existing target, isolation, recovery, acceptance, integration and cleanup requirements"
+      ],
+      "initial_outcome": "repair required",
+      "findings": [
+        {
+          "id": "SPEC-01",
+          "priority": "P2",
+          "description": "List/object status causes TypeError instead of structured JSON blocker",
+          "disposition": "resolved",
+          "proof": "test_malformed_observation_status_returns_structured_blocker; [], {}, null and integer yield blocked exit 2"
+        }
+      ],
+      "delta": "Type validation before set membership and focused regression test",
+      "final_outcome": "pass; prior Spec coverage retained; final code hashes independently reported by reviewer"
+    }
+  ]
+}

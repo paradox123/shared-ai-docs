@@ -1,0 +1,26 @@
+{
+  "recorded_utc": "2026-09-20T08:17:39.405447+00:00",
+  "agent_id": "/root/live_completion",
+  "sources": {
+    "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/change-accepted/SKILL.md": {
+      "snapshot": "evidence/skill-sources/change-accepted/SKILL.md",
+      "sha256": "dc3a71a673e2e8cab9aaad7b63039deaf8313ff98ee03dd7d6cb9afbdac604d5"
+    },
+    "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/change-accepted/references/requirements-verification.md": {
+      "snapshot": "evidence/skill-sources/change-accepted/references/requirements-verification.md",
+      "sha256": "e48cfc8bd57730f927a875c79e3fcac7b5184270cf13553e4e3f4310dac37f32"
+    },
+    "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/SKILL.md": {
+      "snapshot": "evidence/skill-sources/code-review/SKILL.md",
+      "sha256": "74ce2fdfdcf72522ee3cf6290c6bc6b59ceb02cf5369521308425900d45623f4"
+    },
+    "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/references/review-criteria.md": {
+      "snapshot": "evidence/skill-sources/code-review/references/review-criteria.md",
+      "sha256": "926c01435b1ffcc2db3bde3735d20fee6e79e1e70b30953129cdc108a3b0836b"
+    },
+    "/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/references/completion-record.md": {
+      "snapshot": "evidence/skill-sources/code-review/references/completion-record.md",
+      "sha256": "a9400c2ed280219900cb6ae29852b822ee5711d5ed70fb4cbb3e8dc9d9df3b14"
+    }
+  }
+}

@@ -8,6 +8,8 @@ metadata:
   generatedBy: "1.2.0"
 ---
 
+Before archive operations, inspect the current completion record from the shared `$code-review` skill. If technical completion is missing or stale, use `$change-accepted` through its technical phase, then resume this archive flow; do not recursively re-enter archival while verification is pending. Reuse valid evidence for unchanged content and reconcile path-only archive moves. This entrypoint owns archival mechanics, not another review method.
+
 # Archive an OpenSpec Change
 
 Finalize one completed OpenSpec change, update canonical specs when appropriate, archive the change, and validate the resulting repository state.

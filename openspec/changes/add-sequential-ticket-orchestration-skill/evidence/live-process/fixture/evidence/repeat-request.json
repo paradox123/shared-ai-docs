@@ -1,0 +1,36 @@
+{
+  "started_utc": "2026-09-20T08:30:49.409889+00:00",
+  "completed_utc": "2026-09-20T08:32:44.383460+00:00",
+  "agent_id": "/root/live_completion",
+  "request": "Change accepted; identical local fixture scope, no delivery",
+  "base": "53f6d11f1a1c9fc1b7fd48b6250ff80aa2f5e26b",
+  "candidate_id": "051676c8052090e73a27a1123e65977a2f46ef40fe6f5831a9b6c346a9c8f875",
+  "state": "technically-complete",
+  "new_reviewer_dispatches": 0,
+  "new_reviewer_ids": [],
+  "new_structural_review_rounds": 0,
+  "new_application_cli_test_runs": 0,
+  "new_metadata_audit_sequences": 1,
+  "actual_logged_read_and_integrity_commands": [
+    "16-repeat-read-record.json",
+    "17-repeat-current-correspondence.json",
+    "18-repeat-skills-and-evidence-integrity.json",
+    "19-repeat-working-tree-scope.json"
+  ],
+  "reused_review_receipts": [
+    "dry-initial-receipt.md",
+    "dry-delta-receipt.md",
+    "solid-receipt.md",
+    "kiss-receipt.md"
+  ],
+  "reused_application_checks": [
+    "10-after-dry-repair-tests.json",
+    "11-after-dry-safe-import.json",
+    "12-final-tracked-diff-check.json",
+    "13-final-source-diff-check.json",
+    "14-final-tests-diff-check.json"
+  ],
+  "coverage_assessment": "R1-R4 still directly covered by expected/observed mappings and current public CLI evidence; all applicable standards still assigned and covered; no open finding or changed requirement. Matching hashes are supported by the explicitly read coverage, not treated as sufficient alone.",
+  "preservation": "Both source files and three contracts unchanged; all 73 pre-existing evidence files other than append-only events.jsonl byte-preserved; original event prefix byte-preserved.",
+  "delivery_performed": []
+}

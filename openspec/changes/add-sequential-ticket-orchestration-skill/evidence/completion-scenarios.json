@@ -1,0 +1,11 @@
+{
+  "cases": [
+    {"id":"direct-ready","entry":"implement","request":"Implementiere den CSV-Export nach der vorhandenen Spec.","state":{"implementation":"ready","initial_tests":"passed","acceptance_message":null,"evidence":"CSV includes requested columns and escaping cases"}},
+    {"id":"design-accepted","entry":"change-accepted","request":"Akzeptiert, wir nehmen Variante 2 des Designs.","state":{"implementation":"not-started","design":"two implementation options"}},
+    {"id":"delegated-gap","entry":"change-accepted","request":"Als im Batch autorisierter Koordinator nehme ich Ticket 12 für den technischen Abschluss an. Nutze den vereinbarten Workflow.","state":{"base":"fixture-base-A","candidate":"fixture-B","delivery":"wait for exact integration grant","requirements":["export all selected columns","reject unauthorized requests"],"observations":["selected columns correct","test suite green"],"authorization_test":"missing"}},
+    {"id":"reuse-archive","entry":"change-accepted","request":"Change accepted, archiviere die lokale OpenSpec-Änderung.","state":{"candidate":"fixture-C","requirements_version":"R1","completion_record":{"candidate":"fixture-C","requirements_version":"R1","coverage":"all required behavior and standards","reviewers":"three complete current receipts","checks":"current","state":"technically-complete"},"archive":"not-yet-done","push_authority":false}},
+    {"id":"late-repair","entry":"code-review","request":"Prüfe die KISS-Reparatur und schließe das Review ab.","state":{"candidate_before":"fixture-D","candidate_after":"fixture-E","requirements_evidence":"passed at D","prior_review":"first two dimensions passed at D","change":"KISS repair changes a shared responsibility boundary and request validation behavior","latest_tests":"focused test passed"}},
+    {"id":"editorial","entry":"change-accepted","request":"Die Rechtschreibkorrektur ist akzeptiert.","state":{"diff":"fixes one spelling error in README; no meaning or link target changed","app_code":"unchanged","completion_record":null}},
+    {"id":"standalone","entry":"code-review","request":"Review this branch against the supplied base.","state":{"base":"fixture-F","candidate":"fixture-G","spec":"available","requirements_evidence":null,"acceptance_message":null,"delivery_authority":false}}
+  ]
+}

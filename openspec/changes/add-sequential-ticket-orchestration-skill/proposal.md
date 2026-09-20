@@ -10,10 +10,13 @@ Codex task `01a0a8fd-8d65-74b1-aae1-95bcd191fab3` repeatedly stalled because asy
 - Retain critical verification, evidence-bound acceptance, permission provenance and durable identity recovery; track all workers and pending operations individually.
 - Preserve evidence outside worktrees before removing owned worktrees/working branches and archiving worker tasks.
 - Update reusable worker, verification, integration and heartbeat prompts. Retain the read-only metadata helper and its CLI behavior tests.
+- Apply the requested token-saving workflow: critical verification before final independent review, scoped follow-ups with review receipts, compact context and a role-specific model profile, local mechanical helpers, consolidated closeout documentation and final-suite timing after behavioral repairs. Permit owned-branch local checkpoint commits before acceptance.
+- Centralize structural review in code-review, called after critical requirements verification by a shared change-accepted entrypoint. Migrate direct implementation, orchestration, archive entrypoints and repository guidance to references instead of duplicated review instructions.
 
 ## Capabilities
 
 ### New Capabilities
+- `technical-change-completion`: Acceptance-triggered completion with centralized review, reusable evidence and the same contract for direct and delegated work.
 - `sequential-ticket-orchestration`: Finite Codex ticket-batch orchestration with verified identity, parallel implementation, serialized delivery and cleanup. The identifier is retained from this active change's original sequential version.
 
 ### Modified Capabilities
@@ -21,4 +24,4 @@ None. Existing application pilots and their no-merge contracts remain unchanged.
 
 ## Impact
 
-Shared skill files, catalog and batch glossary; no application implementation, active automation edits, vendor edits or new external dependencies. The skill is published in the shared repository for use on other computers with the existing skill-sync setup.
+Shared skill files, local Python standard-library helpers, catalog and batch glossary; completion guidance in shared-ai-docs, NCG backend, ki-fuer-kmu and probare-crm. Locally maintained code-review, implement and ask-matt keep their public names while preserving the vendor snapshot. No application implementation, active automation edits, global model-default changes or new external dependencies. Skills use the existing shared skill-sync setup.

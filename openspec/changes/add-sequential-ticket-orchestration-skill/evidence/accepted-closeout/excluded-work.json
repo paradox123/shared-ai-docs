@@ -1,0 +1,22 @@
+[
+  {
+    "path": "docs/skills/hybrid-skill-sync.md",
+    "sha256": "e14b1ec917c0de1d575cf613f095bc23c57ef28be074d4ff456fd349f9022357"
+  },
+  {
+    "path": "skills-repo/skills/improve-skills/references/codex-desktop-session-review.md",
+    "sha256": "f3e0147459f6102252ba8b134c17c765a7e78c565b280d5c022da9399de39c85"
+  },
+  {
+    "path": "skills-repo/skills/improve-skills/scripts/resolve_codex_sessions.py",
+    "sha256": "bf25958b71f1a2399782344b6c6d41af0fc37e925329c85c69b94333b6f2581e"
+  },
+  {
+    "path": "skills-repo/skills/improve-skills/scripts/tests/test_resolve_codex_sessions.py",
+    "sha256": "4cb18018a3c18be27f04888f0cc55939707db9ec56e66b7a5f0714317f3f008f"
+  },
+  {
+    "path": "skills-repo/skills/install-vendor-skills/SKILL.md",
+    "sha256": "64c24ff90a3dba4c68d14b6c94858ee7c460a76c0cb6bd4a2561dc1efb9eace5"
+  }
+]

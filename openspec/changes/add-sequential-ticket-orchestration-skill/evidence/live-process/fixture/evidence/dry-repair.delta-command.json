@@ -1,0 +1,14 @@
+{
+  "command": [
+    "git",
+    "diff",
+    "--no-index",
+    "--",
+    "evidence/snapshots/pre-review/ticket_export.py",
+    "ticket_export.py"
+  ],
+  "exit_code": 1,
+  "stdout": "diff --git a/evidence/snapshots/pre-review/ticket_export.py b/ticket_export.py\nindex 17c7e53..0a3fd64 100644\n--- a/evidence/snapshots/pre-review/ticket_export.py\n+++ b/ticket_export.py\n@@ -5,12 +5,17 @@ import json\n from pathlib import Path\n \n \n-def export_csv(tickets, status):\n+def prepare_rows(tickets, status):\n     rows = []\n     for ticket in tickets:\n-        if status is None or ticket[\"status\"].strip().lower() == status:\n-            rows.append({\"id\": ticket[\"id\"], \"title\": ticket[\"title\"].strip(), \"status\": ticket[\"status\"].strip().lower()})\n+        normalized_status = ticket[\"status\"].strip().lower()\n+        if status is None or normalized_status == status:\n+            rows.append({\"id\": ticket[\"id\"], \"title\": ticket[\"title\"].strip(), \"status\": normalized_status})\n     rows.sort(key=lambda row: row[\"id\"])\n+    return rows\n+\n+\n+def export_csv(rows):\n     stream = io.StringIO(newline=\"\")\n     writer = csv.DictWriter(stream, fieldnames=[\"id\", \"title\", \"status\"])\n     writer.writeheader()\n@@ -18,15 +23,6 @@ def export_csv(tickets, status):\n     return stream.getvalue()\n \n \n-def export_json(tickets, status):\n-    rows = []\n-    for ticket in tickets:\n-        if status is None or ticket[\"status\"].strip().lower() == status:\n-            rows.append({\"id\": ticket[\"id\"], \"title\": ticket[\"title\"].strip(), \"status\": ticket[\"status\"].strip().lower()})\n-    rows.sort(key=lambda row: row[\"id\"])\n-    return json.dumps(rows)\n-\n-\n def main():\n     parser = argparse.ArgumentParser()\n     parser.add_argument(\"input\", type=Path)\n@@ -34,7 +30,8 @@ def main():\n     parser.add_argument(\"--status\", choices=[\"todo\", \"done\"])\n     args = parser.parse_args()\n     tickets = json.loads(args.input.read_text())\n-    output = export_csv(tickets, args.status) if args.format == \"csv\" else export_json(tickets, args.status)\n+    rows = prepare_rows(tickets, args.status)\n+    output = export_csv(rows) if args.format == \"csv\" else json.dumps(rows)\n     print(output, end=\"\" if args.format == \"csv\" else \"\\n\")\n \n \n",
+  "stderr": "",
+  "recorded_utc": "2026-09-20T08:20:13.260230+00:00"
+}

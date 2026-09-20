@@ -1,0 +1,16 @@
+{
+  "observer": "/root",
+  "started_utc": "2026-09-20T08:15:24.835435+00:00",
+  "cwd": "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix/evidence/snapshots/red",
+  "command": [
+    "python3",
+    "-m",
+    "unittest",
+    "-v",
+    "test_ticket_export.ExportTests.test_filter_matches_normalized_status_in_both_formats"
+  ],
+  "exit_code": 1,
+  "stdout": "",
+  "stderr": "test_filter_matches_normalized_status_in_both_formats (test_ticket_export.ExportTests) ... \n======================================================================\nFAIL: test_filter_matches_normalized_status_in_both_formats (test_ticket_export.ExportTests) (format='csv')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix/evidence/snapshots/red/test_ticket_export.py\", line 41, in test_filter_matches_normalized_status_in_both_formats\n    self.assertEqual(list(csv.DictReader(io.StringIO(output))), [{\"id\": \"2\", \"title\": \"Second\", \"status\": \"done\"}, {\"id\": \"10\", \"title\": \"Tenth\", \"status\": \"done\"}])\nAssertionError: Lists differ: [] != [{'id': '2', 'title': 'Second', 'status': [53 chars]ne'}]\n\nSecond list contains 2 additional elements.\nFirst extra element 0:\n{'id': '2', 'title': 'Second', 'status': 'done'}\n\n- []\n+ [{'id': '2', 'status': 'done', 'title': 'Second'},\n+  {'id': '10', 'status': 'done', 'title': 'Tenth'}]\n\n======================================================================\nFAIL: test_filter_matches_normalized_status_in_both_formats (test_ticket_export.ExportTests) (format='json')\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/private/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix/evidence/snapshots/red/test_ticket_export.py\", line 39, in test_filter_matches_normalized_status_in_both_formats\n    self.assertEqual(json.loads(output), [{\"id\": 2, \"title\": \"Second\", \"status\": \"done\"}, {\"id\": 10, \"title\": \"Tenth\", \"status\": \"done\"}])\nAssertionError: Lists differ: [] != [{'id': 2, 'title': 'Second', 'status': 'd[49 chars]ne'}]\n\nSecond list contains 2 additional elements.\nFirst extra element 0:\n{'id': 2, 'title': 'Second', 'status': 'done'}\n\n- []\n+ [{'id': 2, 'status': 'done', 'title': 'Second'},\n+  {'id': 10, 'status': 'done', 'title': 'Tenth'}]\n\n----------------------------------------------------------------------\nRan 1 test in 0.058s\n\nFAILED (failures=2)\n",
+  "source_sha256": "4b8dfa515856b2573f2c4495e72d736605381d36c187cd4dab060f48fb3e11ba"
+}

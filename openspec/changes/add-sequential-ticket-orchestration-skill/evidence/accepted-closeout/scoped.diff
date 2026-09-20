@@ -1,0 +1,1962 @@
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/.codex/skills/openspec-archive-change/SKILL.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/.codex/skills/openspec-archive-change/SKILL.md
+@@ -7,6 +7,8 @@
+   version: "1.0"
+   generatedBy: "1.2.0"
+ ---
++
++Before archive operations, inspect the current completion record from the shared `$code-review` skill. If technical completion is missing or stale, use `$change-accepted` through its technical phase, then resume this archive flow; do not recursively re-enter archival while verification is pending. Reuse valid evidence for unchanged content and reconcile path-only archive moves. This entrypoint owns archival mechanics, not another review method.
+ 
+ # Archive an OpenSpec Change
+ 
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/AGENTS.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/AGENTS.md
+@@ -45,13 +45,7 @@
+ ## Change Completion
+ A spec/change is not done only because files were edited, checks pass, or OpenSpec validation succeeds. It is ready for acceptance/archive only after the intended behavior has been verified through the most direct surface available: skill invocation behavior, script output, generated docs, RAG/QMD results, n8n workflow behavior, or automation logs.
+ 
+-Before archiving any OpenSpec change, perform a refactoring pass over the code, skills, and specs touched by that change. Inspect both the current diff and nearby context for:
+-
+-1. DRYness: duplication introduced by the change or nearby repeated patterns now worth consolidating.
+-2. SOLID issues: mixed responsibilities, hard-to-test boundaries, or abstractions that are difficult to replace.
+-3. KISS issues: accidental complexity, unclear names, needless branching, or structure larger than the current spec requires.
+-
+-Preserve behavior during this pass and rerun the relevant tests or checks afterward.
++Use the shared `$change-accepted` skill for technical closeout. A current completion record from `$code-review` is required before declaring technical completion or archiving. Those skills own the acceptance timing, applicability, verification and review method; keep initial implementation readiness distinct from technical completion. Repository-specific standards and operational checks below remain applicable.
+ 
+ For langgraph-github-issue-pilot and other applications developed in this repo, prefer verification through:
+ - local application endpoints
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/adr/0017-three-sequential-refactoring-checks.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/adr/0017-three-sequential-refactoring-checks.md
+@@ -0,0 +1,16 @@
++---
++status: accepted
++date: 2026-09-19
++---
++
++# Drei getrennte Refactoring-Prüfungen im gemeinsamen Abschluss
++
++Der gemeinsame technische Abschluss für NCG-Backend, ki-fuer-kmu und probare-crm enthält nach erfolgreicher kritischer Anforderungsverifikation drei sequenzielle Refactoring-Prüfungen: DRY → SOLID → KISS, jeweils mit einem eigenen Prüfagenten. Lücken in der Anforderungsumsetzung werden vor dem ersten Strukturreview behoben. Befunde werden vor der nächsten Prüfung bearbeitet und betroffene Tests erneut ausgeführt; die bisher strengste Prüfmethode bleibt damit erhalten und wird für probare-crm erweitert.
++
++Daniel hat diese Variante am 2026-09-19 ausdrücklich gewählt. Die Einsparung soll aus weniger wiederholten Abschlussrunden und kompakteren Aufträgen entstehen; die drei Perspektiven werden nicht zu einem einzigen Prüfauftrag zusammengelegt. Der gemeinsame Ablauf gilt für inhaltliche technische Änderungen an Code, Anforderungen, wirksamer Konfiguration oder verbindlichen Arbeitsregeln, einschließlich Skills und AGENTS.md. Reine redaktionelle Korrekturen erhalten passende Dokumentprüfungen. Diese Anwendungsgrenze wurde ebenfalls ausdrücklich bestätigt und wird zentral gepflegt.
++
++Der gemeinsame Ablauf gilt sowohl bei direkter Umsetzung als auch bei orchestrierter Arbeit. Am 2026-09-20 hat Daniel den Auslöser festgelegt: Direkte Implementierungsarbeit wartet nach Umsetzung und ersten Tests auf eine fachliche Abnahme wie „akzeptiert“ oder „Change accepted“, bevor die vollständigen Abschlussprüfungen beginnen. Bei vollständig delegierten Aufträgen erteilt der autorisierte Koordinator denselben Abschlussauftrag ohne zusätzliche menschliche Freigabe. Laufende Tests und Refactoring im Entwicklungszyklus bleiben Teil der Implementierung.
++
++Die fachliche Abnahme startet die technische Prüfung und bestätigt deren Ergebnis nicht vorab. Gültige Nachweise desselben Standes werden wiederverwendet; nachfolgende Änderungen öffnen die betroffenen Prüfungen wieder. Lieferautorisierung und Zielvorgaben ergeben sich aus dem tatsächlichen Auftrag. „Unabhängig“ beschreibt die Trennung von Implementierung und Prüfung, keine weitere Prüfart.
++
++Auf Daniels anschließenden Vorschlag wird code-review die zentrale Definition für DRY → SOLID → KISS, Repository-Standards und Nachprüfung. AGENTS.md und die Abschluss-/Orchestrierungs-Einstiege verweisen auf diesen Skill, statt seine Methode zu wiederholen. Der Accepted-Einstieg steuert kritische Anforderungsverifikation → code-review → autorisierten Abschluss. Der bisherige Spec-Abgleich geht in der vorgelagerten Anforderungsverifikation auf; eine zusätzliche pauschale Standards-/Spec-Runde entfällt im Zielentwurf. [Design und Begriffsklärung](../../openspec/changes/add-sequential-ticket-orchestration-skill/completion-contract-design.md) dokumentieren die Zuständigkeiten und den Migrationsumfang; die Migration ist lokal umgesetzt, ihre vollständige technische Abschlussprüfung wartet auf kontextbezogene Abnahme.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/technical-completion.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/technical-completion.md
+@@ -0,0 +1,21 @@
++# Shared technical completion integration
++
++The active shared entrypoints are `skills-repo/skills/implement`, `change-accepted` and `code-review`. Use these active paths or skill names, not preserved vendor entrypoints. The workflow requirements are maintained in the active OpenSpec change `add-sequential-ticket-orchestration-skill`, capability `technical-change-completion`; [ADR 0017](../adr/0017-three-sequential-refactoring-checks.md) records the accepted decision.
++
++`code-review` owns review methodology and applicability. `change-accepted` owns the technical closeout transition. Repository AGENTS.md files and delivery/archive adapters reference them; repository-specific commands and standards stay local.
++
++## Local ownership and vendor provenance
++
++Daniel's requested central entrypoint retains the public name `code-review`. The active `code-review`, `implement` and `ask-matt` entries are now Daniel-owned directories, adopted from the preserved Matt Pocock snapshot. This keeps named callers stable while separating local policy from upstream updates. The snapshot and its lock remain unchanged. Vendor synchronization must continue to preserve owned directories, as required by the hybrid skill-sync contract; it must not replace them with vendor links.
++
++| Active skill | Preserved source | Source SKILL.md SHA-256 at adoption |
++| --- | --- | --- |
++| code-review | `skills-repo/vendor/mattpocock/.agents/skills/code-review` | `47f4e52c21694def9c7c11cbfbf891ca35eac7a93e395797515be3c8a409ae50` |
++| implement | `skills-repo/vendor/mattpocock/.agents/skills/implement` | `a83f5eeb80700628c6af781ba1d4ec6b220de2a4cb93d426929c180ae268a1d1` |
++| ask-matt | `skills-repo/vendor/mattpocock/.agents/skills/ask-matt` | `b25d86fb36b1d294eeead5d7db529f86135f9671f2afcd607579a63bb2213769` |
++
++Runtime links remain managed by `skills-repo/tools/sync-codex-skill-links.sh`. The ask-matt phase-boundary reference still uses the preserved snapshot. The local adaptation does not update any upstream repository, live batch ledger or automation.
++
++## Migration scope
++
++The shared repository, NCG backend's project and Git-root guidance, probare-crm, and ki-fuer-kmu use the shared completion entrypoints. The write-agents-md template emits references. ki-fuer-kmu retains local delivery mechanics in `change-accepted-closeout`; local OpenSpec archive entrypoints reuse completion evidence. Other application pilots keep their own lifecycle contracts.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/completion-contract-design.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/completion-contract-design.md
+@@ -0,0 +1,81 @@
++# Gemeinsamer technischer Abschluss — Design und Begriffsklärung
++
++Stand: 2026-09-20. Anwendungsbereich, Abnahmeauslöser, Reihenfolge und zentrale Zuständigkeit von code-review sind entschieden; die Vereinheitlichung ist lokal implementiert und initial geprüft. Die vollständige technische Abschlussprüfung dieser Änderung wartet auf Daniels kontextbezogene Abnahme. Die Erweiterung gehört zum laufenden Change, weil sie die Orchestrator-spezifische Review-Ausnahme der ersten Tokenoptimierung durch einen gemeinsamen Abschluss ersetzen soll. Die frühere Implementierung und ihre Nachweise bleiben als Ausgangsstand erhalten.
++
++## Bestätigte Entscheidung
++
++Für NCG-Backend, ki-fuer-kmu und probare-crm gelten beim gemeinsamen Abschluss drei getrennte Prüfungen in der Reihenfolge **DRY → SOLID → KISS**, jeweils mit eigenem Prüfagenten. Sie beginnen erst nach kritischer Verifikation der Anforderungsumsetzung und der Behebung dort gefundener Lücken. Befunde werden vor dem nächsten Durchlauf bearbeitet; Verhalten bleibt erhalten und betroffene Tests werden erneut ausgeführt. Daniel hat die drei getrennten Prüfungen ausdrücklich gewählt, einschließlich der Erweiterung gegenüber der bisherigen probare-crm-Vorgabe. Ihre frühere Platzierung vor der kritischen Verifikation war ein Fehler bei der Zusammenführung der Abläufe. Siehe [ADR 0017](../../../docs/adr/0017-three-sequential-refactoring-checks.md).
++
++Das Ziel aus dem vorherigen Auftrag bleibt: widerspruchsarme Anweisungen und weniger wiederholte Arbeit, auch wenn eine Änderung ohne Orchestrator umgesetzt wird.
++
++## Zentrale Zuständigkeit von code-review
++
++Daniel hat vorgeschlagen, DRY, SOLID und KISS ausdrücklich in code-review aufzunehmen und alle Aufrufer auf diesen Skill verweisen zu lassen. Dieser Vorschlag ersetzt die vorherige Aufteilung, bei der ein neuer Abschluss-Skill die Reviewmethodik besessen hätte.
++
++- **code-review besitzt die Reviewmethodik:** drei getrennte Prüfagenten in der Reihenfolge DRY → SOLID → KISS, zugeordnete Repository-Standards, Bearbeitung der Befunde, gezielte Nachprüfung und Nachweis für den geprüften Stand. Reihenfolge und Kriterien stehen ausschließlich dort und in seinen eigenen Referenzen.
++- **Der Accepted-/Abschluss-Einstieg besitzt den Ablauf:** kontextbezogene Abnahme erkennen, kritische Anforderungsverifikation einschließlich Spec-Abgleich abschließen, code-review aufrufen, danach den autorisierten Abschluss fortsetzen. Er kopiert keine Reviewkriterien und startet keine weitere allgemeine Standards-/Spec-Runde.
++- **AGENTS.md verankert die Pflicht:** Vor technischem Abschluss muss ein gültiger Nachweis des code-review-Skills vorliegen. Repository-spezifische Standards und Prüfkommandos bleiben lokal; die allgemeine DRY-/SOLID-/KISS-Anleitung wird durch den Verweis ersetzt.
++- **Implementierung und Orchestrator verwenden diese Einstiege:** Der Orchestrator koordiniert Arbeit, erteilt im delegierten Auftrag den Abschlussauftrag, beurteilt Nachweise und integriert. Er besitzt keine zweite Reviewmethodik.
++- **Archivierung prüft den vorhandenen Abschlussnachweis:** Ein unveränderter bereits geprüfter Stand löst keine erneute Refactoring-Runde aus; Änderungen öffnen betroffene Prüfungen über code-review wieder.
++- **write-agents-md erzeugt den Verweis:** Die Vorlage enthält die Abschlussverpflichtung und lokale Ergänzungen, keine Kopie der Reviewmethode.
++
++code-review verlangt als Eingang einen festen Änderungsumfang und aktuelle Anforderungsnachweise. Fehlen diese oder gelten sie nicht für den aktuellen Stand, muss die kritische Verifikation vor dem ersten Strukturreview vervollständigt werden. Ein ausdrücklicher eigenständiger code-review-Auftrag benötigt keinen Accepted-Trigger und erteilt keine Lieferfreigabe. Dadurch bleibt der Skill auch für die Prüfung eines Branches oder PRs verwendbar.
++
++Der Abschluss-Skill bleibt ein schlanker Aufrufer. Nachweisdateiname und mechanische Migration sind Implementierungsdetails. Keine neue Glossardefinition ist erforderlich: DRY, SOLID, KISS und Refactoring sind allgemeine Engineering-Begriffe.
++
++## Begriffsklärung und Überschneidungen
++
++| Begriff | Prüffrage und Ergebnis |
++| --- | --- |
++| Kritische Anforderungsverifikation | Sind alle vereinbarten Anforderungen tatsächlich und korrekt umgesetzt? Akzeptanzkriterien werden mit beobachtetem Verhalten, relevanten Gegenbeispielen und Grenzen abgeglichen. Fehlende oder falsche Umsetzung und unzureichende Nachweise werden vor den Strukturprüfungen behoben. |
++| Strukturprüfung DRY → SOLID → KISS | Ist die bereits funktional verifizierte Umsetzung ohne unnötige Dopplung, mit klaren Verantwortlichkeiten und angemessen einfach aufgebaut? Die drei Agenten prüfen jeweils eine Perspektive; Refactoring ist die anschließende Bearbeitung ihrer Befunde. |
++| Unabhängige Prüfung | Beschreibt die Trennung vom Implementierungsagenten und einen eigenen Prüfauftrag. Es ist keine zusätzliche inhaltliche Prüfkategorie. Auch die drei Strukturprüfungen sind unabhängige Reviews. Ein unabhängiger Agent kann ebenfalls die Anforderungsverifikation übernehmen. |
++| Standards-/Spec-Review im vorhandenen code-review-Skill | Ein konkretes Paket aus zwei Prüfaufträgen: Standards prüft dokumentierte Repository-Regeln und Code Smells; Spec gleicht den Diff mit den Anforderungen ab, einschließlich fehlender, falscher oder nicht beauftragter Umsetzung. |
++
++Der Spec-Auftrag stellt dieselbe fachliche Grundfrage wie die kritische Anforderungsverifikation, verwendet aber primär eine unabhängige Diff-Inspektion. Die bisherige kritische Verifikation wird gesondert beim Implementierungsagenten angefordert und verlangt Verhaltensnachweise. Das ist eine Überschneidung mit unterschiedlicher Methode und Perspektive; ein zusätzlicher Spec-Agent wäre eine bewusste zweite Anforderungsprüfung, keine neue Qualitätsdimension.
++
++Standards überschneidet sich bei Duplikaten, Verantwortlichkeiten und unnötiger Komplexität mit DRY/SOLID/KISS. Er enthält zusätzlich verbindliche Repository-Regeln, die nicht automatisch durch diese drei Prinzipien abgedeckt sind. Solche Regeln dürfen bei einer Zusammenlegung nicht verloren gehen.
++
++Die zentrale Zuständigkeit löst diese Überschneidung so auf: Anforderungsabdeckung einschließlich Spec-Abgleich gehört in die kritische Verifikation; Strukturqualität und Repository-Standards gehören in code-review. Dessen drei getrennte Reviews ersetzen den bisherigen allgemeinen Standards-Auftrag. Verbleibende Repository-Regeln werden ausdrücklich einer passenden Prüfung oder vorhandenen automatischen Checks zugeordnet. Eine weitere pauschale Spec-Runde nach bereits abgeschlossener Anforderungsverifikation entfällt. Der aktive Skill und die Delta-Spezifikation setzen diese Zuständigkeit um; die unveränderten Vendor-Fassungen bleiben als Herkunftsnachweis erhalten.
++
++## Bestätigter Anwendungsbereich
++
++Daniel hat Option 1 gewählt: Der vollständige Abschluss gilt für inhaltliche Änderungen an Code, Anforderungen, wirksamer Konfiguration oder verbindlichen Arbeitsregeln; damit gehören auch verhaltensändernde Skill-/AGENTS-Anpassungen dazu. Reine Rechtschreib-, Formatierungs- oder redaktionelle Linkkorrekturen erhalten passende Dokumentprüfungen. Maßgeblich ist die Wirkung der Änderung, nicht die Dateiendung.
++
++Die Anwendungsgrenze wird zentral gepflegt; einzelne Skills erhalten keine eigenen Ausnahmelisten.
++
++## Bestehende Abnahme-Einstiege
++
++Daniel verwendet häufig „Change accepted“ oder „akzeptiert“ und schlägt diese Formulierungen als Trigger für den Abschluss vor.
++
++Die lokale Bestandsprüfung zeigt zwei unterschiedliche Bedeutungen:
++
++- `ki-fuer-kmu/.codex/skills/change-accepted-closeout/SKILL.md` beschreibt „change accepted“ als Einstieg in Archivierung, Commit, standardmäßige Integration nach main, Push und Issue-Abschluss. Fehlende Verifikation muss zuvor erledigt werden.
++- Die aktuelle Orchestrator-Vorlage `references/messages.md` verwendet „Akzeptiert für [ticket]“ erst nach technischer Verifikation und Review als Vorbereitung der Integration; eine konkrete Merge-Freigabe folgt später.
++
++Zusammenführung: Ein auf einen konkreten Implementierungsstand bezogener Abschlussauftrag ruft den gemeinsamen Abschluss auf. Der Ablauf übernimmt passende aktuelle Nachweise und führt fehlende oder durch Änderungen betroffene Prüfungen aus. Ein wiederholtes „akzeptiert“ erzeugt keine neue vollständige Prüfrunde für denselben Stand. Die Formulierung bei einer Designentscheidung oder in zitiertem Text ist kein Abschlussauftrag für eine Implementierung. Vorhandene Lieferautorisierung und Zielvorgaben werden aus dem tatsächlichen Auftrag übernommen, nicht aus einem globalen Schlüsselwort mit main als Standard abgeleitet.
++
++## Bestätigter Auslöser und Ablauf
++
++Daniel hat am 2026-09-20 Option 2 gewählt: Bei direkter Implementierungsarbeit beginnt der vollständige technische Abschluss erst nach fachlicher Abnahme durch „akzeptiert“, „Change accepted“ oder einen gleichwertigen, auf die konkrete Umsetzung bezogenen Abschlussauftrag. Ein gewöhnlicher Implementierungsauftrag löst die vollständige Abschlussrunde noch nicht aus.
++
++Bei vollständig delegierten Aufträgen übernimmt der autorisierte Koordinator diese Abnahme und erteilt denselben Abschlussauftrag. Dadurch entsteht keine zusätzliche menschliche Freigabeschleife. Der gemeinsame Ablauf hat einen Auslöser; wer ihn erteilen darf, ergibt sich aus der bestehenden Delegation.
++
++1. Umsetzung und erforderliche erste Verhaltensnachweise durchführen. Laufende Tests und Refactoring im Entwicklungszyklus bleiben Teil der Implementierung.
++2. Bei direkter Arbeit die Umsetzung als bereit zur fachlichen Abnahme melden und den technischen Abschluss ausdrücklich als offen kennzeichnen. Bei delegierter Arbeit beurteilt der autorisierte Koordinator die Bereitschaft.
++3. Nach dem Abschlussauftrag zuerst kritisch verifizieren, ob die Anforderungen tatsächlich umgesetzt sind. Lücken beheben und betroffene Verhaltensnachweise erneuern, bevor die Strukturreviews beginnen.
++4. code-review für den festen Änderungsumfang und mit den aktuellen Anforderungsnachweisen aufrufen. Seine Methodik ist dort zentral definiert.
++5. Nach den letzten Reparaturen die abschließenden relevanten Tests ausführen und den Reviewnachweis aus code-review übernehmen. Änderungen durch Refactoring können Anforderungsnachweise entwerten; dann die betroffenen Anforderungen erneut verifizieren. Unveränderte gültige Prüfabdeckung bleibt erhalten.
++6. Den technischen Abschluss mit Nachweisen für den geprüften Stand dokumentieren. Integration, Push, Archivierung und Issue-Abschluss folgen der bereits erteilten Lieferautorisierung und den Zielvorgaben.
++
++Fachliche Abnahme startet die technische Abschlussprüfung; sie bescheinigt deren Ergebnis nicht vorab. Die jetzige Auswahl des Ablaufmodells ist eine Designentscheidung und kein Abschlussauftrag für die bisherige Implementierung.
++
++## Übergabe an die Umsetzung
++
++Die zentrale Zuständigkeit von code-review klärt die verbliebene Aufteilung. Ablage und Format des Abschlussnachweises sowie die konkreten Verweise bleiben Implementierungsentscheidungen. Der Nachweis muss den geprüften Inhalt und die abgedeckten Anforderungen erkennen lassen; bloße Dateigleichheit ersetzt keine fehlende Prüfabdeckung.
++
++Die Umsetzung erweitert die Spezifikation im bestehenden Change, passt code-review als zentrale Reviewdefinition an, führt den schlanken Abschluss-Einstieg ein und ersetzt widersprechende Ablauftexte an ihren bisherigen Stellen: NCG-Backend einschließlich übergeordneter Anleitung, ki-fuer-kmu, probare-crm, implement, orchestrate-ticket-batch, change-accepted-closeout, betroffene Archivierungs-Einstiege und die Vorlage in write-agents-md. Beschreibungen des alten Zwei-Achsen-Ablaufs, etwa in ask-matt, müssen ebenfalls dem neuen Vertrag entsprechen. Repository-spezifische Prüfkommandos bleiben lokal. Die gepflegte Anpassung des Vendor-Skills muss den bestehenden Skill-Sync-Vertrag beachten und den kanonischen Einstieg code-review erhalten.
++
++Die aktiven Aufrufer und die vereinbarten Repository-Anleitungen wurden auf den gemeinsamen Vertrag umgestellt; Details und Grenzen stehen in [completion-implementation.md](completion-implementation.md). Die zusätzlichen drei Prüfungen erhöhen bei probare-crm den Aufwand pro vollständigem Abschluss; die erwartete Tokenersparnis stammt aus vermiedenen Wiederholungen und kompakterer Koordination und ist noch nicht an einem neuen Live-Lauf gemessen.
++
++Die Abnahme der Umsetzung muss mindestens zeigen: direkte Umsetzung wartet nach ersten Tests; eine kontextbezogene Abnahme startet den Abschluss; autorisierte Delegation benötigt keine weitere Benutzerfreigabe; kritische Anforderungsverifikation und erforderliche Reparaturen liegen vor allen drei getrennten Strukturprüfungen DRY → SOLID → KISS; Anforderungs- und Repository-Regelabdeckung sind ausdrücklich zugeordnet; wiederholte Abnahme und Archivierung nutzen gültige Nachweise; spätere Änderungen öffnen betroffene Prüfungen wieder; Designzustimmung und zitierte Trigger lösen keinen Abschluss aus; reine redaktionelle Korrekturen erhalten passende Dokumentprüfungen.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/design.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/design.md
+@@ -9,6 +9,7 @@
+ 
+ ## Decisions
+ 
++- The completion extension in [completion-contract-design.md](completion-contract-design.md) supersedes the earlier two-axis review sequence: change-accepted owns critical requirements verification followed by code-review; code-review alone owns structural review and follow-up. Direct work waits for contextual acceptance after implementation and initial tests; authorized coordinators trigger the same entrypoint. Repository instructions and skill callers reference this contract.
+ - Default to three tickets in flight from registration through delivery confirmation. Count uncertain creations and waiting candidates. Park a blocked worker only after confirming it is quiescent; retain its conflict/dependency reservations. This avoids an unbounded integration queue while unrelated work continues.
+ - Require the actual user target branch before worker creation. Start every new worker in a separate worktree on a dedicated working branch from that target, verifying the fresh remote base and isolating mutable test resources.
+ - Build dependency and anticipated file/interface overlap constraints before dispatch. Refill slots after actionable transitions; no whole-wave barrier. Pause unexpected conflicting work safely and reassess.
+@@ -17,7 +18,8 @@
+ - Persist mutable state beside the batch automation, keeping stable instructions in the skill. Record each pending action before dispatch and reconcile reality before retry. Only the coordinator writes the ledger.
+ - Use read_thread/wait_threads for known IDs. The existing stdlib helper reads only session_index.jsonl and emits capped exact-title candidates; direct task verification remains required. Later updated_at values remain eligible.
+ - Carry original user authority in worker prompts. A denied mutation cannot be rerouted to bypass review. Block only the affected scope and present concrete required approval when necessary.
+-- Validate this instruction workflow through independent fixture-based forward evaluation and separate standards/spec reviews, plus the helper's existing subprocess tests.
++- Validate this instruction workflow through independent fixture-based forward evaluation and the helper's existing subprocess tests. Technical completion after contextual acceptance uses the central completion contract; the earlier Standards/Spec results remain historical evidence for the preceding helper implementation.
++- The token-saving extension in [scripted-batch-design.md](scripted-batch-design.md) adds local compare/checkpoint/manifest/verify/retain commands, preserving the coordinator's decision and execution authority. Put critical verification before final independent review, retain reviewer coverage across deltas, and consolidate pure status/archive closeout work. Use scoped context and the recorded role profile without silently changing global defaults or existing batches.
+ 
+ ## Risks / Trade-offs
+ 
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/proposal.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/proposal.md
+@@ -10,10 +10,13 @@
+ - Retain critical verification, evidence-bound acceptance, permission provenance and durable identity recovery; track all workers and pending operations individually.
+ - Preserve evidence outside worktrees before removing owned worktrees/working branches and archiving worker tasks.
+ - Update reusable worker, verification, integration and heartbeat prompts. Retain the read-only metadata helper and its CLI behavior tests.
++- Apply the requested token-saving workflow: critical verification before final independent review, scoped follow-ups with review receipts, compact context and a role-specific model profile, local mechanical helpers, consolidated closeout documentation and final-suite timing after behavioral repairs. Permit owned-branch local checkpoint commits before acceptance.
++- Centralize structural review in code-review, called after critical requirements verification by a shared change-accepted entrypoint. Migrate direct implementation, orchestration, archive entrypoints and repository guidance to references instead of duplicated review instructions.
+ 
+ ## Capabilities
+ 
+ ### New Capabilities
++- `technical-change-completion`: Acceptance-triggered completion with centralized review, reusable evidence and the same contract for direct and delegated work.
+ - `sequential-ticket-orchestration`: Finite Codex ticket-batch orchestration with verified identity, parallel implementation, serialized delivery and cleanup. The identifier is retained from this active change's original sequential version.
+ 
+ ### Modified Capabilities
+@@ -21,4 +24,4 @@
+ 
+ ## Impact
+ 
+-Shared skill files, catalog and batch glossary; no application implementation, active automation edits, vendor edits or new external dependencies. The skill is published in the shared repository for use on other computers with the existing skill-sync setup.
++Shared skill files, local Python standard-library helpers, catalog and batch glossary; completion guidance in shared-ai-docs, NCG backend, ki-fuer-kmu and probare-crm. Locally maintained code-review, implement and ask-matt keep their public names while preserving the vendor snapshot. No application implementation, active automation edits, global model-default changes or new external dependencies. Skills use the existing shared skill-sync setup.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/scripted-batch-design.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/scripted-batch-design.md
+@@ -1,32 +1,25 @@
+-# Script support for ticket-batch orchestration — design interview
++# Token-efficient ticket batches
+ 
+-Status: interview started; no implementation or expansion of runtime authority decided.
++Status: implemented locally and verified on 2026-09-18; see token-efficiency-verification.md. The bounded implementation assumption is local mechanical helpers only. A larger execution engine was offered as an optional scope expansion and was not selected. No new runtime authority is introduced.
+ 
+-## User objective and preserved contract
++The later [completion-contract-design.md](completion-contract-design.md) supersedes the review ownership, acceptance timing and former Standards/Spec roles described below. This document and its original evidence retain the first token-efficiency implementation baseline.
+ 
+-Reduce repeated model reasoning and token consumption by moving mechanically checkable parts of orchestrate-ticket-batch into scripts. Preserve the accepted batch contract: explicit user target, default three independent worktree tasks, conservative overlap constraints, separate critical verification and acceptance, serialized integration, durable recovery and guarded cleanup.
++## Source and scope
+ 
+-This is an extension of the existing shared skill. Product implementation and the separate agent-pilot/control-plane projects remain outside this change. The user invoked grill-with-docs to clarify scope before specification and implementation.
++The supplied analysis describes `Wiki-Maintenance-Tickets implement` (`01a0af21-127f-7833-b0c1-136e653dc476`). The user also linked `Ticket 8 bearbeiten und mergen` (`01a0af3f-b5ba-7d80-8fcb-514121c60182`). These are distinct tasks; the reported token counts are not attributed to the latter. The requested seven recommendations, rather than an unverified cost estimate, define this extension.
+ 
+-## Current evidence
++Continue the existing change and shared skill. Preserve explicit target selection, isolated worktrees, independent review, acceptance evidence, serialized merge, pending-action recovery and guarded cleanup. Do not modify the application pilots, existing live batches, vendor skills or global model defaults.
+ 
+-The skill currently describes per-ticket state, capacity accounting, dependencies, integration reservations, pending actions and cleanup gates in prose. A read-only metadata candidate helper already exists. Mechanical transition validation, compact next-action output and prompt rendering are candidates for scripting. Interpreting requirements, discovering semantic dependencies and evaluating acceptance evidence still need agent judgment.
++## Decisions and implementation assumptions
+ 
+-## First unresolved decision
++1. Implementation → separate critical verification and repairs → independent Standards/Spec review → focused repairs and reviewer follow-up → final relevant full suite → acceptance and integration. Local commits on the owned branch are checkpoints, not delivery authority.
++2. Review records preserve base/head or manifest, reviewer identity, requirement coverage, findings and disposition. Reuse the same reviewers for deltas; broaden only with a concrete reason. A final record identifies current contents and retained earlier coverage.
++3. A Python standard-library CLI performs local JSON checkpoints, meaningful snapshot comparison, assignment comparison, SHA-256 manifests and non-overwriting evidence copies. Codex still calls task/Git/automation tools and makes scheduling, acceptance and cleanup decisions. No database or new workflow engine is needed.
++4. Use revision-checked atomic writes under an exclusive local lock. An interrupted lock is an explicit blocker requiring inspection, not an excuse to overwrite another writer. Existing Markdown/arbitrary JSON ledgers require explicit adoption preserving all known facts and uncertain actions.
++5. Record delivered ticket facts immediately; collect pure versioned status/archival work into one batch closeout change. Per-ticket activation evidence and repository-required pre-merge docs remain required. A blocked batch may flush a clearly labelled partial closeout.
++6. Workers and reviewers receive self-contained scoped packets; subagents use fresh context. Default role profile: Sol/medium coordination and Standards; Astra/high implementation, critical verification and Spec. Honor explicit user choices and runtime model restrictions. A skill cannot itself change its running coordinator's model: report the mismatch once and continue authorized work.
++7. Establish semantically valid fixtures during implementation, use narrow checks during repair, and run the relevant full suite on final repaired contents. Later substantive or integration changes require affected revalidation; required CI remains.
+ 
+-What should the first script-supported release execute itself?
++## Verification and limits
+ 
+-Recommendation, not yet accepted: persist and validate state, compute eligible next actions and render complete worker messages. Codex continues executing task tools and Git delivery/cleanup under the existing contract. Add script-executed evidence retention and guarded cleanup in a later increment. This gives an initial usable release with fewer repeated bookkeeping decisions while keeping the first implementation bounded.
+-
+-Alternative: include script-executed evidence retention and guarded Git cleanup in the first release, accepting the larger delivery and verification scope.
+-
+-## Questions to reassess after the scope decision
+-
+-- Whether existing running batches must be adoptable in the first release or only newly started batches use the scripted state.
+-- Whether any further user-visible failure or execution requirement remains unsettled. Existing uncertain-action and approval rules remain authoritative; do not re-interview already accepted policy.
+-
+-## Implementation assumptions, not user decisions
+-
+-Python/SQLite and the name batchctl are proposals, not requirements. Storage and command details can be chosen during implementation unless they change portability or externally visible behavior. No automatic token-saving percentage is claimed; compare equivalent orchestration work to measure the result.
+-
+-No glossary addition or ADR yet: no new domain term or hard-to-reverse architecture choice has been settled.
++Test the public CLI using temporary files and subprocesses, including repeated unchanged observations, stale writers, identity mismatches, missing/tampered artifacts and retention conflicts. Forward-test instructions with realistic worker results, then perform independent Standards/Spec review. No live batch, merge or productive activation is launched solely to evaluate this skill. A comparable future real batch is needed to measure token savings and model-quality effects; no percentage is promised.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/specs/sequential-ticket-orchestration/spec.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/specs/sequential-ticket-orchestration/spec.md
+@@ -87,3 +87,51 @@
+ #### Scenario: Interrupted cleanup
+ - **WHEN** the worktree was removed but archival was interrupted
+ - **THEN** the coordinator verifies completed cleanup items and resumes remaining ones without recreating resources or repeating unchecked deletions
++
++### Requirement: Review after critical verification
++Workers SHALL implement and establish behavioral evidence before a separate critical verification. The worker SHALL use change-accepted for technical completion and code-review for structural review after that verification and its repairs; orchestration SHALL reference their contracts rather than redefine the review method. Local checkpoint commits on the owned working branch SHALL be allowed before acceptance; push, merge, closure and archive gates SHALL remain unchanged. Review records SHALL identify reviewer, axis, base, reviewed contents, covered requirements, findings and outcome.
++
++#### Scenario: Critical verification repairs behavior
++- **WHEN** critical verification finds a defect before final review
++- **THEN** the worker repairs it and refreshes affected evidence before invoking code-review for structural review
++
++#### Scenario: Repair after review
++- **WHEN** a review finding is repaired
++- **THEN** the same reviewer checks the delta and affected behavior, retaining earlier coverage; a full repeat requires a recorded reason such as changed requirements, a broad behavioral change or an unusable review baseline
++
++### Requirement: Compact coordination and context
++The skill SHALL use bounded context packets for workers and independent reviewers, with explicit fresh context for subagents. It SHALL define a role profile of Sol/medium for coordination and routine structural review, Astra/high for implementation and critical requirements verification, with focused escalation of difficult structural findings, subject to explicit user model choices and actual runtime support. It SHALL NOT silently change global model defaults or claim that text instructions switched a running coordinator's model. Unchanged observations SHALL NOT trigger extra detail reads, filesystem probes or follow-up prompts; recovery and required pre-mutation checks remain mandatory.
++
++#### Scenario: Unchanged worker snapshot
++- **WHEN** only a wait cursor or observation timestamp changes
++- **THEN** the coordinator saves the cursor and continues a bounded wait without redundant messages or file reads
++
++#### Scenario: Scoped reviewer context
++- **WHEN** a reviewer is launched
++- **THEN** it receives the fixed base/head, relevant requirements and standards, file scope and review brief without the full batch conversation or the other reviewer's conclusions
++
++### Requirement: Local mechanical helpers
++The skill SHALL provide standard-library CLI helpers for atomic revision-checked JSON ledger updates, compact observation comparison, recorded identity comparison, explicit file manifests and verified evidence retention. Helpers SHALL NOT execute task APIs, Git mutations, scheduling, acceptance or cleanup. They SHALL preserve unknown ledger fields, reject stale writes and invalid inputs without replacing the ledger, and retain uncertain actions for coordinator reconciliation. Existing batches SHALL be adopted explicitly rather than silently rewritten.
++
++#### Scenario: Stale ledger writer
++- **WHEN** a checkpoint uses an outdated revision
++- **THEN** the helper reports blocked and leaves the current ledger unchanged
++
++#### Scenario: Identity mismatch
++- **WHEN** an observed task, worktree, branch or target differs from the recorded assignment
++- **THEN** comparison reports divergence without rebinding ownership or authorizing an action
++
++#### Scenario: Changed manifest or unsafe retention
++- **WHEN** evidence differs from its recorded manifest, a path escapes its root, or a retention destination contains different content
++- **THEN** the helper reports the problem without overwriting existing evidence or reporting successful preservation
++
++### Requirement: Consolidated closeout and stable verification
++Ticket delivery and merge evidence SHALL be recorded in the ledger immediately. Pure status and archival documentation SHALL be consolidated into at most one batch closeout change when repository policy permits. Required per-ticket operational activation evidence and pre-merge specification validation SHALL remain per ticket. Workers SHALL establish representative fixtures early, run focused checks during repairs and run the relevant full suite after the last behavioral repair, while retaining required CI checks.
++
++#### Scenario: Six ticket deliveries
++- **WHEN** six tickets have been merged and only status/archival bookkeeping remains
++- **THEN** their merge facts remain individually recorded and one closeout change collects the versioned bookkeeping, instead of six routine follow-up PRs
++
++#### Scenario: Activation and final repair
++- **WHEN** a ticket includes productive activation or a final behavioral repair
++- **THEN** its own activation proof remains required and the final suite covers the repaired contents before delivery; a changed target triggers relevant integration checks
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/specs/technical-change-completion/spec.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/specs/technical-change-completion/spec.md
+@@ -0,0 +1,56 @@
++## ADDED Requirements
++
++### Requirement: Acceptance-triggered technical completion
++Direct implementation SHALL establish initial behavioral evidence and report technical completion as pending until contextual user acceptance or an equivalent completion request. An authorized coordinator SHALL trigger the same change-accepted workflow for fully delegated work without another human gate. Design agreement, quoted text and unrelated uses of accepted SHALL NOT trigger implementation closeout. Delivery actions and target SHALL derive from actual authorization, not a trigger word.
++
++#### Scenario: Direct implementation ready
++- **WHEN** implementation and initial tests finish without a completion request
++- **THEN** the agent reports readiness for substantive acceptance and does not start the complete closure reviews, archive or deliver
++
++#### Scenario: Delegated acceptance
++- **WHEN** an authorized coordinator accepts a worker's implementation for technical completion
++- **THEN** change-accepted runs the same completion contract without requesting additional human acceptance
++
++#### Scenario: Design agreement
++- **WHEN** the user accepts a design option or quotes an acceptance phrase
++- **THEN** no implementation closeout or delivery authority is inferred
++
++### Requirement: Requirements verification before structural review
++change-accepted SHALL critically verify requirement coverage, actual behavior, counterexamples, limits and the implementation-to-spec comparison before invoking code-review. Missing or incorrect behavior SHALL be repaired and affected evidence refreshed first. A list of passing checks SHALL NOT substitute for requirement-level evidence. code-review SHALL check that current requirements evidence is available before structural reviewers start and SHALL NOT add another blanket Spec review afterward.
++
++#### Scenario: Green tests miss a requirement
++- **WHEN** a required behavior lacks evidence or the spec comparison reveals a gap
++- **THEN** the gap is repaired and verified before structural review starts
++
++### Requirement: Single owner of review methodology
++code-review SHALL alone define three independent sequential reviews DRY, SOLID and KISS, each using its own reviewer. Findings SHALL be addressed and affected checks run before the next review. Review SHALL inspect both the scoped diff and surrounding context. Relevant documented repository standards SHALL be assigned explicit coverage within these reviews or existing automated checks; they SHALL NOT disappear when the former Standards/Spec wrapper is replaced. Callers, AGENTS.md and generated guidance SHALL reference the skill instead of copying its methodology.
++
++#### Scenario: All implementation entrypoints
++- **WHEN** direct work, a delegated worker or an archive entrypoint needs technical review
++- **THEN** it uses code-review or verifies its current receipt without defining a separate review sequence
++
++#### Scenario: Explicit standalone review
++- **WHEN** the user asks code-review to inspect a branch or PR
++- **THEN** no acceptance trigger is required, missing requirements verification is completed before structural review, and review grants no delivery authority
++
++### Requirement: Content-bound reusable evidence
++Completion evidence SHALL bind scope, base, current content identity, requirements, measured results, limitations and per-reviewer coverage. Later repairs SHALL use the same reviewer for affected coverage and retain unaffected findings and coverage. A full repeat SHALL require a recorded reason. Refactoring that invalidates behavioral evidence SHALL reopen affected verification. Repeated acceptance or archival of unchanged content SHALL reuse valid evidence. Relevant final tests SHALL follow final repairs; unchanged applicable results MAY be reused.
++
++#### Scenario: Repair after a later structural pass
++- **WHEN** a repair also affects an earlier review dimension or a behavioral requirement
++- **THEN** those affected checks reopen against the delta and their final coverage is recorded without routinely restarting every review
++
++#### Scenario: Repeated acceptance and archival
++- **WHEN** valid completion evidence covers the current scope and requirements
++- **THEN** the caller reuses it and only completes outstanding authorized actions
++
++### Requirement: Central applicability boundary
++The complete review contract SHALL apply to substantive code, requirements, effective configuration and binding workflow rules, including skills and AGENTS.md. Pure spelling, formatting or editorial link corrections SHALL receive relevant document checks. Classification SHALL depend on effect, not extension, and SHALL be defined centrally in code-review.
++
++#### Scenario: Documentation changes workflow behavior
++- **WHEN** a Markdown edit changes binding agent behavior
++- **THEN** it requires the full completion contract after acceptance
++
++#### Scenario: Editorial correction
++- **WHEN** a change only corrects spelling without changing meaning
++- **THEN** appropriate document checks suffice and the scope rationale is recorded
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/tasks.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/openspec/changes/add-sequential-ticket-orchestration-skill/tasks.md
+@@ -14,4 +14,19 @@
+ - [x] 4.4 Validate and publish scoped skill changes to the shared repository.
+ 
+ ## 5. Script support design
+-- [ ] 5.1 Clarify first-release scope and adoption requirements in scripted-batch-design.md; record accepted decisions before specifying implementation.
++- [x] 5.1 Clarify first-release scope and adoption requirements in scripted-batch-design.md; record accepted decisions before specifying implementation.
++
++## 6. Token-efficient batch workflow
++- [x] 6.1 Implement local mechanical helpers through CLI behavior tests in red-green slices.
++- [x] 6.2 Update review order, delta reviews, compact context, role profile, fixture/test timing and consolidated closeout in the skill and prompts.
++- [x] 6.3 Critically verify helper failure paths and forward-test workflow decisions; repair findings before final independent review.
++- [x] 6.4 Complete refactoring, validation and a requirement-by-requirement acceptance overview; verify active skill links.
++
++## 7. Shared completion contract
++- [x] 7.1 Record the accepted DRY → SOLID → KISS sequence with separate agents for all three repositories in ADR 0017 and completion-contract-design.md.
++- [x] 7.2 Record applicability to substantive technical changes; editorial-only corrections retain appropriate document checks.
++- [x] 7.3 Record acceptance-triggered completion after direct implementation and initial tests; authorized coordinators trigger the same workflow for fully delegated work. Finish the design interview and documentation handoff.
++- [x] 7.4 Record code-review as the sole owner of DRY → SOLID → KISS, repository standards and review follow-up; place the Spec comparison in preceding critical requirements verification and keep callers as references.
++- [x] 7.5 Specify and implement the common workflow and central code-review definition; migrate conflicting entrypoints/templates and repository guidance.
++- [x] 7.6 Initially verify direct, standalone-review and orchestrated completion decisions, contextual trigger recognition, evidence reuse and affected revalidation through isolated scenarios and source/link checks.
++- [ ] 7.7 After contextual acceptance, run change-accepted for this migration, including critical verification and the central code-review workflow; preserve initial checks without claiming full technical completion early.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/ask-matt/SKILL.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/ask-matt/SKILL.md
+@@ -0,0 +1,90 @@
++---
++name: ask-matt
++description: Ask which skill or flow fits your situation. A router over the skills in this repo.
++disable-model-invocation: true
++---
++
++# Ask Matt
++
++You don't remember every skill, so ask.
++
++A **flow** is a path through the skills. Most paths run along one **main flow**, and two **on-ramps** merge onto it. Everything else is standalone, or a vocabulary layer that runs underneath.
++
++## The main flow: idea → ship
++
++The route most work travels. You have an idea and want it built.
++
++1. **`/grill-with-docs`** sharpens the idea by interview. Start here whenever you are **working in a working directory**: it's stateful, retaining what it learns in `CONTEXT.md` and ADRs. (No working directory? Use `/grill-me` instead, covered under Standalone. Both run the same `/grilling` primitive; `grill-with-docs` is the one that leaves a paper trail, which makes it the better of the two whenever a repo is there to leave it in.)
++2. **Branch: can you settle every question in conversation?** If a question needs a runnable answer (state, business logic, a UI you have to see), detour through a prototype, bridged by **`/handoff`** in both directions (a prototype lives in its own directory, which is exactly what `/handoff` is for; see Phase boundaries):
++   - **`/handoff`** out, then open a fresh session against that file,
++   - **`/prototype`** to answer the question with throwaway code,
++   - **`/handoff`** back what you learned, and reference it from the original idea thread.
++3. **Branch: is this a multi-session build?**
++   - **Yes** → **`/to-spec`** (turn the thread into a spec), then **`/to-tickets`** to split it into tracer-bullet tickets, each declaring its **blocking edges**. On a local tracker that's one file per ticket under `.scratch/<feature>/issues/`, worked blockers-first by hand; on a real tracker the edges become native blocking links, so any ticket whose blockers are done can be grabbed: kick off **`/implement`** per ticket, **`/clear`ing context between each one**. Each ticket is self-contained, so the last one's context is disposable.
++   - **No** → **`/implement`** right here, in the same context window.
++
++   Either way, **`/implement`** builds each issue by driving **`/tdd`** internally (one red-green slice at a time), then reports implementation evidence and awaits contextual acceptance. **`/change-accepted`** handles technical completion and invokes the central **`/code-review`** method after requirements verification; an authorized coordinator can trigger the same flow for delegated work. Reach for **`/tdd`** on its own when you just want to build a concrete behaviour test-first without a full spec, and **`/code-review`** on its own whenever you want to review a branch or PR against a fixed point.
++
++### Context hygiene
++
++Keep steps 1–3 in **one unbroken context window** (don't compact or clear until after `/to-tickets`) so the grilling, spec, and tickets all build on the same thinking. Each `/implement` then starts fresh, working from the ticket.
++
++The limit on this is the **[smart zone](https://www.aihero.dev/ai-coding-dictionary/smart-zone)**: the window (~150k tokens on state-of-the-art models) within which the model still reasons sharply. If a session approaches it before `/to-tickets`, don't push on degraded; `/compact` at the nearest phase boundary and carry on (see Phase boundaries).
++
++## On-ramps
++
++A starting situation that generates work, then merges onto the main flow.
++
++- **Bugs and requests piling up** → **`/triage`**. It moves issues through triage roles and produces agent-ready issues, which **`/implement`** later picks up.
++
++  Triage is only for issues **you didn't create**: bug reports, incoming feature requests, anything that arrives raw. Tickets that `/to-tickets` produced are already agent-ready, so **don't triage them**.
++
++- **Something's broken** → **`/diagnosing-bugs`**. For the hard ones: the bug that resists a first glance, the intermittent flake, the regression that crept in between two known-good states. It refuses to theorise until it has a **tight feedback loop** (one command that already goes red on *this* bug), then fixes with a regression test. Its post-mortem hands off to **`/improve-codebase-architecture`** when the real finding is that there's no good seam to lock the bug down.
++
++- **A huge, foggy effort: a greenfield project or a huge feature build, too big for one session** → **`/wayfinder`**, the most cognitively demanding flow here. When the way from here to the destination isn't visible yet, it charts a **shared map** of **decision tickets** on the issue tracker and resolves them one at a time, producing **decisions, not deliverables**, until the fog is pushed back and the way is clear. Where **`/grill-with-docs`** sharpens an idea you can hold in one session, wayfinder is for the idea you can't, and it's slower and denser, so save it for exactly that, never a well-scoped feature.
++
++  When the map clears, **it hands off, it doesn't build**: merge onto the main flow at **`/to-spec`**, which collapses the map's linked decisions into a buildable plan, then `/to-tickets` and `/implement` as usual. Looping the map straight into `/implement` skips that collapse and throws the linked detail away, so go straight to `/implement` only when the effort turned out genuinely small.
++
++## Codebase health
++
++Not feature work, just upkeep.
++
++- **`/improve-codebase-architecture`** runs whenever you have a spare moment to keep the codebase good for agents to operate in. It surfaces **deepening opportunities**; picking one _generates an idea_ you can take into the main flow at `/grill-with-docs`. It's the survey that finds the candidates; **`/codebase-design`** (below) is the bench you design the chosen one on.
++
++## Vocabulary underneath
++
++Two model-invoked references that run *beneath* the other skills, each the single source of truth for its vocabulary. Reach for them directly when the **words**, not the process, are the problem; or let the skills above pull them in.
++
++- **`/domain-modeling`**: sharpen the project's *domain* language: challenge a fuzzy term, resolve an overloaded word ("account" doing three jobs), record a hard-to-reverse decision as an ADR. It's the active discipline `/grill-with-docs` drives to keep `CONTEXT.md` a clean glossary.
++- **`/codebase-design`** is the deep-module vocabulary (module, interface, depth, seam, adapter, leverage, locality) for designing a module's *shape*: a lot of behaviour behind a small interface at a clean seam. `/tdd` and `/improve-codebase-architecture` both speak it.
++
++## Phase boundaries
++
++A **phase** is a chunk of work inside a session: the grilling, the implementation, the QA. At the **boundary** between two of them you have five options, and picking between them is the fuzziest decision in this whole map:
++
++- **Continue**: stay put. Costs nothing, loses nothing.
++- **`/clear`**: empty the window, when nothing here matters to what's next.
++- **`/handoff`** writes a portable markdown file. Narrow: only for a **new harness**, a **new directory**, a **colleague**, or forking a side task **mid-phase**. What it buys is portability.
++- **Subagent**: send a tightly-scoped task to its own window and get a report back.
++- **`/compact`** compresses this context and seeds a fresh session with it. The **default**, at the bottom of the tree rather than the first reach.
++
++Read [PHASE-BOUNDARIES.md](../../vendor/mattpocock/.agents/skills/ask-matt/PHASE-BOUNDARIES.md) for the ordered tree: the five questions, the reasoning behind each branch, and why the primary-source cost makes **Continue** the one to rule out first. Make the decision **at** a boundary; mid-phase, continue or split the rest into subagents.
++
++## Standalone
++
++Off the main flow entirely.
++
++- **`/grill-me`**: the same relentless interview as `/grill-with-docs`, but **stateless**: it saves nothing locally and builds no `CONTEXT.md`. Reach for it when you are **not working in a working directory** (sharpening a plan, a design, a piece of writing, anything with no repo under it). If you are in a working directory, use `/grill-with-docs` instead: it runs the same interview and leaves a paper trail, so it is strictly the better one.
++- **`/grilling`** is the interview primitive itself: rounds, the frontier, facts are the agent's job and decisions are yours. `/grill-me` and `/grill-with-docs` are the two named ways in, and `/triage`, `/wayfinder` and `/improve-codebase-architecture` all run it internally. Reach for it directly only when you want the interview with no wrapper around it.
++- **`/resolving-merge-conflicts`** works an in-progress merge or rebase conflict hunk by hunk, resolving by **intent** traced to each side's primary source rather than by picking lines, then finishes the operation. It never runs `--abort`. Standalone and off every flow: reach for it when you are already mid-conflict.
++- **`/prototype`** is a small, throwaway program that answers one design question: does this state model feel right, or what should this UI look like. Throwaway is a constraint on how the code is written, not a promise to destroy it: the answer folds into the real code, and the prototype itself is kept as a **primary source** on a `prototype/<name>` branch out of main, pointed at from the implementation issue. It's the detour in step 2 of the main flow, but reach for it any time a design question is hard to settle on paper.
++- **`/research`**: delegate reading legwork to a **background agent**: it investigates a question against **primary sources**, then leaves a cited Markdown file in the repo. Keep working while it reads. The file it produces is something to take *into* the main flow at `/grill-with-docs`, since research feeds the thinking rather than replacing it.
++- **`/to-questionnaire`** comes in when the thing blocking you isn't in your head or the codebase but in **someone else's**, and it writes them a questionnaire to fill in. It's the inverse of `/grill-me`: instead of interviewing you about the subject, it interviews you about the **send** (who it's going to, what you need back) and aims the questions at the gap. What comes back is material for `/grill-with-docs` or `/to-spec`.
++- **`/wizard`** is for the steps only a **human** can take: provisioning infrastructure, setting up credentials or CI secrets, clicking through an unfamiliar third-party dashboard, running a one-off migration or cutover. It generates an interactive bash script that opens each URL, captures each value, and writes it into `.env` and GitHub secrets, so the procedure stops being something you re-explain to an agent every time. Model-invoked, so the agent reaches for it the moment it hits a wall only you can pass. If the agent could just do it itself, it should; this is for where a human is genuinely in the loop.
++- **`/wait-what`** is the corrective for a message that didn't land. Use it mid-conversation, inside any other skill, and the agent re-pitches what it just said with the context you were missing, in plain English, using the `CONTEXT.md` vocabulary. It works after the fact; `/grill-with-docs` is the upfront cure, because a shared language agreed early is what stops the jargon arriving at all.
++- **`/teach`**: learn a concept over multiple sessions, using the current directory as a stateful workspace.
++- **`/writing-for-agents`** is the reference for writing documents agents consume: skills, AGENTS.md, pointed-at docs.
++
++## Precondition
++
++**`/setup-matt-pocock-skills`**: run before your first engineering flow to configure the issue tracker, triage labels, and doc layout the other skills assume. Custom issue trackers also work.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/change-accepted/SKILL.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/change-accepted/SKILL.md
+@@ -0,0 +1,16 @@
++---
++name: change-accepted
++description: Complete a concrete implemented change after contextual acceptance such as "akzeptiert", "Change accepted" or an equivalent closeout request, including an authorized coordinator's delegated request. Verify requirements, invoke code-review and continue only authorized delivery/archive actions. Design agreement and quoted acceptance text do not trigger closeout.
++---
++
++# Change Accepted
++
++This is the shared technical completion entrypoint for direct and delegated work. It owns the transition from initial implementation evidence to technical completion, while [code-review](../code-review/SKILL.md) owns applicability and review methodology.
++
++1. **Resolve the request.** Identify the concrete implemented change, repository/write set, existing evidence, original authorization and any delivery target/actions. Ordinary implementation ends with initial evidence and `awaiting-acceptance`; it does not trigger this workflow automatically. A fully authorized coordinator may issue the same completion request without another human gate. An explicit archive/finalization request can be an equivalent completion request. Do not infer a target or push/merge permission merely from "accepted". Ask only for genuinely ambiguous scope or missing authority needed for a concrete remaining action.
++2. **Reuse current evidence.** Inspect the [completion record](../code-review/references/completion-record.md) if present. Repeated acceptance continues outstanding work; it does not restart valid verification. Apply code-review's central scope rule. For editorial-only work, run the relevant document checks and record why structural review is not required.
++3. **Verify requirements first.** For substantive work, use [requirements-verification.md](references/requirements-verification.md). Repair gaps and refresh affected evidence before invoking structural review.
++4. **Invoke code-review.** Pass the fixed scope/base/current identity, requirements evidence, repository standards and existing receipts. Let that skill run or reuse its checks. Do not add another generic review after it.
++5. **Continue authorized closeout.** Require current technical-completion evidence before delivery/archive. Follow repository-specific integration, branch protection, OpenSpec and issue workflows within the original authority; existing explicit delegation persists. An orchestrated worker returns its record and waits for the coordinator's integration slot and exact delivery grant. A missing new target does not prevent finishing local technical checks. Do not ask again for actions already authorized.
++
++For OpenSpec, use the repo-local archive skill only after technical completion, passing the record so archival reuses it. For another archive format, use that repository's workflow. Reconcile pure archive/path movements by content mapping; substantive edits reopen affected checks through the same owners. Finish with the actual technical and delivery state, evidence and remaining limitations. Never imply completion from edits or passing check counts alone.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/change-accepted/references/requirements-verification.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/change-accepted/references/requirements-verification.md
+@@ -0,0 +1,11 @@
++# Critical requirements verification
++
++Use after a completion request, or to establish missing evidence for an explicit standalone code-review request. This is also the owner of the former Spec comparison; do not append another blanket Spec review later.
++
++Pin the current candidate and requirement sources. Compare each requirement with both the implementation and the most direct observable surface: public interface behavior, measured output, running UI, generated artifact or workflow invocation. Look for missing/partial behavior, incorrect implementation, unrequested scope and evidence that proves only startup or green test counts. Inspect substantive constraints that cannot be established by a screenshot through suitable tests and code inspection.
++
++Challenge happy-path evidence with relevant counterexamples, failure paths and boundaries. Select these from actual requirements and risks, not a universal exhaustive checklist. Use representative fixtures early; disclose what mocks or synthetic providers cannot prove. Do not run remote mutations or production tests without the applicable authority.
++
++Record expected versus observed results, evidence paths, exact candidate and verification limits per requirement using the completion record linked by code-review. If a requirement is absent or fails, repair within the authorized scope, run affected tests and refresh affected evidence before structural review starts. Do not invent missing product decisions or silently treat unverified behavior as passed. When direct verification is unavailable, explain why and what lower-level evidence exists; unresolved required coverage prevents technical completion.
++
++The implementing agent may perform this separately requested critical verification; independence is a property of the structural reviewers, not an additional late phase named "independent review". A caller may explicitly assign an independent requirements verifier. Reviewers can discover behavioral defects later: reopen only affected requirements and review coverage, then refresh final checks. Preserve unchanged valid evidence.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/SKILL.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/SKILL.md
+@@ -0,0 +1,38 @@
++---
++name: code-review
++description: Review a fixed change through separate sequential DRY, SOLID and KISS reviewers, including repository standards, after critical requirements verification. Use for branch, PR or work-in-progress review and technical completion; reuse current evidence and review only affected deltas after repairs.
++---
++
++# Code Review
++
++This skill is the single owner of structural review, standards coverage and review follow-up. Callers reference it instead of copying the method. Requirements verification precedes structural review; there is no additional blanket Spec/Standards review afterward.
++
++## Scope and inputs
++
++The complete review applies to substantive code, requirements, effective configuration and binding workflow rules, including skills and AGENTS.md. Pure spelling, formatting and editorial link corrections need appropriate document checks, with a recorded `not-required` scope rationale. Classify by effect, not filename; mixed changes use the complete review for their substantive scope.
++
++Resolve the repository, relevant instructions, requirement sources and exact write set. Pin the supplied base to a commit SHA; infer an unambiguous existing change baseline when available, otherwise ask for the missing baseline. Never assume HEAD represents uncommitted work. For a committed branch use the resolved merge-base and head; for work in progress include the scoped staged, unstaged and relevant untracked contents. Preserve unrelated dirty work. Record a content manifest when no commit identifies the candidate. No commit is required solely to review it.
++
++Read the actual requirements verification for this candidate, not just test totals or a worker's approval claim. Missing, stale or incomplete evidence must be completed using [requirements-verification.md](../change-accepted/references/requirements-verification.md) before starting a structural reviewer. A standalone review request authorizes this verification without an Accepted trigger; it does not authorize delivery. Report unavailable verification honestly and do not claim completion.
++
++Read [review-criteria.md](references/review-criteria.md) and the applicable repository standards. Assign each relevant standard to one review dimension or an existing automated check. Keep a coverage map so standards outside the three principle names are still checked. Record tooling results once rather than asking reviewers to repeat enforced checks.
++
++## Three sequential reviews
++
++Run **DRY → SOLID → KISS**, each with its own independent reviewer. Do not combine or parallelize the three passes. Use a fresh context (`fork_turns="none"` where available), the exact scoped diff/current content identity, nearby-context paths, requirements, assigned standards and that dimension's brief from the criteria reference. Follow an explicitly authorized model profile; otherwise retain runtime defaults. The reviewing agent reports findings; the implementing agent owns repairs.
++
++For each dimension:
++
++1. Ask its reviewer to inspect both the diff and surrounding context. Require actionable findings with file/line, affected rule or heuristic, expected improvement and material risk. Distinguish binding rules from judgment calls. Keep the result concise; do not mandate abstractions or edits merely to produce a finding.
++2. Address justified findings within scope, preserve required behavior and run affected checks. Record the reason for any disputed or inapplicable finding; unresolved binding failures prevent completion.
++3. Send the same reviewer the old-to-new delta, its prior findings and affected coverage. Obtain a current result before starting the next dimension. Carry unaffected coverage forward. Replace an unavailable reviewer only with the same bounded packet and recorded provenance.
++
++A later repair may affect an earlier dimension or a behavioral requirement: reopen that affected coverage and refresh its evidence, not the entire sequence automatically. A complete restart needs a recorded reason such as broad changed behavior, changed requirements or an unusable baseline. If separate reviewers cannot be run, report the specific limitation rather than label self-review independent.
++
++## Result and reuse
++
++After the last repair, run the relevant final suite and required checks; reuse existing results when their inputs have not changed. Any new repair reopens affected verification/review. Do not rerun the whole suite merely because a status note changed.
++
++Save the compact [completion record](references/completion-record.md) with requirements evidence and the three reviewer receipts. For repeated invocations, check content, requirements and coverage and perform only missing or invalidated checks. Path-only archive moves can retain evidence through an explicit content/path mapping; changed rules or behavior cannot.
++
++Report the reviewed scope, per-dimension outcome, current evidence and remaining limitations. Review alone grants no commit, push, merge, archive or issue-close authority.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/references/completion-record.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/references/completion-record.md
+@@ -0,0 +1,15 @@
++# Completion record
++
++Use one durable record per change/write set, available without a batch ledger. Prefer `completion.md` in the active change directory; otherwise use the repository's evidence convention or `.scratch/completion/<scope>/completion.md`. Callers and batch ledgers link to it. Keep raw logs in linked artifacts.
++
++Record:
++
++- **Scope and identity:** repository, change/ticket, exact write set, fixed base SHA, current head or reproducible content manifest, relevant untracked files, and excluded unrelated changes. Include behavior-bearing docs/config in the identity. Keep generated receipts/logs outside the reviewed-content identity to avoid self-referential hashes; explain their separate evidence role.
++- **Applicability:** substantive review or editorial `not-required`, with the effect-based reason.
++- **Requirements evidence:** source and version, each requirement's expected behavior, observed result, counterexample/limit coverage, inspected artifact or code location, verification command/result and candidate identity. State unverified coverage explicitly.
++- **Standards coverage:** repository rule sources and mapping to a reviewer or an existing automated check.
++- **Reviewer receipts:** dimension, reviewer identity, fixed base, reviewed contents, covered properties/rules, stable finding IDs, disposition, result and evidence paths. A delta receipt links its prior receipt and old/new identities, lists rechecked properties and explicitly retained coverage. Never attribute earlier approval to a replacement reviewer.
++- **Final checks and state:** commands/results and content identity, remaining limitations, `awaiting-acceptance`, `verification-incomplete`, `review-incomplete` or `technically-complete`. Editorial completion uses documented checks, not fabricated reviewer receipts.
++- **Delivery:** separately record authorized target/actions and their verified outcome when performed. Technical completion is not delivery authority.
++
++Reuse requires both content correspondence and sufficient requirement/standards coverage. Matching hashes alone cannot supply omitted criteria. Later relevant changes reopen affected checks. Archive/squash/rebase mappings must show which current contents the receipts cover. Keep previous observations attributable instead of overwriting them as if reviewers had inspected a new candidate.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/references/review-criteria.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/code-review/references/review-criteria.md
+@@ -0,0 +1,13 @@
++# Structural review criteria
++
++Repository rules override these design heuristics. Treat code smells as hypotheses requiring a concrete benefit, not automatic violations. Inspect adjacent code as well as changed lines; preserve tested behavior and stay within the change's relevant context.
++
++| Pass | Primary question | Typical observations |
++| --- | --- | --- |
++| DRY | Is knowledge or logic repeated in ways that create inconsistent maintenance? | Duplicated Code; repeated domain decisions or Switches; Data Clumps that repeatedly travel together. Consolidate only when the shared meaning and change reasons agree. |
++| SOLID | Are responsibilities, contracts and dependencies coherent and replaceable? | Divergent Change; Shotgun Surgery; Feature Envy; Message Chains; Refused Bequest; interfaces forcing unrelated dependencies; type/contract and substitution violations. Deepen useful boundaries without inventing future requirements. |
++| KISS | Is this the smallest clear structure supporting current requirements? | Mysterious Name; Speculative Generality; needless Middle Man; unnecessary branches or abstractions; Primitive Obsession where a small domain type simplifies actual behavior. Do not add a type solely because a primitive exists. |
++
++Before dispatch, map applicable repository standards to the best fitting pass. Examples: duplicated domain constants to DRY; ownership, dependency, interface and error-handling contracts to SOLID; naming, readability and unused abstractions to KISS. Put remaining manually checked code standards explicitly in KISS's packet so they are not silently omitted. Formatting, typechecking and other tooling-enforced rules point to their actual check results. Behavioral/security requirements belong in preceding requirements verification; reviewers still report any concrete defect they discover and reopen that coverage.
++
++Give each reviewer its assigned criteria and standards, not the other reviewers' conclusions as a desired answer. Require separate rule-backed violations and heuristic suggestions, with actionable evidence. A clean result is valid. If a finding concerns another dimension, identify that dimension for the implementing agent to route to its owner instead of launching another broad review.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/implement/SKILL.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/implement/SKILL.md
+@@ -0,0 +1,25 @@
++---
++name: implement
++description: "Implement a piece of work based on a spec or set of tickets."
++disable-model-invocation: true
++---
++
++Implement the work described by the user in the spec or tickets.
++
++Before editing, record the owning Git root, current branch or detached state, and intended target branch from the user's request, issue, PRD, or repository workflow. If the current branch is unrelated or the target is unclear, resolve that mismatch before changing files; preserve existing work and use an isolated worktree when moving immediately would be unsafe. Do not assume that "current branch" is the intended delivery target.
++
++Before implementation, inspect the repository's OpenSpec policy. When an `openspec/` directory exists, run `openspec list --json` as a routing gate; an empty or non-matching list does not by itself mean OpenSpec is unnecessary.
++
++- Apply a matching active change through the repository's local `$openspec-apply-change` skill.
++- When no active change matches, use the local `$openspec-propose` skill before editing if the work changes a public API or wire status, stored data or persistence behavior, cross-cutting runtime safety or configuration, or spans multiple tickets—unless repository policy explicitly treats the supplied ticket or spec as the accepted change artifact.
++- Record a brief evidence-backed reason whenever OpenSpec is skipped. Configuration that changes runtime or wire semantics is not narrow configuration.
++
++If the local skills are unavailable, follow the equivalent `openspec status` and `openspec instructions` CLI workflow. Do not install or rely on global OpenSpec skills for a repo-local workflow, and do not force OpenSpec onto genuinely narrow documentation, configuration, or mechanical work unless repository guidance requires it. For OpenSpec-backed work, keep active tasks and evidence current and run `openspec validate <change> --strict` before review.
++
++Use /tdd where possible, at pre-agreed seams.
++
++Run typechecking regularly, single test files regularly, and the full test suite once at the end.
++
++After implementation and initial behavioral checks, report the actual scope, expected/observed results, evidence paths, limitations and current content identity. Mark technical completion as awaiting acceptance. A normal implementation request does not start the full closure workflow. On contextual user acceptance, or an authorized coordinator's completion request, use /change-accepted; it owns the transition to verification and /code-review. Do not duplicate the review method here.
++
++Owned-branch local checkpoint commits may establish a baseline within the task's authority. They do not authorize push, merge, archive or issue closure. Preserve the confirmed delivery target and follow the existing delivery authority after technical completion.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/SKILL.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/SKILL.md
+@@ -15,8 +15,8 @@
+ 
+ 1. Read repository AGENTS/README and relevant ticket/specification guidance. Resolve repository, remote, user-named target and original authorization. Use the repository-prescribed tracker tools. Expand the requested range/query into a finite list; freeze “all open tickets” at start. Do not silently add new tickets or out-of-batch prerequisites.
+ 2. Map ticket dependencies and anticipated file/interface changes from tickets and a bounded repository inspection. Keep conservative parallel eligibility: dependencies must already be delivered on the selected target, and concurrent tickets must have clearly separate changes. Foreseeable overlap in files/interfaces, migrations, shared generated outputs or test resources is a serialization constraint even without a functional dependency. Uncertain overlap needs focused investigation, not an optimistic launch. Use ticket order/priority as a tie-breaker, not a global barrier.
+-3. Resolve the project with `list_projects`; use `environment.type=worktree` and the **explicit target branch as startingState**, not the project's default branch. Every new implementation task in this batch gets its own worktree and owned working branch. Never run concurrent writers in a saved/shared checkout. Adopt an existing worker only after verifying identity and isolation; preserve its work if it requires safe relocation first. Do not override the configured model without user direction.
+-4. Resolve and verify `$implement`; Daniel's canonical entry is `~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/vendor/mattpocock/.agents/skills/implement/SKILL.md`. Pass its resolved absolute path. That skill owns OpenSpec routing, TDD and engineering review.
++3. Resolve the project with `list_projects`; use `environment.type=worktree` and the **explicit target branch as startingState**, not the project's default branch. Every new implementation task in this batch gets its own worktree and owned working branch. Never run concurrent writers in a saved/shared checkout. Adopt an existing worker only after verifying identity and isolation; preserve its work if it requires safe relocation first. Use the role profile and runtime limits in [efficient-execution.md](references/efficient-execution.md); preserve explicit user model choices.
++4. Resolve the active shared `$implement` and `$change-accepted` skills under `skills-repo/skills`, not the preserved vendor snapshot. Pass their verified absolute paths. They own implementation and technical completion for both direct and delegated work; no batch-specific review override is needed.
+ 5. Read any documented prototype reference and pass it as visual inspiration only. Tickets/specifications determine behavior; do not infer new gates, states or scope from a prototype.
+ 6. Locate known workers/PRs and establish one batch ledger/heartbeat using [recovery-and-state.md](references/recovery-and-state.md). Labels and task-list omissions do not prove ownership or absence. Never create a second worker for the same ticket. Reuse a matching heartbeat; load `build-codex-automations` when changing its definition. Do not alter unrelated automations or pilots.
+ 
+@@ -30,9 +30,9 @@
+ | --- | --- | --- |
+ | queued | Select an eligible ticket within the limit; checkpoint dispatch intent | Create/adoption response recorded |
+ | registering | Resolve and directly verify real task ID and isolated worktree | Ticket, repository, target/base and worker match |
+-| implementing | Monitor; handle newly discovered overlap/blockers | Worker explicitly reports ready |
+-| verifying | Send separate critical verification once | Worker returns inspectable evidence |
+-| reviewing / repairing | Inspect evidence or request outcome-focused repairs | Identified contents accepted |
++| implementing | Implement, stabilize fixtures and gather behavioral evidence | Worker reports ready for substantive acceptance |
++| verifying | Issue the delegated change-accepted request once; track requirements verification | Critical evidence is ready for independent review |
++| reviewing / repairing | Track code-review and its completion record | Evidence and current reviewed contents accepted |
+ | awaiting-integration | Wait for the one integration slot for the target | Slot reserved for this worker and target revision |
+ | integrating | Prepare final candidate against current target; check evidence | Accepted candidate plus target revision confirmed |
+ | delivering | Issue specific merge authorization to slot holder | Worker reports merge result |
+@@ -47,6 +47,8 @@
+ 
+ Compose assignments with [messages.md](references/messages.md), replacing all placeholders. Include the exact user target, remote base, isolated worktree instruction, original authorization provenance, ownership limits and separate acceptance/merge gates. A task may not launch other tickets or choose its own merge time.
+ 
++Give workers self-contained packets: ticket/spec, relevant standards and files, fixed base, target, authority and phase contract. Do not copy the batch conversation. For review subagents explicitly use fresh context (`fork_turns="none"`), with the packets and review receipts in [efficient-execution.md](references/efficient-execution.md).
++
+ Record creation intent and result immediately. `clientThreadId` is provisional; never pass it to `read_thread` or `wait_threads`. Emit the required created-task directive with the actual returned ID type. Registration requires direct verification of the real ID. A missing `list_threads` entry is inconclusive: use bounded local metadata recovery from the recovery reference rather than ask the user for a link or loop indefinitely.
+ 
+ Worker callbacks are optional assistance. Missing ID knowledge, unavailable tools or a denied callback must not block implementation or lead to another worker.
+@@ -55,13 +57,15 @@
+ 
+ Use one `wait_threads` call for confirmed active workers, each with its own host and latest cursor; respect the tool's target limit and rotate fairly if a user override exceeds it. Read a task in detail only for relevant completion, error or clarification. Normalize JSON-string/tool content once; use top-level `turns`, legacy `page.turns` only as fallback. Start first reads with `threadId` alone when needed for tool-version compatibility.
+ 
+-Continue bounded waits (up to 60 seconds each) during an active run and process actionable changes immediately. A timeout is not completion. Do not intentionally defer every transition to the heartbeat after a one-second probe. Keep updates meaningful; stay quiet on unchanged heartbeat observations. If ending a run is necessary, checkpoint all workers and next actions. A heartbeat provides recovery, not a guarantee of exact wake time or execution while the runtime is unavailable.
++Use 60-second bounded waits during an active run and process actionable changes immediately. On unchanged observations, checkpoint the latest cursor without extra file/PR probes, detailed task reads or follow-up messages. Use `batch_state.py compare` and revision-checked checkpoints through [local-helpers.md](references/local-helpers.md); reconciliation after interruption and required pre-mutation checks still apply. A timeout is not completion. Do not intentionally defer every transition to the heartbeat after a one-second probe. Keep updates meaningful; stay quiet on unchanged heartbeat observations. If ending a run is necessary, checkpoint all workers and next actions. A heartbeat provides recovery, not a guarantee of exact wake time or execution while the runtime is unavailable.
+ 
+ Reconcile ledger with workers, remote PRs and actual worktrees before resuming mutations. Record each pending create/send/delivery/cleanup action before dispatch and its outcome afterward. After interruption inspect whether it occurred before retrying; never assume tool idempotency. An uncertain merge or creation retains its reservation until reconciled.
+ 
+ ### Verification and acceptance
+ 
+-After initial completion request **separate critical verification**, even when tests are already green. Require the worker to challenge criteria coverage, counterexamples and relevant limits, close gaps and regenerate affected evidence.
++After inspecting initial implementation evidence, issue the delegated **change-accepted** request. This is substantive acceptance to begin technical completion, not a claim that verification is finished. The shared entrypoint completes critical requirements verification before code-review; track both outcomes without redefining their method or requesting another human acceptance for fully delegated work.
++
++The worker continues through code-review under the same completion request. Inspect its current completion record and link it in the ledger. Review methodology, repairs and evidence reuse belong to that skill; do not dispatch a second generic review. See [efficient-execution.md](references/efficient-execution.md).
+ 
+ Actually open screenshots or rendered reports and inspect measured expected/actual outcomes. For nonvisual work use readable behavioral measurements. A screenshot of a checklist or test count alone is insufficient. Check relevant persistence, restart, idempotency and failure paths through appropriate tests; screenshots cannot establish backend invariants.
+ 
+@@ -79,4 +83,6 @@
+ 
+ ## Finish
+ 
++Record ticket status and merge evidence in the ledger immediately. Bundle pure versioned status and OpenSpec archival bookkeeping into one batch closeout change when repository policy permits; keep required pre-merge docs and per-ticket productive activation evidence with their tickets. Track deferred closeout work explicitly and verify its delivery before declaring the batch complete. See [efficient-execution.md](references/efficient-execution.md).
++
+ A delivered prerequisite can unlock dependent work once it is verified on the target. A ticket is fully done only when evidence preservation and cleanup also succeed. Pause only this batch's heartbeat when all tickets are done; report ticket/PR/merge links, durable evidence paths and cleanup results. If only externally blocked work remains, report that precise state once and follow the saved recovery condition; do not claim completion or retry unchanged destructive operations.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/efficient-execution.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/efficient-execution.md
+@@ -0,0 +1,38 @@
++# Context, reviews and batch closeout
++
++## Role profile
++
++For the token-saving profile requested by Daniel, use:
++
++| Role | Model | Reasoning |
++| --- | --- | --- |
++| Coordinator | `gpt-5.6-sol` | `medium` |
++| Implementation and separate critical verification | `gpt-6-astra` | `high` |
++| Structural reviewers through code-review | `gpt-5.6-sol` | `medium` |
++| Mechanical bookkeeping | Local helper | None |
++
++Record the user's profile authorization and the actual runtime selections in the batch ledger. Preserve later explicit choices. Check the current tool schema: task creation may allow a model override only when the user explicitly requested it. Without that authority, omit the override and use the configured runtime model. Do not replace an unavailable model silently; record the limitation and use an authorized available setting. Escalate a structural finding needing difficult concurrency/persistence reasoning to Astra/high with a focused question; retain the original finding and attribution.
++
++A skill does not switch its own active task's model. Start a coordinator with Sol/medium using the app's model selector; for CLI use `codex -m gpt-5.6-sol -c model_reasoning_effort='"medium"'` when supported by the installed CLI. If already running with another model, disclose this once and continue permitted work. Never edit global defaults or create/restart a task solely to simulate a model change. Task tools use `model`/`thinking`; review subagent tools use `model`/`reasoning_effort` and `fork_turns="none"`. Verify supported values on the destination host. [Official model and reasoning selection](https://learn.chatgpt.com/docs/models).
++
++## Context packets
++
++New worker: ticket/spec paths or contents, relevant standards, expected file/interface scope, fixed starting target SHA, explicit target branch, isolated worktree requirements, authority provenance and phase/delivery contract from messages.md. Existing repository instructions still apply. Link primary sources instead of copying the full batch history.
++
++Reviewer packets and receipts are defined in [code-review](../../code-review/SKILL.md). The coordinator passes the authorized role profile and scoped requirements/evidence; it links the returned completion record rather than maintaining a second receipt schema.
++
++Worker result: current contents, ready/blocked phase, measured acceptance result, test and review artifact paths, limitations and next action. The coordinator opens only evidence needed for its decision. Do not require periodic prose updates or callbacks when the normal completion result is sufficient.
++
++## Technical completion
++
++Use [change-accepted](../../change-accepted/SKILL.md) after the coordinator's substantive acceptance of an implementation-ready candidate. It owns requirements verification followed by code-review. The coordinator inspects evidence, records the technical outcome and retains separate integration authority; it does not override implement or repeat the review instructions.
++
++Record a path to the current completion record in the batch ledger. Local checkpoint commits do not grant delivery. Preserve applicable checks after target movement and use the common record to reopen affected coverage. Existing batches retain prior receipts as historical evidence; reconcile their coverage with the current contract only on explicit adoption, never invent missing review outcomes.
++
++## One consolidated closeout
++
++After each verified merge, record PR/head/merge/target, accepted-content mapping, ticket closure and deferred versioned status/archive paths in the ledger. This immediately unlocks delivered prerequisites. Keep evidence retention and owned-resource cleanup per ticket.
++
++Do required specification updates and validation before each implementation merge. Keep productive activation, restart/persistence or deployment proof with its own ticket. A repository rule requiring per-ticket archive/docs before merge wins; record that exception. Otherwise defer only pure bookkeeping, including archive moves, to one batch closeout change. Do not create an automatic second PR per ticket for a checked task box or merge link.
++
++At batch end, collect deferred paths and merge facts into one closeout change on an owned branch/worktree from the explicit target. Reuse an idle verified worker when practical; obey actual task-creation authority. Reserve the integration slot, inspect the complete documentation diff, run required OpenSpec/docs checks, bind acceptance to the closeout head and target, and use the normal preparation and specific merge grant. If the diff adds behavior, route that portion through change-accepted. Verify the remote closeout merge and cleanup before marking the batch done. If externally blocked, a partial closeout may record delivered work while explicitly retaining outstanding tickets; never mark undelivered work complete.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/local-helpers.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/local-helpers.md
+@@ -0,0 +1,64 @@
++# Local mechanical helpers
++
++Run `python3 <resolved-skill-dir>/scripts/batch_state.py --help`. Python standard library only. These commands do not call task APIs, Git or automations. They compare supplied facts; they cannot establish live ownership, semantic coverage, acceptance or permission. Normalize task-tool responses before creating snapshots. Keep inputs, ledgers and manifests in the batch directory, outside disposable worker worktrees.
++
++Exit codes: **0** ready/unchanged, **2** diverged/blocked, **3** invalid/unreadable input. Results are JSON; changed-field names and paths are reported, not raw worker prose. CLI usage errors use argparse's normal exit 2. A `ready` result from a mechanical check never means the ticket is accepted.
++
++## Compare observations and assignment
++
++```sh
++python3 "$SKILL_DIR/scripts/batch_state.py" compare \
++  --previous "$BATCH_DIR/previous.json" --current "$BATCH_DIR/current.json"
++```
++
++Both snapshots include nonempty `ticket`, `thread_id`, `worktree`, `branch`, `target` and `status` (`running`, `ready`, `blocked`, `error`). `ready` means the worker explicitly reported readiness for the **current phase**, not that a tool merely said idle/completed. An optional `pending_action` carries unresolved dispatch information. Include candidate head/target SHA, blocker, evidence revision and other meaningful facts when they change.
++
++Only top-level `wait_cursor` and `observed_at` are ignored for comparison. Persist the latest cursor even for `unchanged`. A changed assignment reports `diverged`; an incomplete assignment reports `blocked`. A changed blocked/error or unresolved pending action reports `blocked`; a matching ready observation reports `ready`; other meaningful changes report `diverged`. Repeated identical blockers report `unchanged`; the ledger still retains their blocked phase and recovery condition.
++
++On `unchanged`, continue a 60-second bounded wait without detail reads, file probes or extra worker messages. On change, inspect the affected result and act once. On resume or before external mutation, reconcile the required live facts regardless of the last comparison. Unregistered provisional IDs use the existing identity recovery flow, not fabricated snapshots.
++
++## Checkpoint a JSON ledger
++
++```sh
++python3 "$SKILL_DIR/scripts/batch_state.py" checkpoint \
++  --ledger "$BATCH_DIR/memory.json" --expect-revision 0 --patch "$BATCH_DIR/initial.json"
++```
++
++Initial patch shape (fill real values):
++
++```json
++{
++  "batch": {"id": "batch-id", "repository": "/absolute/repo", "target": "release/wiki"},
++  "tickets": {"01": {"phase": "queued", "pending_action": null}}
++}
++```
++
++Add authority provenance, frozen scope, dependencies, identities, reviews and other fields required by recovery-and-state.md. The helper inserts `schema_version: 1` and `revision: 1`. Subsequent patches recursively merge object fields and replace explicit scalar/list/null values; omitted fields survive. Pass the last observed revision. Managed schema/revision and existing batch id/repository/target cannot be patched. Ticket objects cannot be removed with null. This is bookkeeping, not a phase-transition validator: only the coordinator may record a justified transition or clear a reconciled pending action.
++
++For example, a cursor checkpoint patches only `tickets.<id>.wait_cursor`. Before sending a request, checkpoint that ticket's concrete `pending_action`; afterward checkpoint its observed result and clear the action only when reconciled. Never replace another ticket's unresolved action with one global field.
++
++The command locks `<ledger>.lock`, rereads the latest ledger, checks the revision and atomically replaces it. A stale writer or existing lock blocks without a write. On interruption, inspect the recorded lock owner and actual pending operations before manually removing a stale lock. Do not delete a live writer's lock or retry a stale revision blindly. Existing Markdown/unversioned JSON ledgers require explicit, backed-up adoption as described in recovery-and-state.md. No live batch migration is automatic.
++
++## Manifest, verify and retain evidence
++
++Write an explicit JSON list of relative regular-file paths, including report dependencies:
++
++```json
++["acceptance.md", "images/result.png", "measurements.json"]
++```
++
++```sh
++python3 "$SKILL_DIR/scripts/batch_state.py" manifest \
++  --root "$ARTIFACT_ROOT" --files "$BATCH_DIR/files.json" > "$BATCH_DIR/manifest.json"
++python3 "$SKILL_DIR/scripts/batch_state.py" verify \
++  --root "$ARTIFACT_ROOT" --manifest "$BATCH_DIR/manifest.json"
++python3 "$SKILL_DIR/scripts/batch_state.py" retain \
++  --root "$ARTIFACT_ROOT" --manifest "$BATCH_DIR/manifest.json" \
++  --destination "$BATCH_DIR/evidence/ticket-01/reviewed-revision"
++```
++
++Check the manifest command's exit status before consuming its output. Keep each accepted manifest immutable under a revision-specific path. A manifest binds exactly the listed bytes; it does not discover omitted files or prove the entire implementation. Prefer a Git SHA for source review, or supply a complete agreed content list when a source manifest is needed.
++
++Paths must be normalized, relative and nonempty; no traversal, symlinks, directories or duplicates. Verification detects missing/changed files. Retention checks source bytes, copies into staging, checks copied hashes and publishes outside the source tree. An existing matching destination is reusable; differing/incomplete evidence is reported and never overwritten. Retain into a fresh revision directory after intentional content changes. Only helper-created temporary staging is removed; source and existing destination files are preserved.
++
++The coordinator verifies the destination is outside **all** disposable worktrees, preserves the manifest and review/merge receipts, checks report links/assets and opens retained artifacts before cleanup. The helper checks only listed files; unlisted files in an existing destination are preserved. It never authorizes branch/worktree deletion.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/messages.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/messages.md
+@@ -7,27 +7,31 @@
+ ```text
+ [$implement]([resolved absolute implement SKILL.md path]) Implementiere [ticket URL] vollständig. Benutze OpenSpec gemäß Implement-Skill und Repository-Policy; dokumentiere bei Verzicht die konkrete Begründung.
+ 
+-Dies ist die dedizierte Umsetzung für [ticket] im Ticket-Batch [batch scope]. Der Nutzer hat diesen Batch mit dem Workflow Implementierung → kritische Verifikation → Abnahme → Commit/Push/Merge beauftragt. Quelle: [original user request/task ID and faithful scope]. Diese Herkunft dokumentiert den Auftrag; tatsächliche Tool-Berechtigungen bleiben maßgeblich.
++Dies ist die dedizierte Umsetzung für [ticket] im Ticket-Batch [batch scope]. Der Nutzer hat diesen Batch mit dem Workflow Implementierung → delegierter Abschlussauftrag über change-accepted → technische Abschlussnachweise → Integrationsfreigabe → Push/Merge beauftragt. Quelle: [original user request/task ID and faithful scope]. Diese Herkunft dokumentiert den Auftrag; tatsächliche Tool-Berechtigungen bleiben maßgeblich.
+ 
+ Prüfe Git-Root, Branch/detached state, Status, vorhandene Vorarbeiten und aktuellen Remote-Zielstand. Repository [root], Zielbranch [target], letzter bestätigter Remote-Stand [SHA]. Arbeite ausschließlich im für diese Aufgabe eingerichteten isolierten Worktree. Prüfe den von Codex eingerichteten Branch; falls der Worktree detached ist oder noch keinen eigenen Arbeitsbranch besitzt, lege darin einen eindeutigen codex/-Arbeitsbranch für dieses Ticket vom verifizierten Zielstand an. Arbeite niemals direkt auf dem Zielbranch. Melde den tatsächlichen Worktree-Pfad und Arbeitsbranch zur Registrierung; die Orchestrierung bestätigt anschließend die Zuordnung. Verifiziere vor Änderungen den Ausgangspunkt gegen den frisch abgerufenen Remote-Zielbranch; melde den bestätigten Basis-SHA. Bewahre fremde Änderungen. Verwende separate Ports, synthetische Datenbanken und Ausgabepfade für veränderliche Testressourcen. Melde neu entdeckte Überschneidungen mit anderen Tickets sofort an die Orchestrierung und koordiniere eine sichere Pause, bevor kollidierende Arbeit fortgesetzt wird.
+ 
+ Lies AGENTS.md, README, Ticket einschließlich relevanter Kommentare sowie zugehörige PRD/ADRs. Falls vorhanden: [prototype reference] ist ausschließlich visuelle Inspiration; daraus keine neuen Anforderungen, Zustände oder Pflichtschritte ableiten und keine Demo-Logik übernehmen.
+ 
+-Wende den genannten Implement-Skill an. Er entscheidet über aktiven OpenSpec-Change, repo-lokalen propose/apply-Workflow oder CLI-Fallback. Prüfe Verhalten durch öffentliche Schnittstellen mit TDD soweit sinnvoll, relevante Backend-/Frontend-Checks und abschließend code-review. Nutze isolierte synthetische Daten für Nachweise.
++Wende den genannten Implement-Skill an. Er entscheidet über aktiven OpenSpec-Change, repo-lokalen propose/apply-Workflow oder CLI-Fallback. Prüfe Verhalten durch öffentliche Schnittstellen mit TDD soweit sinnvoll, relevante Backend-/Frontend-Checks und repräsentative, fachlich korrekte Fixtures. Nutze isolierte synthetische Daten für Nachweise. Der Implement-Skill endet mit den ersten Verhaltensnachweisen und wartet auf den Abschlussauftrag über change-accepted. Lokale Zwischencommits auf dem eigenen Arbeitsbranch erteilen keine Lieferfreigabe.
+ 
+-Liefere zunächst ein abnahmebereites Ergebnis: echte Screenshots der laufenden Anwendung oder verständliche Darstellungen tatsächlich gemessener Ergebnisse, absolute Artefaktpfade, Soll/Ist-Zuordnung zu Akzeptanzkriterien, Test-/Reviewbefunde, Grenzen und Identität des geprüften Standes (Commit oder Manifest). Eine bloße Liste grüner Tests genügt nicht.
++Liefere zunächst den Implementierungsstand zur fachlichen Abnahme: echte Screenshots der laufenden Anwendung oder verständliche Darstellungen tatsächlich gemessener Ergebnisse, absolute Artefaktpfade, Soll/Ist-Zuordnung zu Akzeptanzkriterien, Testbefunde, Grenzen und Identität des geprüften Standes (Commit oder Manifest). Eine bloße Liste grüner Tests genügt nicht.
+ 
+-Noch nicht committen, pushen, mergen, das Ticket schließen oder OpenSpec archivieren. Warte auf die separate kritische Verifikation und danach auf die Vorbereitung im exklusiven Integrationsslot durch [coordinator task ID]. Eine fachliche Abnahme erlaubt noch keinen Merge. Der Merge erhält anschließend eine gesonderte Freigabe für den konkreten PR-Head und den geprüften Zielstand. Melde technische Freigabeablehnungen mit ihrer tatsächlichen Ursache.
++Lokale Zwischencommits sind erlaubt. Noch nicht pushen, mergen, das Ticket schließen oder OpenSpec archivieren. Warte auf den delegierten change-accepted-Auftrag und nach dessen technischem Abschluss auf die Vorbereitung im exklusiven Integrationsslot durch [coordinator task ID]. Eine fachliche Abnahme erlaubt noch keinen Merge. Der Merge erhält anschließend eine gesonderte Freigabe für den konkreten PR-Head und den geprüften Zielstand. Melde technische Freigabeablehnungen mit ihrer tatsächlichen Ursache.
+ 
+ Falls die eigene echte threadId im Sessionkontext oder CODEX_THREAD_ID verfügbar ist und send_message_to_thread zulässig ist, melde einmal Issue, ID, hostId, Worktree und Branch an [coordinator ID]. Rate keine ID und durchsuche keine fremden Sitzungen. Ist die Rückmeldung unmöglich, erwähne das kurz und arbeite weiter; die Orchestrierung übernimmt die Zuordnung. Starte keine weiteren Ticket-Tasks.
+ ```
+ 
+-## Separate critical verification
++## Delegated technical completion
++
++Send once after inspecting the initial implementation evidence. Record the request and reconcile uncertain delivery before resending.
+ 
+ ```text
+-Prüfe jetzt gesondert und kritisch, ob die Implementierung und bisherige Verifikation sämtliche Akzeptanzkriterien von [ticket] tatsächlich abdecken. Prüfe auch relevante Gegenbeispiele und Grenzen. Leite erforderliche Ergänzungen selbst aus Ticket und Repository-Vorgaben ab und behebe gefundene Lücken.
++Der Implementierungsstand für [ticket], [SHA/manifest], ist fachlich für den technischen Abschluss angenommen. Der ursprüngliche Nutzerauftrag [actual provenance] delegiert diesen Abschluss an die Orchestrierung.
+ 
+-Zeige das Ergebnis mit tatsächlichen Screenshots der laufenden Umsetzung oder lesbaren, gemessenen Soll/Ist-Ergebnissen. Liefere absolute Pfade, relevante Test-/Reviewbefunde, Prüfgrenzen und die Identität des final geprüften Standes. Erneuere betroffene Nachweise nach Änderungen. Noch kein Commit/Push/Merge, Ticketabschluss oder OpenSpec-Archivieren.
++Wende jetzt [$change-accepted]([resolved absolute active change-accepted SKILL.md path]) für diesen Stand an. Anforderungen [paths], erste Nachweise [paths], fester Ausgangspunkt [base SHA], vorhandener Abschlussnachweis [path or none]. Nutze [authorized role model profile or runtime default]. Liefere den aktuellen Abschlussnachweis, tatsächlich beobachtete Soll/Ist-Ergebnisse und verbleibende Grenzen. Reviewmethodik und Nachprüfungen bestimmt der zentrale code-review-Skill.
++
++Noch kein Push/Merge, Issue-Abschluss oder Archivieren. Nach technischem Abschluss warte auf die gesonderte Vorbereitung im Integrationsslot und die anschließende Freigabe für den konkreten PR-Head und Zielstand. Eine weitere menschliche Abnahme ist innerhalb dieses delegierten technischen Auftrags nicht nötig.
+ ```
+ 
+ ## Repair
+@@ -36,14 +40,14 @@
+ Noch nicht akzeptiert. Für [criterion] zeigt [inspected artifact/measurement] folgendes Problem: [observed outcome or missing proof]. Erwartet ist [ticket-grounded outcome]. Diagnostiziere die Ursache selbst, korrigiere beziehungsweise ergänze die Verifikation und liefere neue Nachweise für den resultierenden Stand. Die übrigen akzeptanzrelevanten Eigenschaften müssen erhalten bleiben. Noch keine Lieferung.
+ ```
+ 
+-## Acceptance and integration preparation
++## Technical acceptance and integration preparation
+ 
+ Send only after reserving the integration slot. Accepted workers waiting for the slot stay idle and may not merge.
+ 
+ ```text
+-Akzeptiert für [ticket], geprüfter Stand [SHA/manifest], anhand [actually inspected evidence]. Akzeptierte Grenzen: [material limitations]. Du hältst jetzt den Integrationsslot für [target]. Bereite die Lieferung vor; noch nicht mergen oder das Ticket schließen.
++Technischer Abschluss für [ticket] verifiziert, geprüfter Stand [SHA/manifest], anhand [actually inspected evidence]. Akzeptierte Grenzen: [material limitations]. Du hältst jetzt den Integrationsslot für [target]. Bereite die Lieferung vor; noch nicht mergen oder das Ticket schließen.
+ 
+-Rufe den aktuellen Stand von [remote]/[target] ab und integriere ihn ohne Force-Push. Führe erforderliche Tests, Checks und relevante Prüfung des kombinierten Verhaltens aus. Erneuere betroffene Nachweise nach Änderungen. Schließe/archiviere OpenSpec soweit erforderlich und validiere es. Committe auf [owned branch], pushe nach [verified remote] und bereite den PR mit exakt [target] als Basis vor. Beachte Branch Protection; kein Bypass.
++Rufe den aktuellen Stand von [remote]/[target] ab und integriere ihn ohne Force-Push. Führe erforderliche Tests, Checks und relevante Prüfung des kombinierten Verhaltens aus. Erneuere betroffene Nachweise nach Änderungen. Validiere OpenSpec und erledige erforderliche Dokumentation vor dem Merge. Reine Status-/Archivbuchungen sammeln wir im Batchabschluss, sofern die Repository-Policy das erlaubt; melde die konkreten offenen Pfade. Produktive Aktivierungsnachweise bleiben bei diesem Ticket. Committe auf [owned branch], pushe nach [verified remote] und bereite den PR mit exakt [target] als Basis vor. Beachte Branch Protection; kein Bypass.
+ 
+ Liefere PR, finalen Head-SHA, geprüften Ziel-SHA, Differenzen gegenüber dem abgenommenen Stand und aktualisierte Nachweise. Wesentliche Änderungen benötigen erneute Abnahme. Bewahre Artefakte und Worktree. Warte auf die gesonderte Merge-Freigabe und starte keine andere Ticket-Aufgabe. Melde Freigabeablehnungen mit ihrer tatsächlichen Ursache.
+ ```
+@@ -69,7 +73,7 @@
+ ```text
+ Setze den autorisierten Ticket-Batch in dieser Orchestrierungsaufgabe [ID] fort. Lade [absolute orchestrate-ticket-batch/SKILL.md] und lies zuerst den aktuellen kompakten Zustand aus [absolute ledger path]. Batchumfang: [frozen ticket IDs], Repository: [root], Ziel: [target].
+ 
+-Gleiche die Phasen aller Tickets, belegte Slots (Limit [recorded concurrency]), den exklusiven Integrationsslot und ausstehende Tool-Aktionen mit den bekannten Umsetzungen, Worktrees und dem Remote-Tracker ab, bevor du mutierst. Nutze bestätigte IDs direkt. Bei fehlender ID folge der begrenzten Metadaten-Wiederherstellung des Skills. Keine doppelten Tasks oder Prompts; keine Produktimplementierung hier.
++Nutze für JSON-Ledger die lokalen Helfer aus [absolute local-helpers.md]. Nach Wiederaufnahme gleiche die Phasen aller Tickets, belegte Slots (Limit [recorded concurrency]), den exklusiven Integrationsslot und ausstehende Tool-Aktionen mit den bekannten Umsetzungen, Worktrees und dem Remote-Tracker ab, bevor du mutierst. Nutze bestätigte IDs direkt. Bei fehlender ID folge der begrenzten Metadaten-Wiederherstellung des Skills. Keine doppelten Tasks oder Prompts; keine Produktimplementierung hier.
+ 
+-Verarbeite erkannte Abschlüsse bis zum nächsten möglichen Schritt im selben Lauf und fülle freie Slots mit unabhängigen, nicht blockierten Tickets. Ein Blocker hält nur betroffene Tickets zurück. Prüfe pro Ticket auch die noch offene Nachweissicherung und Bereinigung. Bei unverändertem oder nicht handlungsrelevantem Stand bleibe still; melde nur wesentliche Fortschritte, Abschluss, Fehler oder nötige Nutzereingaben. Speichere pro Ticket Phase, Cursor und nächste Aktion sowie Integrations- und Bereinigungsstand vor Laufende. Nach vollständiger verifizierter Lieferung und Bereinigung des eingefrorenen Batches pausiere nur diese Automation.
++Verarbeite erkannte Abschlüsse bis zum nächsten möglichen Schritt im selben Lauf und fülle freie Slots mit unabhängigen, nicht blockierten Tickets. Ein Blocker hält nur betroffene Tickets zurück. Prüfe pro Ticket auch die noch offene Nachweissicherung und Bereinigung. Bei unverändertem oder nicht handlungsrelevantem Stand bleibe still, sichere nur neue Cursor und unterlasse zusätzliche Detail-/Dateiabfragen und Folgeprompts; melde nur wesentliche Fortschritte, Abschluss, Fehler oder nötige Nutzereingaben. Speichere pro Ticket Phase, Cursor und nächste Aktion sowie Integrations- und Bereinigungsstand vor Laufende. Nach vollständiger verifizierter Lieferung, gebündeltem Dokumentationsabschluss und Bereinigung des eingefrorenen Batches pausiere nur diese Automation.
+ ```
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/parallel-delivery.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/parallel-delivery.md
+@@ -20,7 +20,7 @@
+ 
+ Reserve integration for one accepted ticket, recording worker, PR/head or manifest, target revision and pending operation. Reserve this slot through preparation, merge and remote confirmation. Other workers can implement and be reviewed; none may merge independently. If a merge result is unknown, reconcile remote state before releasing the slot.
+ 
+-1. Send acceptance plus **preparation only** to the holder. It fetches the latest target, integrates that state without force-pushing history, resolves conflicts, performs OpenSpec bookkeeping, commits/pushes and prepares the PR against the exact target. It runs required checks and tests relevant to combined behavior, and returns the candidate head, target SHA and evidence. No merge yet.
++1. Send acceptance plus **preparation only** to the holder. It fetches the latest target, integrates that state without force-pushing history, resolves conflicts, performs required pre-merge OpenSpec validation/documentation (deferring pure closeout bookkeeping when policy allows), commits/pushes and prepares the PR against the exact target. It runs required checks and tests relevant to combined behavior, and returns the candidate head, target SHA and evidence. No merge yet.
+ 2. Inspect the final candidate and compare it with accepted contents. Map bookkeeping-only differences explicitly; substantive changes require renewed evidence and acceptance. Recheck remote PR base/head, required checks and target tip. Acceptance is bound to candidate contents plus the tested target revision. If the target moved, keep the slot and request relevant revalidation against the new tip before issuing a merge grant.
+ 3. Authorize only that PR/head against that target revision. The worker checks them again immediately before merging and stops for revalidation if either changed. No unattended auto-merge grant that can apply to a later unreviewed head. Use repository branch protection/native merge checks to enforce freshness where available; a coordinator reservation cannot lock out external writers.
+ 4. Confirm actual remote merge and accepted contents on the user-selected target, including squash/rebase mapping. If external changes raced with merging, verify relevant combined behavior and required checks on the resulting target; do not claim the reservation prevented that race. A failed combined check blocks further integration until the worker repairs it and the result is verified. Release the reservation only after the delivery outcome is known. Confirm ticket closure; explicitly close a delivered ticket if the non-default target did not trigger auto-close.
+@@ -33,7 +33,7 @@
+ 
+ The coordinator performs cleanup from a surviving checkout/directory after the worker is idle and no process still writes to its worktree. Do not ask a worker to remove its own active working directory. Keep these checkpointed outcomes separate: `evidence-preserved`, `worktree-removed`, `local-branch-removed`, `remote-branch-removed`, `worker-archived`.
+ 
+-1. Copy acceptance evidence to a durable batch-owned directory outside every worker worktree, for example `<ledger-directory>/evidence/<ticket>/<accepted-revision>/`. Include the rendered report, screenshots/measurements and referenced assets needed to inspect it, plus accepted manifest, inspected conclusions and PR/merge mapping. Rewrite report links to durable destinations where needed. Verify copied files with hashes and open the retained report/images; update ledger links before deleting originals. An expired preview URL or links into the soon-deleted worktree are insufficient.
++1. Use `batch_state.py manifest`, `verify` and `retain` from [local-helpers.md](local-helpers.md) for explicit local artifact sets. The coordinator still establishes that the destination is outside **every** worker worktree and inspects the retained report. The helper does not authorize deletion. Copy acceptance evidence to a durable batch-owned directory outside every worker worktree, for example `<ledger-directory>/evidence/<ticket>/<accepted-revision>/`. Include the rendered report, screenshots/measurements and referenced assets needed to inspect it, plus accepted manifest, inspected conclusions and PR/merge mapping. Rewrite report links to durable destinations where needed. Verify copied files with hashes and open the retained report/images; update ledger links before deleting originals. An expired preview URL or links into the soon-deleted worktree are insufficient.
+ 2. Re-read remote delivery, worktree ownership/path, worktree status, owned local/remote branch heads and worker status immediately before deletion. Require a known mapping of accepted contents to the actual merge (including squash), no additional unintegrated changes, and a clean worktree after approved evidence relocation. Unexpected files/commits or changed branch heads block their deletion pending investigation. Never delete the target, protected default branch, foreign worktrees/branches or unrelated user files.
+ 3. Remove only the recorded owned worktree using normal Git worktree removal; never use a force-removal or broad recursive deletion to overcome unexpected contents. Remove the exact owned local and remote working branches only after proving all their intended changes are integrated. Prefer normal merged-branch deletion. For squash/rebase, an ancestry check alone may fail: establish the PR-head-to-merge mapping and absence of additional work, then use an expected-old-SHA guarded ref deletion. For a remote branch, use a lease checked against the recorded verified head when deleting, so a newly pushed commit is preserved. If the necessary proof or guarded operation is unavailable, record `cleanup-blocked` and retain the branch. This narrow conditional deletion is not permission to force-push history.
+ 4. Verify actual worktree and branch absence, then archive the implementation task using `set_thread_archived`. Confirm archival from the returned result or a scoped archived-task lookup; absence from the ordinary recent-task list does not prove archival. Do not delete its history or the retained batch evidence. A task already archived or branch already removed is success only after verifying the intended object and the corresponding delivery/evidence gates; do not recreate it to replay cleanup.
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/recovery-and-state.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/recovery-and-state.md
+@@ -2,25 +2,31 @@
+ 
+ ## Ledger and heartbeat
+ 
+-Use one ledger for one batch. Prefer `~/.codex/automations/<actual-automation-id>/memory.md` beside the existing heartbeat; for a run without scheduling use `~/.codex/batches/<confirmed-coordinator-id>/memory.md`. Normalize `CODEX_HOME` with `~/.codex` as fallback. Do not assume shell variables survive tool calls. If the current task ID is unavailable, use a recorded unique local batch directory and resolve the coordinator identity through supported tools; never guess an ID.
++Use one ledger for one batch. Prefer `~/.codex/automations/<actual-automation-id>/memory.json` beside the existing heartbeat; for a run without scheduling use `~/.codex/batches/<confirmed-coordinator-id>/memory.json`. Normalize `CODEX_HOME` with `~/.codex` as fallback. Do not assume shell variables survive tool calls. If the current task ID is unavailable, use a recorded unique local batch directory and resolve the coordinator identity through supported tools; never guess an ID.
++
++For new batches use the versioned JSON ledger and CLI in [local-helpers.md](local-helpers.md). Retain an existing ledger in its original format until explicit adoption; do not rename or overwrite it merely because the default changed.
+ 
+ Read the current ledger before deciding or writing. Keep one compact batch header, one state row/record per ticket and a short transition history. Never collapse concurrent workers into a single current-ticket field. Store:
+ 
+ - Batch identity: original user task/request reference, repository/remote, Codex projectId/hostId, explicit user target branch and provenance, concurrency limit (default 3), dependency/conflict graph, fixed ordered ticket list, scope/permission limits, optional prototype, automation ID.
+ - Each ticket: issue URL, requested title, UTC dispatch time, clientThreadId separately from threadId, worker host/worktree/owned local and remote branch refs, starting target SHA, change areas, dependencies, slot reservation/parked status, phase, wait cursor, last observation and concrete next action.
++- Technical completion: delegated acceptance request and outcome, current completion-record path from code-review, content identity and next pending action. Preserve old reviewer receipts during adoption without inventing missing coverage.
++- Closeout: per-ticket deferred status/archive paths and batch closeout PR/head/merge/verification; keep activation evidence per ticket.
+ - Evidence: critical verification requested/completed, artifact paths, inspected results, accepted SHA/manifest and tested target SHA, material limitations, durable copied evidence paths/hash verification.
+ - Integration reservation: one holder, candidate PR/head, tested target SHA, preparation/merge-grant status and unresolved merge outcome. Never release an uncertain mutation just because the worker is idle.
+ - Delivery per ticket: PR URL/number/head/base, remote merge commit and accepted-content mapping, combined checks and closed-ticket verification.
+ - Cleanup per ticket: evidence preservation, worktree removal, local/remote branch removal and worker archival, each with pending/outcome status and verified ownership/head. Preserve exact retained refs/paths and causes for cleanup-blocked items.
+ - Pending action: operation, destination, payload/brief intent, timestamp, dispatch outcome; plus any unresolved rejection and required recovery event.
+ 
+-Write checkpoints atomically (temporary file in the same directory then replace). Only the coordinator updates the ledger; workers return facts through task results. Re-read before update and avoid overlapping coordinators. Do not rewrite stable automation instructions with thousands of characters of new runtime history at every poll. Store its real ledger path in the heartbeat prompt and point it to this skill.
++For a versioned JSON ledger use `batch_state.py checkpoint` with the last observed revision and a scoped patch. It preserves omitted fields, rejects stale writes and replaces atomically under a local lock; it does not validate acceptance or authorize phases. For older ledgers preserve their format and write atomically until adoption. Only the coordinator updates the ledger; workers return facts through task results. Re-read before update and avoid overlapping coordinators. Do not rewrite stable automation instructions with thousands of characters of new runtime history at every poll. Store its real ledger path in the heartbeat prompt and point it to this skill.
+ 
+ Create/update the heartbeat via `automation_update` using `build-codex-automations` and current tool schema. Ten minutes is a reasonable recovery default if the user provided no interval; it is not a latency guarantee. Reuse an existing batch heartbeat, preserve notification settings, and stay quiet on unchanged state. Persistent scheduling does not replace processing actionable completions during a running turn.
+ 
+ Before each create/send/merge/cleanup mutation, save its ticket-specific `pending_action`; one global field must not overwrite another worker's pending operation. After a response, save returned IDs or outcome. If the response is lost, use identity recovery or inspect the destination's latest messages before retrying. Do not claim exactly-once dispatch when tools cannot guarantee it. If whether a mutating action happened remains uncertain, preserve that uncertainty and stop the dependent step.
+ 
+-## Adopt an older sequential ledger
++## Adopt an older ledger
++
++Explicitly select this batch for adoption, keep its original ledger as a backup, and map all existing fields (including custom fields) into a new versioned JSON ledger. Never fabricate a missing identity, target, review, pending-action outcome or cleanup result. Confirm the mapping against live facts before activating the new ledger path. A live heartbeat path update follows `build-codex-automations`.
+ 
+ Migrate its known current ticket into one ticket record and completed tickets into verified delivery records; preserve IDs, original authority, artifacts and uncertain actions. Do not invent cleanup success for previously delivered work. Reconcile actual worktrees/branches before adopting cleanup. If the original user explicitly named the target, retain it; an inferred old main/default value is insufficient and requires user input before new dispatch. Existing shared-checkout workers need safe isolation before concurrent writing. Do not restart them merely to obtain worktree setup.
+ 
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/scripts/batch_state.py
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/scripts/batch_state.py
+@@ -0,0 +1,237 @@
++#!/usr/bin/env python3
++"""Local bookkeeping for ticket batches; never dispatches or delivers work."""
++
++import argparse
++import hashlib
++import json
++import os
++from pathlib import Path
++import shutil
++import tempfile
++
++
++def read_json(path):
++    return json.loads(path.read_text())
++
++
++def file_digest(path):
++    digest = hashlib.sha256()
++    size = 0
++    with path.open("rb") as handle:
++        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
++            digest.update(chunk)
++            size += len(chunk)
++    return {"sha256": digest.hexdigest(), "size": size}
++
++
++def artifact_path(root, name):
++    if (not isinstance(name, str) or not name or "\\" in name or name == "."
++            or Path(name).is_absolute() or ".." in Path(name).parts or str(Path(name)) != name):
++        raise ValueError("artifact names must be normalized relative file paths")
++    root = root.resolve(strict=True)
++    path = root
++    for part in Path(name).parts:
++        path = path / part
++        if path.is_symlink():
++            raise ValueError("artifact paths must not contain symbolic links")
++    if path.exists() and not path.is_file():
++        raise ValueError("artifact must be a regular file")
++    return path
++
++
++def manifest(root, files):
++    if (not isinstance(files, list) or not files or not all(isinstance(name, str) for name in files)
++            or len(files) != len(set(files))):
++        raise ValueError("file list must be nonempty and unique")
++    return {"status": "ready", "schema_version": 1,
++            "files": {name: file_digest(artifact_path(root, name)) for name in sorted(files)}}
++
++
++def verify(root, proof):
++    if (not isinstance(proof, dict) or proof.get("schema_version") != 1
++            or not isinstance(proof.get("files"), dict) or not proof["files"]):
++        raise ValueError("invalid manifest")
++    mismatches = []
++    for name, expected in proof["files"].items():
++        if (not isinstance(expected, dict) or type(expected.get("size")) is not int
++                or expected["size"] < 0 or not isinstance(expected.get("sha256"), str)
++                or len(expected["sha256"]) != 64
++                or any(char not in "0123456789abcdef" for char in expected["sha256"])):
++            raise ValueError("invalid manifest file digest")
++        path = artifact_path(root, name)
++        if not path.exists() or file_digest(path) != expected:
++            mismatches.append(name)
++    return {"status": "diverged" if mismatches else "ready", "mismatches": sorted(mismatches)}
++
++
++def retain(root, proof, destination):
++    root = root.resolve(strict=True)
++    if destination.is_symlink():
++        raise ValueError("retention destination must not be a symbolic link")
++    destination = destination.resolve()
++    if destination == root or root in destination.parents or destination in root.parents:
++        raise ValueError("retention destination must be outside the source tree")
++    checked = verify(root, proof)
++    if checked["status"] != "ready":
++        return checked
++    if destination.exists():
++        checked = verify(destination, proof)
++    else:
++        destination.parent.mkdir(parents=True, exist_ok=True)
++        lock = destination.with_name(destination.name + ".lock")
++        try:
++            descriptor = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
++        except FileExistsError:
++            return {"status": "blocked", "reason": "retention locked; reconcile owner before retry"}
++        try:
++            os.close(descriptor)
++            if destination.exists():
++                checked = verify(destination, proof)
++            else:
++                with tempfile.TemporaryDirectory(dir=destination.parent, prefix=".retention-") as directory:
++                    staged = Path(directory) / "evidence"
++                    staged.mkdir()
++                    for name in proof["files"]:
++                        target = staged / name
++                        target.parent.mkdir(parents=True, exist_ok=True)
++                        shutil.copyfile(artifact_path(root, name), target)
++                    checked = verify(staged, proof)
++                    if checked["status"] == "ready":
++                        staged.rename(destination)
++        finally:
++            lock.unlink()
++    if checked["status"] == "ready":
++        checked.update(destination=str(destination), file_count=len(proof["files"]))
++    return checked
++
++
++def merge_patch(current, patch):
++    result = dict(current)
++    for key, value in patch.items():
++        result[key] = (merge_patch(result[key], value)
++                       if isinstance(value, dict) and isinstance(result.get(key), dict) else value)
++    return result
++
++
++def atomic_json(path, value):
++    temporary = None
++    try:
++        with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as handle:
++            temporary = Path(handle.name)
++            json.dump(value, handle, indent=2, ensure_ascii=False)
++            handle.write("\n")
++            handle.flush()
++            os.fsync(handle.fileno())
++        os.replace(temporary, path)
++    finally:
++        if temporary is not None:
++            temporary.unlink(missing_ok=True)
++
++
++def validate_ledger(value):
++    if (not isinstance(value, dict) or type(value.get("schema_version")) is not int
++            or value["schema_version"] != 1 or type(value.get("revision")) is not int
++            or value["revision"] < 0):
++        raise ValueError("unsupported ledger; explicit adoption required")
++    batch = value.get("batch")
++    if not isinstance(batch, dict) or any(
++            not isinstance(batch.get(key), str) or not batch[key].strip()
++            for key in ("id", "repository", "target")):
++        raise ValueError("batch id, repository and explicit target are required")
++    tickets = value.get("tickets")
++    if not isinstance(tickets, dict) or any(not isinstance(row, dict) for row in tickets.values()):
++        raise ValueError("tickets must be an object of ticket records")
++
++
++def checkpoint(path, patch, expected):
++    if not isinstance(patch, dict) or {"revision", "schema_version"}.intersection(patch):
++        raise ValueError("patch must be an object without managed revision/schema fields")
++    if path.is_symlink():
++        raise ValueError("ledger must not be a symbolic link")
++    lock = path.with_name(path.name + ".lock")
++    try:
++        descriptor = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
++    except FileExistsError:
++        return {"status": "blocked", "reason": "ledger locked; reconcile owner before retry"}
++    try:
++        with os.fdopen(descriptor, "w") as handle:
++            handle.write(str(os.getpid()))
++        if path.exists():
++            current = read_json(path)
++            validate_ledger(current)
++        else:
++            current = {"schema_version": 1, "revision": 0}
++        if current["revision"] != expected:
++            return {"status": "blocked", "reason": "stale revision", "revision": current["revision"]}
++        updated = merge_patch(current, patch)
++        validate_ledger(updated)
++        if "batch" in current and any(current["batch"].get(key) != updated["batch"][key]
++                                       for key in ("id", "repository", "target")):
++            raise ValueError("batch identity cannot be rebound")
++        updated["revision"] = current["revision"] + 1
++        atomic_json(path, updated)
++        return {"status": "ready", "revision": updated["revision"]}
++    finally:
++        lock.unlink()
++
++
++def compare_snapshots(previous, current):
++    identity = {"ticket", "thread_id", "worktree", "branch", "target"}
++    for snapshot in (previous, current):
++        if not isinstance(snapshot, dict) or any(
++                not isinstance(snapshot.get(key), str) or not snapshot[key].strip()
++                for key in identity):
++            return {"status": "blocked", "reason": "incomplete assignment"}
++        if (not isinstance(snapshot.get("status"), str)
++                or snapshot["status"] not in {"running", "ready", "blocked", "error"}):
++            return {"status": "blocked", "reason": "invalid observation status"}
++    ignored = {"wait_cursor", "observed_at"}
++    changed = sorted(key for key in previous.keys() | current.keys()
++                     if key not in ignored and previous.get(key) != current.get(key))
++    status = "unchanged"
++    if changed:
++        if identity.intersection(changed):
++            status = "diverged"
++        elif current["status"] in {"blocked", "error"} or current.get("pending_action"):
++            status = "blocked"
++        else:
++            status = "ready" if current["status"] == "ready" else "diverged"
++    return {"status": status, "changed_fields": changed}
++
++
++def main():
++    parser = argparse.ArgumentParser(description=__doc__)
++    commands = parser.add_subparsers(dest="command", required=True)
++    compare = commands.add_parser("compare")
++    compare.add_argument("--previous", type=Path, required=True)
++    compare.add_argument("--current", type=Path, required=True)
++    checkpoint_parser = commands.add_parser("checkpoint")
++    checkpoint_parser.add_argument("--ledger", type=Path, required=True)
++    checkpoint_parser.add_argument("--patch", type=Path, required=True)
++    checkpoint_parser.add_argument("--expect-revision", type=int, required=True)
++    for name in ("manifest", "verify", "retain"):
++        command = commands.add_parser(name)
++        command.add_argument("--root", type=Path, required=True)
++        command.add_argument("--files" if name == "manifest" else "--manifest", type=Path, required=True)
++        if name == "retain":
++            command.add_argument("--destination", type=Path, required=True)
++    args = parser.parse_args()
++    try:
++        if args.command == "compare":
++            result = compare_snapshots(read_json(args.previous), read_json(args.current))
++        elif args.command == "checkpoint":
++            result = checkpoint(args.ledger, read_json(args.patch), args.expect_revision)
++        elif args.command == "manifest":
++            result = manifest(args.root, read_json(args.files))
++        elif args.command == "verify":
++            result = verify(args.root, read_json(args.manifest))
++        else:
++            result = retain(args.root, read_json(args.manifest), args.destination)
++    except (OSError, ValueError) as error:
++        result = {"status": "error", "reason": str(error)}
++    print(json.dumps(result))
++    return 3 if result["status"] == "error" else 2 if result["status"] in {"blocked", "diverged"} else 0
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/scripts/tests/test_batch_state.py
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/scripts/tests/test_batch_state.py
+@@ -0,0 +1,223 @@
++import json
++from pathlib import Path
++import subprocess
++import sys
++import tempfile
++import unittest
++
++SCRIPT = Path(__file__).resolve().parents[1] / "batch_state.py"
++
++
++class BatchStateCliTests(unittest.TestCase):
++    def setUp(self):
++        self.directory = tempfile.TemporaryDirectory()
++        self.addCleanup(self.directory.cleanup)
++        self.root = Path(self.directory.name)
++
++    def document(self, name, value):
++        path = self.root / name
++        path.write_text(json.dumps(value))
++        return path
++
++    def run_cli(self, *args):
++        result = subprocess.run([sys.executable, str(SCRIPT), *map(str, args)],
++                                capture_output=True, text=True)
++        self.assertTrue(result.stdout.strip(), result.stderr)
++        return result.returncode, json.loads(result.stdout)
++
++    def snapshot(self, **changes):
++        return {"ticket": "01", "thread_id": "worker-01", "worktree": "/tmp/work-01",
++                "branch": "codex/ticket-01", "target": "release/wiki", "status": "running",
++                "wait_cursor": "cursor-a", "observed_at": "2026-09-18T10:00:00Z", **changes}
++
++    def test_cursor_only_change_does_not_request_followup(self):
++        previous = self.document("previous.json", self.snapshot())
++        current = self.document("current.json", self.snapshot(wait_cursor="cursor-b", observed_at="later"))
++        code, result = self.run_cli("compare", "--previous", previous, "--current", current)
++        self.assertEqual((code, result["status"]), (0, "unchanged"))
++        self.assertEqual(result["changed_fields"], [])
++
++    def test_readiness_requires_matching_assignment_and_complete_observation(self):
++        previous = self.document("previous.json", self.snapshot())
++        for changes, expected in [({"status": "ready"}, "ready"),
++                                  ({"status": "ready", "branch": "codex/other"}, "diverged"),
++                                  ({"status": "ready", "thread_id": ""}, "blocked"),
++                                  ({"status": "blocked", "blocker": "check failed"}, "blocked")]:
++            with self.subTest(changes=changes):
++                current = self.document("current.json", self.snapshot(**changes))
++                _, result = self.run_cli("compare", "--previous", previous, "--current", current)
++                self.assertEqual(result["status"], expected)
++                self.assertNotIn("check failed", json.dumps(result))
++
++    def test_malformed_observation_status_returns_structured_blocker(self):
++        previous = self.document("previous.json", self.snapshot())
++        for status in ([], {}, None, 5):
++            with self.subTest(status=status):
++                current = self.document("current.json", self.snapshot(status=status))
++                code, result = self.run_cli("compare", "--previous", previous, "--current", current)
++                self.assertEqual((code, result["status"]), (2, "blocked"))
++                self.assertEqual(result["reason"], "invalid observation status")
++
++    def test_checkpoint_preserves_other_tickets_and_pending_actions(self):
++        ledger = self.root / "memory.json"
++        initial = self.document("initial.json", {
++            "batch": {"id": "batch-01", "repository": "/tmp/repo", "target": "release/wiki"},
++            "tickets": {"01": {"phase": "implementing", "pending_action": {"operation": "send"}},
++                        "02": {"phase": "verifying", "custom_evidence": ["proof.md"]}},
++            "custom_provenance": "user request"})
++        code, result = self.run_cli("checkpoint", "--ledger", ledger, "--patch", initial,
++                                    "--expect-revision", 0)
++        self.assertEqual((code, result.get("revision")), (0, 1))
++        patch = self.document("patch.json", {"tickets": {"01": {"wait_cursor": "new-cursor"}}})
++        _, result = self.run_cli("checkpoint", "--ledger", ledger, "--patch", patch,
++                                "--expect-revision", 1)
++        saved = json.loads(ledger.read_text())
++        self.assertEqual(result["revision"], 2)
++        self.assertEqual(saved["tickets"]["01"]["pending_action"], {"operation": "send"})
++        self.assertEqual(saved["tickets"]["02"]["custom_evidence"], ["proof.md"])
++        self.assertEqual(saved["custom_provenance"], "user request")
++
++    def test_stale_locked_or_invalid_checkpoint_leaves_ledger_untouched(self):
++        ledger = self.document("memory.json", {
++            "schema_version": 1, "revision": 4,
++            "batch": {"id": "batch-01", "repository": "/tmp/repo", "target": "release/wiki"},
++            "tickets": {"01": {"pending_action": {"operation": "merge", "uncertain": True}}}})
++        original = ledger.read_bytes()
++        for revision, patch_value in [(3, {"tickets": {"01": {"phase": "done"}}}),
++                                       (4, {"batch": {"target": "main"}}),
++                                       (4, {"tickets": None}), (4, {"revision": 50})]:
++            with self.subTest(revision=revision, patch=patch_value):
++                ledger.write_bytes(original)
++                patch = self.document("patch.json", patch_value)
++                code, result = self.run_cli("checkpoint", "--ledger", ledger, "--patch", patch,
++                                            "--expect-revision", revision)
++                self.assertIn(code, (2, 3))
++                self.assertIn(result["status"], ("blocked", "error"))
++                self.assertEqual(ledger.read_bytes(), original)
++        ledger.write_bytes(original)
++        lock = self.root / "memory.json.lock"
++        lock.write_text("another writer")
++        patch = self.document("patch.json", {"tickets": {"01": {"phase": "done"}}})
++        code, result = self.run_cli("checkpoint", "--ledger", ledger, "--patch", patch,
++                                    "--expect-revision", 4)
++        self.assertEqual((code, result["status"]), (2, "blocked"))
++        self.assertEqual(ledger.read_bytes(), original)
++        self.assertEqual(lock.read_text(), "another writer")
++
++    def test_manifest_identifies_explicit_artifacts_by_bytes(self):
++        (self.root / "evidence.txt").write_bytes(b"abc")
++        files = self.document("files.json", ["evidence.txt"])
++        code, result = self.run_cli("manifest", "--root", self.root, "--files", files)
++        self.assertEqual(code, 0)
++        self.assertEqual(result.get("files"), {"evidence.txt": {
++            "sha256": "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
++            "size": 3}})
++
++    def test_manifest_verification_detects_changed_and_missing_artifacts(self):
++        artifact = self.root / "evidence.txt"
++        artifact.write_bytes(b"abc")
++        files = self.document("files.json", ["evidence.txt"])
++        _, value = self.run_cli("manifest", "--root", self.root, "--files", files)
++        proof = self.document("manifest.json", value)
++        code, result = self.run_cli("verify", "--root", self.root, "--manifest", proof)
++        self.assertEqual((code, result["status"]), (0, "ready"))
++        artifact.write_bytes(b"different evidence")
++        code, result = self.run_cli("verify", "--root", self.root, "--manifest", proof)
++        self.assertEqual((code, result["status"]), (2, "diverged"))
++        self.assertEqual(result["mismatches"], ["evidence.txt"])
++        artifact.unlink()
++        code, result = self.run_cli("verify", "--root", self.root, "--manifest", proof)
++        self.assertEqual((code, result["status"]), (2, "diverged"))
++        self.assertEqual(result["mismatches"], ["evidence.txt"])
++
++    def test_manifest_rejects_empty_duplicate_escaping_and_symlink_paths(self):
++        (self.root / "evidence.txt").write_bytes(b"abc")
++        (self.root / "alias.txt").symlink_to(self.root / "evidence.txt")
++        for names in [[], ["evidence.txt", "evidence.txt"], ["../outside"],
++                      [str(self.root / "evidence.txt")], ["alias.txt"], ["."], [123]]:
++            with self.subTest(names=names):
++                files = self.document("files.json", names)
++                code, result = self.run_cli("manifest", "--root", self.root, "--files", files)
++                self.assertEqual((code, result["status"]), (3, "error"))
++
++    def test_retention_is_verified_repeatable_and_never_overwrites_different_evidence(self):
++        source = self.root / "worker"
++        source.mkdir()
++        (source / "evidence.txt").write_bytes(b"abc")
++        files = self.document("files.json", ["evidence.txt"])
++        _, value = self.run_cli("manifest", "--root", source, "--files", files)
++        proof = self.document("manifest.json", value)
++        destination = self.root / "durable"
++        for _ in range(2):
++            code, result = self.run_cli("retain", "--root", source, "--manifest", proof,
++                                        "--destination", destination)
++            self.assertEqual((code, result["status"]), (0, "ready"))
++            self.assertEqual((destination / "evidence.txt").read_bytes(), b"abc")
++        (destination / "evidence.txt").write_bytes(b"other accepted proof")
++        code, result = self.run_cli("retain", "--root", source, "--manifest", proof,
++                                    "--destination", destination)
++        self.assertEqual((code, result["status"]), (2, "diverged"))
++        self.assertEqual((destination / "evidence.txt").read_bytes(), b"other accepted proof")
++        code, _ = self.run_cli("retain", "--root", source, "--manifest", proof,
++                               "--destination", source / "inside")
++        self.assertEqual(code, 3)
++        self.assertFalse((source / "inside").exists())
++
++    def test_malformed_existing_ledger_is_not_repaired_by_overwriting_it(self):
++        for invalid_batch in (None, [], "not a batch"):
++            with self.subTest(batch=invalid_batch):
++                ledger = self.document("memory.json", {"schema_version": 1, "revision": 1,
++                                                        "batch": invalid_batch, "tickets": {}})
++                original = ledger.read_bytes()
++                patch = self.document("patch.json", {
++                    "batch": {"id": "batch-01", "repository": "/tmp/repo", "target": "release/wiki"}})
++                code, result = self.run_cli("checkpoint", "--ledger", ledger, "--patch", patch,
++                                            "--expect-revision", 1)
++                self.assertEqual((code, result["status"]), (3, "error"))
++                self.assertEqual(ledger.read_bytes(), original)
++
++    def test_concurrent_checkpoints_keep_exactly_one_writer(self):
++        ledger = self.document("memory.json", {"schema_version": 1, "revision": 1,
++            "batch": {"id": "batch-01", "repository": "/tmp/repo", "target": "release/wiki"},
++            "tickets": {"01": {"phase": "implementing"}}})
++        processes = []
++        for phase in ("verifying", "blocked"):
++            patch = self.document(phase + ".json", {"tickets": {"01": {"phase": phase}}})
++            processes.append(subprocess.Popen([sys.executable, str(SCRIPT), "checkpoint", "--ledger",
++                str(ledger), "--patch", str(patch), "--expect-revision", "1"],
++                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True))
++        responses = [process.communicate() for process in processes]
++        self.assertEqual(sorted(process.returncode for process in processes), [0, 2], responses)
++        saved = json.loads(ledger.read_text())
++        self.assertEqual(saved["revision"], 2)
++        self.assertIn(saved["tickets"]["01"]["phase"], {"verifying", "blocked"})
++
++    def test_changed_source_never_publishes_retained_evidence(self):
++        source = self.root / "worker"
++        source.mkdir()
++        artifact = source / "evidence.txt"
++        artifact.write_bytes(b"abc")
++        files = self.document("files.json", ["evidence.txt"])
++        _, value = self.run_cli("manifest", "--root", source, "--files", files)
++        proof = self.document("manifest.json", value)
++        artifact.write_bytes(b"new unreviewed contents")
++        destination = self.root / "durable"
++        code, result = self.run_cli("retain", "--root", source, "--manifest", proof,
++                                    "--destination", destination)
++        self.assertEqual((code, result["status"]), (2, "diverged"))
++        self.assertFalse(destination.exists())
++
++    def test_invalid_json_and_unsupported_manifest_have_structured_errors(self):
++        malformed = self.root / "malformed.json"
++        malformed.write_text("{broken")
++        code, result = self.run_cli("manifest", "--root", self.root, "--files", malformed)
++        self.assertEqual((code, result["status"]), (3, "error"))
++        for value in ([], {}, {"schema_version": 1, "files": {}},
++                      {"schema_version": 2, "files": {"proof": {"size": 1, "sha256": "a" * 64}}}):
++            proof = self.document("manifest.json", value)
++            code, result = self.run_cli("verify", "--root", self.root, "--manifest", proof)
++            self.assertEqual((code, result["status"]), (3, "error"))
++
++
++if __name__ == "__main__":
++    unittest.main()
+--- base//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/write-agents-md/SKILL.md
++++ candidate//Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/write-agents-md/SKILL.md
+@@ -73,7 +73,7 @@
+ - `Start Work Checklist` with `git status --short`, relevant spec discovery, and change-scope decision
+ - `Development Cycle` with TDD, vertical slices, behavior tests through public interfaces, and active task tracking
+ - `OpenSpec Change Policy` when the repo uses OpenSpec or an equivalent spec/change system
+-- `Change Completion` with operational verification, refactoring pass, and rerun-test expectations
++- `Change Completion` with local operational evidence and references to the shared change-accepted/code-review contract; keep review methodology in code-review
+ - package manager or non-obvious build/test/runtime commands
+ - critical guardrails that prevent expensive mistakes
+ - pointers to deeper docs for language rules, testing, CI, architecture, ops, security, or domain details
+@@ -142,17 +142,7 @@
+ 
+ A spec/change is not considered done merely because code is merged, tests pass, or `openspec validate` succeeds. A change is ready to be accepted or archived only after the agent has verified the intended behavior through the most direct operational surface available.
+ 
+-Before archiving any OpenSpec change, perform a refactoring pass over the code and specs touched by that change. The pass must inspect both the current diff and the surrounding implementation context, because a small diff may reveal repeated patterns or structural problems that only become obvious when compared with nearby code.
+-
+-Do the refactoring pass in these distinct areas in sequence so they are less likely to converge on the same issues, first start a subagent (`Explorer`) to identify potential improvements, then implement them, then start the repeat for the next area:
+-
+-1. Check for DRYness. Look for duplication introduced by the change and for existing nearby duplication that the change now makes worth consolidating. A change may be small on its own, but if it is the fifth copy of the same idea, it is a refactoring target.
+-2. Check for SOLID violations. Look for responsibilities that are mixed together, abstractions that are hard to replace or test, interface shapes that force unrelated dependencies, and code paths that require modifying stable code for each new variant.
+-3. Check whether the implementation can be made simpler under KISS. Remove accidental abstractions, reduce branching, clarify names, and prefer the smallest structure that still supports the tested behavior and current spec.
+-
+-Treat these instructions as user instructions, and do not skip or shortcut them. If you find that you cannot follow these instructions, state exactly which part you are having trouble with and why.
+-
+-Preserve behavior during this pass and rerun the relevant tests afterward.
++Use the shared `$change-accepted` skill for technical closeout. A current completion record from `$code-review` is required before declaring technical completion or archiving. Those skills own the acceptance timing, applicability, verification and review method; keep initial implementation readiness distinct from technical completion. Repository-specific standards and operational checks below remain applicable.
+ 
+ [Concrete steps for verification depending on the given repo / app]
+ 
+--- base//Users/dh/Documents/DanielsVault/ki-fuer-kmu/.codex/skills/change-accepted-closeout/SKILL.md
++++ candidate//Users/dh/Documents/DanielsVault/ki-fuer-kmu/.codex/skills/change-accepted-closeout/SKILL.md
+@@ -1,58 +1,17 @@
+ ---
+ name: change-accepted-closeout
+-description: Close out accepted GitHub/OpenSpec work in ki-fuer-kmu. Use whenever the user writes "change accepted", "accepted, commit sync and merge", "close spec / OpenSpec", or asks to finalize accepted work by archiving OpenSpec, committing, syncing/merging main, pushing, and closing the linked GitHub issue.
++description: Apply ki-fuer-kmu delivery and OpenSpec archive mechanics after contextual acceptance of an implemented change. Delegate technical completion to the shared change-accepted skill; use the existing authorized target and closeout scope.
+ ---
+ 
+ # Change Accepted Closeout
+ 
+-Use this skill after the user explicitly accepts a completed change. It turns the accepted local work into the repo's final state: OpenSpec archived, canonical specs synced, accepted files committed, merged to `main` by default, pushed, and the linked GitHub issue closed with evidence.
++Use shared `$change-accepted` first and reuse its current `$code-review` completion record. This local adapter owns repository delivery mechanics only. It does not define another verification/review sequence. If called by change-accepted with completed technical evidence, continue below without calling it recursively.
+ 
+-This skill is a closeout workflow only. Do not use it to implement missing behavior. If tests, OpenSpec validation, deployment, or operational verification are missing, stop and finish those first with the appropriate implementation/deployment skills.
++Resolve the concrete change/issue, accepted write set, unrelated dirty or staged work, original delivery authorization and target. "Change accepted" alone does not select main or grant push/merge/issue-close authority. Preserve an explicit existing target and authorization; finish local technical work before requesting any genuinely missing delivery decision.
+ 
+-## Inputs To Resolve
++## Repository verification
+ 
+-Before mutating anything, identify:
+-
+-- accepted OpenSpec change id, if any
+-- linked GitHub issue number, if any
+-- current branch and remote target
+-- accepted write set: code/spec/tests/evidence to commit
+-- unrelated dirty files that must stay unstaged
+-
+-Run:
+-
+-```bash
+-git status --short --untracked-files=all
+-git branch --show-current
+-git remote -v
+-openspec list --json
+-```
+-
+-If multiple active changes or issues could be accepted, ask a short clarification before archiving or closing anything. If the accepted change is clear from the current session, proceed.
+-
+-## OpenSpec Archive
+-
+-Use the repo-local archive flow. Prefer the CLI path:
+-
+-```bash
+-openspec status --change "<change-id>" --json
+-openspec validate <change-id> --strict
+-openspec archive "<change-id>" --yes
+-```
+-
+-After archive:
+-
+-```bash
+-openspec list --json
+-openspec validate <canonical-capability-id> --strict
+-git diff --check
+-```
+-
+-If `git diff --check` reports generated whitespace, fix only files in the accepted write set. Do not clean unrelated dirty files.
+-
+-## Verification Floor
+-
+-Run the narrowest meaningful final verification, plus any evidence-specific checks required by the change:
++Use the required checks from AGENTS.md and the active change. Reuse current results when their inputs are unchanged. For .NET application changes, the local floor is:
+ 
+ ```bash
+ REPO_ROOT="$(git rev-parse --show-toplevel)"
+@@ -61,116 +20,16 @@
+ git diff --check
+ ```
+ 
+-For deployment or customer-facing release work, verify the already-produced operational evidence path and live/public surface before committing. Mention if a lower-level or sanitized-evidence check was used and why.
++Keep deployment/customer-facing evidence and its verification limits with its change. Do not run production mutations as an implied closeout check.
+ 
+-### Isolated Verification From Dirty `main`
++If unrelated dirty work prevents scoped verification, create a task-owned detached verification worktree at the pinned baseline and apply only the accepted tracked diff plus explicitly inventoried accepted untracked files. Do not use the entire staged patch when it includes unrelated work. Verify the resulting content identity before testing. Keep .NET restore, build, test and server paths under the same canonical `/private/tmp/...` path; mixing `/tmp` aliases can break absolute artifact paths. Remove only the verified task-owned worktree afterward. An incomplete patch or dependence on unrelated edits is an explicit blocker, not permission to broaden scope.
+ 
+-If the accepted work is on `main` but unrelated concurrent changes make the primary checkout fail, verify the accepted staged write set in a detached worktree instead of modifying or cleaning the unrelated files:
++## Archive and delivery
+ 
+-```bash
+-REPO_ROOT="$(git rev-parse --show-toplevel)"
+-git add <accepted paths...>
+-VERIFY_ROOT="$(mktemp -d /private/tmp/ki-fuer-kmu-closeout.XXXXXX)"
+-git diff --cached --binary > "$VERIFY_ROOT/accepted.patch"
+-git worktree add --detach "$VERIFY_ROOT/worktree" HEAD
+-git -C "$VERIFY_ROOT/worktree" apply "$VERIFY_ROOT/accepted.patch"
+-```
++1. Use `.codex/skills/openspec-archive-change/SKILL.md` for the accepted OpenSpec change, passing the current completion record. Keep CLI-owned spec sync and archive in that workflow. Confirm resulting canonical validation and reconcile path-only moves with the evidence.
++2. Stage and commit only accepted paths, inspecting both the staged diff and any pre-existing staged changes. Leave unrelated files unstaged or preserve their prior staging; never include them implicitly. Use a concise imperative commit subject.
++3. For authorized delivery, fetch and verify the actual remote target. On an isolated feature branch, push that branch and prepare a PR or use a dedicated integration worktree according to the authorized delivery mode and branch protection. If direct target pushes are authorized, verify combined behavior before pushing the exact candidate to the resolved target. Never silently substitute main or bypass protection.
++4. Target movement, conflict repairs or other substantive edits reopen affected checks via the shared completion contract. Preserve unrelated work and report a blocked conflict rather than broadening the write set. In an orchestrated batch, wait for the reserved integration slot and exact head/target grant.
++5. Verify the remote result and accepted-content mapping. Close the linked issue only when closure is authorized and delivery succeeded; verify its closed state. Add an evidence comment only if communication was explicitly authorized by the request or invoked workflow.
+ 
+-Run restore, build, test, and any local server from the same canonical `"$VERIFY_ROOT/worktree"` path. On macOS, do not mix `/tmp/...` and `/private/tmp/...` paths between .NET restore/build/run commands; the aliases can produce inconsistent absolute artifact paths. After verification, remove the detached worktree with `git worktree remove "$VERIFY_ROOT/worktree"` and clean only the validated task-owned `"$VERIFY_ROOT"` directory.
+-
+-If the accepted staged patch does not apply cleanly to `HEAD`, or verification requires unrelated dirty files, stop and report that dependency instead of broadening the accepted write set.
+-
+-## Stage And Commit
+-
+-Stage only the accepted write set. Keep pre-existing unrelated changes unstaged.
+-
+-Useful pattern:
+-
+-```bash
+-git add <accepted paths...>
+-git diff --cached --check
+-git diff --cached --stat
+-git commit -m "<concise imperative subject>"
+-```
+-
+-Commit subject examples:
+-
+-- `free-entry-v2-landing: confirm download starts`
+-- `free-entry-v2-s7: archive harness evidence`
+-
+-Never include secrets, Cloudflare tokens, provider credentials, customer data, survey payloads, customer documents, payment data, or hardware fingerprints in commits, logs, issue comments, or evidence.
+-
+-## Sync, Merge, Push
+-
+-Default: accepted feature-branch closeout merges to `main` and pushes `main` unless the user explicitly says not to merge, asks for a PR-only closeout, or repository policy blocks direct main pushes.
+-
+-If the accepted work was committed on `main`, sync and push:
+-
+-```bash
+-git fetch origin main
+-git rev-list --left-right --count HEAD...origin/main
+-git push origin main
+-```
+-
+-If the accepted work was committed on a feature branch, first push the feature branch, then merge it to `main` through a dedicated integration worktree so unrelated dirty files in the primary checkout stay untouched:
+-
+-```bash
+-REPO_ROOT="$(git rev-parse --show-toplevel)"
+-INTEGRATION_ROOT="${REPO_ROOT}-integrate-<change-or-issue>"
+-git fetch origin main <feature-branch>
+-git -C "$REPO_ROOT" worktree add "$INTEGRATION_ROOT" -b codex/integrate-<change-or-issue> origin/main
+-cd "$INTEGRATION_ROOT"
+-git merge --no-ff origin/<feature-branch> -m "Merge <feature-branch> into main"
+-```
+-
+-After the merge, rerun the verification floor in the integration worktree before pushing `main`:
+-
+-```bash
+-(cd /private/tmp && dotnet restore "$INTEGRATION_ROOT/src/free-entry/FreeEntryV2.sln")
+-(cd /private/tmp && dotnet build "$INTEGRATION_ROOT/src/free-entry/FreeEntryV2.sln" --configuration Release --no-restore)
+-(cd /private/tmp && dotnet test "$INTEGRATION_ROOT/src/free-entry/FreeEntryV2.sln" --configuration Release --no-build)
+-openspec validate --all --strict
+-git diff --check
+-git push origin HEAD:main
+-```
+-
+-If the merge conflicts, resolve conflicts only inside the accepted write set and rerun verification. If the conflict reaches unrelated dirty work, generated artifacts outside the accepted write set, or a policy/permission block prevents pushing `main`, stop and report the blocker instead of closing the issue.
+-
+-After push:
+-
+-```bash
+-git rev-list --left-right --count HEAD...origin/main
+-git status --short --untracked-files=all
+-```
+-
+-Report any remaining dirty files as unrelated if they were intentionally left unstaged.
+-
+-## Close GitHub Issue
+-
+-If a linked issue exists, close it after commit/push succeeds:
+-
+-```bash
+-gh issue close <number> --repo paradox123/ki-fuer-kmu --comment "<brief evidence note>"
+-gh issue view <number> --repo paradox123/ki-fuer-kmu --json number,state,closedAt,url
+-```
+-
+-The close comment should include:
+-
+-- commit hash
+-- OpenSpec archive path or no-OpenSpec rationale
+-- release/deployment evidence path when relevant
+-- tests and operational checks run
+-
+-Do not close an issue if commit, required merge-to-main, push, or verification failed, or if acceptance is ambiguous.
+-
+-## Final Response
+-
+-Keep the final short and concrete:
+-
+-- archive location and canonical spec validation
+-- commit hash and push/merge status
+-- issue closed state and URL
+-- tests/verification run
+-- unrelated dirty files still present
+-
+-If staging, committing, pushing, branch creation, or PR creation succeeded, include the Codex app git directive for that action in the final response.
++Never include credentials, customer data, survey payloads, customer documents, payment data or hardware fingerprints in commits/logs/evidence. Report actual archive, commit, push/merge and issue status, technical evidence, limitations and unrelated remaining changes. Do not report delivery from a local commit or an open PR alone.
+--- base//Users/dh/Documents/DanielsVault/ki-fuer-kmu/.codex/skills/openspec-archive-change/SKILL.md
++++ candidate//Users/dh/Documents/DanielsVault/ki-fuer-kmu/.codex/skills/openspec-archive-change/SKILL.md
+@@ -8,6 +8,8 @@
+   version: "1.0"
+   generatedBy: "1.3.1"
+ ---
++
++Before archive operations, inspect the current completion record from the shared `$code-review` skill. If technical completion is missing or stale, use `$change-accepted` through its technical phase, then resume this archive flow; do not recursively re-enter archival while verification is pending. Reuse valid evidence for unchanged content and reconcile path-only archive moves. This entrypoint owns archival mechanics, not another review method.
+ 
+ Archive a completed change in the experimental workflow.
+ 
+--- base//Users/dh/Documents/DanielsVault/ki-fuer-kmu/.codex/skills/repo-issue-operating-flow/SKILL.md
++++ candidate//Users/dh/Documents/DanielsVault/ki-fuer-kmu/.codex/skills/repo-issue-operating-flow/SKILL.md
+@@ -138,7 +138,7 @@
+      --add-label has-openspec \
+      --add-label agent-running
+    ```
+-2. After the required tests and operational evidence pass, add `verified` and remove `agent-running`:
++2. After technical completion through change-accepted and the required operational evidence pass, add `verified` and remove `agent-running`:
+    ```bash
+    gh issue edit <number> \
+      --remove-label agent-running \
+@@ -149,6 +149,8 @@
+ These qualifier transitions do not close the issue. Close it only when the user requested closure or the issue's acceptance scope is complete, and include the verification evidence in the close/comment message.
+ 
+ ## Closeout
++
++After implementation and initial evidence, report readiness for acceptance. Use the shared `$change-accepted` entrypoint on contextual acceptance or an authorized delegated completion request. It owns technical completion and invokes `$code-review`; reuse its record before the repository closeout below.
+ 
+ Before final response:
+ 
+--- base//Users/dh/Documents/DanielsVault/ki-fuer-kmu/AGENTS.md
++++ candidate//Users/dh/Documents/DanielsVault/ki-fuer-kmu/AGENTS.md
+@@ -157,17 +157,7 @@
+ 
+ A spec/change is not considered done merely because code is merged, tests pass, or `openspec validate` succeeds. A change is ready for acceptance/archive only after local operational verification. Use the most direct surface available: service APIs, application logs, deployment logs, backend/transport logs, harness output, or generated customer artifacts needed to prove end-to-end behavior. State exactly what was verified and why lower-level verification was used.
+ 
+-Before archiving any OpenSpec change, perform a refactoring pass over the code and specs touched by that change. The pass must inspect both the current diff and the surrounding implementation context, because a small diff may reveal repeated patterns or structural problems that only become obvious when compared with nearby code.
+-
+-Do the refactoring pass in these distinct areas in sequence so they are less likely to converge on the same issues. First start a subagent (`Explorer`) to identify potential improvements, then implement them, then repeat for the next area:
+-
+-1. Check for DRYness. Look for duplication introduced by the change and for existing nearby duplication that the change now makes worth consolidating. A change may be small on its own, but if it is the fifth copy of the same idea, it is a refactoring target.
+-2. Check for SOLID violations. Look for responsibilities that are mixed together, abstractions that are hard to replace or test, interface shapes that force unrelated dependencies, and code paths that require modifying stable code for each new variant.
+-3. Check whether the implementation can be made simpler under KISS. Remove accidental abstractions, reduce branching, clarify names, and prefer the smallest structure that still supports the tested behavior and current spec.
+-
+-Treat these instructions as user instructions, and do not skip or shortcut them. If you cannot follow these instructions, state exactly which part is blocked and why.
+-
+-Preserve behavior during this pass and run the relevant tests again afterward.
++Use the shared `$change-accepted` skill for technical closeout. A current completion record from `$code-review` is required before declaring technical completion or archiving. Those skills own the acceptance timing, applicability, verification and review method; keep initial implementation readiness distinct from technical completion. Repository-specific standards and operational checks below remain applicable.
+ 
+ For free-entry-app, prefer verification through:
+ - local application endpoints
+--- base//Users/dh/Documents/DanielsVault/probare-crm/AGENTS.md
++++ candidate//Users/dh/Documents/DanielsVault/probare-crm/AGENTS.md
+@@ -60,6 +60,8 @@
+ 
+ ## Completion
+ 
++Use the shared `$change-accepted` skill for technical closeout. A current completion record from `$code-review` is required before declaring technical completion or archiving. Those skills own the acceptance timing, applicability, verification and review method; keep initial implementation readiness distinct from technical completion. Repository-specific standards and operational checks below remain applicable.
++
+ Before calling a change complete:
+ 
+ - inspect the final diff and repository status
+--- base//Users/dh/Documents/Dev/NCG/ncg-backend/AGENTS.md
++++ candidate//Users/dh/Documents/Dev/NCG/ncg-backend/AGENTS.md
+@@ -0,0 +1,284 @@
++# AGENTS.md
++
++## NCG Hosting and Network: Read-Only by Default
++
++For NCG infrastructure analysis, production `10.1.0.0/16` and development `10.0.0.0/16` are read-only. This also covers their hosts, containers, databases, registry, CI/CD and network management through public URLs or other access paths. Full Access, VPN connectivity, available credentials and documented commands are not authorization to change these systems.
++
++Read-only inspection needs no per-command confirmation. Any write or system-changing operation requires Daniel's explicit prior approval for the concrete target and action, including changes initiated indirectly through pipelines, APIs, scripts or remote Docker contexts. Inspect helpers before execution; if side effects are unclear, stop and ask. No automatic fixes, remote temporary files, installs, pulls, restarts, deployments, migrations or active security tests under an analysis-only instruction. Existing build/deploy/test examples below do not override this restriction. Authorized local documentation and protected local evidence writes remain allowed.
++
++Before remote audit work, read the [NCG read-only audit policy](/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs/Ops/Security/NCG-Audit-Read-Only-Policy.md). Pass this restriction to any delegated work. It remains in force across audit continuations unless Daniel explicitly changes it; approval of one action does not lift the general restriction.
++
++## Project Orientation
++`ncg-backend` is a .NET microservice backend for the Nagel Car Group e-commerce webshop: [auto-nagel.de/shop](https://www.auto-nagel.de/shop/).
++
++When starting work in this repository, read `README.md` first for current runtime architecture, then read the repo spec documents under `backend/sources/specs` before changing behavior:
++- `README.md`
++- `backend/AGENTS.md` for git-root workflow and completion guidance
++- `backend/sources/README.md` when touching runtime architecture, services, or commands
++- `backend/sources/AGENTS.md` for command routing and machine-oriented context
++- `backend/sources/SERVICES_INVENTORY.md` when changing service wiring or dependencies
++- `backend/sources/secrets/README.md` when touching local secrets, STS credentials, or F5 config
++- `backend/sources/tests/README.md` for check-build, incident tooling, and targeted runtime gates
++- `backend/sources/Makefile` and `backend/sources/tests/resilience/` when touching mocked-neighbor resilience verification or observability evidence
++- `backend/.gitlab/scripts/README.md` when touching CI build/deploy/check-build orchestration
++- `backend/sources/tests/secrets-validation/README.md` when validating local Docker secret wiring
++- relevant specs under `backend/sources/specs/*.md`
++- active change files under `backend/sources/specs/changes/<change-id>/`
++- active change `proposal.md`, `implementation-evidence.md`, `acceptance-criteria-matrix.md`, and `tasks.md` only when more context is needed
++- past change `proposal.md`, `implementation-evidence.md`, and acceptance criteria if a new spec conflicts with old work
++
++Do not treat implementation code as the only source of truth. Requirements and rollout evidence belong in the repo spec/change documents.
++
++## Multi-Repository NCG Project
++This file is also the primary guidance for the local Codex project `ncg`. That project attaches these related repositories:
++
++- Backend: `/Users/dh/Documents/Dev/NCG/ncg-backend/backend`
++- Frontend: `/Users/dh/Documents/Dev/NCG/ncg-frontend`
++- Security Token Service: `/Users/dh/Documents/Dev/NCG/ncg-security-token`
++- Pimcore: `/Users/dh/Documents/Dev/NCG/pimcore`
++- Operations and architecture documentation: `/Users/dh/Documents/DanielsVault/ncg/ncg-docs`
++
++When a task may span repositories:
++
++1. State which repositories are in scope before editing and leave the others untouched.
++2. Read each in-scope repository's own `AGENTS.md`, `README.md`, and requirement/spec source before changing it. Codex does not automatically discover project guidance in secondary project folders.
++3. Run `git status --short` from every actual Git root in scope. Never treat `/Users/dh/Documents/Dev/NCG` or `/Users/dh/Documents/Dev/NCG/ncg-backend` as a shared Git root.
++4. Establish the shared contract, dependency order, and rollout sequence before implementation. Record behavioral requirements in the repository that owns them; update `ncg-docs` when cross-service architecture or operational contracts change.
++5. Treat repositories as independent delivery units with their own branches, commits, pull requests, tests, and rollback boundaries. A worktree for the primary repository does not isolate changes in attached secondary repositories.
++6. Verify each changed repository through its prescribed checks, then verify the cross-repository behavior at the most direct available end-to-end boundary. Report exactly which repositories and verification levels were covered.
++
++The repository-specific guidance remains authoritative inside each attached repository; this section only defines cross-repository coordination.
++
++## Context & Ops Anchors
++Keep this file compact. Use the repo docs above for implementation context, and use `/Users/dh/Documents/DanielsVault/ncg/ncg-docs/docs` for infrastructure and operations context when deployment, CI, networking, certificates, or secrets are involved.
++
++High-signal ops docs:
++- `Ops/README.md`: operations map and documentation index.
++- `Ops/Environments/Development/Dev-Environment.md`: dev servers, private network, and service access assumptions.
++- `Ops/Services/GitLab-CI-CD.md`: GitLab, runner, registry, deploy, and check-build pipeline contracts.
++- `Ops/Services/Service-Dependency-Graph.md`: runtime service dependencies, startup tiers, and known query-level cycles.
++- `Ops/Security/Secrets-Management.md`: CI variable / Docker secret policy; never commit plain-text secrets.
++- `Ops/Security/Certificates.md`: certificate strategy, trust material, and TLS deployment notes.
++
++## Start Work Checklist
++Before editing specs or code:
++1. Confirm the git root before running git commands. The actual git repository is `backend/`, so from `/Users/dh/Documents/Dev/NCG/ncg-backend` use `git -C backend status --short` or `cd backend` first.
++2. Run `git status --short` from the `backend/` git root and note existing user/agent changes.
++3. Identify whether there is an active repo spec/change relevant to the request.
++4. Read relevant specs before reading implementation details.
++5. Decide whether the request belongs to an existing change or needs a new change.
++6. State that decision and reason before editing requirements or code.
++
++## Do / Don't Rules
++Do:
++- Work from `backend/sources` for build/test/runtime commands.
++- Follow .NET naming conventions: `PascalCase` for types/methods, `camelCase` for locals/parameters.
++- Keep controllers thin; place business logic in service/domain layers.
++- Use the `$tdd` skill for feature and bug work (failing behavior test first).
++- Use existing stack first: .NET 9, EF Core, Ocelot, Polly, Serilog/Sentry.
++- Use `backend/sources/specs/changes/<change-id>/tasks.md` as the resumable work log for meaningful behavior changes.
++
++Don't:
++- Don’t edit `backend/sources/ApiGateway/ConfigFiles/ocelot-merged.json` directly.
++- Don’t hardcode secrets, cert passwords, tokens, or environment-specific URLs.
++- Don’t add new libraries when existing project patterns/utilities cover the need.
++- Don’t skip repo spec/change updates for behavior/requirement changes.
++
++## Project Structure
++- `README.md`: monorepo overview and quick-start.
++- `backend/`: git repository root.
++- `backend/sources/`: main solution root (`NCD.DT.sln`, services, tests, compose files).
++- `backend/sources/<Service>/`: service implementation.
++- `backend/sources/<Service>.Tests/`: service tests.
++- `backend/sources/Platform.*/`: shared platform/runtime libraries.
++- `backend/sources/tests/`: validation/check-build scripts.
++- `backend/sources/tests/resilience/`: mocked-neighbor resilience harness, probe scenarios, and observability evidence outputs.
++- `backend/security/`: security-related assets/docs.
++
++Service dependency summary: `ApiGateway` is the Ocelot entry point; core commerce services include `Customer`, `Store`, `ShoppingCart`, `Order`, `Payment`, `Appointment`, `Confirmation`, and related catalog/proxy services. Use `backend/sources/SERVICES_INVENTORY.md` for the deployable service matrix instead of recreating it here.
++
++## Build & Test Commands
++Run from repository root unless command says otherwise.
++
++```bash
++# Start local stack
++cd backend/sources
++docker compose --env-file .env -f docker-compose.dev.yml up -d
++
++# Start Hetzner-like stack with Docker secrets
++docker compose --env-file .env -f docker-compose.develop_hetzner.yml up -d
++
++# Stop stack
++docker compose -f docker-compose.dev.yml down
++
++# Follow local stack logs
++docker compose -f docker-compose.dev.yml logs -f [service_name]
++
++# Build full solution
++dotnet build NCD.DT.sln -c Release
++
++# Build one service
++dotnet build Store/Store.csproj -c Release
++
++# Run full test suite
++dotnet test NCD.DT.sln
++
++# Run one service tests
++dotnet test Customer.Tests/Customer.Tests.csproj
++
++# Run filtered tests
++dotnet test --filter "FullyQualifiedName~CustomerTests.Registration"
++
++# Validate compose/service wiring
++bash tests/compose-validate.sh
++
++# Validate service inventory status
++bash tests/check-service-inventory.sh
++
++# Build local Docker images for all or selected services
++bash tests/build-local.sh [ServiceName...]
++
++# Build one service Docker image from the shared build context
++docker build -f Store/Dockerfile -t ncg/store:dev .
++
++# Scaffold Hetzner onboarding snippets for one service
++bash tests/scaffold-service.sh <ServiceName> [--no-db]
++
++# Validate local F5 STS defaults and required user-secrets examples
++bash tests/check-local-sts-config.sh
++
++# Prepare local + develop_hetzner Store STS gate prerequisites for a candidate STS URL
++bash tests/sts-store-gate-prepare-prereqs.sh --candidate-url <https://sts-host[:port]>
++
++# Seed dev Login-By-Link data across STS, Customer, and CareCache assumptions
++bash tests/setup-dev-login-link-user.sh [--email <address>] [--plate <license-plate>]
++
++# Create an EF migration inside a service directory
++cd Customer
++dotnet ef migrations add MigrationName --context CustomerContext
++
++# Arm the next build watcher for automated pull -> analyze -> plan
++dotnet run tests/check-build.local.watch.cs -- --arm-next-build --project-id <id> --branch <branch>
++
++# Start or inspect the next-build watcher
++dotnet run tests/check-build.local.watch.cs -- --watch --project-id <id>
++
++# Run one watcher polling cycle / inspect or clear watcher state
++dotnet run tests/check-build.local.watch.cs -- --once --project-id <id>
++dotnet run tests/check-build.local.watch.cs -- --show-state
++dotnet run tests/check-build.local.watch.cs -- --disarm
++
++# Manual incident workflow after a failed check-build upload
++dotnet run tests/check-build.local.pull.cs -- --gitlab-url https://git.auto-nagel-cloud.de --project-id <id> --pipeline-id <id> --token <pat-with-read_api>
++dotnet run tests/check-build.local.analyze.cs -- --bundle-dir incident-local/job-<job-id>/incident
++dotnet run tests/check-build.local.plan.cs -- --analysis-file incident-local/job-<job-id>/incident/<run-id>/analysis/diagnosis.json
++
++# Smoke-check VPN-gated /ops routes through ApiGateway
++bash tests/ops-vpn-access-check.sh --gateway-base-url https://dev.auto-nagel-cloud.de --mode vpn --expect-ops-status 200 --service store --check-spoofing false
++
++# Smoke-check non-VPN /ops denial and spoofing behavior
++bash tests/ops-vpn-access-check.sh --gateway-base-url https://dev.auto-nagel-cloud.de --mode non-vpn --expect-ops-status 403 --service store --check-spoofing true
++
++# Watch the pipeline created by a pushed commit and save logs locally
++GITLAB_TOKEN=<token> bash tests/trigger-pipeline.sh
++
++# Run the local Docker secrets validation suite
++(cd backend/sources/tests/secrets-validation && ./run-all-tests.sh)
++
++# Run the mocked-neighbor resilience acceptance gate
++(cd backend/sources && make verify-neighbor-resilience)
++
++# Validate shared exception-handler wiring across all backend services
++(cd backend/sources && bash tests/check-global-exception-handler.sh)
++
++# Run the AppointmentProxy list-dependency gate against a deterministic TerminService 502 mock
++(cd backend/sources && bash tests/appointment-list-dependency/verify.sh)
++
++# Run the ApiGateway Sentry fingerprinting/enrichment gate against deterministic local mocks
++(cd backend/sources && bash tests/apigateway-sentry/verify.sh)
++
++# Run the TecAlliance maintenance, token-refresh, and global-handler gate
++(cd backend/sources && make verify-tecalliance-maintenance-concurrency)
++
++# Run the Tyre24 rate-limit runtime proof against a deterministic local mock
++(cd backend/sources && docker compose -f tests/tyre24-rate-limit/docker-compose.yml up --build --abort-on-container-exit --exit-code-from tyre24_rate_limit_tests)
++(cd backend/sources && docker compose -f tests/tyre24-rate-limit/docker-compose.yml down --remove-orphans)
++
++# Run one resilience scenario and keep the stack up for manual inspection
++cd backend/sources
++bash tests/resilience/verify-neighbor-resilience.sh --scenario jfnetwork-5xx --keep-running
++
++# Run consolidated GitLab CI entry points from backend/
++(cd backend && bash .gitlab/scripts/build-service-development.sh [--all])
++(cd backend && bash .gitlab/scripts/build-service-production.sh [--all])
++(cd backend && bash .gitlab/scripts/deploy-service-development.sh [--all])
++(cd backend && bash .gitlab/scripts/deploy-service-production.sh [--all])
++(cd backend && bash .gitlab/scripts/check-build-development.sh)
++(cd backend && bash .gitlab/scripts/check-build-production.sh)
++
++# Inspect the CI change detector used by the consolidated GitLab scripts
++(cd backend/.gitlab/scripts && bash detect-changed-services.sh [output_file])
++
++# Materialize local Docker secrets from tracked examples
++cd secrets
++for f in *.example; do cp "$f" "${f%.example}"; done
++chmod 600 *
++chmod 644 *.example README.md
++```
++
++For deployment/runtime incidents, use the check-build tooling described in `backend/sources/tests/README.md`. The manual local flow is pull artifact -> analyze incident bundle -> generate plan; the watcher flow can arm the next branch build and then run that chain automatically.
++The remote collector chain behind those workflows is `bash tests/check-build.sh` -> `warmup.sh` + `observe.sh` -> `diagnose.sh`; use `backend/sources/tests/README.md` for the expected incident bundle contents and failure semantics.
++For mocked neighbor degradation verification, use `backend/sources/Makefile` or `backend/sources/tests/resilience/verify-neighbor-resilience.sh`; the harness layers `docker-compose.resilience.yml` over `docker-compose.local.yml` and writes evidence to `tests/resilience/artifacts/result.json`, `result.junit.xml`, and `resilience-compose.log`.
++
++## Development Cycle
++Use the `$tdd` skill for feature work and bug fixes. Work in small vertical slices:
++1. Add/update the relevant repo spec/change requirement or acceptance criteria.
++2. Add one failing behavior test through the public interface.
++3. Implement the minimum code needed to pass that test.
++4. Repeat for the next behavior.
++5. Refactor only after tests are green.
++6. Run relevant tests and update the active change evidence/tasks files when the repo spec workflow expects it.
++
++Tests should describe observable behavior and avoid coupling to implementation details.
++
++For feature/spec work, keep active `backend/sources/specs/changes/<change-id>/tasks.md` current enough that another agent can resume work. Update tasks for meaningful behavior changes; skip churn for tiny doc/config/mechanical edits.
++
++## Spec Change Policy
++If the user explicitly asks to create a new change, create one.
++
++If the user does not explicitly say whether to create a new change, decide from context:
++- If an open change is already being worked in the current session and request concerns same behavior, treat it as part of that change.
++- If there is no open change, create or extend a repo change under `backend/sources/specs/changes/` for behavior/requirement changes unless request is very small or not a spec change.
++- Documentation-only edits, deployment variable fixes, build plumbing, and similarly narrow maintenance work usually do not need a new spec change.
++- Bug fixes should still start with a failing test. Add required behavior as an addendum to the original spec/change that defined intended behavior, not an unrelated new requirement.
++
++When in doubt, make reasoning explicit before editing specs or code.
++
++## Change Completion
++A spec/change is not done just because code is merged, tests pass, or validation succeeds.
++
++A change is ready to accept/archive only after intended behavior is verified locally using Docker compose build/up.
++
++Use the most direct operational surface available:
++- relevant service APIs
++- application logs and deployment logs
++- backend/transport logs needed to prove end-to-end behavior
++
++When the current change modifies or adds a REST endpoint, route, middleware behavior affecting that route, or its downstream request handling, starting the containers and checking only a health endpoint is not sufficient. Send a representative REST request through the modified endpoint in the local Docker Compose environment and verify the expected HTTP status, content type, minimal response shape or invariant, and relevant application or downstream logs. If authentication or a dependency prevents the exact end-to-end request, use a deterministic local mock or fixture at that boundary and document any test-only deviation; do not claim runtime verification from health alone.
++
++State exactly why and what lower-level verification was performed.
++
++Use the shared `$change-accepted` skill for technical closeout. A current completion record from `$code-review` is required before declaring technical completion or archiving. Those skills own the acceptance timing, applicability, verification and review method; keep initial implementation readiness distinct from technical completion. Repository-specific standards and operational checks below remain applicable.
++
++## Commit / PR Guidelines
++Commits:
++- Use concise imperative subject: `<type>(<scope>): <summary>`.
++- Recommended types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`.
++- Keep first line <= 72 chars.
++- Reference the active spec/change id in body when applicable.
++
++Pull/Merge Requests:
++- Include sections: `Summary`, `OpenSpec Change`, `Test Evidence`, `Runtime Verification`, `Risks/Rollback`.
++- List exact commands run and their outcome.
++- Link affected spec/change files.
++- Keep PR focused to one behavior change set.
+--- base//Users/dh/Documents/Dev/NCG/ncg-backend/backend/AGENTS.md
++++ candidate//Users/dh/Documents/Dev/NCG/ncg-backend/backend/AGENTS.md
+@@ -55,13 +55,7 @@
+ 
+ When the current change modifies or adds a REST endpoint, route, middleware behavior affecting that route, or its downstream request handling, starting the containers and checking only a health endpoint is not sufficient. Send a representative REST request through the modified endpoint in the local Docker Compose environment and verify the expected HTTP status, content type, minimal response shape or invariant, and relevant application or downstream logs. If authentication or a dependency prevents the exact end-to-end request, use a deterministic local mock or fixture at that boundary and document any test-only deviation; do not claim runtime verification from health alone.
+ 
+-Before archiving any repo spec/change, perform a refactoring pass over the code and specs touched by that change. Inspect both the current diff and nearby context for:
+-
+-1. DRYness: duplication introduced by the change or nearby repeated patterns now worth consolidating.
+-2. SOLID issues: mixed responsibilities, hard-to-test boundaries, or abstractions that are difficult to replace.
+-3. KISS issues: accidental complexity, unclear names, needless branching, or structure larger than the current spec requires.
+-
+-Preserve behavior during this pass and run the relevant tests again afterward.
++Use the shared `$change-accepted` skill for technical closeout. A current completion record from `$code-review` is required before declaring technical completion or archiving. Those skills own the acceptance timing, applicability, verification and review method; keep initial implementation readiness distinct from technical completion. Repository-specific standards and operational checks below remain applicable.
+ 
+ Prefer verification through:
+ 

@@ -1,0 +1,51 @@
+{
+  "observer": "/root",
+  "input": [
+    {
+      "id": 2,
+      "title": " Second ",
+      "status": " DONE "
+    }
+  ],
+  "expected": [
+    {
+      "id": 2,
+      "title": "Second",
+      "status": "done"
+    }
+  ],
+  "observations": [
+    {
+      "snapshot": "initial",
+      "observed_utc": "2026-09-20T08:24:16.810323+00:00",
+      "command": [
+        "python3",
+        "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix/evidence/snapshots/initial/ticket_export.py",
+        "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/export-behavior-observer-dkuwh5kv/input.json",
+        "--format",
+        "json",
+        "--status",
+        "done"
+      ],
+      "exit_code": 0,
+      "stdout": "[]\n",
+      "stderr": ""
+    },
+    {
+      "snapshot": "pre-review",
+      "observed_utc": "2026-09-20T08:24:16.833509+00:00",
+      "command": [
+        "python3",
+        "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/completion-live-proof-sxwalzix/evidence/snapshots/pre-review/ticket_export.py",
+        "/var/folders/wb/rpvbdznn4g3f4s2k4nwbn24c0000gn/T/export-behavior-observer-dkuwh5kv/input.json",
+        "--format",
+        "json",
+        "--status",
+        "done"
+      ],
+      "exit_code": 0,
+      "stdout": "[{\"id\": 2, \"title\": \"Second\", \"status\": \"done\"}]\n",
+      "stderr": ""
+    }
+  ]
+}
