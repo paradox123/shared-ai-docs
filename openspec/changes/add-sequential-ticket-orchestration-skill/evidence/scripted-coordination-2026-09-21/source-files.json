@@ -1,0 +1,18 @@
+[
+  "SKILL.md",
+  "agents/openai.yaml",
+  "assets/phase-messages.json",
+  "references/efficient-execution.md",
+  "references/local-helpers.md",
+  "references/messages.md",
+  "references/parallel-delivery.md",
+  "references/recovery-and-state.md",
+  "references/worker-events.md",
+  "scripts/batch_coordination.py",
+  "scripts/batch_state.py",
+  "scripts/find_task_candidates.py",
+  "scripts/tests/test_batch_state.py",
+  "scripts/tests/test_coordination.py",
+  "scripts/tests/test_find_task_candidates.py",
+  "scripts/tests/test_worker_events.py"
+]

@@ -20,6 +20,8 @@ Use /tdd where possible, at pre-agreed seams.
 
 Run typechecking regularly, single test files regularly, and the full test suite once at the end.
 
+Before declaring the implementation complete, identify all acceptance criteria in the user's request, spec, tickets, issue, PRD, or repository workflow. When acceptance criteria exist, verify every criterion individually against the implemented behavior and record the expected result, observed result, and supporting evidence. Any unmet, unverified, or ambiguous acceptance criterion means the implementation is not complete; resolve it or report it explicitly as a limitation.
+
 After implementation and initial behavioral checks, report the actual scope, expected/observed results, evidence paths, limitations and current content identity. Mark technical completion as awaiting acceptance. A normal implementation request does not start the full closure workflow. On contextual user acceptance, or an authorized coordinator's completion request, use /change-accepted; it owns the transition to verification and /code-review. Do not duplicate the review method here.
 
 Owned-branch local checkpoint commits may establish a baseline within the task's authority. They do not authorize push, merge, archive or issue closure. Preserve the confirmed delivery target and follow the existing delivery authority after technical completion.

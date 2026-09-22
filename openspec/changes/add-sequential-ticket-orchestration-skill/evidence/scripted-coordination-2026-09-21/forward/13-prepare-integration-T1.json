@@ -1,0 +1,7 @@
+{
+  "op": "prepare",
+  "ticket": "A",
+  "phase": "integrating",
+  "target_ref": "T1",
+  "instruction": "Prepare synthetic candidate C1 against T1 on release/demo; no merge grant. Provide candidate, tested target, required checks, and PR base/head fixture."
+}

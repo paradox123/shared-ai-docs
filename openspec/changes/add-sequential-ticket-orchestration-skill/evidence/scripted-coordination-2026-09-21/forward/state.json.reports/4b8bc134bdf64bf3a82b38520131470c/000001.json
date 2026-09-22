@@ -1,0 +1,14 @@
+{
+  "batch_id": "synthetic-forward",
+  "ticket": "A",
+  "thread_id": "synthetic-worker-A",
+  "host_id": "local",
+  "request_id": "4b8bc134bdf64bf3a82b38520131470c",
+  "event_seq": 1,
+  "phase": "integrating",
+  "status": "ready",
+  "result_path": "/private/tmp/scripted-flow-forward/state.json.reports/4b8bc134bdf64bf3a82b38520131470c/000001-result.md",
+  "content_ref": "C1",
+  "target_ref": "T2",
+  "result_sha256": "ed385158f6e33be12764bc348e8353ff7db443d51ec2df24eff0fbb2c07b8c6b"
+}

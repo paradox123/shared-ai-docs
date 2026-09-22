@@ -1,0 +1,11 @@
+{
+  "op": "consume",
+  "ticket": "A",
+  "event": "/private/tmp/scripted-flow-forward/state.json.reports/86a65f7be24d4635b28dfb0bbc8f456c/000001.json",
+  "next": {
+    "phase": "verifying",
+    "instruction": "Apply change-accepted to synthetic C1, perform critical verification then code-review, return current completion record. Honor one sequential nested-agent allowance. This fixture does not run agents.",
+    "content_ref": "C1",
+    "evidence": "/tmp/scripted-flow-forward/implementation-acceptance.md"
+  }
+}

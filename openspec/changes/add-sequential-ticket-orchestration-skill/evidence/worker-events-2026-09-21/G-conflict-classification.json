@@ -1,0 +1,5 @@
+{
+  "exit_code": 2,
+  "stdout": "{\"status\": \"blocked\", \"reason\": \"sequence reused with different content\"}",
+  "stderr": ""
+}

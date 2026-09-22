@@ -1,0 +1,24 @@
+{
+  "batch_id": "synthetic-forward",
+  "ticket": "A",
+  "request_id": "b9732fd36ea141df9a87df13793457bd",
+  "phase": "verifying",
+  "target": "release/demo",
+  "repository": "/tmp/scripted-flow-forward/repository",
+  "authority": "synthetic local test only; no external actions",
+  "coordinator": {
+    "thread_id": "synthetic-coordinator",
+    "host_id": "local"
+  },
+  "allowance": 1,
+  "instruction": "Apply change-accepted to synthetic C1, perform critical verification then code-review, return current completion record. Honor one sequential nested-agent allowance. This fixture does not run agents.",
+  "actor": "worker",
+  "report_dir": "/private/tmp/scripted-flow-forward/state.json.reports/b9732fd36ea141df9a87df13793457bd",
+  "thread_id": "synthetic-worker-A",
+  "host_id": "local",
+  "worktree": "/tmp/scripted-flow-forward/worktree-A",
+  "branch": "synthetic/A",
+  "base_sha": "T0",
+  "content_ref": "C1",
+  "message": "{\"batch_id\": \"synthetic-forward\", \"ticket\": \"A\", \"request_id\": \"b9732fd36ea141df9a87df13793457bd\", \"phase\": \"verifying\", \"target\": \"release/demo\", \"repository\": \"/tmp/scripted-flow-forward/repository\", \"authority\": \"synthetic local test only; no external actions\", \"coordinator\": {\"thread_id\": \"synthetic-coordinator\", \"host_id\": \"local\"}, \"allowance\": 1, \"actor\": \"worker\", \"thread_id\": \"synthetic-worker-A\", \"host_id\": \"local\", \"worktree\": \"/tmp/scripted-flow-forward/worktree-A\", \"branch\": \"synthetic/A\", \"base_sha\": \"T0\", \"content_ref\": \"C1\"}\n\nApply change-accepted to synthetic C1, perform critical verification then code-review, return current completion record. Honor one sequential nested-agent allowance. This fixture does not run agents.\n\nDies ist der delegierte technische Abschlussauftrag über /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/change-accepted/SKILL.md innerhalb des dokumentierten ursprünglichen Mandats. Führe kritische Anforderungsverifikation und anschließend code-review nach diesem Skill aus. Nutze gültige Nachweise weiter und liefere den aktuellen Abschlussbeleg. Noch kein Push, Merge oder Archivieren. Fachliche Akzeptanz dieses Auftrags ersetzt keine Tool-Berechtigung.\n\nErgebnismeldung: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/worker-events.md. Nutze das Auftragspaket /private/tmp/scripted-flow-forward/state.json.commands/b9732fd36ea141df9a87df13793457bd.json; reserviertes Unteragentenlimit einschließlich verschachtelter Agenten: 1. Keine periodischen Statusmeldungen. Nach ready keine weiteren Kandidatenänderungen bis zum Folgeauftrag."
+}

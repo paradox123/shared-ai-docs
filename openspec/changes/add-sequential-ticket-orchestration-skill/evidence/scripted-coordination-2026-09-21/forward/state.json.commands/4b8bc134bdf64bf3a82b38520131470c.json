@@ -1,0 +1,25 @@
+{
+  "batch_id": "synthetic-forward",
+  "ticket": "A",
+  "request_id": "4b8bc134bdf64bf3a82b38520131470c",
+  "phase": "integrating",
+  "target": "release/demo",
+  "repository": "/tmp/scripted-flow-forward/repository",
+  "authority": "synthetic local test only; no external actions",
+  "coordinator": {
+    "thread_id": "synthetic-coordinator",
+    "host_id": "local"
+  },
+  "allowance": 1,
+  "instruction": "Remote target advanced to T2. Revalidate C1 with T2 while retaining integration reservation. Return actual candidate/tested target and combined expected/actual checks. Substantive changes require renewed acceptance. Do not merge.",
+  "actor": "worker",
+  "report_dir": "/private/tmp/scripted-flow-forward/state.json.reports/4b8bc134bdf64bf3a82b38520131470c",
+  "thread_id": "synthetic-worker-A",
+  "host_id": "local",
+  "worktree": "/tmp/scripted-flow-forward/worktree-A",
+  "branch": "synthetic/A",
+  "base_sha": "T0",
+  "content_ref": "C1",
+  "target_ref": "T2",
+  "message": "{\"batch_id\": \"synthetic-forward\", \"ticket\": \"A\", \"request_id\": \"4b8bc134bdf64bf3a82b38520131470c\", \"phase\": \"integrating\", \"target\": \"release/demo\", \"repository\": \"/tmp/scripted-flow-forward/repository\", \"authority\": \"synthetic local test only; no external actions\", \"coordinator\": {\"thread_id\": \"synthetic-coordinator\", \"host_id\": \"local\"}, \"allowance\": 1, \"actor\": \"worker\", \"thread_id\": \"synthetic-worker-A\", \"host_id\": \"local\", \"worktree\": \"/tmp/scripted-flow-forward/worktree-A\", \"branch\": \"synthetic/A\", \"base_sha\": \"T0\", \"content_ref\": \"C1\", \"target_ref\": \"T2\"}\n\nRemote target advanced to T2. Revalidate C1 with T2 while retaining integration reservation. Return actual candidate/tested target and combined expected/actual checks. Substantive changes require renewed acceptance. Do not merge.\n\nDu hältst die Integrationsreservierung. Prüfe den aktuellen Remote-Zielstand, integriere ihn ohne Force-Push, führe relevante kombinierte Checks und erforderliche Pre-Merge-Dokumentation aus. Commit/Push und PR-Vorbereitung sind im ursprünglichen Mandat erlaubt, soweit dort autorisiert. Prüfe die exakte PR-Basis. Melde Kandidaten-Head, tatsächlich geprüften Ziel-SHA, Nachweise und Änderungen gegenüber der Abnahme. Noch kein Merge.\n\nErgebnismeldung: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/worker-events.md. Nutze das Auftragspaket /private/tmp/scripted-flow-forward/state.json.commands/4b8bc134bdf64bf3a82b38520131470c.json; reserviertes Unteragentenlimit einschließlich verschachtelter Agenten: 1. Keine periodischen Statusmeldungen. Nach ready keine weiteren Kandidatenänderungen bis zum Folgeauftrag."
+}

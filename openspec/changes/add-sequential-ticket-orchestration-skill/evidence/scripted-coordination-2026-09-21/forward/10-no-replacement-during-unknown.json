@@ -1,0 +1,8 @@
+{
+  "op": "prepare",
+  "ticket": "A",
+  "phase": "verifying",
+  "instruction": "Attempt a replacement only as a negative CLI test; never dispatch it.",
+  "content_ref": "C1",
+  "evidence": "/tmp/scripted-flow-forward/implementation-acceptance.md"
+}

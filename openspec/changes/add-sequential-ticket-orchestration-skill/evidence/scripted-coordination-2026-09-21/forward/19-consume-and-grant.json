@@ -1,0 +1,13 @@
+{
+  "op": "consume",
+  "ticket": "A",
+  "event": "/private/tmp/scripted-flow-forward/state.json.reports/4b8bc134bdf64bf3a82b38520131470c/000001.json",
+  "next": {
+    "phase": "delivering",
+    "content_ref": "C1",
+    "target_ref": "T2",
+    "current_target_ref": "T2",
+    "evidence": "/tmp/scripted-flow-forward/integration-final-inspection.md",
+    "instruction": "Synthetic delivery grant only for exact C1 on exact T2 to release/demo. Recheck immediately before merge; stop on movement. Report actual merge, contents mapping, closure and quiescence. No real external action authorized."
+  }
+}

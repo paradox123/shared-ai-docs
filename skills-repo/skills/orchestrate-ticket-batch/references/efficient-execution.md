@@ -1,38 +1,23 @@
-# Context, reviews and batch closeout
+# Bounded work and context
 
 ## Role profile
 
-For the token-saving profile requested by Daniel, use:
+Daniel's token-saving profile uses Sol/medium for coordination and code-review structural reviewers, Astra/high for implementation and separate critical verification, and scripts for mechanical bookkeeping. At start record requested roles, their authorization and actual runtime selections; disclose a mismatch once. Preserve explicit user choices and current tool restrictions. Do not silently substitute models, change global defaults, restart a task to simulate a model switch or assume a prompt changed the current model. Difficult structural findings may receive a focused Astra/high escalation within the authorized profile.
 
-| Role | Model | Reasoning |
-| --- | --- | --- |
-| Coordinator | `gpt-5.6-sol` | `medium` |
-| Implementation and separate critical verification | `gpt-6-astra` | `high` |
-| Structural reviewers through code-review | `gpt-5.6-sol` | `medium` |
-| Mechanical bookkeeping | Local helper | None |
+## Work packets
 
-Record the user's profile authorization and the actual runtime selections in the batch ledger. Preserve later explicit choices. Check the current tool schema: task creation may allow a model override only when the user explicitly requested it. Without that authority, omit the override and use the configured runtime model. Do not replace an unavailable model silently; record the limitation and use an authorized available setting. Escalate a structural finding needing difficult concurrency/persistence reasoning to Astra/high with a focused question; retain the original finding and attribution.
+Add ticket/spec paths, relevant standards, expected scope, base, isolation requirements, original authorization and applicable model profile to the task-specific instruction. The CLI supplies assignment fields and phase rules. Review subagents use fresh context (`fork_turns="none"`) and the scoped packets/receipts owned by [code-review](../../code-review/SKILL.md); do not copy the batch conversation or invent another receipt schema.
 
-A skill does not switch its own active task's model. Start a coordinator with Sol/medium using the app's model selector; for CLI use `codex -m gpt-5.6-sol -c model_reasoning_effort='"medium"'` when supported by the installed CLI. If already running with another model, disclose this once and continue permitted work. Never edit global defaults or create/restart a task solely to simulate a model change. Task tools use `model`/`thinking`; review subagent tools use `model`/`reasoning_effort` and `fork_turns="none"`. Verify supported values on the destination host. [Official model and reasoning selection](https://learn.chatgpt.com/docs/models).
+For large repetitive work, prove a few complete normal/boundary cases before broad generation. Seek an early decision only when interpretation, method or scope needs it. A valid sample proves the approach, not ticket completion. This is not an extra approval gate for small changes.
 
-## Context packets
+Ticket concurrency and nested-agent capacity are separate. Both default to three across the batch; per-worker allowances include nested agents and may be reused for sequential reviews. The CLI reserves capacity. Workers must honor their packet's allowance. Required reviews wait for capacity instead of being skipped. Reallocation requires confirmed quiescence and reconciliation of any old grant; an idle coordinator does not release reservations.
 
-New worker: ticket/spec paths or contents, relevant standards, expected file/interface scope, fixed starting target SHA, explicit target branch, isolated worktree requirements, authority provenance and phase/delivery contract from messages.md. Existing repository instructions still apply. Link primary sources instead of copying the full batch history.
+Repairs identify finding, criterion, affected scope, contents and needed evidence delta. The same worker repairs; code-review owns affected rechecks. If a failure recurs or helper rebuilding keeps expanding, secure the useful result, reassess cause/method and provide bounded remaining packages before another equivalent round. Reuse suitable deterministic tools and valid evidence. Do not lower acceptance or call locally solvable work externally blocked to save tokens.
 
-Reviewer packets and receipts are defined in [code-review](../../code-review/SKILL.md). The coordinator passes the authorized role profile and scoped requirements/evidence; it links the returned completion record rather than maintaining a second receipt schema.
+## Metrics and closeout
 
-Worker result: current contents, ready/blocked phase, measured acceptance result, test and review artifact paths, limitations and next action. The coordinator opens only evidence needed for its decision. Do not require periodic prose updates or callbacks when the normal completion result is sufficient.
+At real phase milestones record already-available input, cached-input subset, output and optional reasoning subset, owner and coverage interval in compact evidence. Use cumulative-counter deltas and avoid double-counting children. Mark unavailable counters; do not scan transcripts or add polling solely for metrics. Track repair rounds and reserved allowances; the helper counts repair commands. Explicit user budgets take precedence; a rising trend alone does not authorize abandoning work.
 
-## Technical completion
+After inspected implementation readiness, the coordinator delegates [change-accepted](../../change-accepted/SKILL.md). It owns critical verification and code-review; retain its current completion record and revalidate affected coverage after substantive/target changes.
 
-Use [change-accepted](../../change-accepted/SKILL.md) after the coordinator's substantive acceptance of an implementation-ready candidate. It owns requirements verification followed by code-review. The coordinator inspects evidence, records the technical outcome and retains separate integration authority; it does not override implement or repeat the review instructions.
-
-Record a path to the current completion record in the batch ledger. Local checkpoint commits do not grant delivery. Preserve applicable checks after target movement and use the common record to reopen affected coverage. Existing batches retain prior receipts as historical evidence; reconcile their coverage with the current contract only on explicit adoption, never invent missing review outcomes.
-
-## One consolidated closeout
-
-After each verified merge, record PR/head/merge/target, accepted-content mapping, ticket closure and deferred versioned status/archive paths in the ledger. This immediately unlocks delivered prerequisites. Keep evidence retention and owned-resource cleanup per ticket.
-
-Do required specification updates and validation before each implementation merge. Keep productive activation, restart/persistence or deployment proof with its own ticket. A repository rule requiring per-ticket archive/docs before merge wins; record that exception. Otherwise defer only pure bookkeeping, including archive moves, to one batch closeout change. Do not create an automatic second PR per ticket for a checked task box or merge link.
-
-At batch end, collect deferred paths and merge facts into one closeout change on an owned branch/worktree from the explicit target. Reuse an idle verified worker when practical; obey actual task-creation authority. Reserve the integration slot, inspect the complete documentation diff, run required OpenSpec/docs checks, bind acceptance to the closeout head and target, and use the normal preparation and specific merge grant. If the diff adds behavior, route that portion through change-accepted. Verify the remote closeout merge and cleanup before marking the batch done. If externally blocked, a partial closeout may record delivered work while explicitly retaining outstanding tickets; never mark undelivered work complete.
+Record each delivery immediately, unlocking prerequisites independently of cleanup. Keep required spec updates and productive activation proof per ticket. Where repo policy permits, consolidate only pure versioned status/archive bookkeeping into one final change. Reuse an idle verified worker under normal identity, capacity, integration and acceptance rules. Behavioral changes in closeout require change-accepted. Verify that final delivery and cleanup before declaring the batch complete; partial closeout retains undelivered tickets explicitly.

@@ -1,0 +1,10 @@
+{
+  "op": "prepare",
+  "ticket": "A",
+  "phase": "delivering",
+  "content_ref": "C1",
+  "target_ref": "T1",
+  "current_target_ref": "T2",
+  "evidence": "/tmp/scripted-flow-forward/remote-target-moved.md",
+  "instruction": "Negative test only: stale target must not grant delivery."
+}

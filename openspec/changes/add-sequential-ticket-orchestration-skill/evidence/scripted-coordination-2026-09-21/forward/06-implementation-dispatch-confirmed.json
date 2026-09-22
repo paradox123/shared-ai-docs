@@ -1,0 +1,7 @@
+{
+  "op": "record",
+  "ticket": "A",
+  "request_id": "86a65f7be24d4635b28dfb0bbc8f456c",
+  "outcome": "confirmed",
+  "evidence": "/tmp/scripted-flow-forward/implement-send.md"
+}

@@ -1,0 +1,18 @@
+{
+  "batch_id": "synthetic-forward",
+  "ticket": "B",
+  "request_id": "7dade962f6844a32afa34f1c809d2300",
+  "phase": "registering",
+  "target": "release/demo",
+  "repository": "/tmp/scripted-flow-forward/repository",
+  "authority": "synthetic local test only; no external actions",
+  "coordinator": {
+    "thread_id": "synthetic-coordinator",
+    "host_id": "local"
+  },
+  "allowance": 1,
+  "instruction": "Synthetic eligibility proof only: A delivered, begin B from release/demo at M1. No actual create_thread. Original scope local CLI test only.",
+  "actor": "coordinator",
+  "report_dir": "/private/tmp/scripted-flow-forward/state.json.reports/7dade962f6844a32afa34f1c809d2300",
+  "message": "{\"batch_id\": \"synthetic-forward\", \"ticket\": \"B\", \"request_id\": \"7dade962f6844a32afa34f1c809d2300\", \"phase\": \"registering\", \"target\": \"release/demo\", \"repository\": \"/tmp/scripted-flow-forward/repository\", \"authority\": \"synthetic local test only; no external actions\", \"coordinator\": {\"thread_id\": \"synthetic-coordinator\", \"host_id\": \"local\"}, \"allowance\": 1, \"actor\": \"coordinator\"}\n\nSynthetic eligibility proof only: A delivered, begin B from release/demo at M1. No actual create_thread. Original scope local CLI test only.\n\nDu bist der Worker für dieses Ticket. Nutze den bereitgestellten isolierten Worktree, einen eigenen Arbeitsbranch und den ausdrücklich genannten Zielbranch als Basis. Prüfe die aktuelle Remote-Basis und melde echte Task-ID, Host, Worktree, Branch und Basis-SHA im normalen Abschlussbericht. Noch keine Implementierung vor dem zugeordneten Folgeauftrag. Starte keine weiteren Ticket-Tasks."
+}

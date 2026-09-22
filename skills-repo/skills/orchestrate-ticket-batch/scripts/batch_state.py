@@ -199,12 +199,65 @@ def compare_snapshots(previous, current):
     return {"status": status, "changed_fields": changed}
 
 
+def classify_event(assignment, event, previous=None):
+    identity = {"batch_id", "ticket", "thread_id", "host_id", "request_id"}
+    for value in (assignment, event, *([previous] if previous is not None else [])):
+        if not isinstance(value, dict) or any(
+                not isinstance(value.get(key), str) or not value[key].strip()
+                for key in identity):
+            raise ValueError("incomplete event assignment")
+    for value in (event, *([previous] if previous is not None else [])):
+        if (type(value.get("event_seq")) is not int or value["event_seq"] < 1
+                or not isinstance(value.get("status"), str)
+                or value["status"] not in {"registered", "ready", "blocked", "error"}
+                or any(not isinstance(value.get(key), str) or not value[key].strip()
+                       for key in ("phase", "result_path"))):
+            raise ValueError("invalid event envelope")
+        if value["status"] == "ready" and (
+                not isinstance(value.get("content_ref"), str) or not value["content_ref"].strip()):
+            raise ValueError("ready event requires a content revision")
+    if any(event[key] != assignment[key] for key in identity - {"request_id"}):
+        return {"status": "blocked", "reason": "event assignment mismatch"}
+    if previous is not None and any(previous[key] != assignment[key] for key in identity):
+        return {"status": "blocked", "reason": "previous receipt assignment mismatch"}
+    if event["request_id"] != assignment["request_id"]:
+        return {"status": "stale"}
+    last_sequence = previous["event_seq"] if previous is not None else 0
+    if event["event_seq"] < last_sequence:
+        return {"status": "stale"}
+    if previous is not None and event["event_seq"] == previous["event_seq"]:
+        normalized = [{k: v for k, v in value.items() if k != "sent_at"}
+                      for value in (previous, event)]
+        if normalized[0] == normalized[1]:
+            return {"status": "duplicate"}
+        return {"status": "blocked", "reason": "sequence reused with different content"}
+    if event["event_seq"] != last_sequence + 1:
+        return {"status": "blocked", "reason": "event sequence gap; reconcile worker"}
+    return {"status": "new"}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest="command", required=True)
+    coordination = commands.add_parser("coordinate", help="Apply one managed coordination operation")
+    coordination.add_argument("--ledger", type=Path, required=True)
+    coordination.add_argument("--expect-revision", type=int, required=True)
+    coordination.add_argument("--input", type=Path, required=True)
+    status = commands.add_parser("status", help="Compact managed-batch decision context")
+    status.add_argument("--ledger", type=Path, required=True)
+    report = commands.add_parser("report", help="Persist a sequenced worker result and return callback text")
+    report.add_argument("--packet", type=Path, required=True)
+    report.add_argument("--result", type=Path, required=True)
+    report.add_argument("--status", choices=("ready", "blocked", "error"), required=True)
+    report.add_argument("--content-ref")
+    report.add_argument("--target-ref")
     compare = commands.add_parser("compare")
     compare.add_argument("--previous", type=Path, required=True)
     compare.add_argument("--current", type=Path, required=True)
+    event_parser = commands.add_parser("classify-event")
+    event_parser.add_argument("--assignment", type=Path, required=True)
+    event_parser.add_argument("--event", type=Path, required=True)
+    event_parser.add_argument("--previous", type=Path)
     checkpoint_parser = commands.add_parser("checkpoint")
     checkpoint_parser.add_argument("--ledger", type=Path, required=True)
     checkpoint_parser.add_argument("--patch", type=Path, required=True)
@@ -217,8 +270,19 @@ def main():
             command.add_argument("--destination", type=Path, required=True)
     args = parser.parse_args()
     try:
-        if args.command == "compare":
+        if args.command in {"coordinate", "status", "report"}:
+            import batch_coordination
+            if args.command == "coordinate":
+                result = batch_coordination.coordinate(args.ledger, args.expect_revision, read_json(args.input))
+            elif args.command == "report":
+                result = batch_coordination.report(args.packet, args.result, args.status, args.content_ref, args.target_ref)
+            else:
+                result = batch_coordination.status(args.ledger)
+        elif args.command == "compare":
             result = compare_snapshots(read_json(args.previous), read_json(args.current))
+        elif args.command == "classify-event":
+            result = classify_event(read_json(args.assignment), read_json(args.event),
+                                    read_json(args.previous) if args.previous else None)
         elif args.command == "checkpoint":
             result = checkpoint(args.ledger, read_json(args.patch), args.expect_revision)
         elif args.command == "manifest":

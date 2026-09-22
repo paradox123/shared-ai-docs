@@ -21,6 +21,8 @@ Non-goals: implement product code in the coordinator, bypass approvals, guarante
 - Validate this instruction workflow through independent fixture-based forward evaluation and the helper's existing subprocess tests. Technical completion after contextual acceptance uses the central completion contract; the earlier Standards/Spec results remain historical evidence for the preceding helper implementation.
 - The token-saving extension in [scripted-batch-design.md](scripted-batch-design.md) adds local compare/checkpoint/manifest/verify/retain commands, preserving the coordinator's decision and execution authority. Put critical verification before final independent review, retain reviewer coverage across deltas, and consolidate pure status/archive closeout work. Use scoped context and the recorded role profile without silently changing global defaults or existing batches.
 
+- The [scripted-coordination-design.md](scripted-coordination-design.md) extension deepens the local helper into managed operations without external execution. It supersedes manual event/command/receipt/reservation recipes for new batches; evidence quality and external authority remain coordinator decisions.
+
 ## Risks / Trade-offs
 
 - Conservative overlap detection reduces parallel throughput in exchange for fewer conflicts; bounded investigation avoids assuming either safety or universal conflict.

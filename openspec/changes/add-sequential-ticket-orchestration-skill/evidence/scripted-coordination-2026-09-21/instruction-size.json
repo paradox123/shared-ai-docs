@@ -1,0 +1,12 @@
+{
+  "before": {
+    "skill_words": 1929,
+    "reference_words": 7665,
+    "phase_asset_words": 0
+  },
+  "after": {
+    "skill_words": 821,
+    "reference_words": 3443,
+    "phase_asset_words": 352
+  }
+}

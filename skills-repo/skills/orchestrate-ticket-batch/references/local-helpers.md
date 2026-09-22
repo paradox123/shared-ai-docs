@@ -1,64 +1,93 @@
-# Local mechanical helpers
+# Managed coordination CLI
 
-Run `python3 <resolved-skill-dir>/scripts/batch_state.py --help`. Python standard library only. These commands do not call task APIs, Git or automations. They compare supplied facts; they cannot establish live ownership, semantic coverage, acceptance or permission. Normalize task-tool responses before creating snapshots. Keep inputs, ledgers and manifests in the batch directory, outside disposable worker worktrees.
+Use `python3 <resolved-skill>/scripts/batch_state.py`. Standard library only; no task, Git or scheduler calls. New batches use schema 2. Old schema-1 helpers remain available; never point generic `checkpoint` at a managed ledger. Keep the ledger, generated packets and reports together outside **all** disposable worktrees. Hosts need access to these absolute paths.
 
-Exit codes: **0** ready/unchanged, **2** diverged/blocked, **3** invalid/unreadable input. Results are JSON; changed-field names and paths are reported, not raw worker prose. CLI usage errors use argparse's normal exit 2. A `ready` result from a mechanical check never means the ticket is accepted.
+## Initialize and inspect
 
-## Compare observations and assignment
-
-```sh
-python3 "$SKILL_DIR/scripts/batch_state.py" compare \
-  --previous "$BATCH_DIR/previous.json" --current "$BATCH_DIR/current.json"
-```
-
-Both snapshots include nonempty `ticket`, `thread_id`, `worktree`, `branch`, `target` and `status` (`running`, `ready`, `blocked`, `error`). `ready` means the worker explicitly reported readiness for the **current phase**, not that a tool merely said idle/completed. An optional `pending_action` carries unresolved dispatch information. Include candidate head/target SHA, blocker, evidence revision and other meaningful facts when they change.
-
-Only top-level `wait_cursor` and `observed_at` are ignored for comparison. Persist the latest cursor even for `unchanged`. A changed assignment reports `diverged`; an incomplete assignment reports `blocked`. A changed blocked/error or unresolved pending action reports `blocked`; a matching ready observation reports `ready`; other meaningful changes report `diverged`. Repeated identical blockers report `unchanged`; the ledger still retains their blocked phase and recovery condition.
-
-On `unchanged`, continue a 60-second bounded wait without detail reads, file probes or extra worker messages. On change, inspect the affected result and act once. On resume or before external mutation, reconcile the required live facts regardless of the last comparison. Unregistered provisional IDs use the existing identity recovery flow, not fabricated snapshots.
-
-## Checkpoint a JSON ledger
-
-```sh
-python3 "$SKILL_DIR/scripts/batch_state.py" checkpoint \
-  --ledger "$BATCH_DIR/memory.json" --expect-revision 0 --patch "$BATCH_DIR/initial.json"
-```
-
-Initial patch shape (fill real values):
+Write an operation JSON file with actual values:
 
 ```json
 {
-  "batch": {"id": "batch-id", "repository": "/absolute/repo", "target": "release/wiki"},
-  "tickets": {"01": {"phase": "queued", "pending_action": null}}
+  "op": "init",
+  "batch": {
+    "id": "audit-batch", "repository": "/absolute/repository",
+    "target": "release/audit", "authority": "original user request reference",
+    "coordinator": {"thread_id": "confirmed-coordinator-id", "host_id": "local"}
+  },
+  "tickets": {"11": {}, "12": {"depends_on": ["11"]}, "13": {"conflicts": ["11"]}},
+  "limits": {"tickets": 3, "subagents": 3},
+  "continuation": {"mode": "active-wait"}
 }
 ```
 
-Add authority provenance, frozen scope, dependencies, identities, reviews and other fields required by recovery-and-state.md. The helper inserts `schema_version: 1` and `revision: 1`. Subsequent patches recursively merge object fields and replace explicit scalar/list/null values; omitted fields survive. Pass the last observed revision. Managed schema/revision and existing batch id/repository/target cannot be patched. Ticket objects cannot be removed with null. This is bookkeeping, not a phase-transition validator: only the coordinator may record a justified transition or clear a reconciled pending action.
-
-For example, a cursor checkpoint patches only `tickets.<id>.wait_cursor`. Before sending a request, checkpoint that ticket's concrete `pending_action`; afterward checkpoint its observed result and clear the action only when reconciled. Never replace another ticket's unresolved action with one global field.
-
-The command locks `<ledger>.lock`, rereads the latest ledger, checks the revision and atomically replaces it. A stale writer or existing lock blocks without a write. On interruption, inspect the recorded lock owner and actual pending operations before manually removing a stale lock. Do not delete a live writer's lock or retry a stale revision blindly. Existing Markdown/unversioned JSON ledgers require explicit, backed-up adoption as described in recovery-and-state.md. No live batch migration is automatic.
-
-## Manifest, verify and retain evidence
-
-Write an explicit JSON list of relative regular-file paths, including report dependencies:
-
-```json
-["acceptance.md", "images/result.png", "measurements.json"]
-```
+`continuation.mode` is `active-wait`, `callback`, `heartbeat` or `manual`; background modes also require `evidence` describing observed idle wake or authorized scheduled recovery. Recording a mode does not configure it. Declare semantic dependencies/conflicts from inspection; an unresolved dependency outside the batch blocks dispatch. Ticket order is the tie-breaker.
 
 ```sh
-python3 "$SKILL_DIR/scripts/batch_state.py" manifest \
-  --root "$ARTIFACT_ROOT" --files "$BATCH_DIR/files.json" > "$BATCH_DIR/manifest.json"
-python3 "$SKILL_DIR/scripts/batch_state.py" verify \
-  --root "$ARTIFACT_ROOT" --manifest "$BATCH_DIR/manifest.json"
-python3 "$SKILL_DIR/scripts/batch_state.py" retain \
-  --root "$ARTIFACT_ROOT" --manifest "$BATCH_DIR/manifest.json" \
-  --destination "$BATCH_DIR/evidence/ticket-01/reviewed-revision"
+python3 "$SKILL_DIR/scripts/batch_state.py" coordinate --ledger "$BATCH_DIR/state.json" --expect-revision 0 --input "$BATCH_DIR/operation.json"
+python3 "$SKILL_DIR/scripts/batch_state.py" status --ledger "$BATCH_DIR/state.json"
 ```
 
-Check the manifest command's exit status before consuming its output. Keep each accepted manifest immutable under a revision-specific path. A manifest binds exactly the listed bytes; it does not discover omitted files or prove the entire implementation. Prefer a Git SHA for source review, or supply a complete agreed content list when a source manifest is needed.
+Every subsequent coordinate call uses the latest returned revision. Status gives identities, current packet, pending dispatch, report/evidence references, capacity and next decision without history/full instructions. A proposed next step is not authorization or proof of eligibility. Check the relevant evidence and live facts.
 
-Paths must be normalized, relative and nonempty; no traversal, symlinks, directories or duplicates. Verification detects missing/changed files. Retention checks source bytes, copies into staging, checks copied hashes and publishes outside the source tree. An existing matching destination is reusable; differing/incomplete evidence is reported and never overwritten. Retain into a fresh revision directory after intentional content changes. Only helper-created temporary staging is removed; source and existing destination files are preserved.
+## Prepare and record an external command
 
-The coordinator verifies the destination is outside **all** disposable worktrees, preserves the manifest and review/merge receipts, checks report links/assets and opens retained artifacts before cleanup. The helper checks only listed files; unlisted files in an existing destination are preserved. It never authorizes branch/worktree deletion.
+Operation `prepare` requires `ticket`, `phase` and a task-specific `instruction`. It generates a request ID, durable packet with ready-to-use `message`, and pending dispatch in the ledger. Dispatch only after success and only from the current packet. A packet file alone is not sufficient: interrupted publication may leave an orphan that is absent from the ledger. There is no automatic retry or exactly-once transport guarantee.
+
+| Phase | Prerequisite / additional input |
+| --- | --- |
+| registering | Queued eligible ticket; optional `allowance` (default 0) reserves nested-agent capacity. Use packet message with create_thread and explicit target/worktree settings. |
+| implementing | Directly verified registration recorded; send packet message to the recorded worker. |
+| verifying | Implementation/repair ready; `content_ref` matching that report and absolute `evidence` path for inspected substantive acceptance. |
+| repairing | Report from implementation, verification, prior repair or integration; `quiescent: true`, `evidence`; instruction names findings and evidence delta. |
+| integrating | Technically accepted awaiting-integration ticket; `target_ref`. Reserves one integration holder. Repeat preparation after target movement requires the current ready report's `content_ref` and `evidence`. |
+| delivering | Integration ready; matching `content_ref`, tested `target_ref`, separately observed `current_target_ref`, and `evidence`. |
+| cleanup | Delivered/quiescent ticket in cleanup; `step`, fresh preflight `evidence`, and instruction describing the exact coordinator mutation. Never send cleanup to the worker. |
+
+Example after inspecting implementation evidence:
+
+```json
+{"op":"prepare","ticket":"11","phase":"verifying","instruction":"Complete change X; inspect criteria A/B and reuse valid proofs.","content_ref":"actual-head-or-manifest","evidence":"/absolute/acceptance.md"}
+```
+
+After the tool call, use `record` with `ticket`, exact `request_id`, `outcome` (`confirmed`, `unknown`, `not-sent`) and an absolute `evidence` file recording the actual tool result/reconciliation. `confirmed` clears pending dispatch. The others retain it. For proven `not-sent`, send the **same packet** if still authorized, then record its outcome; never prepare a replacement. With unknown outcome, inspect destination/remote state first. A tool timeout is not proof of non-delivery.
+
+Registration confirmation additionally supplies `worker`: real `thread_id`, `host_id`, absolute `worktree`, owned `branch`, `base_sha`. A provisional client ID is insufficient: leave creation unknown and use identity recovery. Worker identity, branch and checkout cannot be reused by another ticket. Registration's initial report is the normal task result, before a bound implementation packet exists.
+
+## Consume a worker report and decide
+
+Workers use `report` as described in [worker-events.md](worker-events.md). The coordinator supplies:
+
+```json
+{"op":"consume","ticket":"11","event":"/absolute/generated-event.json","next":{"phase":"verifying","instruction":"Complete change X","content_ref":"reported-contents","evidence":"/absolute/acceptance.md"}}
+```
+
+Omit `next` to record the result without acceptance or a phase change. Include it after inspection: with `instruction` it prepares a command; without it, it advances a local decision. The receipt and resulting command/phase share one ledger revision. A failed decision leaves both unchanged. Identity/phase mismatch, sequence conflicts/gaps, changed evidence and pending uncertain dispatch block progress; inspect only the affected worker. Duplicates/stale events leave the ledger unchanged and do not clear existing pending actions. Do not manually reset receipts or skip sequences.
+
+`advance` uses the same decision fields independently after a report was consumed:
+
+| To phase | From / required facts |
+| --- | --- |
+| awaiting-integration | verifying; matching `content_ref`, inspected `evidence`, current `completion_record` file |
+| confirming | delivering; matching `content_ref`, inspected `evidence`; reported candidate and target must match the grant |
+| cleanup | confirming; `quiescent: true`, `evidence`, and `delivery` containing exact `target`, accepted `content_ref`, actual `merge_ref`, `pr`, `closed: true` |
+| done | cleanup; all cleanup outcomes confirmed plus final `evidence` |
+
+Cleanup steps are `evidence-preserved`, `worktree-removed`, `local-branch-removed`, `remote-branch-removed`, `worker-archived`. Prepare/record each actual mutation, including unknown outcomes. Retention precedes deletion, archival follows resource cleanup. Live ownership checks remain in [parallel-delivery.md](parallel-delivery.md). Evidence files are assertions supplied by the coordinator: their existence/hash does not prove correctness or authority.
+
+## Capacity and recovery
+
+`capacity` takes `ticket`, `allowance`, optional `parked`, `quiescent: true` and `evidence`. It requires reconciled dispatch and enforces total reservations. Parking releases the ticket slot and requires allowance 0; dependency/conflict reservations remain. Resuming rechecks eligibility and limits. A changed allowance in a follow-up prepare also requires quiescence/evidence; tell the worker its new grant before further delegation.
+
+Parking an integration holder additionally requires acknowledged `grant_revoked: true` and verified `mutation_absent: true`, documented in evidence. It returns to awaiting integration; prior grants do not revive. Unknown pending mutations cannot be released. Successful verified delivery releases integration and worker capacity independently of remaining cleanup.
+
+Only the coordinator calls coordinate; workers own their report streams. The helper locks the ledger, rejects stale revisions, validates the whole operation before publishing a packet, and replaces state atomically. Inspect an existing lock's owner and interrupted operations before removing a stale lock. Never remove a live lock, patch around a blocker, or migrate a live ledger implicitly. Old/custom ledgers require explicit adoption and preservation of all uncertain actions.
+
+Exit 0 means a local operation succeeded (or an event was duplicate/stale), 2 means blocked/diverged, 3 means invalid/unreadable input. Always inspect the result. Missing permission, truth of evidence, external target freshness and runtime wake behavior cannot be established by this helper.
+
+For a meaningful observation, `observe` accepts `ticket`, `evidence`, and `facts` limited to `wait_cursor`, `usage`, `scope_notes`, `deferred_closeout`, `role_profile`. It can also update `continuation` using the same mode/evidence contract as initialization. Batch cursor-only updates with the next useful checkpoint; do not poll just to collect metrics. Observations cannot patch phases, requests or reservations.
+
+## Existing evidence utilities
+
+`manifest --root ROOT --files FILES.json` hashes an explicit nonempty list of relative regular-file paths. `verify --root ROOT --manifest MANIFEST.json` detects changed/missing bytes. `retain --root ROOT --manifest MANIFEST.json --destination DEST` verifies and copies outside the source tree without replacing different existing evidence. Check exit status and retain immutable revision-specific manifests. Include report assets, inspect retained artifacts and confirm the destination is outside every disposable worktree.
+
+Legacy-only `compare`, `classify-event` and `checkpoint` remain for adopted older workflows; use `--help` for flags. They do not enforce the managed lifecycle. `checkpoint` preserves unknown fields with recursive object merges, so it must never be used as an alternate managed-state mutation path.

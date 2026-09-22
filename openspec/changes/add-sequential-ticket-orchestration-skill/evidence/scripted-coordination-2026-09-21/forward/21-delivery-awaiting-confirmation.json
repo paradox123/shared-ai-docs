@@ -1,0 +1,10 @@
+{
+  "op": "consume",
+  "ticket": "A",
+  "event": "/private/tmp/scripted-flow-forward/state.json.reports/0106353d92094c1f83b03fb1d83529f8/000001.json",
+  "next": {
+    "phase": "confirming",
+    "content_ref": "C1",
+    "evidence": "/tmp/scripted-flow-forward/delivery-inspection.md"
+  }
+}

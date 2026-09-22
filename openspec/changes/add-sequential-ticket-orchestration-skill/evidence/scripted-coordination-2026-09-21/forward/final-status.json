@@ -1,0 +1,84 @@
+{
+  "status": "ready",
+  "revision": 19,
+  "target": "release/demo",
+  "available": {
+    "tickets": 1,
+    "subagents": 0
+  },
+  "integration": null,
+  "continuation": {
+    "mode": "active-wait"
+  },
+  "tickets": {
+    "A": {
+      "phase": "cleanup",
+      "next": "cleanup",
+      "slot": false,
+      "allowance": 0,
+      "worker": {
+        "thread_id": "synthetic-worker-A",
+        "host_id": "local",
+        "worktree": "/tmp/scripted-flow-forward/worktree-A",
+        "branch": "synthetic/A",
+        "base_sha": "T0"
+      },
+      "report": {
+        "status": "ready",
+        "content_ref": "C1",
+        "result_path": "/private/tmp/scripted-flow-forward/state.json.reports/0106353d92094c1f83b03fb1d83529f8/000001-result.md",
+        "target_ref": "T2",
+        "event_seq": 1
+      },
+      "receipt": {
+        "path": "/private/tmp/scripted-flow-forward/state.json.reports/0106353d92094c1f83b03fb1d83529f8/000001.json",
+        "sha256": "fc848448405f54cb63157c93c82742f43da078e02f246eeffd56f4a668a25034",
+        "size": 486
+      },
+      "pending": null,
+      "acceptance": {
+        "content_ref": "C1",
+        "evidence": {
+          "path": "/tmp/scripted-flow-forward/integration-final-inspection.md",
+          "sha256": "6c6f76ac28ec6d0a805b24905f665728d0a25ac4b49540f5b2cbb2cad9e6f4ad",
+          "size": 265
+        },
+        "target_ref": "T2"
+      },
+      "completion_record": {
+        "path": "/tmp/scripted-flow-forward/completion-C1.md",
+        "sha256": "1ddbd1361b57e524fef1d402ee1a71b1995c1237433735d47be37afccd7f2cca",
+        "size": 267
+      },
+      "delivery": {
+        "target": "release/demo",
+        "content_ref": "C1",
+        "merge_ref": "M1",
+        "pr": "synthetic:fixture-A",
+        "closed": true,
+        "evidence": {
+          "path": "/tmp/scripted-flow-forward/delivery-confirmation.md",
+          "sha256": "293c8fd572f955d6388242892d0168f587695d1fe71a5e27464b9903fe4a0726",
+          "size": 218
+        }
+      },
+      "request_id": "0106353d92094c1f83b03fb1d83529f8",
+      "packet": "/private/tmp/scripted-flow-forward/state.json.commands/0106353d92094c1f83b03fb1d83529f8.json"
+    },
+    "B": {
+      "phase": "registering",
+      "next": "reconcile-dispatch",
+      "slot": true,
+      "allowance": 1,
+      "worker": null,
+      "report": null,
+      "receipt": null,
+      "pending": {
+        "request_id": "7dade962f6844a32afa34f1c809d2300",
+        "outcome": "prepared"
+      },
+      "request_id": "7dade962f6844a32afa34f1c809d2300",
+      "packet": "/private/tmp/scripted-flow-forward/state.json.commands/7dade962f6844a32afa34f1c809d2300.json"
+    }
+  }
+}

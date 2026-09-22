@@ -104,7 +104,7 @@ The skill SHALL use bounded context packets for workers and independent reviewer
 
 #### Scenario: Unchanged worker snapshot
 - **WHEN** only a wait cursor or observation timestamp changes
-- **THEN** the coordinator saves the cursor and continues a bounded wait without redundant messages or file reads
+- **THEN** the coordinator checkpoints the cursor with the next required state write and returns to event-driven idle when a usable wake/recovery path exists, without another model-driven polling cycle, redundant messages or file reads
 
 #### Scenario: Scoped reviewer context
 - **WHEN** a reviewer is launched
@@ -135,3 +135,74 @@ Ticket delivery and merge evidence SHALL be recorded in the ledger immediately. 
 #### Scenario: Activation and final repair
 - **WHEN** a ticket includes productive activation or a final behavioral repair
 - **THEN** its own activation proof remains required and the final suite covers the repaired contents before delivery; a changed target triggers relevant integration checks
+
+### Requirement: Worker events with recoverable idle
+Worker reports SHALL be the preferred continuation path for decision-relevant phase transitions and blockers. Assignments SHALL identify the coordinator, batch, ticket and request. Workers SHALL persist compact, revision-bound results before notifying and SHALL NOT send periodic progress callbacks or wait for transport acknowledgements. The coordinator SHALL process actionable events, fill eligible slots and end its turn when only waiting remains and a usable wake/recovery path exists. Callback arrival SHALL NOT itself prove acceptance, delivery or quiescence.
+
+#### Scenario: Ready event wakes the coordinator
+- **WHEN** a worker reports readiness for its assigned phase and callback continuation is available
+- **THEN** the coordinator inspects the referenced evidence, advances only the justified phase and ends its turn again when there is no actionable work
+
+#### Scenario: Callback unavailable or worker crashes
+- **WHEN** callbacks are denied, missing, unverified or never emitted after a worker failure
+- **THEN** the coordinator uses the recorded recovery path and preserves worker identity and pending actions; it does not create a replacement, claim successful wake delivery or leave an unattended batch without a continuation path
+
+#### Scenario: No background recovery permitted
+- **WHEN** callback wake behavior is unverified and the user prohibits scheduling
+- **THEN** the coordinator uses bounded active waits as an explicit fallback when continued execution is required, rather than creating an automation or promising automatic continuation after ending its turn
+
+### Requirement: Correlated event consumption
+Events SHALL carry batch, ticket, worker/host, request ID, positive sequence, phase, outcome and a durable result path. Ready events SHALL bind their result to a content revision. Only the coordinator SHALL record consumption in the shared ledger. An event SHALL be classified against the current assignment and receipt before any follow-up action. Event receipt and concrete pending action SHALL be checkpointed together before dispatch; uncertain dispatch SHALL be reconciled even if the event is later duplicated.
+
+#### Scenario: Duplicate or delayed event
+- **WHEN** the same event arrives twice or an event belongs to an older request or sequence
+- **THEN** the coordinator does not redispatch or move the current phase backwards; unresolved pending actions remain subject to reconciliation
+
+#### Scenario: Conflicting or out-of-order event
+- **WHEN** an event has a foreign assignment, reuses a sequence with different content, or skips an unobserved sequence
+- **THEN** the helper returns a bounded blocker and the coordinator reconciles the affected worker before recording a new receipt or taking dependent action
+
+### Requirement: Early evidence and bounded expansion
+Large repetitive work SHALL establish a few representative end-to-end results before broad replication. Worker packets SHALL include a bounded subagent allowance and result format. The coordinator SHALL account for active subagent allowances across tickets separately from ticket slots; mandatory reviews SHALL remain required. Repeated findings, growing helper work or expanding delegation SHALL trigger a bounded method reassessment without silently adding scope or lowering acceptance.
+
+#### Scenario: Repeated incomplete inventory
+- **WHEN** early examples reveal generic or unsupported mappings
+- **THEN** the worker corrects the method before generating the entire inventory, without treating the sample as acceptance of the whole ticket
+
+#### Scenario: Same failure recurs
+- **WHEN** a repaired finding recurs or a helper requires repeated rebuilding
+- **THEN** the same worker reports cause, affected scope and a bounded next method; unchanged accepted evidence is reused under the code-review contract
+
+#### Scenario: Milestone consumption
+- **WHEN** a phase completes and trustworthy usage counters are available
+- **THEN** the coordinator records available token categories and review/repair rounds with attribution limits; unavailable counters are marked unavailable and do not trigger new polling or transcript discovery
+
+### Requirement: Managed local coordination operations
+The CLI SHALL prepare durable correlated command packets, record confirmed/uncertain dispatch outcomes, create immutable sequenced worker reports, consume events with any next decision atomically, and return compact actionable context. It SHALL enforce allowed lifecycle transitions, declared dependencies/conflicts, ticket and nested-agent reservations, and exclusive integration. It SHALL preserve evidence-bound coordinator decisions and SHALL NOT perform external task/Git/scheduler operations or infer acceptance from readiness.
+
+#### Scenario: Uncertain dispatch
+- **WHEN** a prepared command's dispatch is unknown or its outcome was not recorded
+- **THEN** it remains pending with the same request identity; another prepare is blocked and status requests reconciliation
+
+#### Scenario: Event and follow-up decision
+- **WHEN** a valid event is consumed together with a justified next command
+- **THEN** its immutable receipt and next pending command are recorded in one revision; redelivery does not prepare another command
+
+#### Scenario: Over-capacity or illegal transition
+- **WHEN** an operation exceeds ticket/subagent limits, conflicts with an existing reservation, or skips required lifecycle evidence
+- **THEN** the operation fails without changing the ledger or publishing a dispatchable command
+
+#### Scenario: Durable worker result
+- **WHEN** a worker creates a report from its command packet
+- **THEN** assignment fields and the next sequence are supplied mechanically and a hash-bound result is persisted before callback text is returned
+
+#### Scenario: Legacy caller attempts managed mutation
+- **WHEN** the generic checkpoint command is used on a managed coordination ledger
+- **THEN** it rejects the mutation and leaves the ledger unchanged; old ledger commands remain compatible
+
+### Requirement: Reduced instruction surface
+The skill SHALL route routine bookkeeping through cohesive CLI operations and remove the text recipes they replace. Its entrypoint SHALL retain intent, authority, evidence decisions and conditional links; exceptional recovery and cleanup detail SHALL be loaded only when relevant. Script code and tests SHALL own mechanical formats and invariants without duplicating them as long model instructions.
+
+#### Scenario: Routine phase report
+- **WHEN** the coordinator resumes for one ordinary worker report
+- **THEN** compact status and the relevant evidence suffice for the next decision without reconstructing IDs, sequence arithmetic, receipt hashing and reservation bookkeeping manually

@@ -1,0 +1,9 @@
+{
+  "op": "prepare",
+  "ticket": "A",
+  "phase": "integrating",
+  "content_ref": "C1",
+  "target_ref": "T2",
+  "evidence": "/tmp/scripted-flow-forward/remote-target-moved.md",
+  "instruction": "Remote target advanced to T2. Revalidate C1 with T2 while retaining integration reservation. Return actual candidate/tested target and combined expected/actual checks. Substantive changes require renewed acceptance. Do not merge."
+}

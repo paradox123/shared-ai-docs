@@ -1,0 +1,14 @@
+{
+  "op": "record",
+  "ticket": "A",
+  "request_id": "c3e797b56f2c4c17b775f9956d935a64",
+  "outcome": "confirmed",
+  "evidence": "/tmp/scripted-flow-forward/registration.md",
+  "worker": {
+    "thread_id": "synthetic-worker-A",
+    "host_id": "local",
+    "worktree": "/tmp/scripted-flow-forward/worktree-A",
+    "branch": "synthetic/A",
+    "base_sha": "T0"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "op": "advance",
+  "ticket": "A",
+  "phase": "cleanup",
+  "quiescent": true,
+  "evidence": "/tmp/scripted-flow-forward/delivery-confirmation.md",
+  "delivery": {
+    "target": "release/demo",
+    "content_ref": "C1",
+    "merge_ref": "M1",
+    "pr": "synthetic:fixture-A",
+    "closed": true
+  }
+}

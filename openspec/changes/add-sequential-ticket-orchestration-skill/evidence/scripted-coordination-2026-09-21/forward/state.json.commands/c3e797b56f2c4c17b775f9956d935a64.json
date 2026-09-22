@@ -1,0 +1,18 @@
+{
+  "batch_id": "synthetic-forward",
+  "ticket": "A",
+  "request_id": "c3e797b56f2c4c17b775f9956d935a64",
+  "phase": "registering",
+  "target": "release/demo",
+  "repository": "/tmp/scripted-flow-forward/repository",
+  "authority": "synthetic local test only; no external actions",
+  "coordinator": {
+    "thread_id": "synthetic-coordinator",
+    "host_id": "local"
+  },
+  "allowance": 1,
+  "instruction": "Synthetic A fixture. Scope /tmp/scripted-flow-forward only. Target release/demo, base T0, owned synthetic branch/worktree. Implement acceptance criterion: operation A returns expected result. Original authority local CLI simulation only. No tools/tasks/network/subagents. Runtime profile not exercised.",
+  "actor": "coordinator",
+  "report_dir": "/private/tmp/scripted-flow-forward/state.json.reports/c3e797b56f2c4c17b775f9956d935a64",
+  "message": "{\"batch_id\": \"synthetic-forward\", \"ticket\": \"A\", \"request_id\": \"c3e797b56f2c4c17b775f9956d935a64\", \"phase\": \"registering\", \"target\": \"release/demo\", \"repository\": \"/tmp/scripted-flow-forward/repository\", \"authority\": \"synthetic local test only; no external actions\", \"coordinator\": {\"thread_id\": \"synthetic-coordinator\", \"host_id\": \"local\"}, \"allowance\": 1, \"actor\": \"coordinator\"}\n\nSynthetic A fixture. Scope /tmp/scripted-flow-forward only. Target release/demo, base T0, owned synthetic branch/worktree. Implement acceptance criterion: operation A returns expected result. Original authority local CLI simulation only. No tools/tasks/network/subagents. Runtime profile not exercised.\n\nDu bist der Worker für dieses Ticket. Nutze den bereitgestellten isolierten Worktree, einen eigenen Arbeitsbranch und den ausdrücklich genannten Zielbranch als Basis. Prüfe die aktuelle Remote-Basis und melde echte Task-ID, Host, Worktree, Branch und Basis-SHA im normalen Abschlussbericht. Noch keine Implementierung vor dem zugeordneten Folgeauftrag. Starte keine weiteren Ticket-Tasks."
+}

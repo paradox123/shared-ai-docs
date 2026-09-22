@@ -1,0 +1,11 @@
+{
+  "op": "consume",
+  "ticket": "A",
+  "event": "/private/tmp/scripted-flow-forward/state.json.reports/b9732fd36ea141df9a87df13793457bd/000001.json",
+  "next": {
+    "phase": "awaiting-integration",
+    "content_ref": "C1",
+    "evidence": "/tmp/scripted-flow-forward/technical-acceptance.md",
+    "completion_record": "/tmp/scripted-flow-forward/completion-C1.md"
+  }
+}

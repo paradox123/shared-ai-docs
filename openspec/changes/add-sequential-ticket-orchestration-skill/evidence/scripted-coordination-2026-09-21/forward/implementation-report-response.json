@@ -1,0 +1,9 @@
+{
+  "status": "ready",
+  "event": "/private/tmp/scripted-flow-forward/state.json.reports/86a65f7be24d4635b28dfb0bbc8f456c/000001.json",
+  "callback": {
+    "thread_id": "synthetic-coordinator",
+    "host_id": "local",
+    "prompt": "Worker result available: /private/tmp/scripted-flow-forward/state.json.reports/86a65f7be24d4635b28dfb0bbc8f456c/000001.json"
+  }
+}

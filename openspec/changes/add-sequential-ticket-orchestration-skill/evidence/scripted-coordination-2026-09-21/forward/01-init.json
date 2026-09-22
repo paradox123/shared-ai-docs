@@ -1,0 +1,1 @@
+{"op":"init","batch":{"id":"synthetic-forward","repository":"/tmp/scripted-flow-forward/repository","target":"release/demo","authority":"synthetic local test only; no external actions","coordinator":{"thread_id":"synthetic-coordinator","host_id":"local"}},"tickets":{"A":{},"B":{"depends_on":["A"]}},"limits":{"tickets":2,"subagents":1},"continuation":{"mode":"active-wait"}}

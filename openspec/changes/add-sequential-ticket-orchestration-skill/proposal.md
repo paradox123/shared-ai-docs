@@ -12,6 +12,8 @@ Codex task `01a0a8fd-8d65-74b1-aae1-95bcd191fab3` repeatedly stalled because asy
 - Update reusable worker, verification, integration and heartbeat prompts. Retain the read-only metadata helper and its CLI behavior tests.
 - Apply the requested token-saving workflow: critical verification before final independent review, scoped follow-ups with review receipts, compact context and a role-specific model profile, local mechanical helpers, consolidated closeout documentation and final-suite timing after behavioral repairs. Permit owned-branch local checkpoint commits before acceptance.
 - Centralize structural review in code-review, called after critical requirements verification by a shared change-accepted entrypoint. Migrate direct implementation, orchestration, archive entrypoints and repository guidance to references instead of duplicated review instructions.
+- Replace routine coordinator polling with correlated worker events and recoverable idle turns. Add local duplicate/stale-event classification, representative early evidence, bounded subagent allowances and milestone-only consumption reporting; retain acceptance, delivery and runtime authority boundaries.
+- Move routine event, command, lifecycle and capacity bookkeeping into cohesive managed CLI operations with generated phase messages, and replace the corresponding text recipes with a smaller conditional instruction surface. Preserve legacy helpers and require explicit adoption for existing batches.
 
 ## Capabilities
 

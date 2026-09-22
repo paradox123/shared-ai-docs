@@ -1,0 +1,7 @@
+{
+  "op": "prepare",
+  "ticket": "B",
+  "phase": "registering",
+  "allowance": 1,
+  "instruction": "Synthetic eligibility proof only: A delivered, begin B from release/demo at M1. No actual create_thread. Original scope local CLI test only."
+}

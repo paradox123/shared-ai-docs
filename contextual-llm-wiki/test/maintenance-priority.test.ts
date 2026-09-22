@@ -62,6 +62,74 @@ function withFacts(body: any) {
 }
 
 test(
+  "bounded packages use configured parallelism without exceeding their extraction limit",
+  { timeout: 30000 },
+  async () => {
+    let active = 0;
+    let peak = 0;
+    const f = await fixture(
+      async (body) => {
+        if (!body.tools) return withFacts(body);
+        active++;
+        peak = Math.max(peak, active);
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        active--;
+        return withFacts(body);
+      },
+      { timeoutMs: 20000 },
+    );
+    Object.assign(f.config, {
+      concurrency: 3,
+      maintenance: { maxExtractionSources: 4 },
+    });
+    await f.saveConfig();
+    for (let i = 0; i < 6; i++)
+      await writeFile(
+        path.join(f.dir, `beta/old${i}.md`),
+        "# Kontrollseite\nUnabhängige Kontrollseite.\n",
+      );
+    try {
+      const result = await f.run("maintain");
+      assert.equal(
+        peak,
+        3,
+        "large inventories must use the configured model concurrency",
+      );
+      assert.equal(
+        f.calls.filter((b) => b.tools).length,
+        4,
+        "parallel dispatch must not overshoot the package limit",
+      );
+      assert.equal(result.extractions.saved, 4);
+      assert.equal(result.maintenance.initial.unextracted, 4);
+      assert.equal(
+        result.ok,
+        false,
+        "partial progress must not certify a complete wiki",
+      );
+      const before = f.calls.length;
+      const resumed = await f.run("maintain");
+      assert.equal(f.calls.slice(before).filter((b) => b.tools).length, 4);
+      assert.equal(
+        resumed.maintenance.initial.unextracted,
+        0,
+        "all parallel successes survive restart",
+      );
+      assert.equal(resumed.ok, true, JSON.stringify(resumed));
+      const completeCalls = f.calls.length;
+      assert.equal((await f.run("maintain")).noop, true);
+      assert.equal(
+        f.calls.length,
+        completeCalls,
+        "unchanged completed wiki requires no model work",
+      );
+    } finally {
+      await f.close();
+    }
+  },
+);
+
+test(
   "bounded inventory preserves initial age and publishes model-processed daily evidence before undiscovered backlog",
   { timeout: 45000 },
   async () => {
@@ -102,8 +170,8 @@ test(
         .filter((b) => b.tools)
         .map((b) => JSON.stringify(b));
       assert.ok(
-        extracted[0].includes("Alpha verlangt vier"),
-        "new daily source first",
+        extracted.some((request) => request.includes("Alpha verlangt vier")),
+        "new daily source receives a package slot",
       );
       assert.equal(
         second.maintenance.daily.pending,
@@ -131,7 +199,7 @@ test(
       );
       assert.equal(second.maintenance.capacity.dailyOverCapacity, true);
       assert.ok(
-        extracted[1].includes("Kontrollseite"),
+        extracted.some((request) => request.includes("Kontrollseite")),
         "reserved backlog slot survives configured concurrency four",
       );
       assert.equal(query.evidence[0].kind, "source-summary");
@@ -151,7 +219,9 @@ test(
       const third = await f.run("maintain");
       const thirdRequests = f.calls.slice(thirdBefore).filter((b) => b.tools);
       assert.ok(
-        JSON.stringify(thirdRequests[0]).includes("Beta verlangt vier"),
+        thirdRequests.some((request) =>
+          JSON.stringify(request).includes("Beta verlangt vier"),
+        ),
         "changed uncompiled initial source now has daily priority",
       );
       await writeFile(

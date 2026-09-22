@@ -1,0 +1,5 @@
+{
+  "op": "consume",
+  "ticket": "A",
+  "event": "/private/tmp/scripted-flow-forward/state.json.reports/9bf2f411891e47498df2cb48e6d4db80/000001.json"
+}

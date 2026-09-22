@@ -1,0 +1,7 @@
+{
+  "op": "record",
+  "ticket": "A",
+  "request_id": "4b8bc134bdf64bf3a82b38520131470c",
+  "outcome": "confirmed",
+  "evidence": "/tmp/scripted-flow-forward/revalidate-send.md"
+}

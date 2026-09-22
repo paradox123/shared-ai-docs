@@ -1,0 +1,11 @@
+{
+  "op": "consume",
+  "ticket": "A",
+  "event": "/private/tmp/scripted-flow-forward/state.json.reports/86a65f7be24d4635b28dfb0bbc8f456c/000001.json",
+  "next": {
+    "phase": "verifying",
+    "instruction": "Do not dispatch a duplicate command; this tests replay protection.",
+    "content_ref": "C1",
+    "evidence": "/tmp/scripted-flow-forward/implementation-acceptance.md"
+  }
+}

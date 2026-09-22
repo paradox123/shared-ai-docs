@@ -1,0 +1,23 @@
+{
+  "batch_id": "synthetic-forward",
+  "ticket": "A",
+  "request_id": "86a65f7be24d4635b28dfb0bbc8f456c",
+  "phase": "implementing",
+  "target": "release/demo",
+  "repository": "/tmp/scripted-flow-forward/repository",
+  "authority": "synthetic local test only; no external actions",
+  "coordinator": {
+    "thread_id": "synthetic-coordinator",
+    "host_id": "local"
+  },
+  "allowance": 1,
+  "instruction": "Implement synthetic criterion A; return measured expected/actual result with current contents. No real code edits.",
+  "actor": "worker",
+  "report_dir": "/private/tmp/scripted-flow-forward/state.json.reports/86a65f7be24d4635b28dfb0bbc8f456c",
+  "thread_id": "synthetic-worker-A",
+  "host_id": "local",
+  "worktree": "/tmp/scripted-flow-forward/worktree-A",
+  "branch": "synthetic/A",
+  "base_sha": "T0",
+  "message": "{\"batch_id\": \"synthetic-forward\", \"ticket\": \"A\", \"request_id\": \"86a65f7be24d4635b28dfb0bbc8f456c\", \"phase\": \"implementing\", \"target\": \"release/demo\", \"repository\": \"/tmp/scripted-flow-forward/repository\", \"authority\": \"synthetic local test only; no external actions\", \"coordinator\": {\"thread_id\": \"synthetic-coordinator\", \"host_id\": \"local\"}, \"allowance\": 1, \"actor\": \"worker\", \"thread_id\": \"synthetic-worker-A\", \"host_id\": \"local\", \"worktree\": \"/tmp/scripted-flow-forward/worktree-A\", \"branch\": \"synthetic/A\", \"base_sha\": \"T0\"}\n\nImplement synthetic criterion A; return measured expected/actual result with current contents. No real code edits.\n\nNutze den Implement-Skill unter /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/implement/SKILL.md. Lies Ticket, Repo-Regeln und relevante Specs. Bei großer gleichförmiger Arbeit prüfe zunächst repräsentative vollständige Fälle. Liefere gemessene Soll/Ist-Nachweise, Standidentität und Grenzen. Lokale Zwischencommits sind erlaubt. Noch kein Push, Merge, Ticketabschluss oder Archivieren; technischer Abschluss folgt durch einen eigenen change-accepted-Auftrag.\n\nErgebnismeldung: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/worker-events.md. Nutze das Auftragspaket /private/tmp/scripted-flow-forward/state.json.commands/86a65f7be24d4635b28dfb0bbc8f456c.json; reserviertes Unteragentenlimit einschließlich verschachtelter Agenten: 1. Keine periodischen Statusmeldungen. Nach ready keine weiteren Kandidatenänderungen bis zum Folgeauftrag."
+}

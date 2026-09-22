@@ -190,6 +190,18 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
     const extracted = new Map<string, any>();
     let requests = 0;
     const maxSources = config.maintenance?.maxExtractionSources || 20;
+    const sourceOrder = await inventory.order(maxSources);
+    // Reserve the package before asynchronous cache reads can reorder arrivals.
+    // Cache misses for previously extracted sources may use only unreserved slots.
+    const reserved = new Set(
+      sourceOrder
+        .filter(
+          (id) =>
+            inventory.value.sources[id].extractedHash !== sources[id].hash,
+        )
+        .slice(0, maxSources),
+    );
+    let repairSlots = maxSources - reserved.size;
     const runExtraction = async (
       request: any,
       generate: () => Promise<string>,
@@ -198,12 +210,20 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       const raw = await cache.run(
         request,
         async () => {
-          if (requests >= maxSources)
+          const priority = reserved.has(request.sourceFile);
+          const pending =
+            inventory.value.sources[request.sourceFile].extractedHash !==
+            sources[request.sourceFile].hash;
+          if (
+            requests >= maxSources ||
+            (!priority && (pending || repairSlots <= 0))
+          )
             throw Object.assign(Error("Extraction package complete"), {
               packageBoundary: true,
               sharedExtractionCache: true,
             });
           requests++;
+          if (!priority) repairSlots--;
           return generate();
         },
         validate,
@@ -221,7 +241,6 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       }
       return raw;
     };
-    const sourceOrder = await inventory.order(maxSources);
     progress.maintenance = inventory.report(state);
     progress.notify();
     const wiki = createWiki({ root });
@@ -231,10 +250,7 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
         embeddings: false,
         extractionCache: runExtraction,
         sourceOrder,
-        concurrency:
-          Object.keys(sources).length > maxSources
-            ? 1
-            : config.concurrency || 2,
+        concurrency: config.concurrency || 2,
         onBoundedFailure: (failure) => failures.push(failure),
       });
     } catch (error: any) {

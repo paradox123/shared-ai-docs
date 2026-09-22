@@ -22,7 +22,8 @@ LLMWIKI_PROVIDER=codex-agent python3 scripts/run-maintenance.py \
   --artifacts "$WIKI_RUN_DIR" \
   --lock-file "$PWD/.local/operations-runs/maintenance.lock" \
   --qmd "$(command -v qmd)" \
-  --reconcile "$PWD/../../danielsvault-rag/scripts/sync-qmd-collections.py"
+  --reconcile "$PWD/../../danielsvault-rag/scripts/sync-qmd-collections.py" \
+  --budget-seconds 10800 --termination-grace-seconds 10
 ```
 
 Vorher müssen Runtime-Binaries, Provider-Anmeldung, QMD-Datenbank und deren Verzeichnis verfügbar und schreibbar sein. Fehlende Mac-Verfügbarkeit, Anmeldung, Berechtigungen oder Runtime werden als Blocker gemeldet. Der Tagesjob installiert nichts und repariert keine TCC-Einstellungen.
@@ -70,7 +71,7 @@ Der Report trennt einen bereits abgeschlossenen inneren Wiki-Lauf (`wiki.ok`, wi
 
 `run-maintenance.py` startet den öffentlichen Helper genau einmal und bewahrt `helper.stdout`, `helper.stderr`, `helper.exitcode`, `process.json` und `observation.json` unter dem zuerst ausgegebenen Artefaktpfad. Die eigentlichen Helperdateien liegen darunter in `maintenance/`. Direkte manuelle Helperaufrufe bleiben unterstützt; die tägliche Automation verwendet den protokollierten Runner.
 
-Produktionsgrenzen: 1200 Sekunden gesamter Helper, 10 Sekunden Beendigungsfrist, 30 Sekunden Beobachtungsmarge (1240 Sekunden), einmalige Diagnose nach 180 Sekunden ohne dauerhaften Fortschritt. Die äußere Notbeendigung beansprucht höchstens weitere 11 Sekunden und betrifft nur den selbst gestarteten, noch nicht abgeholten Helper; dessen bestehender Guardian behält die Kindprozesssicherung. Höchstens 22 Beobachtungen desselben Handles mit je maximal 60 Sekunden, kein Neustart des Zählers nach Kontextwechsel. Das bestehende Paketmaximum ist 20 neue Extraktionen, die produktive Parallelität bleibt 8. Diese Sicherheitsgrenzen versprechen keine Tageskapazität. Ein kontrollierter Aktivierungslauf darf ein ausdrücklich protokolliertes kürzeres Zeitbudget verwenden.
+Produktionsgrenzen seit 22.09.2026: 10800 Sekunden gesamter Helper, 10 Sekunden Beendigungsfrist, 30 Sekunden Beobachtungsmarge (10840 Sekunden), einmalige Diagnose nach 180 Sekunden ohne dauerhaften Fortschritt. Die äußere Notbeendigung beansprucht höchstens weitere 11 Sekunden und betrifft nur den selbst gestarteten, noch nicht abgeholten Helper; dessen bestehender Guardian behält die Kindprozesssicherung. Denselben Handle mit je maximal 60 Sekunden Wartezeit bis zum Abschluss oder zur absoluten Zeitgrenze beobachten; die Anzahl der Abfragen beendet den Lauf nicht vorzeitig. Die produktive Konfiguration erlaubt 2500 neue Extraktionen und tatsächlich acht parallele Anfragen auch bei großem Rückstand. Diese Sicherheitsgrenzen versprechen keine Tageskapazität. Ein kontrollierter Aktivierungslauf darf ein ausdrücklich protokolliertes kürzeres Zeitbudget verwenden.
 
 Fehlt danach der Abschlussbericht, folgt genau eine begrenzte Diagnose aus `process.json`, `diagnosis.json`, Fortschritt und höchstens 4000 Zeichen Fehlerausgabe. Der Runner liefert Nicht-Erfolg; der Agent hält Prozesszustand und unbekannte oder konkrete Restarbeit fest und beendet die Beobachtung. Lebende/ungeklärte Besitzer blockieren einen Folgestart. Niemals einen zweiten Collector zum Wiedergewinnen der Ausgabe starten, fremde Prozesse beenden oder Locks pauschal entfernen. Vollerfolg verlangt Runner- und Helperexit 0, `ok:true`, vollständige Kontexte und keine Restarbeit.
 

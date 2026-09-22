@@ -30,3 +30,22 @@
 - [x] 7.5 Specify and implement the common workflow and central code-review definition; migrate conflicting entrypoints/templates and repository guidance.
 - [x] 7.6 Initially verify direct, standalone-review and orchestrated completion decisions, contextual trigger recognition, evidence reuse and affected revalidation through isolated scenarios and source/link checks.
 - [x] 7.7 After contextual acceptance, run change-accepted for this migration, including critical verification and the central code-review workflow; preserve initial checks without claiming full technical completion early.
+
+## 8. Worker-driven coordination (2026-09-21)
+- [x] 8.1 Use the 2026-09-20 batch analysis to agree the bounded extension and update requirements in this existing change.
+- [x] 8.2 Replace polling defaults and conflicting templates with worker events, durable receipts and explicit recovery modes.
+- [x] 8.3 Add public-CLI event classification through red-green slices; preserve existing helper behavior.
+- [x] 8.4 Integrate early evidence, bounded delegation, scoped repairs and milestone-only usage reporting.
+- [x] 8.5 Validate helpers, OpenSpec, skill links and instruction decisions with isolated forward scenarios; record live-wakeup limitations.
+- [ ] 8.6 After acceptance of the implemented extension, apply change-accepted for technical closeout; previous completion evidence covers only the earlier revisions.
+
+Initial verification for section 8: [event-coordination-verification.md](event-coordination-verification.md).
+
+## 9. Scripted coordination and shorter instructions
+- [x] 9.1 Confirm branch/target and define managed CLI contract in scripted-coordination-design.md.
+- [x] 9.2 Implement initialization, command preparation/outcome and compact status through public-CLI red-green slices.
+- [x] 9.3 Implement durable worker reports, atomic event decisions, phase and capacity enforcement through public-CLI red-green slices.
+- [x] 9.4 Replace superseded instructions and templates with the tested interface and conditional references.
+- [x] 9.5 Verify lifecycle/recovery scenarios, regressions, source identity, instruction reduction and skill coherence.
+
+Section 9 evidence and current content identity: [scripted-coordination-verification.md](scripted-coordination-verification.md).

@@ -24,6 +24,12 @@ The automation MUST observe its owned run for a bounded period and use durable p
 - **AND** incomplete or incompatible results are not treated as reusable successes
 - **AND** the report distinguishes source-index completion, ongoing updates and initial-import backlog
 
+#### Scenario: Bounded packages retain configured processing capacity
+- **WHEN** the source inventory exceeds the finite extraction package limit
+- **THEN** maintenance uses the configured model concurrency instead of serializing the entire package
+- **AND** admission preserves daily priority and the reserved initial-import opportunity without exceeding the package limit
+- **AND** successful concurrent extractions remain reusable across runs until full synthesis and a subsequent no-op complete
+
 #### Scenario: Validate extraction compatibility independently of publication
 - **WHEN** a fresh process considers a previously saved extraction
 - **THEN** it checks the source identity and content, resolved model/provider contract, actual prompt and tool schema including supplied context, and installed compiler contract

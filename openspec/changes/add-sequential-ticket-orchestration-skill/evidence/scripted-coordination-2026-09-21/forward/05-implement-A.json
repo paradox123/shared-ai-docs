@@ -1,0 +1,6 @@
+{
+  "op": "prepare",
+  "ticket": "A",
+  "phase": "implementing",
+  "instruction": "Implement synthetic criterion A; return measured expected/actual result with current contents. No real code edits."
+}

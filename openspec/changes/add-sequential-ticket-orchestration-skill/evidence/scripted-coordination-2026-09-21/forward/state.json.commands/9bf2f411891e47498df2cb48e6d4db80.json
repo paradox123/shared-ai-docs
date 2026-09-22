@@ -1,0 +1,24 @@
+{
+  "batch_id": "synthetic-forward",
+  "ticket": "A",
+  "request_id": "9bf2f411891e47498df2cb48e6d4db80",
+  "phase": "integrating",
+  "target": "release/demo",
+  "repository": "/tmp/scripted-flow-forward/repository",
+  "authority": "synthetic local test only; no external actions",
+  "coordinator": {
+    "thread_id": "synthetic-coordinator",
+    "host_id": "local"
+  },
+  "allowance": 1,
+  "instruction": "Prepare synthetic candidate C1 against T1 on release/demo; no merge grant. Provide candidate, tested target, required checks, and PR base/head fixture.",
+  "actor": "worker",
+  "report_dir": "/private/tmp/scripted-flow-forward/state.json.reports/9bf2f411891e47498df2cb48e6d4db80",
+  "thread_id": "synthetic-worker-A",
+  "host_id": "local",
+  "worktree": "/tmp/scripted-flow-forward/worktree-A",
+  "branch": "synthetic/A",
+  "base_sha": "T0",
+  "target_ref": "T1",
+  "message": "{\"batch_id\": \"synthetic-forward\", \"ticket\": \"A\", \"request_id\": \"9bf2f411891e47498df2cb48e6d4db80\", \"phase\": \"integrating\", \"target\": \"release/demo\", \"repository\": \"/tmp/scripted-flow-forward/repository\", \"authority\": \"synthetic local test only; no external actions\", \"coordinator\": {\"thread_id\": \"synthetic-coordinator\", \"host_id\": \"local\"}, \"allowance\": 1, \"actor\": \"worker\", \"thread_id\": \"synthetic-worker-A\", \"host_id\": \"local\", \"worktree\": \"/tmp/scripted-flow-forward/worktree-A\", \"branch\": \"synthetic/A\", \"base_sha\": \"T0\", \"target_ref\": \"T1\"}\n\nPrepare synthetic candidate C1 against T1 on release/demo; no merge grant. Provide candidate, tested target, required checks, and PR base/head fixture.\n\nDu hältst die Integrationsreservierung. Prüfe den aktuellen Remote-Zielstand, integriere ihn ohne Force-Push, führe relevante kombinierte Checks und erforderliche Pre-Merge-Dokumentation aus. Commit/Push und PR-Vorbereitung sind im ursprünglichen Mandat erlaubt, soweit dort autorisiert. Prüfe die exakte PR-Basis. Melde Kandidaten-Head, tatsächlich geprüften Ziel-SHA, Nachweise und Änderungen gegenüber der Abnahme. Noch kein Merge.\n\nErgebnismeldung: /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/orchestrate-ticket-batch/references/worker-events.md. Nutze das Auftragspaket /private/tmp/scripted-flow-forward/state.json.commands/9bf2f411891e47498df2cb48e6d4db80.json; reserviertes Unteragentenlimit einschließlich verschachtelter Agenten: 1. Keine periodischen Statusmeldungen. Nach ready keine weiteren Kandidatenänderungen bis zum Folgeauftrag."
+}

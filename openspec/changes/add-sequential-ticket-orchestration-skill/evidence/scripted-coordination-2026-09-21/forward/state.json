@@ -1,0 +1,217 @@
+{
+  "schema_version": 2,
+  "revision": 19,
+  "batch": {
+    "id": "synthetic-forward",
+    "repository": "/tmp/scripted-flow-forward/repository",
+    "target": "release/demo",
+    "authority": "synthetic local test only; no external actions",
+    "coordinator": {
+      "thread_id": "synthetic-coordinator",
+      "host_id": "local"
+    }
+  },
+  "tickets": {
+    "A": {
+      "phase": "cleanup",
+      "slot": false,
+      "allowance": 0,
+      "worker": {
+        "thread_id": "synthetic-worker-A",
+        "host_id": "local",
+        "worktree": "/tmp/scripted-flow-forward/worktree-A",
+        "branch": "synthetic/A",
+        "base_sha": "T0"
+      },
+      "request": {
+        "id": "0106353d92094c1f83b03fb1d83529f8",
+        "packet": "/private/tmp/scripted-flow-forward/state.json.commands/0106353d92094c1f83b03fb1d83529f8.json",
+        "phase": "delivering",
+        "sha256": "2592f0718dbe79368f0f4a2c3deb68c97047bd593af8af6484ef2b7e22ce0c54",
+        "dispatch": {
+          "outcome": "confirmed",
+          "evidence": {
+            "path": "/tmp/scripted-flow-forward/grant-send.md",
+            "sha256": "eb182f951e0d418bdae1caabe887fb4c0c9c6fff2844810f7990fbaecf241b61",
+            "size": 87
+          }
+        }
+      },
+      "receipt": {
+        "path": "/private/tmp/scripted-flow-forward/state.json.reports/0106353d92094c1f83b03fb1d83529f8/000001.json",
+        "sha256": "fc848448405f54cb63157c93c82742f43da078e02f246eeffd56f4a668a25034",
+        "size": 486
+      },
+      "pending": null,
+      "history": [
+        {
+          "request": {
+            "id": "c3e797b56f2c4c17b775f9956d935a64",
+            "packet": "/private/tmp/scripted-flow-forward/state.json.commands/c3e797b56f2c4c17b775f9956d935a64.json",
+            "phase": "registering",
+            "sha256": "9883f53d6356b6c696f2e03b4899892f894e3bf57811e19caef080617f5bb08e",
+            "dispatch": {
+              "outcome": "confirmed",
+              "evidence": {
+                "path": "/tmp/scripted-flow-forward/registration.md",
+                "sha256": "1cae6b052cfc8d5c2f887c6a5529fb8c6bc1918c74a9a9c5dd663f4dfceafcac",
+                "size": 211
+              }
+            }
+          },
+          "receipt": null
+        },
+        {
+          "request": {
+            "id": "86a65f7be24d4635b28dfb0bbc8f456c",
+            "packet": "/private/tmp/scripted-flow-forward/state.json.commands/86a65f7be24d4635b28dfb0bbc8f456c.json",
+            "phase": "implementing",
+            "sha256": "b0d57259e3bbbd904aeb0fe66ff3c2a9b2b812a3caa7e4226c8a0e8e0f7f81f3",
+            "dispatch": {
+              "outcome": "confirmed",
+              "evidence": {
+                "path": "/tmp/scripted-flow-forward/implement-send.md",
+                "sha256": "9b36b5119a25bdc383f0cd61c5b7faedc367f01caccdd8ec3e4b60108755d61e",
+                "size": 87
+              }
+            }
+          },
+          "receipt": {
+            "path": "/private/tmp/scripted-flow-forward/state.json.reports/86a65f7be24d4635b28dfb0bbc8f456c/000001.json",
+            "sha256": "fb9bd2cb6cedf001d38da6b5ddb2b744af89196597699aacf5d97c81aaff153d",
+            "size": 466
+          }
+        },
+        {
+          "request": {
+            "id": "b9732fd36ea141df9a87df13793457bd",
+            "packet": "/private/tmp/scripted-flow-forward/state.json.commands/b9732fd36ea141df9a87df13793457bd.json",
+            "phase": "verifying",
+            "sha256": "7935a5e416d9350b43ee8be620691634adfa7efc5d16b3505b5127b66be2ef6e",
+            "dispatch": {
+              "outcome": "confirmed",
+              "evidence": {
+                "path": "/tmp/scripted-flow-forward/reconcile-send.md",
+                "sha256": "2348619da5e345a68715ba9873da75fed2e08101d26bd0193cdfe12008562cec",
+                "size": 193
+              }
+            }
+          },
+          "receipt": {
+            "path": "/private/tmp/scripted-flow-forward/state.json.reports/b9732fd36ea141df9a87df13793457bd/000001.json",
+            "sha256": "b940669a8ae0cdf393ce4731898eae1b9c44ea29b5d033168e949a2479d96010",
+            "size": 463
+          }
+        },
+        {
+          "request": {
+            "id": "9bf2f411891e47498df2cb48e6d4db80",
+            "packet": "/private/tmp/scripted-flow-forward/state.json.commands/9bf2f411891e47498df2cb48e6d4db80.json",
+            "phase": "integrating",
+            "sha256": "bd7f587faa662d9f18bdaa99a7fdb000eec5a8b0bbee85cc0556631a51984cd1",
+            "dispatch": {
+              "outcome": "confirmed",
+              "evidence": {
+                "path": "/tmp/scripted-flow-forward/integrate-send-T1.md",
+                "sha256": "9b36b5119a25bdc383f0cd61c5b7faedc367f01caccdd8ec3e4b60108755d61e",
+                "size": 87
+              }
+            }
+          },
+          "receipt": {
+            "path": "/private/tmp/scripted-flow-forward/state.json.reports/9bf2f411891e47498df2cb48e6d4db80/000001.json",
+            "sha256": "dc1168ca7f118209cc574627603c41971cc91267cc4f7d678bcc09710edac9db",
+            "size": 487
+          }
+        },
+        {
+          "request": {
+            "id": "4b8bc134bdf64bf3a82b38520131470c",
+            "packet": "/private/tmp/scripted-flow-forward/state.json.commands/4b8bc134bdf64bf3a82b38520131470c.json",
+            "phase": "integrating",
+            "sha256": "12bdce31efa240201ddbd732bdcc2c07e92e0a9e4dbd4ec0aeed127e2ae05f16",
+            "dispatch": {
+              "outcome": "confirmed",
+              "evidence": {
+                "path": "/tmp/scripted-flow-forward/revalidate-send.md",
+                "sha256": "eb182f951e0d418bdae1caabe887fb4c0c9c6fff2844810f7990fbaecf241b61",
+                "size": 87
+              }
+            }
+          },
+          "receipt": {
+            "path": "/private/tmp/scripted-flow-forward/state.json.reports/4b8bc134bdf64bf3a82b38520131470c/000001.json",
+            "sha256": "2afbbbd6bc2d0ec429bcd38856f5a7570da088fd0bf51df4ffbc60eac7096d95",
+            "size": 487
+          }
+        }
+      ],
+      "delivered": true,
+      "report": {
+        "status": "ready",
+        "content_ref": "C1",
+        "result_path": "/private/tmp/scripted-flow-forward/state.json.reports/0106353d92094c1f83b03fb1d83529f8/000001-result.md",
+        "target_ref": "T2",
+        "event_seq": 1
+      },
+      "report_status": "ready",
+      "acceptance": {
+        "content_ref": "C1",
+        "evidence": {
+          "path": "/tmp/scripted-flow-forward/integration-final-inspection.md",
+          "sha256": "6c6f76ac28ec6d0a805b24905f665728d0a25ac4b49540f5b2cbb2cad9e6f4ad",
+          "size": 265
+        },
+        "target_ref": "T2"
+      },
+      "completion_record": {
+        "path": "/tmp/scripted-flow-forward/completion-C1.md",
+        "sha256": "1ddbd1361b57e524fef1d402ee1a71b1995c1237433735d47be37afccd7f2cca",
+        "size": 267
+      },
+      "delivery": {
+        "target": "release/demo",
+        "content_ref": "C1",
+        "merge_ref": "M1",
+        "pr": "synthetic:fixture-A",
+        "closed": true,
+        "evidence": {
+          "path": "/tmp/scripted-flow-forward/delivery-confirmation.md",
+          "sha256": "293c8fd572f955d6388242892d0168f587695d1fe71a5e27464b9903fe4a0726",
+          "size": 218
+        }
+      }
+    },
+    "B": {
+      "depends_on": [
+        "A"
+      ],
+      "phase": "registering",
+      "slot": true,
+      "allowance": 1,
+      "worker": null,
+      "request": {
+        "id": "7dade962f6844a32afa34f1c809d2300",
+        "packet": "/private/tmp/scripted-flow-forward/state.json.commands/7dade962f6844a32afa34f1c809d2300.json",
+        "phase": "registering",
+        "sha256": "2309d1c11bb47900a0cbdae373cda94aa31e5e6e4e8cf09f2b11d3c027e32cec"
+      },
+      "receipt": null,
+      "pending": {
+        "request_id": "7dade962f6844a32afa34f1c809d2300",
+        "outcome": "prepared"
+      },
+      "history": [],
+      "delivered": false,
+      "report": null
+    }
+  },
+  "limits": {
+    "tickets": 2,
+    "subagents": 1
+  },
+  "continuation": {
+    "mode": "active-wait"
+  },
+  "integration": null
+}

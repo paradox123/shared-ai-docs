@@ -1,0 +1,12 @@
+{
+  "batch_id": "B",
+  "ticket": "11",
+  "thread_id": "worker11",
+  "host_id": "local",
+  "request_id": "implement-1",
+  "event_seq": 1,
+  "content_ref": "A",
+  "phase": "implementing",
+  "status": "ready",
+  "result_path": "/tmp/fixture/11.md"
+}

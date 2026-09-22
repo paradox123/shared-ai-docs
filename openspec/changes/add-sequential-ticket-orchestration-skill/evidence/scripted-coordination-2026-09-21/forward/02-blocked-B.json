@@ -1,0 +1,6 @@
+{
+  "op": "prepare",
+  "ticket": "B",
+  "phase": "registering",
+  "instruction": "Synthetic registration B after A delivery."
+}
