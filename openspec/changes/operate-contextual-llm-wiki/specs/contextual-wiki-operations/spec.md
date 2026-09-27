@@ -24,6 +24,19 @@ The automation MUST observe its owned run for a bounded period and use durable p
 - **AND** incomplete or incompatible results are not treated as reusable successes
 - **AND** the report distinguishes source-index completion, ongoing updates and initial-import backlog
 
+#### Scenario: Resume an individually completed page response after interrupted generation
+- **WHEN** a bounded run receives a valid page-generation response but ends before the complete page batch is validated and published
+- **THEN** the host durably saves that response before the remaining batch finishes
+- **AND** a fresh process reuses it only when the exact request, current owner-source identities and hashes, publication version, provider/model contract, and installed compiler contract still match
+- **AND** the resumed page still passes the normal provenance, source-drift, publication, and QMD checks before it is current
+- **AND** cached intermediate work does not make a partial run report success or advance the completed-maintenance timestamp
+
+#### Scenario: Changed source invalidates only affected page-generation responses
+- **WHEN** a current source changes after a valid page response was saved
+- **THEN** a new request is generated for the affected page using the current source version
+- **AND** unrelated valid generated knowledge remains available
+- **AND** a response from the earlier source version is not published as current
+
 #### Scenario: Validate extraction compatibility independently of publication
 - **WHEN** a fresh process considers a previously saved extraction
 - **THEN** it checks the source identity and content, resolved model/provider contract, actual prompt and tool schema including supplied context, and installed compiler contract

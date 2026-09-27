@@ -158,6 +158,101 @@ test(
 );
 
 test(
+  "bounded helper resumes a completed page response after generation is interrupted",
+  { timeout: 40000 },
+  async () => {
+    let generationRequests = 0;
+    let releaseSecond!: () => void;
+    const secondGate = new Promise<void>((resolve) => (releaseSecond = resolve));
+    let holdSecond = true;
+    const f = await fixture(async (body) => {
+      if (!body.tools && ++generationRequests === 2 && holdSecond)
+        await secondGate;
+    });
+    (f.config as any).concurrency = 1;
+    await f.saveConfig();
+    const alphaOriginal = await readFile(path.join(f.dir, "alpha/README.md"), "utf8");
+    const betaOriginal = await readFile(path.join(f.dir, "beta/README.md"), "utf8");
+    await writeFile(
+      path.join(f.dir, "alpha/control.md"),
+      "# Kontrollseite\n\nUnabhängige Kontrollseite.\n",
+    );
+    try {
+      const first = await helper(f, "page-budget", 5);
+      await waitFor(() => generationRequests === 2);
+      const progressPath = path.join(f.dir, "page-budget", "maintain-test.progress.json");
+      await waitFor(async () =>
+        JSON.parse(await readFile(progressPath, "utf8").catch(() => "{}"))
+          .modelResponses >= 3,
+      );
+      const stopped = await first.done;
+      assert.equal(stopped.report.outcome, "budget-exhausted");
+      assert.equal(stopped.report.ok, false);
+      assert.ok(stopped.report.remaining.length > 0);
+      assert.equal((await f.run("status")).lastCompleted, null);
+      await assert.rejects(
+        readFile(path.join(f.config.output, "wiki/concepts/freigabe.md")),
+      );
+      assert.equal((await f.run("query", "--question", "Freigabe")).fallback, true);
+      holdSecond = false;
+      releaseSecond();
+      const completedBeforeResume = f.calls.filter((b) => !b.tools)[0];
+      const before = f.calls.length;
+      const resumed = await (await helper(f, "page-resume", 15)).done;
+      assert.equal(resumed.code, 0, JSON.stringify(resumed));
+      assert.equal(
+        f.calls.slice(before).filter((b) =>
+          !b.tools && b.messages?.[0]?.content === completedBeforeResume.messages?.[0]?.content,
+        ).length,
+        0,
+        "a valid completed page response must not be requested again",
+      );
+      const pagePath = path.join(f.config.output, "wiki/concepts/freigabe.md");
+      const controlPath = path.join(f.config.output, "wiki/concepts/kontrollseite.md");
+      const page = await readFile(pagePath, "utf8");
+      const control = await readFile(controlPath, "utf8");
+      assert.match(page, /Alpha verlangt zwei/);
+      assert.match(page, /Beta verlangt drei/);
+      assert.match(page, /alpha\/README.md/);
+      assert.match(page, /beta\/README.md/);
+      assert.equal(await readFile(path.join(f.dir, "alpha/README.md"), "utf8"), alphaOriginal);
+      assert.equal(await readFile(path.join(f.dir, "beta/README.md"), "utf8"), betaOriginal);
+      const query = await f.run("query", "--question", "Freigabe");
+      assert.equal(query.engine, "qmd");
+      assert.ok(query.evidence.some((item: any) => item.id === "concepts/freigabe"));
+      const completeCalls = f.calls.length;
+      const noop = await (await helper(f, "page-noop", 15)).done;
+      assert.equal(noop.report.contexts[0].noop, true);
+      assert.equal(f.calls.length, completeCalls);
+      await writeFile(
+        path.join(f.dir, "beta/README.md"),
+        "# Freigabe\n\nBeta verlangt vier Freigaben.\n",
+      );
+      const changed = await (await helper(f, "page-changed", 15)).done;
+      assert.equal(changed.code, 0, JSON.stringify(changed));
+      const changedRequests = f.calls.slice(completeCalls);
+      assert.ok(
+        changedRequests.some(
+          (body) => !body.tools && JSON.stringify(body).includes("Beta verlangt vier Freigaben."),
+        ),
+        "the changed source must produce a fresh page-generation request",
+      );
+      const changedPage = await readFile(pagePath, "utf8");
+      assert.match(changedPage, /Beta verlangt vier/);
+      assert.doesNotMatch(changedPage, /Beta verlangt drei/);
+      assert.equal(await readFile(controlPath, "utf8"), control);
+      assert.equal(
+        await readFile(path.join(f.dir, "beta/README.md"), "utf8"),
+        "# Freigabe\n\nBeta verlangt vier Freigaben.\n",
+      );
+    } finally {
+      releaseSecond();
+      await f.close();
+    }
+  },
+);
+
+test(
   "shared authentication failure stops a filled provider queue and bounded source errors remain distinct",
   { timeout: 40000 },
   async () => {

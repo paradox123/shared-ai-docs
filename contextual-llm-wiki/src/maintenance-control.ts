@@ -23,6 +23,7 @@ export function maintenanceControl(file: string, progress: any) {
       modelResponses: successful,
       modelErrors: failed,
       extractions: progress.extractions || { saved: 0, reused: 0, invalid: 0 },
+      pageResponses: progress.pageResponses || { saved: 0, reused: 0, invalid: 0 },
       sourceIndex: progress.sourceIndex,
       maintenance: progress.maintenance,
       remaining: (progress.remaining || [{ phase: "scan" }]).map(

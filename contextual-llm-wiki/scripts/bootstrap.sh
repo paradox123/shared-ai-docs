@@ -11,6 +11,10 @@ if [[ ! -d .runtime/compiler/.git ]]; then
   git -C .runtime/compiler -c core.hooksPath=/dev/null checkout "$pin"
 fi
 [[ $(git -C .runtime/compiler rev-parse HEAD) == "$pin" ]] || { echo 'Compiler pin mismatch' >&2; exit 1; }
+# The compiler checkout is generated. Rebuild its tracked source from the pin so
+# overlapping integration patches can be reapplied cleanly on repeated setup.
+git -C .runtime/compiler reset --hard "$pin"
+git -C .runtime/compiler clean -fd
 for patch in "$base"/patches/*.patch; do
   if git -C .runtime/compiler apply --check "$patch" 2>/dev/null; then
     git -C .runtime/compiler apply "$patch"
