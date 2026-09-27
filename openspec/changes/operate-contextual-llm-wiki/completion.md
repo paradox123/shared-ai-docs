@@ -1,6 +1,6 @@
 # Completion: durable page-response resumption
 
-Status: requirements and structural reviews verified; delivery pending.
+Status: requirements, structural reviews, and delivery verified.
 
 ## Scope and identity
 
@@ -64,4 +64,4 @@ All three sequential full reviews completed against the same fixed base and impl
 
 ## Delivery authorization
 
-On 2026-09-27 Daniel explicitly accepted this scoped change and authorized commit, push and merge to `main` if needed, plus cleanup of implementation worktrees/artifacts. Planned branch: `codex/lean-shared-wiki-requirements`. The wider OpenSpec includes independent unchecked full-import, later-scheduler and upstream-release work; it remains active under the repository's archive rules. Delivery outcomes will be recorded here after they are verified.
+On 2026-09-27 Daniel explicitly accepted this scoped change and authorized commit, push and merge to `main` if needed, plus cleanup of implementation worktrees/artifacts. Branch `codex/lean-shared-wiki-requirements` was committed as `b0ba2dfa677bfcaf56e46d727fcb8c41b5f4e6d1`, pushed, and delivered through [PR #14](https://github.com/paradox123/shared-ai-docs/pull/14), squash-merged at `21166ac52e8d99d0d53ba3fa988ef0840b30d97c` on 2026-09-27. The wider OpenSpec includes independent unchecked full-import, later-scheduler and upstream-release work; it remains active under the repository's archive rules.
