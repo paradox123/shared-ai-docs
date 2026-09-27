@@ -1,3 +1,7 @@
+## Umsetzungsscope 25.09.2026 — angenommen am 27.09.2026
+
+Die [Tracker-Spec zum gemeinsamen Vault-Wiki](../../../.scratch/lean-shared-wiki/spec.md) war die Abnahmegrenze für diesen Auftrag. Sie ersetzt die breitere Pflegeinterview-Scope für diese Arbeit; frühere Betriebsentscheidungen und die übrigen offenen Aufgaben bleiben historische Dokumentation beziehungsweise separate Arbeit. Die konkrete Lücke war die Wiederaufnahme einzelner Seitenantworten vor Abschluss des gesamten Compiler-Batches. Diese enge Scope wurde anhand der Implementierungs- und Produktionsnachweise in [page-response evidence](../../../contextual-llm-wiki/evidence/page-response-resumption-2026-09-25.md) angenommen.
+
 ## 1. Betrieb
 - [x] 1.1 Bestehende Session, Spec, Konfiguration und Automation prüfen.
 - [x] 1.2 Wartungshelfer über öffentliche Prozessgrenze mit Rot→Grün-Slices implementieren.
@@ -77,6 +81,8 @@ Wissenspflege und Schedulerwechsel sind auf Nutzerwunsch für eine andere Sessio
 
 
 ## Ticket06: zweistufige Aktivierung
+
+- [x] Jede einzeln abgeschlossene, schema-valide Seitenantwort vor Batchabschluss dauerhaft sichern und nur bei identischen aktuellen Quellen-/Prompt-/Publikations-/Modell-/Compilerverträgen über den öffentlichen Helper wiederverwenden; Änderung und No-op prüfen.
 
 - [x] Einmaligen Runner mit eigener endlicher Beobachtung, dauerhaften Prozess-/Exit-/Diagnoseartefakten und Nicht-Erfolg bei fehlendem Abschluss isoliert umsetzen.
 - [x] Vorgängerverhalten gemeinsam über öffentlichen Helper, echte isolierte QMD-Suche und WikiQuery prüfen; Grenzen und kanonischen Prompt mit Betriebsreferenzen abgleichen.

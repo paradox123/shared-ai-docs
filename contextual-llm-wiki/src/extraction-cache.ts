@@ -13,6 +13,18 @@ type Request = {
   tools: unknown[];
 };
 
+type PageRequest = {
+  slug: string;
+  sourceFiles: string[];
+  model: string;
+  rebuild: boolean;
+  system: string;
+  messages: { role: string; content: string }[];
+};
+
+type CacheStats = { saved: number; reused: number; invalid: number };
+type CacheFailure = "sharedExtractionCache" | "sharedPageCache";
+
 // Include installed code (not just the upstream pin), so local prompt/schema,
 // parsing, provider adapters and integration patch changes invalidate old work.
 async function compilerDigest(dir: string): Promise<string> {
@@ -55,11 +67,74 @@ async function persist(file: string, value: unknown) {
   }
 }
 
-export async function extractionCache(
-  config: any,
-  sources: Record<string, Source>,
-  notify: () => void = () => {},
-) {
+async function readReusableResponse(
+  file: string,
+  key: string,
+  validate: (raw: string) => boolean,
+  stats: CacheStats,
+  notify: () => void,
+  failure: CacheFailure,
+): Promise<string | undefined> {
+  try {
+    const stored = JSON.parse(await readFile(file, "utf8"));
+    if (
+      stored &&
+      stored.version === 1 &&
+      stored.key === key &&
+      typeof stored.raw === "string" &&
+      stored.checksum === hash(stored.raw) &&
+      validate(stored.raw)
+    ) {
+      stats.reused++;
+      notify();
+      return stored.raw;
+    }
+    stats.invalid++;
+  } catch (error: any) {
+    if (error instanceof SyntaxError) stats.invalid++;
+    else if (error.code !== "ENOENT")
+      throw Object.assign(error, { [failure]: true });
+  }
+  return undefined;
+}
+
+async function saveValidatedResponse(
+  file: string,
+  key: string,
+  contract: string,
+  raw: string,
+  validate: (raw: string) => boolean,
+  stats: CacheStats,
+  notify: () => void,
+  failure: CacheFailure,
+  metadata: Record<string, unknown> = {},
+): Promise<void> {
+  if (!validate(raw)) return;
+  try {
+    await persist(file, {
+      version: 1,
+      key,
+      ...metadata,
+      contract,
+      raw,
+      checksum: hash(raw),
+    });
+  } catch (error) {
+    throw Object.assign(error as Error, { [failure]: true });
+  }
+  stats.saved++;
+  notify();
+}
+
+// This compiler patch changes only page generation, not extraction prompts or
+// schemas. Preserve validated extraction work from the immediately prior
+// production compiler build, and no other compiler revision.
+const PREVIOUS_EXTRACTION_COMPILER =
+  "3e73d5bf221276d6a9b1cd7521a378375b06dea12f605008883e13fadbc9bb74";
+const PAGE_CACHE_COMPILER =
+  "48c07885fa82636b6914059eff6fd22f4547391133fb2dbf8c498e889822fb2b";
+
+async function modelContract(compiler?: string) {
   const provider = process.env.LLMWIKI_PROVIDER!;
   // Hash request-affecting settings only; never persist credentials or prompts.
   const settingNames = [
@@ -80,11 +155,11 @@ export async function extractionCache(
   const settings = Object.fromEntries(
     settingNames.map((key) => [key, process.env[key]]),
   );
-  const contract = hash(
+  return hash(
     JSON.stringify({
       version: 1,
       pin: PIN,
-      compiler: await compilerDigest(path.join(compilerRoot, "dist")),
+      compiler: compiler || await compilerDigest(path.join(compilerRoot, "dist")),
       lock: hash(await readFile(path.join(compilerRoot, "package-lock.json"))),
       provider,
       settings,
@@ -96,6 +171,18 @@ export async function extractionCache(
           : undefined,
     }),
   );
+}
+
+export async function extractionCache(
+  config: any,
+  sources: Record<string, Source>,
+  notify: () => void = () => {},
+) {
+  const installedCompiler = await compilerDigest(path.join(compilerRoot, "dist"));
+  const contract = await modelContract(installedCompiler);
+  const compatibleContract = installedCompiler === PAGE_CACHE_COMPILER
+    ? await modelContract(PREVIOUS_EXTRACTION_COMPILER)
+    : undefined;
   const stats = { saved: 0, reused: 0, invalid: 0 };
   const run = async (
     request: Request,
@@ -117,53 +204,106 @@ export async function extractionCache(
     }
     if (hash(current) !== source.hash)
       throw Error("Source changed before extraction reuse: " + source.id);
-    const key = hash(
+    const keyFor = (candidateContract: string) => hash(
       JSON.stringify({
-        contract,
+        contract: candidateContract,
         context: config.context,
         scope: config.scope,
         source: { id: source.id, original: source.original, hash: source.hash },
         request,
       }),
     );
-    const file = path.join(config.output, ".state/extractions", key + ".json");
-    try {
-      const stored = JSON.parse(await readFile(file, "utf8"));
-      if (
-        stored &&
-        stored.version === 1 &&
-        stored.key === key &&
-        typeof stored.raw === "string" &&
-        stored.checksum === hash(stored.raw) &&
-        validate(stored.raw)
-      ) {
-        stats.reused++;
-        notify();
-        return stored.raw;
-      }
-      stats.invalid++;
-    } catch (error: any) {
-      if (error instanceof SyntaxError) stats.invalid++;
-      else if (error.code !== "ENOENT")
-        throw Object.assign(error, { sharedExtractionCache: true });
+    const key = keyFor(contract);
+    for (const candidateKey of [key, ...(compatibleContract ? [keyFor(compatibleContract)] : [])]) {
+      const candidateFile = path.join(config.output, ".state/extractions", candidateKey + ".json");
+      const cached = await readReusableResponse(
+        candidateFile,
+        candidateKey,
+        validate,
+        stats,
+        notify,
+        "sharedExtractionCache",
+      );
+      if (cached !== undefined) return cached;
     }
     const raw = await generate();
-    if (validate(raw)) {
+    const file = path.join(config.output, ".state/extractions", key + ".json");
+    await saveValidatedResponse(
+      file,
+      key,
+      contract,
+      raw,
+      validate,
+      stats,
+      notify,
+      "sharedExtractionCache",
+      { source: source.id },
+    );
+    return raw;
+  };
+  return { run, stats };
+}
+
+export async function pageResponseCache(
+  config: any,
+  sources: Record<string, Source>,
+  publicationVersion: number | undefined,
+  notify: () => void = () => {},
+) {
+  const contract = await modelContract();
+  const stats = { saved: 0, reused: 0, invalid: 0 };
+  const run = async (
+    request: PageRequest,
+    generate: () => Promise<string>,
+    validate: (raw: string) => boolean,
+  ) => {
+    const evidence = [];
+    for (const id of request.sourceFiles) {
+      const source = sources[id];
+      if (!source)
+        throw Object.assign(Error("Unknown page source: " + id), { sharedPageCache: true });
+      let current: string;
       try {
-        await persist(file, {
-          version: 1,
-          key,
-          source: source.id,
-          contract,
-          raw,
-          checksum: hash(raw),
-        });
-      } catch (error) {
-        throw Object.assign(error as Error, { sharedExtractionCache: true });
+        current = await readFile(source.original, "utf8");
+      } catch {
+        // A missing original invalidates reuse; the full inventory check reports
+        // the incomplete source tree before publication.
+        return generate();
       }
-      stats.saved++;
-      notify();
+      if (hash(current) !== source.hash)
+        // Never reuse or save an answer against an outdated scan snapshot.
+        return generate();
+      evidence.push({ id, original: source.original, hash: source.hash });
     }
+    const key = hash(JSON.stringify({
+      contract,
+      context: config.context,
+      scope: config.scope,
+      publicationVersion,
+      evidence,
+      request,
+    }));
+    const file = path.join(config.output, ".state/page-responses", key + ".json");
+    const cached = await readReusableResponse(
+      file,
+      key,
+      validate,
+      stats,
+      notify,
+      "sharedPageCache",
+    );
+    if (cached !== undefined) return cached;
+    const raw = await generate();
+    await saveValidatedResponse(
+      file,
+      key,
+      contract,
+      raw,
+      validate,
+      stats,
+      notify,
+      "sharedPageCache",
+    );
     return raw;
   };
   return { run, stats };

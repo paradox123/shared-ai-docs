@@ -21,7 +21,7 @@ import { indexSources } from "./source-index.ts";
 import { lint } from "./inspection.ts";
 import { validatePublication } from "./publication-validation.ts";
 import { preflight } from "./runtime.ts";
-import { extractionCache } from "./extraction-cache.ts";
+import { extractionCache, pageResponseCache } from "./extraction-cache.ts";
 import { failureScope } from "./failure-scope.ts";
 export async function maintain(config: any) {
   const artifacts = path.join(config.output, ".state/runs", randomUUID());
@@ -187,6 +187,13 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       progress.notify(),
     );
     progress.extractions = cache.stats;
+    const pageCache = await pageResponseCache(
+      config,
+      sources,
+      state.publicationVersion,
+      () => progress.notify(),
+    );
+    progress.pageResponses = pageCache.stats;
     const extracted = new Map<string, any>();
     let requests = 0;
     const maxSources = config.maintenance?.maxExtractionSources || 20;
@@ -230,6 +237,7 @@ async function maintainRun(config: any, artifacts: string, progress: any) {
       result = await wiki.compile({
         embeddings: false,
         extractionCache: runExtraction,
+        pageCache: pageCache.run,
         sourceOrder,
         concurrency:
           Object.keys(sources).length > maxSources
