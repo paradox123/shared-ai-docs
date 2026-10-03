@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintain LLM Wiki"
+  short_description: "Maintain selected synthesis notes and source freshness"
+  default_prompt: "Use $maintain-llm-wiki to maintain the selected synthesis note against its original sources."

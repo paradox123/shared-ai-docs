@@ -35,7 +35,7 @@ Bei SDKs und Laufzeiten werden die unterstützte Version und notwendige Zielplat
 
 Ein gemeinsames Muster erteilt keinen Auftrag, alle bestehenden Repositories sofort umzustellen. Es wird bei deren Einrichtung oder bei einem entsprechenden Wartungsauftrag angewendet. Dieses Dokument registriert selbst keinen zusätzlichen Job.
 
-Renovate pflegt versionierte Abhängigkeitsreferenzen. Ein erfolgreicher Merge beweist kein Deployment und keine Aktualisierung einer lokalen Installation. Bei eingebundenen Fremdprojekten wird die eigene Upstream-Referenz gepflegt; deren interne Bibliotheken werden nicht eigenständig vorgezogen. Ein engerer, ausdrücklich vereinbarter Updateumfang bleibt maßgeblich, beispielsweise bei den [LLM-Wiki-Release-Updates](rag/2026-09-13-llm-wiki-dependency-updates.md).
+Renovate pflegt versionierte Abhängigkeitsreferenzen. Ein erfolgreicher Merge beweist kein Deployment und keine Aktualisierung einer lokalen Installation. Bei eingebundenen Fremdprojekten wird die eigene Upstream-Referenz gepflegt; deren interne Bibliotheken werden nicht eigenständig vorgezogen. Ein engerer, ausdrücklich vereinbarter Updateumfang bleibt maßgeblich.
 
 Die automatische Merge-Freigabe gilt für die hier beschriebenen Abhängigkeitsupdates. Sie ändert keine Freigaberegeln für allgemeine agentische Implementierungsaufträge.
 

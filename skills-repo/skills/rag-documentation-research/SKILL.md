@@ -1,39 +1,37 @@
 ---
 name: rag-documentation-research
-description: Research DanielsVault knowledge through managed WikiQuery, verify its original-source references, and hand off grounded evidence for planning or implementation. Use for finding or synthesizing vault documentation; ordinary research does not maintain the index or save answers.
+description: Research DanielsVault knowledge through QMD, verify findings against original source files, and hand off grounded evidence for planning or implementation. Use for finding or synthesizing vault documentation; ordinary research does not maintain the index or save answers.
 ---
 
 # DanielsVault Documentation Research
 
-Start knowledge-context searches through the common wiki's managed WikiQuery. QMD is its internal persisted retrieval engine. This skill owns source discovery and verification; after gathering evidence, continue the user's requested artifact or implementation.
+Start DanielsVault documentation searches with QMD over relevant original-source collections from `_shared/danielsvault-rag/qmd-collections.json`; optionally add the curated `contextual-wiki-common` collection. Use `qmd search` for exact names and identifiers and `qmd query` for natural-language questions. Pass `-c` for each selected collection to keep historical or copied wiki content out of the task. This skill owns source discovery and verification; after gathering evidence, continue the user's requested artifact or implementation. Explicit wiki ingestion, update or review work uses [maintain-llm-wiki](../maintain-llm-wiki/SKILL.md). WikiQuery is retired.
 
 ## Entry and source verification
 
 Honor repository startup requirements and the task's explicit boundaries. Already named primary documents may be opened directly. Inside session-review automations, read the required automation/session state before knowledge retrieval.
 
-Use the existing local installation:
+Use the existing QMD index; this example searches the original `shared-ai-docs` collection:
 
 ```bash
-WIKI_HOME=/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/contextual-llm-wiki
-"$WIKI_HOME/wiki" query --config "$WIKI_HOME/.local/common.json" \
-  --question '<specific question>'
+qmd query '<specific question>' -c shared-ai-docs
 ```
 
-For an explicitly repository-limited task, append `--repo <id>` (repeat for multiple allowed repos). Registered identities are `vault-root`, `meeting-assistant`, `shared-ai-docs`, `ki-fuer-kmu`, `ncg-docs`, `private`, `probare-crm`, and `sparkle`. Exact source limits use repeated `--source '<repo-id>/<relative.md>'`. WikiQuery enforces these limits across transitive evidence. Do not infer a private access restriction from a directory name.
+Select collections according to the task and repository navigation rules; repeat `-c` for several originals or an optional curated-wiki collection. Do not infer a private access restriction from a directory name. QMD results are discovery aids: open the cited or retrieved originals and verify their relevant passages. Before relying on a curated wiki note, use the read-only `wiki_sources.py check --vault PATH --wiki PATH --page PAGE` interface described in the maintenance skill. For `review`, `invalid` or missing provenance, use current originals and state the note's limitation. `unchanged` confirms only the recorded original bytes; read relevant original passages before presenting claims. A useful note leads to its direct originals rather than a compiler dependency graph.
 
-1. Inspect `ok`, `answer`, `evidence`, `originals`, `review`, and `fallback`.
-2. Follow selected `originals[].path` or `uri` references; read the relevant original sections before relying on their claims. `hash` and `freshness` identify the checked original version.
-3. Treat `review` as visible maintenance needs. `fallback:true` means the same interface used current original evidence instead of eligible stored wiki knowledge. It does not certify the stale wiki pages.
-4. Report missing evidence or an unavailable WikiQuery. Do not silently start a parallel QMD or broad `rg` context search. Already supplied or returned primary paths remain directly readable; targeted literal checks in those sources are appropriate.
+1. Inspect QMD results and identify the original paths supporting each relevant claim.
+2. Read the relevant sections from those original files; check their current contents and follow repository instructions, OpenSpec requirements, and ADRs as applicable.
+3. Use targeted literal checks in known sources when needed. If QMD has no useful result, state the gap and continue with already named sources or bounded discovery appropriate to the task.
+4. Report the question/search used, relevant original paths and sections, and any missing evidence or conflicts. Do not claim that QMD search results alone establish source freshness.
 
-Keep the execution handle of a running query and follow that execution to completion. A query does not compile or create a saved answer unless the user requests saving. Do not invoke `maintain` or add `--save` for ordinary research.
+Keep the execution handle of a running QMD query and follow that execution to completion. Retrieval does not update the index, create a saved answer or record a new reviewed timestamp. A read-only source check is permitted; do not run maintenance or save content for ordinary research.
 
 ## Evidence handoff
 
-Return the relevant original paths and sections, a brief explanation of their relevance, the managed query used and its freshness/fallback result, and any remaining gaps or conflicts. Wiki text is derived evidence; original requirements, AGENTS, OpenSpec and ADRs retain their authority. A documentation lookup does not prove runtime behavior.
+Return the relevant original paths and sections, a brief explanation of their relevance, the QMD search used, and any remaining gaps or conflicts. Search results are navigation hints; original requirements, AGENTS, OpenSpec and ADRs retain their authority. A documentation lookup does not prove runtime behavior.
 
 ## Operations and compatibility
 
-Use the [operations guide](../../../contextual-llm-wiki/OPERATIONS.md) for the installed runtime, maintenance, diagnostics and production acceptance status. Direct QMD belongs to index operations and diagnostics; historical QMD-backed `rag` envelopes remain compatibility interfaces for explicit callers, not a second standard context route. There is no additional `.rag/store`.
+Use the [operations guide](../../../docs/rag/llm-wiki.md) when the user asks about wiki operation. Explicit maintenance uses the shared maintenance skill. Use the QMD skill for index operations and diagnostics. Historical QMD-backed `rag` envelopes remain compatibility interfaces for explicit callers; there is no additional `.rag/store`.
 
-Read [runtime-transfer.md](references/runtime-transfer.md) only for an explicitly requested move or runtime transfer; its historical QMD commands do not override this context entry.
+Read [runtime-transfer.md](references/runtime-transfer.md) only for an explicitly requested move or runtime transfer; its historical commands do not override this QMD-first retrieval flow.

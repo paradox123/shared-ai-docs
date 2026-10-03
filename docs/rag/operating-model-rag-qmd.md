@@ -1,29 +1,30 @@
-# Operating Model: WikiQuery mit QMD als einziger Engine
+# Operating Model: QMD als DanielsVault-Retrieval
 
-Wissenskontextsuche beginnt mit der verwalteten WikiQuery des gemeinsamen DanielsVault-Wikis. Sie prüft relevante Originalstände, liefert belegte Erkenntnisse und navigierbare Primärquellenverweise. QMD bleibt intern die einzige persistierte Index-, Embedding- und Retrieval-Engine; `rag` ist eine Kompatibilitätshülle für ausdrücklich bestehende Aufrufer. Es gibt keinen zweiten `.rag/store`.
+DanielsVault-Dokumentationsrecherche beginnt mit dem bestehenden QMD-Index und passenden Originalquellen-Collections. Relevante Treffer werden anhand gegenwärtiger Originaldateien geprüft. Kuratierte Wiki-Seiten können als zusätzliche Wissenshinweise einbezogen werden; ihre Quellenstände sind vor Nutzung zu prüfen. `rag` bleibt eine Kompatibilitätshülle für ausdrücklich bestehende Aufrufer. Es gibt keinen zweiten `.rag/store`.
 
 ## Verantwortlichkeiten
 
 | Bereich | Zuständig |
 |---|---|
-| Standardzugang für Agenten-Kontextfragen | WikiQuery: `wiki query --config .local/common.json` |
-| Originalquellenprüfung und explizite Aufgabengrenzen | WikiQuery mit `--repo` / `--source` |
-| Wissenspflege und Antwortabhängigkeiten | `wiki maintain` |
-| Quell-Collections und Pfade | Bestehendes `danielsvault-rag/qmd-collections.json` |
-| Gemeinsame Wiki-Collection | Wiki-eigenes Teilmanifest, `contextual-wiki-common` |
-| Index, Embeddings und Diagnose | QMD |
+| Agenten-Kontextfragen | QMD: `qmd search` / `qmd query` mit aufgabenbezogener Collectionauswahl |
+| Autorität und explizite Aufgabengrenzen | Originaldateien und Repository-Anweisungen |
+| Ausdrücklich beauftragte Wiki-Pflege | [maintain-llm-wiki](../../skills-repo/skills/maintain-llm-wiki/SKILL.md), direkte Markdown-Bearbeitung |
+| Quellenstand kuratierter Wiki-Seiten | Deterministischer `wiki_sources.py check`; fachliches Review durch den Agenten |
+| Originalcollections und Pfade | Bestehendes `danielsvault-rag/qmd-collections.json` |
+| Optionale kuratierte Wiki-Collection | `contextual-wiki-common` am aktiven `common/wiki`-Pfad |
+| Index, Embeddings und Diagnose | QMD und bestehender QMD-only-Tagesjob |
 | Historische JSON-/Workflow-Verträge | QMD-backed `rag` CLI |
 
 ## Kontextrecherche
 
-Dem [zentralen Recherche-Skill](../../skills-repo/skills/rag-documentation-research/SKILL.md) folgen. `originals` liefert aktuelle Originalpfade und URIs. Relevante Abschnitte direkt lesen; OpenSpec, ADRs und Repo-Anweisungen behalten ihre Autorität. `review` macht veraltete Evidenz sichtbar. WikiQuery verwendet bei Lücken geeignete aktuelle Quellen im selben Zugang. Ist WikiQuery nicht verfügbar, wird das gemeldet; direkte QMD-Kontextsuche ist kein stiller Ersatz.
+Dem [Recherche-Skill](../../skills-repo/skills/rag-documentation-research/SKILL.md) folgen. Bei jeder Suche passende Originalcollections mit wiederholtem `-c` wählen; bei Nutzen die kuratierte `contextual-wiki-common` ergänzen. Bereits benannte Originale dürfen direkt geöffnet werden. Vor Nutzung einer Wiki-Seite ihre direkten Originalstände prüfen und relevante Originalpassagen lesen. `review` oder `invalid` bedeutet, mit aktuellen Originalen weiterzurecherchieren und die Grenze der Wiki-Seite zu nennen. Gleiche Hashes zertifizieren weder Aussagen noch Schlussfolgerungen. OpenSpec, ADRs und Repo-Anweisungen behalten ihre Autorität.
 
-`private` und `Projects/Private` sind persönliche Fachbereiche des gemeinsamen Wissensbestands. Fachliche Relevanz und ausdrücklich gesetzte Aufgabengrenzen entscheiden über Evidenz, nicht der Verzeichnisname. Alte Scope-Labels der Kompatibilitätshülle definieren keine Zugriffspolitik für WikiQuery. Eine gewöhnliche Query löst keine Pflege und keine dauerhafte Speicherung aus.
+`private` und `Projects/Private` sind persönliche Fachbereiche des gemeinsamen Wissensbestands. Fachliche Relevanz und ausdrücklich gesetzte Aufgabengrenzen entscheiden über Evidenz. Eine normale Suche führt keine Indexpflege aus, schreibt keine Wiki-Seite und setzt kein Prüfdatum. Bei fehlenden Treffern gezielt in bekannten Quellen oder mit begrenzter Textsuche weiterarbeiten und Evidenzlücken benennen.
 
-## Indexbetrieb
+## Wiki-Pflege und Indexbetrieb
 
-Das Manifest unter `_shared/danielsvault-rag/qmd-collections.json` beschreibt Quellindexabdeckung. Sein Reconciler fügt fehlende Collections hinzu und meldet abweichende Pfade oder Muster als Konflikt; fremde Collections werden nicht automatisch umgebogen. Repo- und Zusatz-Collections halten auch relevante versteckte Markdown-Bereiche erreichbar. Die gemeinsame Wiki-Collection wird separat von der Wiki-CLI verwaltet.
+[ADR 0018](../adr/0018-agent-managed-markdown-wiki.md) ersetzt seit 02.10.2026 Compiler und WikiQuery durch ausgewählte direkte Seitenpflege. Wissensseiten unter `notes/` nennen die tatsächlich tragenden Originale; `index.md` und `log.md` halten Navigation und Ergebnisse fest. Erfolgreiche Pflege bezieht sich auf den gewählten Umfang. Es gibt keine globale Importpflicht, keinen transitiven Antwortgraph und keine tägliche Wiki-Frist. [Wiki-Betriebsanleitung](llm-wiki.md) enthält Beispiele.
 
-Die bestehende tägliche Automation pflegt den vollständigen gemeinsamen Eingang vor der anschließenden QMD-Pflege. Begrenzte Fehler erlauben nur nachweislich unabhängige Arbeit; Gesamtergebnis und Memory bleiben bei Teilfehlern erfolglos. Quellen werden nicht editiert. Zeitplan, Modell, Projekt und Benachrichtigungseinstellungen bleiben erhalten. Ablauf, Runtime, Sperren, genaue Artefakte und Abnahmestand stehen in [OPERATIONS.md](../../contextual-llm-wiki/OPERATIONS.md).
+Das Originalmanifest beschreibt Indexabdeckung. Reconciliation fügt fehlende Collections hinzu und meldet abweichende Pfade oder Muster als Konflikt; fremde Collections werden nicht umgebogen. Die gemeinsame Wiki-Collection bleibt als zusätzliche Sammlung kuratierter Seiten bestehen. Historische Compiler-Spiegel, Backups und Abnahmeausgaben sind keine aktiven Wissenscollections.
 
-Direktes `qmd status`, Collection-Inspektion, `update` und `embed` sind Betriebs- und Diagnosewerkzeuge. Sie ersetzen keine queryzeitige Quellenprüfung. Bei Runtime-, Datenbank- oder Berechtigungsfehlern den konkreten Blocker protokollieren; keine automatisierte Installations- oder TCC-Reparatur.
+Der unveränderte tägliche QMD-Job aktualisiert Suchdaten und Embeddings unabhängig von Wiki-Pflege. Indexierte Bytes sind kein Inhaltsreview. `qmd status`, Collection-Inspektion, `update` und `embed` sind Betriebswerkzeuge. Bei Runtime-, Datenbank- oder Berechtigungsfehlern den konkreten Befund protokollieren; keine automatisierte Installations- oder TCC-Reparatur.

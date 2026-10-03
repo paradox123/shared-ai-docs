@@ -1,15 +1,9 @@
 ---
-status: accepted
+status: superseded by ADR-0018
 ---
 
 # Gemeinsames Wiki über persönliche und berufliche Tätigkeitsbereiche
 
-Das DanielsVault-Wiki bildet einen gemeinsamen Wissensbestand über alle ausgewählten Fachrepos einschließlich `private` und `Projects/Private`. Daniel hat am 13.09.2026 klargestellt, dass „privat“ einen Tätigkeitsbereich bezeichnet und keine Vertraulichkeits- oder Zugriffsregel enthält; die fachliche Relevanz für die konkrete Aufgabe entscheidet über Verknüpfungen und die Nutzung von Quellen. Die bisherige Trennung in allgemeine und private Kompilierungen verhindert erwünschte repoübergreifende Synthesen und wird deshalb aufgehoben; auch der gemeinsame Bestand erhält nicht allein wegen dieser Quellen eine pauschale Privatklassifizierung.
+Daniel entschied am 13.09.2026 für einen gemeinsamen Wissensbestand aus fachlich relevanten Originalen persönlicher und beruflicher Repositories. Getrennte Kompilierungen verhinderten gewünschte Synthesen. `private` und `Projects/Private` bezeichnen Tätigkeitsbereiche; ihre Namen allein schließen relevante Quellen nicht aus. Ausdrückliche Aufgabengrenzen und Quellenautorität gelten weiterhin. Ein gemeinsamer Wissensbestand ist keine Freigabe zur Veröffentlichung oder Weitergabe.
 
-Diese Entscheidung präzisiert [ADR 0009](0009-contextual-llm-wiki-over-existing-source-repositories.md). Repo-Identitäten, Originalquellen, Provenienz, Quellenaktualität und ausdrücklich gesetzte Aufgabengrenzen bleiben erhalten. Ein gemeinsamer Wissensbestand erfordert weder das Laden sämtlicher Quellen bei jeder Anfrage noch die Veröffentlichung oder Weitergabe des Wikis.
-
-Die technischen Änderungen an Quellenfilterung, Ausgabe, QMD-Routing und Betrieb sind im [aktiven Change](../../openspec/changes/operate-contextual-llm-wiki/design.md) geplant. Die bisherige Abnahme der getrennten Bestände belegt diese Zielarchitektur noch nicht.
-
-## Agentenzugang
-
-Agenten verwenden WikiQuery als ersten Anlaufpunkt für Kontextrecherche und folgen dessen Belegen zu den Primärquellen. QMD bleibt intern die Suchmaschine; Agenten erhalten keine zwei konkurrierenden Standardwege für die Kontextsuche. Die regelmäßige Pflege wird durch Aktualitätsprüfung bei der Abfrage ergänzt, weil zwischen Pflege und Nutzung Quellenänderungen eintreten können. Damit bleiben gemeinsamer Einstieg, überprüfte Synthesen und Quellenautorität im selben Ablauf verbunden.
+Der damalige WikiQuery-Zugang wurde am 02.10.2026 durch [ADR 0018](0018-agent-managed-markdown-wiki.md) ersetzt. Die gemeinsame Wissensschicht bleibt erhalten. Aktuelle Recherche nutzt passende QMD-Originalcollections und bei Bedarf kuratierte Wiki-Seiten mit Originalprüfung; ausdrückliche Pflege folgt [Direkte Wiki-Pflege](../rag/llm-wiki.md) und der [kanonischen Wiki-Spec](../../openspec/specs/contextual-llm-wiki/spec.md).

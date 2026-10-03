@@ -6,7 +6,7 @@ This repository contains AI-related documentation, prompts, skills, hooks, and w
 
 - **Agent Control Plane**: [Use and compose existing platforms](docs/adr/0015-compose-existing-agent-platforms-for-use.md), [vision and pilot reference](docs/agent-control-plane/product-vision.md), and [platform comparison](docs/research/agent-control-plane-platform-comparison-2026-09-15.md)
 - **Repository maintenance**: [Renovate in each owning GitHub repository](docs/renovate-repository-standard.md) and [ADR 0011](docs/adr/0011-renovate-in-each-owning-github-repository.md)
-- **contextual-llm-wiki/**: [Context-scoped Markdown wiki with Atomicstrata and QMD](contextual-llm-wiki/README.md), [daily Mac operations](contextual-llm-wiki/OPERATIONS.md), and [agent-context adoption catalog](docs/rag/llm-wiki-context-adoption-catalog.md)
+- **LLM-Wiki**: [Direkte Markdown-Pflege und Quellenprüfung](docs/rag/llm-wiki.md), [Verifikation](docs/rag/llm-wiki-verification-2026-10-02.md) und [Kontext-Einstiege](docs/rag/llm-wiki-context-adoption-catalog.md). Wiki-Pflege erfolgt auf ausdrücklichen Auftrag; der QMD-Tagesjob pflegt den Index unabhängig.
 - **n8n/**: Workflow automation engine setup
 - **langgraph-github-issue-pilot/**: Local persistent GitHub issue workflow receiver
 - **cloudflare-github-webhook-relay/**: Signed Cloudflare Worker, Queue, DLQ, and Tunnel relay for the local pilot

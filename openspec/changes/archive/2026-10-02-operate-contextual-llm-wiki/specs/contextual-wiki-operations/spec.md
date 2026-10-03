@@ -1,9 +1,5 @@
-# contextual-wiki-operations Specification
+## MODIFIED Requirements
 
-## Purpose
-Maintain explicitly selected wiki pages through one shared skill and a deterministic source checker. Keep QMD index maintenance independent and remove obsolete compiler delivery and working artifacts.
-
-## Requirements
 ### Requirement: Observable serialized maintenance with bounded failures
 Wiki maintenance MUST be explicitly requested and limited to the selected topics, sources or pages. The agent MUST avoid overlapping edits to the same selected pages, publish complete reviewed Markdown results and report unresolved pages or sources accurately. Independent reviewed pages MAY complete despite a different page needing review. The active workflow MUST NOT require compiler-owned processes, global extraction queues, transitive publication locks or a global import completion timestamp. An unchanged reviewed scope MUST avoid unnecessary knowledge rewriting. The existing daily QMD job MUST remain independent of manual wiki work.
 
@@ -16,6 +12,7 @@ Wiki maintenance MUST be explicitly requested and limited to the selected topics
 - **WHEN** two agent tasks would edit the same wiki page
 - **THEN** they coordinate ownership before mutation and avoid overlapping replacements
 
+## ADDED Requirements
 
 ### Requirement: Deterministic direct-source check and record interface
 The shared skill MUST provide a public local helper `wiki_sources.py` with `check --vault PATH --wiki PATH [--page PAGE]` and `record --vault PATH --wiki PATH --page PAGE --source ORIGINAL`; the check page option and record source option MUST be repeatable. Default checking MUST cover curated Markdown under `notes/`; navigation and logs MUST NOT be treated as knowledge pages. Explicit page selection MUST restrict the checked scope. Check MUST be read-only, compare direct current originals with recorded SHA-256 values, and report per-page `unchanged`, `review` or `invalid`. Changed or missing originals MUST produce review need; malformed or missing dependency metadata and unsafe paths MUST be invalid. Check MUST exit 1 if any checked page requires review or is invalid and exit 0 only for unchanged valid selected pages. Paths outside the declared vault or wiki, wiki pages used as originals and technical source mirrors MUST NOT be accepted as direct original dependencies. No provider, compiler, index mutation or automatic page refresh MAY occur during check.

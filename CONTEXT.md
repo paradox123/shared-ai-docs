@@ -133,40 +133,44 @@ _Avoid_: Implementierungswarteschlange, unbegrenzter Backlog-Auftrag
 ## LLM-Wiki
 
 **Fachquelle**:
-Ein Dokument in einem bestehenden Fachrepository, das als Beleg und Eingang fuer das LLM-Wiki dient. Es kann bereits kuratiertes Wissen enthalten; seine Rolle als Eingang macht es nicht zu unbearbeitetem Material.
-_Avoid_: Rohdaten im Sinne von ausschliesslich unbearbeiteten Inhalten
+Ein Originaldokument in einem bestehenden Fachrepository, das Aussagen einer Wiki-Seite belegt. Es kann bereits kuratiertes Wissen enthalten und behält seine fachliche Autorität.
+_Avoid_: Compiler-Spiegel, abgeleitete Wiki-Seite
 
 **LLM-Wiki**:
-Die vom LLM geschriebene und gepflegte Wissensschicht nach Karpathys LLM-Wiki-Konzept zwischen Fachquellen und ihrer Nutzung durch Mensch und Agent. Im DanielsVault umfasst sie den jeweiligen Repo-Kontext und macht gemeinsame Erkenntnisse dauerhaft nutzbar.
-_Avoid_: Eigenstaendiges Fachrepository, separates Wiki je Repo
+Die vom Agenten geschriebene und gepflegte gemeinsame Wissensschicht zwischen Fachquellen und ihrer Nutzung durch Mensch und Agent. Sie enthält ausgewählte, dauerhaft nutzbare Erkenntnisse.
+_Avoid_: Eigenständiges Fachrepository, separates Wiki je Repo, Vollimport
 
 **Repo-Kontext**:
-Die fuer eine konkrete Wissenssicht einbezogene Menge von Repositories.
+Die für eine konkrete Aufgabe einbezogene Menge von Repositories.
 
 **Repoübergreifende Synthese**:
 Eine aus Fachquellen mehrerer Repositories abgeleitete Erkenntnis oder ein Vergleich mit nachvollziehbaren Belegen und Geltungsgrenzen.
-_Avoid_: Blosse Quellensammlung, Kopie einer Fachseite
+_Avoid_: Bloße Quellensammlung, Kopie einer Fachseite
 
-**Quellenabhängigkeit**:
-Die Beziehung zwischen einer abgeleiteten Aussage und den Fachquellen oder weiteren abgeleiteten Aussagen, auf denen sie beruht. Sie macht sichtbar, welche Aussage bei einer Quellenaenderung erneut geprueft werden muss.
-_Avoid_: Beliebiger Querverweis, reine Themengleichheit
+**Kuratierte Wiki-Seite**:
+Eine fachlich geprüfte Wissensseite mit direkten Originalbelegen, deren Aussagen und Grenzen für spätere Nutzung nachvollziehbar sind.
+_Avoid_: Automatisch indexierte Bytes, ungeprüfte Quellensummary
+
+**Direkte Quellenabhängigkeit**:
+Die Beziehung einer Wiki-Seite zu den Originaldokumenten, auf denen ihre Aussagen beruhen. Sie umfasst die tatsächlich tragenden Originale auch dann, wenn eine andere Wiki-Seite als Recherchehinweis diente.
+_Avoid_: Beliebiger Querverweis, transitiver Antwortgraph
 
 **Wiki-Pflegeumfang**:
-Die Menge der Fachquellen, deren abgeleitete Inhalte im gemeinsamen Wiki regelmaessig aktualisiert werden sollen. Sie ist unabhaengig davon, welche Quellen fuer eine einzelne Abfrage fachlich relevant sind.
-_Avoid_: Abfragefreigabe, nur der gerade abgefragte Kontext
+Die ausdrücklich ausgewählten Themen, Fachquellen oder Seiten eines Pflegeauftrags. Sein Abschluss sagt nichts über die Bearbeitung anderer Vault-Inhalte aus.
+_Avoid_: Globaler Erstimport, automatisch sämtliche Repositories
 
-**Wiki-Erstimport**:
-Die erstmalige Verarbeitung des bereits vorhandenen Fachquellenbestands in das gemeinsame Wiki. Noch nicht verarbeitete Quellen dieses Ausgangsbestands bilden den Erstimport-Rueckstand.
-_Avoid_: Taeglicher Vollimport, erneute Verarbeitung aller Quellen bei jeder Pflege
+**Quellenprüfung**:
+Der Vergleich des festgehaltenen Originalstands mit den gegenwärtigen Fachquellen als Hinweis auf nötige Inhaltsprüfung. Ein unveränderter Quellenstand ist keine Bescheinigung fachlicher Wahrheit.
+_Avoid_: Wahrheitszertifikat, fachliches Review allein durch Hashvergleich
 
-**Laufende Wiki-Nachpflege**:
-Die Verarbeitung neu hinzukommender, geaenderter oder bestaetigt entfernter Fachquellen samt ihrer betroffenen abgeleiteten Aussagen. Sie ist vom noch offenen Wiki-Erstimport zu unterscheiden.
-_Avoid_: Vollimport, reine Suchindex-Aktualisierung
+**Wiki-Nachpflege**:
+Die fachliche Prüfung und gegebenenfalls Korrektur ausgewählter Wiki-Seiten anhand gegenwärtiger Originale.
+_Avoid_: Vollimport, reine Hashaktualisierung, Suchindex-Aktualisierung
 
 **Fachquellen-Indexpflege**:
-Die Aktualisierung der Suchdaten fuer vorhandene Fachquellen, unabhaengig von deren Aufbereitung zu Wiki-Aussagen. Ein aktueller Fachquellenindex belegt fuer sich keine abgeschlossene Wiki-Nachpflege.
-_Avoid_: Wiki-Kompilierung, vollstaendiger Wiki-Erstimport
+Die Aktualisierung der Suchdaten für vorhandene Fachquellen, unabhängig von deren Aufbereitung zu Wiki-Aussagen. Ein aktueller Fachquellenindex belegt keine abgeschlossene Wiki-Nachpflege.
+_Avoid_: Wiki-Pflege, Inhaltsprüfung
 
 **Privater Tätigkeitsbereich**:
-Der Lebens- und Aufgabenbereich fuer persoenliche Belange wie Vermietung oder Portfoliopflege. Die Bezeichnung „privat“ ordnet Informationen fachlich zu und begruendet fuer sich keine Zugriffs-, Verknuepfungs- oder Sichtbarkeitsbeschraenkung.
+Der Lebens- und Aufgabenbereich für persönliche Belange wie Vermietung oder Portfoliopflege. Die Bezeichnung „privat“ ordnet Informationen fachlich zu und begründet für sich keine Zugriffs-, Verknüpfungs- oder Sichtbarkeitsbeschränkung.
 _Avoid_: Vertraulichkeitsstufe, gesperrter Wissensbestand, separates Privat-Wiki

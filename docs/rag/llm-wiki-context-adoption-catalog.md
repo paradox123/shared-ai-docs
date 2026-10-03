@@ -1,75 +1,42 @@
 # LLM-Wiki: Katalog der Kontext-Einstiege
 
-Stand: 13.09.2026, nach Klärung der Tätigkeitsbereich-Semantik. Ziel ist ein gemeinsames Wiki nach [ADR 0010](../adr/0010-shared-wiki-across-personal-and-professional-domains.md); der genaue Aktivierungs- und Importstatus steht in der Ticket-04-Evidence. Dieser Katalog plant die Einführung; nur mit „umgesetzt“ markierte Betriebsverweise wurden in dieser Session geändert. „Geplant“ bedeutet keine bereits aktivierte Wiki-Nutzung.
+Stand: 02.10.2026. [ADR 0018](../adr/0018-agent-managed-markdown-wiki.md) definiert ein gemeinsam direkt gepflegtes Markdown-Wiki, QMD-Recherche und ausdrückliche ausgewählte Pflege. Die abgelösten Compiler- und WikiQuery-Pläne sind aus den aktiven Dokumentationspfaden entfernt.
 
-## Empfohlenes Routing
+## Aktuelles Routing
 
-1. Verpflichtende Repo-Orientierung und ausdrücklich gesetzte Aufgabengrenzen beachten. Bereits bekannte Primärquellen dürfen direkt gelesen werden.
-2. Jede Wissenskontextsuche über die verwaltete WikiQuery des gemeinsamen Wikis beginnen. Sie liefert relevante Erkenntnisse, Prüfstatus und navigierbare Verweise auf Originalquellen.
-3. Aufgabengrenzen an WikiQuery übergeben und dort einschließlich transitiver Evidenz prüfen lassen. Die technische Begrenzung aus Ticket 01 gilt einschließlich transitiver Evidenz; sie wird nicht durch separate QMD-Suche ersetzt.
-4. Bei veralteter oder fehlender Wiki-Evidenz verwendet WikiQuery geeignete aktuelle Primärquellen oder meldet die Lücke. Ein Ausfall von WikiQuery wird sichtbar gemeldet. Direkte QMD-Kontextsuche ist kein stiller Ersatz; QMD bleibt intern sowie für Wartung und Diagnose verfügbar.
-5. Verweisen zu Primärquellen folgen, wenn Originalwortlaut oder Details benötigt werden. README/AGENTS/CONTEXT/OpenSpec/ADRs bleiben für ihren jeweiligen Inhalt maßgeblich; Wiki-Text ist abgeleitete Evidenz. Kein automatisches `maintain` oder `--save` bei gewöhnlicher Recherche.
-6. `private` und `Projects/Private` sind Tätigkeitsbereiche im gemeinsamen Wiki. Die fachliche Relevanz entscheidet über Verknüpfung und Nutzung, nicht der Name des Bereichs.
+1. Repo-Startup und ausdrückliche Aufgabengrenzen beachten. Mit einem passenden Fachbereich beginnen; benannte Originale dürfen direkt gelesen werden.
+2. QMD mit passenden Originalcollections nutzen und bei Bedarf `contextual-wiki-common` ergänzen. `qmd search` eignet sich für genaue Namen, `qmd query` für natürliche Fragen.
+3. Vor Nutzung einer Wiki-Seite deren direkte Quellenstände prüfen und relevante Originalpassagen lesen. Bei Prüfbedarf aus aktuellen Originalen arbeiten und die Grenze der Note nennen. Gleiche Hashes allein zertifizieren keine Aussage.
+4. Für ausdrücklich beauftragte Aufnahme, Aktualisierung oder Prüfung ausgewählter Wiki-Inhalte `maintain-llm-wiki` nutzen. Normale Recherche speichert und pflegt keine Seiten.
+5. Fachlich relevante Synthesen über Repo-Grenzen einschließlich `private` sind erlaubt. Originale, OpenSpec, ADRs und Repo-Anweisungen behalten ihre Autorität.
 
-Kanonischer Betrieb und ausführbare Beispiele: [OPERATIONS.md](../../contextual-llm-wiki/OPERATIONS.md). Das zentrale Routing steht in `rag-documentation-research`; Repo-Dateien erhalten kurze Verweise statt kopierter Abläufe.
+[Betriebsbeispiele](llm-wiki.md) bleiben zentral; Repo-Einstiege erhalten kurze Verweise statt kopierter Abläufe.
 
-## Priorisierte Dateien
+## Zentrale Dateien
 
-Alle folgenden Pfade sind relativ zum DanielsVault-Root. P0 = zentraler Einstieg, P1 = Repo-Einführung, P2 = bedarfsabhängige Folgepflege.
+Die folgenden Pfade sind relativ zum `shared-ai-docs`-Gitroot. P0 bezeichnet zentrale Einstiege; P1 bezeichnet zusätzliche Orientierung.
 
-| Priorität | Datei | Rolle | Konkrete Änderung | Status / Eigentum |
-|---|---|---|---|---|
-| P0 | `_shared/shared-ai-docs/skills-repo/skills/rag-documentation-research/SKILL.md` | Kanonischer DanielsVault-Retrieval-Router | WikiQuery als ersten Zugang für Wissenskontextsuche verankern; Quellenprüfung und Rückgriff auf Primärquellen laufen darüber. Explizite Aufgabengrenzen weitergeben. | umgesetzt in Ticket 04; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/skills-repo/skills/qmd/SKILL.md` | Such- und Pflege-Einstieg | Kontextfragen zu WikiQuery routen; direkte QMD-Nutzung für Indexpflege und Diagnose behalten. Keine konkurrierende Standard-Kontextsuche. | umgesetzt in Ticket 04; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/skills-repo/skills/qmd/references/scheduled-index-maintenance.md` | Täglicher Betrieb | Auf gemeinsamen Helper, explizite Konfiguration und Laufberichte verweisen. | umgesetzt; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/AGENTS.md` | Repo-Startup und Requirement-Autorität | Nach Pflichtorientierung gezielte Wiki-Nutzung und kanonische Retrieval-Referenz ergänzen; OpenSpec/ADR-Autorität erhalten. | geplant; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/README.md` | Menschlicher Repo-Einstieg | Betriebsanleitung und Einführungskatalog verlinken. | umgesetzt; lokal gepflegt |
-| P1 | `_shared/shared-ai-docs/CONTEXT.md` | Gemeinsame Wiki-Domänensprache | Bereits vorhandene Begriffe um Pflegezyklus/Quellenaktualität präzisieren; CLI-Details in Betriebsanleitung belassen. | teilweise vorhanden; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/.github/copilot-instructions.md` | Copilot Retrieval-Preference | Bisheriges QMD-first für Kontextfragen durch WikiQuery-first ersetzen; Ausfall sichtbar melden und Quellenverweise nutzbar halten. | umgesetzt in Ticket 04; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/docs/rag/README.md` | Kanonischer RAG-/QMD-Einstieg | Wiki-Rolle und tägliche Pflege verlinken; widersprüchliche alte Kurzbeschreibung korrigieren. | umgesetzt; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/docs/rag/index.md` | Kanonischer RAG-/QMD-Einstieg | Wiki-Rolle und tägliche Pflege verlinken; widersprüchliche alte Kurzbeschreibung korrigieren. | umgesetzt; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/docs/rag/operating-model-rag-qmd.md` | Kanonischer RAG-/QMD-Einstieg | Wiki-Rolle und tägliche Pflege verlinken; widersprüchliche alte Kurzbeschreibung korrigieren. | umgesetzt; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/contextual-llm-wiki/README.md` | CLI-Einrichtung | Explizite CLI und täglichen externen Auslöser unterscheiden. | umgesetzt; lokal gepflegt |
-| P0 | `_shared/shared-ai-docs/contextual-llm-wiki/OPERATIONS.md` | Kanonische Betriebsreferenz | Ablauf, Konfiguration, Protokolle, Fehler, Aktualität und Vollimportstatus dokumentieren. | umgesetzt; lokal gepflegt |
-| P0 | `_shared/danielsvault-rag/README.md` | Bestehende QMD-Runtime-Anleitung | Wiki-Kompilierung vor QMD update/embed verlinken; Manifestzuständigkeit und alleinige QMD-Engine erhalten. | geplant; lokal gepflegt |
-| P0 | `_shared/danielsvault-rag/DEPLOYMENT.md` | Bestehende QMD-Runtime-Anleitung | Wiki-Kompilierung vor QMD update/embed verlinken; Manifestzuständigkeit und alleinige QMD-Engine erhalten. | geplant; lokal gepflegt |
-| P0 | `AGENTS.md` | Vault-weiter Einstieg | Kurzen Verweis auf Wiki-/Quellenrouting ergänzen; spezifische Repo-Startup-Regeln behalten. | geplant; lokal gepflegt |
-| P0 | `VAULT_AGENT_STRUCTURE.md` | Vault-Domänenrouting | Wiki-Ausgabe und Quellenrollen als zusätzliche Schicht ausweisen; fachlich passende Domäne zuerst wählen und sinnvolle repoübergreifende Bezüge zulassen; keine Privat-Zugriffsgrenze ableiten. | geplant; lokal gepflegt |
-| P1 | `_ops/meeting-assistant/AGENTS.md` | Meeting Assistant Einstieg | Kurzen zentralen Wiki-Verweis für passende Synthesefragen ergänzen; repo-spezifische Quellen und Anweisungen bleiben maßgeblich. | geplant; lokal gepflegt |
-| P1 | `_ops/meeting-assistant/README.md` | Meeting Assistant Einstieg | Kurzen zentralen Wiki-Verweis für passende Synthesefragen ergänzen; repo-spezifische Quellen und Anweisungen bleiben maßgeblich. | geplant; lokal gepflegt |
-| P1 | `ki-fuer-kmu/AGENTS.md` | KI-Angebot Einstieg | Kurzen zentralen Wiki-Verweis für passende Synthesefragen ergänzen; repo-spezifische Quellen und Anweisungen bleiben maßgeblich. | geplant; lokal gepflegt |
-| P1 | `ki-fuer-kmu/README.md` | KI-Angebot Einstieg | Kurzen zentralen Wiki-Verweis für passende Synthesefragen ergänzen; repo-spezifische Quellen und Anweisungen bleiben maßgeblich. | geplant; lokal gepflegt |
-| P2 | `ki-fuer-kmu/CONTEXT.md` | KI-Angebot Fachbegriffe | Nur bei fachlich passender Querverbindung Wiki-Synthesen verlinken; keine Betriebskommandos in das Domänenlexikon kopieren. | geplant; lokal gepflegt |
-| P1 | `ncg/ncg-docs/AGENTS.md` | NCG Einstieg | Kurzen zentralen Wiki-Verweis für passende Synthesefragen ergänzen; repo-spezifische Quellen und Anweisungen bleiben maßgeblich. | geplant; lokal gepflegt |
-| P1 | `ncg/ncg-docs/README.md` | NCG Einstieg | Kurzen zentralen Wiki-Verweis für passende Synthesefragen ergänzen; repo-spezifische Quellen und Anweisungen bleiben maßgeblich. | geplant; lokal gepflegt |
-| P2 | `ncg/ncg-docs/CONTEXT.md` | NCG Fachbegriffe | Nur bei fachlich passender Querverbindung Wiki-Synthesen verlinken; keine Betriebskommandos in das Domänenlexikon kopieren. | geplant; lokal gepflegt |
-| P1 | `probare-crm/AGENTS.md` | CRM Einstieg | Kurzen zentralen Wiki-Verweis für passende Synthesefragen ergänzen; repo-spezifische Quellen und Anweisungen bleiben maßgeblich. | geplant; lokal gepflegt |
-| P1 | `probare-crm/README.md` | CRM Einstieg | Kurzen zentralen Wiki-Verweis für passende Synthesefragen ergänzen; repo-spezifische Quellen und Anweisungen bleiben maßgeblich. | geplant; lokal gepflegt |
-| P1 | `sparkle/AGENTS.md` | Standalone-Wissen Einstieg | Kurzen zentralen Wiki-Verweis für passende Synthesefragen ergänzen; repo-spezifische Quellen und Anweisungen bleiben maßgeblich. | geplant; lokal gepflegt |
-| P1 | `sparkle/README.md` | Standalone-Wissen Einstieg | Kurzen zentralen Wiki-Verweis für passende Synthesefragen ergänzen; repo-spezifische Quellen und Anweisungen bleiben maßgeblich. | geplant; lokal gepflegt |
-| P1 | `private/AGENTS.md` | Privater Einstieg | Zum gemeinsamen Wiki routen; Vermietung, Portfolio und weitere persönliche Themen nach Aufgabenrelevanz verknüpfen. Bisher nur Pfad/Existenz inventarisiert. | geplant; lokal gepflegt |
-| P1 | `private/README.md` | Privater Einstieg | Zum gemeinsamen Wiki routen; Vermietung, Portfolio und weitere persönliche Themen nach Aufgabenrelevanz verknüpfen. Bisher nur Pfad/Existenz inventarisiert. | geplant; lokal gepflegt |
-| P1 | `Projects/NCG/AGENTS.md` | Projektkontext-Routing | Projektbezug und Wiki-Synthesen verlinken; NCG-Domänengrenze nicht durch allgemeinen Wiki-Kontext erweitern. | geplant; lokal gepflegt |
-| P2 | `_shared/shared-ai-docs/skills-repo/skills/build-codex-automations/SKILL.md` | Betriebsänderungen | Wiki-/QMD-Helper als existierendes Betriebsbeispiel referenzieren; keine automatische Wiki-Pflege bei beliebigen Automationsaufträgen. | geplant; lokal gepflegt |
-| P2 | `_shared/shared-ai-docs/skills-repo/skills/write-agents-md/SKILL.md` | Künftige Agent-Einstiege | Zentrale Wiki-Routingreferenz als optionalen lokalen Einstieg berücksichtigen; keine Vollkopie des Playbooks. | geplant; lokal gepflegt |
-| P2 | `_shared/shared-ai-docs/skills-repo/skills/resume-codex-session/SKILL.md` | Session-Fortsetzung | Session-Wiederaufnahme behalten; nach verifiziertem Session-Kontext bei fachlichen Synthesefragen auf Wiki-Router verweisen. | geplant; lokal gepflegt |
-| P2 | `_shared/shared-ai-docs/skills-repo/skills/improve-skills/SKILL.md` | Skill-Retrospektive | Wiki-Nutzung bei konkreten Retrieval-Lücken prüfen; Session-Bootstrap weiterhin zuerst. | geplant; lokal gepflegt |
-| P2 | `_shared/shared-ai-docs/skills-repo/skills/rag-documentation-research/references/runtime-transfer.md` | Runtime-Umzug | Wiki-Konfiguration, Compiler-Runtime und externe generierte Ausgabe zusätzlich zu QMD erklären. | geplant; lokal gepflegt |
-| P2 | `_shared/shared-ai-docs/skills-repo/vendor/mattpocock/.agents/skills/research/SKILL.md` | Allgemeiner Vendor-Skill | Lokales DanielsVault-Routing im aufrufenden Router ergänzen; Vendor-Original nicht mit Mac-Pfaden spezialisieren. | geplant; Vendor; nicht direkt ändern |
-| P2 | `_shared/shared-ai-docs/skills-repo/vendor/mattpocock/.agents/skills/domain-modeling/SKILL.md` | Allgemeiner Vendor-Skill | Lokales DanielsVault-Routing im aufrufenden Router ergänzen; Vendor-Original nicht mit Mac-Pfaden spezialisieren. | geplant; Vendor; nicht direkt ändern |
-| P2 | `_shared/shared-ai-docs/skills-repo/vendor/mattpocock/.agents/skills/codebase-design/SKILL.md` | Allgemeiner Vendor-Skill | Lokales DanielsVault-Routing im aufrufenden Router ergänzen; Vendor-Original nicht mit Mac-Pfaden spezialisieren. | geplant; Vendor; nicht direkt ändern |
+| Priorität | Datei | Rolle / konkretes Routing | Status |
+|---|---|---|---|
+| P0 | `skills-repo/skills/rag-documentation-research/SKILL.md` | QMD, optionale kuratierte Notizen, Quellencheck und direkte Originalprüfung | aktualisiert |
+| P0 | `skills-repo/skills/qmd/SKILL.md` | Recherche- und Indexoperation auswählen; keine implizite Wiki-Pflege | aktualisiert |
+| P0 | `skills-repo/skills/maintain-llm-wiki/SKILL.md` | Gemeinsamer ausdrücklicher Pflegeauftrag mit direkten Originalen | implementiert und geprüft |
+| P0 | `skills-repo/skills/qmd/references/scheduled-index-maintenance.md` | QMD-only-Tagesjob unabhängig von Wiki-Pflege | QMD-only; Konfiguration hier nicht geändert |
+| P0 | `.github/copilot-instructions.md` | Zentralen Recherchefluss verlinken | aktualisiert |
+| P0 | `README.md` | Direkte Wiki-Pflege und Betrieb verlinken | aktualisiert |
+| P0 | `docs/rag/README.md`, `docs/rag/index.md`, `docs/rag/operating-model-rag-qmd.md` | QMD-Recherche und direkte Wiki-Pflege erklären | aktualisiert |
+| P0 | `docs/rag/llm-wiki.md` | Aktiver Seiten-/Quellenvertrag mit ausführbaren Beispielen | aktualisiert |
+| P1 | `CONTEXT.md`, `docs/adr/0018-agent-managed-markdown-wiki.md` | Begriffe und akzeptierte Entscheidung | aktualisiert |
+| P1 | `AGENTS.md` | Startup und Requirement-Autorität; kurzer optionaler Rechercheverweis | weiterer Verweis geplant |
 
-## Weitere Oberflächen und Grenzen
+`~/.codex/skills/<name>` ist bei lokal gepflegten Skills der bestehende globale Symlink auf die kanonische Skilldatei. Aliase sind keine weiteren Pflegeziele. Vendor-Skills werden nicht mit Mac-spezifischem Routing überschrieben. Die tatsächliche Verfügbarkeit des neuen Skills wird in der [Umstellungsevidenz](llm-wiki-verification-2026-10-02.md) geprüft.
 
-- `~/.codex/automations/update-qmd-index-daily/automation.toml`: aktiver Auslöser, in dieser Session aktualisiert. `memory.md` enthält Laufresultate; kein Retrieval-Playbook hineinkopieren. Andere Fachautomationen bleiben unverändert.
-- `~/.codex/skills/<name>` löst bei den lokalen Skills auf `skills-repo/skills` auf. Aliase sind keine zusätzlichen Pflegeziele. Die drei oben genannten allgemeinen Skills liegen tatsächlich unter `skills-repo/vendor/mattpocock/.agents/skills`.
-- `~/.codex/AGENTS.md` existiert, ist derzeit leer. Ein globaler Mac-spezifischer Verweis wäre erst nach der P0-Einführung sinnvoll; nicht als Ersatz für Repo-Routing verwenden. `_ops/codex-global/AGENTS.md` existiert nicht und wurde nicht als vermeintlicher Treffer aufgenommen.
-- `Meetings/Assistant Context/` und weitere `Projects/**/AGENTS.md` sind eine zweite, projektweise Einführungsstufe. Kein pauschales Umschreiben generierter Meeting-Kontexte oder privater Projektdateien. Der zentrale Vault-Router deckt die erste Einführung ab.
-- Historische OpenSpec-Changes, Abnahmekopien und alte Research-Berichte nicht nachträglich auf aktuelle Betriebsversprechen umschreiben. Die bestehende `contextual-llm-wiki`-Spec und ADR 0009 bleiben Grundlagen; die neue Betriebsanforderung liegt im Change `operate-contextual-llm-wiki`.
-- `qmd-collections.json` beschreibt Indexabdeckung, keine Agent-Routing-Anweisung. Die Wiki-eigenen Collections gehören weiterhin ihrem Teilmanifest.
+## Zusätzliche Einführung
 
-## Verifikation und Quellen
+Vault-, Fachrepo- und Projekt-Einstiege können bei passender Folgearbeit einen kurzen Verweis auf den zentralen Recherche-Skill und die direkte Pflege erhalten. Dazu gehören die `AGENTS.md`-/`README.md`-Dateien von Vault, Meeting Assistant, `ki-fuer-kmu`, `ncg-docs`, `probare-crm`, `sparkle`, `private` und Projektbindungen. Ihre aktuelle Einführung ist weiterhin geplant; in dieser Umstellung wird kein fremdes Repository oder generierter Meeting-Kontext pauschal umgeschrieben.
 
-QMD-Status und Collection-Liste erfolgreich. Lexikalische Suche `QMD` in `shared-ai-docs` lieferte Wartungsreferenz, Operating Model und Runtime-Transfer; in `vault-root`, `danielsvault-rag`, `ncg-agents` die Runtime-Anleitungen. Ausgewählte Quelltexte wurden direkt geprüft. Kandidaten wurden ergänzend über die acht bekannten Git-Wurzeln (`git ls-files`) und genaue Pfade auf Existenz verifiziert; kanonische Skill-Pfade über Symlink-Auflösung. Keine inhaltliche Privat-Recherche. Die Liste ist ein priorisierter Katalog zentraler Einstiege, keine Behauptung eines Volltextaudits sämtlicher Unterordner.
+Das Originalcollection-Manifest beschreibt Indexabdeckung. Die aktive Wiki-Collection `contextual-wiki-common` enthält kuratierte Seiten am gemeinsamen Pfad; alte wiki-eigene Spiegel- und Abnahmecollections sind entfernt. Der tägliche QMD-Job behält seine Konfiguration. Die aktuelle Spezifikation und der Abschlussnachweis beschreiben den direkten Markdown-Ablauf.
 
-Abnahmekriterium für die spätere Einführung: eine Synthesefrage nutzt gültige Wiki-Evidenz, eine geänderte Fachquelle wird nicht als aktuelle Wiki-Evidenz ausgegeben, eine Repo-begrenzte Frage bleibt im gewählten Repo und eine fachlich passende Frage verknüpft private und andere Quellen, während irrelevante Quellen unabhängig vom Tätigkeitsbereich ungenutzt bleiben.
+## Nachweis und Grenzen
+
+Zentrale Dateien wurden für die Umstellung direkt gelesen und ihr Routing abgeglichen. Eine flächendeckende Prüfung sämtlicher Fachrepo-Einstiege wird hier nicht behauptet. Erfolgskriterium für aktuelles Routing: eine gewöhnliche Suche prüft Originale ohne zu speichern; eine Wiki-Seite mit geändertem Original wird nicht als aktuell zertifiziert; ausdrückliche Quellenlimits gelten auch für gemeinsame Synthesen. Der konkrete Helper-, Backup- und aktive Seitennachweis liegt im [Umstellungsbericht](llm-wiki-verification-2026-10-02.md).

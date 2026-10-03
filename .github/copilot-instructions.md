@@ -1,8 +1,8 @@
 # Copilot Instructions (shared-ai-docs)
 
-## WikiQuery Context Entry
+## DanielsVault Documentation Retrieval
 
-For knowledge-context searches, follow [the central WikiQuery research flow](../skills-repo/skills/rag-documentation-research/SKILL.md). Start with the common wiki, pass explicit task/source limits, inspect freshness and follow original-source references. QMD remains internal and available for index operations/diagnostics. Report unavailable WikiQuery instead of silently bypassing it. Already named primary files may be read directly; `private` is a subject domain.
+For DanielsVault documentation searches, follow [the central documentation research flow](../skills-repo/skills/rag-documentation-research/SKILL.md) and use QMD with task-relevant original-source collections as the standard retrieval entry. Verify findings against the original files and follow repository instructions and primary requirements. Optionally include curated `contextual-wiki-common` notes; check their direct source state before relying on them and read relevant current originals. Explicit wiki maintenance uses [maintain-llm-wiki](../skills-repo/skills/maintain-llm-wiki/SKILL.md); ordinary research does not save or maintain pages. WikiQuery is retired. Already named primary files may be read directly; `private` is a subject domain.
 
 ## Spec Review Auto-Resolve
 

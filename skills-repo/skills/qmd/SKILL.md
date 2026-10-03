@@ -1,6 +1,6 @@
 ---
 name: qmd
-description: Search, update, or maintain markdown knowledge-base indexes using QMD. USE WHEN users ask to search notes, find documents, look up information across markdown-heavy repos, update the local QMD index, refresh embeddings, or run scheduled QMD index maintenance. Route DanielsVault context questions to managed WikiQuery; use QMD directly for index operations, diagnostics, or an explicitly requested QMD command.
+description: Search, update, or maintain markdown knowledge-base indexes using QMD. USE WHEN users ask to search notes, find documents, look up information across markdown-heavy repos, update the local QMD index, refresh embeddings, or run scheduled QMD index maintenance. Use QMD as the standard retrieval entry for DanielsVault documentation; verify useful results against their original files; optional curated wiki notes require a source check before use.
 license: MIT
 metadata:
   author: tobi
@@ -17,9 +17,9 @@ Local search engine for markdown content.
 
 ## Choose the operation first
 
-For DanielsVault knowledge-context questions, use [the managed WikiQuery research flow](../rag-documentation-research/SKILL.md) first and follow its checked original-source references. Do not run QMD status/search/query as a competing context entry. Missing or stale evidence and WikiQuery outages stay visible through that flow. `private` names a subject domain, not a separate query permission.
+For DanielsVault documentation questions, use QMD as the standard retrieval entry. Choose relevant original-source collection(s) from `_shared/danielsvault-rag/qmd-collections.json` and pass `-c <collection>` for each. You may add the curated `contextual-wiki-common` collection when it helps the task; avoid unfiltered searches that mix in historical or copied wiki content. Follow useful hits to current originals, read the relevant sections, and honor repository instructions, task boundaries, and primary requirements. Before relying on a wiki note, run the read-only source check described in [maintain-llm-wiki](../maintain-llm-wiki/SKILL.md); `review` or `invalid` means use current originals and state the note's limitation. `unchanged` only describes original bytes, not claim correctness. Use `qmd search` for exact names and identifiers and `qmd query` for natural-language questions. A named or known original may be opened directly. `private` names a subject domain. Explicit wiki ingestion, update or review work uses the shared maintenance skill; ordinary research does not save pages or record a new review timestamp. WikiQuery is retired.
 
-The commands below are for index operations, diagnostics, an explicitly requested QMD command, or QMD use outside the configured DanielsVault wiki. They do not override WikiQuery routing. Never trigger indexing or embeddings merely to answer a context question.
+The commands below cover retrieval, index operations, diagnostics, and explicitly requested QMD commands. Never trigger indexing or embeddings merely to answer a context question.
 
 ## Runtime and automation guard
 
