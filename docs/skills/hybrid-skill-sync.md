@@ -20,7 +20,7 @@ Im Scope:
 - globale Skills fuer Codex, Claude, Agents und Copilot
 - gemeinsame Skills, die auf mehreren Geraeten genutzt werden sollen
 - Vendor-Skills, die global aktiv sein sollen
-- Runtime-Links unter `/Users/dh/.codex/skills`, `/Users/dh/.agents/skills`, `/Users/dh/.claude/skills` und dem globalen Copilot-Skillpfad
+- Runtime-Links unter `/Users/dh/.codex/skills`, `/Users/dh/.agents/skills`, `/Users/dh/.claude/skills` und den entsprechenden globalen Windows-Skillpfaden
 
 Nicht im Scope:
 
@@ -45,6 +45,7 @@ Repo-spezifische Skill-Setups sollen der jeweiligen Repo-Dokumentation folgen. D
       vercel/
     tools/
       sync-codex-skill-links.sh
+      sync-windows-skill-links.ps1
       install-git-hooks.sh
 ```
 
@@ -105,7 +106,7 @@ Die Council-Overlays erhalten den simulierten Codex-Standardmodus, explizit ange
 npx skills@latest add 0xNyk/council-of-high-intelligence --list
 ```
 
-Den aktualisierten Snapshot unter `vendor/custom/council-of-high-intelligence` uebernehmen und danach `sync-codex-skill-links.sh` ausfuehren. Eine direkte globale CLI-Installation wuerde die bestehende Linkstruktur und den bewusst ausgewaehlten Codex-Einstiegspunkt umgehen.
+Den aktualisierten Snapshot unter `vendor/custom/council-of-high-intelligence` uebernehmen und danach bei freigegebener Runtime-Aktualisierung den zum Betriebssystem passenden Skill-Sync ausfuehren. Eine direkte globale CLI-Installation wuerde die bestehende Linkstruktur und den bewusst ausgewaehlten Codex-Einstiegspunkt umgehen.
 
 ## Keine `active-skills/`
 
@@ -125,7 +126,7 @@ skills-repo/skills
 
 ## Tools
 
-### Codex-Links synchronisieren
+### Codex-Links synchronisieren (macOS/POSIX)
 
 ```bash
 /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
@@ -137,37 +138,54 @@ Das Tool:
 2. entfernt alte Codex-Links auf dieses Repo oder auf das fruehere `active-skills/`
 3. legt passende Links in `/Users/dh/.codex/skills` an
 
-### Git-Hooks installieren
+### Git-Hooks installieren (macOS/POSIX)
 
 ```bash
 /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/install-git-hooks.sh
 ```
 
-Das Tool installiert lokale `post-merge` und `post-checkout` Hooks im Git-Repo `shared-ai-docs`. Nach Pulls oder Branch-Wechseln werden die Codex-Skill-Links dadurch automatisch aktualisiert.
+Das Tool installiert lokale `post-merge` und `post-checkout` Hooks im Git-Repo `shared-ai-docs`. Nur in einem freigegebenen normalen Checkout mit `.git`-Verzeichnis ausfuehren, nicht in Worktrees oder auf Windows. Nach Pulls oder Branch-Wechseln werden die Codex-Skill-Links dadurch automatisch aktualisiert.
 
 ## Windows-Zielsetup
 
-Auf Windows soll der Copilot-Skillpfad auf dieselbe aktive Liste zeigen:
+Auf Windows mit `git config core.symlinks=false` sind Git-Symlinks im Checkout
+nur Textdateien. Eine einzelne Junction von `%USERPROFILE%\.copilot\skills`
+auf `skills-repo\skills` wuerde deshalb Vendor-Skills und den `council`-Einstieg
+nicht lauffaehig machen. Wenn native Symlinks Administratorrechte erfordern,
+verwendet der Windows-Sync stattdessen Junctions ohne Administratorrechte und
+loest die Git-Linktexte gegen die Vendor-Quellen auf:
 
 ```text
-%USERPROFILE%\.copilot\skills -> <repo>\skills-repo\skills
+%USERPROFILE%\.copilot\skills\<skill-name> -> <repo>\skills-repo\skills\<skill-name>
+                                                  oder <repo>\skills-repo\vendor\...
+%USERPROFILE%\.agents\skills -> %USERPROFILE%\.copilot\skills
+%USERPROFILE%\.claude\skills -> %USERPROFILE%\.copilot\skills
+%USERPROFILE%\.codex\skills\<skill-name> -> dieselbe Skill-Quelle
 ```
 
-Je nach Firmenrichtlinie sollte dafuer eine Junction oder ein Directory Symlink verwendet werden.
+`council` braucht bei einem Checkout ohne native Symlinks eine kleine
+Runtime-Projektion: `SKILL.md` wird aus der kanonischen Vendor-Datei kopiert;
+`agents`, `configs` und `scripts` bleiben Junctions auf die Vendor-Quellen.
+`skills-repo\skills` bleibt die **einzige aktive Quellliste**; die Runtime-Pfade
+sind nur daraus abgeleitete Links und werden nicht im Git-Repo gepflegt.
 
-Beispiel:
+Bei freigegebener Runtime-Aktualisierung aus dem Repository-Root installieren
+oder nach einem Pull/Branch-Wechsel aktualisieren. Ein reiner Quellcode-PR im
+Worktree autorisiert keine Aenderung globaler Runtime-Links:
 
 ```powershell
-$RepoSkills = "<repo>\skills-repo\skills"
-$Copilot = "$env:USERPROFILE\.copilot\skills"
-
-if (Test-Path $Copilot) {
-  Rename-Item $Copilot "$Copilot.bak"
-}
-
-New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.copilot" | Out-Null
-cmd /c mklink /J "$Copilot" "$RepoSkills"
+powershell.exe -NoProfile -File .\skills-repo\tools\sync-windows-skill-links.ps1
 ```
+
+Das Script behaelt fremde Skills und Codex-Systemskills bei, ersetzt keine
+bestehenden echten Skill-Ordner und entfernt nur veraltete Junctions auf
+dieses Repo. Ein unbekannter Namenskonflikt oder ein defektes Vendor-Ziel
+fuehrt zu einem Fehler statt zum Ueberschreiben. Ein Link in die abgeleitete
+Copilot-Runtime gilt nur mit dem vorhandenen Sync-Marker und exakt passendem
+kanonischen Quellpfad als verwaltet, nicht allein durch seinen Runtime-Ort.
+Anders als die Mac-Hooks
+laeuft der Windows-Sync nicht automatisch nach einem Pull; bei neuen oder
+entfernten Skills sowie Council-Updates das Script erneut ausfuehren.
 
 ## Arbeitsweise
 
@@ -183,8 +201,8 @@ cmd /c mklink /J "$Copilot" "$RepoSkills"
 1. Zuerst unterscheiden, ob `skills-repo/vendor/<source>` ein eigener Git-Checkout, ein ueber eine Lockdatei gepinnter Snapshot oder eine Legacy-Kopie ohne Lockdatei ist.
 2. Einen Git-Checkout innerhalb seiner eigenen Repo-Grenze aktualisieren. Einen gepinnten Snapshot nicht wie einen Checkout behandeln und nicht blind mit dem neuen Upstream-Stand ueberschreiben. Bei einer Legacy-Kopie zuerst den nachfolgenden Provenienz-Bootstrap abschliessen.
 3. Weil aktive globale Vendor-Skills in `skills-repo/skills` als Links auf Vendor-Quellen liegen, sieht der aktive Skill die neue Vendor-Version sofort.
-4. Nach einem Pull oder Branch-Wechsel aktualisieren die installierten Hooks die Codex-Links.
-5. Wenn neue aktive Skills hinzukommen, `sync-codex-skill-links.sh` ausfuehren oder die Hooks installieren.
+4. Auf dem Mac aktualisieren die installierten Hooks nach einem Pull oder Branch-Wechsel die Codex-Links. Auf Windows den Windows-Sync erneut ausfuehren.
+5. Wenn neue aktive Skills hinzukommen, den zum Betriebssystem passenden Sync ausfuehren oder auf dem Mac die Hooks installieren.
 
 ### Legacy-Kopie ohne Lockdatei bootstrapen
 
@@ -228,7 +246,7 @@ Nur konfliktfreie Ergebnisse in den Staging-Baum uebernehmen. Bei Konflikten, Up
 5. Die neue Lockdatei nach ihrer bestehenden Semantik erzeugen. Wenn ihre Hashes kanonischen Upstream abbilden, aus dem unmodifizierten neuen Upstream-Baum hashen; lokale Overlays separat durch einen erwarteten Vendor/Upstream-Diff pruefen.
 6. Neue, entfernte und umbenannte Skills sowie direkte Skill-Abhaengigkeiten ermitteln. Fuer jeden neuen oder aktualisierten Einstiegspunkt dessen direkte Skill-Aufrufe und verlinkte Referenzen pruefen. Formulierungen wie "always call", "requires" oder ein namentlich verwendetes Primitiv gelten als notwendige Abhaengigkeit; rein beschreibende Beispiele nicht. Jede notwendige Abhaengigkeit muss im gestagten Vendor-Snapshot vorhanden und bei Aufruf ueber den Skillnamen unter `skills-repo/skills` aktiv sein, oder der Einstiegspunkt muss einen dokumentierten eigenstaendigen Ersatz enthalten. Bei fehlender notwendiger Abhaengigkeit vor der Aktivierung anhalten und Vendor-Version, fehlenden Link oder eine ausdruecklich Daniel-eigene Adaption klaeren. Unter `skills-repo/skills` nur Links aendern, deren bestehendes Ziel nachweislich zu diesem Vendor gehoert. Vor dem Entfernen das exakte erwartete Linkziel pruefen; Daniel-eigene Ordner und Links anderer Vendoren erhalten.
 7. Erst nach erfolgreichen Merge-, Lock- und Link-Pruefungen den Staging-Baum auf den exakt validierten Vendor-Zielpfad anwenden. Destruktive Synchronisierung wie `rsync --delete` nie direkt aus einer ungeprueften Quelle oder gegen einen breiten beziehungsweise unaufgeloesten Zielpfad ausfuehren.
-8. Danach `sync-codex-skill-links.sh` ausfuehren und mindestens Folgendes verifizieren:
+8. Danach den zum Betriebssystem passenden Skill-Sync ausfuehren und mindestens Folgendes verifizieren:
 
 - gepinnter `sourceRef` entspricht dem ausgewaehlten neuen Upstream-Ref
 - Lock-Hashes entsprechen dem kanonischen Upstream nach der dokumentierten Semantik
@@ -240,10 +258,11 @@ Nur konfliktfreie Ergebnisse in den Staging-Baum uebernehmen. Bei Konflikten, Up
 
 ### Globale Vendor-Skills lokal anpassen
 
-Vendor-Skills, die direkt als Link aus `skills-repo/skills` auf `vendor/...` zeigen, sollen nicht direkt im aktiven Pfad angepasst werden. Fuer lokale Aenderungen gibt es zwei saubere Optionen:
+Vendor-Skills, die direkt als Link aus `skills-repo/skills` auf `vendor/...` zeigen, sollen nicht direkt im aktiven Pfad angepasst werden. Fuer lokale Aenderungen gibt es folgende Optionen:
 
 1. den Skill aus Vendor in einen eigenen Skill unter `skills-repo/skills/<new-name>` forken
 2. die Anpassung upstream im Vendor-Repo vornehmen
+3. bei ausdruecklicher Freigabe ein lokales Overlay direkt im verifizierten Vendor-Quellpfad pflegen, ohne den aktiven Link zu veraendern; `sourceRef` und kanonische Upstream-Hashes unveraendert lassen und die Overlay-Differenz separat pruefen
 
 ## Verifikation
 
@@ -270,6 +289,28 @@ find -L /Users/dh/.codex/skills -mindepth 1 -maxdepth 2 -name SKILL.md -print
 
 Erwartung: fuer jeden aktiven globalen Skill in `skills-repo/skills` gibt es einen passenden Codex-Link, ausgenommen Codex-Systemskills, Plugin-Runtime-Skills und repo-spezifische Skills.
 
+### Windows-Runtime-Pfade
+
+Aus dem Repository-Root fuer jeden aktiven Skill den lesbaren Einstiegspunkt
+in allen vier globalen Runtimes pruefen:
+
+```powershell
+$names = (Get-ChildItem .\skills-repo\skills -Force).Name
+foreach ($client in @('.copilot', '.agents', '.claude', '.codex')) {
+  foreach ($name in $names) {
+    $manifest = Join-Path $env:USERPROFILE "$client\skills\$name\SKILL.md"
+    if (-not (Test-Path -LiteralPath $manifest -PathType Leaf) -or
+        (Get-Content -LiteralPath $manifest -TotalCount 1) -ne '---') {
+      throw "Nicht nutzbar: $manifest"
+    }
+  }
+}
+```
+
+Die Junctions fuer `.agents\skills` und `.claude\skills` zeigen auf
+`.copilot\skills`; alle `SKILL.md` Dateien enthalten echte Frontmatter statt
+Git-Linktext. `git status --short` im Repository bleibt unveraendert.
+
 ### Kein Aggregationsordner
 
 ```bash
@@ -295,8 +336,8 @@ Erwartung:
 ## Akzeptanzkriterien
 
 1. `skills-repo/skills` ist die einzige aktive gemeinsame globale Skill-Liste.
-2. `/Users/dh/.agents/skills` und `/Users/dh/.claude/skills` zeigen auf `skills-repo/skills`.
-3. `/Users/dh/.codex/skills` enthaelt Links fuer die aktiven globalen Skills aus `skills-repo/skills`.
+2. Auf dem Mac zeigen `/Users/dh/.agents/skills` und `/Users/dh/.claude/skills` auf `skills-repo/skills`; auf Windows zeigen die entsprechenden Pfade auf die daraus abgeleitete Copilot-Runtime-Liste.
+3. Die globalen Codex-Skillpfade enthalten Links fuer alle aktiven globalen Skills aus `skills-repo/skills`, auch bei Git-Checkouts ohne native Symlinks.
 4. Alle global aktivierten Matt-Pocock-Vendor-Skills sind unter `skills-repo/skills` aktiv und zeigen per Link auf `skills-repo/vendor/mattpocock/.agents/skills/...`.
 5. `skills-repo/active-skills` existiert nicht.
 6. Die Dokumentation beschreibt denselben Zustand, den die lokalen Pfade tatsaechlich verwenden.

@@ -9,7 +9,7 @@ Diese Seite sammelt die Dokumentation fuer gemeinsame Agent-Skills, lokale Runti
 - [Repository-lokale UX/UI-Skills](../../.codex/skills/README.md)
   Impeccable und Vercels Web Design Guidelines für dieses Repository, getrennt
   von der gemeinsamen globalen Skill-Sammlung.
-- [Hybrid Skill Sync fuer private und Arbeitsgeraete](/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md)
+- [Hybrid Skill Sync fuer private und Arbeitsgeraete](hybrid-skill-sync.md)
   Zielbild und Migrationspfad fuer ein Git-basiertes Skill-Repo mit lokalen Runtime-Links fuer Agenten und GitHub Copilot.
 
 ## Eigene Workflow-Skills

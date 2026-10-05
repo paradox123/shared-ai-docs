@@ -7,24 +7,25 @@ description: Install, import, update, or activate global/shared skills from exte
 
 ## Overview
 
-Use this skill as a global-skill setup guardrail. The canonical global active skill list is `skills-repo/skills`; external global vendor content belongs under `skills-repo/vendor`; Codex links are synchronized from the global active list.
+Use this skill as a global-skill setup guardrail. The canonical global active skill list is `skills-repo/skills`; external global vendor content belongs under `skills-repo/vendor`; runtime links are synchronized from the global active list with the host's existing helper.
 
 This setup does not apply to repo-specific skills. If the user wants skills installed or configured for one repository only, follow that repository's `AGENTS.md`, README, local `.agents/skills`, local `.codex/skills`, or other repo-local convention instead.
 
 ## Canonical Files
 
-Before installing or changing global vendor skills, read:
+For a global/shared request, resolve the configured shared-ai-docs checkout or authorized worktree for the current host; do not assume a macOS home path or switch to another checkout. Confirm that it contains `skills-repo/skills`, `skills-repo/vendor` and `docs/skills/hybrid-skill-sync.md`, then verify its Git root. If the canonical checkout cannot be resolved, stop and ask rather than invent a second global source.
+
+Before installing or changing global vendor skills, read [hybrid-skill-sync.md](../../../docs/skills/hybrid-skill-sync.md) in that checkout. It owns runtime mappings, host-specific verification and vendor provenance mechanics.
+
+Use these existing repo-relative tools instead of inventing parallel installers or runtime paths:
 
 ```text
-~/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md
+Windows: skills-repo\tools\sync-windows-skill-links.ps1
+macOS/POSIX: skills-repo/tools/sync-codex-skill-links.sh
+macOS/POSIX hooks: skills-repo/tools/install-git-hooks.sh
 ```
 
-Use these tools instead of inventing parallel runtime paths:
-
-```text
-~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
-~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/install-git-hooks.sh
-```
+On Windows, Git may check out symlinks as text files (`core.symlinks=false`). Use the Windows helper to resolve vendor entrypoints and derive runtime Junctions without elevation; a single Junction to `skills-repo\skills` does not make those placeholders usable. Keep detailed mechanics in the canonical documentation.
 
 ## Required Workflow
 
@@ -34,18 +35,21 @@ Use these tools instead of inventing parallel runtime paths:
 - Repo-specific skill setup: do not apply the global `skills-repo/skills` policy. Work inside the target repo, read its local agent instructions, and keep the skill local to that repo unless the user explicitly asks to promote it globally.
 - Ambiguous request: inspect the current cwd/repo context and ask only if the scope cannot be inferred.
 
-2. Confirm the global skills git root before global edits:
+2. Confirm the resolved global skills Git root before global edits. Use the current host's shell and the resolved path, not a hard-coded home directory:
 
 ```bash
-git -C ~/Documents/DanielsVault/_shared/shared-ai-docs rev-parse --show-toplevel
+git -C "$shared_repo" rev-parse --show-toplevel
+git -C "$shared_repo" status --short
+find "$shared_repo/skills-repo/skills" -mindepth 1 -maxdepth 1 \( -type d -o -type l \) -exec basename {} \; | sort
 ```
 
-3. Inspect current global state before changing anything:
-
-```bash
-git -C ~/Documents/DanielsVault/_shared/shared-ai-docs status --short
-find ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills -mindepth 1 -maxdepth 1 \( -type d -o -type l \) -exec basename {} \; | sort
+```powershell
+git -C $SharedRepo rev-parse --show-toplevel
+git -C $SharedRepo status --short
+Get-ChildItem -LiteralPath (Join-Path $SharedRepo 'skills-repo\skills') -Force | Sort-Object Name | Select-Object Name, LinkType, Target
 ```
+
+3. Inspect the active entries and their actual source ownership before changing anything. On Windows, include Git symlink-text files in that inventory; do not mistake them for owned skill directories or write through them into vendor content.
 
 4. Classify the vendor source before updating it:
 
@@ -61,7 +65,7 @@ find ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills -mindept
 skills-repo/skills/<skill-name> -> ../vendor/<vendor-path>/<skill-name>
 ```
 
-Use a normal directory in `skills-repo/skills` only for Daniel-owned global skills. Use a symlink for vendor-managed global skills so future vendor pulls update the active skill immediately.
+Use a normal directory in `skills-repo/skills` only for Daniel-owned global skills. Use a Git symlink for vendor-managed global skills so future vendor pulls update the active source immediately. On Windows, preserve the Git link entry and let the existing sync helper resolve its checked-out representation; do not require elevation or convert source entries into runtime Junctions.
 
 7. If the vendor has multiple agent-specific entrypoints, choose the Codex-specific entrypoint for Codex-facing `SKILL.md` when one exists. Example: `council/SKILL.md` points to the vendor's `SKILL.codex.md`.
 
@@ -72,17 +76,25 @@ Use a normal directory in `skills-repo/skills` only for Daniel-owned global skil
 - If a required sibling is absent, stop before activation. Reconcile the vendor version, activate the missing sibling, or create an explicitly Daniel-owned adaptation; do not leave a router active with a known missing primitive and do not silently rewrite vendor-managed files through active symlinks.
 - Record the checked dependency set and any optional-versus-required judgment in the update evidence.
 
-9. After changing `skills-repo/skills`, synchronize Codex:
+9. Synchronize only when runtime updates are authorized, using the checkout intended to own the live runtime links. Source-only work in an isolated worktree does not authorize pointing global runtimes at that worktree. Run the host's sync from the resolved repository root:
 
-```bash
-~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
+```powershell
+powershell.exe -NoProfile -File .\skills-repo\tools\sync-windows-skill-links.ps1
 ```
 
-10. If hooks are missing or the setup was freshly cloned, install them:
+On macOS/POSIX:
 
 ```bash
-~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/install-git-hooks.sh
+./skills-repo/tools/sync-codex-skill-links.sh
 ```
+
+10. On macOS/POSIX, install missing hooks only in an authorized main checkout whose `.git` is a directory:
+
+```bash
+./skills-repo/tools/install-git-hooks.sh
+```
+
+Do not run that Bash hook installer in a worktree or on Windows. Windows sync is manual after pulls or branch changes; rerun it for added/removed skills and vendor entrypoint updates as documented in the canonical workflow.
 
 ## Bootstrapping A Legacy Copied Snapshot
 
@@ -95,7 +107,7 @@ Use this branch when copied vendor content exists but no lock identifies its pre
 5. Create the initial lock in staging. Record the old base as `reconstructedPreviousRef`, record the selected new upstream commit as `sourceRef`, preserve canonical-upstream hash semantics, and inventory merged local content separately under the lock's overlay field.
 6. Continue with the pinned-snapshot workflow only after the reconstructed base, overlay inventory, staged lock, and target path all validate.
 
-The detailed provenance contract is maintained in `~/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md` under “Legacy-Kopie ohne Lockdatei bootstrapen”.
+Use the canonical documentation's "Legacy-Kopie ohne Lockdatei bootstrapen" section for the detailed provenance contract.
 
 ## Updating An Existing Pinned Snapshot
 
@@ -110,7 +122,7 @@ Use this branch when `skills-repo/vendor/<vendor-name>/` contains copied vendor 
 7. Apply the staged snapshot to the exact validated vendor directory only after merge and link checks pass. Never run `rsync --delete` or an equivalent destructive copy directly from an unvalidated source or against a broad/unresolved target.
 8. Verify the pinned ref, canonical hashes, expected overlay-only differences, active vendor skill-name set, removed and added runtime links, broken links, and `git diff --check` before finishing.
 
-The detailed lock and overlay contract is maintained in `~/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md` under “Gepinnte Vendor-Snapshots sicher aktualisieren”.
+Use the canonical documentation's "Gepinnte Vendor-Snapshots sicher aktualisieren" section for the detailed lock and overlay contract.
 
 ## Hard Rules
 
@@ -118,29 +130,18 @@ The detailed lock and overlay contract is maintained in `~/Documents/DanielsVaul
 - Do not make `~/.codex/skills` the source of truth.
 - Do not apply this global setup to repo-specific skill folders.
 - Do not copy global vendor skills into `skills-repo/skills` when a symlink to `vendor/...` can preserve update behavior.
-- Do not edit a vendor-managed skill through the active symlink unless the user explicitly wants to patch the vendored source. For local adaptations, fork it into a Daniel-owned skill under `skills-repo/skills/<new-name>`.
+- Do not edit vendor-managed content through an active entrypoint. Apply an explicitly authorized local overlay only at the verified vendor source, preserving active links and canonical upstream hash semantics; otherwise fork a local adaptation into a Daniel-owned skill under `skills-repo/skills/<new-name>`.
 - Do not overwrite unrelated dirty work in `shared-ai-docs`.
 
 ## Verification
 
-Run these checks before finishing:
-
-```bash
-test ! -e ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/active-skills
-readlink ~/.agents/skills
-readlink ~/.claude/skills
-find -L ~/.codex/skills -mindepth 1 -maxdepth 2 -name SKILL.md -print | sed 's#/SKILL.md$##' | sed 's#^.*/skills/##' | sort
-find ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills -maxdepth 1 -type l -exec sh -c 'for p do [ -e "$p/SKILL.md" ] || echo "broken active skill: $p -> $(readlink "$p")"; done' sh {} +
-find ~/.codex/skills -maxdepth 1 -type l -exec sh -c 'for p do [ -e "$p/SKILL.md" ] || echo "broken codex skill: $p -> $(readlink "$p")"; done' sh {} +
-```
-
-Expected:
+Run the current host's verification from the canonical documentation, not POSIX `readlink`/`find` commands on Windows. Verify:
 
 - `active-skills` is absent.
-- `.agents/skills` and `.claude/skills` point to `skills-repo/skills`.
-- Codex-visible skill names match the active list in `skills-repo/skills`.
+- On macOS/POSIX, `.agents/skills` and `.claude/skills` point to `skills-repo/skills`; on Windows they point to the derived Copilot runtime list.
+- Managed runtime-visible skill names and readable `SKILL.md` entrypoints match the active source list, preserving foreign skills and system/plugin entries.
 - Required sibling skills referenced by active vendor routers exist and are active when invoked by skill name, or the router documents a self-contained replacement.
-- Broken-link checks print nothing.
+- No managed runtime entrypoint contains unresolved Git link text or a broken target.
+- Source changes remain limited to the authorized scope and `git diff --check` passes.
 
-## References
-hybrid skill documentation: ~/Documents/DanielsVault/_shared/shared-ai-docs/docs/skills/hybrid-skill-sync.md
+For isolated Windows helper verification without live runtime changes, run `powershell.exe -NoProfile -File .\skills-repo\tests\test-sync-windows-skill-links.ps1` from the repository root. The test uses its own fixture source and user home.
