@@ -1,0 +1,55 @@
+{
+  "base": "fc70c24fd7282516556040412bd098911c95f0df",
+  "reviewed_candidate_tree": "bdadf6876c91b44a1d800bb4012854986656351a",
+  "files": [
+    {
+      "path": "openspec/changes/harden-ncg-wiki-review-checkpoints/.openspec.yaml",
+      "sha256": "1dfdca412094f24473d8b842866201ec26f200b29b17064b03f1e4982c35a7b9"
+    },
+    {
+      "path": "openspec/changes/harden-ncg-wiki-review-checkpoints/design.md",
+      "sha256": "fc548f398da73ef3aab11d1c4c5867a5da705cd13eaf24e142cc39334f0c55e9"
+    },
+    {
+      "path": "openspec/changes/harden-ncg-wiki-review-checkpoints/proposal.md",
+      "sha256": "f7351586c6928905c8525cb485d92089d438e78d1dc8919424251a1f1fae1e75"
+    },
+    {
+      "path": "openspec/changes/harden-ncg-wiki-review-checkpoints/specs/recoverable-wiki-review/spec.md",
+      "sha256": "1649df3e6548913b87040f497532f8481d019af88197b3ebdfdd35a0b828b831"
+    },
+    {
+      "path": "openspec/changes/harden-ncg-wiki-review-checkpoints/tasks.md",
+      "sha256": "5de7a646e879717b2ee434432777d39376c7aac433967143550f075e25dfab0d"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/references/codex-desktop-session-review.md",
+      "sha256": "4ba2a66ce9ea75bcbd8d0e30d69032debba9597449676886e12301277ca67b03"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/resolve_codex_sessions.py",
+      "sha256": "3386be6ba7ba606f9c0f14e9b7a323d3c360aaf2430d7269809015f3df79de6d"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/tests/test_resolve_codex_sessions.py",
+      "sha256": "5015019c1fe0596c50d4dd649d10fa9d94c08e72ce25378c98eb6b31238cd7ff"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/README.md",
+      "sha256": "0e5c8a5e680141979584271e1ba98277db0674718d8d929904738a210698e04a"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRun.cs",
+      "sha256": "efe509f08e09567f471dea77585af3c2cf10636a259d2f648330ec8eec7a80d9"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRunTests.cs",
+      "sha256": "9bdc1b5e83f8af2cb50f38f1ede96efacd3b764d0e30a1feea5c51f0e90e7749"
+    }
+  ],
+  "personal_automation_sha256": "4f49c7854a255ecc483673010db11a66cd0055cf9e35e37b52672306ca5d663a",
+  "memory_sha256_unchanged": "1c3fec3e3f8035bad1bcbdebc432b19ee8473c63ab080d9306c60f8d9c9958dd",
+  "baseline_extractor_sha256": "2f949cc434db2fb7f7e31e21d8eba72a3d842a5195cf438856a2c305ae705f84",
+  "excluded": "pre-existing wrapper extractor/test edits, skill-link edits, wrapper reference paragraph, unrelated scratch/caches; newly concurrent future batching/recovery/Docs-tip/planning work",
+  "generated_evidence": "This manifest and completion/review extracts are separate records excluded from reviewed source identity. Archive path mapping is in completion.md."
+}

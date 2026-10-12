@@ -10,6 +10,183 @@ SCRIPT = Path(__file__).parents[1] / "resolve_codex_sessions.py"
 
 
 class ResolveCodexSessionsCliTests(unittest.TestCase):
+    def test_rejects_snapshot_hash_mismatch_before_parsing_or_saving(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            snapshot_path = root / "review-index.jsonl"
+            snapshot_path.write_bytes(b"not a valid index\n")
+            saved_path = root / "copy.jsonl"
+
+            result = subprocess.run(
+                [
+                    sys.executable, str(SCRIPT), "--codex-home", str(root),
+                    "--prompt-last-run", "2026-07-27T06:00:00Z",
+                    "--index-snapshot", str(snapshot_path),
+                    "--expected-index-sha256", "0" * 64,
+                    "--save-index-snapshot", str(saved_path),
+                ],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(result.returncode, 1, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertEqual(
+                [entry["code"] for entry in output["diagnostics"]],
+                ["index_snapshot_hash_mismatch"],
+            )
+            self.assertNotIn("window", output)
+            self.assertNotIn("sessions", output)
+            self.assertFalse(saved_path.exists())
+
+    def test_replay_requires_a_valid_explicit_hash_pin(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            snapshot_path = root / "review-index.jsonl"
+            saved_path = root / "copy.jsonl"
+            cases = [
+                (["--index-snapshot", str(snapshot_path)],
+                 "--index-snapshot requires --expected-index-sha256"),
+                (["--index-snapshot", str(snapshot_path),
+                  "--expected-index-sha256", "invalid"],
+                 "--expected-index-sha256 must contain 64 hexadecimal digits"),
+                (["--expected-index-sha256", "0" * 64],
+                 "--expected-index-sha256 requires --index-snapshot"),
+            ]
+            for flags, message in cases:
+                with self.subTest(flags=flags):
+                    result = subprocess.run(
+                        [sys.executable, str(SCRIPT), "--codex-home", str(root),
+                         "--save-index-snapshot", str(saved_path), *flags],
+                        capture_output=True, text=True,
+                    )
+                    self.assertEqual(result.returncode, 2, result.stderr)
+                    self.assertIn(message, result.stderr)
+                    self.assertEqual(result.stdout, "")
+                    self.assertFalse(saved_path.exists())
+
+    def test_capture_preserves_an_existing_snapshot_and_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            index_path = root / "session_index.jsonl"
+            index_path.write_bytes(
+                b'{"id":"session-1","updated_at":"2026-07-27T07:00:00Z"}\n'
+            )
+            saved_path = root / "review-index.jsonl"
+            saved_path.write_bytes(b"original captured bytes\n")
+
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), "--codex-home", str(root),
+                 "--prompt-last-run", "2026-07-27T06:00:00Z",
+                 "--save-index-snapshot", str(saved_path)],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(result.returncode, 1, result.stderr)
+            self.assertEqual(saved_path.read_bytes(), b"original captured bytes\n")
+            output = json.loads(result.stdout)
+            self.assertEqual(
+                [entry["code"] for entry in output["diagnostics"]],
+                ["index_snapshot_save_failed"],
+            )
+            self.assertNotIn("window", output)
+            self.assertEqual(
+                sorted(path.name for path in root.iterdir()),
+                ["review-index.jsonl", "session_index.jsonl"],
+            )
+
+    def test_replays_same_snapshot_after_overflow_with_explicit_higher_limit(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            codex_home = root / ".codex"
+            sessions_day = codex_home / "sessions" / "2026" / "07" / "27"
+            sessions_day.mkdir(parents=True)
+            rows = [
+                {"id": "session-2", "updated_at": "2026-07-27T08:00:00Z"},
+                {"id": "session-1", "updated_at": "2026-07-27T07:00:00Z"},
+            ]
+            index_path = codex_home / "session_index.jsonl"
+            index_path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+            for row in rows:
+                records = [
+                    {"timestamp": row["updated_at"], "type": "session_meta",
+                     "payload": {"id": row["id"], "timestamp": row["updated_at"]}},
+                    {"timestamp": row["updated_at"], "type": "response_item",
+                     "payload": {"type": "message", "role": "assistant",
+                                 "phase": "final", "content": []}},
+                ]
+                (sessions_day / f"rollout-{row['id']}.jsonl").write_text(
+                    "".join(json.dumps(record) + "\n" for record in records)
+                )
+            snapshot_path = root / "review-index.jsonl"
+            base_command = [
+                sys.executable, str(SCRIPT), "--codex-home", str(codex_home),
+                "--prompt-last-run", "2026-07-27T06:00:00Z",
+            ]
+            captured = subprocess.run(
+                [*base_command, "--max-sessions", "1",
+                 "--save-index-snapshot", str(snapshot_path)],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(captured.returncode, 2, captured.stderr)
+            original = json.loads(captured.stdout)
+            index_path.unlink()
+
+            replayed = subprocess.run(
+                [*base_command, "--max-sessions", "2",
+                 "--index-snapshot", str(snapshot_path),
+                 "--expected-index-sha256", original["snapshot"]["sha256"]],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(replayed.returncode, 0, replayed.stderr)
+            replay = json.loads(replayed.stdout)
+            self.assertEqual(replay["snapshot"], original["snapshot"])
+            self.assertEqual(replay["cutoff"], original["cutoff"])
+            for field in ("start_exclusive", "end_inclusive", "cursor_to_persist"):
+                self.assertEqual(replay["window"][field], original["window"][field])
+            self.assertEqual(
+                [session["id"] for session in replay["sessions"]],
+                ["session-1", "session-2"],
+            )
+            self.assertTrue(replay["window"]["safe_to_persist"])
+            self.assertEqual(replay["window"]["carry_forward_to_persist"], [])
+
+    def test_saves_exact_captured_bytes_even_when_session_limit_is_exceeded(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            codex_home = root / ".codex"
+            codex_home.mkdir()
+            index_bytes = (
+                b'{"id":"session-2","updated_at":"2026-07-27T08:00:00Z"}\r\n'
+                b'\r\n'
+                b'{"id":"session-1","updated_at":"2026-07-27T07:00:00Z"}\r\n'
+            )
+            (codex_home / "session_index.jsonl").write_bytes(index_bytes)
+            saved_snapshot = root / "review-index.jsonl"
+
+            result = subprocess.run(
+                [
+                    sys.executable, str(SCRIPT),
+                    "--codex-home", str(codex_home),
+                    "--prompt-last-run", "2026-07-27T06:00:00Z",
+                    "--max-sessions", "1",
+                    "--save-index-snapshot", str(saved_snapshot),
+                ],
+                capture_output=True,
+                text=True,
+            )
+
+            self.assertTrue(saved_snapshot.exists(), result.stderr)
+            self.assertEqual(saved_snapshot.read_bytes(), index_bytes)
+            self.assertEqual(result.returncode, 2, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertFalse(output["window"]["safe_to_persist"])
+            self.assertEqual(output["sessions"], [])
+            self.assertIn(
+                {"code": "too_many_sessions", "count": 2, "max_sessions": 1},
+                output["diagnostics"],
+            )
+
     def test_help_distinguishes_recent_output_from_review_cutoff(self):
         result = subprocess.run(
             [sys.executable, str(SCRIPT), "--help"],
@@ -23,7 +200,7 @@ class ResolveCodexSessionsCliTests(unittest.TestCase):
         )
         self.assertIn("Explicit trusted review cutoff", result.stdout)
 
-    def test_returns_one_consistent_window_from_newest_structured_cutoff(self):
+    def test_processed_cutoff_selects_sessions_before_later_completion(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             codex_home = root / ".codex"
@@ -39,7 +216,7 @@ class ResolveCodexSessionsCliTests(unittest.TestCase):
                 {
                     "id": "session-ki",
                     "thread_name": "Keep ki-fuer-kmu docs up-to-date",
-                    "updated_at": "2026-07-27T06:18:00.356988Z",
+                    "updated_at": "2026-07-27T06:40:00Z",
                 },
             ]
             index_text = "".join(json.dumps(row) + "\n" for row in rows)
@@ -64,8 +241,9 @@ class ResolveCodexSessionsCliTests(unittest.TestCase):
             memory = root / "memory.md"
             memory.write_text(
                 "# Learn Memory\n\n"
-                "Last review: 2026-07-26T07:00:52.759124Z\n"
-                "Processed window end: 2026-07-26T06:00:00Z\n"
+                "Last review: 2026-07-27T07:07:00Z\n"
+                "Processed window end: 2026-07-27T06:15:00Z\n"
+                "Run time: 2026-07-27T07:08:00Z\n"
             )
 
             result = subprocess.run(
@@ -77,7 +255,7 @@ class ResolveCodexSessionsCliTests(unittest.TestCase):
                     "--memory",
                     str(memory),
                     "--prompt-last-run",
-                    "2026-07-26T07:00:50.878Z",
+                    "2026-07-27T07:10:00Z",
                     "--recent",
                     "120",
                 ],
@@ -89,11 +267,16 @@ class ResolveCodexSessionsCliTests(unittest.TestCase):
             output = json.loads(result.stdout)
             self.assertEqual(output["schema_version"], 1)
             self.assertEqual(
-                output["cutoff"]["chosen"], "2026-07-26T07:00:52.759124Z"
+                output["cutoff"]["chosen"], "2026-07-27T06:15:00Z"
+            )
+            self.assertFalse(output["cutoff"]["legacy_fallback"])
+            self.assertEqual(
+                [source["name"] for source in output["cutoff"]["sources"]],
+                ["memory.Processed window end"],
             )
             self.assertEqual(
                 output["window"]["end_inclusive"],
-                "2026-07-27T06:18:00.356988Z",
+                "2026-07-27T06:40:00Z",
             )
             self.assertEqual(
                 output["window"]["cursor_to_persist"],
@@ -102,11 +285,281 @@ class ResolveCodexSessionsCliTests(unittest.TestCase):
             self.assertTrue(output["window"]["safe_to_persist"])
             self.assertEqual(
                 [session["id"] for session in output["sessions"]],
-                ["session-qmd", "session-ki"],
+                ["session-ki"],
             )
             self.assertEqual(
                 output["snapshot"]["recent_index"][-1]["id"], "session-ki"
             )
+
+    def test_invalid_processed_cursor_fails_without_legacy_window(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "session_index.jsonl").write_text(
+                '{"id":"session-1","updated_at":"2026-07-27T08:00:00Z"}\n'
+            )
+            memory = root / "memory.md"
+            private_value = "private-malformed-checkpoint-" + ("x" * 200) + "Z"
+            memory.write_text(
+                "Processed window end: " + private_value
+                + "\nLast review: 2026-07-27T07:07:00Z\n"
+            )
+
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), "--codex-home", str(root),
+                 "--memory", str(memory),
+                 "--prompt-last-run", "2026-07-27T07:10:00Z"],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(result.returncode, 1, result.stdout)
+            self.assertNotIn(private_value, result.stdout + result.stderr)
+            output = json.loads(result.stdout)
+            self.assertNotIn("cutoff", output)
+            self.assertNotIn("window", output)
+            self.assertNotIn("sessions", output)
+            self.assertTrue(any(
+                diagnostic.get("code") == "invalid_memory_timestamp"
+                and diagnostic.get("field") == "Processed window end"
+                for diagnostic in output["diagnostics"]
+            ))
+
+    def test_empty_duplicate_or_ambiguous_processed_cursor_fails_closed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "session_index.jsonl").write_text(
+                '{"id":"session-1","updated_at":"2026-07-27T08:00:00Z"}\n'
+            )
+            memory = root / "memory.md"
+            processed_values = {
+                "empty": "Processed window end: ",
+                "duplicate": (
+                    "Processed window end: 2026-07-27T06:15:00Z\n"
+                    "Processed window end: 2026-07-27T06:15:00Z"
+                ),
+                "conflicting": (
+                    "Processed window end: 2026-07-27T06:15:00Z\n"
+                    "Processed window end: 2026-07-27T06:20:00Z"
+                ),
+                "multiple_values": (
+                    "Processed window end: 2026-07-27T06:15:00Z "
+                    "2026-07-27T06:20:00Z"
+                ),
+                "missing_timezone": (
+                    "Processed window end: 2026-07-27T06:15:00"
+                ),
+            }
+            for case, processed_text in processed_values.items():
+                with self.subTest(case=case):
+                    memory.write_text(
+                        "Last review: 2026-07-27T07:07:00Z\n"
+                        + processed_text
+                    )
+                    result = subprocess.run(
+                        [sys.executable, str(SCRIPT),
+                         "--codex-home", str(root), "--memory", str(memory),
+                         "--prompt-last-run", "2026-07-27T07:10:00Z"],
+                        capture_output=True, text=True,
+                    )
+
+                    self.assertEqual(result.returncode, 1, result.stdout)
+                    output = json.loads(result.stdout)
+                    self.assertNotIn("cutoff", output)
+                    self.assertNotIn("window", output)
+                    self.assertNotIn("sessions", output)
+                    self.assertTrue(any(
+                        diagnostic.get("field") == "Processed window end"
+                        for diagnostic in output["diagnostics"]
+                    ))
+
+    def test_valid_processed_cursor_ignores_invalid_legacy_boundaries(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            sessions_day = root / "sessions" / "2026" / "07" / "27"
+            sessions_day.mkdir(parents=True)
+            (root / "session_index.jsonl").write_text(
+                '{"id":"session-1","updated_at":"2026-07-27T06:40:00Z"}\n'
+            )
+            (sessions_day / "rollout-session-1.jsonl").write_text(
+                json.dumps({
+                    "timestamp": "2026-07-27T06:40:00Z",
+                    "type": "session_meta",
+                    "payload": {"id": "session-1"},
+                }) + "\n"
+            )
+            memory = root / "memory.md"
+            memory.write_text(
+                "Processed window end: 2026-07-27T06:15:00Z\n"
+                "Last review: invalid-completion\n"
+                "Run time: invalid-runtime\n"
+            )
+
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), "--codex-home", str(root),
+                 "--memory", str(memory),
+                 "--prompt-last-run", "invalid-scheduler-timestamp"],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertEqual(output["cutoff"]["chosen"], "2026-07-27T06:15:00Z")
+            self.assertFalse(output["cutoff"]["legacy_fallback"])
+            self.assertEqual(output["diagnostics"], [])
+            self.assertEqual([session["id"] for session in output["sessions"]],
+                             ["session-1"])
+            self.assertTrue(output["window"]["safe_to_persist"])
+
+    def test_historical_processed_fields_do_not_supply_current_cursor(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            sessions_day = root / "sessions" / "2026" / "07" / "27"
+            sessions_day.mkdir(parents=True)
+            (root / "session_index.jsonl").write_text(
+                '{"id":"session-1","updated_at":"2026-07-27T06:40:00Z"}\n'
+            )
+            (sessions_day / "rollout-session-1.jsonl").write_text(
+                json.dumps({
+                    "timestamp": "2026-07-27T06:40:00Z",
+                    "type": "session_meta",
+                    "payload": {"id": "session-1"},
+                }) + "\n"
+            )
+            memory = root / "memory.md"
+            headers = [
+                ("Processed window end: 2026-07-27T06:15:00Z\n"
+                 "Last review: 2026-07-27T07:07:00Z\n", False,
+                 "memory.Processed window end"),
+                ("Last review: 2026-07-27T06:15:00Z\n", True,
+                 "memory.Last review"),
+            ]
+            for header, legacy_fallback, expected_source in headers:
+                with self.subTest(legacy_fallback=legacy_fallback):
+                    memory.write_text(
+                        "# Review Memory\n\n" + header
+                        + "\n## Earlier review\n"
+                        "Processed window end: 2026-07-26T05:00:00Z\n"
+                    )
+                    result = subprocess.run(
+                        [sys.executable, str(SCRIPT),
+                         "--codex-home", str(root), "--memory", str(memory)],
+                        capture_output=True, text=True,
+                    )
+
+                    self.assertEqual(result.returncode, 0, result.stdout)
+                    output = json.loads(result.stdout)
+                    self.assertEqual(output["cutoff"]["chosen"],
+                                     "2026-07-27T06:15:00Z")
+                    self.assertEqual(output["cutoff"]["legacy_fallback"],
+                                     legacy_fallback)
+                    self.assertEqual(
+                        [source["name"] for source in output["cutoff"]["sources"]],
+                        [expected_source],
+                    )
+                    self.assertEqual(
+                        [session["id"] for session in output["sessions"]],
+                        ["session-1"],
+                    )
+                    self.assertTrue(output["window"]["safe_to_persist"])
+
+    def test_first_history_heading_excludes_processed_and_carry_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            sessions_day = root / "sessions" / "2026" / "07" / "27"
+            sessions_day.mkdir(parents=True)
+            rows = [
+                {"id": "session-old", "updated_at": "2026-07-27T05:00:00Z"},
+                {"id": "session-new", "updated_at": "2026-07-27T06:40:00Z"},
+            ]
+            (root / "session_index.jsonl").write_text(
+                "".join(json.dumps(row) + "\n" for row in rows)
+            )
+            for row in rows:
+                (sessions_day / f"rollout-{row['id']}.jsonl").write_text(
+                    json.dumps({
+                        "timestamp": row["updated_at"],
+                        "type": "session_meta",
+                        "payload": {"id": row["id"]},
+                    }) + "\n"
+                )
+            memory = root / "memory.md"
+            memory.write_text(
+                "## Historical review\n"
+                "Processed window end: 2026-07-27T06:10:00Z\n"
+                "Carry-forward sessions: "
+                '[{"id":"session-old","line_count":1,'
+                '"last_activity_at":"2026-07-27T05:00:00Z"}]\n'
+            )
+
+            result = subprocess.run(
+                [sys.executable, str(SCRIPT), "--codex-home", str(root),
+                 "--memory", str(memory),
+                 "--prompt-last-run", "2026-07-27T06:15:00Z"],
+                capture_output=True, text=True,
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout)
+            output = json.loads(result.stdout)
+            self.assertEqual(output["cutoff"]["chosen"], "2026-07-27T06:15:00Z")
+            self.assertTrue(output["cutoff"]["legacy_fallback"])
+            self.assertEqual(
+                [source["name"] for source in output["cutoff"]["sources"]],
+                ["prompt.Last run"],
+            )
+            self.assertEqual(output["window"]["carry_forward_from_memory"], [])
+            self.assertEqual(
+                [session["id"] for session in output["sessions"]],
+                ["session-new"],
+            )
+            self.assertTrue(output["window"]["safe_to_persist"])
+
+    def test_identifies_usable_legacy_cutoffs_when_processed_cursor_is_absent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            sessions_day = root / "sessions" / "2026" / "07" / "27"
+            sessions_day.mkdir(parents=True)
+            (root / "session_index.jsonl").write_text(
+                '{"id":"session-1","updated_at":"2026-07-27T06:40:00Z"}\n'
+            )
+            (sessions_day / "rollout-session-1.jsonl").write_text(
+                json.dumps({
+                    "timestamp": "2026-07-27T06:40:00Z",
+                    "type": "session_meta",
+                    "payload": {"id": "session-1"},
+                }) + "\n"
+            )
+            memory = root / "memory.md"
+            cases = [
+                ("Last review: 2026-07-27T06:15:00Z\n", "",
+                 ["memory.Last review"]),
+                ("", "2026-07-27T06:15:00Z", ["prompt.Last run"]),
+                ("Last review: 2026-07-27T06:10:00Z\n",
+                 "2026-07-27T06:15:00Z",
+                 ["memory.Last review", "prompt.Last run"]),
+            ]
+            for memory_text, prompt_last_run, expected_sources in cases:
+                with self.subTest(sources=expected_sources):
+                    memory.write_text(memory_text)
+                    result = subprocess.run(
+                        [sys.executable, str(SCRIPT),
+                         "--codex-home", str(root), "--memory", str(memory),
+                         "--prompt-last-run", prompt_last_run],
+                        capture_output=True, text=True,
+                    )
+
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    output = json.loads(result.stdout)
+                    self.assertEqual(output["cutoff"]["chosen"],
+                                     "2026-07-27T06:15:00Z")
+                    self.assertTrue(output["cutoff"]["legacy_fallback"])
+                    self.assertEqual(
+                        [source["name"] for source in output["cutoff"]["sources"]],
+                        expected_sources,
+                    )
+                    self.assertEqual(
+                        [session["id"] for session in output["sessions"]],
+                        ["session-1"],
+                    )
+                    self.assertTrue(output["window"]["safe_to_persist"])
 
     def test_resolves_only_the_newest_index_row_for_a_duplicate_session_id(self):
         with tempfile.TemporaryDirectory() as tmp:

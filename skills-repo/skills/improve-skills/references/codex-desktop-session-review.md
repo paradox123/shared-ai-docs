@@ -61,41 +61,11 @@ If another skill suggests a different startup order for a session-review automat
 
 Normalize `$CODEX_HOME` before any memory read. An unset `$CODEX_HOME` means use `~/.codex`; it is not evidence that Codex state lives elsewhere.
 
-Derive cutoff candidates from each present structured memory field (`Processed window end` and `Last review`) plus prompt `Last run:`. Normalize and compare all present candidates, then use the newest timestamp. Memory is authoritative only when its structured checkpoint is newer; never let stale memory widen a review that has a newer prompt timestamp.
+When a top-level `Processed window end:` exists, its valid timestamp is the sole authoritative cutoff. Later `Last review`, `Run time` and scheduler `Last run:` values describe execution timing and cannot extend the processed window. A present malformed, empty or ambiguous processed cursor is a blocker; do not fall back to a later field.
 
-Example cutoff parser:
+Only when the processed cursor is absent may the resolver use the existing legacy `Last review` or explicitly supplied trusted prompt boundary. Its output identifies this as `cutoff.legacy_fallback: true`; establish a processed-window cursor on the first successful review. Do not use a scheduled start as an assumed review boundary. Existing stored `Last review` values that represented completion time do not need to be rewritten to recover their gap: the next selection starts from the preserved processed cursor.
 
-```bash
-CODEX_HOME_RESOLVED="${CODEX_HOME:-$HOME/.codex}" python3 - <<'PY'
-from pathlib import Path
-from datetime import datetime, timezone
-import os, re
-mem = Path(os.environ["CODEX_HOME_RESOLVED"]) / "automations" / "<automation-id>" / "memory.md"
-text = mem.read_text() if mem.exists() else ""
-prompt_raw = "<prompt-last-run-or-empty>"
-
-def parse_ts(raw):
-    raw = str(raw).strip()
-    if raw.endswith("Z"):
-        raw = raw[:-1] + "+00:00"
-    m = re.match(r"^(.*\.)(\d+)([+-]\d\d:\d\d)$", raw)
-    if m:
-        raw = m.group(1) + m.group(2)[:6].ljust(6, "0") + m.group(3)
-    dt = datetime.fromisoformat(raw)
-    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
-
-candidates = []
-for field in ("Processed window end", "Last review"):
-    match = re.search(rf"{re.escape(field)}:\s*(\S+)", text)
-    if match:
-        candidates.append(match.group(1))
-if prompt_raw and not prompt_raw.startswith("<"):
-    candidates.append(prompt_raw)
-print(max(candidates, key=parse_ts) if candidates else "<missing-cutoff>")
-PY
-```
-
-Once the newer cutoff is known, use that single timeline. Do not run duplicate extractors for both the prompt header and memory cutoff.
+Use the shared resolver below for normalization and selection instead of constructing a second inline cutoff parser. Its `cutoff.chosen` and `cutoff.sources` are the selection receipt. Use that one timeline for extraction; do not run separate windows for memory and scheduler timestamps.
 
 Capture the review-window end from the same `session_index.jsonl` snapshot used for candidate selection, normally the greatest indexed `updated_at` visible in that snapshot. Filter evidence to `(cutoff, review_window_end]`, exclude the current maintenance thread from substantive evidence, and persist that captured watermark as `Processed window end`. Keep the actual completion time in a separate `Run time` field. Never use end-of-run wall clock as the processed cursor: sessions can arrive between the index scan and memory write, and advancing to completion time would skip them on the next run.
 
@@ -123,6 +93,7 @@ resolver_exit_status=0
     --codex-home "$CODEX_HOME_RESOLVED" \
     --memory "$MEMORY_PATH" \
     --prompt-last-run "$PROMPT_LAST_RUN" \
+    --save-index-snapshot "$RESOLVER_ARTIFACT_DIR/session_index.snapshot.jsonl" \
     --recent 0 \
     --compact \
     "$@"
@@ -132,7 +103,11 @@ printf 'resolver_artifact_dir=%s\nresolver_status=%s\n' \
   "$RESOLVER_ARTIFACT_DIR" "$resolver_exit_status"
 ```
 
-Use a temporary-directory template that ends in `XXXXXX`, and use a non-special status name such as `resolver_exit_status`; `status` is read-only in zsh. The printed artifact directory is cross-call state: reuse that exact quoted path after a yield or in a later tool call instead of scanning `/tmp` for the newest match. If the status file is absent, the status is nonzero, or the manifest is invalid, do not rerun the resolver and do not advance memory; inspect only bounded persisted diagnostics.
+Use a temporary-directory template that ends in `XXXXXX`, and use a non-special status name such as `resolver_exit_status`; `status` is read-only in zsh. The printed artifact directory is cross-call state: reuse that exact quoted path after a yield or in a later tool call instead of scanning `/tmp` for the newest match. If the status file is absent, the status is nonzero, or the manifest is invalid, do not refresh the live index or advance memory; inspect only bounded persisted diagnostics. The saved index contains local session titles and routing metadata; keep it in task-owned local artifacts and do not print or publish it.
+
+The default `--max-sessions 100` is a resolution-work bound, not a pagination limit. A `too_many_sessions` diagnostic leaves `sessions` empty; an empty evidence page from that manifest does not mean there was no work. If that is the only input problem, replay the saved index with `--index-snapshot "$RESOLVER_ARTIFACT_DIR/session_index.snapshot.jsonl"`, `--expected-index-sha256 '<snapshot.sha256 from the original manifest>'`, and an explicit `--max-sessions <diagnostic count>`. Keep the original cutoff, memory input, current-session exclusion and `--recent 0 --compact`; write replay stdout/stderr/status to separate files beside the original receipt. The replay must retain the original snapshot hash and window bounds, and evidence pagination must use the replay manifest. Other unresolved or malformed sessions still make it provisional.
+
+Never replay from a newly captured index or raise the limit without inspecting the diagnostic. If an older invocation did not save its bytes, a one-time hash comparison may recover them only when the current index exactly matches the original manifest's SHA-256; otherwise keep the incomplete receipt and leave the remaining review for the next run. Replay without a hash, or with a mismatched hash, fails closed.
 
 The canonical flow uses `--recent 0` because the visible bootstrap already displayed the recent index excerpt; suppressing that duplicate changes only the resolver's output payload. `--compact` keeps the persistence fields and the exact session path/line-range manifest while omitting file-wide counters that are not needed for routing. The resolver still captures the full index once, normalizes the prompt and structured-memory cutoffs, drives selection and watermarking from that snapshot, resolves selected rollout paths, and inspects only rollout records timestamped at or before the captured window end. Each resolved session gets a `rollout_window.state`; `open` means it has non-metadata records without a final after the most recent user message, including a session resumed after an older final, while `metadata_only` means it has only `session_meta` in the captured window. Malformed, unreadable, or checkpoint-truncated ranges are unsafe and must not advance the cursor. Records already appended after the window are counted but left for a later review. For a carried session, inspect only its advertised inclusive `review_line_start` to `review_line_end` delta; the full prefix is checkpoint context, not new evidence.
 
@@ -147,6 +122,18 @@ Treat `window.cursor_to_persist` and `window.carry_forward_to_persist` as one pe
 3. A carried open session that adds no lines during the next bounded pass is retired after that clean follow-up. If it grows, its checkpoint advances; if it completes, it is removed. This guarantees continuation across an active review boundary without turning the resolver into an unbounded watcher for arbitrarily old resumed tasks.
 
 Advance the cursor only when `window.safe_to_persist` is `true` **and** update `Carry-forward sessions:` in the same memory patch. Exit `2` means the snapshot was readable but incomplete or ambiguous and must not advance memory; exit `1` means the input or cutoff was unusable. Do not rerun the resolver merely to obtain a different watermark.
+
+For an unsafe but readable snapshot, keep the top-level cursor and carry bundle unchanged. Save a compact provisional receipt with the captured window bounds, snapshot hash, unresolved ids, and whether candidate increments were already recorded. On a later review, compare each candidate's session id, advertised line range, and discovery pattern against those receipts before incrementing it; count only unseen evidence. A missing carried rollout remains an explicit review gap, even after repeated runs. Do not silently remove that carry or treat provisional coverage as a safely persisted window; any exception needs an explicit task-specific approval or automation contract.
+
+## Protected Wiki Review Runs
+
+For an automation that explicitly needs interrupted wiki-review resumption, use the [local .NET review-run helper](../scripts/wiki-review-run/README.md). It reuses the existing resolver/extractor and stores protected run evidence outside the automation memory directory. Follow its public request schemas; do not build another snapshot reader or topic cache in the prompt.
+
+`capture` persists original index, memory/definition inputs, resolver output and status before returning. A later invocation adopts the same capture only when the official checkpoint bundle, definition, resolver/helper version and maintenance-thread exclusion still match. Appended failure prose or Run time does not invalidate unchanged checkpoint state. Stored snapshot corruption remains a blocker. Task-specific approved deleted-carry IDs must be explicit; no other unsafe resolver condition is accepted.
+
+Use helper-owned summary pages from the same run and stable repository scope. Identical requests with unchanged bounds and verified source bytes reuse their existing page receipts, preserving topic comparisons across restart. `verify-pages` requires their complete contiguous selection, zero output omissions, exact eligible IDs/counts and resolved manual clone work. It also validates stored clone resolutions before any new clone follow-up. A successful child exit or terminal `has_more=false` alone is not a completion receipt. Smaller retries of an overflowing page keep the same run, manifest and offset. Clone follow-up uses the existing boundary/suffix projections, never a new raw-history reader.
+
+Record a topic only after its actual comparison, bound to that complete receipt, the exact source-pin map, session/Git candidate identities and current wiki-input hashes. On restart, `resume-topics` revalidates those bindings before returning reusable decisions. A cached `update_needed` comparison remains pending delivery, and a blocked comparison is not reusable completion. The caller must still prove source reachability, finish the full wiki review and satisfy final source-tip, main-only and delivery rules before the official atomic checkpoint patch. After successful checkpoint persistence, retire the active run while preserving its receipts. Explicitly invalidating a stale run never advances the checkpoint.
 
 ## Candidate Session Selection
 

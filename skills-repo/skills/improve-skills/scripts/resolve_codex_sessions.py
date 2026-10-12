@@ -5,9 +5,11 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import sys
+import tempfile
 from typing import Dict, Iterable, List, Optional, Tuple
 
 
@@ -44,18 +46,50 @@ def cutoff_sources(
     if memory_path is not None:
         if memory_path.exists():
             memory_text = memory_path.read_text(errors="replace")
+            memory_header = re.split(r"^## ", memory_text, maxsplit=1, flags=re.MULTILINE)[0]
             for field in STRUCTURED_MEMORY_FIELDS:
-                match = re.search(
-                    rf"^{re.escape(field)}:\s*(\S+)",
-                    memory_text,
-                    flags=re.MULTILINE,
-                )
-                if not match:
-                    continue
-                raw = match.group(1)
+                if field == "Processed window end":
+                    values = re.findall(
+                        rf"^{re.escape(field)}:[ \t]*(.*)$",
+                        memory_header,
+                        flags=re.MULTILINE,
+                    )
+                    if not values:
+                        continue
+                    if len(values) != 1:
+                        return [], [{
+                            "code": "ambiguous_memory_timestamp",
+                            "field": field,
+                            "count": len(values),
+                        }]
+                    raw = values[0].strip()
+                else:
+                    match = re.search(
+                        rf"^{re.escape(field)}:\s*(\S+)",
+                        memory_text,
+                        flags=re.MULTILINE,
+                    )
+                    if not match:
+                        continue
+                    raw = match.group(1)
                 try:
+                    if field == "Processed window end" and not re.search(
+                        r"(?:Z|[+-]\d\d:\d\d)$", raw
+                    ):
+                        raise ValueError(
+                            "Processed window end requires an explicit timezone"
+                        )
                     normalized = format_timestamp(parse_timestamp(raw))
                 except ValueError as exc:
+                    if field == "Processed window end":
+                        return [], [{
+                            "code": "invalid_memory_timestamp",
+                            "field": field,
+                            "message": (
+                                "Expected one ISO 8601 timestamp with an "
+                                "explicit timezone"
+                            ),
+                        }]
                     diagnostics.append(
                         {
                             "code": "invalid_memory_timestamp",
@@ -72,6 +106,8 @@ def cutoff_sources(
                         "normalized": normalized,
                     }
                 )
+                if field == "Processed window end":
+                    return sources, diagnostics
         else:
             diagnostics.append(
                 {
@@ -107,7 +143,7 @@ def carry_forward_sessions(
     if memory_path is None or not memory_path.exists():
         return [], []
     memory_text = memory_path.read_text(errors="replace")
-    memory_header = memory_text.split("\n## ", 1)[0]
+    memory_header = re.split(r"^## ", memory_text, maxsplit=1, flags=re.MULTILINE)[0]
     match = re.search(
         rf"^{re.escape(CARRY_FORWARD_SESSIONS_FIELD)}:\s*(.*)$",
         memory_header,
@@ -525,8 +561,22 @@ def resolve_rollouts(
     return resolved, diagnostics, safe
 
 
-def load_index_snapshot(index_path: Path) -> Tuple[bytes, List[dict], List[dict]]:
-    snapshot = index_path.read_bytes()
+def save_index_snapshot(path: Path, snapshot: bytes) -> None:
+    """Publish captured bytes atomically without replacing an existing snapshot."""
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=path.parent, delete=False) as handle:
+            temporary_path = Path(handle.name)
+            handle.write(snapshot)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.link(temporary_path, path)
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
+
+def parse_index_snapshot(snapshot: bytes) -> Tuple[List[dict], List[dict]]:
     rows: List[dict] = []
     diagnostics: List[dict] = []
     for line_number, raw_line in enumerate(snapshot.splitlines(), start=1):
@@ -572,24 +622,38 @@ def load_index_snapshot(index_path: Path) -> Tuple[bytes, List[dict], List[dict]
             "_updated": parsed,
         }
         rows.append(normalized)
-    return snapshot, rows, diagnostics
+    return rows, diagnostics
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Capture session_index.jsonl once, choose the newest structured "
-            "cutoff, resolve the bounded review window, and emit compact JSON."
+            "Capture or replay session_index.jsonl once, use the processed-window "
+            "cutoff or an explicit legacy fallback, resolve the bounded review "
+            "window, and emit compact JSON."
         )
     )
     parser.add_argument("--codex-home", required=True, type=Path)
+    parser.add_argument(
+        "--index-snapshot", type=Path,
+        help="Replay saved index bytes without reading the live session index.",
+    )
+    parser.add_argument(
+        "--expected-index-sha256",
+        help="Required SHA-256 pin for --index-snapshot replay.",
+    )
+    parser.add_argument(
+        "--save-index-snapshot", type=Path,
+        help="Atomically save captured index bytes to a new file before selection.",
+    )
     parser.add_argument("--memory", type=Path)
     parser.add_argument(
         "--prompt-last-run",
         default="",
         help=(
             "Explicit trusted review cutoff; required when structured memory "
-            "does not provide Last review or Processed window end."
+            "provides neither Processed window end nor legacy Last review. "
+            "Ignored when Processed window end is present."
         ),
     )
     parser.add_argument(
@@ -619,7 +683,16 @@ def parse_args() -> argparse.Namespace:
             "resolution, normally the exported CODEX_THREAD_ID; may be repeated."
         ),
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if args.index_snapshot is not None and not args.expected_index_sha256:
+        parser.error("--index-snapshot requires --expected-index-sha256")
+    if args.expected_index_sha256 is not None:
+        if args.index_snapshot is None:
+            parser.error("--expected-index-sha256 requires --index-snapshot")
+        if not re.fullmatch(r"[0-9a-fA-F]{64}", args.expected_index_sha256):
+            parser.error("--expected-index-sha256 must contain 64 hexadecimal digits")
+        args.expected_index_sha256 = args.expected_index_sha256.lower()
+    return args
 
 
 def compact_session(session: dict) -> dict:
@@ -690,9 +763,9 @@ def main() -> int:
         (parse_timestamp(source["normalized"]) for source in sources)
     )
 
-    index_path = args.codex_home / "session_index.jsonl"
+    index_path = args.index_snapshot or args.codex_home / "session_index.jsonl"
     try:
-        snapshot, rows, index_diagnostics = load_index_snapshot(index_path)
+        snapshot = index_path.read_bytes()
     except OSError as exc:
         print(
             json.dumps(
@@ -711,6 +784,35 @@ def main() -> int:
             )
         )
         return 1
+    snapshot_digest = hashlib.sha256(snapshot).hexdigest()
+    if (
+        args.expected_index_sha256 is not None
+        and snapshot_digest != args.expected_index_sha256
+    ):
+        print(json.dumps({
+            "schema_version": 1,
+            "diagnostics": diagnostics + [{
+                "code": "index_snapshot_hash_mismatch",
+                "path": str(index_path),
+                "expected_sha256": args.expected_index_sha256,
+                "actual_sha256": snapshot_digest,
+            }],
+        }, indent=2))
+        return 1
+    if args.save_index_snapshot is not None:
+        try:
+            save_index_snapshot(args.save_index_snapshot, snapshot)
+        except OSError as exc:
+            print(json.dumps({
+                "schema_version": 1,
+                "diagnostics": diagnostics + [{
+                    "code": "index_snapshot_save_failed",
+                    "path": str(args.save_index_snapshot),
+                    "message": str(exc),
+                }],
+            }, indent=2))
+            return 1
+    rows, index_diagnostics = parse_index_snapshot(snapshot)
     diagnostics.extend(index_diagnostics)
     if not rows:
         print(
@@ -853,7 +955,7 @@ def main() -> int:
     output = {
         "schema_version": 1,
         "snapshot": {
-            "sha256": hashlib.sha256(snapshot).hexdigest(),
+            "sha256": snapshot_digest,
             "record_count": len(rows),
             "max_updated_at": format_timestamp(snapshot_end),
             "recent_index": [
@@ -863,6 +965,10 @@ def main() -> int:
         "cutoff": {
             "chosen": format_timestamp(cutoff),
             "sources": sources,
+            "legacy_fallback": not any(
+                source["name"] == "memory.Processed window end"
+                for source in sources
+            ),
         },
         "window": {
             "start_exclusive": format_timestamp(cutoff),
