@@ -1,0 +1,274 @@
+{
+  "candidate": "Delivery-2026-10-13",
+  "base": "780e87460de79d6bff2300bc7f1aeb96d9d28217",
+  "technical_state": "technical-complete",
+  "identity": "Actual staged blobs; this manifest excludes itself to avoid self-reference",
+  "owned": [
+    {
+      "path": ".scratch/ncg-wiki-review-followup/issues/01-harden-wiki-review.md",
+      "sha256": "65a2362c17ebfa15e6cc4137e158ada4433d8d7128174444a2ce3023cb161dd7",
+      "git_blob": "e6c7b5b8ee228edf0fd11e76b1846218141cd19f"
+    },
+    {
+      "path": ".scratch/ncg-wiki-review-followup/spec.md",
+      "sha256": "fb90b5b680a3e06b933cd64034e8e8a82e4cc3f7563b47f49cbd973e54dc0f73",
+      "git_blob": "dc6f33f2c295747a1364c08f05a08b57f4501c6e"
+    },
+    {
+      "path": "CONTEXT.md",
+      "sha256": "6805a110c8ff76f4ecebb112d754c20e268d721627822b4b876541a5612044bf",
+      "git_blob": "7a277b7cb14340d47dbfd68f1acb38fcd8c3d2ce"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/.openspec.yaml",
+      "sha256": "1dfdca412094f24473d8b842866201ec26f200b29b17064b03f1e4982c35a7b9",
+      "git_blob": "b9ebfc72d6da2b141f153e3d48f7513ff2d0fa0b"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/automation-prompt.template.md",
+      "sha256": "7b75edae91461983665722fc66fb19710e37709258a6f84bb811c3209cc4597d",
+      "git_blob": "900bb744d689798184a99b8d8039e39f82152eeb"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/completion.md",
+      "sha256": "77fd31fd00792e330dfb8d72a8811213a5bc71c82116cd12b531449f0be7c00e",
+      "git_blob": "653f4e331aa88ef08f68d3d81967ce9b43e64061"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/design.md",
+      "sha256": "9a2b493429bfd150d5b42526db63e5ffd06bb97100dceb9e408d849bbb0a6bda",
+      "git_blob": "63706111711437770e6513c933baeba4a977e7fe"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/content-manifest-W1.json",
+      "sha256": "34133d68bddcf37ebea3e0ebb87880650c4ddcdd9c6240bbcb788682e83f8559",
+      "git_blob": "ded5ed43fae6be4d558aa1965fc3db10cafb9607"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/content-manifest-W2.json",
+      "sha256": "4a582ad90c737b1759fafaf22ceea02ca71f5d33e140b2aa881046bcddd7a060",
+      "git_blob": "5c6a4a6d6a641d958a791725d38c1e04983507d2"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/content-manifest-W3.json",
+      "sha256": "d401bfd8dba80af285511354a286ff55e0c08803d3ae86b3383ad2c278a9cf2a",
+      "git_blob": "bd1feedc4335e0a9f37415ccfafb53b8a2ddf6d6"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/content-manifest.json",
+      "sha256": "032a47ebcd5b02f9fa1632ac8d5c09698528241756d5c8e8d09409e606815371",
+      "git_blob": "c7843d8b4ed347eb7c2b9e2f1b3d9b54b3fa88dd"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/delta-W1-W2.json",
+      "sha256": "88d492d5065bbfab774e75a3a7f3c4666dabf4d53b9c47c1c601e2bbed57b7b3",
+      "git_blob": "4c82afd272739a4891c520786c650b17d1b61f23"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/delta-W2-W3.json",
+      "sha256": "36d5f5678c9bb778b4f6861c7c7e0e09bb6d6227616c670abf8d4f95c0ca4e34",
+      "git_blob": "a8e339ac5c2f059b88f8fa117da0a5e5981ec191"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/delta-W3-W4.json",
+      "sha256": "bfdaaa89c76bb92243f4f33946ef44a1822ee77c6ec13046f9b5c9d72e9b3b35",
+      "git_blob": "9d801feb9636c3996ff3d274c365daea45ea3c24"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/live-run-verification.md",
+      "sha256": "c738336323f9f3f9129ac0923f85b62b0a4124acee1e9e397e0375c308cf0bb5",
+      "git_blob": "3d8de6d85ca958479e919d135f132df636699a21"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/requirements.md",
+      "sha256": "5ad18ccbddd9c2feb5162c00d02d654183d41c22ffc2b74d22eacfa7e587cebd",
+      "git_blob": "42adf2884f91ed3e826052a9557f19df9dc2c834"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/review-dry-W1.md",
+      "sha256": "88fefc84f740cf3fa94a64204a4420f8a1755f486558d6dd6b7368b6a6a3de97",
+      "git_blob": "9bfc74e14a9cd8183c8150d8446f2634be4c2723"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/review-dry-W2.md",
+      "sha256": "690bda485bf7e6b46571e98e0b566ed49330ea0490578c4eaea0016b130cde36",
+      "git_blob": "8905a41d7270f26f43f01d5d528fa052b84bcf2a"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/review-dry-W3.md",
+      "sha256": "54c287ab462498bdee157d72e18454fc2a96e6f9b0d84804f1dfac7735841e22",
+      "git_blob": "d58febaeb4dd4762b00f7924a4ff824fb0ce08a5"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/review-kiss-W2.md",
+      "sha256": "2bd8adf4db60f94f0c2fd98e085279286f7fea74998e627e25290f66174150b0",
+      "git_blob": "98815bc69e07ca290ce4fd2118094ee43c4a9715"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/review-kiss-W3.md",
+      "sha256": "1c3688ccfbb4968f178d8cef0a0d96743e0ec075fbb53a7ac006e1a302e07b25",
+      "git_blob": "b1bf8e7c363f6e3331fe12fa77a4736fa3523b6a"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/review-live-usage-delta.md",
+      "sha256": "babb767ca9f2e9523964cc24c7209d6a1f98fbbc93b007d5301601963af8b2ec",
+      "git_blob": "c90eea03b173f32e04df0b35d403d838d7f708bb"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/review-solid-W2.md",
+      "sha256": "10ebcdffb63a2afeb385040ed095feeafdbd568146ea5b0085431f3250b6ce3b",
+      "git_blob": "212bba53aa55fd258b1d9efd88a6d63275e22850"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/evidence/review-solid-W3.md",
+      "sha256": "10c9b66ff1b671928c544f8aa40cea1af1a5ca505ba011df94ce1a479b030147",
+      "git_blob": "5ffea507fc06dc9da09aa2fc147fdcd3a1259ca4"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/proposal.md",
+      "sha256": "926db4f513fc19f2c1d194d038c9e972b325dba445b51997d0d11f44bf9a43fa",
+      "git_blob": "01e5ac1c98a7357ce640191a947fd85fbad2960b"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/specs/recoverable-wiki-review/spec.md",
+      "sha256": "eb8f1b92ce14308899c410adaa61c478f189dcfed0bdf9f2fd078977f778c0af",
+      "git_blob": "05649cc3f3c99f5d8826834ea5407e46e6aca007"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/tasks.md",
+      "sha256": "f32cf29db854cd382d8dde60f7824d47db9ac7733b6cceec746086c16374243b",
+      "git_blob": "939d5d35b809673366f8b443c48e70afcb82d1c8"
+    },
+    {
+      "path": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening/ticket-plan.md",
+      "sha256": "971897a7881eb1d5f522e9da32c0c6a23d77de00b1168b5879ffb96fb318015d",
+      "git_blob": "d5c3e225773656a26426ce7dac09c126801bc7d3"
+    },
+    {
+      "path": "openspec/specs/recoverable-wiki-review/spec.md",
+      "sha256": "ec2b53249ad9472108c2d6aef228a311b335c90e4c9224852f10bf4694ee5ea8",
+      "git_blob": "4cbcfb1e2c914cc47991b1bd003f0c317cd3c680"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/references/codex-desktop-session-review.md",
+      "sha256": "7d876f4b97ff04ba3a50dcd18aceb2653ca6efab59e882f74df08a1d80ee35fb",
+      "git_blob": "18f3fef05c290e9c899ca96d14c992807ab34abb"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/resolve_codex_sessions.py",
+      "sha256": "0fe60df7e0c65565043a2797d206ad312c1a08fc300dc623d12776b1eafba52f",
+      "git_blob": "4b57deb0457b015adac05268c221d58cc0d4fbfb"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/tests/test_resolve_codex_session_batches.py",
+      "sha256": "52e0922347ff470fe0833477a30131fa415714a9dbd811fa67541537bd1f094a",
+      "git_blob": "d0db7682252f9b591648ce51d94ebe75a97b2815"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/NCG-Automation.md",
+      "sha256": "ebf6bcc280776507e27ba5808ffd981f2a4ea4c34a1fde9c47d34589ab1aba5b",
+      "git_blob": "db2587e7a061bdb93500bb30c137e5bb09500c7f"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDelivery.cs",
+      "sha256": "dc33835f55770091558972634fd554a2ff3aa28aa62b8643f76256ab1cd54933",
+      "git_blob": "ec5e7e0ba23d8bf278f6970329ade6446469c81a"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDeliveryTests.cs",
+      "sha256": "4b9627dfe297005f2c7156eb1829ddc63d187508035b495d5346344655cc2f0a",
+      "git_blob": "69f506f03c731f81dd991c6d28ee961dd4816c77"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiIntegrationTests.cs",
+      "sha256": "5ca3989c7382706d815a27ab234bdf1907fc009a4be9b3b1e2d264a7a91203a1",
+      "git_blob": "8c40c6b539eab0d4d6bc4a0a05d1539e6b1760a0"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/README.md",
+      "sha256": "61a65bfb1fbd462e5476e23eee8cf7e20d8fd2a784fde803cae3aed7236f29eb",
+      "git_blob": "88a8758b308c63b3dbd6e9d6fb9fbac386f5554a"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRun.cs",
+      "sha256": "b0669491cfc4cdcd09dbb7a46ca76089dd6ef7aaed0f72302dfc994b1f5cc651",
+      "git_blob": "3bc5c38ad068305d59342649484fc5719c902d78"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRunBatchTests.cs",
+      "sha256": "1685c330992d1adfd15c19dfbf3577818269b221a746f78c8623aaab538d04d3",
+      "git_blob": "0092de01df65ad19347da5d7712b20d59f04d300"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRunRecoveryTests.cs",
+      "sha256": "5202121159ffa7adf886ad4b275419ef674c82080a8690096c16fad1d13998b4",
+      "git_blob": "2457fee0ad9bbdb6a35364225d86209d6bf0dd3e"
+    }
+  ],
+  "partial_file": {
+    "path": "skills-repo/skills/improve-skills/references/codex-desktop-session-review.md",
+    "owned_hunk": "Protected Wiki contract at original line129",
+    "excluded_hunk": "pre-existing Page/AGENTS wrapper paragraph at original line211",
+    "owned_patch_sha256": "990fbf0d8943feef7ee28fc90dbced7f9f61ce26365e739b61818af3bd9d26c4",
+    "historical_W4_whole_file_hash_is_not_delivery_hash": true
+  },
+  "review_reuse": {
+    "behavior": "W4 executable contents unchanged",
+    "docs_delta": "review-live-usage-delta.md: sequential DRY/SOLID/KISS clean",
+    "closeout_delta": "Dated live results, issue closure, archive/link mapping; editorial and mechanically checked"
+  },
+  "archive": {
+    "schema": "spec-driven",
+    "mode": "standard",
+    "old_prefix": "openspec/changes/complete-ncg-wiki-review-hardening",
+    "new_prefix": "openspec/changes/archive/2026-10-13-complete-ncg-wiki-review-hardening",
+    "canonical_effect": {
+      "added_requirements": 5,
+      "modified_requirements": 2
+    },
+    "historical_manifests": "W1-W4 are retained unchanged; apply prefix mapping for historical active paths"
+  },
+  "dependencies": {
+    "historical_working_hashes": [
+      {
+        "path": "global.json",
+        "sha256": "2453a99b53402c938db96e6f982e20525938469feb66329d2f52315949c3a496"
+      },
+      {
+        "path": "AGENTS.md",
+        "sha256": "5c9647db5161823ec2e40309b4f5b6f7b95f6ca92aa5321ba7a2ae19eb20f426"
+      },
+      {
+        "path": "skills-repo/skills/improve-skills/scripts/extract_codex_session_evidence.py",
+        "sha256": "f93d17b10b236520942182aa37bcfbd4ac488c9b34c8f5d98039e465a9d361f5"
+      },
+      {
+        "path": "skills-repo/skills/improve-skills/scripts/tests/test_extract_codex_session_evidence.py",
+        "sha256": "e82b23a256426d8d3c32f4c7e532777640eb880fec17f36f1d334aa4c24e5ba2"
+      },
+      {
+        "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRunTests.cs",
+        "sha256": "9bdc1b5e83f8af2cb50f38f1ede96efacd3b764d0e30a1feea5c51f0e90e7749"
+      }
+    ],
+    "committed_extractor_sha256": "2f949cc434db2fb7f7e31e21d8eba72a3d842a5195cf438856a2c305ae705f84",
+    "delivery_package_check": "Current shipped entrypoints plus committed-base extractor: isolated integration exit0; unrelated extractor diff not shipped"
+  },
+  "external_automation": {
+    "id": "keep-ncg-wiki-current",
+    "definition_sha256": "2c31c985aa61ac4fc9ab2d70d2d1d8514d3d2525945a3bb7c6ddf0a0defeb812",
+    "memory_before_live_sha256": "1c3fec3e3f8035bad1bcbdebc432b19ee8473c63ab080d9306c60f8d9c9958dd",
+    "memory_after_first_live_sha256": "f91aa2b89b0014e5df255f8cdf72dda475ab2b3fe4201ebdfcfd55a7a8eca343",
+    "memory_after_correction_sha256": "49cdbfd8af2b4846de8424d96be0d25f5f3a2063f3056f29d6c68f086ccbb1c3",
+    "docs_commit": "2115e5d857992d710cec5a4075c9140965b66cdb",
+    "processed_window_end": "2026-10-13T07:18:25.033931Z",
+    "source_tip_count": 4,
+    "independent_finalize_repeats": "Both exit0; before/after memory and receipt hashes identical"
+  },
+  "excluded": [
+    "Pre-existing skill/installer/extractor/test changes and second reference hunk",
+    "Generated caches and unrelated .scratch/completion",
+    "Raw private session/request/receipt/log payloads",
+    "Historical tracked.patch full-working-tree snapshot, privately preserved SHA256 dc57155eedd241cae097841d59a8ee025a5fed7208161c7fa03f5315ecd8cfa8"
+  ]
+}

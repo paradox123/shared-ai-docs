@@ -174,3 +174,17 @@ _Avoid_: Wiki-Pflege, Inhaltsprüfung
 **Privater Tätigkeitsbereich**:
 Der Lebens- und Aufgabenbereich für persönliche Belange wie Vermietung oder Portfoliopflege. Die Bezeichnung „privat“ ordnet Informationen fachlich zu und begründet für sich keine Zugriffs-, Verknüpfungs- oder Sichtbarkeitsbeschränkung.
 _Avoid_: Vertraulichkeitsstufe, gesperrter Wissensbestand, separates Privat-Wiki
+
+## NCG-Wiki-Review
+
+**Wiki-Review-Fenster**:
+Die für einen NCG-Wiki-Lauf festgehaltene Menge von Session- und Git-Kandidaten zwischen dem zuletzt abgeschlossenen Prüfstand und den eingefrorenen Quellenständen. Die Aufteilung in Arbeitspakete verändert ihren Umfang nicht.
+_Avoid_: Letzter Ausführungszeitpunkt, beliebig verlängerter Suchzeitraum
+
+**Wiki-Lieferbeleg**:
+Der nachvollziehbare Nachweis, welche eigenen Dokumentationsänderungen zu einem Wiki-Review gehören und ob sie auf dem erlaubten Ziel angekommen sind. Ein Inhaltsvergleich allein ist noch kein Lieferbeleg.
+_Avoid_: Themenvergleich, erfolgreiche Lieferung allein durch Commit-Erstellung
+
+**Docs-Prüfstand**:
+Die zuletzt vollständig geprüfte Revision der NCG-Dokumentationsgeschichte. Sie gehört zur Review-Fortschreibung und ist von den freigegebenen Backend-/STS-Quellenständen getrennt.
+_Avoid_: Indexdatum, letzter Commit-Zeitstempel, zusätzlicher Backend-/STS-Quellenstand

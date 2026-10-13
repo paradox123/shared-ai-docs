@@ -1,0 +1,125 @@
+{
+  "candidate": "W3",
+  "base": "780e87460de79d6bff2300bc7f1aeb96d9d28217",
+  "owned": [
+    {
+      "path": "CONTEXT.md",
+      "sha256": "6805a110c8ff76f4ecebb112d754c20e268d721627822b4b876541a5612044bf"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/references/codex-desktop-session-review.md",
+      "sha256": "9d62601eaf6d574e4520d4be070014b6a1500a5a528ec986ab6a8af6cf4b2f56"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/resolve_codex_sessions.py",
+      "sha256": "0fe60df7e0c65565043a2797d206ad312c1a08fc300dc623d12776b1eafba52f"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/tests/test_resolve_codex_session_batches.py",
+      "sha256": "52e0922347ff470fe0833477a30131fa415714a9dbd811fa67541537bd1f094a"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/README.md",
+      "sha256": "d92aa1923918790c131ae46f4ca26a699fe795092e542f23f359dad0d31c17bf"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/NCG-Automation.md",
+      "sha256": "28cdc2f694ca5fd2bf6851a3dd451d538e7059da4df0663fd860ce2a802d9346"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRun.cs",
+      "sha256": "b0669491cfc4cdcd09dbb7a46ca76089dd6ef7aaed0f72302dfc994b1f5cc651"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRunBatchTests.cs",
+      "sha256": "1685c330992d1adfd15c19dfbf3577818269b221a746f78c8623aaab538d04d3"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRunRecoveryTests.cs",
+      "sha256": "5202121159ffa7adf886ad4b275419ef674c82080a8690096c16fad1d13998b4"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDelivery.cs",
+      "sha256": "dc33835f55770091558972634fd554a2ff3aa28aa62b8643f76256ab1cd54933"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDeliveryTests.cs",
+      "sha256": "4b9627dfe297005f2c7156eb1829ddc63d187508035b495d5346344655cc2f0a"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiIntegrationTests.cs",
+      "sha256": "5ca3989c7382706d815a27ab234bdf1907fc009a4be9b3b1e2d264a7a91203a1"
+    },
+    {
+      "path": "openspec/changes/complete-ncg-wiki-review-hardening/proposal.md",
+      "sha256": "54e97f1bbaef0535a5a2b449c7d4e958903f8eac41fd67d3db1ee2f9041b2379"
+    },
+    {
+      "path": "openspec/changes/complete-ncg-wiki-review-hardening/design.md",
+      "sha256": "9a2b493429bfd150d5b42526db63e5ffd06bb97100dceb9e408d849bbb0a6bda"
+    },
+    {
+      "path": "openspec/changes/complete-ncg-wiki-review-hardening/specs/recoverable-wiki-review/spec.md",
+      "sha256": "eb8f1b92ce14308899c410adaa61c478f189dcfed0bdf9f2fd078977f778c0af"
+    },
+    {
+      "path": "openspec/changes/complete-ncg-wiki-review-hardening/tasks.md",
+      "sha256": "624bf71a12599474ec849beea33ae006599889f2691f298f5e73f45177094ff3"
+    },
+    {
+      "path": "openspec/changes/complete-ncg-wiki-review-hardening/ticket-plan.md",
+      "sha256": "8535c2d3c1db0186795c99c9b856642d3a56c4304c832a65a2cd2a4cccc91ebf"
+    },
+    {
+      "path": "openspec/changes/complete-ncg-wiki-review-hardening/automation-prompt.template.md",
+      "sha256": "7b75edae91461983665722fc66fb19710e37709258a6f84bb811c3209cc4597d"
+    },
+    {
+      "path": ".scratch/ncg-wiki-review-followup/spec.md",
+      "sha256": "158c93c6f8cd78698a26dab24534c693aa1603a9d79e6e075b4b73eea5f85f2e"
+    },
+    {
+      "path": ".scratch/ncg-wiki-review-followup/issues/01-harden-wiki-review.md",
+      "sha256": "11b9a58f247b7654754e1035d95cf7e18ee8f037731e787384498e1cc7dc0ce5"
+    }
+  ],
+  "read_only_dependencies": [
+    {
+      "path": "global.json",
+      "sha256": "2453a99b53402c938db96e6f982e20525938469feb66329d2f52315949c3a496"
+    },
+    {
+      "path": "AGENTS.md",
+      "sha256": "5c9647db5161823ec2e40309b4f5b6f7b95f6ca92aa5321ba7a2ae19eb20f426"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/extract_codex_session_evidence.py",
+      "sha256": "f93d17b10b236520942182aa37bcfbd4ac488c9b34c8f5d98039e465a9d361f5"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/tests/test_extract_codex_session_evidence.py",
+      "sha256": "e82b23a256426d8d3c32f4c7e532777640eb880fec17f36f1d334aa4c24e5ba2"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRunTests.cs",
+      "sha256": "9bdc1b5e83f8af2cb50f38f1ede96efacd3b764d0e30a1feea5c51f0e90e7749"
+    }
+  ],
+  "external_automation": {
+    "id": "keep-ncg-wiki-current",
+    "definition_sha256": "2c31c985aa61ac4fc9ab2d70d2d1d8514d3d2525945a3bb7c6ddf0a0defeb812",
+    "memory_sha256": "1c3fec3e3f8035bad1bcbdebc432b19ee8473c63ab080d9306c60f8d9c9958dd",
+    "verified_changed_fields": [
+      "prompt",
+      "updated_at"
+    ],
+    "private_prompt": "kept outside shared Git"
+  },
+  "excluded": [
+    "pre-existing improve-skills/SKILL.md and install-vendor-skills edits",
+    "pre-existing extractor-wrapper diff and its tests (read-only tested dependency)",
+    "unrelated .scratch/completion state",
+    "generated caches",
+    "generated review/evidence records"
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "old": "W1",
+  "new": "W2",
+  "changes": [
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDelivery.cs",
+      "old_sha256": "bdb0f8522759e3ce19a0ba2deeef31428b19b4a7c51eafcd6d6f9c9856bcf2de",
+      "new_sha256": "1f876ac72532d95e08fc6f2ea96a81496782f6ba3cb1fd483897dc5ee8aa10b1"
+    },
+    {
+      "path": "skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDeliveryTests.cs",
+      "old_sha256": "24e1c0278c8f0b8a03b265d819a62c7d4143aef8675e09bc0a8595c7775d470a",
+      "new_sha256": "da7e8052cfa7f1411fb43495df70590310cb5828dc412bc193ea21c0d84bdba4"
+    },
+    {
+      "path": "openspec/changes/complete-ncg-wiki-review-hardening/specs/recoverable-wiki-review/spec.md",
+      "old_sha256": "d7d74a44b70b24677d3d17c35adf2b2a3fa04905ce31600056b4e8cd782a66f1",
+      "new_sha256": "480f83dddd3309f0281b27d9866f8b5fc56061370cf5cd77cb1ac1a2a4e140c4"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "old": "W3",
+  "new": "W4",
+  "classification": "editorial completion state only; behavior/requirements/configuration/dependencies unchanged",
+  "changes": [
+    {
+      "path": "openspec/changes/complete-ncg-wiki-review-hardening/tasks.md",
+      "old_sha256": "624bf71a12599474ec849beea33ae006599889f2691f298f5e73f45177094ff3",
+      "new_sha256": "ea74e61c024e10f781237cd6bc23a7f42d49957879fef4098631cdf0d009bf07"
+    },
+    {
+      "path": ".scratch/ncg-wiki-review-followup/issues/01-harden-wiki-review.md",
+      "old_sha256": "11b9a58f247b7654754e1035d95cf7e18ee8f037731e787384498e1cc7dc0ce5",
+      "new_sha256": "12b00d5808ee8e280d4141da0fc50ede60c8abf952a957edffb666a706a5c6ad"
+    }
+  ]
+}

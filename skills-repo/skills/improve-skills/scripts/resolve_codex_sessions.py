@@ -667,6 +667,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--max-sessions", type=int, default=100)
     parser.add_argument(
+        "--batch-offset", type=int,
+        help="Opt-in bounded slice of one frozen selection; later slices require a pinned index snapshot.",
+    )
+    parser.add_argument(
         "--compact",
         action="store_true",
         help=(
@@ -684,6 +688,11 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     args = parser.parse_args()
+    if args.batch_offset is not None:
+        if args.batch_offset < 0 or not 1 <= args.max_sessions <= 100:
+            parser.error("batch offset must be nonnegative and max-sessions must be 1..100")
+        if args.batch_offset > 0 and args.index_snapshot is None:
+            parser.error("later batches require --index-snapshot")
     if args.index_snapshot is not None and not args.expected_index_sha256:
         parser.error("--index-snapshot requires --expected-index-sha256")
     if args.expected_index_sha256 is not None:
@@ -889,6 +898,27 @@ def main() -> int:
             )
     selected_rows = list(selected_by_id.values())
     selected_rows.sort(key=lambda row: (row["_updated"], row["id"]))
+    batch = None
+    if args.batch_offset is not None:
+        plan = hashlib.sha256()
+        for row in selected_rows:
+            encoded_id = row["id"].encode("utf-8")
+            plan.update(len(encoded_id).to_bytes(8, "big"))
+            plan.update(encoded_id)
+        total = len(selected_rows)
+        if args.batch_offset > total or (args.batch_offset == total and total > 0):
+            print(json.dumps({"schema_version": 1, "diagnostics": [{"code": "invalid_batch_offset"}]}))
+            return 2
+        end = min(total, args.batch_offset + args.max_sessions)
+        batch = {
+            "offset": args.batch_offset,
+            "limit": args.max_sessions,
+            "selection_count": total,
+            "selection_plan_sha256": plan.hexdigest(),
+            "next_offset": end,
+            "has_more": end < total,
+        }
+        selected_rows = selected_rows[args.batch_offset:end]
     selected_duplicates = [
         {"id": row["id"], "row_count": duplicate_counts[row["id"]]}
         for row in selected_rows
@@ -983,6 +1013,11 @@ def main() -> int:
         "sessions": resolved,
         "diagnostics": diagnostics,
     }
+    if batch is not None:
+        batch["safe_for_extraction"] = safe_to_persist
+        output["batch"] = batch
+        # Only the protected caller can prove that every slice was resolved.
+        output["window"]["safe_to_persist"] = False
     if args.compact:
         print(
             json.dumps(

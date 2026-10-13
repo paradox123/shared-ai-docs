@@ -5,7 +5,9 @@ selection, proving bounded summary-page completeness, and reusing provisional
 topic comparisons after interruption. The existing Python resolver and extractor
 remain the record readers. The helper uses only .NET standard libraries; it does
 not run Git/network commands, edit wiki/source files, update automation memory,
-or certify delivery.
+or certify delivery. The separate NCG-specific `NcgWikiDelivery.cs` owns fixed
+source fetches, delivery reconciliation and recoverable official completion;
+follow [NCG-Automation.md](NCG-Automation.md) for that ordered workflow.
 
 Run from the owning `shared-ai-docs` repository so `global.json` selects SDK
 10.0.203 (an ambient Vault/NCG SDK8 cannot run a file-based app):
@@ -22,6 +24,11 @@ on stdout; failure exits2. Capture also emits a compact `capture_started` path
 receipt on stderr **before invoking the resolver**. Resolver/extractor stderr
 and complete raw outputs remain in private files.
 
+NcgWikiDelivery rejects symlink components in request paths as well as protected
+evidence/target paths. Pass a canonical request path. On macOS, normalize an
+existing mktemp `/var/...` file to its `/private/var/...` location with the existing
+path-resolution tool; keep its bytes, permissions and original run unchanged.
+
 ## Capture and recovery
 
 ```json
@@ -33,7 +40,10 @@ and complete raw outputs remain in private files.
   "resolver": "/absolute/scripts/resolve_codex_sessions.py",
   "python": "python3",
   "exclude_session_id": "current-maintenance-thread-id",
-  "max_sessions": 500
+  "max_sessions": 100,
+  "batch_size": 100,
+  "timeout_seconds": 120,
+  "max_output_bytes": 16777216
 }
 ```
 
@@ -50,19 +60,25 @@ case-insensitive filesystem while preserving genuinely distinct case-sensitive
 directories; containment comparisons remain ordinal. The CLI regression exercises
 whichever case behavior the fixture filesystem actually provides.
 
-Capture owns exactly one invocation with `--save-index-snapshot`, compact
-manifest and the supplied current-thread exclusion. Protected evidence includes
+Capture reads the live index exactly once using `--save-index-snapshot`. With
+optional `batch_size` (1–100), each resolver call resolves one bounded slice;
+`resolve-batch` replays only the stored exact snapshot and original memory.
+Without it, legacy `max_sessions` still limits the whole selection. Protected evidence includes
 exact original index bytes, resolver stdout/stderr, numeric exit, full original
 memory/definition/resolver snapshots and their digests. Directories are `0700`,
 files `0600`. Atomic files and an exclusive store lock prevent partial publication
 or competing selection; a racing caller may receive `store_busy_retry`.
 
-Repeat the same `capture` request in a later process to receive `resumed` with
-the same run directory and manifest/index SHA256s. It does not read the live index
-again. Identity binds automation ID, definition/resolver/helper contents, Codex
-home, exclusion, limits and the official memory checkpoint bundle. Current
+Repeat the same `capture` request in a later process to adopt its original run.
+A `resolving` result supplies `next_offset`; call `resolve-batch` with
+`{"run_directory":"/absolute/captured-run","offset":100}` using that exact next
+offset until complete. A repeated completed offset returns `batch_reused:true`.
+No live-index refresh or successful batch repetition occurs. The aggregate
+manifest is published only after full contiguous identity/carry validation;
+require terminal `extraction_allowed:true`. Identity binds automation ID,
+definition/resolver/helper contents, Codex home, exclusion, limits and checkpoint. Current
 memory comparison uses top-level `Processed window end`, `Carry-forward
-sessions`, and `Authoritative source tips`; `Last review` participates only when
+sessions`, `Authoritative source tips` and separate `Docs reviewed tip`; `Last review` participates only when
 Processed is absent. Run time and appended failure prose may change. The original
 full memory snapshot still must match its original byte digest.
 When Processed is present, the ignored `prompt_last_run` scheduler value is
@@ -92,7 +108,8 @@ remain false/2; `extraction_allowed:true` is no checkpoint permission.
 
 ## Summary pages and completeness
 
-`page`, `verify-pages`, `resolve-clone`, `record-topic` and `resume-topics` share:
+`page`, `verify-pages`, `resolve-clone`, `record-topic`, `resume-topics` and
+`topics-batch` share:
 
 ```json
 {
@@ -229,7 +246,88 @@ decision; changed pins/candidates/wiki inputs return `stale`, absent topics
 `missing`, and blocked decisions remain `topic_blocked`. Creating a formerly
 missing wiki file makes a pending receipt stale. There is no delivered state.
 
-All receipts explicitly withhold checkpoint permission. The full semantic wiki
+`topics-batch` adds `operation:"record"` or `operation:"resume"` and a `topics`
+array of 1–64 topic field objects to the common request. Use at most12 topics per
+model call. Top-level shared topic defaults are inherited; a nested topic cannot
+override run/scope/extractor/python. All contexts are validated before recording,
+and the complete source proof is validated once. Response `topics_complete`
+contains per-topic `results` and `complete_proof_validations:1`. The aggregate
+request is bounded to524288 bytes; individual topic commands remain supported.
+
+Resolver/extractor startup uses the existing Python interpreter for its Unix
+session boundary. Processes default to120 seconds and16 MiB combined output; capture
+options are identity-bound. Page attempts may set timeout_seconds (1–120) and
+max_output_bytes (2000–16777216). Timeout124, outputlimit125 and unsafe
+termination126 retain protected diagnostics and return non-success. Explicit
+`retry_failed:true` can supersede only a validated known failed attempt; its
+original named evidence remains linked. Successful/corrupt/changed attempts
+cannot be silently replaced. The store lock is released after bounded cleanup.
+
+All ReviewRun receipts explicitly withhold checkpoint permission. The full semantic wiki
 review, approved deleted-carry handling, source/reachability/migration guards,
 main-only delivery and successful required commit/push gates remain the caller's
 responsibility. This app never advances official memory.
+
+## NCG-specific source, delivery and completion requests
+
+`NcgWikiDelivery.cs` is a separate file-based app. It requires the same SDK/Unix/
+Python environment and actual Git; use local bare repositories for tests. It
+performs fixed allowed fetches (local remote-ref updates), writes protected
+receipts/content, and only `finalize` writes official memory/retirement. It does
+not edit docs, commit or push. Its exact source/delivery gates and restart order
+are owned by [NCG-Automation.md](NCG-Automation.md).
+
+Common input for `verify-sources` and first `plan-delivery`:
+
+```json
+{
+  "run_directory": "/absolute/captured-run",
+  "review_helper": "/absolute/ReviewRun.cs",
+  "review_request": {
+    "extractor": "/absolute/extract_codex_session_evidence.py",
+    "python": "python3",
+    "scope": {"cwd_roots":["/absolute/backend","/absolute/sts","/absolute/docs"],"worktree_tails":["backend","sts","docs"]}
+  },
+  "repositories": {"backend":"/absolute/backend","sts":"/absolute/sts","docs":"/absolute/docs"}
+}
+```
+
+`review_helper` must match the capture. Proof is current and repositories are
+exact Git roots; docs must belong to the bound scope. `verify-sources` returns
+`status:sources`, a protected `receipt`/`receipt_sha256`, four `source_pins`, a
+separate `documentation_pin` and counts. Full candidate/range lists stay private.
+
+`git-history` and `docs-history` take `run_directory`, `source_receipt`, optional
+`source_receipt_sha256`, `offset` and `limit` (1–100). Their protected page payload
+has offset/count/next_offset/has_more/selection_count plus bounded candidates or
+commit SHAs. Follow both complete chains, including empty offset0 pages. Docs
+missing baseline is explicit; no datetime substitutes for its SHA range.
+
+`plan-delivery` adds the source receipt, `candidates` and `edits` to common input.
+Candidate objects have kind (`session` with id, or `git` with repository/sha),
+disposition, concrete reason, and for relevant compared work `topic_receipt` plus
+`topic_receipt_sha256`. Edits have repo-relative regular Markdown `path` and exact
+desired UTF8 `content`. Expected full candidate coverage is derived independently.
+Unproven session discovery is a terminal no-claim; eligible Git work cannot be
+silently omitted. Plan receipts bind desired contents and original comparisons
+before any edit. The named `delivery/plan.json` pointer supports unchanged plan
+adoption after interruption. Changed intent blocks rather than overwrites it.
+
+`delivery-status` takes `run_directory`, `plan_receipt` and its optional SHA256.
+Results are planned, own_edits, own_commit or delivered; blockers return exit2
+without adopting unrelated files/commits. Actual guarded edit/stage/commit/push
+remains the automation's action, based on this exact own-work reconciliation.
+
+`finalize` takes the plan identity and common `review_helper`/`review_request`
+for current pre-write proof. Omit optional `new_checkpoint`: cursor/carry/code
+tips/Docs tip are derived from evidence. If supplied, exactly five named header
+keys and their derived values are required. First finalize verifies before the
+shared writer lock; protected expected-old/intended-new intent supports narrow
+crash recovery. `complete` requires actual needed delivery and exact full bundle
+persistence plus active retirement. Repetition of an already completed plan is
+idempotent. Memory of a third bundle blocks; other memory prose is retained.
+
+All receipt reuse binds the current delivery-helper source identity. Old tools,
+corrupt files, changed candidate/proof inputs and foreign state cannot certify
+completion. This is a cooperating-writer lock contract, not a universal CAS
+against independent writers ignoring that lock.
