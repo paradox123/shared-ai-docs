@@ -1,0 +1,28 @@
+{
+  "disabled_reason": null,
+  "disabled_tools": null,
+  "enabled": true,
+  "enabled_tools": [
+    "query",
+    "get",
+    "multi_get",
+    "status"
+  ],
+  "name": "qmd",
+  "startup_timeout_sec": null,
+  "tool_timeout_sec": 180.0,
+  "transport": {
+    "args": [
+      "/opt/homebrew/lib/node_modules/@tobilu/qmd/dist/cli/qmd.js",
+      "mcp"
+    ],
+    "command": "/opt/homebrew/opt/node@22/bin/node",
+    "cwd": null,
+    "env": {
+      "INDEX_PATH": "/Users/dh/.cache/qmd/index.sqlite",
+      "QMD_CONFIG_DIR": "/Users/dh/.config/qmd"
+    },
+    "env_vars": [],
+    "type": "stdio"
+  }
+}

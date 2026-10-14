@@ -6,7 +6,7 @@ DanielsVault-Dokumentationsrecherche beginnt mit dem bestehenden QMD-Index und p
 
 | Bereich | Zuständig |
 |---|---|
-| Agenten-Kontextfragen | QMD: `qmd search` / `qmd query` mit aufgabenbezogener Collectionauswahl |
+| Agenten-Kontextfragen | QMD-MCP `query` / `get` mit aufgabenbezogener Collectionauswahl; CLI als zulässiger Ersatz |
 | Autorität und explizite Aufgabengrenzen | Originaldateien und Repository-Anweisungen |
 | Ausdrücklich beauftragte Wiki-Pflege | [maintain-llm-wiki](../../skills-repo/skills/maintain-llm-wiki/SKILL.md), direkte Markdown-Bearbeitung |
 | Quellenstand kuratierter Wiki-Seiten | Deterministischer `wiki_sources.py check`; fachliches Review durch den Agenten |
@@ -17,7 +17,7 @@ DanielsVault-Dokumentationsrecherche beginnt mit dem bestehenden QMD-Index und p
 
 ## Kontextrecherche
 
-Dem [Recherche-Skill](../../skills-repo/skills/rag-documentation-research/SKILL.md) folgen. Bei jeder Suche passende Originalcollections mit wiederholtem `-c` wählen; bei Nutzen die kuratierte `contextual-wiki-common` ergänzen. Bereits benannte Originale dürfen direkt geöffnet werden. Vor Nutzung einer Wiki-Seite ihre direkten Originalstände prüfen und relevante Originalpassagen lesen. `review` oder `invalid` bedeutet, mit aktuellen Originalen weiterzurecherchieren und die Grenze der Wiki-Seite zu nennen. Gleiche Hashes zertifizieren weder Aussagen noch Schlussfolgerungen. OpenSpec, ADRs und Repo-Anweisungen behalten ihre Autorität.
+Dem [Recherche-Skill](../../skills-repo/skills/rag-documentation-research/SKILL.md) und dem [QMD-Skill](../../skills-repo/skills/qmd/SKILL.md) folgen. Für normale Suche und Dokumentabruf verfügbare QMD-MCP-Werkzeuge bevorzugen; sie besitzen einen eigenen Laufzeit- und Indexzugang und werden nicht durch einen Shell-Statusaufruf freigegeben. Bei jeder Suche passende Originalcollections über MCP `collections` oder, beim zulässigen CLI-Ersatz, mit wiederholtem `-c` wählen; bei Nutzen die kuratierte `contextual-wiki-common` ergänzen. Bereits benannte Originale dürfen direkt geöffnet werden. Vor Nutzung einer Wiki-Seite ihre direkten Originalstände prüfen und relevante Originalpassagen lesen. `review` oder `invalid` bedeutet, mit aktuellen Originalen weiterzurecherchieren und die Grenze der Wiki-Seite zu nennen. Gleiche Hashes zertifizieren weder Aussagen noch Schlussfolgerungen. OpenSpec, ADRs und Repo-Anweisungen behalten ihre Autorität.
 
 `private` und `Projects/Private` sind persönliche Fachbereiche des gemeinsamen Wissensbestands. Fachliche Relevanz und ausdrücklich gesetzte Aufgabengrenzen entscheiden über Evidenz. Eine normale Suche führt keine Indexpflege aus, schreibt keine Wiki-Seite und setzt kein Prüfdatum. Bei fehlenden Treffern gezielt in bekannten Quellen oder mit begrenzter Textsuche weiterarbeiten und Evidenzlücken benennen.
 

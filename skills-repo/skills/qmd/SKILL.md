@@ -17,19 +17,40 @@ Local search engine for markdown content.
 
 ## Choose the operation first
 
-For DanielsVault documentation questions, use QMD as the standard retrieval entry. Choose relevant original-source collection(s) from `_shared/danielsvault-rag/qmd-collections.json` and pass `-c <collection>` for each. You may add the curated `contextual-wiki-common` collection when it helps the task; avoid unfiltered searches that mix in historical or copied wiki content. Follow useful hits to current originals, read the relevant sections, and honor repository instructions, task boundaries, and primary requirements. Before relying on a wiki note, run the read-only source check described in [maintain-llm-wiki](../maintain-llm-wiki/SKILL.md); `review` or `invalid` means use current originals and state the note's limitation. `unchanged` only describes original bytes, not claim correctness. Use `qmd search` for exact names and identifiers and `qmd query` for natural-language questions. A named or known original may be opened directly. `private` names a subject domain. Explicit wiki ingestion, update or review work uses the shared maintenance skill; ordinary research does not save pages or record a new review timestamp. WikiQuery is retired.
+For DanielsVault documentation questions, use QMD as the standard retrieval entry. Prefer its callable MCP search and retrieval tools. Choose relevant original-source collection(s) from `_shared/danielsvault-rag/qmd-collections.json` and pass them through MCP `collections`, or repeat `-c <collection>` when using the CLI. You may add the curated `contextual-wiki-common` collection when it helps the task; avoid unfiltered searches that mix in historical or copied wiki content. Follow useful hits to current originals, read the relevant sections, and honor repository instructions, task boundaries, and primary requirements. Before relying on a wiki note, run the read-only source check described in [maintain-llm-wiki](../maintain-llm-wiki/SKILL.md); `review` or `invalid` means use current originals and state the note's limitation. `unchanged` only describes original bytes, not claim correctness. Use lexical search for exact names and identifiers and semantic search for natural-language questions. A named or known original may be opened directly. `private` names a subject domain. Explicit wiki ingestion, update or review work uses the shared maintenance skill; ordinary research does not save pages or record a new review timestamp. WikiQuery is retired.
 
-The commands below cover retrieval, index operations, diagnostics, and explicitly requested QMD commands. Never trigger indexing or embeddings merely to answer a context question.
+The tools and commands below cover retrieval, index operations, diagnostics, and explicitly requested QMD commands. Never trigger indexing or embeddings merely to answer a context question.
+
+## MCP-first retrieval
+
+Discover available QMD tools by their server and advertised capabilities; normalized tool names may differ between clients. Prefer MCP `query`, `get`, and `multi_get` for ordinary retrieval. Do not gate MCP retrieval on a shell `qmd status`: the MCP server owns its runtime and index access, which can differ from the project shell's sandbox.
+
+Use MCP `status` once when health or collection coverage is needed, reusing current evidence when sufficient. If the MCP tools are unavailable, use the CLI fallback only when the current execution environment permits access to the actual index and its cache directory, including SQLite journal/WAL writes. A sandbox may permit reading the database while denying these writes.
+
+If an invocation fails, report the failing tool or process, index path when known, and original error. Do not describe QMD as generally unavailable based on one shell or index-path failure. Continue with known originals or bounded file searches when useful; do not install, initialize, rebuild, or change permissions as part of retrieval.
 
 ## Runtime and automation guard
 
-Inside an automation, read its required state before runtime probes. For direct QMD operations, resolve the installed runtime and run `qmd status` once. A nonzero result is a blocker for dependent index work; report it instead of retrying initialization or repairing installations automatically. Inspect collections only when the operation needs coverage or configuration information. Do not infer private-domain exclusion from historical collection labels.
+Inside an automation, read its required state before runtime probes. For explicit CLI operations, CLI fallback, or index maintenance, resolve the installed runtime and run `qmd status` once. A nonzero result is a blocker for dependent index work; report it instead of retrying initialization or repairing installations automatically. Keep this CLI guard separate from MCP retrieval. Inspect collections only when the operation needs coverage or configuration information. Do not infer private-domain exclusion from historical collection labels.
 
 ## Scheduled Index Maintenance
 
 Use [scheduled-index-maintenance.md](references/scheduled-index-maintenance.md) for recurring QMD index/update automations. Do not load that reference for ordinary search.
 
 ## MCP: `query`
+
+For exact names, variables, filenames, route fragments, and identifiers, use `lex` alone with `rerank: false` to keep retrieval lexical without LLM reranking:
+
+```json
+{
+  "searches": [{ "type": "lex", "query": "handleError" }],
+  "collections": ["docs"],
+  "rerank": false,
+  "limit": 10
+}
+```
+
+For natural-language questions, use the advertised MCP query schema, such as `vec` or a combination of lexical and semantic searches:
 
 ```json
 {
@@ -57,7 +78,7 @@ Use [scheduled-index-maintenance.md](references/scheduled-index-maintenance.md) 
 - Exact phrase: `"connection pool"` (quoted)
 - Exclude terms: `performance -sports` (minus prefix)
 - Code identifiers work: `handleError async`
-- Environment variables, secret names, CLI flags, and exact IDs should use `qmd search` first, not `qmd query`
+- Environment variables, secret names, CLI flags, and exact IDs should use MCP `lex` with `rerank: false`; the CLI equivalent is `qmd search`
 
 **vec (semantic)**
 - Full natural language question
@@ -67,11 +88,6 @@ Use [scheduled-index-maintenance.md](references/scheduled-index-maintenance.md) 
 **hyde (hypothetical document)**
 - Write 50-100 words of what the *answer* looks like
 - Use the vocabulary you expect in the result
-
-**expand (auto-expand)**
-- Use a single-line query (implicit) or `expand: question` on its own line
-- Lets the local LLM generate lex/vec/hyde variations
-- Do not mix `expand:` with other typed lines — it's either a standalone expand query or a full query document
 
 ### Intent (Disambiguation)
 
@@ -92,8 +108,8 @@ Intent affects expansion, reranking, chunk selection, and snippet extraction. It
 
 | Goal | Approach |
 |------|----------|
-| Know exact terms | `lex` only |
-| Don't know vocabulary | Use a single-line query (implicit `expand:`) or `vec` |
+| Know exact terms | `lex` only, `rerank: false` |
+| Don't know vocabulary | `vec` with a natural-language question |
 | Best recall | `lex` + `vec` |
 | Complex topic | `lex` + `vec` + `hyde` |
 | Ambiguous query | Add `intent` to any combination above |
@@ -117,7 +133,7 @@ Note: `-term` only works in lex queries, not vec/hyde.
 { "collections": ["docs", "notes"] }     // Multiple (OR)
 ```
 
-Omit to search all collections.
+Omitting `collections` searches all collections. For DanielsVault, select task-relevant collections as described above.
 
 ## Other MCP Tools
 
@@ -127,7 +143,9 @@ Omit to search all collections.
 | `multi_get` | Retrieve multiple by glob/list |
 | `status` | Collections and health |
 
-## CLI
+## CLI fallback and explicit operations
+
+CLI `qmd query` accepts a single-line question or standalone `expand: question` to generate lex/vec/hyde variations through the local LLM. Do not mix `expand:` with other typed lines. This expansion input belongs to the CLI; MCP `query` accepts the structured `searches` shown above.
 
 ```bash
 qmd query "question"              # Auto-expand + rerank
@@ -140,7 +158,7 @@ qmd multi-get "journals/2026-*.md" -l 40  # Batch pull snippets by glob
 qmd multi-get notes/foo.md,notes/bar.md   # Comma-separated list, preserves order
 ```
 
-Prefer this decision rule:
+When using the CLI, prefer this decision rule:
 
 - `qmd search "<exact-term>" -c <collection> --files` for exact names, variables, filenames, route fragments, or identifier discovery
 - `qmd query "<question>" -c <collection>` for natural-language questions where you do not know the document vocabulary yet

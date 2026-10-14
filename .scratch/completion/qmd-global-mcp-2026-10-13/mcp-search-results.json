@@ -1,0 +1,66 @@
+{
+  "lexical": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Found 3 results for \"QMD\":\n\n#6b1baa 100% danielsvault-rag/readme.md - DanielsVault QMD Runtime\n#6c3295 50% danielsvault-rag/deployment.md - DanielsVault QMD Deployment\n#31f1e5 33% danielsvault-rag/openspec/changes/qmd-single-index-retrieval/specs/rag-cli-runtime/spec.md - MODIFIED Requirements"
+      }
+    ],
+    "structuredContent": {
+      "results": [
+        {
+          "docid": "#6b1baa",
+          "file": "danielsvault-rag/readme.md",
+          "title": "DanielsVault QMD Runtime",
+          "score": 1,
+          "context": null,
+          "snippet": "3: @@ -2,4 @@ (1 before, 60 after)\n4: \n5: QMD is the single indexing, embedding, and retrieval engine for DanielsVault Markdown. This project keeps the historical `rag` command as a compatibility and workflow adapter; it does not maintain a second chunk or record store.\n6: \n7: ## Source of truth"
+        },
+        {
+          "docid": "#6c3295",
+          "file": "danielsvault-rag/deployment.md",
+          "title": "DanielsVault QMD Deployment",
+          "score": 0.5,
+          "context": null,
+          "snippet": "3: @@ -2,4 @@ (1 before, 60 after)\n4: \n5: QMD is the only persisted indexing and retrieval engine. The Python package in this directory is optional and exists for callers that still depend on the `rag` CLI's structured response and workflow shapes.\n6: \n7: ## Requirements"
+        },
+        {
+          "docid": "#31f1e5",
+          "file": "danielsvault-rag/openspec/changes/qmd-single-index-retrieval/specs/rag-cli-runtime/spec.md",
+          "title": "MODIFIED Requirements",
+          "score": 0.33,
+          "context": null,
+          "snippet": "7: @@ -6,4 @@ (5 before, 11 after)\n8: ### Requirement: Runtime validation MUST provide health and smoke outcomes\n9: The system MUST provide runtime health and smoke checks that verify QMD executable availability, collection state, and a bounded retrieval through the compatibility interface.\n10: \n11: #### Scenario: Runtime health and smoke valid..."
+        }
+      ]
+    }
+  },
+  "semantic": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Found 2 results for \"How are QMD collections configured for DanielsVault?\":\n\n#6b1baa 100% danielsvault-rag/readme.md - DanielsVault QMD Runtime\n#01d95f 50% danielsvault-rag/openspec/changes/qmd-single-index-retrieval/specs/qmd-collection-maintenance/spec.md - ADDED Requirements"
+      }
+    ],
+    "structuredContent": {
+      "results": [
+        {
+          "docid": "#6b1baa",
+          "file": "danielsvault-rag/readme.md",
+          "title": "DanielsVault QMD Runtime",
+          "score": 1,
+          "context": null,
+          "snippet": "12: @@ -11,4 @@ (10 before, 51 after)\n13: - Each real nested Git repository is indexed from its repository root with `**/*.md`; Markdown outside `docs` and `adr`, including root READMEs and OpenSpec files, is included.\n14: - Explicit supplementary collections cover tracked `.agents`, `.codex`, `.github`, and `vendor` Markdown that QMD exclud..."
+        },
+        {
+          "docid": "#01d95f",
+          "file": "danielsvault-rag/openspec/changes/qmd-single-index-retrieval/specs/qmd-collection-maintenance/spec.md",
+          "title": "ADDED Requirements",
+          "score": 0.5,
+          "context": null,
+          "snippet": "12: @@ -11,4 @@ (10 before, 30 after)\n13: - **AND** redundant docs-only, ADR-only, or other nested collections for those repositories are absent\n14: - **AND** explicit supplementary collections cover repository `.agents`, `.codex`, `.github`, and tracked `vendor` Markdown that QMD excludes from parent-root glob traversal\n15: \n16: #### Scenario: Vaul..."
+        }
+      ]
+    }
+  }
+}
