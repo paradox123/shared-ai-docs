@@ -47,8 +47,17 @@ WRAPPER_PATTERNS = (
         flags=re.IGNORECASE | re.DOTALL,
     ),
     re.compile(
+        r"^\s*#\s*AGENTS\.md instructions\s*"
+        r"<INSTRUCTIONS\b[^>]*>.*?</INSTRUCTIONS\s*>",
+        flags=re.IGNORECASE | re.DOTALL,
+    ),
+    re.compile(
         r"<environment_context\b[^>]*>.*?</environment_context\s*>",
         flags=re.IGNORECASE | re.DOTALL,
+    ),
+    re.compile(
+        r'^\s*<external_codex_apps_open_page>\s*\{\s*"page_id"\s*:\s*null\s*\}'
+        r"\s*</external_codex_apps_open_page>",
     ),
 )
 NESTED_TOOL_RE = re.compile(

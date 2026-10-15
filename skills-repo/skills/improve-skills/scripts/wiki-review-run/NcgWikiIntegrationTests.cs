@@ -8,7 +8,8 @@ using System.Text.Json.Nodes;
 // fixture unless NCG_WIKI_KEEP_FIXTURE=1. --compile-only skips all fixture work.
 if(OperatingSystem.IsWindows()) return 2;
 if(args.SequenceEqual(new[]{"--compile-only"})) { Console.WriteLine("PASS integration fixture compiles; workflow was not executed"); return 0; }
-if(args.Length!=0) { Console.Error.WriteLine("Usage: dotnet run --file NcgWikiIntegrationTests.cs [-- --compile-only]"); return 2; }
+var ignoreMissing=args.SequenceEqual(new[]{"--ignore-missing"});
+if(args.Length!=0 && !ignoreMissing) { Console.Error.WriteLine("Usage: dotnet run --file NcgWikiIntegrationTests.cs [-- --compile-only|--ignore-missing]"); return 2; }
 
 var identity=Guid.NewGuid().ToString("N");
 var root=Path.Combine(OperatingSystem.IsMacOS()?"/private/tmp":Path.GetTempPath(),"ncg-wiki-integration-"+identity);
@@ -29,6 +30,7 @@ try {
     var definition=Path.Combine(automation,"automation.toml");File.WriteAllText(definition,"id = \"keep-ncg-wiki-current\"\n");
     var memory=Path.Combine(automation,"memory.md");
     var oldMemory="Processed window end: 2026-10-12T06:00:00Z\nLast review: 2026-10-12T06:01:00Z\nCarry-forward sessions: []\nAuthoritative source tips: "+sourcePins.ToJsonString()+"\nDocs reviewed tip: "+new JsonObject{["repository"]=docs,["ref"]="refs/remotes/origin/main",["sha"]=priorDocs}.ToJsonString()+"\n\n## Earlier\nHistorical fixture paragraph stays unchanged\n";
+    if(ignoreMissing) oldMemory=oldMemory.Replace("Carry-forward sessions: []","Carry-forward sessions: [{\"id\":\"deleted-carry\",\"line_count\":4,\"last_activity_at\":\"2026-10-11T07:00:00Z\"},{\"id\":\"deleted-window-carry\",\"line_count\":4,\"last_activity_at\":\"2026-10-11T08:00:00Z\"}]");
     File.WriteAllText(memory,oldMemory);
     var sessions=new[]{"session-backend","session-sts","session-docs"};var roots=new[]{backend,sts,docs};
     var day=Path.Combine(home,"sessions","2026","10","12");Directory.CreateDirectory(day);var index=new List<string>();
@@ -42,6 +44,10 @@ try {
         ];
         File.WriteAllText(Path.Combine(day,"rollout-"+sessions[n]+".jsonl"),string.Join("\n",records.Select(x=>x.ToJsonString()))+"\n");
     }
+    if(ignoreMissing) {
+        index.Add(new JsonObject{["id"]="deleted-window-carry",["updated_at"]="2026-10-12T07:03:00Z"}.ToJsonString());
+        index.Add(new JsonObject{["id"]="deleted-window",["updated_at"]="2026-10-12T07:04:00Z"}.ToJsonString());
+    }
     File.WriteAllText(Path.Combine(home,"session_index.jsonl"),string.Join("\n",index)+"\n");
     var docsCommits=new List<string>();
     for(var n=1;n<=3;n++) {
@@ -50,12 +56,21 @@ try {
     }
     var store=Path.Combine(root,"store");
     var captureRequest=new JsonObject{["store"]=store,["automation_id"]="keep-ncg-wiki-current",["codex_home"]=home,["memory"]=memory,["definition"]=definition,["resolver"]=Path.Combine(scripts,"resolve_codex_sessions.py"),["python"]="python3",["exclude_session_id"]="maintenance",["batch_size"]=1};
+    if(ignoreMissing) {
+        captureRequest["missing_session_policy"]="ignore";
+        // External Python resolver fixture retains missing carry checkpoints, so
+        // public finalization must perform the authorized pruning itself.
+        var fixtureResolver=Path.Combine(root,"carry-reporting-resolver.py");
+        File.WriteAllText(fixtureResolver,"import contextlib,io,json,runpy\nbuffer=io.StringIO()\ncode=0\ntry:\n with contextlib.redirect_stdout(buffer): runpy.run_path("+JsonValue.Create(Path.Combine(scripts,"resolve_codex_sessions.py"))!.ToJsonString()+",run_name='__main__')\nexcept SystemExit as ex: code=ex.code\nmanifest=json.loads(buffer.getvalue())\nmissing={s['id'] for s in manifest['sessions'] if s['status']=='missing'}\nmanifest['window']['carry_forward_to_persist'] += [c for c in manifest['window']['carry_forward_from_memory'] if c['id'] in missing]\nprint(json.dumps(manifest))\nraise SystemExit(code)\n");
+        captureRequest["resolver"]=fixtureResolver;
+    }
     var capture=Call(review,"capture",captureRequest);Check(capture.Exit==0&&capture.Body["status"]?.GetValue<string>()=="resolving"&&capture.Body["next_offset"]?.GetValue<int>()==1,"three-session capture starts one-session bounded resolution");
     var run=capture.Body["run_directory"]!.GetValue<string>();var resolution=capture.Body;
     while(resolution["extraction_allowed"]?.GetValue<bool>()!=true) {
         var next=Call(review,"resolve-batch",new JsonObject{["run_directory"]=run,["offset"]=resolution["next_offset"]!.DeepClone()});Check(next.Exit==0,"next frozen selection slice resolves");resolution=next.Body;
     }
-    Check(resolution["selection_count"]?.GetValue<int>()==3,"complete aggregate retains all three sessions");
+    Check(resolution["selection_count"]?.GetValue<int>()==(ignoreMissing?6:3),"complete aggregate retains the original full selection including ignored missing rows");
+    if(ignoreMissing) Check(resolution["ignored_missing_session_ids"]!.AsArray().Select(x=>x!.GetValue<string>()).ToHashSet(StringComparer.Ordinal).SetEquals(new[]{"deleted-carry","deleted-window-carry","deleted-window"}),"all three missing selection forms are reported across bounded batches");
     Check(File.ReadAllText(memory)==oldMemory,"batch capture never advances official memory");
     Pass("three-session-batch-selection");
     var reviewRequest=new JsonObject{["extractor"]=Path.Combine(scripts,"extract_codex_session_evidence.py"),["python"]="python3",["scope"]=new JsonObject{["cwd_roots"]=new JsonArray(backend,sts,docs),["worktree_tails"]=new JsonArray()}};
@@ -100,8 +115,13 @@ try {
     var completion=common.DeepClone().AsObject();completion["plan_receipt"]=plan.Body["receipt"]!.DeepClone();completion["plan_receipt_sha256"]=plan.Body["receipt_sha256"]!.DeepClone();
     var final=Call(delivery,"finalize",completion);Check(final.Exit==0&&final.Body["status"]?.GetValue<string>()=="complete","no-change full review finalizes across both helpers");
     var completedMemory=File.ReadAllBytes(memory);var newText=Encoding.UTF8.GetString(completedMemory);
-    Check(newText.Contains("Processed window end: 2026-10-12T07:02:00Z\n")&&newText.Contains("## Earlier\nHistorical fixture paragraph stays unchanged\n"),"atomic completion advances the captured ceiling and preserves history");
+    Check(newText.Contains("Processed window end: "+(ignoreMissing?"2026-10-12T07:04:00Z":"2026-10-12T07:02:00Z")+"\n")&&newText.Contains("## Earlier\nHistorical fixture paragraph stays unchanged\n"),"atomic completion advances the captured ceiling and preserves history");
     var newBundle=final.Body["new_checkpoint"]!.AsObject();
+    if(ignoreMissing) {
+        var expectedCarry=new JsonArray(new JsonObject{["id"]="session-backend",["line_count"]=3,["last_activity_at"]="2026-10-12T07:00:00Z"},new JsonObject{["id"]="session-sts",["line_count"]=3,["last_activity_at"]="2026-10-12T07:01:00Z"},new JsonObject{["id"]="session-docs",["line_count"]=3,["last_activity_at"]="2026-10-12T07:02:00Z"});
+        Check(JsonNode.DeepEquals(JsonNode.Parse(newBundle["Carry-forward sessions"]!.GetValue<string>()),expectedCarry),"successful finalization removes ignored missing carries and preserves remaining checkpoint objects and order");
+        Pass("ignored-missing-carry-atomic-pruning");
+    }
     Check(JsonNode.Parse(newBundle["Authoritative source tips"]!.GetValue<string>())!.AsObject().Count==4&&JsonNode.Parse(newBundle["Docs reviewed tip"]!.GetValue<string>())!["sha"]!.GetValue<string>()==docsCommits.Last(),"completed bundle retains four code pins and advances its separate reviewed Docs tip");
     Check(!File.Exists(Path.Combine(store,"active.json")),"successful full completion retires the exact active run");
     var repeated=Call(delivery,"finalize",completion);Check(repeated.Exit==0&&File.ReadAllBytes(memory).SequenceEqual(completedMemory),"terminal repeated finalization is idempotent after retirement");

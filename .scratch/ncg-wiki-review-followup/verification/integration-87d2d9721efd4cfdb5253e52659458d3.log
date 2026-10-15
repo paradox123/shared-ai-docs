@@ -1,0 +1,167 @@
+git -c init.templateDir= init --bare /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/backend.git exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/backend.git/
+
+git config core.hooksPath /dev/null exit=0
+
+git -c init.templateDir= init -b develop /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/backend exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/backend/.git/
+
+git config user.name Fixture exit=0
+
+git config user.email fixture@example.invalid exit=0
+
+git config core.hooksPath /dev/null exit=0
+
+git add a.md exit=0
+
+git commit -m Initial fixture exit=0
+[develop (root-commit) c870c39] Initial fixture
+ 1 file changed, 1 insertion(+)
+ create mode 100644 a.md
+
+git remote add origin /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/backend.git exit=0
+
+git push -u origin develop exit=0
+branch 'develop' set up to track 'origin/develop'.
+To /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/backend.git
+ * [new branch]      develop -> develop
+
+git -c init.templateDir= init --bare /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/sts.git exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/sts.git/
+
+git config core.hooksPath /dev/null exit=0
+
+git -c init.templateDir= init -b develop /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/sts exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/sts/.git/
+
+git config user.name Fixture exit=0
+
+git config user.email fixture@example.invalid exit=0
+
+git config core.hooksPath /dev/null exit=0
+
+git add a.md exit=0
+
+git commit -m Initial fixture exit=0
+[develop (root-commit) 1d36fda] Initial fixture
+ 1 file changed, 1 insertion(+)
+ create mode 100644 a.md
+
+git remote add origin /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/sts.git exit=0
+
+git push -u origin develop exit=0
+branch 'develop' set up to track 'origin/develop'.
+To /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/sts.git
+ * [new branch]      develop -> develop
+
+git -c init.templateDir= init --bare /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/docs.git exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/docs.git/
+
+git config core.hooksPath /dev/null exit=0
+
+git -c init.templateDir= init -b main /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/docs exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/docs/.git/
+
+git config user.name Fixture exit=0
+
+git config user.email fixture@example.invalid exit=0
+
+git config core.hooksPath /dev/null exit=0
+
+git add a.md exit=0
+
+git commit -m Initial fixture exit=0
+[main (root-commit) 1d36fda] Initial fixture
+ 1 file changed, 1 insertion(+)
+ create mode 100644 a.md
+
+git remote add origin /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/docs.git exit=0
+
+git push -u origin main exit=0
+branch 'main' set up to track 'origin/main'.
+To /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/docs.git
+ * [new branch]      main -> main
+
+git branch production exit=0
+
+git push origin production exit=0
+To /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/backend.git
+ * [new branch]      production -> production
+
+git branch production exit=0
+
+git push origin production exit=0
+To /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/sts.git
+ * [new branch]      production -> production
+
+git rev-parse develop exit=0
+c870c399c7a1714c699ff37d8ddfa8b6033e8f69
+
+git rev-parse production exit=0
+c870c399c7a1714c699ff37d8ddfa8b6033e8f69
+
+git rev-parse develop exit=0
+1d36fdacf5f8d9e611a3ab4ddd09000448b5382b
+
+git rev-parse production exit=0
+1d36fdacf5f8d9e611a3ab4ddd09000448b5382b
+
+git rev-parse HEAD exit=0
+1d36fdacf5f8d9e611a3ab4ddd09000448b5382b
+
+git add fixture-notes.md exit=0
+
+git commit -m Fixture bookkeeping 1 exit=0
+[main b64255c] Fixture bookkeeping 1
+ 1 file changed, 1 insertion(+)
+ create mode 100644 fixture-notes.md
+
+git push origin main exit=0
+To /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/docs.git
+   1d36fda..b64255c  main -> main
+
+git rev-parse HEAD exit=0
+b64255cbe5e535c9871758fba1bd9e506e45e1c5
+
+git add fixture-notes.md exit=0
+
+git commit -m Fixture bookkeeping 2 exit=0
+[main fcdfc8a] Fixture bookkeeping 2
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+git push origin main exit=0
+To /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/docs.git
+   b64255c..fcdfc8a  main -> main
+
+git rev-parse HEAD exit=0
+fcdfc8ac3621f2dad55a4e8290db4204830c8ef8
+
+git add fixture-notes.md exit=0
+
+git commit -m Fixture bookkeeping 3 exit=0
+[main 0d0e76f] Fixture bookkeeping 3
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+git push origin main exit=0
+To /private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/docs.git
+   fcdfc8a..0d0e76f  main -> main
+
+git rev-parse HEAD exit=0
+0d0e76f35921f8d649a83d5a9735041158ecc49d
+
+ReviewRun.cs capture exit=0
+{"schema_version":1,"status":"resolving","preserved_failed_batches":0,"selection_count":3,"next_offset":1,"selection_plan_sha256":"8a3aeb3c8c0a3380188b2683a5bc73ea7089599c5d84d6c368d9f2db4c2a7e3b","run_directory":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4","index_snapshot":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4/index.jsonl","index_sha256":"97dc28d480500e1f04177d83984e435597fa49cd59e638cd1147d480be753851","extraction_allowed":false,"checkpoint_permission":"none_incomplete_resolution"}
+{"schema_version":1,"status":"capture_started","run_directory":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4","active_receipt":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/active.json"}
+
+ReviewRun.cs resolve-batch exit=0
+{"schema_version":1,"status":"resolving","preserved_failed_batches":0,"selection_count":3,"next_offset":2,"selection_plan_sha256":"8a3aeb3c8c0a3380188b2683a5bc73ea7089599c5d84d6c368d9f2db4c2a7e3b","run_directory":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4","index_snapshot":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4/index.jsonl","index_sha256":"97dc28d480500e1f04177d83984e435597fa49cd59e638cd1147d480be753851","extraction_allowed":false,"checkpoint_permission":"none_incomplete_resolution","batch_output":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4/batches/00000001-36cec7c11d684ed79bb66ae63489b3c4.stdout"}
+
+ReviewRun.cs resolve-batch exit=0
+{"schema_version":1,"status":"captured","preserved_failed_batches":0,"selection_count":3,"next_offset":3,"selection_plan_sha256":"8a3aeb3c8c0a3380188b2683a5bc73ea7089599c5d84d6c368d9f2db4c2a7e3b","run_directory":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4","manifest":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4/manifest.json","index_snapshot":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4/index.jsonl","manifest_sha256":"7912b103cdb0ec1371d64ade11db278cee807129d3dbd8f2c65b78f7ccdf0f1b","index_sha256":"97dc28d480500e1f04177d83984e435597fa49cd59e638cd1147d480be753851","resolver_exit":0,"extraction_allowed":true,"resolver_safe_to_persist":true,"checkpoint_permission":"none_final_review_and_delivery_required","batch_output":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4/batches/00000002-7d486516e40648dc8ae2c819d8599e33.stdout"}
+
+PASS three-session-batch-selection
+ReviewRun.cs page exit=0
+{"schema_version":1,"status":"page_captured","output":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4/pages/output-3e35e5eeb4084f388f3b4c9bb92f5dca/stdout.json","page_receipt":"/private/tmp/ncg-wiki-integration-87d2d9721efd4cfdb5253e52659458d3/store/run-50bec35c5adf4641bffb1f2fa80be6a4/pages/page-0000000000.json","extractor_exit":0,"offset":0}
+
+FAIL System.NullReferenceException: Object reference not set to an instance of an object.
+   at Program.<Main>$(String[] args) in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiIntegrationTests.cs:line 69

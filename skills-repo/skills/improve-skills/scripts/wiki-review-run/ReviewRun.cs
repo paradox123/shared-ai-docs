@@ -191,6 +191,8 @@ static class Review
         var timeout=Number(request,"timeout_seconds",120); var output=Number(request,"max_output_bytes",16777216);
         if(timeout<1 || timeout>120 || output<2000 || output>16777216) throw new ReviewBlocked("invalid_process_bounds");
         var approved=StringArray(request,"approved_missing_carry_ids");
+        var missingPolicy=request["missing_session_policy"] is null ? "block" : Text(request,"missing_session_policy");
+        if(missingPolicy is not ("block" or "ignore")) throw new ReviewBlocked("missing_session_policy_must_be_block_or_ignore");
         var (memoryHeader,memoryHistory)=MemoryParts(memory);
         if(!System.Text.RegularExpressions.Regex.IsMatch(memoryHeader,@"^(Processed window end|Last review):",System.Text.RegularExpressions.RegexOptions.Multiline)
             && System.Text.RegularExpressions.Regex.IsMatch(memoryHistory,@"^Last review:",System.Text.RegularExpressions.RegexOptions.Multiline)) throw new ReviewBlocked("historical_last_review_without_header_cutoff");
@@ -205,7 +207,7 @@ static class Review
             ["helper"]=HelperPath(),["helper_sha256"]=FileHash(HelperPath()),["codex_home"]=Full(request,"codex_home"),
             ["python"]=Text(request,"python"),["exclude_session_id"]=Text(request,"exclude_session_id"),["max_sessions"]=max,
             ["batch_size"]=batch,["timeout_seconds"]=timeout,["max_output_bytes"]=output,
-            ["prompt_last_run"]=prompt,["approved_missing_carry_ids"]=Strings(approved)
+            ["prompt_last_run"]=prompt,["approved_missing_carry_ids"]=Strings(approved),["missing_session_policy"]=missingPolicy
         };
     }
     // CallerFilePath keeps source identity available in ordinary file-based runs.
@@ -328,24 +330,36 @@ static class Review
     static bool ExtractionAllowed(JsonObject run,JsonObject manifest)
     {
         var exit=Number(run,"resolver_exit",-1); var safe=manifest["window"]?["safe_to_persist"]?.GetValue<bool>();
-        if(exit==0 && safe==true) return true;
+        var sessions=manifest["sessions"]?.AsArray(); if(sessions is null) return false;
+        if(exit==0 && safe==true) return sessions.All(x=>x is JsonObject session && Text(session,"status")=="resolved" && session["rollout_window"]?["state"]?.GetValue<string>() is not ("unknown" or "unreadable"));
         if(exit!=2 || safe!=false) return false;
         var approved=StringArray(run["binding"]!.AsObject(),"approved_missing_carry_ids");
-        if(approved.Length==0 || approved.Distinct(StringComparer.Ordinal).Count()!=approved.Length) return false;
+        var ignoreMissing=TextOrEmpty(run["binding"]!.AsObject(),"missing_session_policy")=="ignore";
+        if((!ignoreMissing && approved.Length==0) || approved.Distinct(StringComparer.Ordinal).Count()!=approved.Length) return false;
         var missing=new HashSet<string>(StringComparer.Ordinal);
-        foreach(var node in manifest["sessions"]!.AsArray()) {
+        var carriedMissing=new HashSet<string>(StringComparer.Ordinal);
+        foreach(var node in sessions) {
             var session=node!.AsObject(); var status=Text(session,"status");
             if(status=="resolved") {
                 if(session["rollout_window"]?["state"]?.GetValue<string>() is "unknown" or "unreadable") return false;
                 continue;
             }
             var id=Text(session,"id");
-            if(status!="missing" || session["path"] is not null || !StringArray(session,"selection_reasons").SequenceEqual(new[]{"carry_forward"},StringComparer.Ordinal) || !approved.Contains(id,StringComparer.Ordinal)) return false;
-            missing.Add(id);
+            // Deleted sessions have no storage metadata; malformed or unreadable
+            // stored histories remain blockers and cannot enter scope pagination.
+            if(status!="missing" || session["path"] is not null || session["meta"] is not null || session["rollout_window"] is not null) return false;
+            var reasons=StringArray(session,"selection_reasons");
+            var carryOnly=reasons.SequenceEqual(new[]{"carry_forward"},StringComparer.Ordinal);
+            if(ignoreMissing) {
+                if(!carryOnly && !reasons.SequenceEqual(new[]{"window"},StringComparer.Ordinal) && !reasons.SequenceEqual(new[]{"window","carry_forward"},StringComparer.Ordinal)) return false;
+            }
+            else if(!carryOnly || !approved.Contains(id,StringComparer.Ordinal)) return false;
+            if(!missing.Add(id)) return false;
+            if(reasons.Contains("carry_forward",StringComparer.Ordinal)) carriedMissing.Add(id);
         }
         if(missing.Count==0) return false;
         var carries=manifest["window"]?["carry_forward_from_memory"]?.AsArray().Select(x=>Text(x!.AsObject(),"id")).ToHashSet(StringComparer.Ordinal);
-        if(carries is null || !missing.IsSubsetOf(carries)) return false;
+        if(carries is null || !carriedMissing.IsSubsetOf(carries)) return false;
         var diagnosed=new HashSet<string>(StringComparer.Ordinal);
         foreach(var node in manifest["diagnostics"]!.AsArray()) {
             var diagnostic=node!.AsObject();
@@ -354,7 +368,7 @@ static class Review
                     if(!missing.Contains(Text(diagnostic,"session_id")) || !diagnosed.Add(Text(diagnostic,"session_id"))) return false;
                     break;
                 case "carry_forward_index_row_missing_recovered":
-                    if(StringArray(diagnostic,"session_ids").Any(id=>!missing.Contains(id))) return false;
+                    if(StringArray(diagnostic,"session_ids").Any(id=>!(ignoreMissing ? carries : missing).Contains(id))) return false;
                     break;
                 case "duplicate_index_rows_collapsed": break;
                 case "embedded_session_history_detected":
@@ -381,7 +395,10 @@ static class Review
         result["run_directory"]=directory; result["manifest"]=Path.Combine(directory,"manifest.json"); result["index_snapshot"]=Path.Combine(directory,"index.jsonl");
         result["manifest_sha256"]=run["files"]?["manifest.json"]?.DeepClone(); result["index_sha256"]=run["files"]?["index.jsonl"]?.DeepClone(); result["resolver_exit"]=run["resolver_exit"]?.DeepClone();
         result["extraction_allowed"]=true;
-        result["resolver_safe_to_persist"]=ReadJson(Path.Combine(directory,"manifest.json"))["window"]?["safe_to_persist"]?.DeepClone();
+        var manifest=ReadJson(Path.Combine(directory,"manifest.json"));
+        result["resolver_safe_to_persist"]=manifest["window"]?["safe_to_persist"]?.DeepClone();
+        result["missing_session_policy"]=TextOrEmpty(run["binding"]!.AsObject(),"missing_session_policy") is "ignore" ? "ignore" : "block";
+        result["ignored_missing_session_ids"]=Strings(manifest["sessions"]!.AsArray().Where(x=>Text(x!.AsObject(),"status")=="missing").Select(x=>Text(x!.AsObject(),"id")));
         result["checkpoint_permission"]="none_final_review_and_delivery_required";
         return result;
     }

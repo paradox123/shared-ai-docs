@@ -1,0 +1,219 @@
+git -c init.templateDir= init --bare /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend.git exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend.git/
+
+git config core.hooksPath /dev/null exit=0
+
+git -c init.templateDir= init -b develop /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend/.git/
+
+git config user.name Fixture exit=0
+
+git config user.email fixture@example.invalid exit=0
+
+git config core.hooksPath /dev/null exit=0
+
+git add a.md exit=0
+
+git commit -m Initial fixture exit=0
+[develop (root-commit) e70e8a1] Initial fixture
+ 1 file changed, 1 insertion(+)
+ create mode 100644 a.md
+
+git remote add origin /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend.git exit=0
+
+git push -u origin develop exit=0
+branch 'develop' set up to track 'origin/develop'.
+To /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend.git
+ * [new branch]      develop -> develop
+
+git -c init.templateDir= init --bare /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts.git exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts.git/
+
+git config core.hooksPath /dev/null exit=0
+
+git -c init.templateDir= init -b develop /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts/.git/
+
+git config user.name Fixture exit=0
+
+git config user.email fixture@example.invalid exit=0
+
+git config core.hooksPath /dev/null exit=0
+
+git add a.md exit=0
+
+git commit -m Initial fixture exit=0
+[develop (root-commit) 962c05b] Initial fixture
+ 1 file changed, 1 insertion(+)
+ create mode 100644 a.md
+
+git remote add origin /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts.git exit=0
+
+git push -u origin develop exit=0
+branch 'develop' set up to track 'origin/develop'.
+To /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts.git
+ * [new branch]      develop -> develop
+
+git -c init.templateDir= init --bare /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs.git exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs.git/
+
+git config core.hooksPath /dev/null exit=0
+
+git -c init.templateDir= init -b main /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs exit=0
+Initialized empty Git repository in /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs/.git/
+
+git config user.name Fixture exit=0
+
+git config user.email fixture@example.invalid exit=0
+
+git config core.hooksPath /dev/null exit=0
+
+git add a.md exit=0
+
+git commit -m Initial fixture exit=0
+[main (root-commit) 962c05b] Initial fixture
+ 1 file changed, 1 insertion(+)
+ create mode 100644 a.md
+
+git remote add origin /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs.git exit=0
+
+git push -u origin main exit=0
+branch 'main' set up to track 'origin/main'.
+To /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs.git
+ * [new branch]      main -> main
+
+git branch production exit=0
+
+git push origin production exit=0
+To /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend.git
+ * [new branch]      production -> production
+
+git branch production exit=0
+
+git push origin production exit=0
+To /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts.git
+ * [new branch]      production -> production
+
+git rev-parse develop exit=0
+e70e8a146086c3f3be12ea7c863452c34ff4da47
+
+git rev-parse production exit=0
+e70e8a146086c3f3be12ea7c863452c34ff4da47
+
+git rev-parse develop exit=0
+962c05bb4e76c7dbae38d8b6284b5cc196c03bb1
+
+git rev-parse production exit=0
+962c05bb4e76c7dbae38d8b6284b5cc196c03bb1
+
+git rev-parse HEAD exit=0
+962c05bb4e76c7dbae38d8b6284b5cc196c03bb1
+
+git add fixture-notes.md exit=0
+
+git commit -m Fixture bookkeeping 1 exit=0
+[main 9aa03d5] Fixture bookkeeping 1
+ 1 file changed, 1 insertion(+)
+ create mode 100644 fixture-notes.md
+
+git push origin main exit=0
+To /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs.git
+   962c05b..9aa03d5  main -> main
+
+git rev-parse HEAD exit=0
+9aa03d5f98a966333f83eb3c22e96db6a7dd81ff
+
+git add fixture-notes.md exit=0
+
+git commit -m Fixture bookkeeping 2 exit=0
+[main bc62fd3] Fixture bookkeeping 2
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+git push origin main exit=0
+To /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs.git
+   9aa03d5..bc62fd3  main -> main
+
+git rev-parse HEAD exit=0
+bc62fd34f6c09e84aa9676e0871a91ea90c35790
+
+git add fixture-notes.md exit=0
+
+git commit -m Fixture bookkeeping 3 exit=0
+[main 5057e49] Fixture bookkeeping 3
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+git push origin main exit=0
+To /private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs.git
+   bc62fd3..5057e49  main -> main
+
+git rev-parse HEAD exit=0
+5057e49edd6e30d104707a771a205e9d9d363175
+
+ReviewRun.cs capture exit=0
+{"schema_version":1,"status":"resolving","preserved_failed_batches":0,"selection_count":6,"next_offset":1,"selection_plan_sha256":"6707d233a82e7998b40a520a6c452a268032fcc172b4f6cdcf2f44e46c3765a5","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","index_snapshot":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/index.jsonl","index_sha256":"04f58fa5196b0784c639122bf1d21a33244d15608558263e651bc785b5c8dcea","extraction_allowed":false,"checkpoint_permission":"none_incomplete_resolution"}
+{"schema_version":1,"status":"capture_started","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","active_receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/active.json"}
+
+ReviewRun.cs resolve-batch exit=0
+{"schema_version":1,"status":"resolving","preserved_failed_batches":0,"selection_count":6,"next_offset":2,"selection_plan_sha256":"6707d233a82e7998b40a520a6c452a268032fcc172b4f6cdcf2f44e46c3765a5","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","index_snapshot":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/index.jsonl","index_sha256":"04f58fa5196b0784c639122bf1d21a33244d15608558263e651bc785b5c8dcea","extraction_allowed":false,"checkpoint_permission":"none_incomplete_resolution","batch_output":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/batches/00000001-978f561db6364134b6281a24225e509e.stdout"}
+
+ReviewRun.cs resolve-batch exit=0
+{"schema_version":1,"status":"resolving","preserved_failed_batches":0,"selection_count":6,"next_offset":3,"selection_plan_sha256":"6707d233a82e7998b40a520a6c452a268032fcc172b4f6cdcf2f44e46c3765a5","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","index_snapshot":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/index.jsonl","index_sha256":"04f58fa5196b0784c639122bf1d21a33244d15608558263e651bc785b5c8dcea","extraction_allowed":false,"checkpoint_permission":"none_incomplete_resolution","batch_output":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/batches/00000002-1542c1cb7b824608ae9ce018907c5a66.stdout"}
+
+ReviewRun.cs resolve-batch exit=0
+{"schema_version":1,"status":"resolving","preserved_failed_batches":0,"selection_count":6,"next_offset":4,"selection_plan_sha256":"6707d233a82e7998b40a520a6c452a268032fcc172b4f6cdcf2f44e46c3765a5","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","index_snapshot":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/index.jsonl","index_sha256":"04f58fa5196b0784c639122bf1d21a33244d15608558263e651bc785b5c8dcea","extraction_allowed":false,"checkpoint_permission":"none_incomplete_resolution","batch_output":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/batches/00000003-3a449aecb0c1460da00794eedbc70b2b.stdout"}
+
+ReviewRun.cs resolve-batch exit=0
+{"schema_version":1,"status":"resolving","preserved_failed_batches":0,"selection_count":6,"next_offset":5,"selection_plan_sha256":"6707d233a82e7998b40a520a6c452a268032fcc172b4f6cdcf2f44e46c3765a5","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","index_snapshot":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/index.jsonl","index_sha256":"04f58fa5196b0784c639122bf1d21a33244d15608558263e651bc785b5c8dcea","extraction_allowed":false,"checkpoint_permission":"none_incomplete_resolution","batch_output":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/batches/00000004-a2944da57dd647568e4f1833fcb56fbf.stdout"}
+
+ReviewRun.cs resolve-batch exit=0
+{"schema_version":1,"status":"captured","preserved_failed_batches":0,"selection_count":6,"next_offset":6,"selection_plan_sha256":"6707d233a82e7998b40a520a6c452a268032fcc172b4f6cdcf2f44e46c3765a5","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","manifest":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/manifest.json","index_snapshot":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/index.jsonl","manifest_sha256":"1e1747f0b79a44a6aff0909c442ffc68293031f09fc00e9cef1ac671fbcfa3b1","index_sha256":"04f58fa5196b0784c639122bf1d21a33244d15608558263e651bc785b5c8dcea","resolver_exit":2,"extraction_allowed":true,"resolver_safe_to_persist":false,"missing_session_policy":"ignore","ignored_missing_session_ids":["deleted-carry","deleted-window-carry","deleted-window"],"checkpoint_permission":"none_final_review_and_delivery_required","batch_output":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/batches/00000005-48ebf1c792064dc895f54ce3cb932c4f.stdout"}
+
+PASS three-session-batch-selection
+ReviewRun.cs page exit=0
+{"schema_version":1,"status":"page_captured","output":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/pages/output-ccbedf5dcdcc429fa820f077346f07c3/stdout.json","page_receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/pages/page-0000000000.json","extractor_exit":0,"offset":0}
+
+ReviewRun.cs page exit=0
+{"schema_version":1,"status":"page_captured","output":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/pages/output-5c8df9c18fbc42c1acd24683cd0c176e/stdout.json","page_receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/pages/page-0000000001.json","extractor_exit":0,"offset":1}
+
+ReviewRun.cs page exit=0
+{"schema_version":1,"status":"page_captured","output":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/pages/output-8682a6b89fc646d6a7570c64dc858687/stdout.json","page_receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/pages/page-0000000002.json","extractor_exit":0,"offset":2}
+
+ReviewRun.cs verify-pages exit=0
+{"schema_version":1,"status":"complete","manifest_sha256":"1e1747f0b79a44a6aff0909c442ffc68293031f09fc00e9cef1ac671fbcfa3b1","selection_sha256":"72ff8accb00620aeb48800416c35de054e59ce20266cf43dcf0f23c806de72da","eligible_sessions":3,"page_count":3,"resolved_manual_clones":0,"receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/complete.json","receipt_sha256":"bb1d763997268d0678243b67310ebb5863bcad4a070c7c66ef1f93d6fd9ae3ff","checkpoint_permission":"none_final_review_and_delivery_required"}
+
+PASS aggregate-bounded-summary-completeness
+NcgWikiDelivery.cs verify-sources exit=0
+/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDelivery.cs(941,145): warning CS8602: Dereference of a possibly null reference.
+{"schema_version":1,"status":"sources","receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/delivery/sources-179eb392b7ac40c9b5eb5aa864f8acd4.json","receipt_sha256":"609fbe00547c455aefe55a80043d7c663c93a0486bbd181ffc42cf0734bdee76","payload":{"repositories":{"backend":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend","sts":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts","docs":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs"},"source_pins":{"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend|refs/remotes/origin/develop":"e70e8a146086c3f3be12ea7c863452c34ff4da47","/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend|refs/remotes/origin/production":"e70e8a146086c3f3be12ea7c863452c34ff4da47","/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts|refs/remotes/origin/develop":"962c05bb4e76c7dbae38d8b6284b5cc196c03bb1","/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts|refs/remotes/origin/production":"962c05bb4e76c7dbae38d8b6284b5cc196c03bb1"},"documentation_pin":{"repository":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs","ref":"refs/remotes/origin/main","sha":"5057e49edd6e30d104707a771a205e9d9d363175"},"old_bundle":{"Processed window end":"2026-10-12T06:00:00Z","Last review":"2026-10-12T06:01:00Z","Carry-forward sessions":"[{\u0022id\u0022:\u0022deleted-carry\u0022,\u0022line_count\u0022:4,\u0022last_activity_at\u0022:\u00222026-10-11T07:00:00Z\u0022},{\u0022id\u0022:\u0022deleted-window-carry\u0022,\u0022line_count\u0022:4,\u0022last_activity_at\u0022:\u00222026-10-11T08:00:00Z\u0022}]","Authoritative source tips":"{\u0022/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend|refs/remotes/origin/develop\u0022:\u0022e70e8a146086c3f3be12ea7c863452c34ff4da47\u0022,\u0022/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend|refs/remotes/origin/production\u0022:\u0022e70e8a146086c3f3be12ea7c863452c34ff4da47\u0022,\u0022/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts|refs/remotes/origin/develop\u0022:\u0022962c05bb4e76c7dbae38d8b6284b5cc196c03bb1\u0022,\u0022/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts|refs/remotes/origin/production\u0022:\u0022962c05bb4e76c7dbae38d8b6284b5cc196c03bb1\u0022}","Docs reviewed tip":"{\u0022repository\u0022:\u0022/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs\u0022,\u0022ref\u0022:\u0022refs/remotes/origin/main\u0022,\u0022sha\u0022:\u0022962c05bb4e76c7dbae38d8b6284b5cc196c03bb1\u0022}"},"docs_prior":{"repository":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs","ref":"refs/remotes/origin/main","sha":"962c05bb4e76c7dbae38d8b6284b5cc196c03bb1"},"complete_proof_sha256":"bb1d763997268d0678243b67310ebb5863bcad4a070c7c66ef1f93d6fd9ae3ff","schema_version":1,"kind":"sources","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","run_sha256":"54436550c44220edfcac43f460941a2b214b2f7eb84f4ca0b49980269dbde110","delivery_helper":"/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDelivery.cs","delivery_helper_sha256":"564db529252a8d27a80cb64287621ae413d0bbc2e17565f54e2be23badd07fd8","git_candidate_count":0}}
+
+NcgWikiDelivery.cs git-history exit=0
+{"schema_version":1,"status":"git-history","receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/delivery/git-history-dfca42f091ed4172895b51e45e123daa.json","receipt_sha256":"54ae8496e81310bc361838741c5c601522cb4f73d4c33b1ee9edd158321585dc","payload":{"source_receipt_sha256":"0343974d24e5b12a6b0e119c85d2406fa1ae71cd64a34b61cfdd2a40d6f82a69","history_sha256":"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","offset":0,"limit":1,"count":0,"selection_count":0,"next_offset":0,"has_more":false,"candidates":[],"schema_version":1,"kind":"git-history","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","run_sha256":"54436550c44220edfcac43f460941a2b214b2f7eb84f4ca0b49980269dbde110","delivery_helper":"/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDelivery.cs","delivery_helper_sha256":"564db529252a8d27a80cb64287621ae413d0bbc2e17565f54e2be23badd07fd8"}}
+
+NcgWikiDelivery.cs docs-history exit=0
+{"schema_version":1,"status":"docs-history","receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/delivery/docs-history-424cc065e22645f3b14ec862bd038c80.json","receipt_sha256":"83ad88d9a2bf992fefcf02883cddb5262ca68e7a38f4c77def67732c4b1dc5a7","payload":{"source_receipt_sha256":"0343974d24e5b12a6b0e119c85d2406fa1ae71cd64a34b61cfdd2a40d6f82a69","docs_pin":{"repository":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs","ref":"refs/remotes/origin/main","sha":"5057e49edd6e30d104707a771a205e9d9d363175"},"history_sha256":"ac1d1f8915dec7c77ede5fdbb351cc66a428c2fb30e804ad21b6f58316ca4460","baseline_missing":false,"offset":0,"limit":1,"count":1,"selection_count":3,"next_offset":1,"has_more":true,"commits":["9aa03d5f98a966333f83eb3c22e96db6a7dd81ff"],"schema_version":1,"kind":"docs-history","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","run_sha256":"54436550c44220edfcac43f460941a2b214b2f7eb84f4ca0b49980269dbde110","delivery_helper":"/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDelivery.cs","delivery_helper_sha256":"564db529252a8d27a80cb64287621ae413d0bbc2e17565f54e2be23badd07fd8"}}
+
+NcgWikiDelivery.cs docs-history exit=0
+{"schema_version":1,"status":"docs-history","receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/delivery/docs-history-ec789e4fe721449e860912755794f7b9.json","receipt_sha256":"688873011ca14e4299654a90fa7369ef493b6448862cece40e5e54102897e402","payload":{"source_receipt_sha256":"0343974d24e5b12a6b0e119c85d2406fa1ae71cd64a34b61cfdd2a40d6f82a69","docs_pin":{"repository":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs","ref":"refs/remotes/origin/main","sha":"5057e49edd6e30d104707a771a205e9d9d363175"},"history_sha256":"ac1d1f8915dec7c77ede5fdbb351cc66a428c2fb30e804ad21b6f58316ca4460","baseline_missing":false,"offset":1,"limit":1,"count":1,"selection_count":3,"next_offset":2,"has_more":true,"commits":["bc62fd34f6c09e84aa9676e0871a91ea90c35790"],"schema_version":1,"kind":"docs-history","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","run_sha256":"54436550c44220edfcac43f460941a2b214b2f7eb84f4ca0b49980269dbde110","delivery_helper":"/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDelivery.cs","delivery_helper_sha256":"564db529252a8d27a80cb64287621ae413d0bbc2e17565f54e2be23badd07fd8"}}
+
+NcgWikiDelivery.cs docs-history exit=0
+{"schema_version":1,"status":"docs-history","receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/delivery/docs-history-d94843ed31294ee1b4d47754aea9d799.json","receipt_sha256":"14416e0dd72f13ef1f72beb9bde5533a1fd87bbf87fc0be3a0f80ed9de7adc47","payload":{"source_receipt_sha256":"0343974d24e5b12a6b0e119c85d2406fa1ae71cd64a34b61cfdd2a40d6f82a69","docs_pin":{"repository":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs","ref":"refs/remotes/origin/main","sha":"5057e49edd6e30d104707a771a205e9d9d363175"},"history_sha256":"ac1d1f8915dec7c77ede5fdbb351cc66a428c2fb30e804ad21b6f58316ca4460","baseline_missing":false,"offset":2,"limit":1,"count":1,"selection_count":3,"next_offset":3,"has_more":false,"commits":["5057e49edd6e30d104707a771a205e9d9d363175"],"schema_version":1,"kind":"docs-history","run_directory":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b","run_sha256":"54436550c44220edfcac43f460941a2b214b2f7eb84f4ca0b49980269dbde110","delivery_helper":"/Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiDelivery.cs","delivery_helper_sha256":"564db529252a8d27a80cb64287621ae413d0bbc2e17565f54e2be23badd07fd8"}}
+
+PASS exact-code-source-and-paged-docs-history
+git show --format= --name-only 9aa03d5f98a966333f83eb3c22e96db6a7dd81ff exit=0
+fixture-notes.md
+
+git show --format= --name-only bc62fd34f6c09e84aa9676e0871a91ea90c35790 exit=0
+fixture-notes.md
+
+git show --format= --name-only 5057e49edd6e30d104707a771a205e9d9d363175 exit=0
+fixture-notes.md
+
+NcgWikiDelivery.cs plan-delivery exit=0
+{"schema_version":1,"status":"plan","receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/delivery/plan-4e8798f71ceb4c558fc74ff84c6ec994.json","receipt_sha256":"73ba69f6ea551e33cb64bca712c6656ee80f327b67b75d3a1b9b744c39f18216","payload":{"docs_base_sha":"5057e49edd6e30d104707a771a205e9d9d363175","owned_files":{},"expected_candidate_count":6,"request_sha256":"57308fdec8891d2b7993990dfc1461909f485c1abe6e2d8d86a662182a23ecec"}}
+
+NcgWikiDelivery.cs finalize exit=0
+{"schema_version":1,"status":"complete","receipt":"/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/store/run-f5b59567b8564ab4b5986bed5ef3638b/delivery/completed.json","checkpoint_changed":true,"active_retired":true,"new_checkpoint":{"Processed window end":"2026-10-12T07:04:00Z","Last review":"2026-10-14T07:17:51.9320340\u002B00:00","Carry-forward sessions":"[{\u0022id\u0022:\u0022session-backend\u0022,\u0022last_activity_at\u0022:\u00222026-10-12T07:00:00Z\u0022,\u0022line_count\u0022:3},{\u0022id\u0022:\u0022session-sts\u0022,\u0022last_activity_at\u0022:\u00222026-10-12T07:01:00Z\u0022,\u0022line_count\u0022:3},{\u0022id\u0022:\u0022session-docs\u0022,\u0022last_activity_at\u0022:\u00222026-10-12T07:02:00Z\u0022,\u0022line_count\u0022:3}]","Authoritative source tips":"{\u0022/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend|refs/remotes/origin/develop\u0022:\u0022e70e8a146086c3f3be12ea7c863452c34ff4da47\u0022,\u0022/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/backend|refs/remotes/origin/production\u0022:\u0022e70e8a146086c3f3be12ea7c863452c34ff4da47\u0022,\u0022/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts|refs/remotes/origin/develop\u0022:\u0022962c05bb4e76c7dbae38d8b6284b5cc196c03bb1\u0022,\u0022/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/sts|refs/remotes/origin/production\u0022:\u0022962c05bb4e76c7dbae38d8b6284b5cc196c03bb1\u0022}","Docs reviewed tip":"{\u0022repository\u0022:\u0022/private/tmp/ncg-wiki-integration-1abbb6e21c2c49cfb24c54ccda95fef5/docs\u0022,\u0022ref\u0022:\u0022refs/remotes/origin/main\u0022,\u0022sha\u0022:\u00225057e49edd6e30d104707a771a205e9d9d363175\u0022}"}}
+
+FAIL System.Exception: successful finalization removes ignored missing carries and preserves remaining checkpoint objects and order
+   at Program.<<Main>$>g__Check|0_4(Boolean condition, String reason) in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiIntegrationTests.cs:line 153
+   at Program.<Main>$(String[] args) in /Users/dh/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiIntegrationTests.cs:line 122

@@ -15,6 +15,7 @@ Run from the owning `shared-ai-docs` repository so `global.json` selects SDK
 ```bash
 dotnet run --file skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRun.cs -- capture --request /private/capture.json
 dotnet run --file skills-repo/skills/improve-skills/scripts/wiki-review-run/ReviewRunTests.cs
+dotnet run --file skills-repo/skills/improve-skills/scripts/wiki-review-run/NcgWikiIntegrationTests.cs -- --ignore-missing
 ```
 
 Dependencies: .NET SDK10 with file-based apps, a Unix filesystem, and Python3 for
@@ -40,6 +41,7 @@ path-resolution tool; keep its bytes, permissions and original run unchanged.
   "resolver": "/absolute/scripts/resolve_codex_sessions.py",
   "python": "python3",
   "exclude_session_id": "current-maintenance-thread-id",
+  "missing_session_policy": "ignore",
   "max_sessions": 100,
   "batch_size": 100,
   "timeout_seconds": 120,
@@ -99,12 +101,21 @@ an explicitly chosen discard/finished run, call `invalidate` with
 `{"run_directory":"/absolute/captured-run","reason":"specific reason"}`.
 It preserves evidence and frees the active pointer; it changes no checkpoint.
 
-Only an explicit `approved_missing_carry_ids` array admits the existing approved
-deleted-carry exception: exit2, safe=false, missing/path:null rows with exactly
-`selection_reasons:["carry_forward"]`, matching memory carry and `missing_rollout`
-diagnostics, and no other unsafe cause. The caller owns concrete authorization
-for those IDs. New window+carry missing rows remain blocked. Raw exit/safe fields
-remain false/2; `extraction_allowed:true` is no checkpoint permission.
+`missing_session_policy` defaults to `"block"`. The NCG automation uses the
+task-authorized `"ignore"` policy: absent-storage rows selected by the window,
+carry-forward or both are irrelevant when status is `missing`, path is null,
+`meta`/`rollout_window` are absent/null and each ID has its exact `missing_rollout`
+diagnostic. Capture reports `ignored_missing_session_ids`; the raw manifest,
+exit2/safe=false fields and full selection remain preserved. Such rows have no
+cwd and cannot enter scoped extraction. Every other unsafe condition still
+blocks. The policy is part of capture identity and cannot change during resume.
+
+Under the default block policy, `approved_missing_carry_ids` retains the existing
+per-ID exception for carry-only missing rows. It does not authorize missing
+window rows. `extraction_allowed:true` is never checkpoint permission. Ignored
+missing carries are pruned only by successful atomic finalization. A previously
+resolved/pinned rollout that disappears later remains changed source evidence;
+this option never weakens stored snapshot, range or hash checks.
 
 ## Summary pages and completeness
 
@@ -264,20 +275,27 @@ original named evidence remains linked. Successful/corrupt/changed attempts
 cannot be silently replaced. The store lock is released after bounded cleanup.
 
 All ReviewRun receipts explicitly withhold checkpoint permission. The full semantic wiki
-review, approved deleted-carry handling, source/reachability/migration guards,
+review, authorized missing-session handling, source/reachability/migration guards,
 main-only delivery and successful required commit/push gates remain the caller's
 responsibility. This app never advances official memory.
 
 ## NCG-specific source, delivery and completion requests
 
 `NcgWikiDelivery.cs` is a separate file-based app. It requires the same SDK/Unix/
-Python environment and actual Git; use local bare repositories for tests. It
+Python environment, actual Git and the POSIX `test` command for bounded regular-file checks; use local bare repositories for tests. It
 performs fixed allowed fetches (local remote-ref updates), writes protected
-receipts/content, and only `finalize` writes official memory/retirement. It does
-not edit docs, commit or push. Its exact source/delivery gates and restart order
-are owned by [NCG-Automation.md](NCG-Automation.md).
+receipts/content, and only `finalize` writes official memory/retirement. Explicit
+`prepare-workspace` creates a protected independent main checkout of the same
+docs origin, leaving the canonical checkout untouched. `retire-plan` preserves a
+superseded owned plan/checkout for bounded same-run replanning after a docs push
+race. `protect-worktree` and `restore-worktree` requests also stash and restore the
+bound docs worktree and index. It does not author docs, commit or push. Callers
+that do not invoke protection retain the existing strict dirty-worktree gates;
+there is no automatic stash on a rejected plan. Its exact source/delivery gates
+and restart order are owned by [NCG-Automation.md](NCG-Automation.md).
 
-Common input for `verify-sources` and first `plan-delivery`:
+Common input for `verify-sources`, `protect-worktree`, first `plan-delivery` and
+`restore-worktree`:
 
 ```json
 {
@@ -292,10 +310,40 @@ Common input for `verify-sources` and first `plan-delivery`:
 }
 ```
 
-`review_helper` must match the capture. Proof is current and repositories are
-exact Git roots; docs must belong to the bound scope. `verify-sources` returns
+Source/planning commands require `review_helper` to match the capture and a
+current proof. Repositories are exact Git roots; docs must belong to the bound
+scope. `restore-worktree` uses the protection recovery contract below instead of
+rerunning the source proof. `verify-sources` returns
 `status:sources`, a protected `receipt`/`receipt_sha256`, four `source_pins`, a
 separate `documentation_pin` and counts. Full candidate/range lists stay private.
+
+`verify-sources` optionally accepts `allow_source_advancement:true`, bound into
+its receipt. Default callers still require exact final code-pin equality.
+Opted-in callers allow only append-only ancestry from each actually reviewed
+pin to its freshly fetched matching develop/production ref. Finalization keeps
+the reviewed four-pin map, never silently checkpoints unreviewed newer commits.
+Missing refs, nonancestor histories and corrupt evidence still reject.
+
+`prepare-workspace` takes common input plus the exact source receipt/SHA. It
+returns `workspace_ready`, protected `receipt`/`receipt_sha256` and a payload
+containing `workspace_root`, `canonical_docs_root`, `docs_base_sha` and `origin`.
+The private independent Git checkout is owned by this run, on main, clean and
+aligned to the selected Docs tip, with exactly the canonical docs origin.
+`delivery/workspace.json` retains its receipt pointer for reuse. Existing dirty
+or concurrent work in the canonical checkout is neither moved nor modified.
+Keep the canonical root in selection scope, source topics and persisted Docs
+reviewed tip; only actual edit/stage/commit/push operates in workspace_root.
+After canonical QMD routing, use the clean owned workspace's physical wiki paths
+for topic-input hashes/comparisons. An isolated plan maps those paths back to
+repository-relative paths and proves them against the exact pinned main blobs;
+dirty canonical text does not substitute for delivered wiki evidence.
+No caller-chosen arbitrary checkout, foreign origin or feature branch is accepted.
+When preparation's fresh main check detects an append-only advance, the command
+instead returns successful nonterminal `refresh_required`. A push after that
+check can instead reach a later pinned-workspace guard. For either normal
+docs-main race before any plan exists, use the guarded pre-plan `retire-plan`
+request below; it independently proves safe ownership/ancestry. Do not stop or
+recapture sessions merely because main advanced.
 
 `git-history` and `docs-history` take `run_directory`, `source_receipt`, optional
 `source_receipt_sha256`, `offset` and `limit` (1–100). Their protected page payload
@@ -303,31 +351,106 @@ has offset/count/next_offset/has_more/selection_count plus bounded candidates or
 commit SHAs. Follow both complete chains, including empty offset0 pages. Docs
 missing baseline is explicit; no datetime substitutes for its SHA range.
 
+`protect-worktree` takes the common input plus `source_receipt` and
+`source_receipt_sha256`. Invoke it after both complete history chains and before
+topic/wiki comparisons. It requires the validated source identity and main with
+HEAD equal to the pinned docs tip. Existing staged, unstaged and untracked
+regular files do not alone block the run: the helper retains protected raw
+snapshots, journals the operation, and uses `stash --include-untracked` to obtain
+its exact owned stash SHA. The resulting delivery worktree must be clean.
+An initially clean worktree records protected clean state without creating a
+stash. Ignored files remain untouched. Unsupported state or a concrete collision
+still blocks with the protected data retained.
+Tracked raw bytes and modes are retained as well as index/Git-tree identities.
+Before mutation, unsupported clean/smudge, encoding/EOL or mode conversions and
+changes to ignore/attribute files are rejected explicitly; ordinary `autocrlf=input`
+with byte-identical LF contents is supported. Entries that Git does not include
+in stash/status, such as FIFOs, remain untouched and are never opened as data.
+
+The protected journal and snapshots live under the named run's `delivery/`
+directory, outside the docs repository. Their identity binds run, repository,
+base and helper; a plan freezes that immutable protection identity, while the
+journal records recovery progress. An unchanged repeated request adopts only its
+own operation, including interruption after stash creation. Never substitute
+`stash@{0}`, another stash or a newly captured run for the saved identity.
+
 `plan-delivery` adds the source receipt, `candidates` and `edits` to common input.
+The optional exact `workspace_receipt`/`workspace_receipt_sha256` selects the
+verified owned isolated checkout and freezes its identity in the plan. Without
+it, existing in-place protection/strict worktree behavior remains unchanged.
 Candidate objects have kind (`session` with id, or `git` with repository/sha),
 disposition, concrete reason, and for relevant compared work `topic_receipt` plus
 `topic_receipt_sha256`. Edits have repo-relative regular Markdown `path` and exact
 desired UTF8 `content`. Expected full candidate coverage is derived independently.
 Unproven session discovery is a terminal no-claim; eligible Git work cannot be
 silently omitted. Plan receipts bind desired contents and original comparisons
-before any edit. The named `delivery/plan.json` pointer supports unchanged plan
-adoption after interruption. Changed intent blocks rather than overwrites it.
+before any edit, plus the immutable protection identity when protection was
+explicitly requested. Nonconflicting overlaps with protected work are permitted
+only through derived expected index/worktree trees; concrete merge conflicts or
+untracked path collisions block. The named `delivery/plan.json` pointer supports
+unchanged plan adoption after interruption. Changed intent blocks rather than
+overwrites it.
 
 `delivery-status` takes `run_directory`, `plan_receipt` and its optional SHA256.
-Results are planned, own_edits, own_commit or delivered; blockers return exit2
+Results are planned, own_edits, own_commit or delivered. In isolated mode, a
+verified append-only docs race returns nonterminal refresh_required for the
+explicit retirement/replanning path. Actual unsafe ownership failures return exit2
 without adopting unrelated files/commits. Actual guarded edit/stage/commit/push
 remains the automation's action, based on this exact own-work reconciliation.
+
+`retire-plan` takes the exact plan identity plus common review input for a known
+docs-main advance. It preserves the old intent/checkout/own commit and archives
+only the active plan/workspace pointer, returning `refresh_required` for new
+source/history/topic comparisons and a fresh owned main workspace in the same
+captured session run. It never resets, rebases, force-pushes or touches the
+canonical checkout. If the exact own commit is already reachable from freshly
+verified origin/main, reconciliation returns delivered instead of repeating its
+push. Unowned edits or rewritten history are not a safe replanning state.
+
+Before a plan exists, `retire-plan` instead takes common input plus the **old**
+`source_receipt`/`source_receipt_sha256`, with optional exact
+`workspace_receipt`/`workspace_receipt_sha256` when a workspace was returned.
+Omit `plan_receipt`. It proves an append-only docs advance and clean owned
+workspace/preparation, archives only its active pointers and preserves the
+checkout. A repeated unchanged request is idempotent. Then run `verify-sources`,
+both complete history chains, `prepare-workspace` and relevant topic comparisons
+again within the same captured session run before recording a new plan.
+
+`restore-worktree` takes common input and, if a plan exists, its `plan_receipt`
+and `plan_receipt_sha256`. Invoke it after delivery, including a no-change result,
+and attempt safe restoration after a failed step before reporting. It validates
+the protected run/repository/stash identity and either the original base or the
+exact planned own commit, then applies only the saved stash SHA with `--index`
+when a stash was needed. Protected clean state needs verification but no apply.
+Recovery does not depend on remote access, current code pins, automation
+definition or memory. Expected staged/worktree trees are derived with
+`merge-tree`, and actual tracked/index/untracked state must match before the
+journal can record verified restoration. A repeated request adopts an already
+verified restore; it does not apply the stash twice. Conflicts, collisions or new
+unrelated work preserve the stash and data and block completion. The restored
+owned stash remains as a safety backup; foreign stash entries are untouched.
+Never pop/drop an unknown stash or use reset, clean or rebase for recovery.
 
 `finalize` takes the plan identity and common `review_helper`/`review_request`
 for current pre-write proof. Omit optional `new_checkpoint`: cursor/carry/code
 tips/Docs tip are derived from evidence. If supplied, exactly five named header
 keys and their derived values are required. First finalize verifies before the
-shared writer lock; protected expected-old/intended-new intent supports narrow
-crash recovery. `complete` requires actual needed delivery and exact full bundle
-persistence plus active retirement. Repetition of an already completed plan is
-idempotent. Memory of a third bundle blocks; other memory prose is retained.
+shared writer lock. A protected plan also requires exact verified restoration,
+including no-change delivery, before any checkpoint replacement.
+Isolated delivery which never stashed user work instead certifies its exact
+owned checkout and remote commit; it does not require moving/restoring unrelated
+canonical work. The canonical repository identity stays in the Docs checkpoint.
+The protected expected-old/intended-new intent freezes its restoration proof along with the
+delivery proof: old-bundle recovery revalidates before writing, while intended-
+new-bundle recovery completes receipt/retirement from those saved proofs.
+`complete` requires actual needed delivery and exact full bundle persistence plus
+active retirement. Repetition of an already completed plan is idempotent. Memory
+of a third bundle blocks; other memory prose is retained.
 
 All receipt reuse binds the current delivery-helper source identity. Old tools,
 corrupt files, changed candidate/proof inputs and foreign state cannot certify
 completion. This is a cooperating-writer lock contract, not a universal CAS
 against independent writers ignoring that lock.
+Narrow restoration is the ownership-only exception: changed tools/definition,
+memory or active pointer cannot strand the saved user work. It validates the
+original run, journal, exact stash and any own commit without certifying review.

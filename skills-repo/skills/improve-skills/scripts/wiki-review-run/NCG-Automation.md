@@ -31,10 +31,16 @@ ReviewRun captures/resolves/extracts and writes local review receipts. It does
 not use Git, change official memory or edit source/wiki files. NcgWikiDelivery
 uses fixed read-only Git commands and exact allowed fetches, writes protected
 delivery/finalization receipts and, only through finalize, replaces official
-memory and retires the matching active pointer. Fetch changes local remote refs;
-neither helper commits, pushes, resets, stashes, amends, pulls or rebases. The
-automation retains its narrowly guarded docs edit/commit/push actions. NCG
-production/development and their management paths remain read-only.
+memory and retires the matching active pointer. prepare-workspace creates a
+private run-owned independent docs checkout on main from the same verified
+origin. It never changes the normal checkout's index, files or stashes.
+Explicit protect-worktree and
+restore-worktree requests also protect and restore the bound local docs worktree
+and index. Fetch changes local remote refs; neither helper authors docs, commits,
+pushes, resets, cleans, amends, pulls or rebases. The automation retains its
+narrowly guarded docs edit/commit/push actions. Protection is explicit; other
+callers retain the strict dirty-worktree gates. NCG production/development and
+their management paths remain read-only.
 
 ## 1. Bootstrap and immutable selection
 
@@ -52,9 +58,16 @@ is a visible legacy fallback only when Processed is absent. Require the actual
 nonempty CODEX_THREAD_ID; never infer it from titles or print environment dumps.
 
 Use capture with batch_size100, max_sessions100, timeout_seconds120 and
-max_output_bytes16777216. Only the task-approved deleted-carry ID may appear in
-approved_missing_carry_ids. The prompt_last_run value is empty when Processed
-exists. Repeat an unchanged capture request to adopt its original selection.
+max_output_bytes16777216, and missing_session_policy:"ignore". Daniel authorizes
+the NCG automation to treat missing sessions as deleted and irrelevant without
+per-ID approval: only missing/path:null rows without storage metadata and with
+matching missing_rollout diagnostics qualify, whether selected by the window,
+carry-forward or both. Report ignored_missing_session_ids and preserve raw
+resolver exit/safety evidence. Ambiguous, unreadable, malformed, incomplete,
+changed or corrupt evidence and other unsafe diagnostics still block. The policy
+is identity-bound; do not change it inside a captured run. The prompt_last_run
+value is empty when Processed exists. Repeat an unchanged capture request to
+adopt its original selection.
 One live index read captures exact bytes. A resolving result supplies next_offset;
 resolve-batch processes that next slice from those bytes only. Repeating a
 successful offset reuses it. Never run the resolver separately or refresh the
@@ -88,8 +101,9 @@ boundary/structural/suffix evidence. Do not regenerate valid clone decisions.
 Known process failures retain their protected stdout/stderr/exit and named
 failed-attempt receipt. Retry explicitly with retry_failed true only on unchanged
 bindings; stop/report if the bounded retry fails. A corrupt successful output,
-changed source bytes, semantic unsafe resolver result or new unapproved missing
-carry is not a retry excuse. Smaller output pages are still the same selection.
+changed source bytes or other semantic unsafe resolver result is not a retry
+excuse. Missing rows follow the bound capture policy, without per-ID approval
+under ignore. Smaller output pages are still the same selection.
 
 ## 3. Authoritative Git sources and revision history
 
@@ -101,7 +115,9 @@ and exact ref to succeed:
   fetched with quiet/no-tags/no-write-fetch-head and exact heads/refspecs.
 - Docs: refs/remotes/origin/main, fetched only from the exact main head.
 
-The four code tips remain exactly four repository|ref entries. Prior tips must
+The four code tips remain exactly four repository|ref entries. Set
+allow_source_advancement:true in this automation's verify-sources request.
+Prior tips must
 be ancestors; code candidates are the deduplicated per-repository union newly
 reachable from both new tips excluding both old tips. The original missing-code-
 baseline exception establishes four tips only, without code-derived backfill.
@@ -123,6 +139,30 @@ Backend/STS checked-out files as implementation evidence. Session narratives are
 discovery only; rederive Backend/STS facts from allowed Git objects. Neither a
 session claim nor an uncommitted/feature SHA substantiates a docs update.
 
+After verify-sources and both complete history chains, call prepare-workspace
+with the common input and exact source_receipt/source_receipt_sha256. Retain its
+workspace receipt and returned main checkout. Use this isolated checkout for
+this automation's actual docs edits/commit/push. Keep the configured original
+docs root as the review/Docs-checkpoint identity and QMD source. Existing changes
+or concurrent work in that normal checkout are not delivery blockers and MUST
+remain untouched. No feature branch is created. Compare wiki inputs against
+pinned main blobs, not uncommitted local text. Use the owned workspace's physical
+wiki paths in topic receipts after canonical
+QMD routing; the delivery helper maps them to repository-relative pinned blobs.
+The original dirty wiki page is not a comparison snapshot. Existing protect-worktree and
+restore-worktree remain available for an intentionally in-place delivery, but
+are not required when the isolated flow never moved prior work. Retain any older
+protected stash/journal as a safety backup; never blindly reapply it over newer
+user work.
+
+Keep the named protection journal across interruptions. It binds run, repository,
+base, helper and raw snapshots; an unchanged request resumes the same operation.
+Literal tracked bytes/modes and staged Git-tree identities are retained. Unsupported
+filter/EOL/mode conversions or changing ignore/attribute files block before stash
+mutation. Git-excluded special entries remain untouched rather than being read.
+Never guess stash@{0}, adopt a foreign stash or create a second stash to recover
+an uncertain first attempt. Protection is not an evidence source for Backend/STS.
+
 ## 4. Compare every candidate and record the delivery intent
 
 Both session and Git passes must finish before a skip/no-change decision. For
@@ -142,55 +182,114 @@ need actual inspection. A cached update_needed decision is pending delivery.
 
 plan-delivery requires complete session/Git/history coverage and actual bound
 topic receipts for relevant candidates. Already-covered Wiki inputs must match
-pinned delivered main blobs; dirty local text cannot substantiate delivery. Before
-an edit it requires clean main with HEAD equal to the pinned docs tip. Desired
+pinned delivered main blobs; dirty local text cannot substantiate delivery.
+Supply the exact workspace receipt to bind the isolated delivery checkout.
+Before an edit it requires that checkout's clean main with HEAD equal to the
+pinned docs tip; the normal checkout is not required to be clean/aligned. Desired
 Markdown is written privately first and bound to base SHA, exact owned paths,
-old/intended blobs and original comparisons. Paths must be regular safe Markdown
-targets. No required update may be omitted. Use the named delivery/plan.json
-pointer after interruption; a matching stored plan is adopted, not recreated from
-post-edit wiki hashes or caller ownership claims.
+old/intended blobs, original comparisons and the immutable protection identity.
+Paths must be regular safe Markdown targets. Nonconflicting overlaps with the
+protected initial work are allowed only through derived expected staging and
+worktree trees; concrete merge conflicts and untracked path collisions block.
+No required update may be omitted. Use the named delivery/plan.json pointer after
+interruption; a matching stored plan is adopted, not recreated from post-edit
+wiki hashes or caller ownership claims. Mutable restoration progress remains in
+the protection journal, separate from frozen comparison evidence.
 
 ## 5. Guarded own delivery and recovery
 
 Call delivery-status before applying the desired files and before each next
-delivery action. It rechecks exact code pins and actual docs state. A changed
-source tip, foreign local/remote commit, wrong branch or unrelated edit blocks.
+delivery action. It rechecks the exact allowed refs and actual owned checkout.
+Under the explicit opt-in, newly fetched code tips may advance normally provided
+each reviewed pin is still its corresponding tip's ancestor. Keep the reviewed
+pins in the successful checkpoint; newly reachable work belongs to the next
+window, not a fabricated current review. Missing refs, rewritten/nonancestor
+history or corrupt evidence remain unsafe. New activity in the normal checkout
+does not affect delivery ownership.
 Only status planned or own_edits permits applying the remaining exact intended
 content and preparing the scoped commit. Run diff --check and inspect the entire
 scoped Markdown diff; stage only the plan's files. Commit directly on main with a
 concise docs subject. Only an exact own_commit permits push origin main; freshly
 confirmed delivered means no duplicate push. Never switch to another branch or
-reset/stash/amend/pull/rebase/force-push to repair a blocker.
+reset/clean/amend/pull/rebase/force-push to repair a blocker. Stash/restore is
+limited to the explicit protection journal, not a general blocker-repair action.
 
-After failed commit/push retain the plan and report the preserved phase. Restart
+An append-only docs-main race can also occur before a plan exists:
+`prepare-workspace` then returns successful nonterminal `refresh_required`.
+If main advances after its fetch, a later pinned-workspace guard can detect the
+race instead; attempt the same guarded pre-plan retirement rather than stopping
+on this normal main advance. Retirement itself verifies clean ownership/ancestry.
+Call `retire-plan` with common review input and the old source receipt/SHA,
+plus the exact workspace receipt/SHA if returned; omit plan_receipt. It retains
+the clean owned preparation/checkout and archives only active pointers. Reuse
+the same captured session run, obtain fresh source proof, complete both history
+chains, prepare a fresh main workspace and redo relevant topic comparisons.
+Do not recapture the index or treat this normal advance as a terminal blocker.
+
+After a docs-main race or non-fast-forward push, retain any plan, intended bytes
+and exact own commit. Use the helper's explicit plan-retirement/replanning path,
+re-fetch only exact main, complete the new docs history and relevant comparisons,
+prepare the new owned main checkout, and deliver a newly validated normal
+fast-forward commit/push. Do not stop just because another task committed.
+If the exact own commit is already reachable from remote main, certify its
+delivery without another push. Never force-push, reset or rebase away foreign
+work. This is a bounded refresh of Git proof, not a live session-index refresh.
+
+After failed commit/push retain the plan and preserved phase. Restart
 reconciles exact owned parent/paths/blobs against the prior intent; unknown work
 is never adopted. The delivery receipt links original topic comparisons to the
 automation's own post-edit committed content. Own intended edits must not be
 mistaken for foreign comparison staleness. No-change delivery remains explicit.
 
+For an in-place protected plan only: after delivered status, including a no-change plan, call restore-worktree with
+common input and the exact optional plan_receipt/plan_receipt_sha256. The helper
+validates the protected stash identity and original base or exact planned own
+commit, then applies only its saved SHA with --index. It derives expected index
+and worktree trees with merge-tree and verifies actual tracked/index/untracked
+restoration. Protected clean state is verified without an apply. Reconciliation
+tolerates only that validated restored initial work; new or unrelated changes
+remain blockers. The owned restored stash stays as a
+safety backup, and foreign stash entries are untouched. Never pop or drop an
+unknown stash.
+
+On any failed step after protection, attempt the same safe restore before
+reporting failure. Restoration does not require remote access, current code pins,
+definition or memory, so changed source state cannot alone strand protected work.
+If a concrete conflict, collision or incompatible worktree prevents restoration,
+retain the stash, snapshots and journal, report the exact preserved phase and
+leave completion blocked. Never reset, clean or replay an already verified apply.
+
 ## 6. Complete, journal and retire
 
 finalize is the sole official checkpoint writer in this flow. Do not patch memory
 manually or pass caller success booleans/arbitrary cursor/pins. It requires current
-complete pages/clones, all dispositions, exact permitted sources and successful
-required delivery, then derives cursor/carry/four code tips/separate Docs tip.
-Only the already approved deleted carried missing row may be pruned.
+complete pages/clones, all dispositions, exact permitted sources, successful
+required delivery and exact verified restored worktree/index state where an
+in-place protection was used, then derives cursor/carry/reviewed four code tips/
+separate canonical Docs tip. An isolated plan certifies the clean owned checkout
+and actual remote delivery without moving/restoring the normal checkout's work.
+All missing IDs validated under the ignore policy are removed from the derived
+carry array only in this successful atomic write. Remaining objects and order
+are retained. Capture alone never prunes the official carry or advances memory.
 
-Under the shared store writer lock, prepare the expected-old/intended-new intent,
-replace the whole completion header while retaining other memory, publish terminal
+Under the shared store writer lock, prepare the expected-old/intended-new intent
+with the frozen delivery and verified restoration proofs, replace the whole
+completion header while retaining other memory, publish terminal
 receipt and retire only its own active pointer. Last review is completion time;
-Processed is the immutable window watermark. A failure before complete proof or
-delivery leaves the official bundle unchanged. Memory writers in this workflow
-must share the same lock; there is no universal transaction against writers that
-ignore it.
+Processed is the immutable window watermark. A failure before complete proof,
+delivery or verified restoration leaves the official bundle unchanged. Memory
+writers in this workflow must share the same lock; there is no universal
+transaction against writers that ignore it.
 
 Restart finalization only with its named protected plan/intent. The exact old
-bundle requires fresh pre-write validation. The exact intended new bundle permits
-receipt/retirement completion from the saved pre-write proofs; newly arriving work
-then belongs to the next review. A third official bundle blocks. A completed
-retired result is idempotent. Preserve all run evidence.
+bundle requires fresh pre-write delivery and restoration validation. The exact
+intended new bundle permits receipt/retirement completion from the saved
+pre-write delivery/restoration proofs; newly arriving work then belongs to the
+next review. A third official bundle blocks. A completed retired result is
+idempotent. Preserve all run evidence.
 
 Report one outcome banner: successful, successful with no update, or failed with
 the concrete blocker. Include reviewed scope/pins, dispositions, lookup method,
-changed files and actual delivery/checkpoint status. Do not label source inspection
-as deployed/runtime behavior or a partial Git pass as a complete wiki review.
+changed files, protection/restoration phase, retained owned stash and actual
+delivery/checkpoint status. Do not label source inspection as deployed/runtime
+behavior or a partial Git pass as a complete wiki review.

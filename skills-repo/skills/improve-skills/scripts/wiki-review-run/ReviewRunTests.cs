@@ -104,6 +104,81 @@ try
     var approvedCarry=Invoke("capture",request);
     Check(approvedCarry.Exit==0 && approvedCarry.Body["resolver_exit"]?.GetValue<int>()==2 && approvedCarry.Body["extraction_allowed"]?.GetValue<bool>()==true,"exact approved deleted carried row is captured with raw unsafe exit and explicit exception");
     Console.WriteLine("PASS exact-approved-missing-carry-compatibility");
+    var missingWindowId="deleted-window-session";
+    File.WriteAllText(Path.Combine(home,"session_index.jsonl"),new JsonObject { ["id"]="session-1",["updated_at"]=stamp }.ToJsonString()+"\n"+new JsonObject { ["id"]=missingWindowId,["updated_at"]=stamp }.ToJsonString()+"\n");
+    var ignoreRequest=request.DeepClone().AsObject(); ignoreRequest["store"]=Path.Combine(root,"ignore-missing-store"); ignoreRequest.Remove("approved_missing_carry_ids"); ignoreRequest["missing_session_policy"]="ignore";
+    var ignoredMissing=Invoke("capture",ignoreRequest);
+    Check(ignoredMissing.Exit==0 && ignoredMissing.Body["extraction_allowed"]?.GetValue<bool>()==true && ignoredMissing.Body["resolver_exit"]?.GetValue<int>()==2 && ignoredMissing.Body["resolver_safe_to_persist"]?.GetValue<bool>()==false,"ignore policy admits missing window and carry sessions without per-ID approval while preserving raw failure");
+    var ignoredIds=ignoredMissing.Body["ignored_missing_session_ids"]!.AsArray().Select(x=>x!.GetValue<string>()).ToHashSet(StringComparer.Ordinal);
+    Check(ignoredIds.SetEquals(new[]{missingId,missingWindowId}),"capture reports exactly the ignored missing sessions");
+    Console.WriteLine("PASS ignore-missing-window-and-carry");
+    var strictMissingRequest=ignoreRequest.DeepClone().AsObject(); strictMissingRequest["store"]=Path.Combine(root,"strict-missing-store"); strictMissingRequest.Remove("missing_session_policy");
+    var strictMissing=Invoke("capture",strictMissingRequest);
+    Check(strictMissing.Exit==2 && strictMissing.Body["reason"]?.GetValue<string>()=="resolver_unsafe_capture","missing sessions remain blocked when the caller omits the opt-in policy and legacy allowlist");
+    Console.WriteLine("PASS missing-session-policy-default-remains-strict");
+    var changedMissingPolicy=ignoreRequest.DeepClone().AsObject(); changedMissingPolicy["missing_session_policy"]="block";
+    var changedMissingResume=Invoke("capture",changedMissingPolicy);
+    Check(changedMissingResume.Exit==2 && changedMissingResume.Body["reason"]?.GetValue<string>()=="active_inputs_changed_explicit_invalidation_required","changing a captured missing-session policy cannot silently adopt its previous ignore decision");
+    var missingLiveIndex=File.ReadAllText(Path.Combine(home,"session_index.jsonl"));
+    File.WriteAllText(Path.Combine(home,"session_index.jsonl"),"invalid live index after ignore capture\n");
+    var ignoreResume=Invoke("capture",ignoreRequest);
+    Check(ignoreResume.Exit==0 && ignoreResume.Body["status"]?.GetValue<string>()=="resumed" && ignoreResume.Body["run_directory"]?.GetValue<string>()==ignoredMissing.Body["run_directory"]?.GetValue<string>() && ignoreResume.Body["manifest_sha256"]?.GetValue<string>()==ignoredMissing.Body["manifest_sha256"]?.GetValue<string>() && ignoreResume.Body["index_sha256"]?.GetValue<string>()==ignoredMissing.Body["index_sha256"]?.GetValue<string>(),"unchanged ignore policy resumes the exact captured snapshot despite a changed live index");
+    Check(ignoreResume.Body["ignored_missing_session_ids"]!.AsArray().Select(x=>x!.GetValue<string>()).ToHashSet(StringComparer.Ordinal).SetEquals(ignoredIds),"snapshot resumption preserves the originally validated ignored IDs");
+    File.WriteAllText(Path.Combine(home,"session_index.jsonl"),missingLiveIndex);
+    Console.WriteLine("PASS ignore-policy-bound-resume-preserves-snapshot");
+    var invalidMissingPolicy=ignoreRequest.DeepClone().AsObject(); invalidMissingPolicy["store"]=Path.Combine(root,"invalid-missing-policy-store"); invalidMissingPolicy["missing_session_policy"]="discard";
+    var invalidMissingCapture=Invoke("capture",invalidMissingPolicy);
+    Check(invalidMissingCapture.Exit==2 && invalidMissingCapture.Body["reason"]?.GetValue<string>()=="missing_session_policy_must_be_block_or_ignore" && !Directory.Exists(invalidMissingPolicy["store"]!.GetValue<string>()),"an unsupported missing-session policy blocks before creating a capture");
+    Console.WriteLine("PASS invalid-missing-session-policy-blocks-capture");
+    foreach(var badHistory in new[]{("malformed-json","{not-json\n"),("unknown-timestamp",new JsonObject { ["type"]="event_msg",["payload"]=new JsonObject { ["type"]="task_started" } }.ToJsonString()+"\n")}) {
+        File.WriteAllText(rollout,System.Text.Encoding.UTF8.GetString(originalRollout)+badHistory.Item2);
+        var badHistoryRequest=ignoreRequest.DeepClone().AsObject(); badHistoryRequest["store"]=Path.Combine(root,"ignore-with-"+badHistory.Item1);
+        var badHistoryCapture=Invoke("capture",badHistoryRequest);
+        Check(badHistoryCapture.Exit==2 && badHistoryCapture.Body["reason"]?.GetValue<string>()=="resolver_unsafe_capture" && badHistoryCapture.Body["resolver_exit"]?.GetValue<int>()==2,"ignore must not admit a resolved "+badHistory.Item1+" history alongside missing sessions");
+        File.WriteAllBytes(rollout,originalRollout);
+    }
+    Console.WriteLine("PASS ignore-missing-does-not-admit-malformed-stored-history");
+    File.WriteAllText(Path.Combine(home,"session_index.jsonl"),new JsonObject { ["id"]=missingWindowId,["updated_at"]=stamp }.ToJsonString()+"\n");
+    var onlyMissingRequest=ignoreRequest.DeepClone().AsObject(); onlyMissingRequest["store"]=Path.Combine(root,"only-missing-store");
+    var onlyMissingCapture=Invoke("capture",onlyMissingRequest);
+    Check(onlyMissingCapture.Exit==0 && onlyMissingCapture.Body["ignored_missing_session_ids"]!.AsArray().Select(x=>x!.GetValue<string>()).ToHashSet(StringComparer.Ordinal).SetEquals(new[]{missingId,missingWindowId}),"an all-missing capture admits only its validated window and carry IDs");
+    var onlyMissingSelection=selection.DeepClone().AsObject(); onlyMissingSelection["run_directory"]=onlyMissingCapture.Body["run_directory"]!.DeepClone();
+    Check(Invoke("verify-pages",onlyMissingSelection).Exit==2,"ignoring all missing sessions does not manufacture an empty-scope completeness receipt");
+    var onlyMissingPage=onlyMissingSelection.DeepClone().AsObject(); onlyMissingPage["offset"]=0; onlyMissingPage["limit"]=1;
+    Check(Invoke("page",onlyMissingPage).Exit==0,"all-missing scope still captures a real offset-zero extraction page");
+    var onlyMissingProof=Invoke("verify-pages",onlyMissingSelection);
+    Check(onlyMissingProof.Exit==0 && onlyMissingProof.Body["status"]?.GetValue<string>()=="complete" && onlyMissingProof.Body["eligible_sessions"]?.GetValue<int>()==0,"the real empty page proves a complete zero-eligible scope");
+    File.WriteAllText(Path.Combine(home,"session_index.jsonl"),missingLiveIndex);
+    Console.WriteLine("PASS ignore-only-missing-requires-real-empty-scope-page");
+    // The production resolver is an external Python CLI. These isolated response
+    // fixtures keep its process interface while C# owns the guard scenarios.
+    var ignoredManifest=JsonNode.Parse(File.ReadAllText(ignoredMissing.Body["manifest"]!.GetValue<string>()))!.AsObject();
+    var resolverGuards=new (string Name,int Exit,Action<JsonObject> Mutate)[] {
+        ("missing-with-safe-zero-exit",0,manifest=>manifest["window"]!["safe_to_persist"]=true),
+        ("missing-with-safe-two-exit",2,manifest=>manifest["window"]!["safe_to_persist"]=true),
+        ("absent-missing-diagnostic",2,manifest=>{
+            var diagnostics=manifest["diagnostics"]!.AsArray();
+            for(var n=diagnostics.Count-1;n>=0;n--) if(diagnostics[n]?["code"]?.GetValue<string>()=="missing_rollout") diagnostics.RemoveAt(n);
+        }),
+        ("wrong-missing-diagnostic-id",2,manifest=>manifest["diagnostics"]!.AsArray().First(x=>x?["code"]?.GetValue<string>()=="missing_rollout")!["session_id"]="unselected-session"),
+        ("missing-with-storage-path",2,manifest=>manifest["sessions"]!.AsArray().First(x=>x?["status"]?.GetValue<string>()=="missing")!["path"]=rollout),
+        ("missing-with-storage-meta",2,manifest=>manifest["sessions"]!.AsArray().First(x=>x?["status"]?.GetValue<string>()=="missing")!["meta"]=new JsonObject { ["cwd"]=repo }),
+        ("missing-with-rollout-window",2,manifest=>manifest["sessions"]!.AsArray().First(x=>x?["status"]?.GetValue<string>()=="missing")!["rollout_window"]=new JsonObject { ["state"]="complete" }),
+        ("unrelated-unsafe-diagnostic",2,manifest=>manifest["diagnostics"]!.AsArray().Add(new JsonObject { ["code"]="unsafe_rollout_window",["session_id"]="session-1",["state"]="unknown" }))
+    };
+    foreach(var guard in resolverGuards) {
+        var guardManifest=ignoredManifest.DeepClone().AsObject(); guard.Mutate(guardManifest);
+        var guardResolver=Path.Combine(root,"resolver-guard-"+guard.Name+".py");
+        File.WriteAllText(guardResolver,"import hashlib,json,pathlib,sys\n"+
+            "data=(pathlib.Path(sys.argv[sys.argv.index('--codex-home')+1])/'session_index.jsonl').read_bytes()\n"+
+            "pathlib.Path(sys.argv[sys.argv.index('--save-index-snapshot')+1]).write_bytes(data)\n"+
+            "manifest=json.loads("+JsonValue.Create(guardManifest.ToJsonString())!.ToJsonString()+")\n"+
+            "manifest['snapshot']['sha256']=hashlib.sha256(data).hexdigest()\nprint(json.dumps(manifest))\nsys.exit("+guard.Exit+")\n");
+        var guardRequest=ignoreRequest.DeepClone().AsObject(); guardRequest["store"]=Path.Combine(root,"resolver-guard-store-"+guard.Name); guardRequest["resolver"]=guardResolver;
+        var guarded=Invoke("capture",guardRequest);
+        Check(guarded.Exit==2 && guarded.Body["reason"]?.GetValue<string>()=="resolver_unsafe_capture" && guarded.Body["resolver_exit"]?.GetValue<int>()==guard.Exit,"ignore rejects the external resolver's "+guard.Name+" response without treating missing storage as a blanket exception");
+    }
+    Console.WriteLine("PASS ignore-missing-rejects-contradictory-resolver-responses");
     File.WriteAllText(memory,"Processed window end: 2026-10-12T06:00:00Z\n");
     var cloneRecords=records.Select(x=>x.DeepClone().AsObject()).ToList(); cloneRecords[0]["payload"]!["id"]="session-clone";
     cloneRecords.Insert(1,new JsonObject { ["timestamp"]=stamp,["type"]="session_meta",["payload"]=new JsonObject { ["id"]="imported-session",["cwd"]=repo } });

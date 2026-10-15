@@ -78,6 +78,8 @@ Use a normal directory in `skills-repo/skills` only for Daniel-owned global skil
 ~/Documents/DanielsVault/_shared/shared-ai-docs/skills-repo/tools/sync-codex-skill-links.sh
 ```
 
+Run this exact canonical script, including when working in a Codex worktree. Then compare each managed `~/.codex/skills/<name>` link with the corresponding canonical `skills-repo/skills/<name>` entry. Matching names and unbroken links alone do not detect links into an older worktree.
+
 10. If hooks are missing or the setup was freshly cloned, install them:
 
 ```bash
@@ -139,6 +141,7 @@ Expected:
 - `active-skills` is absent.
 - `.agents/skills` and `.claude/skills` point to `skills-repo/skills`.
 - Codex-visible skill names match the active list in `skills-repo/skills`.
+- Each managed Codex skill link resolves to the corresponding canonical `skills-repo/skills` entry, not a worktree copy.
 - Required sibling skills referenced by active vendor routers exist and are active when invoked by skill name, or the router documents a self-contained replacement.
 - Broken-link checks print nothing.
 

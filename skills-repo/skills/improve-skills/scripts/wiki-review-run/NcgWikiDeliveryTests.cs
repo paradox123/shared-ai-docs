@@ -10,6 +10,379 @@ var review = Path.Combine(Path.GetDirectoryName(helper)!, "ReviewRun.cs");
 var scripts = Path.GetDirectoryName(Path.GetDirectoryName(helper))!;
 try
 {
+    if (Environment.GetEnvironmentVariable("NCG_WIKI_ONLY_IGNORED_TARGET") != "1")
+    {
+    var untrackedNormalization = Fixture("untracked-only-normalization-preflight", false, true);
+    var untrackedNormalizationSource = Sources(untrackedNormalization);
+    History(untrackedNormalization, untrackedNormalizationSource, 0, 100);
+    var untrackedNormalizationMemory = File.ReadAllBytes(untrackedNormalization.Memory);
+    var untrackedNormalizationHead = Git(untrackedNormalization.Docs, "rev-parse", "HEAD");
+    var untrackedNormalizationIndex = Git(untrackedNormalization.Docs, "rev-parse", "HEAD^{tree}");
+    File.WriteAllBytes(Path.Combine(untrackedNormalization.Docs, "raw-crlf-untracked.txt"), Encoding.UTF8.GetBytes("Untracked CRLF bytes\r\nSecond CRLF line\r\n"));
+    var untrackedNormalizationRequest = Common(untrackedNormalization);
+    untrackedNormalizationRequest["source_receipt"] = untrackedNormalizationSource.Body["receipt"]!.DeepClone();
+    untrackedNormalizationRequest["source_receipt_sha256"] = untrackedNormalizationSource.Body["receipt_sha256"]!.DeepClone();
+    foreach (var normalization in new[] { (Setting: "true", Reason: "worktree_eol_conversion_unsupported"), (Setting: "input", Reason: "worktree_raw_normalization_unsupported") })
+    {
+        Git(untrackedNormalization.Docs, "config", "core.autocrlf", normalization.Setting);
+        Check(Git(untrackedNormalization.Docs, "diff", "--name-only") == "" && Git(untrackedNormalization.Docs, "diff", "--cached", "--name-only") == "" && Git(untrackedNormalization.Docs, "status", "--porcelain", "--untracked-files=all") == "?? raw-crlf-untracked.txt", "the CRLF preflight fixture has only untracked dirt under core.autocrlf=" + normalization.Setting);
+        var normalizationProtection = Call(helper, "protect-worktree", untrackedNormalizationRequest);
+        Check(normalizationProtection.Exit == 2 && normalizationProtection.Body["reason"]!.GetValue<string>() == normalization.Reason, "untracked-only CRLF normalization is rejected concretely before protection under core.autocrlf=" + normalization.Setting + ": " + normalizationProtection.Body.ToJsonString());
+        Check(File.ReadAllBytes(Path.Combine(untrackedNormalization.Docs, "raw-crlf-untracked.txt")).SequenceEqual(Encoding.UTF8.GetBytes("Untracked CRLF bytes\r\nSecond CRLF line\r\n")) && File.ReadAllBytes(untrackedNormalization.Memory).SequenceEqual(untrackedNormalizationMemory) && Git(untrackedNormalization.Docs, "rev-parse", "HEAD") == untrackedNormalizationHead && Git(untrackedNormalization.Docs, "write-tree") == untrackedNormalizationIndex && GitExit(untrackedNormalization.Docs, "rev-parse", "--verify", "refs/stash") != 0, "rejected untracked normalization preserves literal bytes, memory, HEAD, index and absence of any stash");
+    }
+    Console.WriteLine("PASS untracked-only-crlf-true-and-input-pre-mutation-rejection");
+    }
+
+    var ignoredTarget = Fixture("ignored-owned-target-collisions", false, true);
+    var ignoredTargetCommit = OldDatedDocsChange(ignoredTarget);
+    var ignoredTargetSource = Sources(ignoredTarget);
+    History(ignoredTarget, ignoredTargetSource, 0, 100);
+    var ignoredTargetMemory = File.ReadAllBytes(ignoredTarget.Memory);
+    var ignoredTargetTopic = Topic(ignoredTarget, ignoredTargetSource, ignoredTargetCommit, "update_needed", "new-page.md");
+    var ignoredTargetCandidates = new JsonArray(Candidate(ignoredTarget, ignoredTargetCommit, ignoredTargetTopic, "update_needed"));
+    var ignoredTargetEdits = new JsonArray(new JsonObject { ["path"] = "new-page.md", ["content"] = "Own new page content\n" });
+    var ignoredTargetRequest = PlanRequest(ignoredTarget, ignoredTargetCandidates, ignoredTargetEdits, ignoredTargetSource);
+    var ignoreFile = Path.Combine(ignoredTarget.Docs, ".git", "info", "exclude");
+    byte[] originalExclusion = File.Exists(ignoreFile) ? File.ReadAllBytes(ignoreFile) : [];
+    File.AppendAllText(ignoreFile, "\nnew-page.md\n");
+    File.WriteAllText(Path.Combine(ignoredTarget.Docs, "new-page.md"), "Foreign ignored user content\n");
+    Check(Git(ignoredTarget.Docs, "check-ignore", "--", "new-page.md") == "new-page.md" && Git(ignoredTarget.Docs, "status", "--porcelain", "--untracked-files=all") == "", "a real ignored target collision is absent from ordinary Git status");
+    var rejectedIgnoredPlan = Call(helper, "plan-delivery", ignoredTargetRequest);
+    Check(rejectedIgnoredPlan.Exit == 2 && (rejectedIgnoredPlan.Body["reason"]!.GetValue<string>().Contains("collision", StringComparison.Ordinal) || rejectedIgnoredPlan.Body["reason"]!.GetValue<string>().Contains("target", StringComparison.Ordinal)), "an ignored foreign file cannot become an owned missing-base delivery target: " + rejectedIgnoredPlan.Body.ToJsonString());
+    Check(!File.Exists(Path.Combine(ignoredTarget.Run, "delivery", "plan.json")) && File.ReadAllText(Path.Combine(ignoredTarget.Docs, "new-page.md")) == "Foreign ignored user content\n" && File.ReadAllBytes(ignoredTarget.Memory).SequenceEqual(ignoredTargetMemory) && GitExit(ignoredTarget.Docs, "rev-parse", "--verify", "refs/stash") != 0, "ignored pre-plan collision blocks actionable intent while preserving foreign file bytes, memory and stash state");
+    File.Delete(Path.Combine(ignoredTarget.Docs, "new-page.md"));
+    File.WriteAllBytes(ignoreFile, originalExclusion);
+    var missingTargetPlan = Plan(ignoredTarget, ignoredTargetCandidates, ignoredTargetEdits, ignoredTargetSource);
+    File.AppendAllText(ignoreFile, "\nnew-page.md\n");
+    File.WriteAllText(Path.Combine(ignoredTarget.Docs, "new-page.md"), "New ignored foreign content after plan\n");
+    Check(Git(ignoredTarget.Docs, "check-ignore", "--", "new-page.md") == "new-page.md" && Git(ignoredTarget.Docs, "status", "--porcelain", "--untracked-files=all") == "", "the new ignored target remains invisible to Git status after the missing-target plan");
+    var ignoredTargetStatus = Call(helper, "delivery-status", Completion(ignoredTarget, missingTargetPlan));
+    Check(ignoredTargetStatus.Exit == 2 && (ignoredTargetStatus.Body["reason"]!.GetValue<string>().Contains("collision", StringComparison.Ordinal) || ignoredTargetStatus.Body["reason"]!.GetValue<string>().Contains("target", StringComparison.Ordinal)), "delivery status rejects the ignored foreign target before approving application of the owned plan: " + ignoredTargetStatus.Body.ToJsonString());
+    Check(File.ReadAllText(Path.Combine(ignoredTarget.Docs, "new-page.md")) == "New ignored foreign content after plan\n" && File.ReadAllBytes(ignoredTarget.Memory).SequenceEqual(ignoredTargetMemory) && GitExit(ignoredTarget.Docs, "rev-parse", "--verify", "refs/stash") != 0, "post-plan ignored collision preserves the exact new foreign bytes, memory and stash state");
+    Console.WriteLine("PASS ignored-target-before-plan-and-after-plan-collision-guards");
+    if (Environment.GetEnvironmentVariable("NCG_WIKI_ONLY_STASH_PREFLIGHT") == "1" || Environment.GetEnvironmentVariable("NCG_WIKI_ONLY_IGNORED_TARGET") == "1")
+    {
+        Console.WriteLine("Fixture: " + root);
+        return 0;
+    }
+    if (Environment.GetEnvironmentVariable("NCG_WIKI_ONLY_STASH_FIFO") != "1")
+    {
+        var interrupted = Fixture("interrupted-real-stash-operations", false, true, maxOutputBytes: 4096, withPriorWork: true);
+        var interruptedSource = Sources(interrupted);
+        History(interrupted, interruptedSource, 0, 100);
+        var interruptedMemory = File.ReadAllBytes(interrupted.Memory);
+        File.WriteAllText(Path.Combine(interrupted.Docs, "prior-work.txt"), "Recovery staged before interruption\n");
+        Git(interrupted.Docs, "add", "--", "prior-work.txt");
+        File.WriteAllText(Path.Combine(interrupted.Docs, "prior-work.txt"), "Recovery unstaged before interruption\n");
+        File.WriteAllBytes(Path.Combine(interrupted.Docs, "interrupted-binary.bin"), [0x08, 0x00, 0xf7, 0x63]);
+        var interruptedLauncher = Path.Combine(interrupted.Folder, "fake-bin");
+        Directory.CreateDirectory(interruptedLauncher);
+        var pushCount = Path.Combine(interrupted.Folder, "push-count.txt");
+        var applyCount = Path.Combine(interrupted.Folder, "apply-count.txt");
+        var interruptedGit = Path.Combine(interruptedLauncher, "git");
+        File.WriteAllText(interruptedGit, $$"""
+            #!/usr/bin/env python3
+            import os,sys,subprocess
+            arguments=sys.argv[1:]
+            mutation=arguments[1] if len(arguments)>1 and arguments[0]=='stash' and arguments[1] in ('push','apply') else None
+            if mutation:
+                result=subprocess.run(['/usr/bin/git',*arguments])
+                if result.returncode==0:
+                    counter={{JsonValue.Create(pushCount)!.ToJsonString()}} if mutation=='push' else {{JsonValue.Create(applyCount)!.ToJsonString()}}
+                    count=int(open(counter).read()) if os.path.exists(counter) else 0
+                    open(counter,'w').write(str(count+1))
+                    if count==0:
+                        sys.stdout.write('x'*8192+'\n')
+                        sys.stdout.flush()
+                sys.exit(result.returncode)
+            os.execv('/usr/bin/git',['git',*arguments])
+            """ + "\n");
+        File.SetUnixFileMode(interruptedGit, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+        var interruptedPath = interruptedLauncher + ":" + Environment.GetEnvironmentVariable("PATH");
+        var interruptedProtectRequest = Common(interrupted);
+        interruptedProtectRequest["source_receipt"] = interruptedSource.Body["receipt"]!.DeepClone();
+        interruptedProtectRequest["source_receipt_sha256"] = interruptedSource.Body["receipt_sha256"]!.DeepClone();
+        var interruptedProtection = Call(helper, "protect-worktree", interruptedProtectRequest, interruptedPath);
+        Check(interruptedProtection.Exit == 2 && interruptedProtection.Body["reason"]!.GetValue<string>() == "process_output_limit" && File.ReadAllText(pushCount) == "1", "a real successful stash push is interrupted by the bounded-output failure");
+        var interruptedStash = Git(interrupted.Docs, "rev-parse", "refs/stash");
+        Check(Git(interrupted.Docs, "status", "--porcelain", "--untracked-files=all") == "" && File.Exists(Path.Combine(interrupted.Run, "delivery", "worktree-protection.json")) && File.ReadAllBytes(interrupted.Memory).SequenceEqual(interruptedMemory), "the successful interrupted mutation leaves clean docs, recovery evidence and unchanged memory");
+        var interruptedDefinition = Path.Combine(Path.GetDirectoryName(interrupted.Memory)!, "automation.toml");
+        File.AppendAllText(interruptedDefinition, "# Definition changed after the protected stash operation\n");
+    var invalidation = Call(review, "invalidate", new JsonObject { ["run_directory"] = interrupted.Run, ["reason"] = "Explicit stale fixture review; restore protected work only" });
+    Check(invalidation.Exit == 0 && !File.Exists(Path.Combine(interrupted.Folder, "store", "active.json")), "explicit stale-run invalidation retires selection without losing protection ownership");
+        var interruptedRestoration = Call(helper, "restore-worktree", Common(interrupted), interruptedPath);
+        Check(interruptedRestoration.Exit == 2 && interruptedRestoration.Body["reason"]!.GetValue<string>() == "process_output_limit" && File.ReadAllText(applyCount) == "1", "stale-definition cleanup adopts the nonce-owned stash and a real successful apply is interrupted by output bounds");
+        Check(File.ReadAllText(Path.Combine(interrupted.Docs, "prior-work.txt")) == "Recovery unstaged before interruption\n" && GitRun(interrupted.Docs, ["show", ":prior-work.txt"]).Output == "Recovery staged before interruption\n" && File.ReadAllBytes(Path.Combine(interrupted.Docs, "interrupted-binary.bin")).SequenceEqual(new byte[] { 0x08, 0x00, 0xf7, 0x63 }), "interrupted apply already recovered the exact original working, index and binary contents");
+        var recoveredRestoration = Call(helper, "restore-worktree", Common(interrupted), interruptedPath);
+        Check(recoveredRestoration.Exit == 0 && recoveredRestoration.Body["status"]!.GetValue<string>() == "restored" && recoveredRestoration.Body["stash_sha"]!.GetValue<string>() == interruptedStash, "restart adopts the exact completed restoration despite changed definition: " + recoveredRestoration.Body.ToJsonString());
+        Check(File.ReadAllText(pushCount) == "1" && File.ReadAllText(applyCount) == "1" && Git(interrupted.Docs, "stash", "list", "--format=%H") == interruptedStash && File.ReadAllBytes(interrupted.Memory).SequenceEqual(interruptedMemory), "recovery performs neither successful Git mutation twice and retains its exact backup and memory");
+        Console.WriteLine("PASS real-stash-push-and-apply-interruption-adoption-after-stale-definition");
+
+        var rawEol = Fixture("protected-raw-eol-preflight", false, true, withPriorWork: true);
+        var rawEolSource = Sources(rawEol);
+        History(rawEol, rawEolSource, 0, 100);
+        var rawEolMemory = File.ReadAllBytes(rawEol.Memory);
+        var rawEolHead = Git(rawEol.Docs, "rev-parse", "HEAD");
+        Git(rawEol.Docs, "config", "core.autocrlf", "true");
+        File.WriteAllBytes(Path.Combine(rawEol.Docs, "prior-work.txt"), Encoding.UTF8.GetBytes("Raw staged fact\r\n"));
+        Git(rawEol.Docs, "add", "--", "prior-work.txt");
+        Check(GitRun(rawEol.Docs, ["show", ":prior-work.txt"]).Output == "Raw staged fact\n", "EOL fixture genuinely normalizes CRLF staged bytes into LF index bytes");
+        File.WriteAllBytes(Path.Combine(rawEol.Docs, "prior-work.txt"), Encoding.UTF8.GetBytes("Raw unstaged fact\n"));
+        var rawEolRequest = Common(rawEol);
+        rawEolRequest["source_receipt"] = rawEolSource.Body["receipt"]!.DeepClone();
+        rawEolRequest["source_receipt_sha256"] = rawEolSource.Body["receipt_sha256"]!.DeepClone();
+        var rawEolProtection = Call(helper, "protect-worktree", rawEolRequest);
+        if (rawEolProtection.Exit == 0)
+        {
+            var rawEolRestore = Call(helper, "restore-worktree", Common(rawEol));
+            Check(rawEolRestore.Exit == 0 && rawEolRestore.Body["status"]!.GetValue<string>() == "restored", "supported EOL conversion can restore its protected work");
+        }
+        else
+        {
+            Check(rawEolProtection.Exit == 2 && rawEolProtection.Body["reason"]!.GetValue<string>() == "worktree_eol_conversion_unsupported" && GitExit(rawEol.Docs, "rev-parse", "--verify", "refs/stash") != 0 && Git(rawEol.Docs, "rev-parse", "HEAD") == rawEolHead, "unsupported EOL conversion is rejected concretely before any stash mutation");
+        }
+        Check(File.ReadAllBytes(Path.Combine(rawEol.Docs, "prior-work.txt")).SequenceEqual(Encoding.UTF8.GetBytes("Raw unstaged fact\n")) && GitRun(rawEol.Docs, ["show", ":prior-work.txt"]).Output == "Raw staged fact\n" && File.ReadAllBytes(rawEol.Memory).SequenceEqual(rawEolMemory), "normalization never silently changes literal original working bytes, staged bytes or memory");
+        Console.WriteLine("PASS raw-working-eol-preservation-or-concrete-pre-mutation-rejection");
+    }
+
+    var nonregular = Fixture("protected-untouched-special-file-or-preflight", false, true, withPriorWork: true);
+    var nonregularSource = Sources(nonregular);
+    History(nonregular, nonregularSource, 0, 100);
+    var nonregularMemory = File.ReadAllBytes(nonregular.Memory);
+    File.WriteAllText(Path.Combine(nonregular.Docs, "prior-work.txt"), "FIFO fixture original staged bytes\n");
+    Git(nonregular.Docs, "add", "--", "prior-work.txt");
+    File.WriteAllText(Path.Combine(nonregular.Docs, "prior-work.txt"), "FIFO fixture original working bytes\n");
+    File.WriteAllBytes(Path.Combine(nonregular.Docs, "original-binary.bin"), [0x7b, 0x00, 0xee]);
+    var fifoPath = Path.Combine(nonregular.Docs, "nonregular.pipe");
+    var fifoStart = new ProcessStartInfo("mkfifo") { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true };
+    fifoStart.ArgumentList.Add(fifoPath);
+    using (var fifo = Process.Start(fifoStart)!)
+    {
+        fifo.WaitForExit();
+        Check(fifo.ExitCode == 0, "the isolated nonregular fixture creates a real FIFO");
+    }
+    File.SetUnixFileMode(fifoPath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+    var nonregularRequest = Common(nonregular);
+    nonregularRequest["source_receipt"] = nonregularSource.Body["receipt"]!.DeepClone();
+    nonregularRequest["source_receipt_sha256"] = nonregularSource.Body["receipt_sha256"]!.DeepClone();
+    var nonregularProtection = Call(helper, "protect-worktree", nonregularRequest);
+    if (nonregularProtection.Exit == 0)
+    {
+        Check(nonregularProtection.Body["status"]!.GetValue<string>() == "protected" && IsFifo(fifoPath) && File.ReadAllBytes(nonregular.Memory).SequenceEqual(nonregularMemory), "Git-ignored special files remain real FIFOs throughout successful protection");
+        var nonregularRestore = Call(helper, "restore-worktree", Common(nonregular));
+        Check(nonregularRestore.Exit == 0 && nonregularRestore.Body["status"]!.GetValue<string>() == "restored", "protected regular work restores while the ignored FIFO stays untouched: " + nonregularRestore.Body.ToJsonString());
+    }
+    else
+    {
+        Check(nonregularProtection.Exit == 2 && nonregularProtection.Body["reason"]!.GetValue<string>().Contains("regular_file", StringComparison.Ordinal) && GitExit(nonregular.Docs, "rev-parse", "--verify", "refs/stash") != 0, "a listed nonregular FIFO is rejected concretely before stash mutation");
+    }
+    Check(IsFifo(fifoPath) && File.ReadAllText(Path.Combine(nonregular.Docs, "prior-work.txt")) == "FIFO fixture original working bytes\n" && GitRun(nonregular.Docs, ["show", ":prior-work.txt"]).Output == "FIFO fixture original staged bytes\n" && File.ReadAllBytes(Path.Combine(nonregular.Docs, "original-binary.bin")).SequenceEqual(new byte[] { 0x7b, 0x00, 0xee }) && File.ReadAllBytes(nonregular.Memory).SequenceEqual(nonregularMemory), "special-file handling preserves the actual FIFO, distinct original working/index bytes, binary data and memory");
+    Console.WriteLine("PASS untouched-special-file-or-preflight");
+    if (Environment.GetEnvironmentVariable("NCG_WIKI_ONLY_STASH_RECOVERY") == "1" || Environment.GetEnvironmentVariable("NCG_WIKI_ONLY_STASH_FIFO") == "1")
+    {
+        Console.WriteLine("Fixture: " + root);
+        return 0;
+    }
+    var protectedWork = Fixture("protected-mixed-prior-work", false, true, withPriorWork: true);
+    var protectedCommit = OldDatedDocsChange(protectedWork);
+    var protectedSource = Sources(protectedWork);
+    History(protectedWork, protectedSource, 0, 100);
+    const string priorPath = "prior-work.txt";
+    File.WriteAllText(Path.Combine(protectedWork.Docs, priorPath), "Foreign stash work\n");
+    Git(protectedWork.Docs, "stash", "push", "-m", "Foreign fixture stash", "--", priorPath);
+    var foreignStash = Git(protectedWork.Docs, "rev-parse", "refs/stash");
+    File.WriteAllText(Path.Combine(protectedWork.Docs, priorPath), "User staged version\n");
+    Git(protectedWork.Docs, "add", "--", priorPath);
+    File.WriteAllText(Path.Combine(protectedWork.Docs, priorPath), "User unstaged version\n");
+    File.SetUnixFileMode(Path.Combine(protectedWork.Docs, priorPath), UnixFileMode.UserRead | UnixFileMode.UserWrite);
+    const string untrackedPath = "untracked ü data.bin";
+    File.WriteAllBytes(Path.Combine(protectedWork.Docs, untrackedPath), [0x00, 0xff, 0x0a, 0x80, 0x42, 0x0d]);
+    File.SetUnixFileMode(Path.Combine(protectedWork.Docs, untrackedPath), UnixFileMode.UserRead | UnixFileMode.UserWrite);
+    var protectedMemory = File.ReadAllBytes(protectedWork.Memory);
+    var protectRequest = Common(protectedWork);
+    protectRequest["source_receipt"] = protectedSource.Body["receipt"]!.DeepClone();
+    protectRequest["source_receipt_sha256"] = protectedSource.Body["receipt_sha256"]!.DeepClone();
+    var protection = Call(helper, "protect-worktree", protectRequest);
+    Check(protection.Exit == 0 && protection.Body["status"]!.GetValue<string>() == "protected", "pre-existing mixed work can be protected: " + protection.Body.ToJsonString());
+    var ownStash = protection.Body["stash_sha"]!.GetValue<string>();
+    Check(ownStash != foreignStash && Git(protectedWork.Docs, "rev-parse", "refs/stash") == ownStash, "protection reports its exact own stash rather than adopting the pre-existing foreign stash");
+    Check(Git(protectedWork.Docs, "status", "--porcelain", "--untracked-files=all") == "" && Git(protectedWork.Docs, "diff", "--cached", "--name-only") == "", "protected staged, unstaged and untracked work leaves a clean delivery tree and index");
+    Check(File.ReadAllBytes(protectedWork.Memory).SequenceEqual(protectedMemory), "protection does not advance the original memory");
+    var protectedTopic = Topic(protectedWork, protectedSource, protectedCommit, "update_needed");
+    var protectedPlan = Plan(protectedWork, new JsonArray(Candidate(protectedWork, protectedCommit, protectedTopic, "update_needed")), new JsonArray(new JsonObject { ["path"] = "a.md", ["content"] = "Owned review fact\n" }), protectedSource);
+    File.WriteAllText(Path.Combine(protectedWork.Docs, "a.md"), "Owned review fact\n");
+    Git(protectedWork.Docs, "add", "--", "a.md");
+    Git(protectedWork.Docs, "commit", "-m", "Own review with protected prior work");
+    var ownProtectedCommit = Git(protectedWork.Docs, "rev-parse", "HEAD");
+    Git(protectedWork.Docs, "push", "origin", "main");
+    Check(Git(protectedWork.Docs, "diff-tree", "--no-commit-id", "--name-only", "-r", ownProtectedCommit) == "a.md", "the delivered own commit contains only the planned Markdown page");
+    var beforeRestore = Call(helper, "delivery-status", Completion(protectedWork, protectedPlan));
+    Check(beforeRestore.Exit == 0 && beforeRestore.Body["status"]!.GetValue<string>() == "delivered", "the exact own pushed commit is recognized while prior work remains protected");
+    var prematureCompletion = Call(helper, "finalize", Completion(protectedWork, protectedPlan));
+    Check(prematureCompletion.Exit == 2 && File.ReadAllBytes(protectedWork.Memory).SequenceEqual(protectedMemory), "delivery alone cannot finalize before protected work is restored");
+    var restoration = Call(helper, "restore-worktree", Completion(protectedWork, protectedPlan));
+    Check(restoration.Exit == 0 && restoration.Body["status"]!.GetValue<string>() == "restored", "the exact protected prior work can be restored: " + restoration.Body.ToJsonString());
+    Check(File.ReadAllBytes(Path.Combine(protectedWork.Docs, priorPath)).SequenceEqual(Encoding.UTF8.GetBytes("User unstaged version\n")), "restoration recovers the literal original unstaged working bytes");
+    var restoredIndex = GitRun(protectedWork.Docs, ["show", ":" + priorPath]);
+    Check(restoredIndex.Exit == 0 && restoredIndex.Output == "User staged version\n", "restoration preserves the distinct literal original staged bytes for the same file");
+    Check(File.ReadAllBytes(Path.Combine(protectedWork.Docs, untrackedPath)).SequenceEqual(new byte[] { 0x00, 0xff, 0x0a, 0x80, 0x42, 0x0d }), "restoration recovers every original untracked binary byte");
+    Check(File.GetUnixFileMode(Path.Combine(protectedWork.Docs, priorPath)) == (UnixFileMode.UserRead | UnixFileMode.UserWrite) && File.GetUnixFileMode(Path.Combine(protectedWork.Docs, untrackedPath)) == (UnixFileMode.UserRead | UnixFileMode.UserWrite), "restoration preserves the literal original 0600 permissions of tracked and untracked prior work");
+    Check(Git(protectedWork.Docs, "diff", "--cached", "--name-only") == priorPath && Git(protectedWork.Docs, "diff", "--name-only") == priorPath, "restored prior work retains its staged and further unstaged changes");
+    Check(Git(protectedWork.Docs, "stash", "list", "--format=%H").Split('\n').SequenceEqual(new[] { ownStash, foreignStash }), "the owned safety backup and the exact foreign stash both remain intact");
+    Check(File.ReadAllText(Path.Combine(protectedWork.Docs, "a.md")) == "Owned review fact\n" && File.ReadAllBytes(protectedWork.Memory).SequenceEqual(protectedMemory), "restoration preserves delivered own content without advancing the memory");
+    var protectedFinal = Call(helper, "finalize", Completion(protectedWork, protectedPlan));
+    Check(protectedFinal.Exit == 0 && protectedFinal.Body["active_retired"]!.GetValue<bool>(), "verified restored prior dirt permits official completion: " + protectedFinal.Body.ToJsonString());
+    var completedProtectedMemory = File.ReadAllBytes(protectedWork.Memory);
+    Check(!completedProtectedMemory.SequenceEqual(protectedMemory), "successful completion advances the review bundle after restoration");
+    Check(Call(helper, "finalize", Completion(protectedWork, protectedPlan)).Exit == 0 && File.ReadAllBytes(protectedWork.Memory).SequenceEqual(completedProtectedMemory), "completed protected delivery is idempotent despite restored prior dirt");
+    Console.WriteLine("PASS protected-mixed-prior-work-own-delivery-restoration-and-finalization");
+    if (Environment.GetEnvironmentVariable("NCG_WIKI_ONLY_STASH") == "1")
+    {
+        Console.WriteLine("Fixture: " + root);
+        return 0;
+    }
+
+    var cleanProtection = Fixture("protected-clean-tree", false, true);
+    var cleanSource = Sources(cleanProtection);
+    History(cleanProtection, cleanSource, 0, 100);
+    var cleanMemory = File.ReadAllBytes(cleanProtection.Memory);
+    var cleanProtectRequest = Common(cleanProtection);
+    cleanProtectRequest["source_receipt"] = cleanSource.Body["receipt"]!.DeepClone();
+    cleanProtectRequest["source_receipt_sha256"] = cleanSource.Body["receipt_sha256"]!.DeepClone();
+    var cleanProtected = Call(helper, "protect-worktree", cleanProtectRequest);
+    Check(cleanProtected.Exit == 0 && cleanProtected.Body["status"]!.GetValue<string>() == "protected" && GitExit(cleanProtection.Docs, "rev-parse", "--verify", "refs/stash") != 0, "clean protection is recorded without inventing a stash");
+    var cleanPlan = Plan(cleanProtection, [], [], cleanSource);
+    Check(Call(helper, "finalize", Completion(cleanProtection, cleanPlan)).Exit == 2 && File.ReadAllBytes(cleanProtection.Memory).SequenceEqual(cleanMemory), "even no-change protection requires confirmed restoration before completion");
+    var cleanRestore = Call(helper, "restore-worktree", Completion(cleanProtection, cleanPlan));
+    Check(cleanRestore.Exit == 0 && cleanRestore.Body["status"]!.GetValue<string>() == "restored", "no-change protection can be restored without applying a stash");
+    var repeatedCleanRestore = Call(helper, "restore-worktree", Completion(cleanProtection, cleanPlan));
+    Check(repeatedCleanRestore.Exit == 0 && repeatedCleanRestore.Body["status"]!.GetValue<string>() == "restored" && Git(cleanProtection.Docs, "status", "--porcelain", "--untracked-files=all") == "" && File.ReadAllBytes(cleanProtection.Memory).SequenceEqual(cleanMemory), "confirmed restoration repeats idempotently without introducing dirt or advancing memory");
+    File.WriteAllText(Path.Combine(cleanProtection.Docs, "later-user.md"), "New user work after restoration\n");
+    Check(Call(helper, "finalize", Completion(cleanProtection, cleanPlan)).Exit == 2 && File.ReadAllBytes(cleanProtection.Memory).SequenceEqual(cleanMemory) && File.ReadAllText(Path.Combine(cleanProtection.Docs, "later-user.md")) == "New user work after restoration\n", "new dirt after verified restoration blocks finalization without overwriting user work");
+    Console.WriteLine("PASS no-change-protection-restoration-idempotence-and-later-dirt-gate");
+
+    var overlap = Fixture("protected-nonconflicting-overlap", false, true);
+    const string overlapBase = "Source title\nLine 02\nLine 03\nLine 04\nLine 05\nLine 06\nLine 07\nSource middle\nLine 09\nLine 10\nLine 11\nLine 12\nLine 13\nLine 14\nLine 15\nSource ending\n";
+    const string overlapStaged = "User staged title\nLine 02\nLine 03\nLine 04\nLine 05\nLine 06\nLine 07\nSource middle\nLine 09\nLine 10\nLine 11\nLine 12\nLine 13\nLine 14\nLine 15\nSource ending\n";
+    const string overlapWorking = "User staged title\nLine 02\nLine 03\nLine 04\nLine 05\nLine 06\nLine 07\nUser unstaged middle\nLine 09\nLine 10\nLine 11\nLine 12\nLine 13\nLine 14\nLine 15\nSource ending\n";
+    const string overlapOwned = "Source title\nLine 02\nLine 03\nLine 04\nLine 05\nLine 06\nLine 07\nSource middle\nLine 09\nLine 10\nLine 11\nLine 12\nLine 13\nLine 14\nLine 15\nOwned ending\n";
+    const string overlapExpectedIndex = "User staged title\nLine 02\nLine 03\nLine 04\nLine 05\nLine 06\nLine 07\nSource middle\nLine 09\nLine 10\nLine 11\nLine 12\nLine 13\nLine 14\nLine 15\nOwned ending\n";
+    const string overlapExpectedWorking = "User staged title\nLine 02\nLine 03\nLine 04\nLine 05\nLine 06\nLine 07\nUser unstaged middle\nLine 09\nLine 10\nLine 11\nLine 12\nLine 13\nLine 14\nLine 15\nOwned ending\n";
+    File.WriteAllText(Path.Combine(overlap.Docs, "a.md"), overlapBase);
+    Git(overlap.Docs, "add", "--", "a.md");
+    Git(overlap.Docs, "commit", "-m", "Source with distant independent changes");
+    Git(overlap.Docs, "push", "origin", "main");
+    var overlapCommit = Git(overlap.Docs, "rev-parse", "HEAD");
+    var overlapSource = Sources(overlap);
+    History(overlap, overlapSource, 0, 100);
+    var overlapMemory = File.ReadAllBytes(overlap.Memory);
+    File.WriteAllText(Path.Combine(overlap.Docs, "a.md"), overlapStaged);
+    Git(overlap.Docs, "add", "--", "a.md");
+    File.WriteAllText(Path.Combine(overlap.Docs, "a.md"), overlapWorking);
+    var overlapProtectRequest = Common(overlap);
+    overlapProtectRequest["source_receipt"] = overlapSource.Body["receipt"]!.DeepClone();
+    overlapProtectRequest["source_receipt_sha256"] = overlapSource.Body["receipt_sha256"]!.DeepClone();
+    var overlapProtection = Call(helper, "protect-worktree", overlapProtectRequest);
+    Check(overlapProtection.Exit == 0, "nonconflicting overlapping work is protected: " + overlapProtection.Body.ToJsonString());
+    var overlapStash = overlapProtection.Body["stash_sha"]!.GetValue<string>();
+    var overlapTopic = Topic(overlap, overlapSource, overlapCommit, "update_needed");
+    var overlapPlan = Plan(overlap, new JsonArray(Candidate(overlap, overlapCommit, overlapTopic, "update_needed")), new JsonArray(new JsonObject { ["path"] = "a.md", ["content"] = overlapOwned }), overlapSource);
+    File.WriteAllText(Path.Combine(overlap.Docs, "a.md"), overlapOwned);
+    Git(overlap.Docs, "add", "--", "a.md");
+    Git(overlap.Docs, "commit", "-m", "Own distant ending change");
+    Git(overlap.Docs, "push", "origin", "main");
+    var overlapRestoration = Call(helper, "restore-worktree", Completion(overlap, overlapPlan));
+    Check(overlapRestoration.Exit == 0 && overlapRestoration.Body["status"]!.GetValue<string>() == "restored", "nonconflicting staged and unstaged overlap restores: " + overlapRestoration.Body.ToJsonString());
+    Check(GitRun(overlap.Docs, ["show", ":a.md"]).Output == overlapExpectedIndex && File.ReadAllText(Path.Combine(overlap.Docs, "a.md")) == overlapExpectedWorking, "literal restored index and working contents combine own delivery with both prior changes");
+    Check(GitRun(overlap.Docs, ["show", "HEAD:a.md"]).Output == overlapOwned && Git(overlap.Docs, "stash", "list", "--format=%H") == overlapStash && File.ReadAllBytes(overlap.Memory).SequenceEqual(overlapMemory), "the own committed page excludes prior work while its original safety backup and memory remain intact");
+    var overlapRestoredBytes = File.ReadAllBytes(Path.Combine(overlap.Docs, "a.md"));
+    Check(Call(helper, "restore-worktree", Completion(overlap, overlapPlan)).Exit == 0 && File.ReadAllBytes(Path.Combine(overlap.Docs, "a.md")).SequenceEqual(overlapRestoredBytes) && GitRun(overlap.Docs, ["show", ":a.md"]).Output == overlapExpectedIndex, "repeating overlapping restoration preserves both already restored states");
+    Check(Call(helper, "finalize", Completion(overlap, overlapPlan)).Exit == 0, "verified overlapping prior work permits completion");
+    Console.WriteLine("PASS staged-and-unstaged-nonconflicting-own-page-overlap");
+
+    var conflict = Fixture("protected-conflicting-overlap", false, true);
+    var conflictCommit = OldDatedDocsChange(conflict);
+    var conflictSource = Sources(conflict);
+    History(conflict, conflictSource, 0, 100);
+    var conflictMemory = File.ReadAllBytes(conflict.Memory);
+    File.WriteAllText(Path.Combine(conflict.Docs, "a.md"), "User conflicting staged fact\n");
+    Git(conflict.Docs, "add", "--", "a.md");
+    File.WriteAllText(Path.Combine(conflict.Docs, "a.md"), "User conflicting working fact\n");
+    File.WriteAllBytes(Path.Combine(conflict.Docs, "conflict-backup.bin"), [0x31, 0x00, 0xfe, 0x79]);
+    var conflictProtectRequest = Common(conflict);
+    conflictProtectRequest["source_receipt"] = conflictSource.Body["receipt"]!.DeepClone();
+    conflictProtectRequest["source_receipt_sha256"] = conflictSource.Body["receipt_sha256"]!.DeepClone();
+    var conflictProtection = Call(helper, "protect-worktree", conflictProtectRequest);
+    Check(conflictProtection.Exit == 0, "conflicting prior work is protected before own delivery");
+    var conflictStash = conflictProtection.Body["stash_sha"]!.GetValue<string>();
+    var conflictBackups = Directory.EnumerateFiles(conflict.Run, "*", SearchOption.AllDirectories)
+        .Where(path => File.ReadAllBytes(path).SequenceEqual(new byte[] { 0x31, 0x00, 0xfe, 0x79 })).ToArray();
+    Check(conflictBackups.Length > 0, "the literal original untracked contents have protected run evidence");
+    var conflictTopic = Topic(conflict, conflictSource, conflictCommit, "update_needed");
+    var conflictPlan = Plan(conflict, new JsonArray(Candidate(conflict, conflictCommit, conflictTopic, "update_needed")), new JsonArray(new JsonObject { ["path"] = "a.md", ["content"] = "Owned incompatible fact\n" }), conflictSource);
+    File.WriteAllText(Path.Combine(conflict.Docs, "a.md"), "Owned incompatible fact\n");
+    Git(conflict.Docs, "add", "--", "a.md");
+    Git(conflict.Docs, "commit", "-m", "Own incompatible same-line change");
+    Git(conflict.Docs, "push", "origin", "main");
+    var conflictRestore = Call(helper, "restore-worktree", Completion(conflict, conflictPlan));
+    Check(conflictRestore.Exit == 2 && File.ReadAllBytes(conflict.Memory).SequenceEqual(conflictMemory), "a conflicting restoration blocks without advancing the official memory");
+    Check(Git(conflict.Docs, "stash", "list", "--format=%H") == conflictStash && GitRun(conflict.Docs, ["show", conflictStash + "^2:a.md"]).Output == "User conflicting staged fact\n" && GitRun(conflict.Docs, ["show", conflictStash + ":a.md"]).Output == "User conflicting working fact\n", "the exact conflicting stash preserves both literal prior states");
+    Check(conflictBackups.All(path => File.Exists(path) && File.ReadAllBytes(path).SequenceEqual(new byte[] { 0x31, 0x00, 0xfe, 0x79 }) && !OperatingSystem.IsWindows() && File.GetUnixFileMode(path) == (UnixFileMode.UserRead | UnixFileMode.UserWrite)) && File.Exists(Path.Combine(conflict.Run, "delivery", "worktree-protection.json")), "conflicting restoration retains protected original backup bytes and recovery journal");
+    Check(File.ReadAllText(Path.Combine(conflict.Docs, "a.md")) == "Owned incompatible fact\n" && GitRun(conflict.Docs, ["show", ":a.md"]).Output == "Owned incompatible fact\n", "a known merge conflict is detected before overwriting the delivered working file or index");
+    Check(Call(helper, "finalize", Completion(conflict, conflictPlan)).Exit == 2 && File.ReadAllBytes(conflict.Memory).SequenceEqual(conflictMemory), "a retained conflicting backup never permits completion");
+    Console.WriteLine("PASS conflicting-overlap-retains-stash-snapshots-memory-and-own-content");
+
+    var staleCleanup = Fixture("protected-stale-source-cleanup", false, true, withPriorWork: true);
+    var staleCleanupSource = Sources(staleCleanup);
+    History(staleCleanup, staleCleanupSource, 0, 100);
+    var staleCleanupMemory = File.ReadAllBytes(staleCleanup.Memory);
+    File.WriteAllText(Path.Combine(staleCleanup.Docs, priorPath), "Protected staged cleanup work\n");
+    Git(staleCleanup.Docs, "add", "--", priorPath);
+    var staleCleanupRequest = Common(staleCleanup);
+    staleCleanupRequest["source_receipt"] = staleCleanupSource.Body["receipt"]!.DeepClone();
+    staleCleanupRequest["source_receipt_sha256"] = staleCleanupSource.Body["receipt_sha256"]!.DeepClone();
+    var staleCleanupProtection = Call(helper, "protect-worktree", staleCleanupRequest);
+    Check(staleCleanupProtection.Exit == 0, "cleanup fixture prior work is protected");
+    var staleCleanupStash = staleCleanupProtection.Body["stash_sha"]!.GetValue<string>();
+    File.WriteAllText(Path.Combine(staleCleanup.Docs, "a.md"), "Later foreign stash content\n");
+    Git(staleCleanup.Docs, "stash", "push", "-m", "Later foreign stash", "--", "a.md");
+    var laterForeignStash = Git(staleCleanup.Docs, "rev-parse", "refs/stash");
+    Git(staleCleanup.Backend, "commit", "--allow-empty", "-m", "Changed code pin while documentation work is protected");
+    Git(staleCleanup.Backend, "push", "origin", "develop");
+    var staleCleanupRestoration = Call(helper, "restore-worktree", Common(staleCleanup));
+    Check(staleCleanupRestoration.Exit == 0 && staleCleanupRestoration.Body["status"]!.GetValue<string>() == "restored", "narrowly owned cleanup remains available after source pins change, without a delivery plan: " + staleCleanupRestoration.Body.ToJsonString());
+    Check(File.ReadAllText(Path.Combine(staleCleanup.Docs, priorPath)) == "Protected staged cleanup work\n" && GitRun(staleCleanup.Docs, ["show", ":" + priorPath]).Output == "Protected staged cleanup work\n" && File.ReadAllText(Path.Combine(staleCleanup.Docs, "a.md")) == "Original fact\n", "cleanup applies only its exact owned stash, preserving the staged prior work");
+    Check(Git(staleCleanup.Docs, "stash", "list", "--format=%H").Split('\n').SequenceEqual(new[] { laterForeignStash, staleCleanupStash }) && File.ReadAllBytes(staleCleanup.Memory).SequenceEqual(staleCleanupMemory), "a newer foreign stash and the owned backup remain untouched while cleanup leaves memory unchanged");
+    Console.WriteLine("PASS changed-source-cleanup-without-plan-and-newer-foreign-stash");
+
+    var guardedCleanup = Fixture("protected-foreign-cleanup-guards", false, true, withPriorWork: true);
+    var guardedSource = Sources(guardedCleanup);
+    History(guardedCleanup, guardedSource, 0, 100);
+    var guardedMemory = File.ReadAllBytes(guardedCleanup.Memory);
+    File.WriteAllText(Path.Combine(guardedCleanup.Docs, priorPath), "Protected prior working bytes\n");
+    File.WriteAllBytes(Path.Combine(guardedCleanup.Docs, "prior-binary.bin"), [0x00, 0xf1, 0x55]);
+    var guardedProtectRequest = Common(guardedCleanup);
+    guardedProtectRequest["source_receipt"] = guardedSource.Body["receipt"]!.DeepClone();
+    guardedProtectRequest["source_receipt_sha256"] = guardedSource.Body["receipt_sha256"]!.DeepClone();
+    var guardedProtection = Call(helper, "protect-worktree", guardedProtectRequest);
+    Check(guardedProtection.Exit == 0, "foreign-state guard fixture is protected");
+    var guardedStash = guardedProtection.Body["stash_sha"]!.GetValue<string>();
+    File.WriteAllBytes(Path.Combine(guardedCleanup.Docs, "prior-binary.bin"), [0x20, 0x21, 0x22]);
+    Check(Call(helper, "restore-worktree", Common(guardedCleanup)).Exit == 2 && File.ReadAllBytes(Path.Combine(guardedCleanup.Docs, "prior-binary.bin")).SequenceEqual(new byte[] { 0x20, 0x21, 0x22 }) && File.ReadAllText(Path.Combine(guardedCleanup.Docs, priorPath)) == "Baseline user work\n", "an untracked-path collision is preserved without restoring over foreign contents");
+    File.Delete(Path.Combine(guardedCleanup.Docs, "prior-binary.bin"));
+    File.WriteAllText(Path.Combine(guardedCleanup.Docs, "new-foreign.md"), "New foreign untracked work\n");
+    Check(Call(helper, "restore-worktree", Common(guardedCleanup)).Exit == 2 && File.ReadAllText(Path.Combine(guardedCleanup.Docs, "new-foreign.md")) == "New foreign untracked work\n" && !File.Exists(Path.Combine(guardedCleanup.Docs, "prior-binary.bin")) && File.ReadAllText(Path.Combine(guardedCleanup.Docs, priorPath)) == "Baseline user work\n", "new unrelated untracked work is retained and blocks restoration before protected files are introduced");
+    File.Delete(Path.Combine(guardedCleanup.Docs, "new-foreign.md"));
+    File.WriteAllText(Path.Combine(guardedCleanup.Docs, priorPath), "New foreign indexed work\n");
+    Git(guardedCleanup.Docs, "add", "--", priorPath);
+    Check(Call(helper, "restore-worktree", Common(guardedCleanup)).Exit == 2 && GitRun(guardedCleanup.Docs, ["show", ":" + priorPath]).Output == "New foreign indexed work\n" && File.ReadAllText(Path.Combine(guardedCleanup.Docs, priorPath)) == "New foreign indexed work\n", "foreign index dirt remains exact and is never overwritten by owned cleanup");
+    Check(Git(guardedCleanup.Docs, "stash", "list", "--format=%H") == guardedStash && GitRun(guardedCleanup.Docs, ["show", guardedStash + ":" + priorPath]).Output == "Protected prior working bytes\n" && File.ReadAllBytes(guardedCleanup.Memory).SequenceEqual(guardedMemory), "all foreign-state refusals preserve the exact owned backup and original memory");
+    Console.WriteLine("PASS untracked-collision-new-untracked-and-foreign-index-restoration-guards");
+    if (Environment.GetEnvironmentVariable("NCG_WIKI_ONLY_STASH_BOUNDARIES") == "1")
+    {
+        Console.WriteLine("Fixture: " + root);
+        return 0;
+    }
     const int outputCap = 4096;
     var bounded = Fixture("within-output-cap", false, true, maxOutputBytes: outputCap);
     var withinCapContent = new string('p', outputCap - 256) + "\n";
@@ -233,13 +606,20 @@ try
 catch (Exception ex) { Console.Error.WriteLine("FAIL " + ex.Message + "\nFixture: " + root); return 1; }
 finally { if (Environment.GetEnvironmentVariable("NCG_WIKI_KEEP_FIXTURE") != "1") Directory.Delete(root, true); }
 
-FixtureState Fixture(string name, bool session, bool docsBaseline, bool reviewedDevelopAhead = false, int timeoutSeconds = 120, bool manualClone = false, int maxOutputBytes = 16777216)
+FixtureState Fixture(string name, bool session, bool docsBaseline, bool reviewedDevelopAhead = false, int timeoutSeconds = 120, bool manualClone = false, int maxOutputBytes = 16777216, bool withPriorWork = false)
 {
     var folder = Path.Combine(root, name);
     Directory.CreateDirectory(folder);
     var backend = Repository(folder, "backend", "develop");
     var sts = Repository(folder, "sts", "develop");
     var docs = Repository(folder, "docs", "main");
+    if (withPriorWork)
+    {
+        File.WriteAllText(Path.Combine(docs, "prior-work.txt"), "Baseline user work\n");
+        Git(docs, "add", "--", "prior-work.txt");
+        Git(docs, "commit", "-m", "Initial unrelated tracked user work");
+        Git(docs, "push", "origin", "main");
+    }
     foreach (var repo in new[] { backend, sts })
     {
         Git(repo, "branch", "production");
@@ -305,6 +685,7 @@ JsonObject Completion(FixtureState f, (int Exit, JsonObject Body) plan) { var r 
 (int Exit, JsonObject Body) Call(string file, string command, JsonObject request, string? pathOverride = null) { var path = Path.Combine(root, "request-" + Guid.NewGuid().ToString("N") + ".json"); File.WriteAllText(path, request.ToJsonString()); File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite); var start = new ProcessStartInfo("dotnet") { UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true }; if (pathOverride is not null) start.Environment["PATH"] = pathOverride; foreach (var arg in new[] { "run", "--file", file, "--", command, "--request", path }) start.ArgumentList.Add(arg); using var p = Process.Start(start)!; var output = p.StandardOutput.ReadToEnd(); var errors = p.StandardError.ReadToEnd(); p.WaitForExit(); File.AppendAllText(Path.Combine(root, "public-cli.log"), command + " exit=" + p.ExitCode + "\n" + output + errors + "\n"); var line = output.Split('\n', StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? "{}"; return (p.ExitCode, JsonNode.Parse(line)!.AsObject()); }
 string Git(string cwd, params string[] arguments) { var r = GitRun(cwd, arguments); Check(r.Exit == 0, "git " + arguments[0] + ": " + r.Error); return r.Output.Trim(); }
 int GitExit(string cwd, params string[] arguments) => GitRun(cwd, arguments).Exit;
+bool IsFifo(string path) { var start = new ProcessStartInfo("/bin/test") { UseShellExecute = false }; start.ArgumentList.Add("-p"); start.ArgumentList.Add(path); using var process = Process.Start(start)!; process.WaitForExit(); return process.ExitCode == 0; }
 (int Exit, string Output, string Error) GitRun(string cwd, string[] arguments) { var start = new ProcessStartInfo("git") { WorkingDirectory = cwd, UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true }; foreach (var arg in arguments) start.ArgumentList.Add(arg); using var p = Process.Start(start)!; var output = p.StandardOutput.ReadToEnd(); var error = p.StandardError.ReadToEnd(); p.WaitForExit(); return (p.ExitCode, output, error); }
 void Check(bool condition, string why) { if (!condition) throw new Exception(why); }
 record FixtureState(string Folder, string Backend, string Sts, string Docs, string Memory, string Store, string Run, JsonObject ReviewRequest);

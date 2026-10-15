@@ -53,6 +53,145 @@ class ExtractCodexSessionEvidenceCliTests(unittest.TestCase):
         )
         return manifest
 
+    def test_skips_null_page_navigation_but_preserves_following_request(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "session.jsonl"
+            navigation = (
+                '<external_codex_apps_open_page>{"page_id":null}'
+                '</external_codex_apps_open_page>'
+            )
+            request = "Explain the selected report."
+            records = [
+                response_item(message("user", navigation)),
+                response_item(message(
+                    "user", '\n<external_codex_apps_open_page> { "page_id" : null } '
+                    '</external_codex_apps_open_page>\n' + request,
+                )),
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(root, [{
+                "id": "session-navigation", "status": "resolved",
+                "path": str(rollout),
+                "rollout_window": {
+                    "state": "open", "review_line_start": 1,
+                    "review_line_end": 2, "embedded_session_metas": [],
+                },
+            }])
+
+            result = self.run_script(manifest)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            session = json.loads(result.stdout)["sessions"][0]
+            self.assertEqual(session["user_summary"], request)
+            self.assertEqual(session["counts"]["user_messages"], 2)
+            self.assertEqual(session["counts"]["substantive_user_messages"], 1)
+
+    def test_preserves_real_page_references_and_discussion_of_wrapper_text(self):
+        cases = [
+            '<external_codex_apps_open_page>{"page_id":"page-123"}'
+            '</external_codex_apps_open_page>',
+            '<external_codex_apps_open_page>{"page_id":null,"request":"review"}'
+            '</external_codex_apps_open_page>',
+            'Explain <external_codex_apps_open_page>{"page_id":null}'
+            '</external_codex_apps_open_page>',
+            '```<external_codex_apps_open_page>{"page_id":null}'
+            '</external_codex_apps_open_page>```',
+            '<external_codex_apps_open_page>{"page_id":null}',
+            '# AGENTS.md instructions',
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            for index, text in enumerate(cases):
+                with self.subTest(text=text):
+                    rollout = root / f"session-{index}.jsonl"
+                    rollout.write_text(json.dumps(response_item(message("user", text))))
+                    manifest = self.write_manifest(root, [{
+                        "id": f"session-{index}", "status": "resolved",
+                        "path": str(rollout),
+                        "rollout_window": {"state": "open", "review_line_start": 1,
+                                           "review_line_end": 1,
+                                           "embedded_session_metas": []},
+                    }])
+
+                    result = self.run_script(manifest)
+
+                    self.assertEqual(result.returncode, 0, result.stderr)
+                    session = json.loads(result.stdout)["sessions"][0]
+                    self.assertEqual(session["user_summary"], text)
+                    self.assertEqual(session["counts"]["substantive_user_messages"], 1)
+
+    def test_skips_injected_agents_header_without_path_and_preserves_request(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            rollout = root / "session.jsonl"
+            wrapper = (
+                "# AGENTS.md instructions\n<INSTRUCTIONS>"
+                "\n# Persönliche Codex-Arbeitspräferenzen\nPRIVATE_RULES\n"
+                "</INSTRUCTIONS>\n"
+            )
+            request = "Review the resolver."
+            records = [
+                response_item(message("user", wrapper)),
+                response_item(message("user", wrapper + request)),
+            ]
+            rollout.write_text(
+                "".join(json.dumps(record) + "\n" for record in records)
+            )
+            manifest = self.write_manifest(root, [{
+                "id": "session-agents", "status": "resolved", "path": str(rollout),
+                "rollout_window": {"state": "open", "review_line_start": 1,
+                                   "review_line_end": 2, "embedded_session_metas": []},
+            }])
+
+            result = self.run_script(manifest)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertNotIn("PRIVATE_RULES", result.stdout)
+            session = json.loads(result.stdout)["sessions"][0]
+            self.assertEqual(session["user_summary"], request)
+            self.assertEqual(session["counts"]["substantive_user_messages"], 1)
+
+    def test_preserves_pathless_agents_examples_in_prose_and_fences(self):
+        examples = [
+            (
+                "Discuss # AGENTS.md instructions\n"
+                "<INSTRUCTIONS>Keep project data local.</INSTRUCTIONS>",
+                "Discuss # AGENTS.md instructions "
+                "<INSTRUCTIONS>Keep project data local.</INSTRUCTIONS>",
+            ),
+            (
+                "Explain this example:\n```markdown\n# AGENTS.md instructions\n"
+                "<INSTRUCTIONS>Keep project data local.</INSTRUCTIONS>\n```",
+                "Explain this example: ```markdown # AGENTS.md instructions "
+                "<INSTRUCTIONS>Keep project data local.</INSTRUCTIONS> ```",
+            ),
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            sessions = []
+            for index, (text, _expected) in enumerate(examples):
+                rollout = root / f"session-{index}.jsonl"
+                rollout.write_text(json.dumps(response_item(message("user", text))))
+                sessions.append({
+                    "id": f"session-{index}", "status": "resolved",
+                    "path": str(rollout),
+                    "rollout_window": {"state": "open", "review_line_start": 1,
+                                       "review_line_end": 1, "embedded_session_metas": []},
+                })
+            manifest = self.write_manifest(root, sessions)
+
+            result = self.run_script(manifest)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            output = json.loads(result.stdout)
+            self.assertEqual(
+                [session["user_summary"] for session in output["sessions"]],
+                [examples[0][1], examples[1][1]],
+            )
+
     def test_extracts_only_advertised_lines_and_bounds_sensitive_evidence(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
